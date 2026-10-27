@@ -1291,7 +1291,7 @@ table.trades td:last-child { font: 600 13.5px var(--font-mono); white-space: now
     document.querySelectorAll('[data-l="tab"]').forEach(el => el.textContent = MK[m].Tab);
     document.querySelectorAll(".side-sw").forEach(el => el.innerHTML = switchHtml());
     const fd = c.feed;
-    document.getElementById("sidefoot").innerHTML = fd ? `<b>${esc(fd.universe)}</b> · ${fd.tickers} ${MK[m].noun}<br>Close of ${fmtDate(fd.as_of, { day: "numeric", month: "short", year: "numeric" })}<br><br>Information only.<br>Not investment advice.` : "";
+    document.getElementById("sidefoot").innerHTML = fd ? `<b>${esc(fd.universe)}</b> · ${fd.tickers} ${MK[m].noun}<br>Close of ${fmtDate(fd.as_of, { day: "numeric", month: "short", year: "numeric" })}` : "";
   }
   const switchHtml = () => [["stocks", "📈", "Stocks"], ["crypto", "🪙", "Crypto"]].map(([m, ic, t]) =>
     `<button data-market="${m}" aria-pressed="${S.market === m}"><span aria-hidden="true">${ic}</span>${t}</button>`).join("");
