@@ -3,12 +3,12 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Signal Desk</title>
+<title>Investment Center Signals</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Signal Desk">
+<meta name="apple-mobile-web-app-title" content="IC Signals">
 <meta name="theme-color" content="#08090b">
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icon-180.png">
@@ -311,6 +311,8 @@ table.trades td:last-child { font: 600 13.5px var(--font-mono); white-space: now
   .side { display: flex; flex-direction: column; position: fixed; inset: 0 auto 0 0; width: var(--side); border-right: 1px solid var(--line); padding: 20px 12px 16px; background: var(--bg); z-index: 25; }
   .brand { display: flex; align-items: center; gap: 10px; padding: 0 8px 24px; font: 700 19px var(--font-display); }
   .brand img { width: 28px; height: 28px; border-radius: 7px; }
+  .brand span { line-height: 1.1; font-size: 16.5px; }
+  .brand em { font-style: normal; color: var(--amber); }
   .side a.nav { display: flex; align-items: center; gap: 12px; padding: 10px 10px; border-radius: 10px; color: var(--muted); text-decoration: none; font-weight: 500; position: relative; }
   .side a.nav:hover { background: var(--hover); color: var(--fg); }
   .side a.nav[aria-current="page"] { background: var(--surface-2); color: var(--fg); }
@@ -336,7 +338,7 @@ table.trades td:last-child { font: 600 13.5px var(--font-mono); white-space: now
 </head>
 <body>
 <aside class="side" aria-label="Sections">
-  <div class="brand"><img src="icon-192.png" alt="">Signal Desk</div>
+  <div class="brand"><img src="icon-192.png" alt=""><span>Investment Center<br><em>Signals</em></span></div>
   <a class="nav" href="#alerts" data-tab="alerts"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9a6 6 0 1 1 12 0c0 6 2.5 7.5 2.5 7.5h-17S6 15 6 9Z"/><path d="M10 20a2 2 0 0 0 4 0"/></svg>Alerts<span class="count" hidden></span></a>
   <a class="nav" href="#stocks" data-tab="stocks"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="m7 15 4-4 3 3 6-7"/></svg>Stocks</a>
   <a class="nav" href="#strategies" data-tab="strategies"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 20h18"/><path d="M6 16V9"/><path d="M4.5 9h3"/><path d="M12 16V5"/><path d="M10.5 5h3"/><path d="M18 16v-5"/><path d="M16.5 11h3"/></svg>Strategies</a>
@@ -1024,7 +1026,7 @@ table.trades td:last-child { font: 600 13.5px var(--font-mono); white-space: now
         h += `<div class="topic"><span style="min-width:0"><span style="display:block;font-size:13px;color:var(--muted)">${esc(stratName(id))}</span><code>${esc(t)}</code></span><button data-copy="${esc(t)}">Copy</button></div>`;
       });
     }
-    h += `<p class="fine">The scan runs once a day after the US market closes (around 23:15 Milan time). Signal Desk shows information about price patterns. It doesn't trade and isn't investment advice.</p>`;
+    h += `<p class="fine">The scan runs once a day after the US market closes (around 23:15 Milan time). Investment Center Signals shows information about price patterns. It doesn't trade and isn't investment advice.</p>`;
     return h;
   }
 

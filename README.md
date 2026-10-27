@@ -1,4 +1,4 @@
-# Signal Desk
+# Investment Center Signals
 
 A phone-friendly web app that explains nine trading strategies and shows
 their alerts on the S&P 100. You pick the strategies you want to follow;

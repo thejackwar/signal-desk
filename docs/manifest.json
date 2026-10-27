@@ -1,6 +1,6 @@
 {
-  "name": "Signal Desk",
-  "short_name": "Signal Desk",
+  "name": "Investment Center Signals",
+  "short_name": "IC Signals",
   "description": "Pick a trading strategy, learn how it works, and see its alerts on the S&P 100. Information only.",
   "start_url": "./#alerts",
   "scope": "./",
