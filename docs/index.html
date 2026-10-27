@@ -59,7 +59,7 @@ a { color: var(--blue); }
   max-width: 560px; margin: 0 auto;
   padding-left: max(16px, env(safe-area-inset-left, 0px));
   padding-right: max(16px, env(safe-area-inset-right, 0px));
-  padding-block: 8px calc(var(--tabbar) + 28px + env(safe-area-inset-bottom, 0px));
+  padding-block: calc(8px + env(safe-area-inset-top, 0px)) calc(var(--tabbar) + 28px + env(safe-area-inset-bottom, 0px));
 }
 
 /* header */
