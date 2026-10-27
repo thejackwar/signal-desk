@@ -1,0 +1,22 @@
+# Top cryptocurrencies by size (Yahoo Finance symbols). Stablecoins are left out
+# because their price is pinned to $1. Edit this list whenever you like.
+BTC-USD
+ETH-USD
+XRP-USD
+BNB-USD
+SOL-USD
+DOGE-USD
+TRX-USD
+ADA-USD
+LINK-USD
+XLM-USD
+BCH-USD
+AVAX-USD
+LTC-USD
+HBAR-USD
+DOT-USD
+XMR-USD
+SHIB-USD
+ETC-USD
+ATOM-USD
+ALGO-USD

@@ -24,15 +24,33 @@ import numpy as np
 import pandas as pd
 
 sys.path.insert(0, str(Path(__file__).parent))
-from chart import payload  # noqa: E402
+from chart import _r as rp, payload  # noqa: E402
 from strategies import REGISTRY, StrategyResult, rsi  # noqa: E402
 
 ROOT = Path(__file__).resolve().parent.parent
-OUT = ROOT / "docs" / "data" / "alerts.json"
-CHART_DIR = ROOT / "docs" / "data" / "charts"   # one small file per alert, loaded when tapped
+ENGINE = Path(__file__).parent
+
+# Each market has its own stock list and writes to its own data folder.
+MARKETS = {
+    "stocks": {"dir": ROOT / "docs" / "data", "tickers": "tickers.txt", "names": "names.json",
+               "universe": "S&P 100", "bt_universe": "Today's S&P 100", "topic": ""},
+    "crypto": {"dir": ROOT / "docs" / "data" / "crypto", "tickers": "crypto.txt", "names": "crypto_names.json",
+               "universe": "Top crypto", "bt_universe": "Today's top cryptocurrencies", "topic": "crypto-"},
+}
+MARKET = "stocks"
+
+
+def configure(market: str):
+    """Point every output path at the chosen market's data folder."""
+    global MARKET, DATA, OUT, CHART_DIR, STOCK_DIR, STOCKS_OUT
+    MARKET = market
+    DATA = MARKETS[market]["dir"]
+    OUT = DATA / "alerts.json"
+    CHART_DIR = DATA / "charts"     # one small file per alert, loaded when tapped
+    STOCK_DIR = DATA / "stocks"     # one chart file per stock / coin
+    STOCKS_OUT = DATA / "stocks.json"
+
 CHART_BARS = 120          # bars of history drawn with each alert
-STOCK_DIR = ROOT / "docs" / "data" / "stocks"    # one chart file per stock
-STOCKS_OUT = ROOT / "docs" / "data" / "stocks.json"
 STOCK_BARS = 260          # about one year on the stock page
 KEEP_DAYS = 45            # alerts older than this drop out of the feed
 LOOKBACK_BARS = 32        # every run rescans the last ~45 days so follow-up returns stay current
@@ -40,7 +58,7 @@ CONFLUENCE_BARS = 3       # "other strategies agree" window: alert day and the 3
 
 
 def load_tickers() -> list[str]:
-    lines = (Path(__file__).parent / "tickers.txt").read_text().splitlines()
+    lines = (ENGINE / MARKETS[MARKET]["tickers"]).read_text().splitlines()
     return [x.strip() for x in lines if x.strip() and not x.startswith("#")]
 
 
@@ -54,6 +72,10 @@ def fetch_real(tickers: list[str], period: str = "2y") -> dict[str, pd.DataFrame
             df = raw[t].rename(columns=str.lower)[["open", "high", "low", "close", "volume"]].dropna()
         except KeyError:
             continue
+        if MARKET == "crypto":
+            # crypto trades around the clock: drop today's unfinished daily candle
+            today = pd.Timestamp.now(tz="UTC").normalize().tz_localize(None)
+            df = df[df.index.tz_localize(None) < today] if df.index.tz is not None else df[df.index < today]
         if len(df) >= 220:
             data[t] = df
     return data
@@ -122,7 +144,7 @@ def strength(df, sigs: dict, sid: str, i: int, side: int, edge: dict | None) -> 
 
 def load_edge() -> dict | None:
     """From the backtest: did each strategy's alerts beat a random day after 20 sessions?"""
-    f = ROOT / "docs" / "data" / "backtest.json"
+    f = DATA / "backtest.json"
     if not f.exists():
         return None
     bt = json.loads(f.read_text())
@@ -159,7 +181,7 @@ def scan(data: dict[str, pd.DataFrame], lookback_bars: int, edge: dict | None) -
                     "ticker": ticker,
                     "date": f"{df.index[i]:%Y-%m-%d}",
                     "side": "bullish" if side > 0 else "bearish",
-                    "price": round(price, 2),
+                    "price": rp(price),
                     "note": res.notes.get(i, ""),
                     "since": round((float(df["close"].iloc[-1]) / price - 1) * 100, 2),
                     "since_days": n - 1 - i,
@@ -181,7 +203,8 @@ def stock_files(data: dict[str, pd.DataFrame], alerts: list[dict], names: dict) 
         m50, m200 = c.rolling(50).mean(), c.rolling(200).mean()
         r = rsi(c).iloc[-1]
         last, prev = float(c.iloc[-1]), float(c.iloc[-2])
-        yr = df.iloc[-252:]
+        MONTH, YEAR = (30, 365) if MARKET == "crypto" else (21, 252)
+        yr = df.iloc[-YEAR:]
         hi52, lo52 = float(yr["high"].max()), float(yr["low"].min())
         start = max(0, len(df) - STOCK_BARS)
         res = StrategyResult(pd.Series(0, index=df.index), {}, [
@@ -192,15 +215,15 @@ def stock_files(data: dict[str, pd.DataFrame], alerts: list[dict], names: dict) 
         mine = by_t.get(t, [])
         row = {
             "ticker": t, "name": names.get(t, [t, ""])[0], "sector": names.get(t, ["", ""])[1],
-            "price": round(last, 2),
+            "price": rp(last),
             "chg1d": round((last / prev - 1) * 100, 2),
-            "chg1m": round((last / float(c.iloc[-22]) - 1) * 100, 2),
-            "chg1y": round((last / float(c.iloc[-253]) - 1) * 100, 2) if len(c) > 253 else None,
+            "chg1m": round((last / float(c.iloc[-MONTH - 1]) - 1) * 100, 2),
+            "chg1y": round((last / float(c.iloc[-YEAR - 1]) - 1) * 100, 2) if len(c) > YEAR + 1 else None,
             "vs200": round((last / float(m200.iloc[-1]) - 1) * 100, 2) if np.isfinite(m200.iloc[-1]) else None,
             "rsi": round(float(r), 1) if np.isfinite(r) else None,
-            "hi52": round(hi52, 2), "lo52": round(lo52, 2),
+            "hi52": rp(hi52), "lo52": rp(lo52),
             "pos52": round((last - lo52) / (hi52 - lo52) * 100, 1) if hi52 > lo52 else None,
-            "spark": [round(float(v), 2) for v in c.iloc[-60:]],
+            "spark": [rp(float(v)) for v in c.iloc[-60:]],
             "bull": sum(a["side"] == "bullish" for a in mine),
             "bear": sum(a["side"] == "bearish" for a in mine),
             "latest": mine[0]["date"] if mine else None,
@@ -230,7 +253,9 @@ def notify(new_alerts: list[dict], prefix: str, names: dict):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--demo", action="store_true", help="use synthetic prices")
+    ap.add_argument("--market", choices=list(MARKETS), default="stocks")
     args = ap.parse_args()
+    configure(args.market)
 
     previous = json.loads(OUT.read_text()) if OUT.exists() else None
     if previous and previous.get("demo") != args.demo:
@@ -264,7 +289,7 @@ def main():
         if f.name not in keep:
             f.unlink()
 
-    names = json.loads((Path(__file__).parent / "names.json").read_text())
+    names = json.loads((ENGINE / MARKETS[MARKET]["names"]).read_text())
     stocks = stock_files(data, alerts, names)
     above = [r for r in stocks if r["vs200"] is not None]
     STOCKS_OUT.write_text(json.dumps({
@@ -280,7 +305,8 @@ def main():
         "generated_at": datetime.now(timezone.utc).isoformat(timespec="minutes"),
         "as_of": f"{as_of:%Y-%m-%d}",
         "demo": args.demo,
-        "universe": "Demo tickers (synthetic prices)" if args.demo else "S&P 100",
+        "market": MARKET,
+        "universe": "Demo tickers (synthetic prices)" if args.demo else MARKETS[MARKET]["universe"],
         "tickers": len(data),
         "ntfy_prefix": os.environ.get("NTFY_PREFIX", "").strip() or None,
         "alerts": alerts,
@@ -290,8 +316,11 @@ def main():
     prefix = os.environ.get("NTFY_PREFIX", "").strip()
     if prefix and previous is not None and not args.demo:
         strat = json.loads((ROOT / "docs" / "data" / "strategies.json").read_text())
-        notify(new, prefix, {s["id"]: s["name"] for s in strat["strategies"]})
+        notify(new, prefix + "-" + MARKETS[MARKET]["topic"].rstrip("-") if MARKETS[MARKET]["topic"] else prefix,
+               {s["id"]: s["name"] for s in strat["strategies"]})
 
+
+configure("stocks")
 
 if __name__ == "__main__":
     main()

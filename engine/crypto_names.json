@@ -1,0 +1,22 @@
+{
+  "BTC-USD": ["Bitcoin", "Layer 1"],
+  "ETH-USD": ["Ethereum", "Layer 1"],
+  "XRP-USD": ["XRP", "Payments"],
+  "BNB-USD": ["BNB", "Exchange"],
+  "SOL-USD": ["Solana", "Layer 1"],
+  "DOGE-USD": ["Dogecoin", "Meme"],
+  "TRX-USD": ["TRON", "Layer 1"],
+  "ADA-USD": ["Cardano", "Layer 1"],
+  "LINK-USD": ["Chainlink", "Oracle"],
+  "XLM-USD": ["Stellar", "Payments"],
+  "BCH-USD": ["Bitcoin Cash", "Payments"],
+  "AVAX-USD": ["Avalanche", "Layer 1"],
+  "LTC-USD": ["Litecoin", "Payments"],
+  "HBAR-USD": ["Hedera", "Layer 1"],
+  "DOT-USD": ["Polkadot", "Layer 0"],
+  "XMR-USD": ["Monero", "Privacy"],
+  "SHIB-USD": ["Shiba Inu", "Meme"],
+  "ETC-USD": ["Ethereum Classic", "Layer 1"],
+  "ATOM-USD": ["Cosmos", "Layer 0"],
+  "ALGO-USD": ["Algorand", "Layer 1"]
+}

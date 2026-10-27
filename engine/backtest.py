@@ -36,7 +36,8 @@ import numpy as np
 import pandas as pd
 
 sys.path.insert(0, str(Path(__file__).parent))
-from scan import fetch_demo, fetch_real, load_tickers  # noqa: E402
+import scan  # noqa: E402
+from scan import MARKETS, fetch_demo, fetch_real, load_tickers  # noqa: E402
 from strategies import REGISTRY  # noqa: E402
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -219,8 +220,11 @@ def run(data: dict[str, pd.DataFrame]) -> dict:
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--demo", action="store_true")
+    ap.add_argument("--market", choices=list(MARKETS), default="stocks")
     args = ap.parse_args()
-    data = fetch_demo(bars=3000, seed=11) if args.demo else fetch_real(load_tickers(), period="15y")
+    scan.configure(args.market)
+    out = scan.DATA / "backtest.json"
+    data = fetch_demo(bars=3000, seed=11) if args.demo else fetch_real(load_tickers(), period="15y" if args.market == "stocks" else "max")
     data = {t: df for t, df in data.items() if len(df) >= 300}
     if not data:
         sys.exit("No price data downloaded; leaving the previous backtest untouched.")
@@ -228,18 +232,19 @@ def main():
     strategies = run(data)
     start = min(df.index[0] for df in data.values())
     end = max(df.index[-1] for df in data.values())
-    OUT.parent.mkdir(parents=True, exist_ok=True)
-    OUT.write_text(json.dumps({
+    out.parent.mkdir(parents=True, exist_ok=True)
+    out.write_text(json.dumps({
         "generated_at": datetime.now(timezone.utc).isoformat(timespec="minutes"),
         "demo": args.demo,
-        "universe": "Demo tickers (simulated prices)" if args.demo else "Today's S&P 100",
+        "market": args.market,
+        "universe": "Demo tickers (simulated prices)" if args.demo else MARKETS[args.market]["bt_universe"],
         "tickers": len(data),
         "start": f"{start:%Y-%m-%d}", "end": f"{end:%Y-%m-%d}",
         "capital": START_CAPITAL,
         "trade_size": TRADE_SIZE,
         "strategies": strategies,
     }, separators=(",", ":")))
-    print(f"-> {OUT.relative_to(ROOT)} ({OUT.stat().st_size // 1024} KB)")
+    print(f"-> {out.relative_to(ROOT)} ({out.stat().st_size // 1024} KB)")
 
 
 if __name__ == "__main__":

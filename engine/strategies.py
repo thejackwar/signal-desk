@@ -34,6 +34,12 @@ class StrategyResult:
     shapes: list = field(default_factory=list)
 
 
+def P(v) -> str:
+    """Price for alert text: 2 decimals, or 5 significant digits for cheap coins."""
+    v = float(v)
+    return f"{v:,.2f}" if abs(v) >= 1 else f"{v:.5g}"
+
+
 # ---------------------------------------------------------------- indicators
 
 def sma(s: pd.Series, n: int) -> pd.Series:
@@ -83,7 +89,7 @@ def ma200(df: pd.DataFrame) -> StrategyResult:
     notes = {}
     for i in np.flatnonzero(sig.values):
         side = "above" if sig.iloc[i] > 0 else "below"
-        notes[int(i)] = f"Closed {side} the 200-day average ({m.iloc[i]:.2f})"
+        notes[int(i)] = f"Closed {side} the 200-day average ({P(m.iloc[i])})"
     return StrategyResult(sig, notes, [{"name": "SMA 200", "values": _vals(m), "style": "accent"}])
 
 
@@ -117,8 +123,8 @@ def donchian(df: pd.DataFrame, n: int = 20) -> StrategyResult:
     sig = _signals(df, buy, sell)
     notes = {}
     for i in np.flatnonzero(sig.values):
-        notes[int(i)] = (f"New {n}-day high: closed above {hi.iloc[i]:.2f}" if sig.iloc[i] > 0
-                         else f"New {n}-day low: closed below {lo.iloc[i]:.2f}")
+        notes[int(i)] = (f"New {n}-day high: closed above {P(hi.iloc[i])}" if sig.iloc[i] > 0
+                         else f"New {n}-day low: closed below {P(lo.iloc[i])}")
     return StrategyResult(sig, notes, [
         {"name": f"{n}-day high", "values": _vals(hi), "style": "band"},
         {"name": f"{n}-day low", "values": _vals(lo), "style": "band"},
@@ -206,7 +212,7 @@ def double_top_bottom(df: pd.DataFrame, k: int = 5, tol: float = 0.03,
                 if neck >= max(l[a], l[b]) * (1 + depth) and c[t] > neck >= c[t - 1]:
                     used.add(("DB", a, b))
                     sig.iloc[t] = 1
-                    notes[t] = f"Double bottom: broke above the neckline at {neck:.2f}"
+                    notes[t] = f"Double bottom: broke above the neckline at {P(neck)}"
                     shapes.append({"at": t, "name": "Double bottom", "points": [[a, l[a]], [m, neck], [b, l[b]], [t, c[t]]]})
                     shapes.append({"at": t, "name": "Neckline", "points": [[m, neck], [t, neck]], "dash": True})
                     continue
@@ -220,7 +226,7 @@ def double_top_bottom(df: pd.DataFrame, k: int = 5, tol: float = 0.03,
                 if neck <= min(h[a], h[b]) * (1 - depth) and c[t] < neck <= c[t - 1]:
                     used.add(("DT", a, b))
                     sig.iloc[t] = -1
-                    notes[t] = f"Double top: broke below the neckline at {neck:.2f}"
+                    notes[t] = f"Double top: broke below the neckline at {P(neck)}"
                     shapes.append({"at": t, "name": "Double top", "points": [[a, h[a]], [m, neck], [b, h[b]], [t, c[t]]]})
                     shapes.append({"at": t, "name": "Neckline", "points": [[m, neck], [t, neck]], "dash": True})
     return StrategyResult(sig, notes, [], None, shapes)
@@ -249,7 +255,7 @@ def head_shoulders(df: pd.DataFrame, k: int = 5, tol: float = 0.05, max_span: in
                 if c[t] < n_now and c[t - 1] >= n_prev:
                     used.add(("HS", ls))
                     sig.iloc[t] = -1
-                    notes[t] = f"Head & shoulders: closed below the neckline (~{n_now:.2f})"
+                    notes[t] = f"Head & shoulders: closed below the neckline (~{P(n_now)})"
                     shapes.append({"at": t, "name": "Head & shoulders",
                                    "points": [[ls, h[ls]], [t1, l[t1]], [hd, h[hd]], [t2, l[t2]], [rs, h[rs]]]})
                     shapes.append({"at": t, "name": "Neckline", "points": [[t1, l[t1]], [t, n_now]], "dash": True})
@@ -266,7 +272,7 @@ def head_shoulders(df: pd.DataFrame, k: int = 5, tol: float = 0.05, max_span: in
                 if c[t] > n_now and c[t - 1] <= n_prev:
                     used.add(("IHS", ls))
                     sig.iloc[t] = 1
-                    notes[t] = f"Inverse head & shoulders: closed above the neckline (~{n_now:.2f})"
+                    notes[t] = f"Inverse head & shoulders: closed above the neckline (~{P(n_now)})"
                     shapes.append({"at": t, "name": "Inverse head & shoulders",
                                    "points": [[ls, l[ls]], [p1, h[p1]], [hd, l[hd]], [p2, h[p2]], [rs, l[rs]]]})
                     shapes.append({"at": t, "name": "Neckline", "points": [[p1, h[p1]], [t, n_now]], "dash": True})

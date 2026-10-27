@@ -3,7 +3,12 @@ import numpy as np
 
 
 def _r(v):
-    return None if v is None or (isinstance(v, float) and np.isnan(v)) else round(float(v), 2)
+    """Round a price: 2 decimals normally, more for cheap coins (5 significant digits)."""
+    if v is None or (isinstance(v, float) and np.isnan(v)):
+        return None
+    v = float(v)
+    a = abs(v)
+    return round(v, 2 if a >= 1 or a == 0 else min(10, 4 - int(np.floor(np.log10(a)))))
 
 
 def payload(df, res, start: int, end: int | None = None, only_marker: int | None = None) -> dict:
