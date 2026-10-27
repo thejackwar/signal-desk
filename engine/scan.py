@@ -109,8 +109,7 @@ def strength(df, sigs: dict, sid: str, i: int, side: int, edge: dict | None) -> 
         checks.append({"ok": False, "text": "No other strategy agrees right now"})
     if opposite:
         score -= 1
-        checks.append({"ok": False, "text": f"{len(opposite)} strateg{'y' if len(opposite) == 1 else 'ies'} "
-                       "point the other way", "ids": opposite})
+        checks.append({"ok": False, "text": f"{len(opposite)} strateg{'y points' if len(opposite) == 1 else 'ies point'} the other way", "ids": opposite})
     if edge is not None:
         ok = edge.get(sid, {}).get("bullish" if side > 0 else "bearish", False)
         score += ok

@@ -13,18 +13,20 @@
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icon-180.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
 <style>
-/* Layout: one narrow column like a phone app, bottom tab bar, charts on true black like a trading terminal. Dark by design. */
+/* Layout: phone = one column + bottom tabs. Desktop (>=1000px) = side nav, list pane, detail pane, like a trading terminal. Dark by design; charts on true black. */
 :root {
   --bg: #08090b;
-  --surface: #121418;
-  --surface-2: #1a1d23;
-  --line: #262a32;
+  --surface: #111317;
+  --surface-2: #191c22;
+  --hover: #14171c;
+  --line: #22262d;
   --fg: #e9ebee;
   --muted: #8b929d;
   --faint: #5b616b;
   --amber: #f2b33d;
+  --amber-bg: rgba(242,179,61,.12);
   --blue: #74a7f5;
   --bull: #32c48d;
   --bear: #f05a63;
@@ -33,8 +35,9 @@
   --chart: #000000;
   --font-display: "Bricolage Grotesque", "Avenir Next", system-ui, sans-serif;
   --font-body: "IBM Plex Sans", -apple-system, "Segoe UI", system-ui, sans-serif;
-  --font-mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+  --font-mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
   --tabbar: 64px;
+  --side: 220px;
   color-scheme: dark;
 }
 * { box-sizing: border-box; }
@@ -48,10 +51,11 @@ body {
 body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 30; background: var(--bg); }
 [hidden] { display: none !important; }
 button { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; }
-button:focus-visible, a:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; border-radius: 6px; }
+button:focus-visible, a:focus-visible, input:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; border-radius: 6px; }
 a { color: var(--blue); }
+.mono { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
 
-.wrap {
+#app {
   max-width: 560px; margin: 0 auto;
   padding-left: max(16px, env(safe-area-inset-left, 0px));
   padding-right: max(16px, env(safe-area-inset-right, 0px));
@@ -63,52 +67,129 @@ a { color: var(--blue); }
 .top h1 { font: 700 26px/1.1 var(--font-display); letter-spacing: -.01em; margin: 0; flex: 1; min-width: 0; text-wrap: balance; }
 .back, .btn { text-decoration: none; }
 .back { display: inline-flex; align-items: center; gap: 4px; color: var(--amber); font-weight: 500; padding: 6px 4px 6px 0; }
-.stamp { font: 500 11px/1.3 var(--font-mono); color: var(--muted); text-align: right; letter-spacing: .02em; }
+.stamp { font: 500 11px/1.35 var(--font-mono); color: var(--muted); text-align: right; letter-spacing: .02em; }
+.demo { background: var(--amber-bg); border: 1px solid rgba(242,179,61,.35); color: var(--amber); border-radius: 10px; padding: 9px 12px; font-size: 13px; margin-bottom: 12px; }
 
-.demo { background: rgba(242,179,61,.1); border: 1px solid rgba(242,179,61,.35); color: var(--amber); border-radius: 10px; padding: 9px 12px; font-size: 13px; margin-bottom: 12px; }
+/* market strip */
+.strip { display: flex; flex-wrap: wrap; gap: 6px 16px; font: 500 12px/1.3 var(--font-mono); color: var(--muted); padding: 2px 0 12px; font-variant-numeric: tabular-nums; }
+.strip b { color: var(--fg); font-weight: 600; }
+.strip a { color: inherit; text-decoration: none; }
+.strip a:hover b { color: var(--amber); }
 
 /* chips */
-.chips { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px; margin-bottom: 8px; scrollbar-width: none; }
+.chips { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px; scrollbar-width: none; scroll-behavior: smooth; }
 .chips::-webkit-scrollbar { display: none; }
-.chipbar { position: relative; margin-bottom: 8px; }
-.chipbar .chips { margin-bottom: 0; scroll-behavior: smooth; }
+.chipbar { position: relative; margin-bottom: 10px; }
 .chiparrow { position: absolute; top: 0; bottom: 4px; width: 44px; display: flex; align-items: center; color: var(--fg); z-index: 2; }
 .chiparrow.left { left: 0; justify-content: flex-start; background: linear-gradient(to right, var(--bg) 55%, transparent); }
 .chiparrow.right { right: 0; justify-content: flex-end; background: linear-gradient(to left, var(--bg) 55%, transparent); }
-.chiparrow svg { background: var(--surface-2); border: 1px solid var(--line); border-radius: 50%; padding: 5px; width: 30px; height: 30px; box-sizing: border-box; }
+.chiparrow svg { background: var(--surface-2); border: 1px solid var(--line); border-radius: 50%; padding: 5px; width: 30px; height: 30px; }
 .chiparrow:hover svg { border-color: var(--amber); color: var(--amber); }
-.chip { cursor: pointer; }
-.chip:hover { border-color: var(--muted); color: var(--fg); }
-.chip[aria-pressed="true"]:hover { color: var(--bg); }
 .chip { flex: none; border: 1px solid var(--line); border-radius: 999px; padding: 6px 12px; font-size: 13px; color: var(--muted); white-space: nowrap; }
+.chip:hover { border-color: var(--muted); color: var(--fg); }
 .chip[aria-pressed="true"] { background: var(--fg); color: var(--bg); border-color: var(--fg); font-weight: 600; }
 
-/* alert feed */
+/* toolbar: show / sort */
+.tools { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; margin-bottom: 4px; }
+.tools .tg { display: inline-flex; align-items: center; gap: 8px; white-space: nowrap; }
+.tools label { font: 500 11px/1 var(--font-mono); text-transform: uppercase; letter-spacing: .08em; color: var(--faint); margin-right: -4px; }
+.seg { display: inline-flex; background: var(--surface); border-radius: 10px; padding: 3px; margin-bottom: 10px; }
+.seg button { padding: 6px 12px; border-radius: 8px; font-size: 13px; color: var(--muted); }
+.seg button:hover { color: var(--fg); }
+.seg button[aria-pressed="true"] { background: var(--surface-2); color: var(--fg); font-weight: 600; }
+.seg.sm { margin-bottom: 0; }
+.seg.sm button { padding: 4px 9px; font-size: 12px; }
+
+/* rows (alerts, stocks) */
 .day { font: 600 11px/1 var(--font-mono); text-transform: uppercase; letter-spacing: .1em; color: var(--faint); padding: 18px 0 8px; display: flex; justify-content: space-between; }
-.alert { width: 100%; text-align: left; display: grid; grid-template-columns: 4px 1fr auto; gap: 0 12px; padding: 12px 0; border-top: 1px solid var(--line); align-items: start; }
-.day + .alert { border-top: 0; }
-.stripe { width: 4px; align-self: stretch; border-radius: 2px; }
+.row { display: grid; gap: 0 12px; padding: 11px 10px; margin: 0 -10px; border-top: 1px solid var(--line); color: inherit; text-decoration: none; border-radius: 0; }
+.day + .row, .rows > .row:first-child { border-top-color: transparent; }
+@media (hover: hover) { .row:hover { background: var(--hover); } }
+.row.sel { background: var(--surface-2); border-radius: 10px; border-top-color: transparent; }
+.row.sel + .row { border-top-color: transparent; }
+.alert { grid-template-columns: 3px 1fr auto; align-items: start; }
+.stripe { width: 3px; align-self: stretch; border-radius: 2px; }
 .bullish .stripe { background: var(--bull); }
 .bearish .stripe { background: var(--bear); }
 .alert .main { min-width: 0; }
-.tk { font: 600 16px/1.2 var(--font-mono); letter-spacing: .02em; }
-.alert .strat { font-size: 12px; color: var(--amber); margin-left: 6px; font-family: var(--font-body); font-weight: 500; letter-spacing: 0; }
-.alert .note { color: var(--muted); font-size: 13.5px; margin-top: 3px; }
+.tk { font: 600 15.5px/1.2 var(--font-mono); letter-spacing: .02em; }
+.alert .strat { font-size: 12px; color: var(--amber); margin-left: 8px; font-family: var(--font-body); font-weight: 500; letter-spacing: 0; }
+.alert .note { color: var(--muted); font-size: 13px; margin-top: 3px; }
+.alert .info { display: flex; align-items: center; gap: 8px; margin-top: 7px; font: 500 11px/1 var(--font-mono); color: var(--muted); }
 .alert .px { text-align: right; font: 500 14px/1.2 var(--font-mono); font-variant-numeric: tabular-nums; }
-.pill { display: inline-block; font: 600 10.5px/1 var(--font-mono); letter-spacing: .06em; text-transform: uppercase; padding: 4px 6px; border-radius: 5px; margin-top: 6px; }
+.alert .since { display: block; font-size: 12px; margin-top: 5px; }
+.pill { display: inline-block; font: 600 10px/1 var(--font-mono); letter-spacing: .06em; text-transform: uppercase; padding: 4px 6px; border-radius: 5px; }
 .bullish .pill, .pill.bullish { color: var(--bull); background: var(--bull-bg); }
 .bearish .pill, .pill.bearish { color: var(--bear); background: var(--bear-bg); }
 
+/* strength meter */
+.meter { display: inline-flex; align-items: flex-end; gap: 2px; height: 12px; }
+.meter i { width: 4px; border-radius: 1px; background: var(--line); }
+.meter i:nth-child(1) { height: 5px; } .meter i:nth-child(2) { height: 7px; } .meter i:nth-child(3) { height: 9.5px; } .meter i:nth-child(4) { height: 12px; }
+.meter.s1 i:nth-child(-n+1), .meter.s2 i:nth-child(-n+2), .meter.s3 i:nth-child(-n+3), .meter.s4 i { background: var(--muted); }
+.meter.s2 i:nth-child(-n+2) { background: var(--fg); }
+.meter.s3 i:nth-child(-n+3), .meter.s4 i { background: var(--amber); }
+.slabel { color: var(--muted); }
+.slabel.Strong { color: var(--amber); }
+.slabel.Moderate { color: var(--fg); }
+
 .empty { color: var(--muted); padding: 28px 4px; text-align: center; }
 .empty strong { color: var(--fg); display: block; font: 700 18px/1.3 var(--font-display); margin-bottom: 6px; }
-.btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; background: var(--amber); color: #1a1204; font-weight: 600; border-radius: 10px; padding: 11px 16px; }
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; background: var(--amber); color: #1a1204; font-weight: 600; border-radius: 10px; padding: 10px 16px; }
 .btn.ghost { background: var(--surface-2); color: var(--fg); }
+.btn.ghost:hover { background: var(--line); }
 .btn.on { background: var(--surface-2); color: var(--amber); }
+
+/* stocks */
+.search { width: 100%; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 9px 12px 9px 34px; color: var(--fg); font: 14px var(--font-body); margin-bottom: 10px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%235b616b' stroke-width='2.2' stroke-linecap='round'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cpath d='m20 20-3.5-3.5'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: 11px 50%; }
+.search::placeholder { color: var(--faint); }
+.stock { grid-template-columns: minmax(0, 1fr) 64px 92px; align-items: center; }
+.stock .nm { display: block; color: var(--muted); font-size: 12.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 2px; }
+.stock .q { text-align: right; font: 500 14px/1.25 var(--font-mono); font-variant-numeric: tabular-nums; }
+.stock .q small { display: block; font-size: 12px; }
+.stock .dots { display: inline-flex; gap: 3px; margin-left: 6px; vertical-align: 2px; }
+.stock .dots i { width: 6px; height: 6px; border-radius: 50%; }
+.spark { display: block; width: 64px; height: 26px; }
+.health { background: var(--surface); border-radius: 14px; padding: 14px; margin-bottom: 14px; }
+.health .hd { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; }
+.health h3 { margin: 0; font: 700 16px var(--font-display); }
+.health .big { font: 600 30px/1.1 var(--font-mono); font-variant-numeric: tabular-nums; }
+.gauge { position: relative; height: 8px; border-radius: 4px; margin: 12px 0 6px; background: linear-gradient(to right, var(--bear) 0%, #b98a3a 50%, var(--bull) 100%); opacity: .9; }
+.gauge b { position: absolute; top: -4px; width: 3px; height: 16px; background: var(--fg); border-radius: 2px; transform: translateX(-50%); box-shadow: 0 0 0 2px var(--surface); }
+.gscale { display: flex; justify-content: space-between; font: 500 10.5px var(--font-mono); color: var(--faint); }
+.health p { color: var(--muted); font-size: 13px; margin: 10px 0 0; }
+.kv { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 12px; }
+.kv div { border-top: 1px solid var(--line); padding-top: 8px; min-width: 0; }
+.kv span { display: block; font: 500 10.5px/1 var(--font-mono); text-transform: uppercase; letter-spacing: .06em; color: var(--faint); }
+.kv b { display: block; font: 600 16px/1.4 var(--font-mono); margin-top: 4px; font-variant-numeric: tabular-nums; }
+
+/* stock + alert detail */
+.big2 { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; margin: 2px 0 2px; }
+.big2 .tk { font-size: 30px; }
+.big2 .px { font: 500 20px var(--font-mono); }
+.sub { color: var(--muted); margin: 0 0 14px; }
+.sub a { color: var(--muted); }
+.range { margin: 4px 0 16px; }
+.range .bar { position: relative; height: 4px; background: var(--surface-2); border-radius: 2px; margin: 8px 0 6px; }
+.range .bar b { position: absolute; top: -4px; width: 12px; height: 12px; border-radius: 50%; background: var(--fg); transform: translateX(-50%); box-shadow: 0 0 0 3px var(--bg); }
+.range .ends { display: flex; justify-content: space-between; font: 500 11.5px var(--font-mono); color: var(--muted); }
+.range .lbl { font: 500 10.5px/1 var(--font-mono); text-transform: uppercase; letter-spacing: .06em; color: var(--faint); }
+.checks { list-style: none; margin: 10px 0 0; padding: 0; display: grid; gap: 8px; }
+.checks li { display: grid; grid-template-columns: 20px 1fr; gap: 8px; font-size: 14px; }
+.checks li::before { content: "✓"; font-weight: 700; color: var(--bull); text-align: center; }
+.checks li.no::before { content: "✕"; color: var(--faint); }
+.checks li.no { color: var(--muted); }
+.checks small { display: block; color: var(--faint); font-size: 12.5px; }
+.since-card { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+.since-card b { font: 600 22px var(--font-mono); }
 
 /* strategies list */
 .cat { font: 600 11px/1 var(--font-mono); text-transform: uppercase; letter-spacing: .1em; color: var(--faint); padding: 18px 0 8px; }
-.srow { display: grid; grid-template-columns: 1fr auto; gap: 12px; align-items: center; padding: 14px; background: var(--surface); border-radius: 14px; margin-bottom: 8px; }
-.srow .open { text-align: left; min-width: 0; }
+.srow { display: grid; grid-template-columns: 1fr auto; gap: 12px; align-items: center; padding: 14px; background: var(--surface); border-radius: 14px; margin-bottom: 8px; border: 1px solid transparent; }
+.srow.sel { border-color: rgba(242,179,61,.45); }
+@media (hover: hover) { .srow:hover { background: var(--hover); } }
+.srow .open { text-align: left; min-width: 0; color: inherit; text-decoration: none; }
 .srow h3 { margin: 0; font: 700 17px/1.25 var(--font-display); }
 .srow p { margin: 3px 0 0; color: var(--muted); font-size: 13.5px; }
 .meta { display: flex; flex-wrap: wrap; gap: 4px 8px; margin-top: 8px; font: 500 11px/1 var(--font-mono); color: var(--faint); letter-spacing: .03em; }
@@ -123,8 +204,8 @@ a { color: var(--blue); }
 .tag { color: var(--muted); font-size: 16px; margin: 0 0 14px; }
 .lede { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-bottom: 16px; }
 .badge { font: 500 11px/1 var(--font-mono); letter-spacing: .04em; color: var(--muted); border: 1px solid var(--line); border-radius: 6px; padding: 6px 8px; }
-.prose p { margin: 0 0 12px; max-width: 65ch; }
-h2 { font: 700 19px/1.3 var(--font-display); margin: 26px 0 10px; text-wrap: balance; }
+.prose p { margin: 0 0 12px; max-width: 68ch; }
+h2 { font: 700 19px/1.3 var(--font-display); margin: 28px 0 10px; text-wrap: balance; }
 .rules { display: grid; gap: 8px; }
 .rule { border-radius: 12px; padding: 12px 14px; background: var(--surface); border-left: 3px solid; }
 .rule.bullish { border-color: var(--bull); }
@@ -144,9 +225,6 @@ ul.watch li { margin-bottom: 8px; }
 .legend i { display: inline-block; width: 12px; height: 2px; vertical-align: middle; margin-right: 5px; }
 .caption { margin: 10px 2px 0; font-size: 14px; }
 .caption .sim { color: var(--faint); font-size: 12px; display: block; margin-top: 4px; }
-.seg { display: inline-flex; background: var(--surface); border-radius: 10px; padding: 3px; margin-bottom: 10px; }
-.seg button { padding: 6px 12px; border-radius: 8px; font-size: 13px; color: var(--muted); }
-.seg button[aria-pressed="true"] { background: var(--surface-2); color: var(--fg); font-weight: 600; }
 .up { color: var(--bull); } .down { color: var(--bear); }
 
 /* backtest */
@@ -161,22 +239,18 @@ table.bt b { display: block; font: 600 17px/1.2 var(--font-mono); }
 table.bt small { display: block; color: var(--faint); font-size: 11.5px; margin-top: 2px; }
 .tiles { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 8px; }
 .tiles div { background: var(--surface); border-radius: 12px; padding: 10px 12px; min-width: 0; }
-.tiles span { display: block; font: 500 11px/1 var(--font-mono); text-transform: uppercase; letter-spacing: .06em; color: var(--faint); }
+.tiles > div > span { display: block; font: 500 11px/1 var(--font-mono); text-transform: uppercase; letter-spacing: .06em; color: var(--faint); }
 .tiles b { display: block; font: 600 19px/1.3 var(--font-mono); margin-top: 6px; font-variant-numeric: tabular-nums; }
 .tiles small { color: var(--muted); font-size: 12px; }
 .bwgrid { display: grid; gap: 0 16px; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
 .bwrow { display: grid; grid-template-columns: 54px auto 1fr auto; gap: 10px; align-items: center; padding: 8px 0; border-top: 1px solid var(--line); font-variant-numeric: tabular-nums; }
 .bwrow .d { color: var(--muted); font-size: 13px; }
 .bwrow > span:last-child { font: 600 14px var(--font-mono); }
-
-/* alert detail */
-.big { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; margin: 2px 0 6px; }
-.big .tk { font-size: 30px; }
-.big .px { font: 500 18px var(--font-mono); color: var(--muted); }
-.sub { color: var(--muted); margin: 0 0 14px; }
 .card { background: var(--surface); border-radius: 14px; padding: 14px; margin-top: 14px; }
 .card h3 { margin: 0 0 4px; font: 700 16px var(--font-display); }
 .card p { margin: 0 0 10px; color: var(--muted); font-size: 14px; }
+.card p:last-child { margin-bottom: 0; }
+.card .hd { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
 
 /* notifications */
 .steps { margin: 0; padding-left: 20px; }
@@ -186,52 +260,86 @@ table.bt small { display: block; color: var(--faint); font-size: 11.5px; margin-
 .topic button { color: var(--amber); font-size: 13px; font-weight: 600; flex: none; }
 .fine { color: var(--faint); font-size: 12.5px; margin-top: 26px; }
 
-/* tab bar */
+/* bottom tabs (phone) */
 .tabs { position: fixed; left: 0; right: 0; bottom: 0; z-index: 25; background: rgba(8,9,11,.92); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); border-top: 1px solid var(--line);
   padding-bottom: env(safe-area-inset-bottom, 0px); padding-left: max(8px, env(safe-area-inset-left, 0px)); padding-right: max(8px, env(safe-area-inset-right, 0px)); }
-.tabs nav { max-width: 560px; margin: 0 auto; display: grid; grid-template-columns: repeat(3, 1fr); height: var(--tabbar); }
+.tabs nav { max-width: 560px; margin: 0 auto; display: grid; grid-template-columns: repeat(4, 1fr); height: var(--tabbar); }
 .tabs a { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; color: var(--faint); text-decoration: none; font-size: 11px; font-weight: 500; position: relative; }
 .tabs a[aria-current="page"] { color: var(--amber); }
 .tabs svg { width: 24px; height: 24px; }
 .count { position: absolute; top: 8px; left: calc(50% + 6px); background: var(--bear); color: #fff; font: 600 10px/16px var(--font-mono); min-width: 16px; padding: 0 4px; border-radius: 8px; text-align: center; }
 
+/* side nav (desktop) */
+.side { display: none; }
+.placeholder { color: var(--muted); text-align: center; padding: 120px 20px; }
+
 .loading { color: var(--muted); padding: 40px 0; text-align: center; }
-@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+
+@media (min-width: 1000px) {
+  .tabs { display: none; }
+  .side { display: flex; flex-direction: column; position: fixed; inset: 0 auto 0 0; width: var(--side); border-right: 1px solid var(--line); padding: 20px 12px 16px; background: var(--bg); z-index: 25; }
+  .brand { display: flex; align-items: center; gap: 10px; padding: 0 8px 24px; font: 700 19px var(--font-display); }
+  .brand img { width: 28px; height: 28px; border-radius: 7px; }
+  .side a.nav { display: flex; align-items: center; gap: 12px; padding: 10px 10px; border-radius: 10px; color: var(--muted); text-decoration: none; font-weight: 500; position: relative; }
+  .side a.nav:hover { background: var(--hover); color: var(--fg); }
+  .side a.nav[aria-current="page"] { background: var(--surface-2); color: var(--fg); }
+  .side a.nav[aria-current="page"] svg { color: var(--amber); }
+  .side svg { width: 20px; height: 20px; }
+  .side .count { position: static; margin-left: auto; }
+  .side .foot { margin-top: auto; padding: 0 8px; font: 500 11px/1.5 var(--font-mono); color: var(--faint); }
+  .side .foot b { color: var(--muted); font-weight: 500; }
+
+  #app { max-width: none; margin: 0 0 0 var(--side); padding: 0; }
+  #app.wide { display: grid; grid-template-columns: minmax(380px, 440px) minmax(0, 1fr); height: 100vh; }
+  #app.single { max-width: 760px; padding: 8px 32px 48px; }
+  .pane { overflow-y: auto; height: 100vh; min-width: 0; scrollbar-width: thin; scrollbar-color: var(--line) transparent; }
+  .pane.list { border-right: 1px solid var(--line); padding: 0 20px 40px; }
+  .pane.detail .dwrap { max-width: 900px; margin: 0 auto; padding: 8px 32px 56px; }
+  .top { top: 0; }
+  .pane.detail .top.backonly { display: none; }
+  .pane.detail .dwrap > :first-child { margin-top: 20px; }
+  .tiles.four { grid-template-columns: repeat(4, 1fr); }
+}
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; scroll-behavior: auto !important; } }
 </style>
 </head>
 <body>
-<main class="wrap" id="app"><p class="loading">Loading…</p></main>
+<aside class="side" aria-label="Sections">
+  <div class="brand"><img src="icon-192.png" alt="">Signal Desk</div>
+  <a class="nav" href="#alerts" data-tab="alerts"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9a6 6 0 1 1 12 0c0 6 2.5 7.5 2.5 7.5h-17S6 15 6 9Z"/><path d="M10 20a2 2 0 0 0 4 0"/></svg>Alerts<span class="count" hidden></span></a>
+  <a class="nav" href="#stocks" data-tab="stocks"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="m7 15 4-4 3 3 6-7"/></svg>Stocks</a>
+  <a class="nav" href="#strategies" data-tab="strategies"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 20h18"/><path d="M6 16V9"/><path d="M4.5 9h3"/><path d="M12 16V5"/><path d="M10.5 5h3"/><path d="M18 16v-5"/><path d="M16.5 11h3"/></svg>Strategies</a>
+  <a class="nav" href="#notify" data-tab="notify"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="2.5" width="12" height="19" rx="2.5"/><path d="M11 18.5h2"/></svg>Phone alerts</a>
+  <div class="foot" id="sidefoot"></div>
+</aside>
+
+<main id="app"><p class="loading">Loading…</p></main>
 
 <div class="tabs">
   <nav aria-label="Sections">
-    <a href="#alerts" data-tab="alerts">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9a6 6 0 1 1 12 0c0 6 2.5 7.5 2.5 7.5h-17S6 15 6 9Z"/><path d="M10 20a2 2 0 0 0 4 0"/></svg>
-      Alerts<span class="count" id="badge" hidden></span>
-    </a>
-    <a href="#strategies" data-tab="strategies">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 20h18"/><path d="M6 16V9"/><path d="M4.5 9h3"/><path d="M12 16V5"/><path d="M10.5 5h3"/><path d="M18 16v-5"/><path d="M16.5 11h3"/></svg>
-      Strategies
-    </a>
-    <a href="#notify" data-tab="notify">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="2.5" width="12" height="19" rx="2.5"/><path d="M11 18.5h2"/></svg>
-      Phone alerts
-    </a>
+    <a href="#alerts" data-tab="alerts"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9a6 6 0 1 1 12 0c0 6 2.5 7.5 2.5 7.5h-17S6 15 6 9Z"/><path d="M10 20a2 2 0 0 0 4 0"/></svg>Alerts<span class="count" hidden></span></a>
+    <a href="#stocks" data-tab="stocks"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="m7 15 4-4 3 3 6-7"/></svg>Stocks</a>
+    <a href="#strategies" data-tab="strategies"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 20h18"/><path d="M6 16V9"/><path d="M4.5 9h3"/><path d="M12 16V5"/><path d="M10.5 5h3"/><path d="M18 16v-5"/><path d="M16.5 11h3"/></svg>Strategies</a>
+    <a href="#notify" data-tab="notify"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="2.5" width="12" height="19" rx="2.5"/><path d="M11 18.5h2"/></svg>Phone</a>
   </nav>
 </div>
 
 <script>
 (() => {
   const DEFAULT_FOLLOW = ["ma200", "bollinger", "donchian"];
-  const STORE = "signaldesk.follow";
-  const SEEN = "signaldesk.seen";
-  const S = { strategies: [], byId: {}, feed: null, follow: new Set(), filter: "all", exSide: {}, btSide: {}, bt: null };
+  const STORE = "signaldesk.follow", SEEN = "signaldesk.seen", PREFS = "signaldesk.prefs";
+  const S = { strategies: [], byId: {}, feed: null, bt: null, stocks: null, stockBy: {}, follow: new Set(), filter: "all",
+              exSide: {}, btSide: {}, prefs: {}, firstSel: null, navs: 0, lastTab: null, lastSel: null, stockData: {} };
   const app = document.getElementById("app");
   const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
   const slug = id => id.replace(/_/g, "-");
   const unslug = s => s.replace(/-/g, "_");
+  const WIDE = matchMedia("(min-width: 1000px)");
 
   function load(key, fallback) { try { const v = localStorage.getItem(key); return v ? JSON.parse(v) : fallback; } catch { return fallback; } }
   function save(key, v) { try { localStorage.setItem(key, JSON.stringify(v)); } catch {} }
+  const pref = (k, d) => S.prefs[k] ?? d;
+  const setPref = (k, v) => { S.prefs[k] = v; save(PREFS, S.prefs); };
 
   // ---------------------------------------------------------------- dates
   const DAY = 864e5;
@@ -245,6 +353,7 @@ table.bt small { display: block; color: var(--faint); font-size: 11.5px; margin-
     return fmtDate(d, { day: "numeric", month: "long" });
   }
   const money = v => v == null ? "–" : v.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  const chg = v => v == null ? `<span>–</span>` : `<span class="${v >= 0 ? "up" : "down"}">${v > 0 ? "+" : v < 0 ? "−" : ""}${Math.abs(v).toFixed(Math.abs(v) >= 100 ? 0 : 1)}%</span>`;
 
   // --------------------------------------------------------------- charts
   const C = { up: "#32c48d", down: "#f05a63", grid: "#1b1e24", axis: "#6b727c", accent: "#f2b33d", accent2: "#74a7f5", muted: "#9aa1ab", band: "#74a7f5", shape: "#f2b33d" };
@@ -266,7 +375,7 @@ table.bt small { display: block; color: var(--faint); font-size: 11.5px; margin-
   function drawChart(box, data, opts = {}) {
     const W = Math.max(280, box.clientWidth || 340);
     const n = data.c.length;
-    const P = { l: 6, r: 50, t: 10 }, priceH = Math.round(Math.min(260, W * 0.62)), panelGap = 14;
+    const P = { l: 6, r: 50, t: 10 }, priceH = Math.round(Math.min(W > 640 ? 360 : 260, W * 0.62)), panelGap = 14;
     const panelH = data.panel ? 86 : 0, axisH = 22;
     const H = P.t + priceH + (panelH ? panelGap + panelH : 0) + axisH;
     const cw = (W - P.l - P.r) / n;
@@ -288,10 +397,11 @@ table.bt small { display: block; color: var(--faint); font-size: 11.5px; margin-
       svg += `<text x="${W - P.r + 6}" y="${(y(t) + 4).toFixed(1)}" fill="${C.axis}" font-size="10.5" font-family="IBM Plex Mono, monospace">${t < 1000 ? t.toFixed(t % 1 ? 1 : 0) : Math.round(t)}</text>`;
     }
     // month labels
-    let lastM = "";
+    let lastM = "", lastX = -99;
     data.dates.forEach((d, i) => {
       const m = d.slice(0, 7);
-      if (m !== lastM && i > 2 && i < n - 3) {
+      if (m !== lastM && i > 2 && i < n - 3 && x(i) - lastX >= 40) {
+        lastX = x(i);
         svg += `<line x1="${x(i).toFixed(1)}" x2="${x(i).toFixed(1)}" y1="${P.t}" y2="${H - axisH}" stroke="${C.grid}" stroke-width="1"/>`;
         svg += `<text x="${x(i).toFixed(1)}" y="${H - 7}" fill="${C.axis}" font-size="10.5" text-anchor="middle" font-family="IBM Plex Mono, monospace">${fmtDate(d, { month: "short" })}</text>`;
       }
@@ -372,7 +482,7 @@ table.bt small { display: block; color: var(--faint); font-size: 11.5px; margin-
     const readout = box.querySelector(".readout"), el = box.querySelector("svg"), xh = box.querySelector(".xhair");
     const show = i => {
       const ch = data.c[i] - (i ? data.c[i - 1] : data.o[i]), pct = ch / (i ? data.c[i - 1] : data.o[i]) * 100;
-      readout.innerHTML = `<b>${fmtDate(data.dates[i], { day: "numeric", month: "short", year: "2-digit" })}</b>  O ${money(data.o[i])}  H ${money(data.h[i])}  L ${money(data.l[i])}  C <b>${money(data.c[i])}</b> <span class="${ch >= 0 ? "up" : "down"}">${pct >= 0 ? "+" : ""}${pct.toFixed(1)}%</span>`;
+      readout.innerHTML = `<b>${fmtDate(data.dates[i], { day: "numeric", month: "short", year: "2-digit" })}</b>  O ${money(data.o[i])}  H ${money(data.h[i])}  L ${money(data.l[i])}  C <b>${money(data.c[i])}</b> <span class="${ch >= 0 ? "up" : "down"}">${pct >= 0 ? "+" : ""}${pct.toFixed(1)}%</span>${opts.extra ? opts.extra(i) : ""}`;
     };
     const rest = opts.focus ?? n - 1;
     show(rest);
@@ -392,29 +502,60 @@ table.bt small { display: block; color: var(--faint); font-size: 11.5px; margin-
 
   // ---------------------------------------------------------------- views
   function header(title, back, right = "") {
-    return `<header class="top">${back ? `<a class="back" href="${back}" aria-label="Back"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>Back</a>` : `<h1>${title}</h1>`}${right}</header>`;
+    if (back) return `<header class="top backonly"><a class="back" href="${back}" data-back aria-label="Back"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>Back</a>${right}</header>`;
+    return `<header class="top"><h1>${title}</h1>${right}</header>`;
   }
   const demoNote = () => S.feed?.demo ? `<div class="demo">Demo data: these alerts come from simulated prices on made-up tickers, so you can see how the app works. Real S&amp;P 100 alerts appear once the daily scan runs on GitHub.</div>` : "";
+  const meter = st => st ? `<span class="meter s${st.score}" aria-hidden="true"><i></i><i></i><i></i><i></i></span><span class="slabel ${st.label}">${st.label}</span>` : "";
+  const stratName = id => S.byId[id]?.name || id;
 
-  function followedAlerts() {
-    return (S.feed?.alerts || []).filter(a => S.follow.has(a.strategy));
+  function followedAlerts() { return (S.feed?.alerts || []).filter(a => S.follow.has(a.strategy)); }
+
+  function alertRow(a, opts = {}) {
+    const idx = S.feed.alerts.indexOf(a);
+    const sinceTxt = a.since_days > 0 ? `${chg(a.since)} <span style="color:var(--faint)">${a.since_days}d</span>` : `<span style="color:var(--faint)">today</span>`;
+    return `<a class="row alert ${a.side}" href="#alert-${idx}">
+      <span class="stripe"></span>
+      <span class="main"><span class="tk">${esc(opts.showDate ? fmtDate(a.date, { day: "numeric", month: "short" }) : a.ticker)}</span><span class="strat">${esc(stratName(a.strategy))}</span>
+        <div class="note">${esc(a.note)}</div>
+        <div class="info">${meter(a.strength)}<span class="pill">${a.side}</span></div></span>
+      <span class="px">${money(a.price)}<span class="since">${sinceTxt}</span></span></a>`;
+  }
+
+  function marketStrip() {
+    const M = S.stocks; if (!M) return "";
+    const today = (S.feed?.alerts || []).filter(a => a.date === S.feed.as_of);
+    const bu = today.filter(a => a.side === "bullish").length, be = today.length - bu;
+    return `<div class="strip"><a href="#stocks"><b>${Math.round(M.breadth200)}%</b> above 200-day</a><span><b class="up">${M.advancers}</b> up · <b class="down">${M.decliners}</b> down</span><span><b>${bu}</b>▲ <b>${be}</b>▼ alerts today</span></div>`;
   }
 
   function viewAlerts() {
     const followed = [...S.follow].filter(id => S.byId[id]);
+    S.firstSel = null;
     if (!followed.length) {
       return header("Alerts") + `<div class="empty"><strong>Pick your strategies</strong>Follow at least one strategy and its alerts show up here.<br><br><a class="btn" href="#strategies">Browse strategies</a></div>`;
     }
-    if (!followed.includes(S.filter)) S.filter = "all";
-    const list = followedAlerts().filter(a => S.filter === "all" || a.strategy === S.filter);
+    if (S.filter !== "all" && !followed.includes(S.filter)) S.filter = "all";
+    const minS = pref("minStr", 0), sort = pref("sort", "new");
+    let list = followedAlerts().filter(a => (S.filter === "all" || a.strategy === S.filter) && (a.strength?.score ?? 0) >= minS);
+    if (sort === "str") list = list.slice().sort((a, b) => (b.strength?.score ?? 0) - (a.strength?.score ?? 0) || (a.date < b.date ? 1 : -1));
     const stamp = S.feed ? `<div class="stamp">${esc(S.feed.universe)}<br>close ${fmtDate(S.feed.as_of, { day: "numeric", month: "short" })}</div>` : "";
-    let h = header("Alerts", null, stamp) + demoNote();
+    let h = header("Alerts", null, stamp) + demoNote() + marketStrip();
     const arrow = d => `<button class="chiparrow ${d < 0 ? "left" : "right"}" data-chipscroll="${d}" aria-label="Scroll ${d < 0 ? "left" : "right"}" hidden>
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="${d < 0 ? "m15 18-6-6 6-6" : "m9 18 6-6-6-6"}"/></svg></button>`;
     h += `<div class="chipbar">${arrow(-1)}<div class="chips" role="group" aria-label="Filter by strategy">` +
       `<button class="chip" data-filter="all" aria-pressed="${S.filter === "all"}">All followed</button>` +
-      followed.map(id => `<button class="chip" data-filter="${id}" aria-pressed="${S.filter === id}">${esc(S.byId[id].name)}</button>`).join("") + `</div>${arrow(1)}</div>`;
-    if (!list.length) return h + `<div class="empty"><strong>No alerts yet</strong>None of your strategies has fired in the last few weeks. Quiet periods are normal, especially for the slow strategies.</div>`;
+      followed.map(id => `<button class="chip" data-filter="${id}" aria-pressed="${S.filter === id}">${esc(stratName(id))}</button>`).join("") + `</div>${arrow(1)}</div>`;
+    h += `<div class="tools"><span class="tg"><label>Show</label><div class="seg sm" role="group" aria-label="Minimum strength">${[[0, "All"], [2, "Moderate+"], [3, "Strong"]].map(([v, t]) =>
+      `<button data-minstr="${v}" aria-pressed="${minS === v}">${t}</button>`).join("")}</div></span>
+      <span class="tg"><label>Sort</label><div class="seg sm" role="group" aria-label="Sort">${[["new", "Newest"], ["str", "Strongest"]].map(([v, t]) =>
+      `<button data-sort="${v}" aria-pressed="${sort === v}">${t}</button>`).join("")}</div></span></div>`;
+    if (!list.length) return h + `<div class="empty"><strong>Nothing matches</strong>${minS ? "No alerts at this strength right now. Try showing all of them." : "None of your strategies has fired in the last few weeks. Quiet periods are normal, especially for the slow strategies."}</div>`;
+    S.firstSel = "alert-" + S.feed.alerts.indexOf(list[0]);
+    if (sort === "str") {
+      h += `<div class="day"><span>Strongest first</span><span>${list.length} alerts</span></div><div class="rows">` + list.map(a => alertRow(a)).join("") + `</div>`;
+      return h;
+    }
     let day = "";
     for (const a of list) {
       if (a.date !== day) {
@@ -422,27 +563,151 @@ table.bt small { display: block; color: var(--faint); font-size: 11.5px; margin-
         const cnt = list.filter(z => z.date === day).length;
         h += `<div class="day"><span>${esc(dayLabel(day))}</span><span>${cnt} alert${cnt > 1 ? "s" : ""}</span></div>`;
       }
-      const idx = S.feed.alerts.indexOf(a);
-      h += `<a class="alert ${a.side}" href="#alert-${idx}" style="color:inherit;text-decoration:none">
-        <span class="stripe"></span>
-        <span class="main"><span class="tk">${esc(a.ticker)}<span class="strat">${esc(S.byId[a.strategy]?.name)}</span></span>
-          <div class="note">${esc(a.note)}</div></span>
-        <span class="px">${money(a.price)}<br><span class="pill">${a.side}</span></span></a>`;
+      h += alertRow(a);
     }
     return h;
   }
 
+  function viewAlert(idx) {
+    const a = S.feed?.alerts?.[idx];
+    if (!a) return viewAlerts();
+    const s = S.byId[a.strategy], st = a.strength, stock = S.stockBy[a.ticker];
+    let h = header("", "#alerts");
+    h += `<div class="big2"><span class="tk">${esc(a.ticker)}</span><span class="px">${money(a.price)}</span><span class="pill ${a.side}">${a.side}</span></div>`;
+    h += `<p class="sub">${stock ? `<a href="#stock-${esc(a.ticker)}">${esc(stock.name)}</a> · ` : ""}${esc(s?.name)} · close of ${esc(fmtDate(a.date, { weekday: "short", day: "numeric", month: "long" }))}</p>`;
+    h += `<div class="chartbox" id="achart"><p class="loading">Loading chart…</p></div>`;
+    h += `<p class="caption"><strong>${esc(a.note)}</strong></p>`;
+    if (a.since_days > 0) {
+      const good = (a.side === "bullish") === (a.since >= 0);
+      h += `<div class="card since-card"><div><h3>Since the alert</h3><p>${a.since_days} session${a.since_days > 1 ? "s" : ""} later, the price is ${a.since >= 0 ? "up" : "down"}${good ? ", the way the alert pointed" : ", against the alert"}.</p></div><b class="${a.since >= 0 ? "up" : "down"}">${a.since > 0 ? "+" : ""}${a.since.toFixed(1)}%</b></div>`;
+    }
+    if (st) {
+      h += `<div class="card"><div class="hd"><h3>Signal strength</h3><span style="display:inline-flex;gap:8px;align-items:center;font:500 12px var(--font-mono)">${meter(st)} ${st.score}/4</span></div>
+        <ul class="checks">${st.checks.map(c => `<li class="${c.ok ? "" : "no"}"><span>${esc(c.text)}${c.ids ? `<small>${c.ids.map(stratName).map(esc).join(", ")}</small>` : ""}</span></li>`).join("")}</ul>
+        <p class="hint" style="margin:12px 0 0">Strength counts how much backs the alert up. It's a way to sort alerts, not a prediction.</p></div>`;
+    }
+    if (s) h += `<div class="card"><h3>What this means</h3><p>${esc(a.side === "bullish" ? s.bullish : s.bearish)}</p>
+      <p>${esc(s.watch_out[0])}</p><div style="display:flex;gap:8px;flex-wrap:wrap"><a class="btn ghost" href="#strategy-${slug(s.id)}">How ${esc(s.name)} works</a>${stock ? `<a class="btn ghost" href="#stock-${esc(a.ticker)}">${esc(a.ticker)} stock page</a>` : ""}</div></div>`;
+    h += `<p class="fine">For information only. An alert describes what the chart did; it is not a recommendation to buy or sell.</p>`;
+    return { html: h, after: async () => {
+      const box = document.getElementById("achart");
+      try {
+        const data = a.chart || await (await fetch("data/charts/" + a.file)).json();
+        if (!box.isConnected) return;
+        const focus = data.markers[0]?.i;
+        mountChart(box, data, { focus, label: `${a.ticker} chart with ${s?.name} alert` });
+      } catch { box.innerHTML = `<p class="loading">The chart couldn't load. Check your connection and open the alert again.</p>`; }
+    } };
+  }
+
+  // ---------------------------------------------------------------- stocks
+  function spark(vals) {
+    const lo = Math.min(...vals), hi = Math.max(...vals), n = vals.length, W = 64, H = 26;
+    const pts = vals.map((v, i) => `${(i / (n - 1) * W).toFixed(1)},${(H - 2 - (v - lo) / ((hi - lo) || 1) * (H - 4)).toFixed(1)}`).join(" ");
+    const col = vals[n - 1] >= vals[0] ? "var(--bull)" : "var(--bear)";
+    return `<svg class="spark" viewBox="0 0 ${W} ${H}" aria-hidden="true"><polyline points="${pts}" fill="none" stroke="${col}" stroke-width="1.5" stroke-linejoin="round"/></svg>`;
+  }
+
+  function healthCard() {
+    const M = S.stocks, b = M.breadth200;
+    const mood = b >= 60 ? ["Broad uptrend", "Most stocks are above their long-term average. Bullish alerts have the wind behind them."]
+      : b >= 40 ? ["Mixed market", "The market is split. Be more selective and favour stronger alerts."]
+      : ["Weak market", "Most stocks are below their long-term average. Bullish alerts are fighting the tide."];
+    const today = (S.feed?.alerts || []).filter(a => a.date === S.feed.as_of);
+    const bu = today.filter(a => a.side === "bullish").length;
+    return `<div class="health"><div class="hd"><h3>Market health</h3><span class="slabel ${b >= 60 ? "Strong" : b >= 40 ? "Moderate" : ""}" style="font:600 12px var(--font-mono)">${mood[0]}</span></div>
+      <div style="display:flex;align-items:baseline;gap:10px;margin-top:8px"><span class="big">${Math.round(b)}%</span><span style="color:var(--muted);font-size:13px">of S&amp;P 100 stocks above their 200-day average</span></div>
+      <div class="gauge"><b style="left:${b}%"></b></div><div class="gscale"><span>0%</span><span>50%</span><span>100%</span></div>
+      <p>${mood[1]}</p>
+      <div class="kv"><div><span>Up today</span><b class="up">${M.advancers}</b></div><div><span>Down today</span><b class="down">${M.decliners}</b></div><div><span>Alerts today</span><b>${bu}<span style="display:inline;color:var(--bull);font-size:13px;letter-spacing:0">▲</span> ${today.length - bu}<span style="display:inline;color:var(--bear);font-size:13px;letter-spacing:0">▼</span></b></div></div></div>`;
+  }
+
+  function viewStocks() {
+    S.firstSel = null;
+    if (!S.stocks) return header("Stocks") + `<div class="empty"><strong>No stock data yet</strong>Stock pages appear after the next daily scan runs on GitHub.</div>`;
+    const sort = pref("stockSort", "ticker");
+    const keys = { ticker: ["Ticker", (a, b) => a.ticker.localeCompare(b.ticker)], chg1d: ["Today", (a, b) => b.chg1d - a.chg1d],
+      chg1m: ["1 month", (a, b) => b.chg1m - a.chg1m], vs200: ["vs 200d", (a, b) => (b.vs200 ?? -999) - (a.vs200 ?? -999)],
+      alerts: ["Alerts", (a, b) => (b.bull + b.bear) - (a.bull + a.bear) || a.ticker.localeCompare(b.ticker)] };
+    const list = S.stocks.stocks.slice().sort(keys[sort][1]);
+    S.firstSel = "stock-" + list[0].ticker;
+    let h = header("Stocks", null, `<div class="stamp">${esc(S.feed?.universe || "")}<br>close ${fmtDate(S.stocks.as_of, { day: "numeric", month: "short" })}</div>`);
+    h += healthCard();
+    h += `<input class="search" id="stocksearch" type="search" placeholder="Search ticker or company" autocomplete="off" aria-label="Search stocks" value="${esc(S.q || "")}">`;
+    h += `<div class="tools" style="margin-bottom:6px"><label>Sort</label><div class="seg sm" role="group" aria-label="Sort stocks">${Object.entries(keys).map(([k, [t]]) =>
+      `<button data-ssort="${k}" aria-pressed="${sort === k}">${t}</button>`).join("")}</div></div><div class="rows" id="stockrows">`;
+    for (const r of list) {
+      const right = sort === "chg1m" ? chg(r.chg1m) + `<small style="color:var(--faint)">1 month</small>` : sort === "vs200" ? chg(r.vs200) + `<small style="color:var(--faint)">vs 200d</small>` : `${money(r.price)}<small>${chg(r.chg1d)}</small>`;
+      const dots = (r.bull ? `<i style="background:var(--bull)" title="${r.bull} bullish alerts"></i>` : "") + (r.bear ? `<i style="background:var(--bear)" title="${r.bear} bearish alerts"></i>` : "");
+      h += `<a class="row stock" href="#stock-${esc(r.ticker)}" data-q="${esc((r.ticker + " " + r.name + " " + r.sector).toLowerCase())}">
+        <span style="min-width:0"><span class="tk">${esc(r.ticker)}</span>${dots ? `<span class="dots">${dots}</span>` : ""}<span class="nm">${esc(r.name)}</span></span>
+        ${spark(r.spark)}<span class="q">${right}</span></a>`;
+    }
+    h += `</div><p class="empty" id="nomatch" hidden>No stock matches that search.</p>`;
+    return { html: h, after: filterStocks };
+  }
+
+  function filterStocks() {
+    const q = (S.q || "").trim().toLowerCase(), rows = app.querySelectorAll("#stockrows .row");
+    let shown = 0;
+    rows.forEach(r => { const ok = !q || r.dataset.q.includes(q); r.hidden = !ok; shown += ok; });
+    const nm = app.querySelector("#nomatch"); if (nm) nm.hidden = shown > 0;
+  }
+
+  function viewStock(t) {
+    const r = S.stockBy[t];
+    if (!r) return viewStocks();
+    const alerts = (S.feed?.alerts || []).filter(a => a.ticker === t);
+    let h = header("", "#stocks");
+    h += `<div class="big2"><span class="tk">${esc(t)}</span><span class="px">${money(r.price)}</span>${chg(r.chg1d)}</div>`;
+    h += `<p class="sub">${esc(r.name)}${r.sector ? " · " + esc(r.sector) : ""}</p>`;
+    const trend = r.vs200 == null ? "–" : r.vs200 >= 0 ? "Long-term uptrend" : "Long-term downtrend";
+    h += `<div class="tiles four" style="margin:0 0 14px">
+      <div><span>1 month</span><b>${chg(r.chg1m)}</b><small>&nbsp;</small></div>
+      <div><span>1 year</span><b>${chg(r.chg1y)}</b><small>&nbsp;</small></div>
+      <div><span>vs 200-day</span><b>${chg(r.vs200)}</b><small>${trend}</small></div>
+      <div><span>RSI 14</span><b>${r.rsi ?? "–"}</b><small>${r.rsi == null ? "" : r.rsi >= 70 ? "Overbought" : r.rsi <= 30 ? "Oversold" : "Neutral"}</small></div></div>`;
+    h += `<div class="range"><span class="lbl">52-week range</span><div class="bar"><b style="left:${r.pos52 ?? 50}%"></b></div>
+      <div class="ends"><span>${money(r.lo52)}</span><span>${r.pos52 != null ? Math.round(r.pos52) + "% of the way up" : ""}</span><span>${money(r.hi52)}</span></div></div>`;
+    h += `<div class="chartbox" id="schart"><p class="loading">Loading chart…</p></div>`;
+    h += `<p class="hint">One year of daily candles with the 50- and 200-day averages. Triangles mark alerts from all strategies in the last few weeks.</p>`;
+    h += `<h2>Recent alerts on ${esc(t)}</h2>`;
+    if (!alerts.length) h += `<p class="tag" style="font-size:14px">No strategy has fired on ${esc(t)} in the last few weeks.</p>`;
+    else h += `<div class="rows">` + alerts.map(a => alertRow(a, { showDate: true })).join("") + `</div>`;
+    h += `<p class="fine">For information only. Not investment advice.</p>`;
+    return { html: h, after: async () => {
+      const box = document.getElementById("schart");
+      try {
+        const data = S.stockData[t] || (S.stockData[t] = await (await fetch(`data/stocks/${t}.json`, { cache: "no-cache" })).json());
+        if (!box.isConnected) return;
+        const pos = {}; data.dates.forEach((d, i) => pos[d] = i);
+        const byDay = {};
+        const seen = new Set();
+        data.markers = [];
+        for (const a of alerts) {
+          const i = pos[a.date]; if (i == null) continue;
+          (byDay[i] = byDay[i] || []).push(a);
+          const k = i + a.side; if (seen.has(k)) continue; seen.add(k);
+          data.markers.push({ i, side: a.side === "bullish" ? 1 : -1 });
+        }
+        mountChart(box, { ...data, shapes: [] }, { label: `${t} one-year chart`, extra: i => byDay[i] ? `  · ${byDay[i].map(a => `<span class="${a.side === "bullish" ? "up" : "down"}">${esc(stratName(a.strategy))}</span>`).join(", ")}` : "" });
+      } catch { box.innerHTML = `<p class="loading">The chart couldn't load. Check your connection and try again.</p>`; }
+    } };
+  }
+
+  // ------------------------------------------------------------ strategies
   function viewStrategies() {
-    let h = header("Strategies") + `<p class="tag" style="margin-top:2px">Switch on the ones you want alerts for. Tap a strategy to learn how it works.</p>`;
+    let h = header("Strategies") + `<p class="tag" style="margin-top:2px;font-size:14.5px">Switch on the ones you want alerts for. Open a strategy to learn how it works and how it did in the past.</p>`;
     const cats = [...new Set(S.strategies.map(s => s.category))];
     const counts = {}; (S.feed?.alerts || []).forEach(a => counts[a.strategy] = (counts[a.strategy] || 0) + 1);
+    S.firstSel = "strategy-" + slug(S.strategies[0].id);
     for (const c of cats) {
       h += `<div class="cat">${esc(c)}</div>`;
       for (const s of S.strategies.filter(s => s.category === c)) {
-        const on = S.follow.has(s.id);
-        h += `<div class="srow"><a class="open" href="#strategy-${slug(s.id)}" style="color:inherit;text-decoration:none">
+        const on = S.follow.has(s.id), hit = S.bt?.strategies?.[s.id]?.bullish?.["20"]?.hit;
+        h += `<div class="srow"><a class="open" href="#strategy-${slug(s.id)}">
           <h3>${esc(s.name)}</h3><p>${esc(s.tagline)}</p>
-          <div class="meta"><span>${esc(s.level)}</span><span>·</span><span><b>${counts[s.id] || 0}</b> recent alerts</span>${S.bt?.strategies?.[s.id]?.bullish?.["20"]?.hit != null ? `<span>·</span><span><b>${Math.round(S.bt.strategies[s.id].bullish["20"].hit)}%</b> right after 20d</span>` : ""}</div></a>
+          <div class="meta"><span>${esc(s.level)}</span><span>·</span><span><b>${counts[s.id] || 0}</b> recent alerts</span>${hit != null ? `<span>·</span><span><b>${Math.round(hit)}%</b> right after 20d</span>` : ""}</div></a>
           <button class="toggle" role="switch" aria-checked="${on}" aria-label="Follow ${esc(s.name)}" data-follow="${s.id}"></button></div>`;
       }
     }
@@ -476,14 +741,7 @@ table.bt small { display: block; color: var(--faint); font-size: 11.5px; margin-
     h += `<h2>Why it can work</h2><div class="prose"><p>${esc(s.why)}</p></div>`;
     h += `<h2>Watch out for</h2><ul class="watch">${s.watch_out.map(w => `<li>${esc(w)}</li>`).join("")}</ul>`;
     h += `<h2>Settings used</h2><div class="settings">${esc(s.settings)}</div>`;
-    if (recent.length) {
-      h += `<h2>Latest alerts</h2>`;
-      recent.forEach(a => {
-        h += `<a class="alert ${a.side}" href="#alert-${S.feed.alerts.indexOf(a)}" style="color:inherit;text-decoration:none"><span class="stripe"></span>
-          <span class="main"><span class="tk">${esc(a.ticker)}</span><div class="note">${esc(fmtDate(a.date, { day: "numeric", month: "short" }))} · ${esc(a.note)}</div></span>
-          <span class="px">${money(a.price)}<br><span class="pill">${a.side}</span></span></a>`;
-      });
-    }
+    if (recent.length) h += `<h2>Latest alerts</h2><div class="rows">` + recent.map(a => alertRow(a)).join("") + `</div>`;
     h += `<p class="fine">For information and learning only. This is not investment advice.</p>`;
     return { html: h, after: () => { mountChart(document.getElementById("exchart"), ex.chart, { focus: ex.chart.focus, label: `${s.name} ${side} example chart` }); bt.after?.(); } };
   }
@@ -593,28 +851,6 @@ table.bt small { display: block; color: var(--faint); font-size: 11.5px; margin-
     el.addEventListener("pointerleave", () => { xh.setAttribute("visibility", "hidden"); show(n - 1); });
   }
 
-  function viewAlert(idx) {
-    const a = S.feed?.alerts?.[idx];
-    if (!a) return viewAlerts();
-    const s = S.byId[a.strategy];
-    let h = header("", "#alerts");
-    h += `<div class="big"><span class="tk">${esc(a.ticker)}</span><span class="px">${money(a.price)}</span><span class="pill ${a.side}" style="margin:0">${a.side}</span></div>`;
-    h += `<p class="sub">${esc(s?.name)} · close of ${esc(fmtDate(a.date, { weekday: "short", day: "numeric", month: "long" }))}</p>`;
-    h += `<div class="chartbox" id="achart"><p class="loading">Loading chart…</p></div>`;
-    h += `<p class="caption"><strong>${esc(a.note)}</strong></p>`;
-    if (s) h += `<div class="card"><h3>What this means</h3><p>${esc(a.side === "bullish" ? s.bullish : s.bearish)}</p>
-      <p>${esc(s.watch_out[0])}</p><a class="btn ghost" href="#strategy-${slug(s.id)}">How ${esc(s.name)} works</a></div>`;
-    h += `<p class="fine">For information only. An alert describes what the chart did; it is not a recommendation to buy or sell.</p>`;
-    return { html: h, after: async () => {
-      const box = document.getElementById("achart");
-      try {
-        const data = a.chart || await (await fetch("data/charts/" + a.file)).json();
-        const focus = data.markers[0]?.i;
-        mountChart(box, data, { focus, label: `${a.ticker} chart with ${s?.name} alert` });
-      } catch { box.innerHTML = `<p class="loading">The chart couldn't load. Check your connection and open the alert again.</p>`; }
-    } };
-  }
-
   function viewNotify() {
     const pre = S.feed?.ntfy_prefix;
     const followed = [...S.follow].filter(id => S.byId[id]);
@@ -632,7 +868,7 @@ table.bt small { display: block; color: var(--faint); font-size: 11.5px; margin-
     } else {
       followed.forEach(id => {
         const t = `${pre}-${id}`;
-        h += `<div class="topic"><span style="min-width:0"><span style="display:block;font-size:13px;color:var(--muted)">${esc(S.byId[id].name)}</span><code>${esc(t)}</code></span><button data-copy="${esc(t)}">Copy</button></div>`;
+        h += `<div class="topic"><span style="min-width:0"><span style="display:block;font-size:13px;color:var(--muted)">${esc(stratName(id))}</span><code>${esc(t)}</code></span><button data-copy="${esc(t)}">Copy</button></div>`;
       });
     }
     h += `<p class="fine">The scan runs once a day after the US market closes (around 23:15 Milan time). Signal Desk shows information about price patterns. It doesn't trade and isn't investment advice.</p>`;
@@ -640,22 +876,51 @@ table.bt small { display: block; color: var(--faint); font-size: 11.5px; margin-
   }
 
   // --------------------------------------------------------------- router
+  function detailFor(r) {
+    if (r.startsWith("alert-")) return () => viewAlert(+r.slice(6));
+    if (r.startsWith("stock-")) return () => viewStock(r.slice(6));
+    if (r.startsWith("strategy-")) return () => viewStrategy(unslug(r.slice(9)));
+    return null;
+  }
+  const norm = x => typeof x === "string" ? { html: x } : x;
+
   function route() {
     const r = (location.hash || "#alerts").slice(1);
-    let tab = "alerts", out;
-    if (r === "strategies") { tab = "strategies"; out = viewStrategies(); }
-    else if (r.startsWith("strategy-")) { tab = "strategies"; out = viewStrategy(unslug(r.slice(9))); }
-    else if (r.startsWith("alert-")) { tab = "alerts"; out = viewAlert(+r.slice(6)); }
-    else if (r === "notify") { tab = "notify"; out = viewNotify(); }
-    else out = viewAlerts();
-    const v = typeof out === "string" ? { html: out } : out;
+    const tab = r.startsWith("strateg") ? "strategies" : r.startsWith("stock") ? "stocks" : r === "notify" ? "notify" : "alerts";
+    const list = { alerts: viewAlerts, stocks: viewStocks, strategies: viewStrategies, notify: viewNotify }[tab];
+    let detail = detailFor(r), sel = detail ? r : null;
     charts.length = 0;
-    app.innerHTML = v.html;
-    v.after?.();
+
+    if (WIDE.matches && tab !== "notify") {
+      const lp = app.querySelector(".pane.list"), dp = app.querySelector(".pane.detail");
+      const listTop = lp?.scrollTop || 0, detTop = dp?.scrollTop || 0;
+      const L = norm(list());
+      if (!detail && S.firstSel) { detail = detailFor(S.firstSel); sel = S.firstSel; }
+      const D = detail ? norm(detail()) : { html: `<div class="placeholder">Select an item on the left.</div>` };
+      app.className = "wide";
+      app.innerHTML = `<section class="pane list">${L.html}</section><section class="pane detail"><div class="dwrap">${D.html}</div></section>`;
+      if (S.lastTab === tab) app.querySelector(".pane.list").scrollTop = listTop;
+      if (S.lastSel === sel) app.querySelector(".pane.detail").scrollTop = detTop;
+      L.after?.(); D.after?.();
+      if (sel) app.querySelectorAll(`.pane.list a[href="#${CSS.escape(sel)}"]`).forEach(a => (a.closest(".srow") || a).classList.add("sel"));
+    } else {
+      app.className = WIDE.matches ? "single" : "";
+      const V = norm(detail ? detail() : list());
+      app.innerHTML = V.html;
+      V.after?.();
+    }
+    S.lastTab = tab; S.lastSel = sel;
     setupChips();
-    document.querySelectorAll(".tabs a").forEach(a => a.setAttribute("aria-current", a.dataset.tab === tab ? "page" : "false"));
+    const search = app.querySelector("#stocksearch");
+    if (search) search.addEventListener("input", () => { S.q = search.value; filterStocks(); });
+    document.querySelectorAll("[data-tab]").forEach(a => a.setAttribute("aria-current", a.dataset.tab === tab ? "page" : "false"));
     if (tab === "alerts" && !r.startsWith("alert-")) markSeen();
     updateBadge();
+  }
+
+  function rerender() {
+    if (WIDE.matches) { route(); return; }
+    const y = scrollY; route(); scrollTo(0, y);
   }
 
   // Filter row: arrows appear only when there's more to scroll that way; mouse wheel scrolls sideways.
@@ -674,35 +939,42 @@ table.bt small { display: block; color: var(--faint); font-size: 11.5px; margin-
       e.preventDefault(); row.scrollLeft += e.deltaY;
     }, { passive: false });
     const sel = row.querySelector('[aria-pressed="true"]');
-    if (sel && sel.offsetLeft + sel.offsetWidth > row.clientWidth) row.scrollLeft = sel.offsetLeft - 48;
+    if (sel && sel.offsetLeft + sel.offsetWidth > row.clientWidth) { row.style.scrollBehavior = "auto"; row.scrollLeft = sel.offsetLeft - 48; row.style.scrollBehavior = ""; }
     update();
     new ResizeObserver(update).observe(row);
   }
 
-  function markSeen() { const ids = followedAlerts().map(a => a.id); save(SEEN, ids); }
+  function markSeen() { save(SEEN, followedAlerts().map(a => a.id)); }
   function updateBadge() {
     const seen = new Set(load(SEEN, []));
     const n = followedAlerts().filter(a => !seen.has(a.id)).length;
-    const b = document.getElementById("badge");
-    b.hidden = !n || !seen.size; b.textContent = n > 99 ? "99+" : n;
+    document.querySelectorAll(".count").forEach(b => { b.hidden = !n || !seen.size; b.textContent = n > 99 ? "99+" : n; });
   }
 
   app.addEventListener("click", e => {
+    const bk = e.target.closest("[data-back]");
+    if (bk && S.navs > 0) { e.preventDefault(); history.back(); return; }
     const f = e.target.closest("[data-follow]");
     if (f) {
       const id = f.dataset.follow;
       S.follow.has(id) ? S.follow.delete(id) : S.follow.add(id);
       save(STORE, [...S.follow]);
-      const y = scrollY; route(); scrollTo(0, y); return;
+      rerender(); return;
     }
     const cs = e.target.closest("[data-chipscroll]");
     if (cs) { const row = cs.parentElement.querySelector(".chips"); row.scrollBy({ left: +cs.dataset.chipscroll * row.clientWidth * 0.7, behavior: "smooth" }); return; }
     const fl = e.target.closest("[data-filter]");
-    if (fl) { S.filter = fl.dataset.filter; route(); return; }
+    if (fl) { S.filter = fl.dataset.filter; S.lastSel = null; goList(); return; }
+    const ms = e.target.closest("[data-minstr]");
+    if (ms) { setPref("minStr", +ms.dataset.minstr); goList(); return; }
+    const so = e.target.closest("[data-sort]");
+    if (so) { setPref("sort", so.dataset.sort); goList(); return; }
+    const ss = e.target.closest("[data-ssort]");
+    if (ss) { setPref("stockSort", ss.dataset.ssort); goList(); return; }
     const ex = e.target.closest("[data-ex]");
-    if (ex) { const id = unslug(location.hash.slice(10)); S.exSide[id] = ex.dataset.ex; const y = scrollY; route(); scrollTo(0, y); return; }
+    if (ex) { S.exSide[currentStrategy()] = ex.dataset.ex; rerender(); return; }
     const bs = e.target.closest("[data-bt]");
-    if (bs) { const id = unslug(location.hash.slice(10)); S.btSide[id] = bs.dataset.bt; const y = scrollY; route(); scrollTo(0, y); return; }
+    if (bs) { S.btSide[currentStrategy()] = bs.dataset.bt; rerender(); return; }
     const cp = e.target.closest("[data-copy]");
     if (cp) {
       const txt = cp.dataset.copy;
@@ -710,22 +982,43 @@ table.bt small { display: block; color: var(--faint); font-size: 11.5px; margin-
       navigator.clipboard?.writeText(txt).then(done, () => { const r = document.createRange(); r.selectNodeContents(cp.previousElementSibling.querySelector("code")); getSelection().removeAllRanges(); getSelection().addRange(r); });
     }
   });
-  addEventListener("hashchange", () => { route(); scrollTo(0, 0); });
+  // a list control changed: on desktop jump to the new first item, on phone just redraw the list
+  function goList() {
+    const tab = S.lastTab || "alerts", base = "#" + tab;
+    if (WIDE.matches && location.hash !== base) { location.hash = base; return; }
+    rerender();
+  }
+  function currentStrategy() {
+    const h = location.hash.slice(1);
+    return h.startsWith("strategy-") ? unslug(h.slice(9)) : (S.lastSel || "").startsWith("strategy-") ? unslug(S.lastSel.slice(9)) : "";
+  }
+
+  addEventListener("hashchange", () => {
+    S.navs++;
+    route();
+    if (WIDE.matches) { const d = app.querySelector(".pane.detail"); if (d) d.scrollTop = 0; }
+    else scrollTo(0, 0);
+  });
+  WIDE.addEventListener?.("change", () => route());
 
   // ----------------------------------------------------------------- boot
   async function boot() {
     S.follow = new Set(load(STORE, DEFAULT_FOLLOW));
+    S.prefs = load(PREFS, {}) || {};
     try {
       const opt = url => fetch(url, { cache: "no-cache" }).then(r => r.ok ? r.json() : null).catch(() => null);
-      const [st, fd, bt] = await Promise.all([
+      const [st, fd, bt, sk] = await Promise.all([
         fetch("data/strategies.json", { cache: "no-cache" }).then(r => r.json()),
-        opt("data/alerts.json"), opt("data/backtest.json"),
+        opt("data/alerts.json"), opt("data/backtest.json"), opt("data/stocks.json"),
       ]);
-      S.strategies = st.strategies; S.feed = fd; S.bt = bt;
+      S.strategies = st.strategies; S.feed = fd; S.bt = bt; S.stocks = sk;
       S.strategies.forEach(s => S.byId[s.id] = s);
+      (sk?.stocks || []).forEach(r => S.stockBy[r.ticker] = r);
+      if (fd) document.getElementById("sidefoot").innerHTML = `<b>${esc(fd.universe)}</b> · ${fd.tickers} stocks<br>Close of ${fmtDate(fd.as_of, { day: "numeric", month: "short", year: "numeric" })}<br><br>Information only.<br>Not investment advice.`;
       route();
-    } catch {
-      app.innerHTML = `<div class="empty"><strong>Couldn't load the strategies</strong>Check your connection and reload the page.</div>`;
+    } catch (err) {
+      console.error(err);
+      app.innerHTML = `<div class="empty"><strong>Couldn't load the data</strong>Check your connection and reload the page.</div>`;
     }
   }
   boot();

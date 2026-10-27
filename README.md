@@ -12,6 +12,8 @@ docs/                    the website (served by GitHub Pages)
   data/alerts.json       the alert feed                   (written by engine/scan.py)
   data/charts/           one chart file per alert
   data/backtest.json     backtest results                 (written by engine/backtest.py)
+  data/stocks.json       stock list + market health       (written by engine/scan.py)
+  data/stocks/           one-year chart per stock
 engine/
   strategies.py          the 9 strategy detectors (shared by scanner and examples)
   scan.py                daily scanner
@@ -19,6 +21,7 @@ engine/
   build_examples.py      builds the example charts
   strategies_content.json  the written explanations (edit text here)
   tickers.txt            the stock list
+  names.json             company names and sectors
 .github/workflows/scan.yml      runs the scan every weekday after the US close
 .github/workflows/backtest.yml  reruns the backtest every Saturday
 ```
@@ -51,6 +54,14 @@ Alerts always show in the app. To also get a push notification:
 2. Install **ntfy** from the App Store.
 3. Open the app's *Phone alerts* tab: it lists one channel per strategy you follow.
    Subscribe to them in ntfy.
+
+## Signal strength
+
+Every alert gets a score from 0 to 4, using only what was known on the alert day:
++1 if it goes with the long-term trend (price above the 200-day average for bullish
+alerts, below for bearish), +1 or +2 if other strategies fired the same way on the same
+stock in the last 4 sessions, −1 if any fired the opposite way, and +1 if the strategy's
+alerts beat a random day in the backtest. 0–1 = Weak, 2 = Moderate, 3–4 = Strong.
 
 ## How the backtest works
 
