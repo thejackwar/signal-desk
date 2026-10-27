@@ -1,0 +1,184 @@
+{
+  "strategies": [
+    {
+      "id": "ma200",
+      "name": "200-Day Trend Filter",
+      "category": "Trend",
+      "level": "Beginner",
+      "tagline": "Is the stock in a long-term uptrend or downtrend?",
+      "how": [
+        "The 200-day moving average is the average closing price of the last 200 trading days, roughly ten months. Because it moves slowly, it shows the long-term direction and ignores day-to-day noise.",
+        "Many investors and funds treat it as a dividing line: above it the stock is in a long-term uptrend, below it in a long-term downtrend. Crossing that line is a change of regime worth knowing about."
+      ],
+      "bullish": "The stock closes above its 200-day average after closing below it the day before.",
+      "bearish": "The stock closes below its 200-day average after closing above it the day before.",
+      "why": "Trends tend to persist. Staying on the right side of the long-term average historically avoided most of the deepest drawdowns, because big bear markets spend most of their time below it.",
+      "watch_out": [
+        "In sideways markets the price can cross back and forth many times (\"whipsaws\"), giving several false alerts in a row.",
+        "It reacts late by design: by the time the cross happens, part of the move is already over.",
+        "Works better as a filter (\"only look at stocks above their 200-day\") than as a precise entry point."
+      ],
+      "settings": "Simple moving average, 200 days, daily closes."
+    },
+    {
+      "id": "bollinger",
+      "name": "Bollinger Band Reversion",
+      "category": "Mean reversion",
+      "level": "Intermediate",
+      "tagline": "Spots stretched moves that are starting to snap back.",
+      "how": [
+        "Bollinger Bands draw an envelope around a 20-day average. The upper and lower bands sit 2 standard deviations away, so they widen when the stock is volatile and tighten when it is calm.",
+        "About 95% of closes normally land inside the bands. A close outside is unusual, and the moment the price closes back inside suggests the extreme move is fading."
+      ],
+      "bullish": "After closing below the lower band, the stock closes back above it.",
+      "bearish": "After closing above the upper band, the stock closes back below it.",
+      "why": "Prices often overshoot on news or panic and then partially return toward their average. Waiting for the close back inside avoids catching a falling knife on the first day of a drop.",
+      "watch_out": [
+        "In strong trends prices can \"walk the band\" for weeks; reversion signals against a powerful trend often fail.",
+        "Combining it with the 200-day filter (only bullish signals above the 200-day) is a common way to reduce bad signals.",
+        "Targets are modest: the usual goal is a move back to the middle band, not a new trend."
+      ],
+      "settings": "20-day simple average, bands at ±2 standard deviations."
+    },
+    {
+      "id": "donchian",
+      "name": "Donchian Breakout",
+      "category": "Breakout",
+      "level": "Beginner",
+      "tagline": "Alerts when a stock makes a fresh 20-day high or low.",
+      "how": [
+        "The Donchian channel is simply the highest high and the lowest low of the previous 20 trading days, about one month.",
+        "When the price closes above the top of that channel, it has done something it hasn't done in a month. Breakouts like this are how many trends begin."
+      ],
+      "bullish": "The stock closes above the highest high of the previous 20 days.",
+      "bearish": "The stock closes below the lowest low of the previous 20 days.",
+      "why": "This is the core of the famous \"Turtle Traders\" rules from the 1980s. New highs attract attention and buyers; trend followers accept many small false breakouts in exchange for catching the occasional big trend.",
+      "watch_out": [
+        "Most breakouts fail. The strategy only works on average because the winners can be much larger than the losers.",
+        "It fires often, so it's noisier than the other strategies. Check the bigger trend before taking a breakout seriously.",
+        "Breakouts on earnings days can reverse quickly."
+      ],
+      "settings": "20-day channel of highs and lows, signal on the daily close."
+    },
+    {
+      "id": "rsi",
+      "name": "RSI Oversold / Overbought",
+      "category": "Momentum",
+      "level": "Beginner",
+      "tagline": "Measures whether a move has gone too far, too fast.",
+      "how": [
+        "The Relative Strength Index (RSI) compares the size of recent up days with recent down days over 14 days, giving a score from 0 to 100.",
+        "Below 30 is called \"oversold\" (selling has been unusually strong), above 70 \"overbought\". The alert fires when RSI leaves these zones, which signals the pressure is easing."
+      ],
+      "bullish": "RSI rises back above 30 after being below it.",
+      "bearish": "RSI falls back below 70 after being above it.",
+      "why": "Sharp one-way moves often exhaust themselves. Waiting for RSI to exit the extreme zone, rather than buying the moment it enters, filters out some of the moves that keep going.",
+      "watch_out": [
+        "In a strong uptrend RSI can stay above 70 for a long time, so bearish signals are unreliable in strong trends (and vice versa).",
+        "Oversold can get more oversold: a stock in real trouble can bounce briefly and fall again.",
+        "Best used on stocks in a range or as a timing tool inside an established trend."
+      ],
+      "settings": "RSI 14 (Wilder smoothing), levels 30 and 70."
+    },
+    {
+      "id": "macd",
+      "name": "MACD Crossover",
+      "category": "Momentum",
+      "level": "Intermediate",
+      "tagline": "Catches shifts in short-term momentum.",
+      "how": [
+        "MACD is the difference between a fast (12-day) and a slow (26-day) exponential moving average. When it rises, short-term momentum is improving relative to the medium term.",
+        "A 9-day average of the MACD itself is the \"signal line\". MACD crossing above the signal line means momentum just turned up; crossing below means it turned down."
+      ],
+      "bullish": "The MACD line crosses above its signal line.",
+      "bearish": "The MACD line crosses below its signal line.",
+      "why": "Momentum tends to change before price trends do. The crossover is a smoothed, objective way to spot that turn. Crosses that happen far below zero (bullish) or far above zero (bearish) are often considered stronger.",
+      "watch_out": [
+        "In choppy markets MACD crosses back and forth frequently.",
+        "It's built from moving averages, so it lags: fast reversals can be over before it reacts.",
+        "The alert note tells you whether the cross happened above or below zero, which adds context."
+      ],
+      "settings": "EMA 12 and 26, signal line EMA 9."
+    },
+    {
+      "id": "golden_cross",
+      "name": "Golden / Death Cross",
+      "category": "Trend",
+      "level": "Beginner",
+      "tagline": "The classic long-term trend change signal.",
+      "how": [
+        "Two averages are compared: the 50-day (medium term) and the 200-day (long term).",
+        "When the 50-day rises above the 200-day it's called a golden cross: recent prices are now stronger than the long-term trend. The opposite, the 50-day falling below the 200-day, is a death cross."
+      ],
+      "bullish": "Golden cross: the 50-day average crosses above the 200-day average.",
+      "bearish": "Death cross: the 50-day average crosses below the 200-day average.",
+      "why": "It confirms that a change in trend has lasted long enough to show up in two slow averages. Rare signals, often reported in financial news, and useful as a big-picture regime indicator.",
+      "watch_out": [
+        "Very slow: the signal often comes months after the bottom or the top.",
+        "Each stock gives only a few signals per year at most, so expect long gaps between alerts.",
+        "In range-bound markets the two averages can tangle and give false crosses."
+      ],
+      "settings": "Simple moving averages, 50 and 200 days."
+    },
+    {
+      "id": "double_top_bottom",
+      "name": "Double Top / Bottom",
+      "category": "Chart pattern",
+      "level": "Intermediate",
+      "tagline": "Two tests of the same level that failed: a possible reversal.",
+      "how": [
+        "A double bottom forms when a stock falls to a low, bounces, falls back to roughly the same low, and holds. It looks like a \"W\". The peak between the two lows is the neckline.",
+        "A double top is the mirror image, an \"M\": two peaks at about the same price with a dip in between. The pattern is only complete when price breaks through the neckline."
+      ],
+      "bullish": "Double bottom: two lows within 3% of each other, at least 10 days apart, then a close above the high between them.",
+      "bearish": "Double top: two highs within 3% of each other, at least 10 days apart, then a close below the low between them.",
+      "why": "The second test shows that sellers (for a bottom) couldn't push the price lower than last time. Breaking the neckline confirms buyers have taken control. A common target is the height of the pattern projected from the neckline.",
+      "watch_out": [
+        "Patterns are drawn by an algorithm here; real charts are messy and some detected patterns will look less clean than textbook examples.",
+        "Without the neckline break it is not a pattern yet. Alerts only fire on the break.",
+        "Failed breakouts that fall back through the neckline are common."
+      ],
+      "settings": "Swing points use 5 bars on each side; lows/highs within 3%; neckline at least 4% away."
+    },
+    {
+      "id": "head_shoulders",
+      "name": "Head & Shoulders",
+      "category": "Chart pattern",
+      "level": "Advanced",
+      "tagline": "A three-peak reversal pattern, one of the best known.",
+      "how": [
+        "A head and shoulders top has three peaks: a left shoulder, a higher head, and a right shoulder at about the same height as the left. The line joining the two dips between them is the neckline.",
+        "The inverse version is upside down: three lows, the middle one deepest. It's a bullish reversal pattern."
+      ],
+      "bullish": "Inverse head & shoulders: price closes above the neckline.",
+      "bearish": "Head & shoulders: price closes below the neckline.",
+      "why": "The right shoulder failing to reach the head shows that the trend is losing strength. The neckline break confirms the shift. Like other patterns, traders often use the head-to-neckline distance as a rough target.",
+      "watch_out": [
+        "One of the most \"seen\" patterns, which also means people find it where it isn't. The detector requires the head at least 2% beyond both shoulders and shoulders within 5% of each other.",
+        "The neckline can slope; the alert uses the sloped line, not a horizontal level.",
+        "Rare signal: expect few alerts."
+      ],
+      "settings": "Swing points use 5 bars each side; shoulders within 5%; pattern within 120 days."
+    },
+    {
+      "id": "triangle",
+      "name": "Triangle Breakout",
+      "category": "Chart pattern",
+      "level": "Intermediate",
+      "tagline": "Price squeezing into a point, then breaking out.",
+      "how": [
+        "A triangle forms when the highs and lows converge: highs get lower, lows get higher, or one side is flat. The range keeps narrowing as buyers and sellers reach a balance.",
+        "Ascending triangles have a flat top and rising lows, descending triangles a flat bottom and falling highs, symmetrical triangles slope on both sides. The alert fires when price closes outside the pattern."
+      ],
+      "bullish": "Price closes above the upper line of the triangle.",
+      "bearish": "Price closes below the lower line of the triangle.",
+      "why": "Narrowing ranges mean volatility is compressing, and compression is often followed by expansion. The breakout direction tells you which side won the tug of war.",
+      "watch_out": [
+        "Breakouts can be false and reverse back into the triangle.",
+        "Ascending triangles lean bullish and descending ones bearish, but either can break the other way.",
+        "Lines are fitted to the last few swing points, so the drawing is an approximation."
+      ],
+      "settings": "Swing points use 4 bars each side, last 70 days, line fit through the last 2-3 swing highs and lows."
+    }
+  ]
+}
