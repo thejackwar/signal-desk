@@ -191,6 +191,42 @@ def scan(data: dict[str, pd.DataFrame], lookback_bars: int, edge: dict | None) -
     return alerts
 
 
+def backdrop(data: dict[str, pd.DataFrame]) -> dict:
+    """Real prices for the page background: last year of lines plus ~5 months of daily candles."""
+    def series(v):
+        return [rp(float(x)) for x in v]
+    if MARKET == "crypto":
+        bars, lines = 365, []
+        for t, name in (("BTC-USD", "Bitcoin"), ("ETH-USD", "Ethereum"), ("SOL-USD", "Solana")):
+            if t in data:
+                lines.append({"name": name, "values": series(data[t]["close"].iloc[-bars:])})
+        src = data.get("BTC-USD")
+        if src is None:
+            return {}
+        cdl = src.iloc[-150:]
+        return {"label": "Bitcoin, Ethereum and Solana, last 12 months · Bitcoin daily candles",
+                "lines": lines, "candles": {k: series(cdl[k]) for k in ("open", "high", "low", "close")}}
+    # stocks: equal-weight average of every stock, each rebased to 1 a year ago
+    bars = 260
+    frames = []
+    for t, df in data.items():
+        if len(df) < bars + 200:
+            continue
+        base = float(df["close"].iloc[-bars - 200])
+        frames.append(df[["open", "high", "low", "close"]].iloc[-(bars + 200):] / base * 100)
+    if not frames:
+        return {}
+    idx = sum(f.reset_index(drop=True) for f in frames) / len(frames)
+    c = idx["close"]
+    m50, m200 = c.rolling(50).mean(), c.rolling(200).mean()
+    cdl = idx.iloc[-150:]
+    return {"label": f"S&P 100 average of {len(frames)} stocks, last 12 months · with its 50- and 200-day averages",
+            "lines": [{"name": "S&P 100 average", "values": series(c.iloc[-bars:])},
+                      {"name": "50-day average", "values": series(m50.iloc[-bars:])},
+                      {"name": "200-day average", "values": series(m200.iloc[-bars:])}],
+            "candles": {k: series(cdl[k]) for k in ("open", "high", "low", "close")}}
+
+
 def stock_files(data: dict[str, pd.DataFrame], alerts: list[dict], names: dict) -> list[dict]:
     """One detail file per stock plus a summary row for the stock list."""
     STOCK_DIR.mkdir(parents=True, exist_ok=True)
@@ -297,6 +333,7 @@ def main():
         "breadth200": round(sum(r["vs200"] > 0 for r in above) / len(above) * 100, 1) if above else None,
         "advancers": sum(r["chg1d"] > 0 for r in stocks),
         "decliners": sum(r["chg1d"] < 0 for r in stocks),
+        "backdrop": backdrop(data),
         "stocks": stocks,
     }, separators=(",", ":")))
 
