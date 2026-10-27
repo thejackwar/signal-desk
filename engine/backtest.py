@@ -45,6 +45,7 @@ HORIZONS = (5, 20, 60)
 HOLD_DAYS = 20
 TREND = {"ma200", "golden_cross", "donchian"}   # hold until the opposite alert
 START_CAPITAL = 10_000
+TRADE_SIZE = 1_000      # "take every trade": each alert is a EUR 1,000 position
 BINS = np.arange(-0.20, 0.2001, 0.025)        # histogram of 20-day results
 
 
@@ -61,6 +62,55 @@ def cagr(eq: pd.Series) -> float:
     return float((eq.iloc[-1] / eq.iloc[0]) ** (1 / years) - 1) if years > 0 else 0.0
 
 
+def trade_stats(t: pd.DataFrame) -> dict:
+    if not len(t):
+        return {"n": 0}
+    pnl = t["ret"] * TRADE_SIZE
+    w, l = pnl[pnl > 0], pnl[pnl <= 0]
+    return {
+        "n": int(len(t)), "wins": int(len(w)), "losses": int(len(l)),
+        "win_rate": pct(len(w) / len(t)),
+        "total": round(float(pnl.sum())),
+        "won": round(float(w.sum())), "lost": round(float(l.sum())),
+        "avg_win": round(float(w.mean()), 1) if len(w) else 0,
+        "avg_loss": round(float(l.mean()), 1) if len(l) else 0,
+        "avg": round(float(pnl.mean()), 1),
+        "profit_factor": round(float(w.sum() / -l.sum()), 2) if l.sum() < 0 else None,
+        "avg_days": round(float(t["days"].mean()), 1),
+    }
+
+
+def trade_summary(trades: list[dict]) -> dict:
+    """Every alert taken as a EUR TRADE_SIZE trade: totals, a cumulative profit curve and recent trades."""
+    df = pd.DataFrame(trades)
+    if not len(df):
+        return {"size": TRADE_SIZE, "all": {"n": 0}, "long": {"n": 0}, "short": {"n": 0}}
+    closed = df[df["closed"]]
+    out = {"size": TRADE_SIZE, "open": int((~df["closed"]).sum())}
+    for key, part in (("all", closed), ("long", closed[closed["side"] > 0]), ("short", closed[closed["side"] < 0])):
+        out[key] = trade_stats(part)
+    # cumulative profit by exit week, for all / long / short
+    c = closed.assign(pnl=closed["ret"] * TRADE_SIZE, wk=closed["out"].dt.to_period("W-FRI").dt.end_time.dt.normalize())
+    weeks = pd.date_range(c["wk"].min(), c["wk"].max(), freq="W-FRI")
+    curve = {"dates": [f"{d:%Y-%m-%d}" for d in weeks]}
+    for key, part in (("all", c), ("long", c[c["side"] > 0]), ("short", c[c["side"] < 0])):
+        wk = part.groupby("wk")["pnl"].sum().reindex(weeks, fill_value=0).cumsum()
+        curve[key] = [round(float(v)) for v in wk]
+    out["curve"] = curve
+    yr = c.assign(y=c["out"].dt.year)
+    out["years"] = [{"year": int(y), "all": round(float(g["pnl"].sum())),
+                     "long": round(float(g.loc[g["side"] > 0, "pnl"].sum())),
+                     "short": round(float(g.loc[g["side"] < 0, "pnl"].sum())),
+                     "n": int(len(g)), "win_rate": pct((g["pnl"] > 0).mean())}
+                    for y, g in yr.groupby("y")]
+    recent = closed.sort_values("out").tail(10).iloc[::-1]
+    out["recent"] = [{"ticker": r["t"], "side": "long" if r["side"] > 0 else "short",
+                      "in": f"{r['in']:%Y-%m-%d}", "out": f"{r['out']:%Y-%m-%d}", "days": int(r["days"]),
+                      "ret": pct(r["ret"]), "pnl": round(float(r["ret"] * TRADE_SIZE))}
+                     for r in recent.to_dict("records")]
+    return out
+
+
 def run(data: dict[str, pd.DataFrame]) -> dict:
     closes = pd.DataFrame({t: df["close"] for t, df in data.items()}).sort_index()
     rets = closes.pct_change()
@@ -75,7 +125,7 @@ def run(data: dict[str, pd.DataFrame]) -> dict:
     out = {}
     for sid, fn in REGISTRY.items():
         print(f"  {sid}...", flush=True)
-        rows = []
+        rows, trades = [], []
         pos = pd.DataFrame(0.0, index=closes.index, columns=closes.columns)
         for t, df in data.items():
             try:
@@ -86,7 +136,20 @@ def run(data: dict[str, pd.DataFrame]) -> dict:
             c = df["close"].values
             sig = res.signals.values
             n = len(df)
+            idx = df.index
             for i in np.flatnonzero(sig):
+                side = int(sig[i])
+                # every alert is a trade: in at the alert's close, out on the opposite alert
+                # (trend strategies) or after HOLD_DAYS sessions / an opposite alert (the rest)
+                opp = np.flatnonzero(sig[i + 1:] == -side)
+                j = i + 1 + int(opp[0]) if len(opp) else n - 1
+                if sid not in TREND:
+                    j = min(j, i + HOLD_DAYS)
+                closed = j < n - 1 or (sid not in TREND and i + HOLD_DAYS <= n - 1) or len(opp) > 0
+                j = min(j, n - 1)
+                if j > i:
+                    trades.append({"t": t, "side": side, "in": idx[i], "out": idx[j], "days": j - i,
+                                   "ret": side * (c[j] / c[i] - 1), "closed": bool(closed)})
                 row = {"t": t, "d": df.index[i], "side": int(sig[i])}
                 for h in HORIZONS:
                     row[h] = c[i + h] / c[i] - 1 if i + h < n else np.nan
@@ -148,6 +211,7 @@ def run(data: dict[str, pd.DataFrame]) -> dict:
             "invested": pct((k > 0).mean()),
             "avg_positions": round(float(k[k > 0].mean()), 1) if (k > 0).any() else 0,
         }
+        result["trades"] = trade_summary(trades)
         out[sid] = result
     return out
 
@@ -172,6 +236,7 @@ def main():
         "tickers": len(data),
         "start": f"{start:%Y-%m-%d}", "end": f"{end:%Y-%m-%d}",
         "capital": START_CAPITAL,
+        "trade_size": TRADE_SIZE,
         "strategies": strategies,
     }, separators=(",", ":")))
     print(f"-> {OUT.relative_to(ROOT)} ({OUT.stat().st_size // 1024} KB)")
