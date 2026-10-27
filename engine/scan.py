@@ -206,7 +206,7 @@ def stock_files(data: dict[str, pd.DataFrame], alerts: list[dict], names: dict) 
         MONTH, YEAR = (30, 365) if MARKET == "crypto" else (21, 252)
         yr = df.iloc[-YEAR:]
         hi52, lo52 = float(yr["high"].max()), float(yr["low"].min())
-        start = max(0, len(df) - STOCK_BARS)
+        start = max(0, len(df) - (YEAR + 8 if MARKET == "crypto" else STOCK_BARS))
         res = StrategyResult(pd.Series(0, index=df.index), {}, [
             {"name": "SMA 50", "values": [None if pd.isna(v) else float(v) for v in m50], "style": "accent2"},
             {"name": "SMA 200", "values": [None if pd.isna(v) else float(v) for v in m200], "style": "accent"},

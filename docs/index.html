@@ -13,7 +13,7 @@
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icon-180.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Unbounded:wght@500;700;800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
 <style>
 /* Layout: phone = one column + bottom tabs. Desktop (>=1000px) = side nav, list pane, detail pane, like a trading terminal. Dark by design; charts on true black. */
 :root {
@@ -283,6 +283,70 @@ table.trades td:last-child { font: 600 13.5px var(--font-mono); white-space: now
 
 @media (max-width: 520px) { table.trades th:nth-child(3), table.trades td:nth-child(3) { display: none; } }
 
+/* market switch */
+.mswitch { display: flex; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 3px; gap: 2px; }
+.mswitch button { flex: 1; display: inline-flex; align-items: center; justify-content: center; gap: 6px; padding: 7px 10px; border-radius: 9px; font-size: 13px; font-weight: 600; color: var(--muted); }
+.mswitch button:hover { color: var(--fg); }
+.mswitch button[aria-pressed="true"] { background: var(--surface-2); color: var(--fg); }
+.mswitch.inline { margin: 10px 0 2px; }
+.side .mswitch { margin: 0 4px 18px; }
+.coin { flex: none; display: inline-grid; place-items: center; border-radius: 50%; font: 700 11px/1 var(--font-mono); color: #fff; letter-spacing: -.02em;
+  background: radial-gradient(circle at 30% 25%, var(--c2), var(--c1) 70%); box-shadow: inset 0 -2px 4px rgba(0,0,0,.35), 0 0 0 1px rgba(255,255,255,.08); text-shadow: 0 1px 2px rgba(0,0,0,.5); }
+.alert.withcoin { grid-template-columns: 3px 32px 1fr auto; }
+.stock.withcoin { grid-template-columns: 32px minmax(0, 1fr) 64px 92px; }
+.big2 .coin { align-self: center; }
+
+/* ===== crypto theme: neon on deep violet ===== */
+:root[data-market="crypto"] {
+  --bg: #0b0714; --surface: #150f24; --surface-2: #211838; --hover: #1a1230; --line: #2b2246;
+  --fg: #f3efff; --muted: #a79ec8; --faint: #6f6694;
+  --amber: #b57bff; --amber-bg: rgba(181,123,255,.14); --blue: #4de8ff;
+  --bull: #2cf59a; --bear: #ff4f9a; --bull-bg: rgba(44,245,154,.13); --bear-bg: rgba(255,79,154,.14);
+  --chart: #07040f;
+  --font-display: "Unbounded", "Bricolage Grotesque", system-ui, sans-serif;
+}
+:root[data-market="crypto"] body { background:
+  radial-gradient(900px 500px at 85% -10%, rgba(140,80,255,.22), transparent 60%),
+  radial-gradient(700px 420px at -10% 110%, rgba(77,232,255,.12), transparent 60%), var(--bg); background-attachment: fixed; }
+:root[data-market="crypto"] .top, :root[data-market="crypto"] .side, :root[data-market="crypto"] body::before { background: transparent; }
+:root[data-market="crypto"] .top { backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); background: rgba(11,7,20,.72); }
+:root[data-market="crypto"] .side { background: rgba(11,7,20,.6); backdrop-filter: blur(12px); }
+:root[data-market="crypto"] .tabs { background: rgba(11,7,20,.88); }
+:root[data-market="crypto"] .top h1 { font-weight: 800; font-size: 24px; letter-spacing: -.02em; background: linear-gradient(90deg, #fff 0%, #d4b8ff 45%, #4de8ff 100%); -webkit-background-clip: text; background-clip: text; color: transparent; }
+:root[data-market="crypto"] h2, :root[data-market="crypto"] .h3, :root[data-market="crypto"] .health h3, :root[data-market="crypto"] .card h3, :root[data-market="crypto"] .compare h3 { font-weight: 700; letter-spacing: -.01em; }
+:root[data-market="crypto"] h2 { font-size: 17px; }
+:root[data-market="crypto"] .brand em { background: linear-gradient(90deg, #b57bff, #4de8ff); -webkit-background-clip: text; background-clip: text; color: transparent; }
+:root[data-market="crypto"] .chip[aria-pressed="true"], :root[data-market="crypto"] .btn:not(.ghost):not(.on) { background: linear-gradient(100deg, #9b5cff, #4de8ff); border-color: transparent; color: #0b0714; }
+:root[data-market="crypto"] .mswitch button[aria-pressed="true"] { background: linear-gradient(100deg, rgba(155,92,255,.35), rgba(77,232,255,.25)); box-shadow: inset 0 0 0 1px rgba(181,123,255,.5); }
+:root[data-market="crypto"] .chartbox, :root[data-market="crypto"] .health, :root[data-market="crypto"] .card, :root[data-market="crypto"] .srow, :root[data-market="crypto"] .compare, :root[data-market="crypto"] .tablewrap, :root[data-market="crypto"] .tiles div, :root[data-market="crypto"] .ledger .total { border: 1px solid var(--line); border-radius: 18px; }
+:root[data-market="crypto"] .row.sel { background: linear-gradient(100deg, rgba(155,92,255,.2), rgba(77,232,255,.08)); box-shadow: inset 0 0 0 1px rgba(181,123,255,.35); border-radius: 14px; }
+:root[data-market="crypto"] .stripe { box-shadow: 0 0 10px currentColor; }
+:root[data-market="crypto"] .bullish .stripe { color: var(--bull); } :root[data-market="crypto"] .bearish .stripe { color: var(--bear); }
+:root[data-market="crypto"] .meter.s3 i:nth-child(-n+3), :root[data-market="crypto"] .meter.s4 i { background: linear-gradient(#4de8ff, #b57bff); box-shadow: 0 0 6px rgba(181,123,255,.6); }
+:root[data-market="crypto"] .slabel.Strong { color: #d4b8ff; }
+.health.mood { position: relative; overflow: hidden; background: linear-gradient(140deg, rgba(155,92,255,.18), rgba(21,15,36,.9) 45%, rgba(77,232,255,.1)); }
+.health.mood::after { content: ""; position: absolute; inset: -40% -10% auto auto; width: 220px; height: 220px; border-radius: 50%; background: radial-gradient(rgba(181,123,255,.35), transparent 65%); pointer-events: none; animation: float 7s ease-in-out infinite alternate; }
+@keyframes float { from { transform: translate(0, 0); } to { transform: translate(-40px, 30px); } }
+.moodtag { font: 700 13px var(--font-display); padding: 5px 10px; border-radius: 999px; background: rgba(255,255,255,.07); border: 1px solid var(--line); white-space: nowrap; }
+.health.mood .big { font: 800 34px/1.1 var(--font-display); }
+.health.mood .gauge { background: linear-gradient(90deg, #ff4f9a, #b57bff 50%, #2cf59a); height: 10px; border-radius: 5px; box-shadow: 0 0 16px rgba(181,123,255,.45); }
+.health.mood .gauge b { width: 18px; height: 18px; top: -4px; border-radius: 50%; background: #fff; box-shadow: 0 0 0 3px rgba(11,7,20,.9), 0 0 14px #fff; }
+.health.mood .gscale { font-family: var(--font-body); }
+.movers { margin: 0 0 14px; }
+.movers { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.mhd { display: block; font: 700 11.5px var(--font-display); color: var(--muted); margin: 0 2px 8px; }
+.mcards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+.mover { display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 10px 4px 8px; border-radius: 16px; text-decoration: none; color: var(--fg); border: 1px solid var(--line); min-width: 0;
+  transition: transform .15s ease, box-shadow .15s ease; }
+.mover.hot { background: linear-gradient(180deg, rgba(44,245,154,.14), rgba(44,245,154,.02)); }
+.mover.cold { background: linear-gradient(180deg, rgba(255,79,154,.14), rgba(255,79,154,.02)); }
+.mover:hover { transform: translateY(-2px); box-shadow: 0 8px 22px rgba(0,0,0,.35); }
+.mover .sym { font: 700 12px var(--font-mono); margin-top: 3px; }
+.mover b { font: 700 14px var(--font-mono); }
+.mover small { color: var(--faint); font: 500 10.5px var(--font-mono); }
+@media (max-width: 520px) { .movers { grid-template-columns: 1fr; gap: 10px; } }
+@media (min-width: 1000px) { .mswitch.inline { display: none; } }
+
 /* notifications */
 .steps { margin: 0; padding-left: 20px; }
 .steps li { margin-bottom: 10px; }
@@ -333,14 +397,15 @@ table.trades td:last-child { font: 600 13.5px var(--font-mono); white-space: now
   .pane.detail .dwrap > :first-child { margin-top: 20px; }
   .tiles.four { grid-template-columns: repeat(4, 1fr); }
 }
-@media (prefers-reduced-motion: reduce) { * { transition: none !important; scroll-behavior: auto !important; } }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; scroll-behavior: auto !important; animation: none !important; } }
 </style>
 </head>
 <body>
 <aside class="side" aria-label="Sections">
   <div class="brand"><img src="icon-192.png" alt=""><span>Investment Center<br><em>Signals</em></span></div>
+  <div class="mswitch side-sw" role="group" aria-label="Market"></div>
   <a class="nav" href="#alerts" data-tab="alerts"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9a6 6 0 1 1 12 0c0 6 2.5 7.5 2.5 7.5h-17S6 15 6 9Z"/><path d="M10 20a2 2 0 0 0 4 0"/></svg>Alerts<span class="count" hidden></span></a>
-  <a class="nav" href="#stocks" data-tab="stocks"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="m7 15 4-4 3 3 6-7"/></svg>Stocks</a>
+  <a class="nav" href="#stocks" data-tab="stocks"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="m7 15 4-4 3 3 6-7"/></svg><span data-l="tab">Stocks</span></a>
   <a class="nav" href="#strategies" data-tab="strategies"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 20h18"/><path d="M6 16V9"/><path d="M4.5 9h3"/><path d="M12 16V5"/><path d="M10.5 5h3"/><path d="M18 16v-5"/><path d="M16.5 11h3"/></svg>Strategies</a>
   <a class="nav" href="#notify" data-tab="notify"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="2.5" width="12" height="19" rx="2.5"/><path d="M11 18.5h2"/></svg>Phone alerts</a>
   <div class="foot" id="sidefoot"></div>
@@ -351,7 +416,7 @@ table.trades td:last-child { font: 600 13.5px var(--font-mono); white-space: now
 <div class="tabs">
   <nav aria-label="Sections">
     <a href="#alerts" data-tab="alerts"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9a6 6 0 1 1 12 0c0 6 2.5 7.5 2.5 7.5h-17S6 15 6 9Z"/><path d="M10 20a2 2 0 0 0 4 0"/></svg>Alerts<span class="count" hidden></span></a>
-    <a href="#stocks" data-tab="stocks"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="m7 15 4-4 3 3 6-7"/></svg>Stocks</a>
+    <a href="#stocks" data-tab="stocks"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="m7 15 4-4 3 3 6-7"/></svg><span data-l="tab">Stocks</span></a>
     <a href="#strategies" data-tab="strategies"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 20h18"/><path d="M6 16V9"/><path d="M4.5 9h3"/><path d="M12 16V5"/><path d="M10.5 5h3"/><path d="M18 16v-5"/><path d="M16.5 11h3"/></svg>Strategies</a>
     <a href="#notify" data-tab="notify"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="2.5" width="12" height="19" rx="2.5"/><path d="M11 18.5h2"/></svg>Phone</a>
   </nav>
@@ -385,12 +450,38 @@ table.trades td:last-child { font: 600 13.5px var(--font-mono); white-space: now
     if (diff < 7) return fmtDate(d, { weekday: "long" });
     return fmtDate(d, { day: "numeric", month: "long" });
   }
-  const money = v => v == null ? "–" : v.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  const money = v => v == null ? "–" : Math.abs(v) >= 1 || v === 0 ? v.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : String(+v.toPrecision(4));
+  const axisLbl = t => Math.abs(t) >= 1000 ? Math.round(t).toLocaleString("en-US") : Math.abs(t) >= 1 || t === 0 ? t.toFixed(t % 1 ? 1 : 0) : String(+t.toPrecision(3));
+  const disp = t => String(t).replace(/-USD$/, "");
+  const MK = {
+    stocks: { noun: "stocks", one: "stock", Tab: "Stocks", index: "S&amp;P 100", base: "data/", search: "Search ticker or company",
+              scan: "The scan runs once a day after the US market closes (around 23:15 Milan time)." },
+    crypto: { noun: "coins", one: "coin", Tab: "Coins", index: "top crypto", base: "data/crypto/", search: "Search coin",
+              scan: "The crypto scan runs every day shortly after the daily candle closes (around 01:20 Milan time), weekends included." },
+  };
+  const L = () => MK[S.market] || MK.stocks;
+  const isCrypto = () => S.market === "crypto";
+  const COIN_COLORS = { BTC: ["#f7931a", "#ffb84d"], ETH: ["#627eea", "#a5b4ff"], XRP: ["#3a4a5c", "#8fa3b8"], BNB: ["#f3ba2f", "#ffe08a"], SOL: ["#9945ff", "#14f195"],
+    DOGE: ["#c2a633", "#f0d97a"], TRX: ["#ff0013", "#ff6b7a"], ADA: ["#0033ad", "#4d8bff"], LINK: ["#2a5ada", "#7fa2ff"], XLM: ["#1d1d1b", "#9aa0a6"], BCH: ["#0ac18e", "#7cf0cc"],
+    AVAX: ["#e84142", "#ff8a8b"], LTC: ["#345d9d", "#a6c0ea"], HBAR: ["#222", "#888"], DOT: ["#e6007a", "#ff6cb8"], XMR: ["#ff6600", "#ffa366"], ETC: ["#328332", "#7fd47f"],
+    ATOM: ["#2e3148", "#8b8fb8"], ALGO: ["#111", "#7d7d7d"] };
+  function coin(t, size = 30) {
+    const sym = disp(t), c = COIN_COLORS[sym] || [`hsl(${[...sym].reduce((a, ch) => a + ch.charCodeAt(0), 0) * 37 % 360} 70% 45%)`, `hsl(${[...sym].reduce((a, ch) => a + ch.charCodeAt(0), 0) * 37 % 360} 80% 70%)`];
+    return `<span class="coin" style="--c1:${c[0]};--c2:${c[1]};width:${size}px;height:${size}px;font-size:${Math.round(size * (sym.length > 3 ? .27 : .33))}px" aria-hidden="true">${esc(sym)}</span>`;
+  }
   const chg = v => v == null ? `<span>–</span>` : `<span class="${v >= 0 ? "up" : "down"}">${v > 0 ? "+" : v < 0 ? "−" : ""}${Math.abs(v).toFixed(Math.abs(v) >= 100 ? 0 : 1)}%</span>`;
 
   // --------------------------------------------------------------- charts
   const C = { up: "#32c48d", down: "#f05a63", grid: "#1b1e24", axis: "#6b727c", accent: "#f2b33d", accent2: "#74a7f5", muted: "#9aa1ab", band: "#74a7f5", shape: "#f2b33d" };
   const STYLE = { accent: C.accent, accent2: C.accent2, muted: C.muted, band: C.band };
+  const PALETTES = {
+    stocks: { bg: "#000", up: "#32c48d", down: "#f05a63", grid: "#1b1e24", axis: "#6b727c", accent: "#f2b33d", accent2: "#74a7f5", muted: "#9aa1ab", band: "#74a7f5", shape: "#f2b33d" },
+    crypto: { bg: "#07040f", up: "#2cf59a", down: "#ff4f9a", grid: "#1c1530", axis: "#7d73a3", accent: "#b57bff", accent2: "#4de8ff", muted: "#a59cc4", band: "#4de8ff", shape: "#ffd23f" },
+  };
+  function applyPalette() {
+    Object.assign(C, PALETTES[S.market] || PALETTES.stocks);
+    Object.assign(STYLE, { accent: C.accent, accent2: C.accent2, muted: C.muted, band: C.band });
+  }
 
   function niceTicks(lo, hi, count) {
     const span = hi - lo, raw = span / count, mag = Math.pow(10, Math.floor(Math.log10(raw)));
@@ -424,10 +515,10 @@ table.trades td:last-child { font: 600 13.5px var(--font-mono); white-space: now
     const y = v => P.t + (hi - v) / (hi - lo) * priceH;
 
     let svg = `<svg class="chart" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" role="img" aria-label="${esc(opts.label || "Price chart")}">`;
-    svg += `<rect x="0" y="0" width="${W}" height="${H}" fill="#000"/>`;
+    svg += `<rect x="0" y="0" width="${W}" height="${H}" fill="${C.bg}"/>`;
     for (const t of niceTicks(lo, hi, 4)) {
       svg += `<line x1="${P.l}" x2="${W - P.r}" y1="${y(t).toFixed(1)}" y2="${y(t).toFixed(1)}" stroke="${C.grid}" stroke-width="1"/>`;
-      svg += `<text x="${W - P.r + 6}" y="${(y(t) + 4).toFixed(1)}" fill="${C.axis}" font-size="10.5" font-family="IBM Plex Mono, monospace">${t < 1000 ? t.toFixed(t % 1 ? 1 : 0) : Math.round(t)}</text>`;
+      svg += `<text x="${W - P.r + 6}" y="${(y(t) + 4).toFixed(1)}" fill="${C.axis}" font-size="10.5" font-family="IBM Plex Mono, monospace">${axisLbl(t)}</text>`;
     }
     // month labels
     let lastM = "", lastX = -99;
@@ -538,7 +629,7 @@ table.trades td:last-child { font: 600 13.5px var(--font-mono); white-space: now
     if (back) return `<header class="top backonly"><a class="back" href="${back}" data-back aria-label="Back"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>Back</a>${right}</header>`;
     return `<header class="top"><h1>${title}</h1>${right}</header>`;
   }
-  const demoNote = () => S.feed?.demo ? `<div class="demo">Demo data: these alerts come from simulated prices on made-up tickers, so you can see how the app works. Real S&amp;P 100 alerts appear once the daily scan runs on GitHub.</div>` : "";
+  const demoNote = () => S.feed?.demo ? `<div class="demo">Demo data: these alerts come from simulated prices on made-up tickers, so you can see how the app works. Real alerts appear once the daily scan runs on GitHub.</div>` : "";
   const meter = st => st ? `<span class="meter s${st.score}" aria-hidden="true"><i></i><i></i><i></i><i></i></span><span class="slabel ${st.label}">${st.label}</span>` : "";
   const stratName = id => S.byId[id]?.name || id;
 
@@ -547,9 +638,9 @@ table.trades td:last-child { font: 600 13.5px var(--font-mono); white-space: now
   function alertRow(a, opts = {}) {
     const idx = S.feed.alerts.indexOf(a);
     const sinceTxt = a.since_days > 0 ? `${chg(a.since)} <span style="color:var(--faint)">${a.since_days}d</span>` : `<span style="color:var(--faint)">today</span>`;
-    return `<a class="row alert ${a.side}" href="#alert-${idx}">
-      <span class="stripe"></span>
-      <span class="main"><span class="tk">${esc(opts.showDate ? fmtDate(a.date, { day: "numeric", month: "short" }) : a.ticker)}</span><span class="strat">${esc(stratName(a.strategy))}</span>
+    return `<a class="row alert ${a.side}${isCrypto() && !opts.showDate ? " withcoin" : ""}" href="#alert-${idx}">
+      <span class="stripe"></span>${isCrypto() && !opts.showDate ? coin(a.ticker, 32) : ""}
+      <span class="main"><span class="tk">${esc(opts.showDate ? fmtDate(a.date, { day: "numeric", month: "short" }) : disp(a.ticker))}</span><span class="strat">${esc(stratName(a.strategy))}</span>
         <div class="note">${esc(a.note)}</div>
         <div class="info">${meter(a.strength)}<span class="pill">${a.side}</span></div></span>
       <span class="px">${money(a.price)}<span class="since">${sinceTxt}</span></span></a>`;
@@ -606,7 +697,7 @@ table.trades td:last-child { font: 600 13.5px var(--font-mono); white-space: now
     if (!a) return viewAlerts();
     const s = S.byId[a.strategy], st = a.strength, stock = S.stockBy[a.ticker];
     let h = header("", "#alerts");
-    h += `<div class="big2"><span class="tk">${esc(a.ticker)}</span><span class="px">${money(a.price)}</span><span class="pill ${a.side}">${a.side}</span></div>`;
+    h += `<div class="big2">${isCrypto() ? coin(a.ticker, 40) : ""}<span class="tk">${esc(disp(a.ticker))}</span><span class="px">${money(a.price)}</span><span class="pill ${a.side}">${a.side}</span></div>`;
     h += `<p class="sub">${stock ? `<a href="#stock-${esc(a.ticker)}">${esc(stock.name)}</a> · ` : ""}${esc(s?.name)} · close of ${esc(fmtDate(a.date, { weekday: "short", day: "numeric", month: "long" }))}</p>`;
     h += `<div class="chartbox" id="achart"><p class="loading">Loading chart…</p></div>`;
     h += `<p class="caption"><strong>${esc(a.note)}</strong></p>`;
@@ -620,12 +711,12 @@ table.trades td:last-child { font: 600 13.5px var(--font-mono); white-space: now
         <p class="hint" style="margin:12px 0 0">Strength counts how much backs the alert up. It's a way to sort alerts, not a prediction.</p></div>`;
     }
     if (s) h += `<div class="card"><h3>What this means</h3><p>${esc(a.side === "bullish" ? s.bullish : s.bearish)}</p>
-      <p>${esc(s.watch_out[0])}</p><div style="display:flex;gap:8px;flex-wrap:wrap"><a class="btn ghost" href="#strategy-${slug(s.id)}">How ${esc(s.name)} works</a>${stock ? `<a class="btn ghost" href="#stock-${esc(a.ticker)}">${esc(a.ticker)} stock page</a>` : ""}</div></div>`;
+      <p>${esc(s.watch_out[0])}</p><div style="display:flex;gap:8px;flex-wrap:wrap"><a class="btn ghost" href="#strategy-${slug(s.id)}">How ${esc(s.name)} works</a>${stock ? `<a class="btn ghost" href="#stock-${esc(a.ticker)}">${esc(disp(a.ticker))} ${L().one} page</a>` : ""}</div></div>`;
     h += `<p class="fine">For information only. An alert describes what the chart did; it is not a recommendation to buy or sell.</p>`;
     return { html: h, after: async () => {
       const box = document.getElementById("achart");
       try {
-        const data = a.chart || await (await fetch("data/charts/" + a.file)).json();
+        const data = a.chart || await (await fetch(L().base + "charts/" + a.file)).json();
         if (!box.isConnected) return;
         const focus = data.markers[0]?.i;
         mountChart(box, data, { focus, label: `${a.ticker} chart with ${s?.name} alert` });
@@ -643,40 +734,63 @@ table.trades td:last-child { font: 600 13.5px var(--font-mono); white-space: now
 
   function healthCard() {
     const M = S.stocks, b = M.breadth200;
+    if (isCrypto()) return moodCard();
     const mood = b >= 60 ? ["Broad uptrend", "Most stocks are above their long-term average. Bullish alerts have the wind behind them."]
       : b >= 40 ? ["Mixed market", "The market is split. Be more selective and favour stronger alerts."]
       : ["Weak market", "Most stocks are below their long-term average. Bullish alerts are fighting the tide."];
     const today = (S.feed?.alerts || []).filter(a => a.date === S.feed.as_of);
     const bu = today.filter(a => a.side === "bullish").length;
     return `<div class="health"><div class="hd"><h3>Market health</h3><span class="slabel ${b >= 60 ? "Strong" : b >= 40 ? "Moderate" : ""}" style="font:600 12px var(--font-mono)">${mood[0]}</span></div>
-      <div style="display:flex;align-items:baseline;gap:10px;margin-top:8px"><span class="big">${Math.round(b)}%</span><span style="color:var(--muted);font-size:13px">of S&amp;P 100 stocks above their 200-day average</span></div>
+      <div style="display:flex;align-items:baseline;gap:10px;margin-top:8px"><span class="big">${Math.round(b)}%</span><span style="color:var(--muted);font-size:13px">of ${L().index} ${L().noun} above their 200-day average</span></div>
       <div class="gauge"><b style="left:${b}%"></b></div><div class="gscale"><span>0%</span><span>50%</span><span>100%</span></div>
       <p>${mood[1]}</p>
       <div class="kv"><div><span>Up today</span><b class="up">${M.advancers}</b></div><div><span>Down today</span><b class="down">${M.decliners}</b></div><div><span>Alerts today</span><b>${bu}<span style="display:inline;color:var(--bull);font-size:13px;letter-spacing:0">▲</span> ${today.length - bu}<span style="display:inline;color:var(--bear);font-size:13px;letter-spacing:0">▼</span></b></div></div></div>`;
   }
 
+  function moodCard() {
+    const M = S.stocks, b = M.breadth200;
+    const mood = b >= 60 ? ["🚀", "Bull run", "Most coins are above their 200-day average. The tide is lifting everything."]
+      : b >= 40 ? ["🌊", "Choppy waters", "Half the market is up, half is down. Pick your coins carefully."]
+      : ["🐻", "Bear market", "Most coins are below their 200-day average. Rallies tend to fade in a bear market."];
+    const today = (S.feed?.alerts || []).filter(a => a.date === S.feed.as_of);
+    const bu = today.filter(a => a.side === "bullish").length;
+    return `<div class="health mood"><div class="hd"><h3>Crypto mood</h3><span class="moodtag">${mood[0]} ${mood[1]}</span></div>
+      <div style="display:flex;align-items:baseline;gap:10px;margin-top:10px"><span class="big">${Math.round(b)}%</span><span style="color:var(--muted);font-size:13px">of the top ${M.stocks.length} coins above their 200-day average</span></div>
+      <div class="gauge"><b style="left:${b}%"></b></div><div class="gscale"><span>🐻 bear</span><span>🌊</span><span>bull 🚀</span></div>
+      <p>${mood[2]}</p>
+      <div class="kv"><div><span>Green today</span><b class="up">${M.advancers}</b></div><div><span>Red today</span><b class="down">${M.decliners}</b></div><div><span>Alerts today</span><b>${bu}<span style="display:inline;color:var(--bull);font-size:13px;letter-spacing:0">▲</span> ${today.length - bu}<span style="display:inline;color:var(--bear);font-size:13px;letter-spacing:0">▼</span></b></div></div></div>`;
+  }
+
+  function moversStrip() {
+    const all = S.stocks.stocks.slice().sort((a, b) => b.chg1d - a.chg1d);
+    const card = (r, hot) => `<a class="mover ${hot ? "hot" : "cold"}" href="#stock-${esc(r.ticker)}">${coin(r.ticker, 34)}<span class="sym">${esc(disp(r.ticker))}</span><b>${chg(r.chg1d)}</b><small>${money(r.price)}</small></a>`;
+    return `<div class="movers"><div class="mgrp"><span class="mhd">🔥 Top gainers</span><div class="mcards">${all.slice(0, 3).map(r => card(r, true)).join("")}</div></div>
+      <div class="mgrp"><span class="mhd">🧊 Biggest drops</span><div class="mcards">${all.slice(-3).reverse().map(r => card(r, false)).join("")}</div></div></div>`;
+  }
+
   function viewStocks() {
     S.firstSel = null;
-    if (!S.stocks) return header("Stocks") + `<div class="empty"><strong>No stock data yet</strong>Stock pages appear after the next daily scan runs on GitHub.</div>`;
+    if (!S.stocks) return header(L().Tab) + `<div class="empty"><strong>No ${L().one} data yet</strong>These pages appear after the next daily scan runs on GitHub.</div>`;
     const sort = pref("stockSort", "ticker");
     const keys = { ticker: ["Ticker", (a, b) => a.ticker.localeCompare(b.ticker)], chg1d: ["Today", (a, b) => b.chg1d - a.chg1d],
       chg1m: ["1 month", (a, b) => b.chg1m - a.chg1m], vs200: ["vs 200d", (a, b) => (b.vs200 ?? -999) - (a.vs200 ?? -999)],
       alerts: ["Alerts", (a, b) => (b.bull + b.bear) - (a.bull + a.bear) || a.ticker.localeCompare(b.ticker)] };
     const list = S.stocks.stocks.slice().sort(keys[sort][1]);
     S.firstSel = "stock-" + list[0].ticker;
-    let h = header("Stocks", null, `<div class="stamp">${esc(S.feed?.universe || "")}<br>close ${fmtDate(S.stocks.as_of, { day: "numeric", month: "short" })}</div>`);
+    let h = header(L().Tab, null, `<div class="stamp">${esc(S.feed?.universe || "")}<br>close ${fmtDate(S.stocks.as_of, { day: "numeric", month: "short" })}</div>`);
     h += healthCard();
-    h += `<input class="search" id="stocksearch" type="search" placeholder="Search ticker or company" autocomplete="off" aria-label="Search stocks" value="${esc(S.q || "")}">`;
+    if (isCrypto()) h += moversStrip();
+    h += `<input class="search" id="stocksearch" type="search" placeholder="${L().search}" autocomplete="off" aria-label="Search" value="${esc(S.q || "")}">`;
     h += `<div class="tools" style="margin-bottom:6px"><label>Sort</label><div class="seg sm" role="group" aria-label="Sort stocks">${Object.entries(keys).map(([k, [t]]) =>
       `<button data-ssort="${k}" aria-pressed="${sort === k}">${t}</button>`).join("")}</div></div><div class="rows" id="stockrows">`;
     for (const r of list) {
       const right = sort === "chg1m" ? chg(r.chg1m) + `<small style="color:var(--faint)">1 month</small>` : sort === "vs200" ? chg(r.vs200) + `<small style="color:var(--faint)">vs 200d</small>` : `${money(r.price)}<small>${chg(r.chg1d)}</small>`;
       const dots = (r.bull ? `<i style="background:var(--bull)" title="${r.bull} bullish alerts"></i>` : "") + (r.bear ? `<i style="background:var(--bear)" title="${r.bear} bearish alerts"></i>` : "");
-      h += `<a class="row stock" href="#stock-${esc(r.ticker)}" data-q="${esc((r.ticker + " " + r.name + " " + r.sector).toLowerCase())}">
-        <span style="min-width:0"><span class="tk">${esc(r.ticker)}</span>${dots ? `<span class="dots">${dots}</span>` : ""}<span class="nm">${esc(r.name)}</span></span>
+      h += `<a class="row stock${isCrypto() ? " withcoin" : ""}" href="#stock-${esc(r.ticker)}" data-q="${esc((r.ticker + " " + r.name + " " + r.sector).toLowerCase())}">
+        ${isCrypto() ? coin(r.ticker, 32) : ""}<span style="min-width:0"><span class="tk">${esc(disp(r.ticker))}</span>${dots ? `<span class="dots">${dots}</span>` : ""}<span class="nm">${esc(r.name)}</span></span>
         ${spark(r.spark)}<span class="q">${right}</span></a>`;
     }
-    h += `</div><p class="empty" id="nomatch" hidden>No stock matches that search.</p>`;
+    h += `</div><p class="empty" id="nomatch" hidden>Nothing matches that search.</p>`;
     return { html: h, after: filterStocks };
   }
 
@@ -692,7 +806,7 @@ table.trades td:last-child { font: 600 13.5px var(--font-mono); white-space: now
     if (!r) return viewStocks();
     const alerts = (S.feed?.alerts || []).filter(a => a.ticker === t);
     let h = header("", "#stocks");
-    h += `<div class="big2"><span class="tk">${esc(t)}</span><span class="px">${money(r.price)}</span>${chg(r.chg1d)}</div>`;
+    h += `<div class="big2">${isCrypto() ? coin(t, 44) : ""}<span class="tk">${esc(disp(t))}</span><span class="px">${money(r.price)}</span>${chg(r.chg1d)}</div>`;
     h += `<p class="sub">${esc(r.name)}${r.sector ? " · " + esc(r.sector) : ""}</p>`;
     const trend = r.vs200 == null ? "–" : r.vs200 >= 0 ? "Long-term uptrend" : "Long-term downtrend";
     h += `<div class="tiles four" style="margin:0 0 14px">
@@ -704,14 +818,14 @@ table.trades td:last-child { font: 600 13.5px var(--font-mono); white-space: now
       <div class="ends"><span>${money(r.lo52)}</span><span>${r.pos52 != null ? Math.round(r.pos52) + "% of the way up" : ""}</span><span>${money(r.hi52)}</span></div></div>`;
     h += `<div class="chartbox" id="schart"><p class="loading">Loading chart…</p></div>`;
     h += `<p class="hint">One year of daily candles with the 50- and 200-day averages. Triangles mark alerts from all strategies in the last few weeks.</p>`;
-    h += `<h2>Recent alerts on ${esc(t)}</h2>`;
-    if (!alerts.length) h += `<p class="tag" style="font-size:14px">No strategy has fired on ${esc(t)} in the last few weeks.</p>`;
+    h += `<h2>Recent alerts on ${esc(disp(t))}</h2>`;
+    if (!alerts.length) h += `<p class="tag" style="font-size:14px">No strategy has fired on ${esc(disp(t))} in the last few weeks.</p>`;
     else h += `<div class="rows">` + alerts.map(a => alertRow(a, { showDate: true })).join("") + `</div>`;
     h += `<p class="fine">For information only. Not investment advice.</p>`;
     return { html: h, after: async () => {
       const box = document.getElementById("schart");
       try {
-        const data = S.stockData[t] || (S.stockData[t] = await (await fetch(`data/stocks/${t}.json`, { cache: "no-cache" })).json());
+        const data = S.stockData[t] || (S.stockData[t] = await (await fetch(`${L().base}stocks/${t}.json`, { cache: "no-cache" })).json());
         if (!box.isConnected) return;
         const pos = {}; data.dates.forEach((d, i) => pos[d] = i);
         const byDay = {};
@@ -795,7 +909,7 @@ table.trades td:last-child { font: 600 13.5px var(--font-mono); white-space: now
     if (B.demo) h += `<div class="demo">Demo backtest on simulated prices. Real results replace these once the backtest runs on GitHub.</div>`;
     h += `<div class="seg" role="group" aria-label="Alert type">${["bullish", "bearish"].map(sd =>
       `<button data-bt="${sd}" aria-pressed="${sd === side}">${sd === "bullish" ? "Bullish" : "Bearish"} alerts</button>`).join("")}</div>`;
-    h += `<p class="sub" style="margin-bottom:10px"><strong style="color:var(--fg)">${st.n.toLocaleString("en-US")}</strong> ${side} alerts on ${B.tickers} stocks, ${B.start.slice(0, 4)}–${B.end.slice(0, 4)}. ` +
+    h += `<p class="sub" style="margin-bottom:10px"><strong style="color:var(--fg)">${st.n.toLocaleString("en-US")}</strong> ${side} alerts on ${B.tickers} ${L().noun}, ${B.start.slice(0, 4)}–${B.end.slice(0, 4)}. ` +
       `“Right way” means the price ${side === "bullish" ? "rose" : "fell"} afterwards. Each result is compared with a random day in the same stocks.</p>`;
     if (!st.n) return { html: h + `<p class="tag">No ${side} alerts in this period.</p>` };
     h += `<div class="tablewrap"><table class="bt"><thead><tr><th>After</th><th>Right way</th><th>Average move</th></tr></thead><tbody>`;
@@ -820,11 +934,11 @@ table.trades td:last-child { font: 600 13.5px var(--font-mono); white-space: now
         <div><span>Time invested</span><b>${pc(e.invested)}</b><small>avg ${e.avg_positions} stocks held</small></div>
       </div>`;
     const lst = (arr, title) => arr.length ? `<div class="bw"><h3 class="h3">${title}</h3>${arr.map(x =>
-      `<div class="bwrow"><span class="tk" style="font-size:14px">${esc(x.ticker)}</span><span class="pill ${x.side}" style="margin:0">${x.side}</span><span class="d">${esc(fmtDate(x.date, { day: "numeric", month: "short", year: "numeric" }))}</span><span class="${(x.side === "bullish") === (x.ret >= 0) ? "up" : "down"}">${sgn(x.ret)}</span></div>`).join("")}</div>` : "";
+      `<div class="bwrow"><span class="tk" style="font-size:14px">${esc(disp(x.ticker))}</span><span class="pill ${x.side}" style="margin:0">${x.side}</span><span class="d">${esc(fmtDate(x.date, { day: "numeric", month: "short", year: "numeric" }))}</span><span class="${(x.side === "bullish") === (x.ret >= 0) ? "up" : "down"}">${sgn(x.ret)}</span></div>`).join("")}</div>` : "";
     h += `<div class="bwgrid">${lst(r.best, "Best alerts (20 days later)")}${lst(r.worst, "Worst alerts (20 days later)")}</div>`;
     h += `<div class="card"><h3>Read this before trusting the numbers</h3><ul class="watch" style="color:var(--muted);font-size:14px">
       <li>No trading costs, taxes or slippage. Strategies that trade often look better here than in real life.</li>
-      <li>It uses ${B.demo ? "the demo list" : "today's S&amp;P 100"}. Companies that collapsed and left the index are missing, which flatters every result, buy &amp; hold included.</li>
+      <li>It uses ${B.demo ? "the demo list" : esc(B.universe)}. ${isCrypto() ? "Coins that collapsed and dropped out of the top list are missing" : "Companies that collapsed and left the index are missing"}, which flatters every result, buy &amp; hold included.</li>
       <li>Past results don't predict future ones. A rule that worked for 15 years can stop working.</li></ul></div>`;
     return { html: h, after: () => {
       drawHist(document.getElementById("bthist"), st.hist);
@@ -836,7 +950,7 @@ table.trades td:last-child { font: 600 13.5px var(--font-mono); white-space: now
     const W = Math.max(280, box.clientWidth || 340), H = 150, P = { l: 10, r: 10, t: 14, b: 24 };
     const n = hist.counts.length, max = Math.max(1, ...hist.counts), bw = (W - P.l - P.r) / n;
     const total = hist.counts.reduce((a, b) => a + b, 0);
-    let svg = `<svg class="chart" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" role="img" aria-label="Histogram of 20-day results"><rect width="${W}" height="${H}" fill="#000"/>`;
+    let svg = `<svg class="chart" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" role="img" aria-label="Histogram of 20-day results"><rect width="${W}" height="${H}" fill="${C.bg}"/>`;
     hist.counts.forEach((c, i) => {
       const mid = (hist.edges[i] + hist.edges[i + 1]) / 2, bh = c / max * (H - P.t - P.b);
       svg += `<rect x="${(P.l + i * bw + 1.5).toFixed(1)}" y="${(H - P.b - bh).toFixed(1)}" width="${Math.max(1, bw - 3).toFixed(1)}" height="${bh.toFixed(1)}" rx="2" fill="${mid >= 0 ? C.up : C.down}" fill-opacity="${mid >= 0 ? .85 : .8}"/>`;
@@ -856,7 +970,7 @@ table.trades td:last-child { font: 600 13.5px var(--font-mono); white-space: now
     const n = e.dates.length, all = e.strategy.concat(e.benchmark).filter(v => v > 0);
     const lo = Math.log(Math.min(...all) * .92), hi = Math.log(Math.max(...all) * 1.08);
     const x = i => P.l + i / (n - 1) * (W - P.l - P.r), y = v => P.t + (hi - Math.log(Math.max(v, 1))) / (hi - lo) * (H - P.t - P.b);
-    let svg = `<svg class="chart" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" role="img" aria-label="Growth of the strategy versus buy and hold"><rect width="${W}" height="${H}" fill="#000"/>`;
+    let svg = `<svg class="chart" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" role="img" aria-label="Growth of the strategy versus buy and hold"><rect width="${W}" height="${H}" fill="${C.bg}"/>`;
     // log-spaced gridlines at 1-2-5 steps
     const grid = []; for (let p = Math.floor(Math.log10(Math.exp(lo))); p <= Math.ceil(Math.log10(Math.exp(hi))); p++) [1, 2, 5].forEach(m => { const v = m * 10 ** p; if (Math.log(v) > lo && Math.log(v) < hi) grid.push(v); });
     const shown = grid.length > 5 ? grid.filter(v => String(v)[0] === "1" || String(v)[0] === "5") : grid;
@@ -918,7 +1032,7 @@ table.trades td:last-child { font: 600 13.5px var(--font-mono); white-space: now
     h += `<h3 class="h3">Result by year</h3><div class="chartbox" id="tryears"></div>`;
     if (T.recent?.length) {
       h += `<h3 class="h3">Latest closed trades</h3><div class="tablewrap"><table class="bt trades"><thead><tr><th>Stock</th><th>In → out</th><th style="text-align:right">Return</th><th style="text-align:right">Result</th></tr></thead><tbody>` +
-        T.recent.map(r => `<tr><td><a href="#stock-${esc(r.ticker)}" class="tk" style="font-size:13.5px;color:var(--fg);text-decoration:none">${esc(r.ticker)}</a> <span class="pill ${r.side === "long" ? "bullish" : "bearish"}">${r.side}</span></td>
+        T.recent.map(r => `<tr><td><a href="#stock-${esc(r.ticker)}" class="tk" style="font-size:13.5px;color:var(--fg);text-decoration:none">${esc(disp(r.ticker))}</a> <span class="pill ${r.side === "long" ? "bullish" : "bearish"}">${r.side}</span></td>
           <td class="dt">${esc(fmtDate(r.in, { day: "numeric", month: "short" }))} → ${esc(fmtDate(r.out, { day: "numeric", month: "short" }))}<small>${r.days} sessions</small></td>
           <td style="text-align:right">${chg(r.ret)}</td><td style="text-align:right" class="${r.pnl >= 0 ? "up" : "down"}">${eurSigned(r.pnl)}</td></tr>`).join("") + `</tbody></table></div>`;
     }
@@ -937,7 +1051,7 @@ table.trades td:last-child { font: 600 13.5px var(--font-mono); white-space: now
     const n = vals.length;
     let lo = Math.min(0, ...vals), hi = Math.max(0, ...vals); const pad = (hi - lo) * .08 || 1; lo -= pad; hi += pad;
     const x = i => P.l + i / Math.max(1, n - 1) * (W - P.l - P.r), y = v => P.t + (hi - v) / (hi - lo) * (H - P.t - P.b);
-    let svg = `<svg class="chart" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" role="img" aria-label="Running total of all trades"><rect width="${W}" height="${H}" fill="#000"/>`;
+    let svg = `<svg class="chart" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" role="img" aria-label="Running total of all trades"><rect width="${W}" height="${H}" fill="${C.bg}"/>`;
     niceTicks(lo, hi, 4).forEach(t => {
       svg += `<line x1="${P.l}" x2="${W - P.r}" y1="${y(t).toFixed(1)}" y2="${y(t).toFixed(1)}" stroke="${t === 0 ? "#3a3f48" : C.grid}"/>`;
       svg += `<text x="${W - P.r + 6}" y="${(y(t) + 4).toFixed(1)}" fill="${C.axis}" font-size="10.5" font-family="IBM Plex Mono, monospace">${Math.abs(t) >= 1000 ? (t < 0 ? "−" : "") + "€" + Math.round(Math.abs(t) / 1000) + "k" : eurS(t)}</text>`;
@@ -974,7 +1088,7 @@ table.trades td:last-child { font: 600 13.5px var(--font-mono); white-space: now
     const vals = years.map(y => y[key]), n = vals.length;
     let lo = Math.min(0, ...vals), hi = Math.max(0, ...vals); const pad = (hi - lo) * .1 || 1; lo -= pad; hi += pad;
     const bw = (W - P.l - P.r) / n, y = v => P.t + (hi - v) / (hi - lo) * (H - P.t - P.b);
-    let svg = `<svg class="chart" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" role="img" aria-label="Result by year"><rect width="${W}" height="${H}" fill="#000"/>`;
+    let svg = `<svg class="chart" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" role="img" aria-label="Result by year"><rect width="${W}" height="${H}" fill="${C.bg}"/>`;
     niceTicks(lo, hi, 3).forEach(t => {
       svg += `<line x1="${P.l}" x2="${W - P.r}" y1="${y(t).toFixed(1)}" y2="${y(t).toFixed(1)}" stroke="${t === 0 ? "#4a505a" : C.grid}"/>`;
       svg += `<text x="${W - P.r + 6}" y="${(y(t) + 4).toFixed(1)}" fill="${C.axis}" font-size="10.5" font-family="IBM Plex Mono, monospace">${Math.abs(t) >= 1000 ? (t < 0 ? "−" : "") + "€" + Math.round(Math.abs(t) / 1000) + "k" : eurS(t)}</text>`;
@@ -1022,11 +1136,11 @@ table.trades td:last-child { font: 600 13.5px var(--font-mono); white-space: now
       h += `<p class="tag">Follow a strategy first, then its channel appears here.</p>`;
     } else {
       followed.forEach(id => {
-        const t = `${pre}-${id}`;
+        const t = `${pre}-${isCrypto() ? "crypto-" : ""}${id}`;
         h += `<div class="topic"><span style="min-width:0"><span style="display:block;font-size:13px;color:var(--muted)">${esc(stratName(id))}</span><code>${esc(t)}</code></span><button data-copy="${esc(t)}">Copy</button></div>`;
       });
     }
-    h += `<p class="fine">The scan runs once a day after the US market closes (around 23:15 Milan time). Investment Center Signals shows information about price patterns. It doesn't trade and isn't investment advice.</p>`;
+    h += `<p class="fine">${L().scan} Investment Center Signals shows information about price patterns. It doesn't trade and isn't investment advice.</p>`;
     return h;
   }
 
@@ -1061,7 +1175,7 @@ table.trades td:last-child { font: 600 13.5px var(--font-mono); white-space: now
     } else {
       app.className = WIDE.matches ? "single" : "";
       const V = norm(detail ? detail() : list());
-      app.innerHTML = V.html;
+      app.innerHTML = (detail || WIDE.matches ? "" : `<div class="mswitch inline" role="group" aria-label="Market">${switchHtml()}</div>`) + V.html;
       V.after?.();
     }
     S.lastTab = tab; S.lastSel = sel;
@@ -1158,20 +1272,53 @@ table.trades td:last-child { font: 600 13.5px var(--font-mono); white-space: now
   });
   WIDE.addEventListener?.("change", () => route());
 
+  // --------------------------------------------------------------- market
+  const CACHE = {};
+  const opt = url => fetch(url, { cache: "no-cache" }).then(r => r.ok ? r.json() : null).catch(() => null);
+  async function loadMarket(m) {
+    if (!CACHE[m]) {
+      const b = MK[m].base;
+      const [feed, bt, stocks] = await Promise.all([opt(b + "alerts.json"), opt(b + "backtest.json"), opt(b + "stocks.json")]);
+      CACHE[m] = { feed, bt, stocks, stockData: {} };
+    }
+    const c = CACHE[m];
+    S.market = m; S.feed = c.feed; S.bt = c.bt; S.stocks = c.stocks; S.stockData = c.stockData;
+    S.stockBy = {}; (c.stocks?.stocks || []).forEach(r => S.stockBy[r.ticker] = r);
+    S.q = ""; S.filter = "all";
+    document.documentElement.dataset.market = m;
+    document.querySelector('meta[name="theme-color"]').content = m === "crypto" ? "#0b0714" : "#08090b";
+    applyPalette();
+    document.querySelectorAll('[data-l="tab"]').forEach(el => el.textContent = MK[m].Tab);
+    document.querySelectorAll(".side-sw").forEach(el => el.innerHTML = switchHtml());
+    const fd = c.feed;
+    document.getElementById("sidefoot").innerHTML = fd ? `<b>${esc(fd.universe)}</b> · ${fd.tickers} ${MK[m].noun}<br>Close of ${fmtDate(fd.as_of, { day: "numeric", month: "short", year: "numeric" })}<br><br>Information only.<br>Not investment advice.` : "";
+  }
+  const switchHtml = () => [["stocks", "📈", "Stocks"], ["crypto", "🪙", "Crypto"]].map(([m, ic, t]) =>
+    `<button data-market="${m}" aria-pressed="${S.market === m}"><span aria-hidden="true">${ic}</span>${t}</button>`).join("");
+  async function switchMarket(m) {
+    if (m === S.market) return;
+    setPref("market", m);
+    await loadMarket(m);
+    S.lastSel = null; S.lastTab = null;
+    const tab = (location.hash || "#alerts").slice(1);
+    const base = tab.startsWith("strateg") ? (tab.startsWith("strategy-") ? tab : "strategies") : tab.startsWith("stock") ? "stocks" : tab === "notify" ? "notify" : "alerts";
+    if ("#" + base !== location.hash) location.hash = base; else route();
+    scrollTo(0, 0);
+  }
+  document.addEventListener("click", e => {
+    const b = e.target.closest("[data-market]");
+    if (b) { e.preventDefault(); switchMarket(b.dataset.market); }
+  });
+
   // ----------------------------------------------------------------- boot
   async function boot() {
     S.follow = new Set(load(STORE, DEFAULT_FOLLOW));
     S.prefs = load(PREFS, {}) || {};
     try {
-      const opt = url => fetch(url, { cache: "no-cache" }).then(r => r.ok ? r.json() : null).catch(() => null);
-      const [st, fd, bt, sk] = await Promise.all([
-        fetch("data/strategies.json", { cache: "no-cache" }).then(r => r.json()),
-        opt("data/alerts.json"), opt("data/backtest.json"), opt("data/stocks.json"),
-      ]);
-      S.strategies = st.strategies; S.feed = fd; S.bt = bt; S.stocks = sk;
+      const st = await fetch("data/strategies.json", { cache: "no-cache" }).then(r => r.json());
+      S.strategies = st.strategies;
       S.strategies.forEach(s => S.byId[s.id] = s);
-      (sk?.stocks || []).forEach(r => S.stockBy[r.ticker] = r);
-      if (fd) document.getElementById("sidefoot").innerHTML = `<b>${esc(fd.universe)}</b> · ${fd.tickers} stocks<br>Close of ${fmtDate(fd.as_of, { day: "numeric", month: "short", year: "numeric" })}<br><br>Information only.<br>Not investment advice.`;
+      await loadMarket(pref("market", "stocks") === "crypto" ? "crypto" : "stocks");
       route();
     } catch (err) {
       console.error(err);

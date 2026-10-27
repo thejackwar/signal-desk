@@ -55,6 +55,14 @@ Alerts always show in the app. To also get a push notification:
 3. Open the app's *Phone alerts* tab: it lists one channel per strategy you follow.
    Subscribe to them in ntfy.
 
+## Crypto
+
+The app has a Stocks / Crypto switch. Crypto uses the same nine strategies on the coins
+in `engine/crypto.txt` (names in `engine/crypto_names.json`) and writes everything to
+`docs/data/crypto/`. The *Daily crypto scan* workflow runs every day at 00:20 UTC, just
+after the daily candle closes, weekends included. The weekly backtest covers both markets.
+Phone notification channels for crypto are `<NTFY_PREFIX>-crypto-<strategy>`.
+
 ## Signal strength
 
 Every alert gets a score from 0 to 4, using only what was known on the alert day:
