@@ -63,6 +63,16 @@ in `engine/crypto.txt` (names in `engine/crypto_names.json`) and writes everythi
 after the daily candle closes, weekends included. The weekly backtest covers both markets.
 Phone notification channels for crypto are `<NTFY_PREFIX>-crypto-<strategy>`.
 
+## BTC/USDT liquidation heatmap
+
+`engine/liquidations.py` estimates where leveraged BTC futures positions would be
+liquidated (the *BTC liquidation heatmap* workflow, every 4 hours). Each hour it assumes
+new positions open near the price, spread over 5×–100× leverage, and keeps them on the
+map until price reaches their liquidation level. Data source, in order of preference:
+Binance BTCUSDT futures with open interest, OKX BTC-USDT perpetual, Yahoo BTC-USD.
+GitHub's servers are in the US, where Binance is blocked, so it usually uses one of the
+other two. It's a model, like the well-known heatmap sites, not exchange data.
+
 ## Signal strength
 
 Every alert gets a score from 0 to 4, using only what was known on the alert day:

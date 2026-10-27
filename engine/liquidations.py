@@ -73,6 +73,23 @@ def fetch_binance(hours: int) -> tuple[pd.DataFrame, str]:
     return df, "Binance BTCUSDT perpetual futures (candles + open interest)"
 
 
+def fetch_okx(hours: int) -> tuple[pd.DataFrame, str]:
+    """BTC-USDT perpetual swap hourly candles from OKX (volume in USDT)."""
+    rows, after = [], ""
+    while len(rows) < hours:
+        k = _get("https://www.okx.com/api/v5/market/history-candles?instId=BTC-USDT-SWAP&bar=1H&limit=100" + (f"&after={after}" if after else ""))["data"]
+        if not k:
+            break
+        rows += k
+        after = k[-1][0]
+    df = pd.DataFrame([r[:8] for r in rows], columns=["t", "open", "high", "low", "close", "v", "vccy", "volume"])
+    df = df.drop_duplicates("t")
+    df.index = pd.to_datetime(df["t"].astype("int64"), unit="ms")
+    df = df.sort_index()[["open", "high", "low", "close", "volume"]].astype(float).tail(hours)
+    df["oi"] = np.nan
+    return df, "OKX BTC-USDT perpetual futures hourly candles (volume as a proxy for new positions)"
+
+
 def fetch_yahoo(hours: int) -> tuple[pd.DataFrame, str]:
     import yfinance as yf
     df = yf.download("BTC-USD", period="60d", interval="1h", auto_adjust=True, progress=False)
@@ -201,8 +218,14 @@ def main():
             if len(df) < HOURS:
                 raise RuntimeError("not enough Binance history")
         except Exception as e:
-            print(f"Binance not reachable ({e}); using Yahoo Finance")
-            df, src = fetch_yahoo(hours)
+            print(f"Binance not reachable ({e}); trying OKX")
+            try:
+                df, src = fetch_okx(hours)
+                if len(df) < HOURS:
+                    raise RuntimeError("not enough OKX history")
+            except Exception as e2:
+                print(f"OKX not reachable ({e2}); using Yahoo Finance")
+                df, src = fetch_yahoo(hours)
     if len(df) < 200:
         sys.exit("Not enough price data; leaving the previous heatmap untouched.")
     res = model(df)
