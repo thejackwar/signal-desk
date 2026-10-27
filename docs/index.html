@@ -349,7 +349,6 @@ table.trades td:last-child { font: 600 13.5px var(--font-mono); white-space: now
 
 /* chart backdrop (stocks) */
 #bgfx { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; }
-:root[data-market="crypto"] #bgfx { display: none; }
 #app { position: relative; z-index: 1; }
 :root:not([data-market="crypto"]) .top { background: rgba(8,9,11,.82); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); }
 :root:not([data-market="crypto"]) .side { background: rgba(8,9,11,.78); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
@@ -1284,52 +1283,87 @@ table.trades td:last-child { font: 600 13.5px var(--font-mono); white-space: now
   // Faint, static market charts behind the stock pages: grid, a few long price lines with
   // a fading fill, a moving average and a band of candles. Seeded, so it never jumps around.
   function drawBackdrop() {
-    const cv = document.getElementById("bgfx"); if (!cv || S.market === "crypto") return;
+    const cv = document.getElementById("bgfx"); if (!cv) return;
+    const crypto = S.market === "crypto";
     const dpr = Math.min(2, devicePixelRatio || 1), W = innerWidth, H = innerHeight;
     cv.width = W * dpr; cv.height = H * dpr;
     const g = cv.getContext("2d"); g.setTransform(dpr, 0, 0, dpr, 0, 0); g.clearRect(0, 0, W, H);
-    let seed = 20261027;
+    let seed = crypto ? 7350 : 20261027;
     const rnd = () => { seed |= 0; seed = seed + 0x6D2B79F5 | 0; let t = Math.imul(seed ^ seed >>> 15, 1 | seed); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; };
     const walk = (n, vol, drift) => { const a = [0]; for (let i = 1; i < n; i++) a.push(a[i - 1] + (rnd() - .5) * vol + drift + Math.sin(i / 23) * vol * .18); return a; };
-    // grid
-    g.strokeStyle = "rgba(255,255,255,0.035)"; g.lineWidth = 1;
     const gs = W > 1000 ? 64 : 48;
-    for (let x = (W % gs) / 2; x < W; x += gs) { g.beginPath(); g.moveTo(x + .5, 0); g.lineTo(x + .5, H); g.stroke(); }
-    for (let y = (H % gs) / 2; y < H; y += gs) { g.beginPath(); g.moveTo(0, y + .5); g.lineTo(W, y + .5); g.stroke(); }
-    // long price lines
-    const lines = [
-      { top: .14, amp: .20, color: "50,196,141", a: .22, fill: .08, drift: .35, vol: 6 },
-      { top: .44, amp: .16, color: "242,179,61", a: .15, fill: .045, drift: .2, vol: 5 },
-      { top: .28, amp: .12, color: "116,167,245", a: .13, fill: 0, drift: -.1, vol: 4 },
+
+    // grid: plain lines for stocks, a dotted field for crypto
+    if (crypto) {
+      g.fillStyle = "rgba(181,123,255,0.11)";
+      for (let x = gs / 2; x < W; x += gs / 2) for (let y = gs / 2; y < H; y += gs / 2) { g.beginPath(); g.arc(x, y, .9, 0, 7); g.fill(); }
+    } else {
+      g.strokeStyle = "rgba(255,255,255,0.03)"; g.lineWidth = 1;
+      for (let x = (W % gs) / 2; x < W; x += gs) { g.beginPath(); g.moveTo(x + .5, 0); g.lineTo(x + .5, H); g.stroke(); }
+      for (let y = (H % gs) / 2; y < H; y += gs) { g.beginPath(); g.moveTo(0, y + .5); g.lineTo(W, y + .5); g.stroke(); }
+    }
+
+    // long price lines (crypto lines glow)
+    const lines = crypto ? [
+      { top: .12, amp: .22, color: "77,232,255", a: .22, fill: .06, drift: .5, vol: 9, glow: 14 },
+      { top: .40, amp: .18, color: "181,123,255", a: .2, fill: .05, drift: .25, vol: 8, glow: 12 },
+      { top: .26, amp: .12, color: "255,79,154", a: .12, fill: 0, drift: -.15, vol: 7, glow: 8 },
+    ] : [
+      { top: .14, amp: .20, color: "50,196,141", a: .18, fill: .065, drift: .35, vol: 6 },
+      { top: .44, amp: .16, color: "242,179,61", a: .12, fill: .035, drift: .2, vol: 5 },
+      { top: .28, amp: .12, color: "116,167,245", a: .1, fill: 0, drift: -.1, vol: 4 },
     ];
     const N = Math.ceil(W / 4) + 2;
     for (const L of lines) {
       const v = walk(N, L.vol, L.drift), lo = Math.min(...v), hi = Math.max(...v);
       const y = i => H * (L.top + L.amp) - (v[i] - lo) / ((hi - lo) || 1) * H * L.amp * 2;
       g.beginPath(); for (let i = 0; i < N; i++) i ? g.lineTo(i * 4, y(i)) : g.moveTo(0, y(0));
-      g.strokeStyle = `rgba(${L.color},${L.a})`; g.lineWidth = 1.6; g.stroke();
+      g.save();
+      if (L.glow) { g.shadowColor = `rgba(${L.color},.8)`; g.shadowBlur = L.glow; }
+      g.strokeStyle = `rgba(${L.color},${L.a})`; g.lineWidth = crypto ? 1.8 : 1.6; g.stroke();
+      g.restore();
       if (L.fill) {
         g.lineTo((N - 1) * 4, H); g.lineTo(0, H); g.closePath();
         const gr = g.createLinearGradient(0, H * L.top, 0, H * (L.top + L.amp * 2.4));
         gr.addColorStop(0, `rgba(${L.color},${L.fill})`); gr.addColorStop(1, `rgba(${L.color},0)`); g.fillStyle = gr; g.fill();
       }
     }
+
+    // crypto only: a little chain of linked blocks drifting across the upper right
+    if (crypto) {
+      const n = W > 1000 ? 7 : 4, bs = W > 1000 ? 22 : 18;
+      const pts = [];
+      for (let i = 0; i < n; i++) pts.push([W * (.52 + i * (.44 / n)) + (rnd() - .5) * 20, H * (.1 + Math.sin(i * .9) * .05 + i * .012)]);
+      g.save(); g.setLineDash([3, 5]); g.strokeStyle = "rgba(77,232,255,0.16)"; g.lineWidth = 1.2;
+      g.beginPath(); pts.forEach(([x, y], i) => i ? g.lineTo(x, y) : g.moveTo(x, y)); g.stroke(); g.restore();
+      pts.forEach(([x, y], i) => {
+        g.save(); g.shadowColor = "rgba(181,123,255,.7)"; g.shadowBlur = 10;
+        g.strokeStyle = i % 2 ? "rgba(181,123,255,0.24)" : "rgba(77,232,255,0.22)"; g.lineWidth = 1.4;
+        g.beginPath(); g.roundRect ? g.roundRect(x - bs / 2, y - bs / 2, bs, bs, 5) : g.rect(x - bs / 2, y - bs / 2, bs, bs); g.stroke();
+        g.restore();
+        g.fillStyle = "rgba(181,123,255,0.18)"; g.fillRect(x - 3, y - 3, 6, 6);
+      });
+    }
+
     // candles along the bottom with a moving average
     const cw = W > 1000 ? 11 : 9, n = Math.ceil(W / cw) + 1, base = H * .84, span = H * .14;
-    const c = walk(n + 20, 3.2, .06), lo = Math.min(...c), hi = Math.max(...c), py = v => base - (v - lo) / ((hi - lo) || 1) * span;
+    const c = walk(n + 20, crypto ? 4.5 : 3.2, .06), lo = Math.min(...c), hi = Math.max(...c), py = v => base - (v - lo) / ((hi - lo) || 1) * span;
+    const upC = crypto ? "rgba(44,245,154,0.17)" : "rgba(50,196,141,0.15)", dnC = crypto ? "rgba(255,79,154,0.17)" : "rgba(240,90,99,0.135)";
     for (let i = 0; i < n; i++) {
       const o = c[i + 19], cl = c[i + 20], up = cl >= o, x = i * cw + cw / 2;
       const h1 = Math.max(o, cl) + rnd() * 1.6, l1 = Math.min(o, cl) - rnd() * 1.6;
-      g.strokeStyle = g.fillStyle = up ? "rgba(50,196,141,0.19)" : "rgba(240,90,99,0.17)";
+      g.strokeStyle = g.fillStyle = up ? upC : dnC;
       g.lineWidth = 1; g.beginPath(); g.moveTo(x + .5, py(h1)); g.lineTo(x + .5, py(l1)); g.stroke();
       g.fillRect(x - cw * .3, py(Math.max(o, cl)), cw * .6, Math.max(1, Math.abs(py(o) - py(cl))));
     }
     g.beginPath();
     for (let i = 0; i < n; i++) { let m = 0; for (let k = 0; k < 10; k++) m += c[i + 20 - k]; m /= 10; const x = i * cw + cw / 2; i ? g.lineTo(x, py(m)) : g.moveTo(x, py(m)); }
-    g.strokeStyle = "rgba(242,179,61,0.2)"; g.lineWidth = 1.5; g.stroke();
+    g.save(); if (crypto) { g.shadowColor = "rgba(181,123,255,.8)"; g.shadowBlur = 8; }
+    g.strokeStyle = crypto ? "rgba(181,123,255,0.22)" : "rgba(242,179,61,0.16)"; g.lineWidth = 1.5; g.stroke(); g.restore();
+
     // darken the middle so text stays easy to read
     const vg = g.createRadialGradient(W / 2, H * .45, Math.min(W, H) * .15, W / 2, H * .45, Math.max(W, H) * .75);
-    vg.addColorStop(0, "rgba(8,9,11,0.45)"); vg.addColorStop(1, "rgba(8,9,11,0)");
+    vg.addColorStop(0, crypto ? "rgba(11,7,20,0.5)" : "rgba(8,9,11,0.45)"); vg.addColorStop(1, "rgba(0,0,0,0)");
     g.fillStyle = vg; g.fillRect(0, 0, W, H);
   }
   let bgT; addEventListener("resize", () => { clearTimeout(bgT); bgT = setTimeout(drawBackdrop, 200); });
