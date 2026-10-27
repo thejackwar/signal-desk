@@ -353,6 +353,8 @@ table.trades td:last-child { font: 600 13.5px var(--font-mono); white-space: now
 :root:not([data-market="crypto"]) .top { background: rgba(8,9,11,.82); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); }
 :root:not([data-market="crypto"]) .side { background: rgba(8,9,11,.78); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
 
+.bdlabel { display: block; margin-top: 12px; color: var(--faint); opacity: .8; font-size: 10.5px; line-height: 1.45; }
+
 /* notifications */
 .steps { margin: 0; padding-left: 20px; }
 .steps li { margin-bottom: 10px; }
@@ -1305,24 +1307,33 @@ table.trades td:last-child { font: 600 13.5px var(--font-mono); white-space: now
 
     // long price lines (crypto lines glow)
     const lines = crypto ? [
-      { top: .12, amp: .22, color: "77,232,255", a: .22, fill: .06, drift: .5, vol: 9, glow: 14 },
-      { top: .40, amp: .18, color: "181,123,255", a: .2, fill: .05, drift: .25, vol: 8, glow: 12 },
-      { top: .26, amp: .12, color: "255,79,154", a: .12, fill: 0, drift: -.15, vol: 7, glow: 8 },
+      { top: .3, amp: .22, color: "77,232,255", a: .22, fill: .06, drift: .5, vol: 9, glow: 14 },
+      { top: .48, amp: .18, color: "181,123,255", a: .2, fill: .05, drift: .25, vol: 8, glow: 12 },
+      { top: .4, amp: .12, color: "255,79,154", a: .12, fill: 0, drift: -.15, vol: 7, glow: 8 },
     ] : [
       { top: .14, amp: .20, color: "50,196,141", a: .18, fill: .065, drift: .35, vol: 6 },
       { top: .44, amp: .16, color: "242,179,61", a: .12, fill: .035, drift: .2, vol: 5 },
       { top: .28, amp: .12, color: "116,167,245", a: .1, fill: 0, drift: -.1, vol: 4 },
     ];
     const N = Math.ceil(W / 4) + 2;
-    for (const L of lines) {
-      const v = walk(N, L.vol, L.drift), lo = Math.min(...v), hi = Math.max(...v);
+    const BD = S.stocks?.backdrop?.lines?.length ? S.stocks.backdrop : null;
+    // real prices: resample each series to the screen width. Stocks lines share one scale
+    // (index + its averages); crypto coins each get their own band.
+    const resample = vals => { const a = vals.filter(v => v != null); return Array.from({ length: N }, (_, i) => a[Math.min(a.length - 1, Math.round(i / (N - 1) * (a.length - 1)))]); };
+    const realSets = BD ? BD.lines.map(l => resample(l.values)) : null;
+    if (BD && !crypto) { const flat = realSets.flat(); var shLo = Math.min(...flat), shHi = Math.max(...flat); }
+    if (BD && !crypto) lines.forEach(L => { L.top = .42; L.amp = .22; });
+    for (const [li, L] of lines.entries()) {
+      if (realSets && !realSets[li]) continue;
+      const v = realSets ? realSets[li] : walk(N, L.vol, L.drift);
+      const lo = realSets && !crypto ? shLo : Math.min(...v), hi = realSets && !crypto ? shHi : Math.max(...v);
       const y = i => H * (L.top + L.amp) - (v[i] - lo) / ((hi - lo) || 1) * H * L.amp * 2;
       g.beginPath(); for (let i = 0; i < N; i++) i ? g.lineTo(i * 4, y(i)) : g.moveTo(0, y(0));
       g.save();
       if (L.glow) { g.shadowColor = `rgba(${L.color},.8)`; g.shadowBlur = L.glow; }
       g.strokeStyle = `rgba(${L.color},${L.a})`; g.lineWidth = crypto ? 1.8 : 1.6; g.stroke();
       g.restore();
-      if (L.fill) {
+      if (L.fill && !(realSets && !crypto && li > 0)) {
         g.lineTo((N - 1) * 4, H); g.lineTo(0, H); g.closePath();
         const gr = g.createLinearGradient(0, H * L.top, 0, H * (L.top + L.amp * 2.4));
         gr.addColorStop(0, `rgba(${L.color},${L.fill})`); gr.addColorStop(1, `rgba(${L.color},0)`); g.fillStyle = gr; g.fill();
@@ -1346,12 +1357,23 @@ table.trades td:last-child { font: 600 13.5px var(--font-mono); white-space: now
     }
 
     // candles along the bottom with a moving average
-    const cw = W > 1000 ? 11 : 9, n = Math.ceil(W / cw) + 1, base = H * .84, span = H * .14;
-    const c = walk(n + 20, crypto ? 4.5 : 3.2, .06), lo = Math.min(...c), hi = Math.max(...c), py = v => base - (v - lo) / ((hi - lo) || 1) * span;
+    const RC = BD?.candles;
+    let cw = W > 1000 ? 11 : 9, n = Math.ceil(W / cw) + 1;
+    const base = H * .84, span = H * .14;
+    let c, oo, hh, ll;
+    if (RC) {
+      const k = Math.min(RC.close.length, n);
+      cw = W / k; n = k;
+      const sl = a => a.slice(-k);
+      oo = sl(RC.open); hh = sl(RC.high); ll = sl(RC.low);
+      c = Array(20).fill(null).concat(sl(RC.close));
+      for (let i = 0; i < 20; i++) c[i] = RC.close[Math.max(0, RC.close.length - k - 20 + i)];
+    } else c = walk(n + 20, crypto ? 4.5 : 3.2, .06);
+    const allv = RC ? hh.concat(ll) : c, lo = Math.min(...allv), hi = Math.max(...allv), py = v => base - (v - lo) / ((hi - lo) || 1) * span;
     const upC = crypto ? "rgba(44,245,154,0.17)" : "rgba(50,196,141,0.15)", dnC = crypto ? "rgba(255,79,154,0.17)" : "rgba(240,90,99,0.135)";
     for (let i = 0; i < n; i++) {
-      const o = c[i + 19], cl = c[i + 20], up = cl >= o, x = i * cw + cw / 2;
-      const h1 = Math.max(o, cl) + rnd() * 1.6, l1 = Math.min(o, cl) - rnd() * 1.6;
+      const o = RC ? oo[i] : c[i + 19], cl = c[i + 20], up = cl >= o, x = i * cw + cw / 2;
+      const h1 = RC ? hh[i] : Math.max(o, cl) + rnd() * 1.6, l1 = RC ? ll[i] : Math.min(o, cl) - rnd() * 1.6;
       g.strokeStyle = g.fillStyle = up ? upC : dnC;
       g.lineWidth = 1; g.beginPath(); g.moveTo(x + .5, py(h1)); g.lineTo(x + .5, py(l1)); g.stroke();
       g.fillRect(x - cw * .3, py(Math.max(o, cl)), cw * .6, Math.max(1, Math.abs(py(o) - py(cl))));
@@ -1388,7 +1410,8 @@ table.trades td:last-child { font: 600 13.5px var(--font-mono); white-space: now
     document.querySelectorAll('[data-l="tab"]').forEach(el => el.textContent = MK[m].Tab);
     document.querySelectorAll(".side-sw").forEach(el => el.innerHTML = switchHtml());
     const fd = c.feed;
-    document.getElementById("sidefoot").innerHTML = fd ? `<b>${esc(fd.universe)}</b> · ${fd.tickers} ${MK[m].noun}<br>Close of ${fmtDate(fd.as_of, { day: "numeric", month: "short", year: "numeric" })}` : "";
+    document.getElementById("sidefoot").innerHTML = (fd ? `<b>${esc(fd.universe)}</b> · ${fd.tickers} ${MK[m].noun}<br>Close of ${fmtDate(fd.as_of, { day: "numeric", month: "short", year: "numeric" })}` : "") +
+      (c.stocks?.backdrop?.label ? `<span class="bdlabel">Background: ${esc(c.stocks.backdrop.label)}</span>` : "");
   }
   const switchHtml = () => [["stocks", "📈", "Stocks"], ["crypto", "🪙", "Crypto"]].map(([m, ic, t]) =>
     `<button data-market="${m}" aria-pressed="${S.market === m}"><span aria-hidden="true">${ic}</span>${t}</button>`).join("");
