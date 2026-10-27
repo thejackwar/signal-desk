@@ -1369,7 +1369,7 @@ table.trades td:last-child { font: 600 13.5px var(--font-mono); white-space: now
     scrollTo(0, 0);
   }
   document.addEventListener("click", e => {
-    const b = e.target.closest("[data-market]");
+    const b = e.target.closest("button[data-market]");
     if (b) { e.preventDefault(); switchMarket(b.dataset.market); }
   });
 
