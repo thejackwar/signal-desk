@@ -19,6 +19,9 @@ docs/                    the website (served by GitHub Pages)
   data/calendar.json     upcoming earnings, IPOs, economy (written by engine/events.py)
   data/topdown/          Top-Down alerts (written by engine/topdown.py)
   data/brokers.json      Brokers page: facts and links (edit by hand; affiliate links go here)
+  data/ucits.json        EU-buyable versions of SPY/QQQ and an ETC per commodity (edit by hand)
+  data/history.json      every alert ever sent, graded 5/20/60 sessions later (written by engine/scan.py;
+                         the Track record page). Crypto and commodities keep their own in their folders.
 worker/                  Cloudflare Workers: trendlines data, counted broker links (see worker/README.md)
 engine/
   strategies.py          the 12 strategy detectors (shared by scanner and examples)

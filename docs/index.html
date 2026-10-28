@@ -239,6 +239,10 @@ a { color: var(--blue); }
 .prr b { font: 600 15px var(--font-mono); }
 .prr small { margin: 0; }
 .prdel { color: var(--faint); font-size: 18px; line-height: 1; padding: 2px 6px; }
+.bt.ucits td:first-child { white-space: normal; font: 500 14px var(--font-body); color: var(--fg); }
+.bt.ucits td:first-child a { color: var(--fg); }
+.bt.ucits td:last-child, .bt.ucits th:last-child { text-align: right; font: 500 13.5px var(--font-mono); white-space: nowrap; }
+.bt.ucits .mono { display: inline; font: 600 12px var(--font-mono); color: var(--muted); }
 .pill.earn { background: color-mix(in srgb, var(--amber) 18%, transparent); color: var(--amber); margin-left: 6px; }
 .earnwarn { display: flex; gap: 12px; align-items: flex-start; color: var(--fg); text-decoration: none; border: 1px solid color-mix(in srgb, var(--amber) 40%, transparent); }
 .earnwarn .ico { flex: none; width: 24px; height: 24px; border-radius: 50%; background: var(--amber); color: var(--on-accent); font: 700 15px/24px var(--font-display); text-align: center; }
@@ -1811,6 +1815,7 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
     h += `<p class="hint">One year of daily candles with the 50- and 200-day averages. Triangles mark alerts from all strategies in the last few weeks.</p>`;
     h += `<div class="card rating" id="rating"><div class="hd"><h3>Technical rating</h3></div><p class="loading" style="padding:18px 0">Reading the indicators…</p></div>`;
     if (isComm() && r.drivers) h += `<div class="card drivers"><h3>What moves the price</h3><p>${esc(r.drivers)}.</p><p class="hint" style="margin:0">Prices follow the nearest contract, so the chart can jump a little when it rolls to the next month.</p></div>`;
+    if (isComm()) h += etcCard(t);
     if (!isComm()) h += `<p style="margin:4px 0 18px"><a class="btn ghost" href="trendlines.html#${encodeURIComponent(t)}">Trendlines on 7 timeframes ›</a></p>`;
     h += nextEarningsCard(t) + mentionsCard(t) + newsFor(t);
     h += `<h2>Recent alerts on ${esc(disp(t))}</h2>`;
@@ -2247,7 +2252,7 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
       return `<a class="cmp" href="#strategy-${slug(r.s.id)}"><span class="nm">${esc(r.s.name)}<em>${r.bust ? "wiped out" : net ? `tax ${kEur(r.tax)} · fees ${kEur(r.fees)}` : `worst drop −${Math.abs(Math.round(r.dd))}%`}</em></span>${track(r, r.profit >= 0 ? "pos" : "neg")}
         <span class="val">${eurBig(r.end)}<small class="${(diff ?? r.profit) >= 0 ? "up" : "down"}">${diff != null ? `${diff >= 0 ? "+" : ""}${kEur(diff)} vs ${BM.short}` : `${r.ret >= 0 ? "+" : "−"}${Math.abs(Math.round(r.ret))}%`}</small></span></a>`;
     }).join("");
-    h += `<p class="hint" style="margin:8px 0 0">Each strategy runs its own ${eurS(size)}, split equally across every open position: it buys on bullish alerts${side === "all" ? " and sells short on bearish ones" : ""}, and with nothing open the money waits in cash.${spy ? ` The ${BM.name} line puts the same ${eurS(size)} into ${BM.short} in the week of ${esc(when)} and holds it${BM.note}; the thin mark on each bar is where it ended.` : ""}${lev > 1 ? ` At ${lev}x every account, ${BM.short} included, borrows to hold ${lev} times its money, so each week's gain or loss is multiplied by ${lev} (rebalanced weekly, borrowing free); a week that loses ${Math.round(100 / lev)}% or more wipes it out.` : ""} Worst drop is the biggest fall from a high along the way. ${net
+    h += `<p class="hint" style="margin:8px 0 0">Each strategy runs its own ${eurS(size)}, split equally across every open position: it buys on bullish alerts${side === "all" ? " and sells short on bearish ones" : ""}, and with nothing open the money waits in cash.${spy ? ` The ${BM.name} line puts the same ${eurS(size)} into ${BM.short} in the week of ${esc(when)} and holds it${BM.note}; the thin mark on each bar is where it ended.${BM.short === "SPY" ? ` (SPY itself isn't sold to EU investors: <a href="#brokers-ucits">here are the EU versions</a>.)` : ""}` : ""}${lev > 1 ? ` At ${lev}x every account, ${BM.short} included, borrows to hold ${lev} times its money, so each week's gain or loss is multiplied by ${lev} (rebalanced weekly, borrowing free); a week that loses ${Math.round(100 / lev)}% or more wipes it out.` : ""} Worst drop is the biggest fall from a high along the way. ${net
       ? `After Italian taxes &amp; fees, for an investor resident in Italy with an "amministrato" account: a ${IT.fee * 100}% broker fee on every buy and sell (about €5 on a €5,000 order), the 0.2% a year stamp duty on the account, and 26% tax on each year's net gains with losses carried forward up to 4 years. Buy &amp; hold pays its fee once each way and the 26% only when it sells at the end, which is why holding is hard to beat after tax. Simplified: it taxes a strategy's gains in the year they're made even if a position is still open, and ignores dividends' own tax and the Tobin tax on Italian shares.`
       : "No costs, taxes or fees."}${mk !== "commodities" && !B.demo ? ` Built on ${esc(B.universe.replace(/^T/, "t"))}, so names that dropped out over the years are missing, which flatters buying.` : ""}${from === last ? ` ${last} so far.` : ""}</p></div>`;
     return h;
@@ -3046,6 +3051,27 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
       <p>Unless the exchange pays the taxes for you (amministrato), you report gains in quadro RT and your holdings in quadro RW, every year you hold crypto, even if you didn't sell anything.</p></div>`,
   };
 
+  // EU-buyable versions of US funds and futures: ISIN, yearly cost, Borsa Italiana code (data/ucits.json)
+  const jet = isin => `https://www.justetf.com/en/etf-profile.html?isin=${encodeURIComponent(isin)}`;
+  const ucRow = o => `<tr><td><a href="${jet(o.isin)}" target="_blank" rel="noopener">${esc(o.name)}</a><small>${esc(o.isin)}${o.milan ? ` · Milan: <b class="mono">${esc(o.milan)}</b>` : ""}${o.policy ? ` · ${esc(o.policy.toLowerCase())}` : ""}${o.kind ? ` · ${o.kind === "physical" ? "backed by metal in a vault" : "tracks futures"}` : ""}</small></td><td>${o.ter.toFixed(2)}%</td></tr>`;
+  function ucitsSection() {
+    const U = S.ucits; if (!U?.funds?.length) return "";
+    let h = `<section class="bsec" id="brokers-ucits"><h2><span aria-hidden="true">🇪🇺</span> US index funds, the EU version</h2>
+      <p class="tag" style="font-size:14.5px">This app compares strategies with SPY, but SPY and other US-listed ETFs can't be bought by most EU retail investors: since 2018 the EU's PRIIPs rules require a key information document (KID) that US funds don't publish. Irish-domiciled UCITS ETFs track the same indexes and can be bought from Italy.</p>`;
+    for (const f of U.funds) h += `<h3 class="h3">${esc(f.index)} <small style="color:var(--faint);font:500 12px var(--font-mono)">instead of ${esc(f.us)}${f.also ? ", " + esc(f.also) : ""}</small></h3><div class="tablewrap"><table class="bt ucits"><thead><tr><th>Fund</th><th>Yearly cost</th></tr></thead><tbody>${f.options.map(ucRow).join("")}</tbody></table></div>`;
+    h += `<p class="hint">Accumulating funds reinvest dividends, distributing ones pay them out (taxed at 26% when paid). For an Italian resident, gains on UCITS ETFs are taxed at 26% as <em>redditi di capitale</em>, so they can't be offset by earlier losses, unlike gains on single stocks or ETCs. Names, codes and costs checked ${esc(fmtDate(U.checked, { day: "numeric", month: "long", year: "numeric" }))}; confirm the ISIN in your broker before buying. Not a recommendation.</p></section>`;
+    return h;
+  }
+  function etcCard(t) {
+    const L2 = S.ucits?.commodities?.[t]; if (!L2?.length) return "";
+    const phys = L2.some(o => o.kind === "physical");
+    return `<div class="card"><h3>How to invest in it from Italy</h3><p>${phys
+      ? "Physically backed ETCs hold the metal in a vault, so they follow the spot price closely."
+      : "There's no way to hold the commodity itself: these ETCs track futures and roll from one contract to the next, so over months they can drift away from the price on this page (the roll can cost or add a few % a year)."}</p>
+      <div class="tablewrap"><table class="bt ucits"><thead><tr><th>ETC</th><th>Yearly cost</th></tr></thead><tbody>${L2.map(ucRow).join("")}</tbody></table></div>
+      <p class="hint" style="margin:8px 0 0">ETC gains are taxed at 26% and can be offset against losses. Checked ${esc(fmtDate(S.ucits.checked, { day: "numeric", month: "short", year: "numeric" }))}; confirm the ISIN in your broker. Not a recommendation.</p></div>`;
+  }
+
   function viewBrokers() {
     const B = S.brokers;
     let h = header("Brokers");
@@ -3057,7 +3083,7 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
     // the market you're browsing comes first
     if (isCrypto()) secs = [...secs].sort((a, b) => (b.id === "crypto") - (a.id === "crypto"));
     if (secs.length > 1) h += `<div class="bjump" role="navigation" aria-label="Sections">${secs.map(x =>
-      `<a href="#brokers-${esc(x.id)}"><span aria-hidden="true">${SECTION_ICON[x.id] || ""}</span>${esc(x.title)}</a>`).join("")}</div>`;
+      `<a href="#brokers-${esc(x.id)}"><span aria-hidden="true">${SECTION_ICON[x.id] || ""}</span>${esc(x.title)}</a>`).join("")}${S.ucits?.funds?.length ? `<a href="#brokers-ucits"><span aria-hidden="true">🇪🇺</span>US funds, EU version</a>` : ""}</div>`;
     for (const x of secs) {
       h += `<section class="bsec" id="brokers-${esc(x.id)}"><h2>${SECTION_ICON[x.id] ? `<span aria-hidden="true">${SECTION_ICON[x.id]}</span> ` : ""}${esc(x.title)}</h2>`;
       if (x.intro) h += `<p class="tag" style="font-size:14.5px;margin-bottom:4px">${esc(x.intro)}</p>`;
@@ -3065,6 +3091,7 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
       h += TAX_HELP[x.id] || "";
       h += `</section>`;
     }
+    h += ucitsSection();
     h += `<h2>What isn't here</h2><div class="prose">
       <p>No CFDs, futures, margin or other leveraged products. Most retail CFD accounts lose money, and leverage doesn't fit the longer-term strategies in this app, so this page only links to stock and ETF accounts and to buying crypto itself.</p>
       <p>No crypto platforms without an EU MiCA licence. Since 1 July 2026 they can't offer their services in Italy, and MiCA protections only apply to the licensed company, not to other companies using the same brand.</p></div>`;
@@ -3794,6 +3821,7 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
     S.prefs = load(PREFS, {}) || {};
     try {
       opt("data/brokers.json").then(b => { S.brokers = b; if (S.routed && location.hash.startsWith("#brokers")) rerender(); });
+      opt("data/ucits.json").then(u => { S.ucits = u; if (u && S.routed && /^#(brokers|stock-|strateg)/.test(location.hash)) rerender(); });
       opt("data/calendar.json").then(c => { S.cal = c; if (c && S.routed && (/^#(calendar|stock-|alert)/.test(location.hash) || !location.hash)) rerender(); });
       const st = await fetch("data/strategies.json", { cache: "no-cache" }).then(r => r.json());
       S.strategies = st.strategies;
