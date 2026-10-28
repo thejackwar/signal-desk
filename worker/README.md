@@ -65,3 +65,39 @@ programs' own dashboards are the real record of sign-ups.
 Edit only `docs/data/brokers.json`: replace the broker's `url` with your affiliate link and
 set `"affiliate": true` (that shows the **Affiliate** tag next to it). The Worker reads the
 file from the site, so nothing else needs changing; new links work within about 5 minutes.
+
+# Exact run times (third Worker: the scheduler)
+
+GitHub starts scheduled workflows when it has capacity, often 5-20 minutes late, and now and
+then not at all. `scheduler-worker.js` runs every minute on Cloudflare (which is punctual) and
+starts each workflow at its time, like pressing **Run workflow** in the Actions tab. The times
+are the same as the `cron:` lines in `.github/workflows` (UTC).
+
+## Set it up (about 15 minutes, in the browser)
+
+1. **A GitHub token that can only start workflows in this repository.** On GitHub: your
+   profile picture → **Settings → Developer settings → Personal access tokens → Fine-grained
+   tokens → Generate new token**.
+   - Name: `signal-desk scheduler`. Expiration: the longest offered (note the date).
+   - Repository access: **Only select repositories** → `signal-desk`.
+   - Permissions → Repository permissions → **Actions: Read and write**. Nothing else.
+   - **Generate token** and copy it (GitHub shows it once).
+2. **The Worker.** Cloudflare: **Workers & Pages → Create → Create Worker**, name it
+   `scheduler` → **Deploy** → **Edit code**: paste the whole of `worker/scheduler-worker.js`
+   → **Deploy**.
+3. In the Worker: **Settings → Variables and Secrets → Add**, type **Secret**, name
+   `GITHUB_TOKEN`, value: the token from step 1.
+4. In the Worker: **Settings → Trigger events → Add → Cron Triggers**, expression `* * * * *`
+   (every minute) → Add.
+5. Check it: open `https://scheduler.<your-subdomain>.workers.dev`. `"token": "works"` and a
+   `next` time for every workflow means it's ready.
+6. Switch off GitHub's own timer, so nothing runs twice: repository **Settings → Secrets and
+   variables → Actions → Variables → New repository variable**, name `EXTERNAL_SCHEDULER`,
+   value `on`. GitHub's late runs still appear in the Actions tab, but as *skipped* (grey).
+
+Back to GitHub's timer at any moment: set `EXTERNAL_SCHEDULER` to `off` (or delete it).
+
+To change a time, edit it in `SCHEDULE` near the top of `scheduler-worker.js`, paste the
+Worker again, and change the matching `cron:` line in the workflow too (that's the backup).
+When the token expires, the page in step 5 says "not working": make a new token (step 1) and
+replace the secret (step 3). Each start shows up in the Worker's **Logs** as `started <file>`.
