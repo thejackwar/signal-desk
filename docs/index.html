@@ -358,24 +358,24 @@ table.trades td:last-child { font: 600 13.5px var(--font-mono); white-space: now
 /* ===== commodities theme: the physical world. Umber ground, brass and verdigris, stencil type
    like the lettering on oil drums and grain sacks, a survey map behind the pages. ===== */
 :root[data-market="commodities"] {
-  --bg: #13100b; --surface: #1c1811; --surface-2: #29231a; --hover: #211c14; --line: #3a3226;
-  --fg: #efe5cf; --muted: #b3a688; --faint: #847860;
-  --amber: #d4a443; --amber-bg: rgba(212,164,67,.13); --blue: #7cc0ad;
-  --bull: #93c46a; --bear: #e0574a; --bull-bg: rgba(147,196,106,.14); --bear-bg: rgba(224,87,74,.14);
-  --chart: #0d0b07;
+  --bg: #0f1214; --surface: #171b1e; --surface-2: #222830; --hover: #1b2024; --line: #2d353b;
+  --fg: #e7e9e6; --muted: #9ca7aa; --faint: #6b777b;
+  --amber: #6cc4ad; --amber-bg: rgba(108,196,173,.13); --blue: #6cc4ad;
+  --bull: #7fcf8a; --bear: #ec6455; --bull-bg: rgba(127,207,138,.13); --bear-bg: rgba(236,100,85,.14);
+  --chart: #0b0e10;
   --font-display: "Big Shoulders Display", "Bricolage Grotesque", system-ui, sans-serif;
   --stencil: "Big Shoulders Stencil Display", "Big Shoulders Display", Impact, sans-serif;
 }
 :root[data-market="commodities"] body { background:
-  radial-gradient(900px 520px at 90% -12%, rgba(212,164,67,.12), transparent 62%),
-  radial-gradient(700px 480px at -10% 105%, rgba(124,192,173,.07), transparent 60%), var(--bg); background-attachment: fixed; }
+  radial-gradient(900px 520px at 90% -12%, rgba(108,196,173,.09), transparent 62%),
+  radial-gradient(700px 480px at -10% 105%, rgba(150,170,180,.06), transparent 60%), var(--bg); background-attachment: fixed; }
 /* a fine grain over everything, like paper or rough metal */
-:root[data-market="commodities"] body::after { content: ""; position: fixed; inset: 0; z-index: 0; pointer-events: none; opacity: .09; mix-blend-mode: overlay;
+:root[data-market="commodities"] body::after { content: ""; position: fixed; inset: 0; z-index: 0; pointer-events: none; opacity: .06; mix-blend-mode: overlay;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); }
 :root[data-market="commodities"] body::before { background: transparent; }
-:root[data-market="commodities"] .top { background: rgba(19,16,11,.84); }
-:root[data-market="commodities"] .side { background: rgba(19,16,11,.8); }
-:root[data-market="commodities"] .tabs { background: rgba(19,16,11,.93); }
+:root[data-market="commodities"] .top { background: rgba(15,18,20,.84); }
+:root[data-market="commodities"] .side { background: rgba(15,18,20,.8); }
+:root[data-market="commodities"] .tabs { background: rgba(15,18,20,.93); }
 :root[data-market="commodities"] .top h1 { font: 800 34px/1 var(--stencil); letter-spacing: .015em; color: var(--fg); }
 :root[data-market="commodities"] h2, :root[data-market="commodities"] .h3, :root[data-market="commodities"] .health h3, :root[data-market="commodities"] .card h3,
 :root[data-market="commodities"] .compare h3, :root[data-market="commodities"] .srow h3, :root[data-market="commodities"] .empty strong { font-family: var(--font-display); font-weight: 700; letter-spacing: .01em; }
@@ -386,8 +386,8 @@ table.trades td:last-child { font: 600 13.5px var(--font-mono); white-space: now
 :root[data-market="commodities"] .tk { font: 700 17px/1.15 var(--font-display); letter-spacing: .01em; }
 :root[data-market="commodities"] .big2 { align-items: center; }
 :root[data-market="commodities"] .big2 .tk { font: 800 40px/1 var(--stencil); letter-spacing: .01em; }
-:root[data-market="commodities"] .chip[aria-pressed="true"], :root[data-market="commodities"] .btn:not(.ghost):not(.on) { background: var(--amber); border-color: var(--amber); color: #1d160b; }
-:root[data-market="commodities"] .mswitch button[aria-pressed="true"] { background: var(--surface-2); color: var(--amber); box-shadow: inset 0 0 0 1px rgba(212,164,67,.45); }
+:root[data-market="commodities"] .chip[aria-pressed="true"], :root[data-market="commodities"] .btn:not(.ghost):not(.on) { background: var(--amber); border-color: var(--amber); color: #0b1714; }
+:root[data-market="commodities"] .mswitch button[aria-pressed="true"] { background: var(--surface-2); color: var(--amber); box-shadow: inset 0 0 0 1px rgba(108,196,173,.45); }
 /* crisp, machined corners instead of the soft cards elsewhere */
 :root[data-market="commodities"] .chartbox, :root[data-market="commodities"] .health, :root[data-market="commodities"] .card, :root[data-market="commodities"] .srow,
 :root[data-market="commodities"] .compare, :root[data-market="commodities"] .tablewrap, :root[data-market="commodities"] .tiles div, :root[data-market="commodities"] .ledger .total,
@@ -681,7 +681,7 @@ canvas.hm { display: block; touch-action: pan-y; }
   const PALETTES = {
     stocks: { bg: "#000", up: "#32c48d", down: "#f05a63", grid: "#1b1e24", axis: "#6b727c", accent: "#f2b33d", accent2: "#74a7f5", muted: "#9aa1ab", band: "#74a7f5", shape: "#f2b33d" },
     crypto: { bg: "#07040f", up: "#2cf59a", down: "#ff4f9a", grid: "#1c1530", axis: "#7d73a3", accent: "#b57bff", accent2: "#4de8ff", muted: "#a59cc4", band: "#4de8ff", shape: "#ffd23f" },
-    commodities: { bg: "#0d0b07", up: "#93c46a", down: "#e0574a", grid: "#231e15", axis: "#857a62", accent: "#d4a443", accent2: "#7cc0ad", muted: "#b2a587", band: "#7cc0ad", shape: "#efd27c" },
+    commodities: { bg: "#0b0e10", up: "#7fcf8a", down: "#ec6455", grid: "#1d2328", axis: "#738086", accent: "#6cc4ad", accent2: "#d08a5c", muted: "#9ca7aa", band: "#6cc4ad", shape: "#e4b26a" },
   };
   function applyPalette() {
     Object.assign(C, PALETTES[S.market] || PALETTES.stocks);
@@ -1812,7 +1812,7 @@ canvas.hm { display: block; touch-action: pan-y; }
             a ? g.lineTo(px, py) : g.moveTo(px, py);
           }
           g.closePath();
-          g.strokeStyle = k % 5 ? "rgba(212,164,67,0.07)" : "rgba(212,164,67,0.15)"; g.lineWidth = k % 5 ? 1 : 1.4; g.stroke();
+          g.strokeStyle = k % 5 ? "rgba(108,196,173,0.06)" : "rgba(108,196,173,0.13)"; g.lineWidth = k % 5 ? 1 : 1.4; g.stroke();
         }
       }
     } else if (crypto) {
@@ -1826,9 +1826,9 @@ canvas.hm { display: block; touch-action: pan-y; }
 
     // long price lines (crypto lines glow)
     const lines = comm ? [
-      { top: .2, amp: .14, color: "230,190,90", a: .2, fill: .05, drift: .3, vol: 5 },      // gold
-      { top: .38, amp: .13, color: "239,229,207", a: .12, fill: 0, drift: -.1, vol: 7 },     // crude
-      { top: .52, amp: .1, color: "124,192,173", a: .14, fill: 0, drift: .05, vol: 5 },      // wheat (verdigris so it reads apart from gold)
+      { top: .2, amp: .14, color: "108,196,173", a: .18, fill: .045, drift: .3, vol: 5 },    // gold
+      { top: .38, amp: .13, color: "220,226,228", a: .1, fill: 0, drift: -.1, vol: 7 },      // crude
+      { top: .52, amp: .1, color: "208,138,92", a: .13, fill: 0, drift: .05, vol: 5 },       // wheat
     ] : crypto ? [
       { top: .3, amp: .22, color: "77,232,255", a: .22, fill: .06, drift: .5, vol: 9, glow: 14 },
       { top: .48, amp: .18, color: "181,123,255", a: .2, fill: .05, drift: .25, vol: 8, glow: 12 },
@@ -1881,7 +1881,7 @@ canvas.hm { display: block; touch-action: pan-y; }
 
     // commodities: soil strata under the candles, the layers a drill core would show
     if (comm) {
-      const tints = ["94,70,40", "120,92,52", "70,58,42", "140,108,60", "60,48,34"];
+      const tints = ["70,82,88", "92,96,94", "58,66,72", "104,100,92", "48,56,62"];
       let prev = null;
       for (let k = 0; k < 5; k++) {
         const top = H * (.74 + k * .055), ph = rnd() * 6, amp = H * (.008 + rnd() * .012);
@@ -1891,7 +1891,7 @@ canvas.hm { display: block; touch-action: pan-y; }
         g.lineTo(W, H); g.lineTo(0, H); g.closePath();
         g.fillStyle = `rgba(${tints[k]},${.07 + k * .015})`; g.fill();
         g.beginPath(); g.moveTo(0, yAt(0)); for (let x = 8; x <= W + 8; x += 8) g.lineTo(x, yAt(x));
-        g.strokeStyle = "rgba(212,164,67,0.08)"; g.lineWidth = 1; g.stroke();
+        g.strokeStyle = "rgba(160,180,186,0.08)"; g.lineWidth = 1; g.stroke();
       }
     }
 
@@ -1909,7 +1909,7 @@ canvas.hm { display: block; touch-action: pan-y; }
       for (let i = 0; i < 20; i++) c[i] = RC.close[Math.max(0, RC.close.length - k - 20 + i)];
     } else c = walk(n + 20, crypto ? 4.5 : 3.2, .06);
     const allv = RC ? hh.concat(ll) : c, lo = Math.min(...allv), hi = Math.max(...allv), py = v => base - (v - lo) / ((hi - lo) || 1) * span;
-    const upC = crypto ? "rgba(44,245,154,0.17)" : comm ? "rgba(147,196,106,0.16)" : "rgba(50,196,141,0.15)", dnC = crypto ? "rgba(255,79,154,0.17)" : comm ? "rgba(224,87,74,0.15)" : "rgba(240,90,99,0.135)";
+    const upC = crypto ? "rgba(44,245,154,0.17)" : comm ? "rgba(127,207,138,0.15)" : "rgba(50,196,141,0.15)", dnC = crypto ? "rgba(255,79,154,0.17)" : comm ? "rgba(236,100,85,0.14)" : "rgba(240,90,99,0.135)";
     for (let i = 0; i < n; i++) {
       const o = RC ? oo[i] : c[i + 19], cl = c[i + 20], up = cl >= o, x = i * cw + cw / 2;
       const h1 = RC ? hh[i] : Math.max(o, cl) + rnd() * 1.6, l1 = RC ? ll[i] : Math.min(o, cl) - rnd() * 1.6;
@@ -1920,11 +1920,11 @@ canvas.hm { display: block; touch-action: pan-y; }
     g.beginPath();
     for (let i = 0; i < n; i++) { let m = 0; for (let k = 0; k < 10; k++) m += c[i + 20 - k]; m /= 10; const x = i * cw + cw / 2; i ? g.lineTo(x, py(m)) : g.moveTo(x, py(m)); }
     g.save(); if (crypto) { g.shadowColor = "rgba(181,123,255,.8)"; g.shadowBlur = 8; }
-    g.strokeStyle = crypto ? "rgba(181,123,255,0.22)" : comm ? "rgba(230,190,90,0.2)" : "rgba(242,179,61,0.16)"; g.lineWidth = 1.5; g.stroke(); g.restore();
+    g.strokeStyle = crypto ? "rgba(181,123,255,0.22)" : comm ? "rgba(108,196,173,0.2)" : "rgba(242,179,61,0.16)"; g.lineWidth = 1.5; g.stroke(); g.restore();
 
     // darken the middle so text stays easy to read
     const vg = g.createRadialGradient(W / 2, H * .45, Math.min(W, H) * .15, W / 2, H * .45, Math.max(W, H) * .75);
-    vg.addColorStop(0, crypto ? "rgba(11,7,20,0.5)" : comm ? "rgba(19,16,11,0.5)" : "rgba(8,9,11,0.45)"); vg.addColorStop(1, "rgba(0,0,0,0)");
+    vg.addColorStop(0, crypto ? "rgba(11,7,20,0.5)" : comm ? "rgba(15,18,20,0.5)" : "rgba(8,9,11,0.45)"); vg.addColorStop(1, "rgba(0,0,0,0)");
     g.fillStyle = vg; g.fillRect(0, 0, W, H);
   }
   let bgT; addEventListener("resize", () => { clearTimeout(bgT); bgT = setTimeout(drawBackdrop, 200); });
@@ -1943,7 +1943,7 @@ canvas.hm { display: block; touch-action: pan-y; }
     S.stockBy = {}; (c.stocks?.stocks || []).forEach(r => S.stockBy[r.ticker] = r);
     S.q = ""; S.filter = "all";
     document.documentElement.dataset.market = m;
-    document.querySelector('meta[name="theme-color"]').content = { crypto: "#0b0714", commodities: "#13100b" }[m] || "#08090b";
+    document.querySelector('meta[name="theme-color"]').content = { crypto: "#0b0714", commodities: "#0f1214" }[m] || "#08090b";
     applyPalette();
     drawBackdrop();
     document.querySelectorAll('[data-l="tab"]').forEach(el => el.textContent = MK[m].Tab);
