@@ -223,6 +223,10 @@ a { color: var(--blue); }
 .since-card { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; flex-wrap: wrap; }
 .since-card b { font: 600 22px var(--font-mono); }
 .pill.lvhit { background: var(--surface-2); color: var(--muted); margin-left: 6px; }
+.pill.earn { background: color-mix(in srgb, var(--amber) 18%, transparent); color: var(--amber); margin-left: 6px; }
+.earnwarn { display: flex; gap: 12px; align-items: flex-start; color: var(--fg); text-decoration: none; border: 1px solid color-mix(in srgb, var(--amber) 40%, transparent); }
+.earnwarn .ico { flex: none; width: 24px; height: 24px; border-radius: 50%; background: var(--amber); color: var(--on-accent); font: 700 15px/24px var(--font-display); text-align: center; }
+.earnwarn small { display: block; color: var(--muted); font-size: 13px; margin-top: 4px; }
 .wrongif .hd b { font: 600 20px var(--font-mono); }
 
 /* strategies list */
@@ -1358,7 +1362,7 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
       <span class="stripe"></span>${!opts.showDate ? icon(a.ticker, 32) : ""}
       <span class="main"><span class="tk">${esc(opts.showDate ? fmtDate(a.date, { day: "numeric", month: "short" }) : disp(a.ticker))}</span><span class="strat">${esc(stratName(a.strategy))}${a.tf ? ` · ${esc(a.tf)}` : ""}</span>
         <div class="note">${esc(a.note)}</div>
-        <div class="info">${meter(a.strength)}<span class="pill">${a.side}</span>${a.stop_hit ? `<span class="pill lvhit" title="Closed beyond its “wrong if” level on ${esc(fmtDate(a.stop_hit, { day: "numeric", month: "short" }))}">level hit</span>` : ""}</div></span>
+        <div class="info">${meter(a.strength)}<span class="pill">${a.side}</span>${S.market === "stocks" && earnSoon(a.ticker) ? `<span class="pill earn" title="Earnings ${inDays(earnSoon(a.ticker).days)}">earnings ${earnSoon(a.ticker).days === 0 ? "today" : earnSoon(a.ticker).days + "d"}</span>` : ""}${a.stop_hit ? `<span class="pill lvhit" title="Closed beyond its “wrong if” level on ${esc(fmtDate(a.stop_hit, { day: "numeric", month: "short" }))}">level hit</span>` : ""}</div></span>
       <span class="px">${money(a.price)}<span class="since">${sinceTxt}</span></span></a>`;
   }
 
@@ -1468,6 +1472,22 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
     return h;
   }
 
+  // Earnings within EARN_DAYS of today: big gaps on the report often undo what the chart said.
+  const EARN_DAYS = 7;
+  function earnSoon(t) {
+    if (S.market !== "stocks" || !S.cal) return null;
+    const today = localToday(), lim = new Date(parse(today).getTime() + EARN_DAYS * DAY).toISOString().slice(0, 10);
+    const e = (S.cal.earnings || []).find(x => x.ticker === t && x.date >= today && x.date <= lim);
+    return e ? { ...e, days: Math.round((parse(e.date) - parse(today)) / DAY) } : null;
+  }
+  const inDays = n => n === 0 ? "today" : n === 1 ? "tomorrow" : `in ${n} days`;
+  function earnCard(a) {
+    const e = earnSoon(a.ticker);
+    if (!e) return "";
+    return `<a class="card earnwarn" href="#calendar-${e.date}"><span class="ico" aria-hidden="true">!</span><span><b>Earnings ${inDays(e.days)}</b> (${esc(fmtDate(e.date, { weekday: "short", day: "numeric", month: "short" }))}${e.time === "bmo" ? ", before the open" : e.time === "amc" ? ", after the close" : ""}).
+      <small>Prices often jump on the report, in either direction, and a jump can wipe out what this chart signal was saying. Many traders wait until after the report, or trade smaller.</small></span></a>`;
+  }
+
   // Where the alert would be proven wrong: a close beyond this level (set on the alert day).
   function wrongIfCard(a) {
     if (!a.stop_why) return "";
@@ -1553,7 +1573,7 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
       const good = (a.side === "bullish") === (a.since >= 0);
       h += `<div class="card since-card"><div><h3>Since the alert</h3><p>${a.since_days} session${a.since_days > 1 ? "s" : ""} later, the price is ${a.since >= 0 ? "up" : "down"}${good ? ", the way the alert pointed" : ", against the alert"}.</p></div><b class="${a.since >= 0 ? "up" : "down"}">${a.since > 0 ? "+" : ""}${a.since.toFixed(1)}%</b></div>`;
     }
-    h += wrongIfCard(a);
+    h += earnCard(a) + wrongIfCard(a);
     if (st) {
       h += `<div class="card"><div class="hd"><h3>Signal strength</h3><span style="display:inline-flex;gap:8px;align-items:center;font:500 12px var(--font-mono)">${meter(st)} ${st.score}/4</span></div>
         <ul class="checks">${st.checks.map(c => `<li class="${c.ok ? "" : "no"}"><span>${esc(c.text)}${c.ids ? `<small>${c.ids.map(stratName).map(esc).join(", ")}</small>` : ""}</span></li>`).join("")}</ul>
@@ -3626,7 +3646,7 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
     S.prefs = load(PREFS, {}) || {};
     try {
       opt("data/brokers.json").then(b => { S.brokers = b; if (S.routed && location.hash.startsWith("#brokers")) rerender(); });
-      opt("data/calendar.json").then(c => { S.cal = c; if (c && S.routed && /^#(calendar|stock-)/.test(location.hash)) rerender(); });
+      opt("data/calendar.json").then(c => { S.cal = c; if (c && S.routed && (/^#(calendar|stock-|alert)/.test(location.hash) || !location.hash)) rerender(); });
       const st = await fetch("data/strategies.json", { cache: "no-cache" }).then(r => r.json());
       S.strategies = st.strategies;
       S.strategies.forEach(s => S.byId[s.id] = s);
