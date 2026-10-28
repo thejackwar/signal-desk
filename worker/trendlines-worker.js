@@ -40,9 +40,9 @@ function nyWall(iso) {
   return Date.UTC(p.year, p.month - 1, p.day, p.hour, p.minute, p.second) / 1000;
 }
 
-async function fetchSeries(sym, tf, days, end, env) {
+async function fetchSeries(sym, tf, start, end, env) {
   const fmt = d => d.toISOString().replace(/\.\d{3}Z$/, "Z");
-  const params = new URLSearchParams({ symbols: sym, timeframe: tf, start: fmt(new Date(end - days * DAY)),
+  const params = new URLSearchParams({ symbols: sym, timeframe: tf, start: fmt(new Date(start)),
     end: fmt(new Date(end)), limit: "10000", adjustment: "all", feed: "sip" });
   const headers = { "APCA-API-KEY-ID": env.ALPACA_KEY_ID, "APCA-API-SECRET-KEY": env.ALPACA_SECRET_KEY };
   const bars = [];
@@ -59,6 +59,38 @@ async function fetchSeries(sym, tf, days, end, env) {
     if (!js.next_page_token) break;
     params.set("page_token", js.next_page_token);
   }
+  return bars;
+}
+
+// Speed: years of candles take Alpaca 10-25 seconds, but only the last few days ever change.
+// So each series is fetched in two parts: the older history, kept in the Worker's cache for the rest
+// of the (UTC) day, and the last 8-14 days (from a Monday, so the current weekly bar is whole),
+// fetched fresh every time. The history is re-fetched daily, so split and dividend adjustments
+// (adjustment=all) stay consistent. The result is the same bars as one long request.
+async function fetchSeriesFast(sym, tf, days, end, env, cache) {
+  const today = Math.floor(end / DAY) * DAY;
+  const start = today - days * DAY;
+  const monday = today - ((new Date(today).getUTCDay() + 6) % 7) * DAY;   // this week's Monday 00:00 UTC
+  const recentStart = monday - 7 * DAY;                                  // last week's Monday
+  const recent = await Promise.all([
+    cachedHistory(sym, tf, start, recentStart + 2 * DAY, today, env, cache),   // overlaps the recent part
+    fetchSeries(sym, tf, recentStart, end, env),
+  ]);
+  const [hist, fresh] = recent;
+  if (!fresh.length) return hist;
+  const first = Date.parse(fresh[0].t);
+  return [...hist.filter(b => Date.parse(b.t) < first), ...fresh];
+}
+
+async function cachedHistory(sym, tf, start, end, today, env, cache) {
+  const key = new Request(`https://trendlines.cache/h/${sym}/${tf}/${new Date(today).toISOString().slice(0, 10)}`);
+  if (cache) {
+    const hit = await cache.match(key).catch(() => null);
+    if (hit) return hit.json();
+  }
+  const bars = await fetchSeries(sym, tf, start, end, env);
+  if (cache) await cache.put(key, new Response(JSON.stringify(bars), {
+    headers: { "Content-Type": "application/json", "Cache-Control": "max-age=86400" } })).catch(() => {});
   return bars;
 }
 
@@ -198,7 +230,7 @@ export default {
     if (!TICKERS.has(sym)) return json({ error: `${sym || "No ticker"}: only S&P 100 stocks, SPY and the app's 19 coins are available.` }, 400);
     if (!env.ALPACA_KEY_ID || !env.ALPACA_SECRET_KEY) return json({ error: "The Alpaca keys are not set on the Worker." }, 500);
 
-    // same request within a minute: answer from the cache
+    // same request within a minute: answer from the cache (older candles are cached separately for the day)
     const cache = typeof caches !== "undefined" ? caches.default : null;
     const key = new Request(`https://trendlines.cache/${sym}`);
     if (cache) { const hit = await cache.match(key); if (hit) return hit; }
@@ -207,7 +239,7 @@ export default {
     const alpacaSym = sym.replace(/-/g, ".");              // BRK-B -> BRK.B
     try {
       const names = Object.keys(SERIES);
-      const got = await Promise.all(names.map(k => fetchSeries(alpacaSym, SERIES[k][0], SERIES[k][1], end, env)));
+      const got = await Promise.all(names.map(k => fetchSeriesFast(alpacaSym, SERIES[k][0], SERIES[k][1], end, env, cache)));
       const frames = {};
       names.forEach((k, i) => {
         frames[k] = shape(got[i], SERIES[k][2]);
