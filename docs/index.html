@@ -1410,7 +1410,7 @@ canvas.hm { display: block; touch-action: pan-y; }
     const D = A.dates, size = A.size || 100000, mk = S.market || "stocks";
     const first = +D[0].slice(0, 4), last = +D[D.length - 1].slice(0, 4);
     const from = Math.min(last, Math.max(first, pref("cmpFrom." + mk, first)));
-    const side = pref("cmpSide", "all") === "long" ? "long" : "all";
+    const side = pref("cmpSide", "long") === "all" ? "all" : "long";
     let i0 = D.findIndex(d => +d.slice(0, 4) >= from); if (i0 < 0) i0 = 0;
     const rows = S.strategies.map(s => { const v = B.strategies[s.id]?.account?.[side]; const r = v && acctRun(v, i0, size); return r && { s, ...r }; })
       .filter(Boolean).sort((a, b) => b.end - a.end);
@@ -1428,7 +1428,7 @@ canvas.hm { display: block; touch-action: pan-y; }
     const years = []; for (let y = first; y <= last; y++) years.push(y);
     const when = fmtDate(D[i0], { day: "numeric", month: "short", year: "numeric" });
     let h = `<div class="compare"><div class="hd"><h3>${kEur(size)} account since <span class="yrpick"><select data-cmpfrom aria-label="Starting year">${years.map(y => `<option value="${y}"${y === from ? " selected" : ""}>${y}</option>`).join("")}</select></span></h3></div>
-      <div class="seg sm" role="group" aria-label="Trades">${[["all", "Long + short"], ["long", "Long only"]].map(([k, l]) => `<button data-cmpside="${k}" aria-pressed="${k === side}">${l}</button>`).join("")}</div>
+      <div class="seg sm" role="group" aria-label="Trades">${[["long", "Long only"], ["all", "Long + short"]].map(([k, l]) => `<button data-cmpside="${k}" aria-pressed="${k === side}">${l}</button>`).join("")}</div>
       ${B.demo ? `<p class="hint" style="margin:0 0 6px">Demo backtest on simulated prices.</p>` : ""}`;
     if (spy) h += `<div class="cmp bench"><span class="nm">S&amp;P 500 buy &amp; hold <small>SPY</small><em>worst drop −${Math.abs(Math.round(spy.dd))}%</em></span>${track(spy, "bench")}
       <span class="val">${eurS(spy.end)}<small class="${spy.ret >= 0 ? "up" : "down"}">${spy.ret >= 0 ? "+" : "−"}${Math.abs(Math.round(spy.ret)).toLocaleString("en-US")}%</small></span></div>`;
