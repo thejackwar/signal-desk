@@ -516,6 +516,7 @@ canvas.hm { display: block; touch-action: pan-y; }
 
 /* news */
 .newslist { display: grid; }
+.newslist > [hidden] { display: none !important; }
 .news { padding: 13px 10px; margin: 0 -10px; border-top: 1px solid var(--line); border-radius: 0; }
 .day + .news, .newslist > .news:first-child { border-top-color: transparent; }
 @media (hover: hover) { .news:hover { background: var(--hover); } }
@@ -1158,6 +1159,20 @@ canvas.hm { display: block; touch-action: pan-y; }
     }
     h += `</div><p class="empty" id="nomatch" hidden>Nothing matches that search.</p>`;
     return { html: h, after: () => { filterStocks(); const pv = document.getElementById("hmprev"); if (pv && S.liq?.views) drawHeatmap(pv, S.liq, { period: "24h", height: 120, compact: true }); } };
+  }
+
+  function filterNews() {
+    const q = (S.nq || "").trim().toLowerCase(), box = app.querySelector("#newsrows");
+    if (!box) return;
+    let shown = 0, day = null, dayHas = false;
+    const closeDay = () => { if (day) day.hidden = !dayHas; };
+    for (const el of box.children) {
+      if (el.classList.contains("day")) { closeDay(); day = el; dayHas = false; continue; }
+      const ok = !q || (el.dataset.q || "").includes(q);
+      el.hidden = !ok; shown += ok; dayHas ||= ok;
+    }
+    closeDay();
+    const nm = app.querySelector("#newsnomatch"); if (nm) nm.hidden = shown > 0;
   }
 
   function filterStocks() {
@@ -1938,14 +1953,17 @@ canvas.hm { display: block; touch-action: pan-y; }
       <button class="chip" data-nsrc="tagged" aria-pressed="${f === "tagged"}">${isCrypto() ? "Mentions a coin" : isComm() ? "Mentions a commodity" : "Mentions a stock"}</button>
       ${srcs.map(x => `<button class="chip" data-nsrc="${esc(x)}" aria-pressed="${f === x}">${esc(x)} · ${counts[x]}</button>`).join("")}</div>${arrow(1)}</div>`;
     const list = N.items.filter(n => f === "all" || (f === "tagged" ? (n.tickers || []).some(t => S.stockBy[t]) : n.source === f));
+    h += `<input class="search" id="newssearch" type="search" placeholder="${isCrypto() ? "Search a coin by name or symbol" : "Search a stock by name or ticker"}" autocomplete="off" aria-label="Search news" value="${esc(S.nq || "")}">`;
     let grp = "";
-    h += `<div class="newslist">`;
+    h += `<div class="newslist" id="newsrows">`;
     for (const n of list) {
       const g = newsGroup(n.time);
       if (g !== grp) { grp = g; h += `<div class="day"><span>${esc(g)}</span></div>`; }
-      h += newsItem(n);
+      // what the search box matches: the headline plus each tagged stock's ticker and company name
+      const q = [n.title, ...(n.tickers || []).flatMap(t => [t, disp(t), S.stockBy[t]?.name || ""])].join(" ").toLowerCase();
+      h += newsItem(n).replace("<article ", `<article data-q="${esc(q)}" `);
     }
-    h += `</div><p class="fine">Headlines and short summaries from each publisher's public news feed; tap a story to read it on their site. Updated every hour.</p>`;
+    h += `</div><p class="empty" id="newsnomatch" hidden>No headlines mention that right now.</p><p class="fine">Headlines and short summaries from each publisher's public news feed; tap a story to read it on their site. Updated every hour.</p>`;
     return h;
   }
 
@@ -2238,6 +2256,8 @@ canvas.hm { display: block; touch-action: pan-y; }
     setupChips();
     const search = app.querySelector("#stocksearch");
     if (search) search.addEventListener("input", () => { S.q = search.value; filterStocks(); });
+    const nsearch = app.querySelector("#newssearch");
+    if (nsearch) { nsearch.addEventListener("input", () => { S.nq = nsearch.value; filterNews(); }); filterNews(); }
     // the phone tab bar has no Calendar button: it lives under News there
     document.querySelectorAll("[data-tab]").forEach(a => a.setAttribute("aria-current", a.dataset.tab === tab || (tab === "calendar" && a.dataset.tab === "news" && a.closest(".tabs")) ? "page" : "false"));
     S.routed = true;
@@ -2517,7 +2537,7 @@ canvas.hm { display: block; touch-action: pan-y; }
       CACHE[m] = { feed, bt, stocks, liq, news, mentions, stockData: {} };
     }
     const c = CACHE[m];
-    S.market = m; S.liq = c.liq; S.news = c.news; S.mentions = c.mentions; S.newsSrc = "all"; S.newsSec = "all"; S.feed = c.feed; S.bt = c.bt; S.stocks = c.stocks; S.stockData = c.stockData;
+    S.market = m; S.liq = c.liq; S.news = c.news; S.mentions = c.mentions; S.newsSrc = "all"; S.newsSec = "all"; S.nq = ""; S.feed = c.feed; S.bt = c.bt; S.stocks = c.stocks; S.stockData = c.stockData;
     S.stockBy = {}; (c.stocks?.stocks || []).forEach(r => S.stockBy[r.ticker] = r);
     S.q = ""; S.filter = "all";
     document.documentElement.dataset.market = m;
