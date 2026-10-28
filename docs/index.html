@@ -958,15 +958,22 @@ body { background:
 .btn { background: var(--title-grad); background-size: 140% 100%; }
 .btn.ghost { background: var(--amber-bg); color: var(--amber); }
 .btn.on { background: var(--amber-bg); color: var(--amber); }
-/* sliders: a coloured track filled up to the thumb (--p is set by the script) */
-input[type=range] { -webkit-appearance: none; appearance: none; height: 26px; background: transparent; accent-color: var(--amber); cursor: pointer; }
-input[type=range]::-webkit-slider-runnable-track { height: 6px; border-radius: 3px;
-  background: linear-gradient(90deg, var(--amber) 0 var(--p, 50%), color-mix(in srgb, var(--fg) 14%, transparent) var(--p, 50%) 100%); }
-input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 22px; height: 22px; margin-top: -8px; border-radius: 50%; background: #fff;
-  box-shadow: 0 1px 4px rgba(0,0,0,.3), 0 0 0 .5px rgba(0,0,0,.1); }
-input[type=range]::-moz-range-track { height: 6px; border-radius: 3px; background: color-mix(in srgb, var(--fg) 14%, transparent); }
-input[type=range]::-moz-range-progress { height: 6px; border-radius: 3px; background: var(--amber); }
-input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 0; border-radius: 50%; background: #fff; box-shadow: 0 1px 4px rgba(0,0,0,.3); }
+/* sliders: thick coloured track filled up to a big coloured handle, so it's obvious you can drag it (--p is set by the script) */
+input[type=range] { -webkit-appearance: none; appearance: none; height: 34px; background: transparent; accent-color: var(--amber); cursor: grab; touch-action: pan-y; }
+input[type=range]:active { cursor: grabbing; }
+input[type=range]::-webkit-slider-runnable-track { height: 10px; border-radius: 5px;
+  background: linear-gradient(90deg, var(--amber), var(--accent2)) 0 0 / var(--p, 50%) 100% no-repeat, color-mix(in srgb, var(--amber) 22%, color-mix(in srgb, var(--fg) 10%, transparent)); }
+input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 28px; height: 28px; margin-top: -9px; border-radius: 50%;
+  background: radial-gradient(circle, #fff 0 30%, var(--amber) 32%); border: 3px solid #fff;
+  box-shadow: 0 2px 8px rgba(0,0,0,.35), 0 0 0 5px color-mix(in srgb, var(--amber) 22%, transparent); transition: transform .15s, box-shadow .15s; }
+input[type=range]:hover::-webkit-slider-thumb { box-shadow: 0 2px 8px rgba(0,0,0,.35), 0 0 0 8px color-mix(in srgb, var(--amber) 25%, transparent); }
+input[type=range]:active::-webkit-slider-thumb { transform: scale(1.18); box-shadow: 0 3px 12px rgba(0,0,0,.4), 0 0 0 10px color-mix(in srgb, var(--amber) 28%, transparent); }
+input[type=range]::-moz-range-track { height: 10px; border-radius: 5px; background: color-mix(in srgb, var(--amber) 22%, color-mix(in srgb, var(--fg) 10%, transparent)); }
+input[type=range]::-moz-range-progress { height: 10px; border-radius: 5px; background: linear-gradient(90deg, var(--amber), var(--accent2)); }
+input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px solid #fff; border-radius: 50%; background: var(--amber);
+  box-shadow: 0 2px 8px rgba(0,0,0,.35), 0 0 0 5px color-mix(in srgb, var(--amber) 22%, transparent); }
+/* the value next to each slider in the accent colour */
+.lp b { color: var(--amber); font-size: 15px; }
 </style>
 </head>
 <body>
