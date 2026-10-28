@@ -15,6 +15,7 @@ docs/                    the website (served by GitHub Pages)
   data/stocks.json       stock list + market health       (written by engine/scan.py)
   data/stocks/           one-year chart per stock
   trendlines.html/.js    automatic trendlines page (data from worker/)
+  data/calendar.json     upcoming earnings, IPOs, economy (written by engine/events.py)
 engine/
   strategies.py          the 9 strategy detectors (shared by scanner and examples)
   scan.py                daily scanner
@@ -109,6 +110,22 @@ CNBC, MarketWatch, Investing.com, Nasdaq, Seeking Alpha and Yahoo Finance for st
 CoinDesk, Cointelegraph, Decrypt, The Block, Bitcoin Magazine and CryptoSlate for crypto.
 It keeps the headline, source, time, a short summary and a link to the full article, and
 tags the stocks or coins a headline mentions. Edit `FEEDS` in the file to change sources.
+
+## Calendar
+
+`engine/events.py` (the *Market calendar* workflow, at 05:37 UTC every day and 21:43 UTC on weekdays)
+builds `docs/data/calendar.json`: earnings dates from two weeks back to three months ahead for US companies
+worth $2 billion or more, upcoming and recently priced IPOs on US exchanges, and the main US economic
+releases (CPI, PCE, PPI, jobs report, GDP, retail sales, ISM, consumer sentiment, Fed decisions). Sources:
+Yahoo Finance's earnings, IPO and economic calendars, each S&P 100 stock's own Yahoo page (for analysts'
+EPS and revenue estimates), Nasdaq's IPO calendar, and Nasdaq's earnings calendar as a fallback. The FOMC
+dates are typed into `FOMC` in the file: add next year's when the Fed publishes them. If every source
+fails, the previous file is kept.
+
+In the app: side menu → *Calendar* (on the phone, *News* → *Calendar*). A month view, Monday to Friday,
+with each day's events, or a list of the next three weeks; filter by type and by which companies
+(S&P 100, $10B+, all). Past earnings show the reported EPS and whether it beat or missed the estimate.
+Each stock's page shows its next earnings date. `python engine/events.py --demo` writes made-up data.
 
 ## News mentions
 

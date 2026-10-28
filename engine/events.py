@@ -33,7 +33,7 @@ ROOT = Path(__file__).resolve().parent.parent
 ENGINE = Path(__file__).parent
 OUT = ROOT / "docs" / "data" / "calendar.json"
 NY = ZoneInfo("America/New_York")
-BACK_DAYS, AHEAD_DAYS = 14, 75
+BACK_DAYS, AHEAD_DAYS = 14, 90
 MIN_CAP = 2e9                    # earnings from companies worth less than $2B are left out
 UA = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36",
       "Accept": "application/json, text/plain, */*", "Accept-Language": "en-US,en;q=0.9",
@@ -58,6 +58,14 @@ MACRO = [
     (r"Michigan.*Sentiment|Consumer Sentiment", "Consumer sentiment", "How confident households feel (University of Michigan)."),
     (r"Fed.*(Rate|Interest)|Interest Rate Decision|FOMC", "Fed rate decision", "The Federal Reserve sets interest rates."),
 ]
+REGIONAL_FED = r"\b(Dallas|Cleveland|Richmond|Philly|Philadelphia|Kansas City|KC|NY|New York|Chicago|Atlanta|St\.? Louis) Fed\b"
+# when a release has several figures (CPI month-on-month, year-on-year, core...), the one shown first
+HEADLINE = {"CPI inflation": r"^CPI YY", "PPI": r"^PPI Final Demand YY", "PCE inflation": r"^PCE Price Index YY", "Jobs report": r"^Non.?Farm Payrolls$",
+            "GDP": r"^GDP (Advance|Prelim|Final|Second|Third)$", "Retail sales": r"^Retail Sales MM$", "ISM manufacturing": r"Manufacturing PMI$",
+            "ISM services": r"(Services|N-Mfg) PMI$", "Consumer sentiment": r"Sentiment", "Fed rate decision": r"Fed Funds"}
+# Yahoo's IPO calendar also lists new ETFs, funds and the extra unit / right / warrant lines of SPACs
+NOT_IPO = r"\bETFs?\b|\bFunds?\b|Portfolio|SPDR|\bUnits?$|\bRights$|\bWarrants?$|Preferred|(?<!Investment) Trust( [IVX]+)?$"
+SPAC = r"Acquisition (Corp|Company|Co\b|Ltd|Inc)|\bSPAC\b|Treasury Corp"
 
 
 def log(*a):
@@ -79,6 +87,30 @@ def num(v):
         return x if x else None
     except ValueError:
         return None
+
+
+def txt(v):
+    """Text from a table cell, or None for blanks (pandas gives NaN for empty cells)."""
+    if v is None or (isinstance(v, float) and math.isnan(v)):
+        return None
+    s = str(v).strip()
+    return None if s.lower() in {"", "nan", "none", "n/a", "na", "--"} else s
+
+
+def clean(o):
+    """Drop empty values everywhere, so the file is valid JSON (no NaN) and small."""
+    if isinstance(o, dict):
+        return {k: c for k, v in o.items() if (c := clean(v)) is not None}
+    if isinstance(o, list):
+        return [clean(v) for v in o]
+    if isinstance(o, float) and (math.isnan(o) or math.isinf(o)):
+        return None
+    return o
+
+
+def short_name(n: str) -> str:
+    n = re.sub(r",? (Inc\.?,? )?(Class [AB] )?(Common Stock|Common Shares|Ordinary Shares|Common stock|American Depositary Shares)$", "", n.strip())
+    return n
 
 
 def r2(x):
@@ -113,11 +145,11 @@ def yahoo_earnings(start: date, end: date) -> list[dict]:
                 when = r.get("Event Start Date")
                 if when is None or str(when) == "NaT":
                     continue
-                out.append({"ticker": str(sym).replace(".", "-"), "name": r.get("Company"), "date": ny_date(when),
+                out.append({"ticker": str(sym).replace(".", "-"), "name": txt(r.get("Company")), "date": ny_date(when),
                             "time": TIMING.get(str(r.get("Timing") or "").upper(), "tns"),
                             "mcap": num(r.get("Marketcap")), "eps_est": r2(num(r.get("EPS Estimate"))),
                             "eps": r2(num(r.get("Reported EPS"))), "surprise": r2(num(r.get("Surprise(%)"))),
-                            "event": r.get("Event Name")})
+                            "event": txt(r.get("Event Name"))})
             if len(df) < 100:
                 break
             time.sleep(.4)
@@ -254,7 +286,7 @@ def us_date(s):
 
 
 def ipo_row(r, status, when, filed=None):
-    name = (r.get("companyName") or "").strip()
+    name = txt(r.get("companyName"))
     if not name:
         return None
     px = str(r.get("proposedSharePrice") or "").replace("$", "")
@@ -263,7 +295,7 @@ def ipo_row(r, status, when, filed=None):
         a, b = px.split("-", 1); lo, hi = num(a), num(b)
     else:
         lo = hi = num(px)
-    return {"ticker": (r.get("proposedTickerSymbol") or "").strip() or None, "name": name, "status": status,
+    return {"ticker": txt(r.get("proposedTickerSymbol")), "name": name, "status": status,
             "date": us_date(when), "filed": us_date(filed), "exchange": r.get("proposedExchange"),
             "price_lo": lo, "price_hi": hi, "price": lo if status == "priced" and lo == hi else None,
             "shares": num(r.get("sharesOffered")), "size": num(r.get("dollarValueOfSharesOffered"))}
@@ -283,9 +315,11 @@ def yahoo_ipos(start: date, end: date) -> list[dict]:
         ok = when is not None and str(when) != "NaT"
         lo, hi, px = num(r.get("Price From")), num(r.get("Price To")), num(r.get("Price"))
         sh = num(r.get("Shares"))
-        out.append({"ticker": str(sym) if sym and str(sym) != "nan" else None, "name": r.get("Company"),
+        if not txt(r.get("Company")):
+            continue
+        out.append({"ticker": txt(sym), "name": txt(r.get("Company")),
                     "status": "priced" if "priced" in deal or (px and ok and ny_date(when) < date.today().isoformat()) else "expected" if ok else "filed",
-                    "date": ny_date(when) if ok else None, "exchange": r.get("Exchange"),
+                    "date": ny_date(when) if ok else None, "exchange": txt(r.get("Exchange")),
                     "price_lo": lo, "price_hi": hi, "price": px, "shares": sh,
                     "size": (sh * (px or hi or lo)) if sh and (px or hi or lo) else None})
     return out
@@ -303,8 +337,16 @@ def ipos(start: date, end: date) -> tuple[list[dict], list[str]]:
             log(f"{name}: {len(got)}")
             if got:
                 srcs.append(name)
-            seen = {(x["ticker"] or x["name"].lower()) for x in rows}
-            rows += [x for x in got if (x["ticker"] or x["name"].lower()) not in seen]
+            for x in got:
+                if re.search(NOT_IPO, x["name"], re.I):
+                    continue
+                x["name"] = short_name(x["name"])
+                if re.search(SPAC, x["name"], re.I):
+                    x["spac"] = True
+                key = re.sub(r"[^a-z0-9]", "", x["name"].lower())
+                if any(key == re.sub(r"[^a-z0-9]", "", y["name"].lower()) or (x["ticker"] and x["ticker"] == y["ticker"]) for y in rows):
+                    continue
+                rows.append(x)
         except Exception as ex:
             log(f"{name} failed:", ex)
     s, e = start.isoformat(), end.isoformat()
@@ -335,7 +377,7 @@ def economy(start: date, end: date) -> tuple[list[dict], list[str]]:
         for ev, r in rows:
             if str(r.get("Region") or "").upper() not in {"US", "USA", "UNITED STATES"}:
                 continue
-            hit = next(((lbl, why) for rx, lbl, why in MACRO if re.search(rx, ev, re.I)), None)
+            hit = None if re.search(REGIONAL_FED, ev, re.I) else next(((lbl, why) for rx, lbl, why in MACRO if re.search(rx, ev, re.I)), None)
             when = r.get("Event Time")
             if not hit or when is None or str(when) == "NaT":
                 continue
@@ -346,8 +388,25 @@ def economy(start: date, end: date) -> tuple[list[dict], list[str]]:
                 continue
             seen.add(k)
             out.append({"date": ny_date(t), "time": t.tz_convert(NY).strftime("%H:%M"), "utc": t.tz_convert("UTC").strftime("%Y-%m-%dT%H:%MZ"),
-                        "name": ev, "kind": hit[0], "why": hit[1], "period": r.get("For"),
+                        "name": ev.strip(" *"), "kind": hit[0], "why": hit[1], "period": txt(r.get("For")),
                         "expected": r2(num(r.get("Expected"))), "last": r2(num(r.get("Last"))), "actual": r2(num(r.get("Actual")))})
+        # one entry per release and day: the headline figure, with the others as parts
+        merged = {}
+        for x in out:
+            k = (x["date"], x["kind"])
+            if k not in merged:
+                merged[k] = x
+                continue
+            m, rx = merged[k], HEADLINE.get(x["kind"])
+            if rx and re.search(rx, x["name"], re.I) and not re.search(rx, m["name"], re.I):
+                x["parts"] = m.pop("parts", []) + [m]
+                merged[k] = x
+            else:
+                m.setdefault("parts", []).append(x)
+        out = []
+        for m in merged.values():
+            m["parts"] = [{f: p.get(f) for f in ("name", "actual", "expected", "last")} for p in m.get("parts", [])][:5]
+            out.append(m)
         log(f"yahoo economy: {len(rows)} releases, {len(out)} kept")
         if out:
             srcs.append("Yahoo Finance economic calendar")
@@ -359,7 +418,6 @@ def economy(start: date, end: date) -> tuple[list[dict], list[str]]:
             out.append({"date": d, "time": "14:00", "utc": None, "name": "FOMC rate decision", "kind": "Fed rate decision",
                         "why": "The Federal Reserve sets interest rates; the chair's press conference follows at 14:30 New York time."})
     srcs.append("Federal Reserve (FOMC dates)")
-    out = [{k: v for k, v in x.items() if v is not None} for x in out]
     out.sort(key=lambda x: (x["date"], x.get("time") or ""))
     return out, srcs
 
@@ -426,7 +484,8 @@ def main():
         if e.get("rev_est"):
             e["rev_est"] = round(e["rev_est"])
     OUT.parent.mkdir(parents=True, exist_ok=True)
-    OUT.write_text(json.dumps(data, separators=(",", ":"), ensure_ascii=False))
+    data = clean(data)
+    OUT.write_text(json.dumps(data, separators=(",", ":"), ensure_ascii=False, allow_nan=False))
     log(f"wrote {OUT.relative_to(ROOT)}: {len(data['earnings'])} earnings, {len(data['ipos'])} IPOs, {len(data['economy'])} economy")
 
 

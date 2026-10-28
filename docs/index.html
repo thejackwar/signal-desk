@@ -534,6 +534,57 @@ canvas.hm { display: block; touch-action: pan-y; }
 @media (max-width: 560px) { .desks { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 
 
+/* calendar: earnings, IPOs, economy */
+.calnav { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin: 6px 0 8px; }
+.calnav h2 { margin: 0; font-size: 20px; }
+.calnav .arw { display: inline-flex; gap: 6px; }
+.calnav .arw button { width: 34px; height: 34px; display: inline-flex; align-items: center; justify-content: center; border: 1px solid var(--line); border-radius: 50%; color: var(--fg); }
+.calnav .arw button:hover:not(:disabled) { border-color: var(--amber); color: var(--amber); }
+.calnav .arw button:disabled { opacity: .3; cursor: default; }
+.calnav .arw .today { width: auto; padding: 0 12px; border-radius: 999px; font-size: 12.5px; color: var(--muted); }
+.calgrid { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 4px; }
+.calgrid .wd { font: 600 10.5px/1 var(--font-mono); text-transform: uppercase; letter-spacing: .1em; color: var(--faint); padding: 4px 6px 6px; }
+.cell { display: flex; flex-direction: column; gap: 3px; min-height: 84px; padding: 6px; background: var(--surface); border: 1px solid transparent; border-radius: 10px; text-align: left; overflow: hidden; }
+.cell:hover { border-color: var(--line); }
+.cell .dn { display: flex; justify-content: space-between; align-items: baseline; font: 600 13px/1 var(--font-mono); color: var(--muted); margin-bottom: 2px; }
+.cell .dn small { font: 500 10px var(--font-mono); color: var(--faint); }
+.cell.out { background: transparent; }
+.cell.out .dn { color: var(--faint); opacity: .5; }
+.cell.past { opacity: .62; }
+.cell.today .dn > span { color: var(--bg); background: var(--amber); border-radius: 5px; padding: 2px 4px; margin: -2px -4px; }
+.cell[aria-pressed="true"] { border-color: var(--amber); background: var(--surface-2); opacity: 1; }
+.ev { display: block; font: 600 11px/1.25 var(--font-mono); font-style: normal; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding: 2px 4px; border-radius: 4px; color: var(--fg); background: rgba(255,255,255,.05); }
+.ev.e-eco { color: var(--amber); background: var(--amber-bg); }
+.ev.e-ipo { color: var(--blue); background: rgba(116,167,245,.13); }
+.ev.e-beat { box-shadow: inset 2px 0 0 var(--bull); } .ev.e-miss { box-shadow: inset 2px 0 0 var(--bear); }
+@media (max-width: 560px) { .cell { min-height: 72px; padding: 5px 4px; } .cell .ev:nth-of-type(n+3) { display: none; } .ev { font-size: 10px; padding: 1px 3px; } .cell .dn small { display: none; } }
+.callegend { display: flex; flex-wrap: wrap; gap: 6px 14px; font: 500 11px var(--font-mono); color: var(--faint); margin: 10px 0 0; }
+.callegend i { display: inline-block; width: 9px; height: 9px; border-radius: 3px; margin-right: 5px; vertical-align: -1px; background: rgba(255,255,255,.18); }
+.callegend i.eco { background: var(--amber); } .callegend i.ipo { background: var(--blue); } .callegend i.beat { background: var(--bull); } .callegend i.miss { background: var(--bear); }
+.agenda h2 { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; }
+.agenda h2 small { font: 500 12px var(--font-mono); color: var(--faint); }
+.agenda .grp { font: 600 11px/1 var(--font-mono); text-transform: uppercase; letter-spacing: .1em; color: var(--faint); padding: 16px 0 6px; display: flex; justify-content: space-between; gap: 8px; }
+.agenda .grp span:last-child { text-transform: none; letter-spacing: 0; font-weight: 500; }
+.cev { grid-template-columns: minmax(0, 1fr) auto; align-items: center; }
+.cev .nm { display: block; color: var(--muted); font-size: 12.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 2px; }
+.cev .meta { display: block; font: 500 11px/1.3 var(--font-mono); color: var(--faint); margin-top: 3px; }
+.cev .q { text-align: right; font: 600 14px/1.2 var(--font-mono); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.cev .q small { display: block; font: 500 10.5px/1.4 var(--font-mono); color: var(--faint); }
+.cev .sp { font: 600 9.5px/1 var(--font-mono); letter-spacing: .06em; color: var(--amber); border: 1px solid rgba(242,179,61,.4); border-radius: 4px; padding: 2px 4px; margin-left: 6px; vertical-align: 2px; }
+.cev.eco { grid-template-columns: 52px minmax(0, 1fr); align-items: start; }
+.cev.eco .when { font: 600 13px/1.2 var(--font-mono); color: var(--amber); }
+.cev.eco .when small { display: block; font: 500 10px var(--font-mono); color: var(--faint); }
+.cev.eco .why { display: block; color: var(--muted); font-size: 12.5px; margin-top: 2px; }
+.surp { display: inline-block; font: 600 10.5px/1 var(--font-mono); padding: 3px 5px; border-radius: 5px; margin-top: 4px; }
+.surp.up { color: var(--bull); background: var(--bull-bg); } .surp.down { color: var(--bear); background: var(--bear-bg); }
+.ipost { display: inline-block; font: 600 9.5px/1 var(--font-mono); letter-spacing: .06em; text-transform: uppercase; padding: 3px 5px; border-radius: 4px; color: var(--blue); background: rgba(116,167,245,.13); margin-left: 6px; vertical-align: 2px; }
+.ipost.priced { color: var(--bull); background: var(--bull-bg); } .ipost.filed { color: var(--muted); background: rgba(255,255,255,.06); }
+.nextearn { display: flex; justify-content: space-between; align-items: center; gap: 12px; text-decoration: none; color: inherit; }
+.nextearn b { font: 700 17px/1.2 var(--font-display); display: block; }
+.nextearn small { display: block; font: 500 12px var(--font-mono); color: var(--muted); margin-top: 3px; }
+.nextearn .go { color: var(--amber); font-size: 12.5px; white-space: nowrap; }
+@media (min-width: 1000px) { #app.single:has(.calgrid) { max-width: 980px; } .cell { min-height: 104px; } }
+
 /* news mentions */
 .nsw { margin: 2px 0 12px; }
 .nsw a { padding: 6px 14px; border-radius: 8px; font-size: 13px; color: var(--muted); text-decoration: none; }
@@ -626,6 +677,7 @@ canvas.hm { display: block; touch-action: pan-y; }
   <a class="nav" href="#stocks" data-tab="stocks"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="m7 15 4-4 3 3 6-7"/></svg><span data-l="tab">Stocks</span></a>
   <a class="nav" href="trendlines.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M6 8l13 5"/><path d="M6 18l13-9"/></svg>Trendlines</a>
   <a class="nav" href="#news" data-tab="news"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h13a1 1 0 0 1 1 1v12a2 2 0 0 0 2 2H6a2 2 0 0 1-2-2Z"/><path d="M18 9h2a1 1 0 0 1 1 1v8a2 2 0 0 1-2 2"/><path d="M8 9h6"/><path d="M8 13h6"/><path d="M8 17h4"/></svg>News</a>
+  <a class="nav" href="#calendar" data-tab="calendar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5" width="17" height="15.5" rx="2"/><path d="M3.5 10h17"/><path d="M8 3v4"/><path d="M16 3v4"/><path d="M7.5 14h2"/><path d="M11 14h2"/><path d="M14.5 14h2"/><path d="M7.5 17h2"/></svg>Calendar</a>
   <a class="nav" href="#strategies" data-tab="strategies"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 20h18"/><path d="M6 16V9"/><path d="M4.5 9h3"/><path d="M12 16V5"/><path d="M10.5 5h3"/><path d="M18 16v-5"/><path d="M16.5 11h3"/></svg>Strategies</a>
   <a class="nav" href="#notify" data-tab="notify"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="2.5" width="12" height="19" rx="2.5"/><path d="M11 18.5h2"/></svg>Phone alerts</a>
   <div class="foot" id="sidefoot"></div>
@@ -1111,7 +1163,7 @@ canvas.hm { display: block; touch-action: pan-y; }
     h += `<p class="hint">One year of daily candles with the 50- and 200-day averages. Triangles mark alerts from all strategies in the last few weeks.</p>`;
     if (isComm() && r.drivers) h += `<div class="card drivers"><h3>What moves the price</h3><p>${esc(r.drivers)}.</p><p class="hint" style="margin:0">Prices follow the nearest contract, so the chart can jump a little when it rolls to the next month.</p></div>`;
     if (S.market === "stocks") h += `<p style="margin:4px 0 18px"><a class="btn ghost" href="trendlines.html#${encodeURIComponent(t)}">Trendlines on 7 timeframes ›</a></p>`;
-    h += mentionsCard(t) + newsFor(t);
+    h += nextEarningsCard(t) + mentionsCard(t) + newsFor(t);
     h += `<h2>Recent alerts on ${esc(disp(t))}</h2>`;
     if (!alerts.length) h += `<p class="tag" style="font-size:14px">No strategy has fired on ${esc(disp(t))} in the last few weeks.</p>`;
     else h += `<div class="rows">` + alerts.map(a => alertRow(a, { showDate: true })).join("") + `</div>`;
@@ -1706,7 +1758,7 @@ canvas.hm { display: block; touch-action: pan-y; }
 
 
   // -------------------------------------------------------- news mentions
-  const newsSwitch = which => `<div class="seg nsw" role="group" aria-label="News view"><a href="#news" role="button" aria-pressed="${which === "news"}">Headlines</a><a href="#buzz" role="button" aria-pressed="${which === "buzz"}">Most mentioned</a></div>`;
+  const newsSwitch = which => `<div class="seg nsw" role="group" aria-label="News view"><a href="#news" role="button" aria-pressed="${which === "news"}">Headlines</a><a href="#buzz" role="button" aria-pressed="${which === "buzz"}">Most mentioned</a><a href="#calendar" role="button" aria-pressed="${which === "calendar"}">Calendar</a></div>`;
   function bars(series, W = 96, H = 26) {
     const n = series.length, vals = series.filter(v => v != null), mx = Math.max(1, ...vals), bw = W / n;
     return `<svg class="mbars" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" preserveAspectRatio="none" aria-hidden="true">${series.map((v, i) => {
@@ -1758,6 +1810,177 @@ canvas.hm { display: block; touch-action: pan-y; }
       ${bars(m.series, 300, 54)}<div class="gscale"><span>30 days ago</span><span>today</span></div></div>`;
   }
 
+  // ---------------------------------------------------------------- calendar
+  // Upcoming earnings, IPOs and US economic releases (data/calendar.json, written by engine/events.py).
+  const isoDay = dt => dt.toISOString().slice(0, 10);
+  const localToday = () => new Date().toLocaleDateString("en-CA");
+  const bigUsd = v => v == null ? "–" : v >= 1e12 ? `$${(v / 1e12).toFixed(2)}T` : v >= 1e9 ? `$${(v / 1e9).toFixed(v >= 1e11 ? 0 : 1)}B` : v >= 1e6 ? `$${Math.round(v / 1e6)}M` : `$${Math.round(v).toLocaleString("en-US")}`;
+  const eps = v => v == null ? "–" : v.toFixed(2);
+  // a New York clock time on a given day -> the same moment in the viewer's time zone (summer/winter time handled on both sides)
+  const NYF = new Intl.DateTimeFormat("en-US", { timeZone: "America/New_York", hourCycle: "h23", year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit" });
+  function nyTime(d, hm) {
+    const [y, m, dd] = d.split("-").map(Number), [H, M] = hm.split(":").map(Number), want = Date.UTC(y, m - 1, dd, H, M);
+    let t = want + 5 * 36e5;
+    for (let i = 0; i < 2; i++) {
+      const p = Object.fromEntries(NYF.formatToParts(new Date(t)).map(x => [x.type, x.value]));
+      t += want - Date.UTC(+p.year, +p.month - 1, +p.day, +p.hour % 24, +p.minute);
+    }
+    return new Date(t);
+  }
+  const yourTime = (d, hm) => nyTime(d, hm).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" });
+  const ECO_SHORT = { "Fed rate decision": "Fed", "CPI inflation": "CPI", "PCE inflation": "PCE", "Jobs report": "Jobs", "Unemployment rate": "Jobless",
+                      "Retail sales": "Retail", "ISM manufacturing": "ISM mfg", "ISM services": "ISM svc", "Job openings": "JOLTS", "Consumer sentiment": "Sentiment" };
+  const TIMES = { bmo: "before the open", amc: "after the close", tns: "time not announced" };
+  const SCOPES = [["sp100", "S&amp;P 100"], ["large", "$10B+"], ["all", "All $2B+"]];
+  const inScope = (e, sc) => sc === "all" || e.sp100 || (sc === "large" && (e.mcap || 0) >= 1e10);
+
+  function calEvents(type, sc) {
+    const C = S.cal || {}, by = {};
+    const put = (d, v) => (by[d] || (by[d] = [])).push(v);
+    if (type === "all" || type === "economy") (C.economy || []).forEach(x => put(x.date, { k: "eco", x }));
+    if (type === "all" || type === "earnings") (C.earnings || []).forEach(x => inScope(x, sc) && put(x.date, { k: "earn", x }));
+    if (type === "all" || type === "ipos") (C.ipos || []).forEach(x => x.date && put(x.date, { k: "ipo", x }));
+    return by;
+  }
+  function evChip(v) {
+    if (v.k === "eco") return `<i class="ev e-eco">${esc(ECO_SHORT[v.x.kind] || v.x.kind)}</i>`;
+    if (v.k === "ipo") return `<i class="ev e-ipo">${esc(v.x.ticker || v.x.name)}</i>`;
+    const s = v.x.surprise;
+    return `<i class="ev${s == null ? "" : s >= 0 ? " e-beat" : " e-miss"}">${esc(v.x.ticker)}</i>`;
+  }
+  const weekdayOn = d => { const w = parse(d).getUTCDay(); return w === 6 ? isoDay(new Date(parse(d).getTime() + 2 * DAY)) : w === 0 ? isoDay(new Date(parse(d).getTime() + DAY)) : d; };
+  // the day the agenda opens on: today if something's on, else the next day with events (in this month)
+  function defaultDay(month, by, today) {
+    const days = Object.keys(by).filter(d => d.startsWith(month)).sort();
+    if (today.startsWith(month)) return days.find(d => d >= today) || weekdayOn(today);
+    return days[0] || weekdayOn(month + "-01");
+  }
+
+  function ecoRow(d, x) {
+    const nums = [x.name && x.name !== x.kind ? esc(x.name) : "", x.actual != null ? `actual <b style="color:var(--fg)">${x.actual}</b>` : "",
+                  x.expected != null ? `expected ${x.expected}` : "", x.last != null ? `previous ${x.last}` : ""].filter(Boolean).join(" · ");
+    return `<div class="row cev eco"><span class="when">${x.time ? yourTime(d, x.time) : "–"}${x.time ? `<small>${esc(x.time)} NY</small>` : ""}</span>
+      <span style="min-width:0"><span class="tk" style="font:600 15px/1.25 var(--font-body)">${esc(x.kind)}</span>${x.period ? `<span class="sp" style="color:var(--muted);border-color:var(--line)">${esc(x.period)}</span>` : ""}
+        <span class="why">${esc(x.why || "")}</span>${nums ? `<span class="meta">${nums}</span>` : ""}${(x.parts || []).slice(0, 4).map(p => {
+          const v = [p.actual != null ? `actual ${p.actual}` : "", p.expected != null ? `exp. ${p.expected}` : "", p.last != null ? `prev. ${p.last}` : ""].filter(Boolean).join(" · ");
+          return `<span class="meta">${esc(p.name)}${v ? ": " + v : ""}</span>`;
+        }).join("")}</span></div>`;
+  }
+  function ipoRow(x) {
+    const px = x.price ? `$${money(x.price)}` : x.price_lo && x.price_hi && x.price_lo !== x.price_hi ? `$${money(x.price_lo)}–${money(x.price_hi)}` : x.price_lo ? `$${money(x.price_lo)}` : "–";
+    const st = x.status === "priced" ? "priced" : x.status === "filed" ? "filed" : "expected";
+    const meta = [x.spac ? "SPAC (blank-cheque company)" : "", x.exchange, x.shares ? `${(x.shares / 1e6).toFixed(1)}M shares` : "", x.filed && !x.date ? "filed " + fmtDate(x.filed, { day: "numeric", month: "short" }) : ""].filter(Boolean);
+    return `<div class="row cev"><span style="min-width:0"><span class="tk">${esc(x.ticker || "—")}</span><span class="ipost ${st}">${st}</span>
+        <span class="nm">${esc(x.name)}</span>${meta.length ? `<span class="meta">${esc(meta.join(" · "))}</span>` : ""}</span>
+      <span class="q">${px}<small>${x.size ? bigUsd(x.size) + " raise" : st === "priced" ? "IPO price" : "price range"}</small></span></div>`;
+  }
+  function earnRow(x, sc) {
+    const linked = S.market === "stocks" && S.stockBy[x.ticker];
+    const meta = [x.mcap ? bigUsd(x.mcap) + " market cap" : "", x.quarter ? "quarter ending " + esc(x.quarter) : "", x.confirmed === false ? "date estimated" : ""].filter(Boolean).join(" · ");
+    const q = x.eps != null
+      ? `${eps(x.eps)}<small>EPS${x.eps_est != null ? ` vs ${eps(x.eps_est)} est.` : ""}</small>${x.surprise != null ? `<span class="surp ${x.surprise >= 0 ? "up" : "down"}">${x.surprise >= 0 ? "Beat +" : "Miss "}${x.surprise.toFixed(1)}%</span>` : ""}`
+      : `${eps(x.eps_est)}<small>EPS est.${x.rev_est ? ` · rev ${bigUsd(x.rev_est)}` : ""}</small>`;
+    const inner = `<span style="min-width:0"><span class="tk">${esc(x.ticker)}</span>${x.sp100 && sc !== "sp100" ? `<span class="sp">S&amp;P 100</span>` : ""}
+        <span class="nm">${esc(x.name || "")}</span>${meta ? `<span class="meta">${meta}</span>` : ""}</span><span class="q">${q}</span>`;
+    return linked ? `<a class="row cev" href="#stock-${esc(x.ticker)}">${inner}</a>` : `<div class="row cev">${inner}</div>`;
+  }
+  const grp = (a, b = "") => `<div class="grp"><span>${a}</span><span>${b}</span></div>`;
+  function dayBody(d, evs, sc) {
+    const pick = k => evs.filter(v => v.k === k).map(v => v.x);
+    const eco = pick("eco"), ipo = pick("ipo"), earn = pick("earn");
+    let h = "";
+    if (eco.length) h += grp("Economy", "your time") + `<div class="rows">${eco.map(x => ecoRow(d, x)).join("")}</div>`;
+    if (ipo.length) h += grp("IPOs", "first day of trading") + `<div class="rows">${ipo.map(ipoRow).join("")}</div>`;
+    for (const [k, name, note] of [["bmo", "Earnings before the open", `US opens ${yourTime(d, "09:30")}`], ["amc", "Earnings after the close", `US closes ${yourTime(d, "16:00")}`], ["tns", "Earnings, time not announced", ""]]) {
+      const xs = earn.filter(x => (x.time || "tns") === k);
+      if (xs.length) h += grp(name, note) + `<div class="rows">${xs.map(x => earnRow(x, sc)).join("")}</div>`;
+    }
+    return h;
+  }
+
+  function viewCalendar(arg) {
+    const C = S.cal;
+    let h = header("Calendar", null, C ? `<div class="stamp">US markets<br>updated ${esc(ago(C.generated_at))}</div>` : "") + newsSwitch("calendar");
+    if (C === undefined) return h + `<p class="loading">Loading…</p>`;
+    if (!C) return h + `<div class="empty"><strong>No calendar yet</strong>Upcoming earnings, IPOs and economic releases appear after the <em>Market calendar</em> update runs on GitHub.</div>`;
+    const today = localToday(), type = S.calType || "all", sc = pref("calScope", "sp100"), mode = pref("calMode", "month");
+    if (/^\d{4}-\d{2}-\d{2}$/.test(arg) && S.calArg !== arg) { S.calArg = arg; S.calDay = arg; S.calMonth = arg.slice(0, 7); }
+    const by = calEvents(type, sc);
+    const month = S.calMonth || (S.calDay || today).slice(0, 7);
+    const sel = S.calDay && S.calDay.startsWith(month) ? S.calDay : defaultDay(month, by, today);
+    if (C.demo) h += `<div class="demo">Demo data: made-up dates so you can see how the calendar works. Real dates appear once the Market calendar update runs on GitHub.</div>`;
+
+    const up = xs => xs.filter(x => x.date && x.date >= today).length;
+    const counts = { earnings: up((C.earnings || []).filter(e => inScope(e, sc))), ipos: up(C.ipos || []), economy: up(C.economy || []) };
+    h += `<div class="chips" role="group" aria-label="Show" style="margin-bottom:10px">${[["all", "All"], ["earnings", "Earnings"], ["ipos", "IPOs"], ["economy", "Economy"]].map(([k, t]) =>
+      `<button class="chip" data-ctype="${k}" aria-pressed="${type === k}">${t}${counts[k] != null ? ` · ${counts[k]}` : ""}</button>`).join("")}</div>`;
+    h += `<div class="tools" style="margin-bottom:10px"><span class="tg"><label>View</label><div class="seg sm" role="group" aria-label="View">${[["month", "Month"], ["list", "Next 3 weeks"]].map(([k, t]) =>
+      `<button data-cmode="${k}" aria-pressed="${mode === k}">${t}</button>`).join("")}</div></span>`;
+    if (type === "all" || type === "earnings") h += `<span class="tg"><label>Earnings</label><div class="seg sm" role="group" aria-label="Which companies">${SCOPES.map(([k, t]) =>
+      `<button data-cscope="${k}" aria-pressed="${sc === k}">${t}</button>`).join("")}</div></span>`;
+    h += `</div>`;
+
+    if (mode === "list") {
+      const end = isoDay(new Date(parse(today).getTime() + 21 * DAY));
+      const days = Object.keys(by).filter(d => d >= today && d <= end).sort();
+      if (!days.length) h += `<div class="empty"><strong>Nothing in the next 3 weeks</strong>Try another filter, or a wider set of companies.</div>`;
+      h += `<div class="agenda">` + days.map(d => {
+        const n = parse(d).getTime() - parse(today).getTime();
+        const lbl = n === 0 ? "Today" : n === DAY ? "Tomorrow" : fmtDate(d, { weekday: "long", day: "numeric", month: "long" });
+        return `<h2>${lbl}<small>${by[d].length} event${by[d].length > 1 ? "s" : ""}</small></h2>` + dayBody(d, by[d], sc);
+      }).join("") + `</div>`;
+    } else {
+      const [y, m] = month.split("-").map(Number);
+      const first = new Date(Date.UTC(y, m - 1, 1, 12)), last = new Date(Date.UTC(y, m, 0, 12));
+      const shift = k => isoDay(new Date(Date.UTC(y, m - 1 + k, 1, 12))).slice(0, 7);
+      const minM = C.window.start.slice(0, 7), maxM = C.window.end.slice(0, 7);
+      h += `<div class="calnav"><h2>${first.toLocaleDateString("en-GB", { month: "long", year: "numeric", timeZone: "UTC" })}</h2><span class="arw">
+        ${month !== today.slice(0, 7) || sel !== weekdayOn(today) ? `<button class="today" data-calday="${weekdayOn(today)}">Today</button>` : ""}
+        <button data-calmonth="${shift(-1)}" aria-label="Previous month"${month <= minM ? " disabled" : ""}><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg></button>
+        <button data-calmonth="${shift(1)}" aria-label="Next month"${month >= maxM ? " disabled" : ""}><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg></button></span></div>`;
+      h += `<div class="calgrid">` + ["Mon", "Tue", "Wed", "Thu", "Fri"].map(w => `<span class="wd">${w}</span>`).join("");
+      const cur = new Date(first); cur.setUTCDate(cur.getUTCDate() - (cur.getUTCDay() + 6) % 7);
+      for (; cur <= last; cur.setUTCDate(cur.getUTCDate() + 1)) {
+        const wd = cur.getUTCDay(); if (wd === 0 || wd === 6) continue;
+        const d = isoDay(cur), evs = by[d] || [], inM = d.slice(0, 7) === month;
+        const cls = "cell" + (inM ? "" : " out") + (d < today ? " past" : "") + (d === today ? " today" : "");
+        h += `<button class="${cls}" data-calday="${d}" aria-pressed="${d === sel}" aria-label="${fmtDate(d, { weekday: "long", day: "numeric", month: "long" })}, ${evs.length} event${evs.length === 1 ? "" : "s"}">
+          <span class="dn"><span>${cur.getUTCDate()}</span>${inM && evs.length ? `<small>${evs.length}</small>` : ""}</span>${inM ? evs.slice(0, 3).map(evChip).join("") : ""}</button>`;
+      }
+      h += `</div><div class="callegend"><span><i class="eco"></i>Economy</span><span><i class="ipo"></i>IPO</span><span><i></i>Earnings</span><span><i class="beat"></i>Beat</span><span><i class="miss"></i>Missed</span></div>`;
+      const evs = by[sel] || [];
+      h += `<section class="agenda" id="calday"><h2>${fmtDate(sel, { weekday: "long", day: "numeric", month: "long" })}<small>${evs.length ? `${evs.length} event${evs.length > 1 ? "s" : ""}` : ""}</small></h2>`;
+      h += evs.length ? dayBody(sel, evs, sc) : `<p class="tag" style="font-size:14px">${sel < C.window.start || sel > C.window.end ? "Outside the dates the calendar covers." : "Nothing scheduled for this filter."}</p>`;
+      h += `</section>`;
+    }
+
+    if (type === "ipos" || type === "all") {
+      const filed = (C.ipos || []).filter(x => !x.date);
+      if (type === "ipos" && filed.length) h += `<h2>Filed, no date yet</h2><div class="rows">${filed.map(ipoRow).join("")}</div>`;
+    }
+    h += `<p class="fine">Earnings from US companies worth $2 billion or more (${SCOPES.find(s => s[0] === sc)[1]} shown), IPOs on US exchanges and the main US economic releases, from ${esc((C.sources || []).join(", "))}. Companies usually confirm their date a few weeks ahead, so far-off dates can move. Times are in your time zone. Updated twice a day. For information only.</p>`;
+    return { html: h, after: () => {
+      if (S.calJump && !WIDE.matches) document.getElementById("calday")?.scrollIntoView({ behavior: "smooth", block: "start" });
+      S.calJump = false;
+    } };
+  }
+
+  function nextEarningsCard(t) {
+    if (S.market !== "stocks" || !S.cal) return "";
+    const today = localToday(), E = (S.cal.earnings || []).filter(x => x.ticker === t);
+    const e = E.find(x => x.date >= today), last = E.filter(x => x.date < today && x.eps != null).pop();
+    const lbl = s => `<span style="display:block;font:500 11px var(--font-mono);text-transform:uppercase;letter-spacing:.06em;color:var(--faint);margin-bottom:3px">${s}</span>`;
+    if (e) {
+      const n = Math.round((parse(e.date) - parse(today)) / DAY);
+      return `<a class="card nextearn" href="#calendar-${e.date}"><span>${lbl("Next earnings · " + (n === 0 ? "today" : n === 1 ? "tomorrow" : `in ${n} days`))}
+        <b>${fmtDate(e.date, { weekday: "long", day: "numeric", month: "long" })}</b>
+        <small>${[TIMES[e.time || "tns"], e.confirmed === false ? "date estimated" : "", e.eps_est != null ? "EPS est. " + eps(e.eps_est) : "", e.rev_est ? "revenue est. " + bigUsd(e.rev_est) : ""].filter(Boolean).join(" · ")}</small></span><span class="go">Calendar ›</span></a>`;
+    }
+    if (last) return `<a class="card nextearn" href="#calendar-${last.date}"><span>${lbl("Last earnings")}<b>${fmtDate(last.date, { day: "numeric", month: "long" })}: EPS ${eps(last.eps)}</b>
+        <small>${last.eps_est != null ? "vs " + eps(last.eps_est) + " expected" : ""}${last.surprise != null ? ` · ${last.surprise >= 0 ? "beat by " : "missed by "}${Math.abs(last.surprise).toFixed(1)}%` : ""}</small></span><span class="go">Calendar ›</span></a>`;
+    return "";
+  }
+
   function viewNotify() {
     const pre = S.feed?.ntfy_prefix;
     const followed = [...S.follow].filter(id => S.byId[id]);
@@ -1794,12 +2017,12 @@ canvas.hm { display: block; touch-action: pan-y; }
 
   function route() {
     const r = (location.hash || "#alerts").slice(1);
-    const tab = r === "news" || r === "buzz" ? "news" : r.startsWith("strateg") ? "strategies" : r.startsWith("stock") || r === "heatmap" ? "stocks" : r === "notify" ? "notify" : "alerts";
-    const list = { alerts: viewAlerts, stocks: viewStocks, strategies: viewStrategies, notify: viewNotify, news: r === "buzz" ? viewBuzz : viewNews }[tab];
+    const tab = r === "news" || r === "buzz" ? "news" : r.startsWith("calendar") ? "calendar" : r.startsWith("strateg") ? "strategies" : r.startsWith("stock") || r === "heatmap" ? "stocks" : r === "notify" ? "notify" : "alerts";
+    const list = { alerts: viewAlerts, stocks: viewStocks, strategies: viewStrategies, notify: viewNotify, news: r === "buzz" ? viewBuzz : viewNews, calendar: () => viewCalendar(r.slice(9)) }[tab];
     let detail = detailFor(r), sel = detail ? r : null;
     charts.length = 0;
 
-    if (WIDE.matches && tab !== "notify" && tab !== "news") {
+    if (WIDE.matches && tab !== "notify" && tab !== "news" && tab !== "calendar") {
       const lp = app.querySelector(".pane.list"), dp = app.querySelector(".pane.detail");
       const listTop = lp?.scrollTop || 0, detTop = dp?.scrollTop || 0;
       const L = norm(list());
@@ -1821,7 +2044,9 @@ canvas.hm { display: block; touch-action: pan-y; }
     setupChips();
     const search = app.querySelector("#stocksearch");
     if (search) search.addEventListener("input", () => { S.q = search.value; filterStocks(); });
-    document.querySelectorAll("[data-tab]").forEach(a => a.setAttribute("aria-current", a.dataset.tab === tab ? "page" : "false"));
+    // the phone tab bar has no Calendar button: it lives under News there
+    document.querySelectorAll("[data-tab]").forEach(a => a.setAttribute("aria-current", a.dataset.tab === tab || (tab === "calendar" && a.dataset.tab === "news" && a.closest(".tabs")) ? "page" : "false"));
+    S.routed = true;
     if (tab === "alerts" && !r.startsWith("alert-")) markSeen();
     updateBadge();
   }
@@ -1885,6 +2110,16 @@ canvas.hm { display: block; touch-action: pan-y; }
     if (ex) { S.exSide[currentStrategy()] = ex.dataset.ex; rerender(); return; }
     const bs = e.target.closest("[data-bt]");
     if (bs) { S.btSide[currentStrategy()] = bs.dataset.bt; rerender(); return; }
+    const cday = e.target.closest("[data-calday]");
+    if (cday) { S.calDay = cday.dataset.calday; S.calMonth = S.calDay.slice(0, 7); S.calJump = !cday.classList.contains("today"); rerender(); return; }
+    const cmon = e.target.closest("[data-calmonth]");
+    if (cmon) { S.calMonth = cmon.dataset.calmonth; S.calDay = null; rerender(); return; }
+    const ctyp = e.target.closest("[data-ctype]");
+    if (ctyp) { S.calType = ctyp.dataset.ctype; rerender(); return; }
+    const cscp = e.target.closest("[data-cscope]");
+    if (cscp) { setPref("calScope", cscp.dataset.cscope); rerender(); return; }
+    const cmod = e.target.closest("[data-cmode]");
+    if (cmod) { setPref("calMode", cmod.dataset.cmode); rerender(); return; }
     const bsrt = e.target.closest("[data-bsort]");
     if (bsrt) { S.buzzSort = bsrt.dataset.bsort; rerender(); return; }
     const nd = e.target.closest("[data-nsec]");
@@ -2104,7 +2339,7 @@ canvas.hm { display: block; touch-action: pan-y; }
     await loadMarket(m);
     S.lastSel = null; S.lastTab = null;
     const tab = (location.hash || "#alerts").slice(1);
-    const base = tab.startsWith("strateg") ? (tab.startsWith("strategy-") ? tab : "strategies") : tab.startsWith("stock") || tab === "heatmap" ? "stocks" : tab === "news" || tab === "buzz" ? tab : tab === "notify" ? "notify" : "alerts";
+    const base = tab.startsWith("strateg") ? (tab.startsWith("strategy-") ? tab : "strategies") : tab.startsWith("stock") || tab === "heatmap" ? "stocks" : tab === "news" || tab === "buzz" ? tab : tab.startsWith("calendar") ? tab : tab === "notify" ? "notify" : "alerts";
     if ("#" + base !== location.hash) location.hash = base; else route();
     scrollTo(0, 0);
   }
@@ -2118,6 +2353,7 @@ canvas.hm { display: block; touch-action: pan-y; }
     S.follow = new Set(load(STORE, DEFAULT_FOLLOW));
     S.prefs = load(PREFS, {}) || {};
     try {
+      opt("data/calendar.json").then(c => { S.cal = c; if (c && S.routed && /^#(calendar|stock-)/.test(location.hash)) rerender(); });
       const st = await fetch("data/strategies.json", { cache: "no-cache" }).then(r => r.json());
       S.strategies = st.strategies;
       S.strategies.forEach(s => S.byId[s.id] = s);
