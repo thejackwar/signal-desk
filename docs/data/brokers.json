@@ -1,0 +1,50 @@
+{
+  "checked": "2026-10-28",
+  "_how_to_edit": "Brokers are shown in alphabetical order. To use an affiliate link: replace 'url' with the link the affiliate program gives you and set 'affiliate' to true (that shows the Affiliate tag). Keep 'url' pointing at the stock/ETF account, never a CFD account. Update 'checked' whenever you re-check the facts.",
+  "brokers": [
+    {
+      "id": "directa",
+      "name": "Directa",
+      "url": "https://www.directa.it/",
+      "affiliate": false,
+      "fees": "Italian shares about €5 flat, or 0.19% (min €1.50, max €18). US shares $9. Many ETFs €0 on orders from €1,000.",
+      "tax": "both",
+      "tax_text": "You choose: Directa pays the taxes for you (amministrato) or you declare them (dichiarativo).",
+      "regulator": "CONSOB and Banca d'Italia (Italy)",
+      "good_to_know": "Italian broker. Real-time quotes cost extra; delayed quotes are free."
+    },
+    {
+      "id": "fineco",
+      "name": "Fineco",
+      "url": "https://finecobank.com/it/",
+      "affiliate": false,
+      "fees": "Italian shares and ETFs €2.95–€19 per order, US shares $3.95–$12.95, cheaper the more you trade each month.",
+      "tax": "amministrato",
+      "tax_text": "Fineco works out and pays the taxes for you (amministrato).",
+      "regulator": "Banca d'Italia and CONSOB (Italy)",
+      "good_to_know": "Italian bank, so the current account, cards and investing sit in one place. Check which account type you open, as fees differ."
+    },
+    {
+      "id": "scalable",
+      "name": "Scalable Capital",
+      "url": "https://it.scalable.capital/",
+      "affiliate": false,
+      "fees": "€0.99 per order on the free plan. With PRIME+ (€4.99/month), €0 on orders over €250.",
+      "tax": "both",
+      "tax_text": "Since September 2026 Scalable pays the taxes for you by default (amministrato); you can switch to dichiarativo.",
+      "regulator": "BaFin and Bundesbank (Germany), Banca d'Italia for the Italian branch",
+      "good_to_know": "German bank with a Milan branch and an Italian IBAN for new clients. Free ETF savings plans from €1."
+    },
+    {
+      "id": "trading212",
+      "name": "Trading 212",
+      "url": "https://www.trading212.com/it",
+      "affiliate": false,
+      "fees": "€0 commission on stocks and ETFs. 0.15% currency fee when you buy something not priced in euros.",
+      "tax": "dichiarativo",
+      "tax_text": "You declare and pay the taxes yourself (dichiarativo, quadri RT and RW).",
+      "regulator": "CySEC (Cyprus) for EU clients",
+      "good_to_know": "Open the Invest account, not the CFD account. Fractional shares from €1."
+    }
+  ]
+}

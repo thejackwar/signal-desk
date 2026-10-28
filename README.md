@@ -16,6 +16,8 @@ docs/                    the website (served by GitHub Pages)
   data/stocks/           one-year chart per stock
   trendlines.html/.js    automatic trendlines page (data from worker/)
   data/calendar.json     upcoming earnings, IPOs, economy (written by engine/events.py)
+  data/brokers.json      Brokers page: facts and links (edit by hand; affiliate links go here)
+worker/                  Cloudflare Workers: trendlines data, counted broker links (see worker/README.md)
 engine/
   strategies.py          the 9 strategy detectors (shared by scanner and examples)
   scan.py                daily scanner

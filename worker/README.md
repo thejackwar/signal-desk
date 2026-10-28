@@ -33,3 +33,35 @@ end = now − 16 min), keeps regular hours (9:30–16:00 New York) for intraday 
 accepted (SPX → SPY, BRK.B → BRK-B). Answers are cached for a minute.
 
 If you change the code, paste it again in step 3. Tests: `python tests/trendlines/test_parity.py`.
+
+# Broker link counter (second Worker, optional)
+
+`go-worker.js` sits between the **Brokers** page and the brokers' sites: a click on
+"Visit site" opens `https://go.<your-subdomain>.workers.dev/scalable`, the Worker adds one to
+that broker's monthly count and sends the visitor on to the link in `docs/data/brokers.json`.
+Without it the page links straight to the brokers, so this step can wait.
+
+## Set it up (about 10 minutes, in the browser)
+
+1. **Workers & Pages → Create → Create Worker**, name it `go` → **Deploy** → **Edit code**:
+   paste the whole of `worker/go-worker.js` → **Deploy**.
+2. **Storage & Databases → KV → Create**, name it `broker-clicks`. Then in the `go` Worker:
+   **Settings → Bindings → Add → KV namespace**, variable name `CLICKS`, pick `broker-clicks`.
+3. Still in **Settings → Variables and Secrets**, add a **Secret** `STATS_KEY` with any long
+   random password (it protects the stats page).
+4. If your site isn't at `https://thejackwar.github.io/signal-desk/`, also add a **Text**
+   variable `SITE_URL` with its address.
+5. Test: open `https://go.<your-subdomain>.workers.dev/trading212`. You should land on
+   Trading 212's site.
+6. In `docs/index.html`, set `const GO_BASE = "https://go.<your-subdomain>.workers.dev";`
+   (search for `GO_BASE`) and push.
+
+Clicks per broker and month: `https://go.<your-subdomain>.workers.dev/stats?key=<STATS_KEY>`.
+Counts are approximate (two clicks in the same second can count as one); the affiliate
+programs' own dashboards are the real record of sign-ups.
+
+## Adding an affiliate link
+
+Edit only `docs/data/brokers.json`: replace the broker's `url` with your affiliate link and
+set `"affiliate": true` (that shows the **Affiliate** tag next to it). The Worker reads the
+file from the site, so nothing else needs changing; new links work within about 5 minutes.
