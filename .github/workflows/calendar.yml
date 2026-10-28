@@ -1,0 +1,34 @@
+name: Market calendar
+
+on:
+  schedule:
+    # 05:37 UTC every day: dates for the day ahead are settled before Europe opens
+    - cron: "37 5 * * *"
+    # 21:43 UTC Mon-Fri: picks up the results reported after the US close
+    - cron: "43 21 * * 1-5"
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+jobs:
+  calendar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      # the earnings / IPO / economic calendars need yfinance 1.0 or newer
+      - run: pip install -r requirements.txt "yfinance>=1.0" requests
+      - name: Upcoming earnings, IPOs and economic releases
+        run: python engine/events.py
+      - name: Publish
+        run: |
+          git config user.name "signal-desk-bot"
+          git config user.email "signal-desk-bot@users.noreply.github.com"
+          git add docs/data/calendar.json
+          git diff --cached --quiet || git commit -m "Calendar $(date -u +%FT%H:%M)"
+          git pull --rebase
+          git push
