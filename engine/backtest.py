@@ -126,6 +126,19 @@ def weekly_account(pos: pd.DataFrame, rets: pd.DataFrame, weeks: pd.Series) -> l
     return [round(float(v)) for v in eq.reindex(weeks.values)]
 
 
+def weekly_turnover(pos: pd.DataFrame, rets: pd.DataFrame, weeks: pd.Series) -> list[float]:
+    """How much of the weekly_account() account was bought or sold each week, as a fraction of it:
+    opening or closing a position trades its share (1 / positions held), a flip from short to long
+    trades it twice. Daily rebalancing between open positions isn't counted (a real account
+    wouldn't do it). The app uses this to charge broker fees in its "after costs" view."""
+    held = pos.shift(1).fillna(0).where(rets.notna(), 0)
+    k = (held != 0).sum(axis=1)
+    denom = pd.concat([k, k.shift(1).fillna(0)], axis=1).max(axis=1).replace(0, np.nan)
+    traded = ((held - held.shift(1).fillna(0)).abs().sum(axis=1) / denom).fillna(0)
+    wk = traded.resample("W-FRI").sum().reindex(weeks.index, fill_value=0)
+    return [round(float(x), 3) for x in wk]
+
+
 def run(data: dict[str, pd.DataFrame]) -> dict:
     closes = pd.DataFrame({t: df["close"] for t, df in data.items()}).sort_index()
     rets = closes.pct_change()
@@ -238,6 +251,7 @@ def run(data: dict[str, pd.DataFrame]) -> dict:
             "avg_positions": round(float(k[k > 0].mean()), 1) if (k > 0).any() else 0,
         }
         result["account"] = {"all": weekly_account(pos_ls, rets, weeks), "long": weekly_account(pos, rets, weeks)}
+        result["turnover"] = {"all": weekly_turnover(pos_ls, rets, weeks), "long": weekly_turnover(pos, rets, weeks)}
         result["trades"] = trade_summary(trades)
         out[sid] = result
     return out

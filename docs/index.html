@@ -2080,16 +2080,41 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
   // lev > 1 multiplies each week's gain or loss (rebalanced weekly, borrowing free);
   // a week that loses 1/lev or more wipes the account out for good.
   const eurBig = v => Math.abs(v) >= 1e7 ? kEur(v) : eurS(v);   // keeps leveraged millions on one line
-  function acctRun(v, i0, size, lev = 1) {
+  // Italian costs, for the "after costs and taxes" view (an investor resident in Italy, stocks or ETFs
+  // through an Italian "regime amministrato" account): a broker fee on every buy and sell, the 0.2% a
+  // year stamp duty on the account's value, and 26% tax on each year's net gains, with losses carried
+  // forward for 4 years. Buy & hold pays the fee once each way and the 26% only when it sells at the end.
+  const IT = { fee: 0.001, stamp: 0.002, tax: 0.26, carry: 4 };
+  function acctRun(v, i0, size, lev = 1, net = null) {
     const base = v[i0]; if (!(base > 0)) return null;
-    let eq = 1, peak = 1, dd = 0, bust = false;
+    let eq = 1, peak = 1, dd = 0, bust = false, taxPaid = 0, feesPaid = 0;
+    const D = net?.dates, losses = [];                       // [{year, amount}] carried forward
+    let yStart = 1;
+    const payTax = (gain, year) => {
+      if (gain < 0) { losses.push({ year, amount: -gain }); return 0; }
+      let g = gain;
+      for (const l of losses) if (year - l.year <= IT.carry && l.amount > 0 && g > 0) { const u = Math.min(g, l.amount); l.amount -= u; g -= u; }
+      return g * IT.tax;
+    };
+    if (net) { const f = eq * lev * IT.fee * (net.bench ? 1 : 0); eq -= f; feesPaid += f; }   // buy & hold buys once
     for (let i = i0 + 1; i < v.length && !bust; i++) {
+      if (net && !net.bench && D[i].slice(0, 4) !== D[i - 1].slice(0, 4)) {   // a new year: tax last year's gain
+        const t = payTax(eq - yStart, +D[i - 1].slice(0, 4)); eq -= t; taxPaid += t; yStart = eq;
+      }
       eq *= 1 + lev * (v[i] / v[i - 1] - 1);
+      if (net) {
+        const f = net.bench ? 0 : eq * lev * (net.turn?.[i] || 0) * IT.fee, st = eq * lev * IT.stamp / 52;
+        eq -= f + st; feesPaid += f + st;
+      }
       if (eq <= 0) { eq = 0; bust = true; }
       if (eq > peak) peak = eq; dd = Math.min(dd, eq / peak - 1);
     }
+    if (net && !bust) {                                      // sell at the end and settle the tax
+      if (net.bench) { const f = eq * lev * IT.fee; eq -= f; feesPaid += f; const t = Math.max(0, eq - 1) * IT.tax; eq -= t; taxPaid += t; }
+      else { const t = payTax(eq - yStart, +D[D.length - 1].slice(0, 4)); eq -= t; taxPaid += t; }
+    }
     const end = eq * size;
-    return { end, profit: end - size, ret: (end / size - 1) * 100, dd: dd * 100, bust };
+    return { end, profit: end - size, ret: (end / size - 1) * 100, dd: dd * 100, bust, tax: taxPaid * size, fees: feesPaid * size };
   }
   // what each market's strategies are measured against: holding SPY, or holding bitcoin for crypto
   const benchOf = () => S.bt?.spy?.ticker === "BTC-USD" ? { name: "Bitcoin", short: "BTC", note: "" }
@@ -2131,10 +2156,12 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
     const from = Math.min(last, Math.max(first, pref("cmpFrom." + mk, first)));
     const side = pref("cmpSide", "long") === "all" ? "all" : "long";
     const lev = Math.min(5, Math.max(1, Math.round(+pref("cmpLev", 1)) || 1));
+    const hasTurn = Object.values(B.strategies).some(r => r.turnover);
+    const net = hasTurn && pref("cmpNet", "gross") === "net";
     let i0 = D.findIndex(d => +d.slice(0, 4) >= from); if (i0 < 0) i0 = 0;
-    const rows = S.strategies.map(s => { const v = B.strategies[s.id]?.account?.[side]; const r = v && acctRun(v, i0, size, lev); return r && { s, ...r }; })
+    const rows = S.strategies.map(s => { const r0 = B.strategies[s.id], v = r0?.account?.[side]; const r = v && acctRun(v, i0, size, lev, net ? { dates: D, turn: r0.turnover?.[side] } : null); return r && { s, ...r }; })
       .filter(Boolean).sort((a, b) => b.end - a.end);
-    const spy = B.spy?.account ? acctRun(B.spy.account, i0, size, lev) : null;
+    const spy = B.spy?.account ? acctRun(B.spy.account, i0, size, lev, net ? { dates: D, bench: true } : null) : null;
     if (!rows.length) return "";
     const all = spy ? [spy, ...rows] : rows;
     const max = Math.max(1, ...all.map(r => Math.abs(r.profit)));
@@ -2150,16 +2177,19 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
     let h = `<div class="compare"><div class="hd"><h3>${kEur(size)} account since <span class="yrpick"><select data-cmpfrom aria-label="Starting year">${years.map(y => `<option value="${y}"${y === from ? " selected" : ""}>${y}</option>`).join("")}</select></span></h3></div>
       <div class="seg sm" role="group" aria-label="Trades">${[["long", "Long only"], ["all", "Long + short"]].map(([k, l]) => `<button data-cmpside="${k}" aria-pressed="${k === side}">${l}</button>`).join("")}</div>
       <div class="seg sm" role="group" aria-label="Leverage">${[1, 2, 3, 4, 5].map(k => `<button data-cmplev="${k}" aria-pressed="${k === lev}">${k}x</button>`).join("")}</div>
+      ${hasTurn ? `<div class="seg sm" role="group" aria-label="Costs">${[["gross", "Before costs"], ["net", "After Italian taxes & fees"]].map(([k, l]) => `<button data-cmpnet="${k}" aria-pressed="${k === (net ? "net" : "gross")}">${l}</button>`).join("")}</div>` : ""}
       ${B.demo ? `<p class="hint" style="margin:0 0 6px">Demo backtest on simulated prices.</p>` : ""}`;
     const BM = benchOf();
-    if (spy) h += `<div class="cmp bench"><span class="nm">${BM.name} buy &amp; hold <small>${BM.short}${lev > 1 ? " " + lev + "x" : ""}</small><em>${spy.bust ? "wiped out" : `worst drop −${Math.abs(Math.round(spy.dd))}%`}</em></span>${track(spy, "bench")}
+    if (spy) h += `<div class="cmp bench"><span class="nm">${BM.name} buy &amp; hold <small>${BM.short}${lev > 1 ? " " + lev + "x" : ""}</small><em>${spy.bust ? "wiped out" : net ? `tax ${kEur(spy.tax)} · fees ${kEur(spy.fees)}` : `worst drop −${Math.abs(Math.round(spy.dd))}%`}</em></span>${track(spy, "bench")}
       <span class="val">${eurBig(spy.end)}<small class="${spy.ret >= 0 ? "up" : "down"}">${spy.ret >= 0 ? "+" : "−"}${Math.abs(Math.round(spy.ret)).toLocaleString("en-US")}%</small></span></div>`;
     h += rows.map(r => {
       const diff = spy ? r.end - spy.end : null;
-      return `<a class="cmp" href="#strategy-${slug(r.s.id)}"><span class="nm">${esc(r.s.name)}<em>${r.bust ? "wiped out" : `worst drop −${Math.abs(Math.round(r.dd))}%`}</em></span>${track(r, r.profit >= 0 ? "pos" : "neg")}
+      return `<a class="cmp" href="#strategy-${slug(r.s.id)}"><span class="nm">${esc(r.s.name)}<em>${r.bust ? "wiped out" : net ? `tax ${kEur(r.tax)} · fees ${kEur(r.fees)}` : `worst drop −${Math.abs(Math.round(r.dd))}%`}</em></span>${track(r, r.profit >= 0 ? "pos" : "neg")}
         <span class="val">${eurBig(r.end)}<small class="${(diff ?? r.profit) >= 0 ? "up" : "down"}">${diff != null ? `${diff >= 0 ? "+" : ""}${kEur(diff)} vs ${BM.short}` : `${r.ret >= 0 ? "+" : "−"}${Math.abs(Math.round(r.ret))}%`}</small></span></a>`;
     }).join("");
-    h += `<p class="hint" style="margin:8px 0 0">Each strategy runs its own ${eurS(size)}, split equally across every open position: it buys on bullish alerts${side === "all" ? " and sells short on bearish ones" : ""}, and with nothing open the money waits in cash.${spy ? ` The ${BM.name} line puts the same ${eurS(size)} into ${BM.short} in the week of ${esc(when)} and holds it${BM.note}; the thin mark on each bar is where it ended.` : ""}${lev > 1 ? ` At ${lev}x every account, ${BM.short} included, borrows to hold ${lev} times its money, so each week's gain or loss is multiplied by ${lev} (rebalanced weekly, borrowing free); a week that loses ${Math.round(100 / lev)}% or more wipes it out.` : ""} Worst drop is the biggest fall from a high along the way. No costs, taxes or fees.${mk !== "commodities" && !B.demo ? ` Built on ${esc(B.universe.replace(/^T/, "t"))}, so names that dropped out over the years are missing, which flatters buying.` : ""}${from === last ? ` ${last} so far.` : ""}</p></div>`;
+    h += `<p class="hint" style="margin:8px 0 0">Each strategy runs its own ${eurS(size)}, split equally across every open position: it buys on bullish alerts${side === "all" ? " and sells short on bearish ones" : ""}, and with nothing open the money waits in cash.${spy ? ` The ${BM.name} line puts the same ${eurS(size)} into ${BM.short} in the week of ${esc(when)} and holds it${BM.note}; the thin mark on each bar is where it ended.` : ""}${lev > 1 ? ` At ${lev}x every account, ${BM.short} included, borrows to hold ${lev} times its money, so each week's gain or loss is multiplied by ${lev} (rebalanced weekly, borrowing free); a week that loses ${Math.round(100 / lev)}% or more wipes it out.` : ""} Worst drop is the biggest fall from a high along the way. ${net
+      ? `After Italian taxes &amp; fees, for an investor resident in Italy with an "amministrato" account: a ${IT.fee * 100}% broker fee on every buy and sell (about €5 on a €5,000 order), the 0.2% a year stamp duty on the account, and 26% tax on each year's net gains with losses carried forward up to 4 years. Buy &amp; hold pays its fee once each way and the 26% only when it sells at the end, which is why holding is hard to beat after tax. Simplified: it taxes a strategy's gains in the year they're made even if a position is still open, and ignores dividends' own tax and the Tobin tax on Italian shares.`
+      : "No costs, taxes or fees."}${mk !== "commodities" && !B.demo ? ` Built on ${esc(B.universe.replace(/^T/, "t"))}, so names that dropped out over the years are missing, which flatters buying.` : ""}${from === last ? ` ${last} so far.` : ""}</p></div>`;
     return h;
   }
 
@@ -3420,6 +3450,8 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
     if (hd) { S.hmPeriod = hd.dataset.hmperiod; rerender(); return; }
     const cs2 = e.target.closest("[data-cmpside]");
     if (cs2) { setPref("cmpSide", cs2.dataset.cmpside); rerender(); return; }
+    const cn = e.target.closest("[data-cmpnet]");
+    if (cn) { setPref("cmpNet", cn.dataset.cmpnet); rerender(); return; }
     const cl = e.target.closest("[data-cmplev]");
     if (cl) { setPref("cmpLev", +cl.dataset.cmplev); rerender(); return; }
     const tb = e.target.closest("[data-tr]");
