@@ -1921,9 +1921,10 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
   const LAB = { mod: null, data: {}, busy: null, timer: 0 };
   function labState() {
     const st = pref("lab", null) || {};
-    return { cfg: st.cfg || { ind: "ma" }, side: st.side === "long" ? "long" : "all", from: st.from || null };
+    // Long only is the default. Saved as "trades" (older versions saved "side", which defaulted to long + short).
+    return { cfg: st.cfg || { ind: "ma" }, side: st.trades === "all" ? "all" : "long", from: st.from || null };
   }
-  const saveLab = st => setPref("lab", st);
+  const saveLab = ({ side, ...st }) => setPref("lab", { ...st, trades: side });
   async function labEnsure() {
     LAB.mod = LAB.mod || await import("./lab.js");
     const mk = S.market || "stocks";
@@ -1966,11 +1967,11 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
         ${cfg.exit === "hold" ? `<label class="lp"><span>Time limit <small>or earlier on an opposite alert</small></span><b id="lpv-hold">${cfg.hold} days</b>
           <input type="range" data-labhold min="2" max="120" step="1" value="${cfg.hold}"></label>` : ""}
         <div class="lrow"><span>Trades</span><div class="seg sm" role="group" aria-label="Trades">
-          <button data-labside="all" aria-pressed="${st.side === "all"}">Long + short</button>
-          <button data-labside="long" aria-pressed="${st.side === "long"}">Long only</button></div></div>
+          <button data-labside="long" aria-pressed="${st.side === "long"}">Long only</button>
+          <button data-labside="all" aria-pressed="${st.side === "all"}">Long + short</button></div></div>
         <div class="lrow"><span>Start in</span><span class="yrpick"><select data-labfrom aria-label="Starting year">${Array.from({ length: last - first + 1 }, (_, i) => first + i).map(y =>
           `<option value="${y}"${y === from ? " selected" : ""}>${y}</option>`).join("")}</select></span>
-          <span style="flex:1"></span><button class="btn ghost sm" data-labreset ${M.sameCfg(cfg, M.defaults(cfg.ind)) ? "disabled" : ""}>Reset to default</button></div>
+          <span style="flex:1"></span><button class="btn ghost sm" data-labreset ${M.sameCfg(cfg, M.defaults(cfg.ind)) && st.side === "long" ? "disabled" : ""}>Reset to default</button></div>
       </div>
       <div id="labout" aria-live="polite"></div>`;
     box.innerHTML = h;
@@ -2060,7 +2061,7 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
       st.cfg.hold = +pi.value; const b = document.getElementById("lpv-hold"); if (b) b.textContent = pi.value + " days";
     }
     saveLab(st);
-    const rb = document.querySelector("[data-labreset]"); if (rb) rb.disabled = M.sameCfg(st.cfg, M.defaults(st.cfg.ind));
+    const rb = document.querySelector("[data-labreset]"); if (rb) rb.disabled = M.sameCfg(st.cfg, M.defaults(st.cfg.ind)) && st.side === "long";
     clearTimeout(LAB.timer); document.getElementById("labout")?.classList.add("busy");
     LAB.timer = setTimeout(() => { runLab(); document.getElementById("labout")?.classList.remove("busy"); }, 180);
     return true;
@@ -2072,7 +2073,7 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
     if (t.dataset.labind) st.cfg = { ind: t.dataset.labind };
     else if (t.dataset.labexit) st.cfg = { ...M.clean(st.cfg), exit: t.dataset.labexit };
     else if (t.dataset.labside) st.side = t.dataset.labside;
-    else st.cfg = M.defaults(M.clean(st.cfg).ind);
+    else { st.cfg = M.defaults(M.clean(st.cfg).ind); st.side = "long"; }
     saveLab(st); renderLab(); return true;
   }
 
