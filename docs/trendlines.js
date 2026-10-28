@@ -191,3 +191,40 @@ export function segments(chain, extendTo) {
 export const fmtLevel = ch => ch.level !== null
   ? ch.level.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })
   : ch.broken ? "broken" : "–";
+
+// ------------------------------------------------------------------ crypto straight from Binance
+// Binance's public market data allows requests from web pages (CORS) but blocks many data-centre
+// addresses, Cloudflare's included. So the page asks Binance itself, from the visitor's browser,
+// and only falls back to the Worker (which then tries Kraken) when that fails. Same candles and
+// payload shape as worker/trendlines-worker.js.
+const BINANCE = "https://data-api.binance.vision/api/v3/klines";
+const BINANCE_SERIES = { W: ["1w", 520], D: ["1d", 1000], "4H": ["4h", 1000], "1H": ["1h", 1000],
+                         "30m": ["30m", 1000], "15m": ["15m", 2000], "5m": ["5m", 2000] };
+
+async function binanceSeries(coin, interval, want) {
+  const rows = [];
+  let endTime = null;
+  while (rows.length < want) {
+    const q = new URLSearchParams({ symbol: `${coin}USDT`, interval, limit: String(Math.min(1000, want - rows.length)) });
+    if (endTime !== null) q.set("endTime", String(endTime));
+    const r = await fetch(`${BINANCE}?${q}`);
+    if (!r.ok) throw new Error(`Binance ${interval}: HTTP ${r.status}`);
+    const js = await r.json();
+    if (!Array.isArray(js) || !js.length) break;
+    rows.unshift(...js);
+    if (js.length < +q.get("limit")) break;                // reached the coin's first candle
+    endTime = js[0][0] - 1;
+  }
+  const out = rows.map(k => [Math.floor(k[0] / 1000), +k[1], +k[2], +k[3], +k[4]]).sort((a, b) => a[0] - b[0]);
+  return out.filter((r, i) => i === 0 || r[0] !== out[i - 1][0]);
+}
+
+export async function binanceCrypto(coin) {
+  const names = Object.keys(BINANCE_SERIES);
+  const got = await Promise.all(names.map(k => binanceSeries(coin, ...BINANCE_SERIES[k])));
+  if (!got[1].length) throw new Error(`Binance: no ${coin}/USDT data`);
+  const frames = Object.fromEntries(names.map((k, i) => [k, got[i]]));
+  const last = Math.max(...got.map(f => f.length ? f[f.length - 1][0] : 0));
+  return { symbol: `${coin}-USD`, market: "crypto", source: `Binance ${coin}/USDT`,
+           end: new Date((last + 300) * 1000).toISOString(), frames };
+}

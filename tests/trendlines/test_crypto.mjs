@@ -1,14 +1,14 @@
 // Crypto path of the Trendlines Worker + page, with fake Binance / Kraken answers (no network).
 // Run:  node tests/trendlines/test_crypto.mjs
 import worker from "../../worker/trendlines-worker.js";
-import { buildFrames, analyzeAll, ORDER } from "../../docs/trendlines.js";
+import { buildFrames, analyzeAll, ORDER, binanceCrypto } from "../../docs/trendlines.js";
 
 let fails = 0;
 const ok = (c, m) => { if (!c) { fails++; console.log("FAIL", m); } };
 const STEP = { "1w": 604800, "1d": 86400, "4h": 14400, "1h": 3600, "30m": 1800, "15m": 900, "5m": 300 };
 const NOW = Date.UTC(2026, 9, 28, 14, 7) / 1000;
 const FIRST = Date.UTC(2017, 7, 14) / 1000;                 // a coin's first Binance candle (a Monday)
-let calls = [], binanceDown = false, binanceCoins = null;
+let calls = [], binanceDown = false, binanceCoins = null, krakenBusy = 0, krakenOpen = 0, krakenMaxOpen = 0;
 
 function candle(t, step) {
   const p = 30000 + 8000 * Math.sin(t / 3e6) + 500 * Math.sin(t / (step * 7));
@@ -29,7 +29,11 @@ globalThis.fetch = async url => {
     for (; rows.length < lim && t >= FIRST; t -= step) { const [o, h, l, c] = candle(t, step); rows.unshift([t * 1000, String(o), String(h), String(l), String(c), "1", 0]); }
     return new Response(JSON.stringify(rows));
   }
-  // Kraken
+  // Kraken: one request at a time, and "Too many requests" the first `krakenBusy` times
+  krakenOpen++; krakenMaxOpen = Math.max(krakenMaxOpen, krakenOpen);
+  await new Promise(ok => setTimeout(ok, 5));
+  krakenOpen--;
+  if (krakenBusy > 0) { krakenBusy--; return new Response(JSON.stringify({ error: ["EGeneral:Too many requests"] })); }
   const step = +u.searchParams.get("interval") * 60, rows = [];
   for (let k = 719, t0 = Math.floor(NOW / step) * step; k >= 0; k--) { const t = t0 - k * step, [o, h, l, c] = candle(t, step); rows.push([t, String(o), String(h), String(l), String(c), "0", "1", 3]); }
   return new Response(JSON.stringify({ error: [], result: { [`X${u.searchParams.get("pair")}`]: rows, last: NOW } }));
@@ -74,6 +78,22 @@ checkFrames(js, "kraken", Object.fromEntries(ORDER.map(t => [t, 720])));
 binanceCoins = null; binanceDown = true; calls = [];
 [st, js] = await ask("DOGE");
 ok(st === 200 && js.source === "Kraken DOGE/USD", `binance down: ${st} ${js.source} ${js.error}`);
+
+ok(krakenMaxOpen === 1, `Kraken got ${krakenMaxOpen} requests at once`);
+
+// 5. Kraken says "Too many requests" twice: the Worker waits and retries
+krakenBusy = 2;
+[st, js] = await ask("LTC");
+ok(st === 200 && js.source === "Kraken LTC/USD", `kraken busy: ${st} ${js.error}`);
+
+// 6. the page's direct Binance path gives the same candles as the Worker's
+binanceDown = false;
+const direct = await binanceCrypto("ETH");
+[st, js] = await ask("ETH");
+ok(direct.source === js.source && ORDER.every(t => JSON.stringify(direct.frames[t]) === JSON.stringify(js.frames[t])), "browser and Worker candles differ");
+binanceDown = true;
+let threw = false; try { await binanceCrypto("ETH"); } catch { threw = true; }
+ok(threw, "browser path should fail when Binance is blocked (so the page falls back)");
 
 console.log(fails ? `${fails} failures` : "ALL OK");
 process.exit(fails ? 1 : 0);

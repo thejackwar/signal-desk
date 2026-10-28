@@ -134,8 +134,16 @@ async function binanceSeries(coin, interval, want) {
   return rows.map(k => [Math.floor(k[0] / 1000), +k[1], +k[2], +k[3], +k[4]]);
 }
 
+// Kraken allows about one public request per second: callers go one at a time, and a
+// "Too many requests" answer is retried after a pause.
 async function krakenSeries(coin, minutes) {
-  const js = await getJson(`${KRAKEN}?pair=${KRAKEN_NAME[coin] || coin}USD&interval=${minutes}`, `Kraken ${minutes}m`);
+  let js;
+  for (let tries = 0; ; tries++) {
+    js = await getJson(`${KRAKEN}?pair=${KRAKEN_NAME[coin] || coin}USD&interval=${minutes}`, `Kraken ${minutes}m`);
+    const busy = (js.error || []).some(e => /too many requests|rate limit/i.test(e));
+    if (!busy || tries >= 4) break;
+    await new Promise(ok => setTimeout(ok, 2500 * (tries + 1)));
+  }
   if (js.error && js.error.length) throw new Error(`Kraken: ${js.error.join(", ")}`);
   const key = Object.keys(js.result || {}).find(k => k !== "last");
   if (!key) throw new Error(`Kraken: no ${coin}/USD data`);
@@ -151,12 +159,19 @@ function clean(rows) {
 async function cryptoFrames(coin) {
   const names = Object.keys(CRYPTO_SERIES);
   const errors = [];
-  for (const [source, get] of [
-    [`Binance ${coin}/USDT`, k => binanceSeries(coin, CRYPTO_SERIES[k][0], CRYPTO_SERIES[k][1])],
-    [`Kraken ${coin}/USD`, k => krakenSeries(coin, CRYPTO_SERIES[k][2])],
+  for (const [source, get, oneByOne] of [
+    [`Binance ${coin}/USDT`, k => binanceSeries(coin, CRYPTO_SERIES[k][0], CRYPTO_SERIES[k][1]), false],
+    [`Kraken ${coin}/USD`, k => krakenSeries(coin, CRYPTO_SERIES[k][2]), true],
   ]) {
     try {
-      const got = await Promise.all(names.map(get));
+      let got;
+      if (oneByOne) {
+        got = [];
+        for (const k of names) {
+          if (got.length) await new Promise(ok => setTimeout(ok, 1100));
+          got.push(await get(k));
+        }
+      } else got = await Promise.all(names.map(get));
       if (!got[1].length) throw new Error("no daily candles");
       const frames = {};
       names.forEach((k, i) => frames[k] = clean(got[i]));
@@ -216,7 +231,7 @@ async function crypto(coin, ctx) {
     const { source, frames } = await cryptoFrames(coin);
     const last = Math.max(...Object.values(frames).map(f => f.length ? f[f.length - 1][0] : 0));
     const end = new Date((last + 5 * 60) * 1000).toISOString();   // end of the newest 5-minute candle
-    const res = json({ symbol: sym, market: "crypto", source, end, frames }, 200, { "Cache-Control": "max-age=60" });
+    const res = json({ symbol: sym, market: "crypto", source, end, frames }, 200, { "Cache-Control": "max-age=300" });
     if (cache) ctx?.waitUntil?.(cache.put(key, res.clone()));
     return res;
   } catch (e) {

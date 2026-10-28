@@ -230,7 +230,7 @@ footer.foot { border-top: 1px solid var(--hair); margin-top: 56px; padding-top: 
 </main>
 
 <script type="module">
-import { TFS, ORDER, buildFrames, analyzeAll, segments, fmtLevel, fmtPrice } from "./trendlines.js";
+import { TFS, ORDER, buildFrames, analyzeAll, segments, fmtLevel, fmtPrice, binanceCrypto } from "./trendlines.js";
 
 // Address of the Cloudflare Worker (see worker/README.md). Can also be set in Customize.
 const DEFAULT_API = "https://trendlines.guerragiacomo00.workers.dev";
@@ -350,7 +350,7 @@ async function show(sym) {
   if (!TICKERS.includes(sym) && !isCrypto(sym)) { setStatus(`${sym} isn't available. Pick an S&P 100 stock, SPY, or one of the coins (BTC, ETH, SOL …).`, true); return; }
   const m = isCrypto(sym) ? "crypto" : "stocks";
   if (m !== mk) setMarket(m);
-  if (!P.api) {
+  if (!P.api && m !== "crypto") {
     clearCharts(); state = null; setStatus("");
     $("out").innerHTML = `<div class="msg"><strong>Connect the data server</strong>Open Customize and paste your Cloudflare Worker's address (it looks like <span class="mono">https://trendlines.&lt;you&gt;.workers.dev</span>). The setup steps are in <span class="mono">worker/README.md</span>.</div>`;
     $("settings").open = true;
@@ -361,10 +361,18 @@ async function show(sym) {
   setStatus(`Loading ${sym}…`);
   $("go").disabled = true;
   try {
-    const r = await fetch(`${P.api}/?symbol=${encodeURIComponent(sym)}`);
-    const js = await r.json().catch(() => ({ error: `HTTP ${r.status}` }));
+    let js = null, direct = "";
+    if (m === "crypto") {                                     // crypto: Binance straight from this browser first
+      try { js = await binanceCrypto(sym.slice(0, -4)); }
+      catch (e) { direct = e.message; if (seq === loadSeq) setStatus(`Loading ${sym} from the backup source…`); }
+    }
+    if (!js) {
+      if (!P.api) throw new Error(direct || "no data server set");
+      const r = await fetch(`${P.api}/?symbol=${encodeURIComponent(sym)}`);
+      js = await r.json().catch(() => ({ error: `HTTP ${r.status}` }));
+      if (!r.ok || js.error) throw new Error((direct ? direct + " · " : "") + (js.error || `HTTP ${r.status}`));
+    }
     if (seq !== loadSeq) return;
-    if (!r.ok || js.error) throw new Error(js.error || `HTTP ${r.status}`);
     const frames = buildFrames(js);
     state = { symbol: js.symbol, end: js.end, frames, results: analyzeAll(frames, P) };
     const crypto = js.market === "crypto";
