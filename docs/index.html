@@ -222,6 +222,8 @@ a { color: var(--blue); }
 .checks small { display: block; color: var(--faint); font-size: 12.5px; }
 .since-card { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; flex-wrap: wrap; }
 .since-card b { font: 600 22px var(--font-mono); }
+.pill.lvhit { background: var(--surface-2); color: var(--muted); margin-left: 6px; }
+.wrongif .hd b { font: 600 20px var(--font-mono); }
 
 /* strategies list */
 .cat { font: 600 11px/1 var(--font-mono); text-transform: uppercase; letter-spacing: .1em; color: var(--faint); padding: 18px 0 8px; }
@@ -621,6 +623,12 @@ canvas.hm { display: block; touch-action: pan-y; }
 .wmore { display: block; width: 100%; margin: 2px 0 6px; padding: 8px; border-radius: 10px; font-size: 13px; color: var(--amber); text-align: center; }
 @media (hover: hover) { .wmore:hover { background: var(--hover); } }
 .bt.wstrat td:nth-child(n+2), .bt.wstrat th:nth-child(n+2) { text-align: right; font-variant-numeric: tabular-nums; }
+.bt.rec td:nth-child(n+3), .bt.rec th:nth-child(n+3) { text-align: right; font: 500 13px var(--font-mono); white-space: nowrap; }
+.bt.rec td:nth-child(2) .tk { font: 600 14px var(--font-mono); color: var(--fg); text-decoration: none; }
+.bt.rec td.dim { color: var(--faint); }
+.bt.recs td:first-child { white-space: normal; font: 500 13.5px var(--font-body); }
+.bt.recs td, .bt.recs th { padding-left: 8px; padding-right: 8px; }
+.bt.recs td:nth-child(n+2) { font: 500 13.5px var(--font-mono); white-space: nowrap; }
 .nsw a { padding: 6px 14px; border-radius: 8px; font-size: 13px; color: var(--muted); text-decoration: none; }
 .nsw a[aria-pressed="true"] { background: var(--surface-2); color: var(--fg); font-weight: 600; }
 .buzz { grid-template-columns: 26px minmax(0, 1fr) 96px 78px; align-items: center; }
@@ -1038,6 +1046,7 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
   <a class="nav" href="#calendar" data-tab="calendar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5" width="17" height="15.5" rx="2"/><path d="M3.5 10h17"/><path d="M8 3v4"/><path d="M16 3v4"/><path d="M7.5 14h2"/><path d="M11 14h2"/><path d="M14.5 14h2"/><path d="M7.5 17h2"/></svg>Calendar</a>
   <a class="nav" href="#strategies" data-tab="strategies"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 20h18"/><path d="M6 16V9"/><path d="M4.5 9h3"/><path d="M12 16V5"/><path d="M10.5 5h3"/><path d="M18 16v-5"/><path d="M16.5 11h3"/></svg>Strategies</a>
   <a class="nav" href="#winners" data-tab="winners"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 4h8v5a4 4 0 0 1-8 0Z"/><path d="M8 6H5a3 3 0 0 0 3 4"/><path d="M16 6h3a3 3 0 0 1-3 4"/><path d="M12 13v4"/><path d="M8.5 20.5h7"/><path d="M10 17h4"/></svg>Best trades</a>
+  <a class="nav" href="#record" data-tab="record"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3.5" width="16" height="17" rx="2"/><path d="m8 9 1.5 1.5L12 8"/><path d="M14 9.5h3"/><path d="m8 15 1.5 1.5L12 14"/><path d="M14 15.5h3"/></svg>Track record</a>
   <a class="nav" href="#learn" data-tab="learn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 6.5C10 5 7 4.5 3.5 5v13.5c3.5-.5 6.5 0 8.5 1.5 2-1.5 5-2 8.5-1.5V5C17 4.5 14 5 12 6.5Z"/><path d="M12 6.5V20"/></svg>Learn</a>
   <a class="nav" href="#notify" data-tab="notify"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="2.5" width="12" height="19" rx="2.5"/><path d="M11 18.5h2"/></svg>Phone alerts</a>
   <a class="nav" href="#brokers" data-tab="brokers"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9.5 12 4l9 5.5"/><path d="M4.5 10v8"/><path d="M9.5 10v8"/><path d="M14.5 10v8"/><path d="M19.5 10v8"/><path d="M3 20.5h18"/></svg>Brokers</a>
@@ -1067,6 +1076,7 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
       <a href="#stocks" data-tab="stocks"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="m7 15 4-4 3 3 6-7"/></svg><span data-l="tab">Stocks</span></a>
       <a href="trendlines.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M6 8l13 5"/><path d="M6 18l13-9"/></svg><span>Trendlines</span></a>
       <a href="#winners" data-tab="winners"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 4h8v5a4 4 0 0 1-8 0Z"/><path d="M8 6H5a3 3 0 0 0 3 4"/><path d="M16 6h3a3 3 0 0 1-3 4"/><path d="M12 13v4"/><path d="M8.5 20.5h7"/><path d="M10 17h4"/></svg><span>Best trades</span></a>
+      <a href="#record" data-tab="record"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3.5" width="16" height="17" rx="2"/><path d="m8 9 1.5 1.5L12 8"/><path d="M14 9.5h3"/><path d="m8 15 1.5 1.5L12 14"/><path d="M14 15.5h3"/></svg><span>Track record</span></a>
       <a href="#news" data-tab="news"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h13a1 1 0 0 1 1 1v12a2 2 0 0 0 2 2H6a2 2 0 0 1-2-2Z"/><path d="M18 9h2a1 1 0 0 1 1 1v8a2 2 0 0 1-2 2"/><path d="M8 9h6"/><path d="M8 13h6"/><path d="M8 17h4"/></svg><span>News</span></a>
       <a href="#calendar" data-tab="calendar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5" width="17" height="15.5" rx="2"/><path d="M3.5 10h17"/><path d="M8 3v4"/><path d="M16 3v4"/><path d="M7.5 14h2"/><path d="M11 14h2"/><path d="M14.5 14h2"/><path d="M7.5 17h2"/></svg><span>Calendar</span></a>
       <a href="#strategies" data-tab="strategies"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 20h18"/><path d="M6 16V9"/><path d="M4.5 9h3"/><path d="M12 16V5"/><path d="M10.5 5h3"/><path d="M18 16v-5"/><path d="M16.5 11h3"/></svg><span>Strategies</span></a>
@@ -1348,7 +1358,7 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
       <span class="stripe"></span>${!opts.showDate ? icon(a.ticker, 32) : ""}
       <span class="main"><span class="tk">${esc(opts.showDate ? fmtDate(a.date, { day: "numeric", month: "short" }) : disp(a.ticker))}</span><span class="strat">${esc(stratName(a.strategy))}${a.tf ? ` · ${esc(a.tf)}` : ""}</span>
         <div class="note">${esc(a.note)}</div>
-        <div class="info">${meter(a.strength)}<span class="pill">${a.side}</span></div></span>
+        <div class="info">${meter(a.strength)}<span class="pill">${a.side}</span>${a.stop_hit ? `<span class="pill lvhit" title="Closed beyond its “wrong if” level on ${esc(fmtDate(a.stop_hit, { day: "numeric", month: "short" }))}">level hit</span>` : ""}</div></span>
       <span class="px">${money(a.price)}<span class="since">${sinceTxt}</span></span></a>`;
   }
 
@@ -1401,7 +1411,7 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
   // ------------------------------------------------------------ best trades
   // Each alert taken as a trade at that day's close: long on bullish alerts, short on bearish ones,
   // valued at the latest close. Ranks the winners inside each alert day.
-  const alertsSwitch = which => `<div class="seg nsw" role="group" aria-label="Alerts view"><a href="#alerts" role="button" aria-pressed="${which === "alerts"}">Latest</a><a href="#winners" role="button" aria-pressed="${which === "winners"}">Best trades</a></div>`;
+  const alertsSwitch = which => `<div class="seg nsw" role="group" aria-label="Alerts view"><a href="#alerts" role="button" aria-pressed="${which === "alerts"}">Latest</a><a href="#winners" role="button" aria-pressed="${which === "winners"}">Best trades</a><a href="#record" role="button" aria-pressed="${which === "record"}">Track record</a></div>`;
   const tradeRet = a => a.side === "bearish" ? -a.since : a.since;
   const pctTxt = (v, d = 1) => (v > 0 ? "+" : v < 0 ? "−" : "") + Math.abs(v).toFixed(d) + "%";
   function winRow(a, rank, opts = {}) {
@@ -1458,6 +1468,73 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
     return h;
   }
 
+  // Where the alert would be proven wrong: a close beyond this level (set on the alert day).
+  function wrongIfCard(a) {
+    if (!a.stop_why) return "";
+    const bull = a.side === "bullish", now = S.stockBy[a.ticker]?.price;
+    if (a.stop == null) return `<div class="card wrongif"><h3>Wrong if</h3><p>The alert is cancelled ${esc(a.stop_why)}. It has no single price level, because it compares the price with the market.</p></div>`;
+    const dist = now ? (bull ? (now - a.stop) / now : (a.stop - now) / now) * 100 : null;
+    const status = a.stop_hit
+      ? `<span class="pill lvhit">hit</span> Closed ${bull ? "below" : "above"} it on ${esc(fmtDate(a.stop_hit, { day: "numeric", month: "long" }))}: the chart no longer backs this alert.`
+      : dist != null ? `Not hit. The latest close is ${Math.abs(dist).toFixed(1)}% ${dist >= 0 ? "away from" : "past"} it.` : "Not hit so far.";
+    return `<div class="card wrongif"><div class="hd"><h3>Wrong if it closes ${bull ? "below" : "above"}</h3><b class="${bull ? "down" : "up"}">${money(a.stop)}</b></div>
+      <p>${esc(a.stop_why.charAt(0).toUpperCase() + a.stop_why.slice(1))}. ${status}</p>
+      <p class="hint" style="margin:6px 0 0">Set on the alert day from the chart itself, so you know in advance what would prove the alert wrong. It's a reference level, not advice on where to place an order.</p></div>`;
+  }
+
+  // ------------------------------------------------------------ track record
+  // Every alert the scanner has sent (data/…/history.json), graded 5, 20 and 60 sessions later.
+  async function loadHistory() {
+    const c = CACHE[S.market];
+    if (c && c.history === undefined) { c.history = null; c.history = await opt(L().base + "history.json") || false; if (location.hash === "#record") rerender(); }
+    return c?.history;
+  }
+  function viewRecord() {
+    S.firstSel = null;
+    const H = CACHE[S.market]?.history;
+    let h = header("Track record", null, S.feed ? `<div class="stamp">${esc(S.feed.universe)}</div>` : "") + alertsSwitch("record");
+    if (H === undefined || H === null) { loadHistory(); return h + `<p class="loading">Loading…</p>`; }
+    if (!H || !H.rows?.length) return h + `<div class="empty"><strong>No record yet</strong>The record starts with the daily scan's next run and grows every day after it.</div>`;
+    if (H.demo) h += `<div class="demo">Demo record from simulated prices.</div>`;
+    const hz = String(pref("recH", 20)), scope = pref("recScope", "all"), dir = pref("recDir", "both");
+    const k = { "5": 6, "20": 7, "60": 8 }[hz] || 7;
+    const sid = i => H.strategies[i];
+    let rows = H.rows.filter(r => forMarket(S.byId[sid(r[2])]));
+    if (scope === "followed") rows = rows.filter(r => S.follow.has(sid(r[2])));
+    if (dir === "long") rows = rows.filter(r => r[3] > 0);
+    const graded = rows.filter(r => r[k] != null), ret = r => r[3] * r[k];
+    const hit = xs => xs.length ? xs.filter(r => ret(r) > 0).length / xs.length * 100 : null;
+    const avg = xs => xs.length ? xs.reduce((t, r) => t + ret(r), 0) / xs.length : null;
+    const stopped = xs => { const w = xs.filter(r => r[5] != null); return w.length ? w.filter(r => r[9] != null && r[9] <= +hz).length / w.length * 100 : null; };
+    const base = S.bt?.strategies ? Object.values(S.bt.strategies)[0]?.bullish?.[hz]?.base_hit : null;
+    h += `<p class="tag" style="font-size:14px;margin-top:0">Every alert since ${esc(fmtDate(H.since, { day: "numeric", month: "long", year: "numeric" }))}, losers included, checked ${hz} sessions after it was sent. Nothing is removed afterwards.</p>`;
+    h += `<div class="tools"><span class="tg"><label>After</label><div class="seg sm" role="group" aria-label="Checked after">${["5", "20", "60"].map(v =>
+      `<button data-rech="${v}" aria-pressed="${hz === v}">${v} days</button>`).join("")}</div></span>
+      <span class="tg"><label>Alerts</label><div class="seg sm" role="group" aria-label="Which alerts">${[["all", "All"], ["followed", "Followed"]].map(([v, t]) =>
+      `<button data-recscope="${v}" aria-pressed="${scope === v}">${t}</button>`).join("")}</div></span>
+      <span class="tg"><label>Side</label><div class="seg sm" role="group" aria-label="Side">${[["both", "Both"], ["long", "Bullish only"]].map(([v, t]) =>
+      `<button data-recdir="${v}" aria-pressed="${dir === v}">${t}</button>`).join("")}</div></span></div>`;
+    const hr = hit(graded), av = avg(graded);
+    h += `<div class="wsum"><div><span>Alerts</span><b>${rows.length.toLocaleString("en-US")}</b><small style="color:var(--faint);font-size:11.5px">${graded.length.toLocaleString("en-US")} checked</small></div>
+      <div><span>Right way</span><b>${hr == null ? "–" : Math.round(hr) + "%"}</b>${base != null ? `<small style="color:var(--faint);font-size:11.5px">random day ${Math.round(base)}%</small>` : ""}</div>
+      <div><span>Average</span><b class="${(av ?? 0) >= 0 ? "up" : "down"}">${av == null ? "–" : pctTxt(av, 2)}</b></div></div>`;
+    if (!graded.length) h += `<p class="hint">No alert is ${hz} sessions old yet, so there's nothing to check. Try a shorter period.</p>`;
+    const by = {};
+    rows.forEach(r => (by[sid(r[2])] ||= []).push(r));
+    const tab = Object.entries(by).map(([id, xs]) => { const g = xs.filter(r => r[k] != null); return { id, n: xs.length, g: g.length, hr: hit(g), av: avg(g), st: stopped(g) }; })
+      .sort((a, b) => (b.g ? b.av : -1e9) - (a.g ? a.av : -1e9));
+    h += `<div class="card"><h3>By strategy</h3><p>Moves are counted in the alert's direction: for a bearish alert a fall is a win. “Level hit” is how often the price closed through the alert's “wrong if” level within ${hz} sessions.</p><div class="tablewrap"><table class="bt wstrat recs"><thead><tr><th>Strategy</th><th>Right way</th><th>Average</th><th>Level hit</th></tr></thead><tbody>` +
+      tab.map(t => `<tr><td><a href="#strategy-${slug(t.id)}">${esc(stratName(t.id))}</a><small>${t.g} of ${t.n} checked</small></td><td>${t.hr == null ? "–" : Math.round(t.hr) + "%"}</td><td class="${(t.av ?? 0) >= 0 ? "up" : "down"}">${t.av == null ? "–" : pctTxt(t.av, 2)}</td><td>${t.st == null ? "–" : Math.round(t.st) + "%"}</td></tr>`).join("") + `</tbody></table></div></div>`;
+    const lim = S.recLim || 60, list = rows.slice().reverse();
+    h += `<div class="day"><span>Every alert, newest first</span><span>${list.length.toLocaleString("en-US")}</span></div><div class="tablewrap"><table class="bt rec"><thead><tr><th>Day</th><th>Alert</th><th>5d</th><th>20d</th><th>60d</th></tr></thead><tbody>` +
+      list.slice(0, lim).map(r => {
+        const cell = j => r[j] == null ? `<td class="dim">…</td>` : `<td class="${r[3] * r[j] > 0 ? "up" : "down"}">${pctTxt(r[3] * r[j])}</td>`;
+        return `<tr><td>${esc(fmtDate(r[0], { day: "numeric", month: "short" }))}</td><td><a href="#stock-${esc(r[1])}" class="tk">${esc(disp(r[1]))}</a> <span class="pill ${r[3] > 0 ? "bullish" : "bearish"}">${r[3] > 0 ? "bull" : "bear"}</span>${r[9] != null ? `<span class="pill lvhit">level hit</span>` : ""}<small>${esc(stratName(sid(r[2])))} · ${money(r[4])}</small></td>${cell(6)}${cell(7)}${cell(8)}</tr>`;
+      }).join("") + `</tbody></table></div>` + (list.length > lim ? `<button class="wmore" data-recmore>Show ${Math.min(200, list.length - lim)} more</button>` : "");
+    h += `<p class="fine">Each alert is measured from the close of the day it was sent, in the alert's direction, with no fees. The record starts with the first scan, which also covered the ~45 days before it; from then on every alert is added the day it fires and is never removed. For information only, not a recommendation.</p>`;
+    return h;
+  }
+
   function viewAlert(idx) {
     const a = S.feed?.alerts?.[idx];
     if (!a) return viewAlerts();
@@ -1476,6 +1553,7 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
       const good = (a.side === "bullish") === (a.since >= 0);
       h += `<div class="card since-card"><div><h3>Since the alert</h3><p>${a.since_days} session${a.since_days > 1 ? "s" : ""} later, the price is ${a.since >= 0 ? "up" : "down"}${good ? ", the way the alert pointed" : ", against the alert"}.</p></div><b class="${a.since >= 0 ? "up" : "down"}">${a.since > 0 ? "+" : ""}${a.since.toFixed(1)}%</b></div>`;
     }
+    h += wrongIfCard(a);
     if (st) {
       h += `<div class="card"><div class="hd"><h3>Signal strength</h3><span style="display:inline-flex;gap:8px;align-items:center;font:500 12px var(--font-mono)">${meter(st)} ${st.score}/4</span></div>
         <ul class="checks">${st.checks.map(c => `<li class="${c.ok ? "" : "no"}"><span>${esc(c.text)}${c.ids ? `<small>${c.ids.map(stratName).map(esc).join(", ")}</small>` : ""}</span></li>`).join("")}</ul>
@@ -3144,12 +3222,12 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
   function route() {
     const r = (location.hash || "#alerts").slice(1);
     const tab = r === "news" || r === "buzz" ? "news" : r.startsWith("calendar") ? "calendar" : r.startsWith("strateg") ? "strategies" : r.startsWith("stock") || r === "heatmap" ? "stocks" : r === "notify" ? "notify" : r.startsWith("brokers") ? "brokers" : r.startsWith("learn") ? "learn" : "alerts";
-    if (r === "winners") S.alView = "winners"; else if (tab === "alerts" && !r.startsWith("alert-")) S.alView = "alerts";
-    const list = { alerts: S.alView === "winners" ? viewWinners : viewAlerts, stocks: viewStocks, strategies: viewStrategies, notify: viewNotify, brokers: viewBrokers, learn: viewLearn, news: r === "buzz" ? viewBuzz : viewNews, calendar: () => viewCalendar(r.slice(9)) }[tab];
+    if (r === "winners" || r === "record") S.alView = r; else if (tab === "alerts" && !r.startsWith("alert-")) S.alView = "alerts";
+    const list = { alerts: S.alView === "winners" ? viewWinners : S.alView === "record" ? viewRecord : viewAlerts, stocks: viewStocks, strategies: viewStrategies, notify: viewNotify, brokers: viewBrokers, learn: viewLearn, news: r === "buzz" ? viewBuzz : viewNews, calendar: () => viewCalendar(r.slice(9)) }[tab];
     let detail = detailFor(r), sel = detail ? r : null;
     charts.length = 0;
 
-    if (WIDE.matches && tab !== "notify" && tab !== "brokers" && tab !== "learn" && tab !== "news" && tab !== "calendar") {
+    if (WIDE.matches && tab !== "notify" && tab !== "brokers" && tab !== "learn" && tab !== "news" && tab !== "calendar" && r !== "record") {
       const lp = app.querySelector(".pane.list"), dp = app.querySelector(".pane.detail");
       const listTop = lp?.scrollTop || 0, detTop = dp?.scrollTop || 0;
       const L = norm(list());
@@ -3176,10 +3254,10 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
     // the phone tab bar has no Calendar button: it lives under News there
     // phone bar: pages without their own button light up Menu
     const inBar = { calendar: "menu", brokers: "menu", notify: "menu", learn: "menu" }[tab] || tab;
-    const navTab = tab === "alerts" && S.alView === "winners" ? "winners" : tab;
+    const navTab = tab === "alerts" && (S.alView === "winners" || S.alView === "record") ? S.alView : tab;
     document.querySelectorAll("[data-tab]").forEach(a => a.setAttribute("aria-current", (a.closest(".tabs") ? a.dataset.tab === inBar : a.dataset.tab === navTab) ? "page" : "false"));
     S.routed = true;
-    if (tab === "alerts" && !r.startsWith("alert-") && r !== "winners") markSeen();
+    if (tab === "alerts" && !r.startsWith("alert-") && r !== "winners" && r !== "record") markSeen();
     updateBadge();
   }
 
@@ -3245,6 +3323,13 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
     if (wsc) { setPref("winScope", wsc.dataset.winscope); goList(); return; }
     const wdr = e.target.closest("[data-windir]");
     if (wdr) { setPref("winDir", wdr.dataset.windir); goList(); return; }
+    const rh = e.target.closest("[data-rech]");
+    if (rh) { setPref("recH", +rh.dataset.rech); rerender(); return; }
+    const rsc = e.target.closest("[data-recscope]");
+    if (rsc) { setPref("recScope", rsc.dataset.recscope); rerender(); return; }
+    const rdr = e.target.closest("[data-recdir]");
+    if (rdr) { setPref("recDir", rdr.dataset.recdir); rerender(); return; }
+    if (e.target.closest("[data-recmore]")) { S.recLim = (S.recLim || 60) + 200; rerender(); return; }
     const wpr = e.target.closest("[data-winper]");
     if (wpr) { setPref("winPer", +wpr.dataset.winper); rerender(); return; }
     const wdy = e.target.closest("[data-winday]");
@@ -3299,7 +3384,7 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
   app.addEventListener("input", e => labInput(e));
   // a list control changed: on desktop jump to the new first item, on phone just redraw the list
   function goList() {
-    const tab = S.lastTab || "alerts", base = tab === "alerts" && S.alView === "winners" ? "#winners" : "#" + tab;
+    const tab = S.lastTab || "alerts", base = tab === "alerts" && (S.alView === "winners" || S.alView === "record") ? "#" + S.alView : "#" + tab;
     if (WIDE.matches && location.hash !== base) { location.hash = base; return; }
     rerender();
   }
@@ -3526,7 +3611,7 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
     await loadMarket(m);
     S.lastSel = null; S.lastTab = null;
     const tab = (location.hash || "#alerts").slice(1);
-    const base = tab.startsWith("strateg") ? (tab.startsWith("strategy-") ? tab : "strategies") : tab.startsWith("stock") || tab === "heatmap" ? "stocks" : tab === "news" || tab === "buzz" ? tab : tab.startsWith("calendar") ? tab : tab === "notify" ? "notify" : tab.startsWith("brokers") ? "brokers" : tab.startsWith("learn") ? tab : tab === "winners" ? "winners" : "alerts";
+    const base = tab.startsWith("strateg") ? (tab.startsWith("strategy-") ? tab : "strategies") : tab.startsWith("stock") || tab === "heatmap" ? "stocks" : tab === "news" || tab === "buzz" ? tab : tab.startsWith("calendar") ? tab : tab === "notify" ? "notify" : tab.startsWith("brokers") ? "brokers" : tab.startsWith("learn") ? tab : tab === "winners" || tab === "record" ? tab : "alerts";
     if ("#" + base !== location.hash) location.hash = base; else route();
     scrollTo(0, 0);
   }

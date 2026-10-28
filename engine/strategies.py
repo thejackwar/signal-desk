@@ -10,6 +10,8 @@ StrategyResult:
   overlays -> lines to draw on the price chart   [{name, values(list), style}]
   panel    -> optional indicator pane under the chart (RSI / MACD)
   shapes   -> pattern drawings [{name, points: [[bar_index, price], ...]}]
+  stops    -> {bar_index: (price or None, reason)}: where the alert would be proven wrong
+              (a close beyond that price), known on the alert day
 
 The same functions power both the live scanner (scan.py) and the
 worked examples shown in the app (build_examples.py), so what you read
@@ -32,6 +34,7 @@ class StrategyResult:
     overlays: list = field(default_factory=list)
     panel: dict | None = None
     shapes: list = field(default_factory=list)
+    stops: dict = field(default_factory=dict)
 
 
 def P(v) -> str:
@@ -73,6 +76,32 @@ def _vals(s: pd.Series) -> list:
     return [None if pd.isna(v) else round(float(v), 4) for v in s]
 
 
+def _swing_stops(df, sig: pd.Series, n: int, reason_low: str, reason_high: str) -> dict:
+    """Bullish: the lowest low of the last n sessions (the dip the signal came out of).
+    Bearish: the highest high of the last n sessions."""
+    lo = df["low"].rolling(n, min_periods=1).min().values
+    hi = df["high"].rolling(n, min_periods=1).max().values
+    return {int(i): ((float(lo[i]), reason_low) if sig.iloc[i] > 0 else (float(hi[i]), reason_high))
+            for i in np.flatnonzero(sig.values)}
+
+
+def stop_for(df, res: StrategyResult, i: int):
+    """The alert's "wrong if" level, checked: if the strategy's own level is already on the wrong
+    side of the close (a gap, or a cross that happened below the average), fall back to the
+    low (bullish) or high (bearish) of the last 10 sessions. Returns (price or None, reason)."""
+    side = int(res.signals.iloc[i])
+    price, reason = res.stops.get(i, (None, ""))
+    c = float(df["close"].iloc[i])
+    if price is not None and (price < c if side > 0 else price > c):
+        return price, reason
+    if price is None and reason:
+        return None, reason
+    w = df.iloc[max(0, i - 9):i + 1]
+    if side > 0:
+        return float(w["low"].min()), "below the low of the last 10 sessions"
+    return float(w["high"].max()), "above the high of the last 10 sessions"
+
+
 def _signals(df, buy: pd.Series, sell: pd.Series) -> pd.Series:
     sig = pd.Series(0, index=df.index, dtype=int)
     sig[buy.fillna(False)] = 1
@@ -90,7 +119,9 @@ def ma200(df: pd.DataFrame) -> StrategyResult:
     for i in np.flatnonzero(sig.values):
         side = "above" if sig.iloc[i] > 0 else "below"
         notes[int(i)] = f"Closed {side} the 200-day average ({P(m.iloc[i])})"
-    return StrategyResult(sig, notes, [{"name": "SMA 200", "values": _vals(m), "style": "accent"}])
+    stops = {int(i): (float(m.iloc[i]), "back " + ("below" if sig.iloc[i] > 0 else "above") + " the 200-day average")
+             for i in np.flatnonzero(sig.values)}
+    return StrategyResult(sig, notes, [{"name": "SMA 200", "values": _vals(m), "style": "accent"}], stops=stops)
 
 
 def bollinger(df: pd.DataFrame, n: int = 20, k: float = 2.0) -> StrategyResult:
@@ -107,11 +138,19 @@ def bollinger(df: pd.DataFrame, n: int = 20, k: float = 2.0) -> StrategyResult:
         notes[int(i)] = ("Closed back inside the lower band after a drop below it"
                          if sig.iloc[i] > 0 else
                          "Closed back inside the upper band after a spike above it")
-    return StrategyResult(sig, notes, [
+    stops = _swing_stops(df, sig, 5, "below the low of the dip", "above the high of the spike")
+    return StrategyResult(sig, notes, stops=stops, overlays=[
         {"name": "Upper band", "values": _vals(up), "style": "band"},
         {"name": "Middle (SMA 20)", "values": _vals(mid), "style": "muted"},
         {"name": "Lower band", "values": _vals(lo), "style": "band"},
     ])
+
+
+def _channel_stops(sig, hi, lo, n) -> dict:
+    """Breakouts: wrong if the price falls back to the middle of the channel it broke out of."""
+    mid = (hi + lo) / 2
+    return {int(i): (float(mid.iloc[i]), f"back {'below' if sig.iloc[i] > 0 else 'above'} the middle of the {n}-day range")
+            for i in np.flatnonzero(sig.values)}
 
 
 def donchian(df: pd.DataFrame, n: int = 20) -> StrategyResult:
@@ -125,7 +164,8 @@ def donchian(df: pd.DataFrame, n: int = 20) -> StrategyResult:
     for i in np.flatnonzero(sig.values):
         notes[int(i)] = (f"New {n}-day high: closed above {P(hi.iloc[i])}" if sig.iloc[i] > 0
                          else f"New {n}-day low: closed below {P(lo.iloc[i])}")
-    return StrategyResult(sig, notes, [
+    stops = _channel_stops(sig, hi, lo, n)
+    return StrategyResult(sig, notes, stops=stops, overlays=[
         {"name": f"{n}-day high", "values": _vals(hi), "style": "band"},
         {"name": f"{n}-day low", "values": _vals(lo), "style": "band"},
     ])
@@ -139,9 +179,10 @@ def rsi_strategy(df: pd.DataFrame, n: int = 14, low: float = 30, high: float = 7
         notes[int(i)] = (f"RSI climbed back above {low:.0f} (now {r.iloc[i]:.0f}): leaving oversold"
                          if sig.iloc[i] > 0 else
                          f"RSI fell back below {high:.0f} (now {r.iloc[i]:.0f}): leaving overbought")
+    stops = _swing_stops(df, sig, 10, "below the low of the last 10 sessions", "above the high of the last 10 sessions")
     panel = {"name": "RSI 14", "lines": [{"name": "RSI", "values": _vals(r), "style": "accent"}],
              "levels": [low, high], "min": 0, "max": 100}
-    return StrategyResult(sig, notes, [], panel)
+    return StrategyResult(sig, notes, [], panel, stops=stops)
 
 
 def macd_strategy(df: pd.DataFrame) -> StrategyResult:
@@ -159,7 +200,8 @@ def macd_strategy(df: pd.DataFrame) -> StrategyResult:
         {"name": "MACD", "values": _vals(line.where(valid)), "style": "accent"},
         {"name": "Signal", "values": _vals(signal.where(valid)), "style": "muted"}],
         "hist": _vals((line - signal).where(valid)), "levels": [0]}
-    return StrategyResult(sig, notes, [], panel)
+    stops = _swing_stops(df, sig, 10, "below the low of the last 10 sessions", "above the high of the last 10 sessions")
+    return StrategyResult(sig, notes, [], panel, stops=stops)
 
 
 def golden_cross(df: pd.DataFrame) -> StrategyResult:
@@ -169,7 +211,9 @@ def golden_cross(df: pd.DataFrame) -> StrategyResult:
     notes = {int(i): ("Golden cross: 50-day average crossed above the 200-day"
                       if sig.iloc[i] > 0 else "Death cross: 50-day average crossed below the 200-day")
              for i in np.flatnonzero(sig.values)}
-    return StrategyResult(sig, notes, [
+    stops = {int(i): (float(s.iloc[i]), "back " + ("below" if sig.iloc[i] > 0 else "above") + " the 200-day average")
+             for i in np.flatnonzero(sig.values)}
+    return StrategyResult(sig, notes, stops=stops, overlays=[
         {"name": "SMA 50", "values": _vals(f), "style": "accent2"},
         {"name": "SMA 200", "values": _vals(s), "style": "accent"},
     ])
@@ -216,7 +260,9 @@ def supertrend(df: pd.DataFrame, n: int = 10, mult: float = 3.0) -> StrategyResu
                         else f"Supertrend turned down: closed below {P(lo[i])}")
     line_up = np.where(trend > 0, lo, np.nan)      # the line that matters: support in an uptrend
     line_dn = np.where(trend < 0, up, np.nan)      # resistance in a downtrend
-    return StrategyResult(sig, notes, [
+    stops = {i: (float(lo[i] if sig.iloc[i] > 0 else up[i]), "back through the Supertrend line")
+             for i in map(int, np.flatnonzero(sig.values))}
+    return StrategyResult(sig, notes, stops=stops, overlays=[
         {"name": "Supertrend (uptrend)", "values": _vals(pd.Series(line_up)), "style": "accent2"},
         {"name": "Supertrend (downtrend)", "values": _vals(pd.Series(line_dn)), "style": "accent"},
     ])
@@ -238,10 +284,10 @@ def volume_breakout(df: pd.DataFrame, n: int = 20, vol_mult: float = 1.5) -> Str
         x = v.iloc[i] / avg.iloc[i]
         notes[int(i)] = (f"New {n}-day high on {x:.1f}x normal volume: closed above {P(hi.iloc[i])}" if sig.iloc[i] > 0
                          else f"New {n}-day low on {x:.1f}x normal volume: closed below {P(lo.iloc[i])}")
-    return StrategyResult(sig, notes, [
+    return StrategyResult(sig, notes, stops=_channel_stops(sig, hi, lo, n), overlays=[
         {"name": f"{n}-day high", "values": _vals(hi), "style": "band"},
         {"name": f"{n}-day low", "values": _vals(lo), "style": "band"},
-    ], {"name": f"Volume vs {n}-day average", "lines": [
+    ], panel={"name": f"Volume vs {n}-day average", "lines": [
         {"name": "Volume ÷ average", "values": _vals(v / avg), "style": "accent"}], "levels": [1, vol_mult]})
 
 
@@ -289,7 +335,10 @@ def relative_strength(df: pd.DataFrame, n: int = 63) -> StrategyResult:
     panel = {"name": f"Relative strength vs {name}", "lines": [
         {"name": f"Price ÷ {name}", "values": _vals(rs), "style": "accent"},
         {"name": "Its 3-month high", "values": _vals(hi), "style": "muted"}]}
-    return StrategyResult(sig, notes, [], panel)
+    stops = {int(i): (None, f"if it falls to a 3-month low against {name} (a bearish alert)" if sig.iloc[i] > 0
+                      else f"if it climbs to a 3-month high against {name} (a bullish alert)")
+             for i in np.flatnonzero(sig.values)}
+    return StrategyResult(sig, notes, [], panel, stops=stops)
 
 
 # ----------------------------------------------------------- chart patterns
@@ -315,7 +364,7 @@ def double_top_bottom(df: pd.DataFrame, k: int = 5, tol: float = 0.03,
     h, l, c = df["high"].values, df["low"].values, df["close"].values
     ph, pl = pivots(df, k)
     sig = pd.Series(0, index=df.index, dtype=int)
-    notes, shapes, used = {}, [], set()
+    notes, shapes, used, stops = {}, [], set(), {}
     for t in range(1, len(df)):
         kh, kl = _known(ph, t, k), _known(pl, t, k)
         # double bottom: last two swing lows ~equal, swing high between = neckline
@@ -330,6 +379,7 @@ def double_top_bottom(df: pd.DataFrame, k: int = 5, tol: float = 0.03,
                     used.add(("DB", a, b))
                     sig.iloc[t] = 1
                     notes[t] = f"Double bottom: broke above the neckline at {P(neck)}"
+                    stops[t] = (float(min(l[a], l[b])), "below the lower of the two bottoms")
                     shapes.append({"at": t, "name": "Double bottom", "points": [[a, l[a]], [m, neck], [b, l[b]], [t, c[t]]]})
                     shapes.append({"at": t, "name": "Neckline", "points": [[m, neck], [t, neck]], "dash": True})
                     continue
@@ -344,16 +394,17 @@ def double_top_bottom(df: pd.DataFrame, k: int = 5, tol: float = 0.03,
                     used.add(("DT", a, b))
                     sig.iloc[t] = -1
                     notes[t] = f"Double top: broke below the neckline at {P(neck)}"
+                    stops[t] = (float(max(h[a], h[b])), "above the higher of the two tops")
                     shapes.append({"at": t, "name": "Double top", "points": [[a, h[a]], [m, neck], [b, h[b]], [t, c[t]]]})
                     shapes.append({"at": t, "name": "Neckline", "points": [[m, neck], [t, neck]], "dash": True})
-    return StrategyResult(sig, notes, [], None, shapes)
+    return StrategyResult(sig, notes, [], None, shapes, stops)
 
 
 def head_shoulders(df: pd.DataFrame, k: int = 5, tol: float = 0.05, max_span: int = 120) -> StrategyResult:
     h, l, c = df["high"].values, df["low"].values, df["close"].values
     ph, pl = pivots(df, k)
     sig = pd.Series(0, index=df.index, dtype=int)
-    notes, shapes, used = {}, [], set()
+    notes, shapes, used, stops = {}, [], set(), {}
 
     def neck_at(p1, v1, p2, v2, x):
         return v1 + (v2 - v1) * (x - p1) / (p2 - p1)
@@ -373,6 +424,7 @@ def head_shoulders(df: pd.DataFrame, k: int = 5, tol: float = 0.05, max_span: in
                     used.add(("HS", ls))
                     sig.iloc[t] = -1
                     notes[t] = f"Head & shoulders: closed below the neckline (~{P(n_now)})"
+                    stops[t] = (float(h[rs]), "above the right shoulder")
                     shapes.append({"at": t, "name": "Head & shoulders",
                                    "points": [[ls, h[ls]], [t1, l[t1]], [hd, h[hd]], [t2, l[t2]], [rs, h[rs]]]})
                     shapes.append({"at": t, "name": "Neckline", "points": [[t1, l[t1]], [t, n_now]], "dash": True})
@@ -390,17 +442,18 @@ def head_shoulders(df: pd.DataFrame, k: int = 5, tol: float = 0.05, max_span: in
                     used.add(("IHS", ls))
                     sig.iloc[t] = 1
                     notes[t] = f"Inverse head & shoulders: closed above the neckline (~{P(n_now)})"
+                    stops[t] = (float(l[rs]), "below the right shoulder")
                     shapes.append({"at": t, "name": "Inverse head & shoulders",
                                    "points": [[ls, l[ls]], [p1, h[p1]], [hd, l[hd]], [p2, h[p2]], [rs, l[rs]]]})
                     shapes.append({"at": t, "name": "Neckline", "points": [[p1, h[p1]], [t, n_now]], "dash": True})
-    return StrategyResult(sig, notes, [], None, shapes)
+    return StrategyResult(sig, notes, [], None, shapes, stops)
 
 
 def triangle(df: pd.DataFrame, k: int = 4, lookback: int = 70) -> StrategyResult:
     h, l, c = df["high"].values, df["low"].values, df["close"].values
     ph, pl = pivots(df, k)
     sig = pd.Series(0, index=df.index, dtype=int)
-    notes, shapes, used = {}, [], set()
+    notes, shapes, used, stops = {}, [], set(), {}
     for t in range(1, len(df)):
         kh = [p for p in _known(ph, t, k) if p >= t - lookback]
         kl = [p for p in _known(pl, t, k) if p >= t - lookback]
@@ -436,9 +489,11 @@ def triangle(df: pd.DataFrame, k: int = 4, lookback: int = 70) -> StrategyResult
             used.add(("T", hx[0], lx[0]))
             sig.iloc[t] = hit
             notes[t] = f"{kind}: broke {'out above' if hit > 0 else 'down below'} the pattern"
+            stops[t] = ((float(lo_t), "back below the triangle's lower line") if hit > 0
+                        else (float(up_t), "back above the triangle's upper line"))
             shapes.append({"at": t, "name": "Upper line", "points": [[start, sh * start + ih], [t, up_t]]})
             shapes.append({"at": t, "name": "Lower line", "points": [[start, sl * start + il], [t, lo_t]]})
-    return StrategyResult(sig, notes, [], None, shapes)
+    return StrategyResult(sig, notes, [], None, shapes, stops)
 
 
 REGISTRY = {

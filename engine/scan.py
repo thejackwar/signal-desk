@@ -25,7 +25,7 @@ import pandas as pd
 
 sys.path.insert(0, str(Path(__file__).parent))
 from chart import _r as rp, payload  # noqa: E402
-from strategies import REGISTRY, StrategyResult, rsi, set_benchmark  # noqa: E402
+from strategies import REGISTRY, StrategyResult, rsi, set_benchmark, stop_for  # noqa: E402
 
 ROOT = Path(__file__).resolve().parent.parent
 ENGINE = Path(__file__).parent
@@ -44,10 +44,11 @@ MARKET = "stocks"
 
 def configure(market: str):
     """Point every output path at the chosen market's data folder."""
-    global MARKET, DATA, OUT, CHART_DIR, STOCK_DIR, STOCKS_OUT
+    global MARKET, DATA, OUT, CHART_DIR, STOCK_DIR, STOCKS_OUT, HISTORY
     MARKET = market
     DATA = MARKETS[market]["dir"]
     OUT = DATA / "alerts.json"
+    HISTORY = DATA / "history.json"  # every alert ever sent, graded 5 / 20 / 60 sessions later
     CHART_DIR = DATA / "charts"     # one small file per alert, loaded when tapped
     STOCK_DIR = DATA / "stocks"     # one chart file per stock / coin
     STOCKS_OUT = DATA / "stocks.json"
@@ -188,6 +189,57 @@ def load_edge() -> dict | None:
     return out
 
 
+def stop_hit(df, i: int, side: int, stop) -> int | None:
+    """First session after the alert that closed beyond its "wrong if" level, or None."""
+    if stop is None:
+        return None
+    c = df["close"].values[i + 1:]
+    beyond = np.flatnonzero(c < stop if side > 0 else c > stop)
+    return i + 1 + int(beyond[0]) if len(beyond) else None
+
+
+HORIZONS = (5, 20, 60)
+
+
+def update_history(found: list[dict], data: dict[str, pd.DataFrame]) -> dict:
+    """Keep every alert the scanner has produced, never dropping one, and grade it with the
+    price change 5, 20 and 60 sessions later plus how many sessions until its "wrong if" level
+    was hit. Rows: [date, ticker, strategy #, side (+1/-1), price, stop, r5, r20, r60, stop_days].
+    The record starts with the first scan, which covered the ~45 days before it."""
+    old = json.loads(HISTORY.read_text()) if HISTORY.exists() else {"strategies": [], "rows": []}
+    sids = old["strategies"]
+    rows = {(r[0], r[1], sids[r[2]]): r for r in old["rows"]}
+    for a in found:
+        if a["strategy"] not in sids:
+            sids.append(a["strategy"])
+        key = (a["date"], a["ticker"], a["strategy"])
+        if key not in rows:
+            rows[key] = [a["date"], a["ticker"], sids.index(a["strategy"]), 1 if a["side"] == "bullish" else -1,
+                         a["price"], a.get("stop"), None, None, None, None]
+    where = {}
+    for (d, t, sid), r in rows.items():
+        df = data.get(t)
+        if df is None or (all(x is not None for x in r[6:9]) and (r[9] is not None or r[5] is None)):
+            continue
+        if t not in where:
+            where[t] = {x: k for k, x in enumerate(df.index.strftime("%Y-%m-%d"))}
+        i = where[t].get(d)
+        if i is None:
+            continue
+        c = df["close"].values
+        base = float(r[4])   # the price as sent, so later dividend adjustments don't move it
+        adj = base / float(c[i]) if c[i] else 1.0
+        for k, h in enumerate(HORIZONS):
+            if r[6 + k] is None and i + h < len(df):
+                r[6 + k] = round((float(c[i + h]) * adj / base - 1) * 100, 2)
+        if r[9] is None and r[5] is not None:
+            j = stop_hit(df.assign(close=df["close"] * adj), i, r[3], r[5])
+            if j is not None:
+                r[9] = j - i
+    out = sorted(rows.values(), key=lambda r: (r[0], r[1], r[2]))
+    return {"since": out[0][0] if out else None, "strategies": sids, "rows": out}
+
+
 def scan(data: dict[str, pd.DataFrame], lookback_bars: int, edge: dict | None) -> list[dict]:
     alerts = []
     for ticker, df in data.items():
@@ -205,6 +257,8 @@ def scan(data: dict[str, pd.DataFrame], lookback_bars: int, edge: dict | None) -
                 side = int(res.signals.iloc[i])
                 start = max(0, i - CHART_BARS + 10)
                 price = float(df["close"].iloc[i])
+                stop, stop_why = stop_for(df, res, i)
+                hit = stop_hit(df, i, side, stop)
                 alerts.append({
                     "id": f"{sid}:{ticker}:{df.index[i]:%Y-%m-%d}",
                     "strategy": sid,
@@ -216,6 +270,9 @@ def scan(data: dict[str, pd.DataFrame], lookback_bars: int, edge: dict | None) -
                     "since": round((float(df["close"].iloc[-1]) / price - 1) * 100, 2),
                     "since_days": n - 1 - i,
                     "strength": strength(df, sigs, sid, i, side, edge),
+                    "stop": rp(stop) if stop is not None else None,
+                    "stop_why": stop_why,
+                    "stop_hit": f"{df.index[hit]:%Y-%m-%d}" if hit is not None else None,
                     "chart": payload(df, res, start, n, only_marker=i),
                 })
     return alerts
@@ -349,6 +406,13 @@ def main():
     use_benchmark(data, args.demo)
 
     found = scan(data, LOOKBACK_BARS, load_edge())
+    if HISTORY.exists() and json.loads(HISTORY.read_text()).get("demo") != args.demo:
+        HISTORY.unlink()   # never mix demo and real alerts
+    history = update_history(found + [a for a in (previous or {}).get("alerts", []) if a.get("strategy") in REGISTRY], data)
+    history["as_of"] = f"{max(df.index[-1] for df in data.values()):%Y-%m-%d}"
+    history["demo"] = args.demo
+    HISTORY.write_text(json.dumps(history, separators=(",", ":")))
+    print(f"history: {len(history['rows'])} alerts since {history['since']}")
     old = {a["id"] for a in (previous or {}).get("alerts", [])}
     new = [a for a in found if a["id"] not in old]
     merged = {a["id"]: a for a in found}
