@@ -183,6 +183,18 @@ details.settings summary:hover .cz { text-decoration: underline; }
 
 .fine { color: var(--faint); font-size: 12px; line-height: 1.5; letter-spacing: -.005em; margin: 0; }
 footer.foot { border-top: 1px solid var(--hair); margin-top: 56px; padding-top: 18px; display: grid; gap: 10px; }
+
+/* a little more colour, as in the app */
+:root { --accent2: #32ade6; --title-grad: linear-gradient(95deg, #0071e3 0%, #32ade6 55%, #34c759 100%); }
+@media (prefers-color-scheme: dark) { :root { --accent2: #64d2ff; --title-grad: linear-gradient(95deg, #2997ff 0%, #64d2ff 55%, #30d158 100%); } }
+body { background: radial-gradient(1100px 560px at 85% -10%, color-mix(in srgb, var(--accent) 16%, transparent), transparent 65%),
+  radial-gradient(900px 480px at -5% 105%, color-mix(in srgb, var(--accent2) 11%, transparent), transparent 62%), var(--bg); background-attachment: fixed; }
+.hero h1, .sec { background: var(--title-grad); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.sec small { -webkit-text-fill-color: var(--muted); }
+.seg button[aria-pressed="true"] { background: var(--accent); color: #fff; box-shadow: 0 1px 6px color-mix(in srgb, var(--accent) 35%, transparent); }
+@media (prefers-color-scheme: dark) { .seg button[aria-pressed="true"] { background: var(--accent); } }
+.btn { background: var(--title-grad); background-size: 140% 100%; }
+.feat > div, .card, .summary, .set { background: linear-gradient(150deg, color-mix(in srgb, var(--accent) 7%, var(--card)) 0%, var(--card) 55%); }
 </style>
 </head>
 <body>

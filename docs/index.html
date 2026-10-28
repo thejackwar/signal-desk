@@ -921,6 +921,52 @@ table.bt td { border-top-color: var(--line); }
   .pane.detail .dwrap { padding: 8px 40px 64px; }
   #app.single { max-width: 820px; padding: 8px 40px 56px; }
 }
+
+/* ================= a little more colour ================= */
+:root { --accent2: #32ade6; --title-grad: linear-gradient(95deg, #0071e3 0%, #32ade6 55%, #34c759 100%); }
+:root[data-market="crypto"] { --accent2: #ff2d55; --title-grad: linear-gradient(95deg, #8e44d6 0%, #d63a9c 60%, #ff6b3d 100%); }
+:root[data-market="commodities"] { --accent2: #c88a12; --title-grad: linear-gradient(95deg, #0e8a8a 0%, #4aa35c 55%, #c88a12 100%); }
+@media (prefers-color-scheme: dark) {
+  :root { --accent2: #64d2ff; --title-grad: linear-gradient(95deg, #2997ff 0%, #64d2ff 55%, #30d158 100%); }
+  :root[data-market="crypto"] { --accent2: #ff375f; --title-grad: linear-gradient(95deg, #bf5af2 0%, #ff4fa3 55%, #ff9f0a 100%); }
+  :root[data-market="commodities"] { --accent2: #ffd60a; --title-grad: linear-gradient(95deg, #40c8c8 0%, #6ad38a 55%, #ffd60a 100%); }
+}
+/* a soft glow of the market's colours behind everything */
+body { background:
+  radial-gradient(1100px 520px at 88% -8%, color-mix(in srgb, var(--amber) 16%, transparent), transparent 65%),
+  radial-gradient(900px 480px at -5% 105%, color-mix(in srgb, var(--accent2) 11%, transparent), transparent 62%),
+  var(--bg); background-attachment: fixed; }
+/* gradient titles, like Apple's product pages */
+#app h1, .top h1, .big2 .tk, .health .big, .ledger .total b, .brand em {
+  background: var(--title-grad); -webkit-background-clip: text; background-clip: text; color: transparent; }
+/* cards: a faint wash of the accent in one corner */
+.health, .card, .compare, .ledger .total, .labbox, .lstart, .srow, .tiles div, .broker, .pitboard, .lq, .labcta {
+  background: linear-gradient(150deg, color-mix(in srgb, var(--amber) 7%, var(--surface)) 0%, var(--surface) 55%); }
+.card .card, .lstrat .card, .lfam .card { background: color-mix(in srgb, var(--amber) 5%, var(--bg)); }
+.srow h3, .card h3, .compare h3, .health h3 { color: var(--fg); }
+/* selected things in the accent colour instead of white */
+.chip[aria-pressed="true"], .labinds button[aria-pressed="true"] { background: var(--amber); color: #fff; box-shadow: 0 2px 10px color-mix(in srgb, var(--amber) 35%, transparent); }
+.seg button[aria-pressed="true"], .nsw a[aria-pressed="true"], .mswitch button[aria-pressed="true"] {
+  background: var(--amber); color: #fff; box-shadow: 0 1px 6px color-mix(in srgb, var(--amber) 35%, transparent); }
+@media (prefers-color-scheme: dark) {
+  .seg button[aria-pressed="true"], .nsw a[aria-pressed="true"], .mswitch button[aria-pressed="true"] { background: var(--amber); }
+}
+.badge { background: var(--amber-bg); color: var(--amber); }
+.tabs a[aria-current="page"] svg, .mgrid svg { filter: drop-shadow(0 2px 6px color-mix(in srgb, var(--amber) 40%, transparent)); }
+.side a.nav[aria-current="page"] { background: var(--amber-bg); color: var(--amber); }
+.day, .cat { color: var(--amber); }
+.btn { background: var(--title-grad); background-size: 140% 100%; }
+.btn.ghost { background: var(--amber-bg); color: var(--amber); }
+.btn.on { background: var(--amber-bg); color: var(--amber); }
+/* sliders: a coloured track filled up to the thumb (--p is set by the script) */
+input[type=range] { -webkit-appearance: none; appearance: none; height: 26px; background: transparent; accent-color: var(--amber); cursor: pointer; }
+input[type=range]::-webkit-slider-runnable-track { height: 6px; border-radius: 3px;
+  background: linear-gradient(90deg, var(--amber) 0 var(--p, 50%), color-mix(in srgb, var(--fg) 14%, transparent) var(--p, 50%) 100%); }
+input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 22px; height: 22px; margin-top: -8px; border-radius: 50%; background: #fff;
+  box-shadow: 0 1px 4px rgba(0,0,0,.3), 0 0 0 .5px rgba(0,0,0,.1); }
+input[type=range]::-moz-range-track { height: 6px; border-radius: 3px; background: color-mix(in srgb, var(--fg) 14%, transparent); }
+input[type=range]::-moz-range-progress { height: 6px; border-radius: 3px; background: var(--amber); }
+input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 0; border-radius: 50%; background: #fff; box-shadow: 0 1px 4px rgba(0,0,0,.3); }
 </style>
 </head>
 <body>
@@ -3049,6 +3095,11 @@ table.bt td { border-top-color: var(--line); }
   });
   WIDE.addEventListener?.("change", () => route());
   DARK.addEventListener?.("change", () => { applyPalette(); drawBackdrop(); if (S.routed) route(); });
+  // coloured slider tracks: --p = how far along the thumb is
+  const fillRange = el => { const lo = +el.min || 0, hi = +el.max || 100; el.style.setProperty("--p", `${((+el.value - lo) / ((hi - lo) || 1)) * 100}%`); };
+  document.addEventListener("input", e => { if (e.target.matches?.('input[type="range"]')) fillRange(e.target); });
+  new MutationObserver(() => document.querySelectorAll('#app input[type="range"]').forEach(fillRange))
+    .observe(document.getElementById("app"), { childList: true, subtree: true });
 
   // ------------------------------------------------------ chart backdrop
   // Faint, static market charts behind the stock pages: grid, a few long price lines with
