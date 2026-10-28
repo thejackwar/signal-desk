@@ -79,7 +79,7 @@ def gdelt_daily(q: str, days: list[str]) -> list[int] | None:
     url = ("https://api.gdeltproject.org/api/v2/doc/doc?" + urllib.parse.urlencode({
         "query": f"{q} sourcelang:english", "mode": "timelinevolraw", "timespan": f"{DAYS}d",
         "format": "json", "timelinesmooth": 0}))
-    for attempt in range(3):
+    for attempt in range(2):
         try:
             txt = _get(url)
             if not txt.strip().startswith("{"):
@@ -93,7 +93,7 @@ def gdelt_daily(q: str, days: list[str]) -> list[int] | None:
             return [per_day.get(d.replace("-", ""), 0) for d in days]
         except Exception as e:
             print(f"    gdelt retry {attempt + 1}: {str(e)[:90]}")
-            time.sleep(GDELT_PAUSE * (attempt + 2))
+            time.sleep(GDELT_PAUSE * 2)
     return None
 
 
@@ -137,6 +137,7 @@ def run(market: str, demo: bool) -> dict:
     days = [(today - timedelta(days=DAYS - 1 - i)).isoformat() for i in range(DAYS)]
     rng = np.random.default_rng(5)
     items, used = [], {"GDELT": 0, "Google News": 0}
+    gdelt_fails, gdelt_ok = 0, True
     for t, (name, _) in names.items():
         if t in SKIP:
             continue
@@ -147,8 +148,13 @@ def run(market: str, demo: bool) -> dict:
             if rng.random() < .15:
                 series[-2] = int(series[-2] * rng.uniform(2, 5))
         else:
-            series = gdelt_daily(q, days)
-            time.sleep(GDELT_PAUSE)
+            series = gdelt_daily(q, days) if gdelt_ok else None
+            if gdelt_ok:
+                time.sleep(GDELT_PAUSE)
+                gdelt_fails = 0 if series is not None else gdelt_fails + 1
+                if gdelt_fails >= 3:
+                    print("  GDELT isn't answering; using Google News for the rest")
+                    gdelt_ok = False
             if series is None:
                 series = google_daily(q, days)
                 if series is None:
