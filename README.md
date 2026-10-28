@@ -16,6 +16,7 @@ docs/                    the website (served by GitHub Pages)
   data/stocks/           one-year chart per stock
   trendlines.html/.js    automatic trendlines page (data from worker/)
   data/calendar.json     upcoming earnings, IPOs, economy (written by engine/events.py)
+  data/topdown/          Top-Down alerts (written by engine/topdown.py)
   data/brokers.json      Brokers page: facts and links (edit by hand; affiliate links go here)
 worker/                  Cloudflare Workers: trendlines data, counted broker links (see worker/README.md)
 engine/
@@ -171,6 +172,19 @@ companies that dropped out of the index are missing. Treat it as a rough guide.
 Everything in `engine/` and `docs/data/` stays as it is. A SwiftUI app would read the
 same `alerts.json`, `strategies.json` and chart files from the GitHub Pages address;
 only `index.html` gets replaced by Swift screens.
+
+## Top-Down Analysis alerts (trendline breaks, every 30 minutes)
+
+`engine/topdown.py` checks the Trendlines page's lines on all 7 timeframes for every S&P 100
+stock and SPY, every 30 minutes while the US market is open (`.github/workflows/topdown.yml`),
+and writes new breaks to `docs/data/topdown/alerts.json`. The app shows them under the
+**Top-Down Analysis** strategy; each viewer picks the timeframes (W, D, 4H, 1H by default).
+Phone notifications go to one ntfy channel per timeframe: `<NTFY_PREFIX>-topdown-1h` etc.
+
+Switch it on once: repository *Settings → Secrets and variables → Actions → Secrets* → add
+`ALPACA_KEY_ID` and `ALPACA_SECRET_KEY` (the same Alpaca keys as the Trendlines Worker). Until
+then the workflow just skips. Try it without keys: `python engine/topdown.py --demo --force`.
+Tests: `python tests/topdown/test_rules.py` (same lines as the Trendlines page, no line alerted twice).
 
 ## License
 

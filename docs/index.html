@@ -338,6 +338,16 @@ table.trades td:last-child { font: 600 13.5px var(--font-mono); white-space: now
   .broker dt { padding: 10px 0 0; }
   .broker dd { border-top: 0; padding: 4px 0 10px; }
 }
+.tfpick { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; }
+.tfpick button { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 10px 2px; border-radius: 10px; background: var(--surface); border: 1px solid var(--line); color: var(--muted); cursor: pointer; }
+.tfpick button b { font: 600 14px var(--font-mono); color: var(--fg); }
+.tfpick button small { font-size: 10.5px; }
+.tfpick button[aria-pressed="true"] { border-color: var(--amber); background: var(--amber-bg); }
+.tfpick button[aria-pressed="true"] b { color: var(--amber); }
+@media (max-width: 480px) { .tfpick { grid-template-columns: repeat(4, 1fr); } }
+.tdline { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.tdline span { display: block; font: 500 11px var(--font-mono); text-transform: uppercase; letter-spacing: .06em; color: var(--faint); }
+.tdline b { font: 600 18px var(--font-mono); }
 .bjump { display: flex; gap: 8px; flex-wrap: wrap; margin: 0 0 4px; }
 .bjump a { display: inline-flex; align-items: center; gap: 7px; padding: 9px 13px; border-radius: 999px; background: var(--surface); border: 1px solid var(--line); color: var(--fg); text-decoration: none; font-weight: 500; font-size: 14px; }
 @media (hover: hover) { .bjump a:hover { background: var(--hover); } }
@@ -1041,6 +1051,20 @@ html.sheet-open { overflow: hidden; }
   const demoNote = () => S.feed?.demo ? `<div class="demo">Demo data: these alerts come from simulated prices on made-up tickers, so you can see how the app works. Real alerts appear once the daily scan runs on GitHub.</div>` : "";
   const meter = st => st ? `<span class="meter s${st.score}" aria-hidden="true"><i></i><i></i><i></i><i></i></span><span class="slabel ${st.label}">${st.label}</span>` : "";
   const stratName = id => S.byId[id]?.name || id;
+  // strategies can be limited to some markets (Top-Down Analysis: stocks only)
+  const forMarket = s => !!s && (!s.markets || s.markets.includes(S.market));
+  // Top-Down Analysis: which timeframes alert on this device
+  const TD_TFS = ["W", "D", "4H", "1H", "30m", "15m", "5m"], TD_DEFAULT = ["W", "D", "4H", "1H"];
+  const TD_LABEL = { W: "Weekly", D: "Daily", "4H": "4-hour", "1H": "1-hour", "30m": "30-min", "15m": "15-min", "5m": "5-min" };
+  const tdTfs = () => { const v = pref("tdTfs", TD_DEFAULT); return Array.isArray(v) ? v.filter(t => TD_TFS.includes(t)) : TD_DEFAULT; };
+  // the daily feed plus the Top-Down alerts for the picked timeframes, newest first
+  function buildFeed(c) {
+    if (!c.feed) return c.feed;
+    const td = S.market === "stocks" ? (c.td?.alerts || []).filter(a => tdTfs().includes(a.tf)) : [];
+    if (!td.length) return c.feed;
+    const key = a => (a.date || "") + (a.found_at || "");
+    return { ...c.feed, alerts: [...td, ...c.feed.alerts].sort((a, b) => key(a) < key(b) ? 1 : key(a) > key(b) ? -1 : 0) };
+  }
 
   function followedAlerts() { return (S.feed?.alerts || []).filter(a => S.follow.has(a.strategy)); }
 
@@ -1057,7 +1081,7 @@ html.sheet-open { overflow: hidden; }
     const sinceTxt = a.since_days > 0 ? `${chg(a.since)} <span style="color:var(--faint)">${a.since_days}d</span>` : `<span style="color:var(--faint)">today${foundTime(a)}</span>`;
     return `<a class="row alert ${a.side}${hasIcon() && !opts.showDate ? " withcoin" : ""}" href="#alert-${idx}">
       <span class="stripe"></span>${!opts.showDate ? icon(a.ticker, 32) : ""}
-      <span class="main"><span class="tk">${esc(opts.showDate ? fmtDate(a.date, { day: "numeric", month: "short" }) : disp(a.ticker))}</span><span class="strat">${esc(stratName(a.strategy))}</span>
+      <span class="main"><span class="tk">${esc(opts.showDate ? fmtDate(a.date, { day: "numeric", month: "short" }) : disp(a.ticker))}</span><span class="strat">${esc(stratName(a.strategy))}${a.tf ? ` · ${esc(a.tf)}` : ""}</span>
         <div class="note">${esc(a.note)}</div>
         <div class="info">${meter(a.strength)}<span class="pill">${a.side}</span></div></span>
       <span class="px">${money(a.price)}<span class="since">${sinceTxt}</span></span></a>`;
@@ -1071,7 +1095,7 @@ html.sheet-open { overflow: hidden; }
   }
 
   function viewAlerts() {
-    const followed = [...S.follow].filter(id => S.byId[id]);
+    const followed = [...S.follow].filter(id => forMarket(S.byId[id]));
     S.firstSel = null;
     if (!followed.length) {
       return header("Alerts") + `<div class="empty"><strong>Pick your strategies</strong>Follow at least one strategy and its alerts show up here.<br><br><a class="btn" href="#strategies">Browse strategies</a></div>`;
@@ -1115,8 +1139,13 @@ html.sheet-open { overflow: hidden; }
     const s = S.byId[a.strategy], st = a.strength, stock = S.stockBy[a.ticker];
     let h = header("", "#alerts");
     h += `<div class="big2">${icon(a.ticker, 40)}<span class="tk">${esc(disp(a.ticker))}</span><span class="px">${money(a.price)}</span><span class="pill ${a.side}">${a.side}</span></div>`;
-    h += `<p class="sub">${stock ? `<a href="#stock-${esc(a.ticker)}">${esc(stock.name)}</a> · ` : ""}${esc(s?.name)} · close of ${esc(fmtDate(a.date, { weekday: "short", day: "numeric", month: "long" }))}</p>`;
-    h += `<div class="chartbox" id="achart"><p class="loading">Loading chart…</p></div>`;
+    const isTd = a.strategy === "topdown";
+    h += `<p class="sub">${stock ? `<a href="#stock-${esc(a.ticker)}">${esc(stock.name)}</a> · ` : ""}${esc(s?.name)} · ${isTd
+      ? `${esc(TD_LABEL[a.tf] || a.tf)} chart · ${esc(fmtDate(a.date, { weekday: "short", day: "numeric", month: "long" }))}${foundTime(a)}`
+      : `close of ${esc(fmtDate(a.date, { weekday: "short", day: "numeric", month: "long" }))}`}</p>`;
+    if (isTd) h += `<div class="card tdline"><div><span>Timeframe</span><b>${esc(a.tf)}</b></div><div><span>${a.side === "bullish" ? "Falling line" : "Rising line"}</span><b class="${a.side === "bullish" ? "down" : "up"}">${money(a.level)}</b></div><div><span>Price at alert</span><b>${money(a.price)}</b></div></div>
+      <p style="margin:10px 0 0"><a class="btn ghost" href="trendlines.html#${encodeURIComponent(a.ticker)}">See ${esc(disp(a.ticker))}'s lines on every timeframe ›</a></p>`;
+    else h += `<div class="chartbox" id="achart"><p class="loading">Loading chart…</p></div>`;
     h += `<p class="caption"><strong>${esc(a.note)}</strong></p>`;
     if (a.since_days > 0) {
       const good = (a.side === "bullish") === (a.since >= 0);
@@ -1133,6 +1162,7 @@ html.sheet-open { overflow: hidden; }
     h += `<p class="fine">For information only. An alert describes what the chart did; it is not a recommendation to buy or sell.</p>`;
     return { html: h, after: async () => {
       const box = document.getElementById("achart");
+      if (!box) return;
       try {
         const data = a.chart || await (await fetch(L().base + "charts/" + a.file)).json();
         if (!box.isConnected) return;
@@ -1320,14 +1350,15 @@ html.sheet-open { overflow: hidden; }
   // ------------------------------------------------------------ strategies
   function viewStrategies() {
     let h = header("Strategies") + `<p class="tag" style="margin-top:2px;font-size:14.5px">Switch on the ones you want alerts for. Open a strategy to learn how it works and how it did in the past.</p>`;
-    const cats = [...new Set(S.strategies.map(s => s.category))];
+    const list = S.strategies.filter(forMarket);
+    const cats = [...new Set(list.map(s => s.category))];
     const counts = {}; (S.feed?.alerts || []).forEach(a => counts[a.strategy] = (counts[a.strategy] || 0) + 1);
     S.firstSel = "strategy-" + slug(S.strategies[0].id);
     h += compareCard();
     h += `<a class="labcta" href="#strategylab"><span><b>Strategy Lab</b><small>Change the settings of an indicator and test it over 15 years</small></span><span aria-hidden="true">›</span></a>`;
     for (const c of cats) {
       h += `<div class="cat">${esc(c)}</div>`;
-      for (const s of S.strategies.filter(s => s.category === c)) {
+      for (const s of list.filter(s => s.category === c)) {
         const on = S.follow.has(s.id), hit = S.bt?.strategies?.[s.id]?.bullish?.["20"]?.hit;
         h += `<div class="srow"><a class="open" href="#strategy-${slug(s.id)}">
           <h3>${esc(s.name)}</h3><p>${esc(s.tagline)}</p>
@@ -1342,6 +1373,7 @@ html.sheet-open { overflow: hidden; }
   function viewStrategy(id) {
     const s = S.byId[id];
     if (!s) return viewStrategies();
+    if (s.kind === "lines") return viewLinesStrategy(s);
     const on = S.follow.has(id);
     const side = S.exSide[id] || "bullish";
     const ex = s.examples.find(e => e.side === side) || s.examples[0];
@@ -1372,6 +1404,33 @@ html.sheet-open { overflow: hidden; }
     if (recent.length) h += `<h2>Latest alerts</h2><div class="rows">` + recent.map(a => alertRow(a)).join("") + `</div>`;
     h += `<p class="fine">For information and learning only. This is not investment advice.</p>`;
     return { html: h, after: () => { mountChart(document.getElementById("exchart"), ex.chart, { focus: ex.chart.focus, label: `${s.name} ${side} example chart` }); bt.after?.(); tr.after?.(); } };
+  }
+
+  function viewLinesStrategy(s) {
+    const id = s.id, on = S.follow.has(id), picked = tdTfs();
+    const recent = (S.feed?.alerts || []).filter(a => a.strategy === id).slice(0, 6);
+    let h = header("", "#strategies");
+    h += `<h1 style="font:700 30px/1.1 var(--font-display);margin:4px 0 6px;text-wrap:balance">${esc(s.name)}</h1>`;
+    h += `<p class="tag">${esc(s.tagline)}</p>`;
+    h += `<div class="lede"><span class="badge">${esc(s.category)}</span><span class="badge">${esc(s.level)}</span><span class="badge">7 timeframes</span>
+      <span style="flex:1"></span><button class="btn ${on ? "on" : ""}" data-follow="${id}">${on ? "✓ Following" : "Follow"}</button></div>`;
+    if (!forMarket(s)) h += `<div class="card"><p style="margin:0">Top-Down alerts cover the S&amp;P 100 stocks and SPY. Switch to <b>Stocks</b> at the top to see them.</p></div>`;
+    h += `<div class="prose">${s.how.map(p => `<p>${esc(p)}</p>`).join("")}</div>`;
+    h += `<h2>Timeframes that alert</h2><div class="tfpick" role="group" aria-label="Timeframes that alert">${TD_TFS.map(tf =>
+      `<button data-tdtf="${tf}" aria-pressed="${picked.includes(tf)}"><b>${tf}</b><small>${TD_LABEL[tf]}</small></button>`).join("")}</div>
+      <p class="hint">Weekly, daily, 4-hour and 1-hour are on by default. The short timeframes break many times a day, so expect a lot more alerts with them on. This choice is saved on this device; for phone notifications, the <a href="#notify" style="color:inherit">Phone alerts</a> page lists one channel per picked timeframe.</p>`;
+    h += `<h2>When it alerts</h2><div class="rules">
+      <div class="rule bullish"><span class="pill bullish">bullish</span><p>${esc(s.bullish)}</p></div>
+      <div class="rule bearish"><span class="pill bearish">bearish</span><p>${esc(s.bearish)}</p></div></div>`;
+    h += `<a class="labcta" href="trendlines.html" style="margin-top:18px"><span><b>See the lines</b><small>The Trendlines page draws all seven timeframes for any S&amp;P 100 stock</small></span><span aria-hidden="true">›</span></a>`;
+    h += `<h2>Why it can work</h2><div class="prose"><p>${esc(s.why)}</p></div>`;
+    h += `<h2>Watch out for</h2><ul class="watch">${s.watch_out.map(w => `<li>${esc(w)}</li>`).join("")}</ul>`;
+    h += `<a class="labcta" href="#brokers-stocks" style="margin-top:22px"><span><b>Want to try this strategy yourself?</b><small>Compare brokers for stocks and ETFs from Italy</small></span><span aria-hidden="true">›</span></a>`;
+    h += `<h2>Settings used</h2><div class="settings">${esc(s.settings)}</div>`;
+    if (recent.length) h += `<h2>Latest alerts</h2><div class="rows">` + recent.map(a => alertRow(a)).join("") + `</div>`;
+    else if (forMarket(s)) h += `<h2>Latest alerts</h2><p class="tag" style="font-size:14px">No line breaks on your picked timeframes yet. The scan runs every 30 minutes while the US market is open.</p>`;
+    h += `<p class="fine">For information and learning only. No backtest yet: trendlines are redrawn as new candles arrive, so past breaks can't be replayed the same way as the other strategies. This is not investment advice.</p>`;
+    return h;
   }
 
   // ------------------------------------------------------------- backtest
@@ -2286,7 +2345,7 @@ html.sheet-open { overflow: hidden; }
 
   function viewNotify() {
     const pre = S.feed?.ntfy_prefix;
-    const followed = [...S.follow].filter(id => S.byId[id]);
+    const followed = [...S.follow].filter(id => forMarket(S.byId[id]));
     let h = header("Phone alerts");
     h += `<div class="prose"><p>Alerts always appear in this app. To also get a notification on your iPhone the moment the daily scan finds one, use the free <strong>ntfy</strong> app. Each strategy has its own channel, so you only get pinged for the ones you follow.</p></div>`;
     h += `<h2>Set it up</h2><ol class="steps">
@@ -2300,8 +2359,11 @@ html.sheet-open { overflow: hidden; }
       h += `<p class="tag">Follow a strategy first, then its channel appears here.</p>`;
     } else {
       followed.forEach(id => {
-        const t = `${pre}-${L().topic}${id}`;
-        h += `<div class="topic"><span style="min-width:0"><span style="display:block;font-size:13px;color:var(--muted)">${esc(stratName(id))}</span><code>${esc(t)}</code></span><button data-copy="${esc(t)}">Copy</button></div>`;
+        // Top-Down Analysis has one channel per timeframe, so you can pick which ones ping you
+        const chans = S.byId[id]?.kind === "lines" ? tdTfs().map(tf => [`${stratName(id)} · ${tf}`, `${pre}-${id}-${tf.toLowerCase()}`]) : [[stratName(id), `${pre}-${L().topic}${id}`]];
+        chans.forEach(([lbl, t]) => {
+          h += `<div class="topic"><span style="min-width:0"><span style="display:block;font-size:13px;color:var(--muted)">${esc(lbl)}</span><code>${esc(t)}</code></span><button data-copy="${esc(t)}">Copy</button></div>`;
+        });
       });
     }
     h += `<p class="fine">${L().scan} Investment Center Signals shows information about price patterns. It doesn't trade and isn't investment advice.</p>`;
@@ -2456,6 +2518,14 @@ html.sheet-open { overflow: hidden; }
     if (labClick(e)) return;
     const bk = e.target.closest("[data-back]");
     if (bk && S.navs > 0) { e.preventDefault(); history.back(); return; }
+    const tf = e.target.closest("[data-tdtf]");
+    if (tf) {
+      const cur = new Set(tdTfs()), t = tf.dataset.tdtf;
+      cur.has(t) ? cur.delete(t) : cur.add(t);
+      setPref("tdTfs", TD_TFS.filter(x => cur.has(x)));
+      if (CACHE[S.market]) S.feed = buildFeed(CACHE[S.market]);
+      rerender(); updateBadge(); return;
+    }
     const f = e.target.closest("[data-follow]");
     if (f) {
       const id = f.dataset.follow;
@@ -2711,11 +2781,11 @@ html.sheet-open { overflow: hidden; }
   async function loadMarket(m) {
     if (!CACHE[m]) {
       const b = MK[m].base;
-      const [feed, bt, stocks, liq, news, mentions] = await Promise.all([opt(b + "alerts.json"), opt(b + "backtest.json"), opt(b + "stocks.json"), m === "crypto" ? opt(b + "liquidations.json") : null, opt(b + "news.json"), opt(b + "mentions.json")]);
-      CACHE[m] = { feed, bt, stocks, liq, news, mentions, stockData: {} };
+      const [feed, bt, stocks, liq, news, mentions, td] = await Promise.all([opt(b + "alerts.json"), opt(b + "backtest.json"), opt(b + "stocks.json"), m === "crypto" ? opt(b + "liquidations.json") : null, opt(b + "news.json"), opt(b + "mentions.json"), m === "stocks" ? opt("data/topdown/alerts.json") : null]);
+      CACHE[m] = { feed, bt, stocks, liq, news, mentions, td, stockData: {} };
     }
     const c = CACHE[m];
-    S.market = m; S.liq = c.liq; S.news = c.news; S.mentions = c.mentions; S.newsSrc = "all"; S.newsSec = "all"; S.nq = ""; S.feed = c.feed; S.bt = c.bt; S.stocks = c.stocks; S.stockData = c.stockData;
+    S.market = m; S.liq = c.liq; S.news = c.news; S.mentions = c.mentions; S.newsSrc = "all"; S.newsSec = "all"; S.nq = ""; S.feed = buildFeed(c); S.bt = c.bt; S.stocks = c.stocks; S.stockData = c.stockData;
     S.stockBy = {}; (c.stocks?.stocks || []).forEach(r => S.stockBy[r.ticker] = r);
     S.q = ""; S.filter = "all";
     document.documentElement.dataset.market = m;

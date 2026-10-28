@@ -95,6 +95,8 @@ def main():
     content = json.loads((Path(__file__).parent / "strategies_content.json").read_text())
     for s in content["strategies"]:
         s["examples"] = []
+        if s.get("kind") == "lines":                     # Top-Down: drawn live on the Trendlines page instead
+            continue
         for side in (1, -1):
             df, res, i, start, end, move = find_example(s["id"], side)
             chart = payload(df, res, start, end)

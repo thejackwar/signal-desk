@@ -179,6 +179,33 @@
         "Lines are fitted to the last few swing points, so the drawing is an approximation."
       ],
       "settings": "Swing points use 4 bars each side, last 70 days, line fit through the last 2-3 swing highs and lows."
+    },
+    {
+      "id": "topdown",
+      "name": "Top-Down Analysis",
+      "kind": "lines",
+      "markets": [
+        "stocks"
+      ],
+      "category": "Multi-timeframe",
+      "level": "Intermediate",
+      "tagline": "Trendlines on seven timeframes, from weekly down to 5 minutes. Alerts when the price crosses one.",
+      "how": [
+        "Top-down analysis means reading a stock from the biggest picture to the smallest: first the weekly chart, then the daily, then the 4-hour and 1-hour, down to the 5-minute. Each timeframe gets its own trendlines, drawn automatically with the same rules as the Trendlines page.",
+        "The green (rising) line runs under the lows from the lowest point of the period and acts as support. The red (falling) line runs over the highs from the highest point and acts as resistance. When both are intact the price is squeezed between them; sooner or later it breaks out of one side.",
+        "The scan checks every S&P 100 stock and SPY every 30 minutes while the US market is open. When the price crosses the newest green or red line on one of the timeframes you picked, you get an alert. Each line alerts only once."
+      ],
+      "bullish": "The price crosses above the newest falling (red) trendline on that timeframe: the resistance gave way.",
+      "bearish": "The price crosses below the newest rising (green) trendline on that timeframe: the support gave way.",
+      "why": "A trendline marks where buyers or sellers have stepped in several times. When it finally gives way, the balance has shifted, and traders often watch for the move to continue. Checking the bigger timeframes first tells you whether a break goes with the larger trend or against it.",
+      "watch_out": [
+        "Alerts use the latest price, about 15 minutes delayed, while the candle is still forming. It can close back on the other side of the line by the end of the candle.",
+        "Short timeframes (30m, 15m, 5m) have many lines that break many times a day. Most of those breaks are noise, which is why they're off by default.",
+        "A break against the bigger timeframes (say, a 1-hour break up while the daily line points down) fails more often. The strength score counts how many bigger timeframes agree.",
+        "Trendlines are drawn by a fixed rule, not by a person. Another trader might draw them differently."
+      ],
+      "settings": "Lines from the highest high and lowest low of each timeframe's window, swing strength 5, a line counts as broken when a candle closes beyond it. Weekly 300 bars, daily 250, 4H 400, 1H 500, 30m 600, 15m and 5m 1,500. Regular US hours only, data 15+ minutes delayed (Alpaca).",
+      "examples": []
     }
   ]
 }
