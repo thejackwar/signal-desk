@@ -23,13 +23,13 @@ jobs:
           python-version: "3.12"
           cache: pip
       - run: pip install numpy
-      - name: Count news mentions per stock and coin (Google News)
+      - name: Count news mentions per stock, coin and commodity (Google News)
         run: python engine/mentions.py
       - name: Publish
         run: |
           git config user.name "signal-desk-bot"
           git config user.email "signal-desk-bot@users.noreply.github.com"
-          git add docs/data/mentions.json docs/data/crypto/mentions.json
+          git add docs/data    # a market with nothing new yet may have no file, so add the folder
           git diff --cached --quiet || git commit -m "News mentions $(date -u +%F)"
           git pull --rebase
           git push

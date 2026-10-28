@@ -25,12 +25,15 @@ jobs:
         run: python engine/backtest.py
       - name: Backtest every strategy on the full history of the top cryptocurrencies
         run: python engine/backtest.py --market crypto
+      - name: Backtest every strategy on 15 years of commodity futures
+        continue-on-error: true   # a bad download here must not hold back the stock and crypto results
+        run: python engine/backtest.py --market commodities
 
       - name: Publish results
         run: |
           git config user.name "signal-desk-bot"
           git config user.email "signal-desk-bot@users.noreply.github.com"
-          git add docs/data/backtest.json docs/data/crypto/backtest.json
+          git add docs/data    # only the backtest files change in this job
           git diff --cached --quiet || git commit -m "Backtest $(date -u +%F)"
           git pull --rebase
           git push

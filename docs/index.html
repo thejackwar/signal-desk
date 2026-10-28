@@ -14,6 +14,8 @@
 <link rel="apple-touch-icon" href="icon-180.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Unbounded:wght@500;700;800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<!-- commodities typefaces: own request, so a problem here never takes the other fonts down -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@600;700;800&family=Big+Shoulders+Stencil+Display:wght@800&display=swap">
 <style>
 /* Layout: phone = one column + bottom tabs. Desktop (>=1000px) = side nav, list pane, detail pane, like a trading terminal. Dark by design; charts on true black. */
 :root {
@@ -353,6 +355,102 @@ table.trades td:last-child { font: 600 13.5px var(--font-mono); white-space: now
 :root:not([data-market="crypto"]) .top { background: rgba(8,9,11,.82); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); }
 :root:not([data-market="crypto"]) .side { background: rgba(8,9,11,.78); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
 
+/* ===== commodities theme: the physical world. Umber ground, brass and verdigris, stencil type
+   like the lettering on oil drums and grain sacks, a survey map behind the pages. ===== */
+:root[data-market="commodities"] {
+  --bg: #13100b; --surface: #1c1811; --surface-2: #29231a; --hover: #211c14; --line: #3a3226;
+  --fg: #efe5cf; --muted: #b3a688; --faint: #847860;
+  --amber: #d4a443; --amber-bg: rgba(212,164,67,.13); --blue: #7cc0ad;
+  --bull: #93c46a; --bear: #e0574a; --bull-bg: rgba(147,196,106,.14); --bear-bg: rgba(224,87,74,.14);
+  --chart: #0d0b07;
+  --font-display: "Big Shoulders Display", "Bricolage Grotesque", system-ui, sans-serif;
+  --stencil: "Big Shoulders Stencil Display", "Big Shoulders Display", Impact, sans-serif;
+}
+:root[data-market="commodities"] body { background:
+  radial-gradient(900px 520px at 90% -12%, rgba(212,164,67,.12), transparent 62%),
+  radial-gradient(700px 480px at -10% 105%, rgba(124,192,173,.07), transparent 60%), var(--bg); background-attachment: fixed; }
+/* a fine grain over everything, like paper or rough metal */
+:root[data-market="commodities"] body::after { content: ""; position: fixed; inset: 0; z-index: 0; pointer-events: none; opacity: .09; mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); }
+:root[data-market="commodities"] body::before { background: transparent; }
+:root[data-market="commodities"] .top { background: rgba(19,16,11,.84); }
+:root[data-market="commodities"] .side { background: rgba(19,16,11,.8); }
+:root[data-market="commodities"] .tabs { background: rgba(19,16,11,.93); }
+:root[data-market="commodities"] .top h1 { font: 800 34px/1 var(--stencil); letter-spacing: .015em; color: var(--fg); }
+:root[data-market="commodities"] h2, :root[data-market="commodities"] .h3, :root[data-market="commodities"] .health h3, :root[data-market="commodities"] .card h3,
+:root[data-market="commodities"] .compare h3, :root[data-market="commodities"] .srow h3, :root[data-market="commodities"] .empty strong { font-family: var(--font-display); font-weight: 700; letter-spacing: .01em; }
+:root[data-market="commodities"] h2 { font-size: 22px; }
+:root[data-market="commodities"] .card h3, :root[data-market="commodities"] .compare h3, :root[data-market="commodities"] .h3 { font-size: 19px; }
+:root[data-market="commodities"] .srow h3 { font-size: 20px; }
+:root[data-market="commodities"] .brand em { color: var(--amber); }
+:root[data-market="commodities"] .tk { font: 700 17px/1.15 var(--font-display); letter-spacing: .01em; }
+:root[data-market="commodities"] .big2 { align-items: center; }
+:root[data-market="commodities"] .big2 .tk { font: 800 40px/1 var(--stencil); letter-spacing: .01em; }
+:root[data-market="commodities"] .chip[aria-pressed="true"], :root[data-market="commodities"] .btn:not(.ghost):not(.on) { background: var(--amber); border-color: var(--amber); color: #1d160b; }
+:root[data-market="commodities"] .mswitch button[aria-pressed="true"] { background: var(--surface-2); color: var(--amber); box-shadow: inset 0 0 0 1px rgba(212,164,67,.45); }
+/* crisp, machined corners instead of the soft cards elsewhere */
+:root[data-market="commodities"] .chartbox, :root[data-market="commodities"] .health, :root[data-market="commodities"] .card, :root[data-market="commodities"] .srow,
+:root[data-market="commodities"] .compare, :root[data-market="commodities"] .tablewrap, :root[data-market="commodities"] .tiles div, :root[data-market="commodities"] .ledger .total,
+:root[data-market="commodities"] .rule, :root[data-market="commodities"] .topic, :root[data-market="commodities"] .settings { border: 1px solid var(--line); border-radius: 4px; }
+:root[data-market="commodities"] .rule.bullish { border-left: 3px solid var(--bull); } :root[data-market="commodities"] .rule.bearish { border-left: 3px solid var(--bear); }
+:root[data-market="commodities"] .seg, :root[data-market="commodities"] .seg button, :root[data-market="commodities"] .search, :root[data-market="commodities"] .mswitch,
+:root[data-market="commodities"] .mswitch button { border-radius: 4px; }
+:root[data-market="commodities"] .row.sel { background: var(--surface-2); box-shadow: inset 3px 0 0 var(--amber); border-radius: 2px; }
+:root[data-market="commodities"] .meter.s3 i:nth-child(-n+3), :root[data-market="commodities"] .meter.s4 i { background: var(--amber); }
+:root[data-market="commodities"] .card.drivers { border-left: 3px solid var(--amber); }
+
+/* commodity tokens: the traded good itself */
+.tok { flex: none; position: relative; display: inline-grid; place-items: center; color: var(--tx); }
+.tok b { position: relative; font: 800 1em/1 "Big Shoulders Display", system-ui, sans-serif; letter-spacing: .03em; }
+.tok.ingot { clip-path: polygon(13% 14%, 87% 14%, 100% 88%, 0 88%);
+  background: linear-gradient(180deg, var(--c2) 0 34%, color-mix(in srgb, var(--c2) 55%, var(--c1)) 34% 40%, var(--c1) 40% 100%); }
+.tok.ingot b { top: 7%; text-shadow: 0 1px 0 rgba(255,255,255,.35); }
+.tok.drum { border-radius: 4px / 22%; scale: .84 1;
+  background: linear-gradient(180deg, transparent 0 20%, rgba(0,0,0,.35) 20% 25%, transparent 25% 75%, rgba(0,0,0,.35) 75% 80%, transparent 80%),
+              linear-gradient(90deg, var(--c1), var(--c2) 40%, var(--c1) 92%); }
+.tok.drum b { scale: 1.19 1; }
+.tok.sack { border-radius: 30% 30% 24% 24% / 22% 22% 30% 30%; background: radial-gradient(circle at 42% 40%, var(--c2), var(--c1) 82%);
+  box-shadow: inset 0 3px 0 -1px rgba(0,0,0,.25); }
+.tok.bean { border-radius: 50% / 44%; background: radial-gradient(ellipse at 38% 32%, var(--c2), var(--c1) 78%); }
+.tok.tag { border-radius: 26% 26% 44% 44%; background: radial-gradient(circle at 50% 17%, var(--bg) 0 8%, transparent 9%), linear-gradient(170deg, var(--c2), var(--c1)); }
+.tok.tag b { top: 10%; }
+.ntag .tok { font-size: 6px !important; }
+
+/* the pit board */
+.pitboard { border: 1px solid var(--line); border-radius: 4px; background: var(--surface); margin-bottom: 14px; }
+.pitboard .hd { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; padding: 12px 14px 6px; }
+.pitboard h3 { margin: 0; font: 800 26px/1 var(--stencil); letter-spacing: .02em; }
+.pitboard .hd span { color: var(--muted); font-size: 12.5px; text-align: right; }
+.pits { display: grid; }
+.pit { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr) auto; gap: 10px; align-items: center; text-align: left; padding: 9px 14px; border-top: 1px dashed var(--line); }
+.pit:hover { background: var(--hover); }
+.pit.on { background: var(--surface-2); box-shadow: inset 3px 0 0 var(--amber); }
+.pit .pn { font: 700 16px/1.15 var(--font-display); letter-spacing: .01em; min-width: 0; }
+.pit .pn small { display: block; font: 400 12px var(--font-body); color: var(--faint); letter-spacing: 0; margin-top: 2px; }
+.pit .pt { display: flex; flex-wrap: wrap; gap: 3px; }
+.pit .pc { text-align: right; font: 600 15px/1.2 var(--font-mono); font-variant-numeric: tabular-nums; }
+.pit .pc small { display: block; font-size: 11px; color: var(--faint); font-weight: 500; }
+.pit .pc small span { font-size: 11px; }
+.pfoot { margin: 0; padding: 10px 14px 12px; border-top: 1px solid var(--line); color: var(--muted); font-size: 13px; }
+.ratios { margin-bottom: 16px; }
+.ratios h3 { font: 700 19px var(--font-display); letter-spacing: .01em; margin: 0 2px 8px; }
+.rgrid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.rgrid > div { border: 1px solid var(--line); border-radius: 4px; padding: 10px 12px; min-width: 0; background: color-mix(in srgb, var(--surface) 70%, transparent); }
+.rgrid .rn { display: block; color: var(--muted); font-size: 13px; }
+.rgrid b { display: block; font: 800 28px/1.15 var(--font-display); margin-top: 2px; font-variant-numeric: tabular-nums; }
+.rgrid em { display: block; font: 500 11.5px var(--font-mono); font-style: normal; color: var(--faint); }
+.rgrid p { margin: 6px 0 0; font-size: 12.5px; color: var(--muted); line-height: 1.4; }
+@media (max-width: 620px) { .rgrid { grid-template-columns: 1fr; } .rgrid > div { display: grid; grid-template-columns: auto 1fr; gap: 0 14px; align-items: baseline; }
+  .rgrid .rn { grid-column: 1 / -1; } .rgrid p { grid-column: 1 / -1; } }
+@media (max-width: 420px) { .pit { grid-template-columns: minmax(0, 1fr) auto; } .pit .pt { grid-column: 1 / -1; grid-row: 2; } }
+@media (min-width: 1000px) { .pane.list .rgrid { grid-template-columns: 1fr; } .pane.list .rgrid > div { display: grid; grid-template-columns: auto 1fr; gap: 0 14px; align-items: baseline; }
+  .pane.list .rgrid .rn, .pane.list .rgrid p { grid-column: 1 / -1; } }
+
+/* three markets: stack the switch in the narrow side nav, tighten it on small phones */
+.side .mswitch { flex-direction: column; }
+.side .mswitch button { justify-content: flex-start; }
+@media (max-width: 400px) { .mswitch button { gap: 4px; padding: 7px 4px; font-size: 12.5px; } }
+
 .bdlabel { display: block; margin-top: 12px; color: var(--faint); opacity: .8; font-size: 10.5px; line-height: 1.45; }
 
 /* liquidation heatmap */
@@ -540,15 +638,33 @@ canvas.hm { display: block; touch-action: pan-y; }
   }
   const money = v => v == null ? "–" : Math.abs(v) >= 1 || v === 0 ? v.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : String(+v.toPrecision(4));
   const axisLbl = t => Math.abs(t) >= 1000 ? Math.round(t).toLocaleString("en-US") : Math.abs(t) >= 1 || t === 0 ? t.toFixed(t % 1 ? 1 : 0) : String(+t.toPrecision(3));
-  const disp = t => String(t).replace(/-USD$/, "");
+  const sym = t => String(t).replace(/-USD$|=F$/, "");
+  const disp = t => isComm() && S.stockBy?.[t] ? S.stockBy[t].name.replace(/ \(.*\)$/, "") : sym(t);
   const MK = {
-    stocks: { noun: "stocks", one: "stock", Tab: "Stocks", index: "S&amp;P 100", base: "data/", search: "Search ticker or company",
+    stocks: { noun: "stocks", one: "stock", Tab: "Stocks", index: "S&amp;P 100", base: "data/", search: "Search ticker or company", topic: "",
               scan: "The scan runs once a day after the US market closes (around 23:15 Milan time)." },
-    crypto: { noun: "coins", one: "coin", Tab: "Coins", index: "top crypto", base: "data/crypto/", search: "Search coin",
+    crypto: { noun: "coins", one: "coin", Tab: "Coins", index: "top crypto", base: "data/crypto/", search: "Search coin", topic: "crypto-",
               scan: "The crypto scan runs every day shortly after the daily candle closes (around 01:20 Milan time), weekends included." },
+    commodities: { noun: "commodities", one: "commodity", Tab: "Futures", Title: "Commodities", index: "commodity", base: "data/commodities/", search: "Search gold, oil, wheat…", topic: "commodities-",
+              scan: "The commodities scan runs Monday to Friday after the futures settle (around midnight Milan time)." },
   };
   const L = () => MK[S.market] || MK.stocks;
   const isCrypto = () => S.market === "crypto";
+  const isComm = () => S.market === "commodities";
+  const hasIcon = () => isCrypto() || isComm();
+  const icon = (t, size) => isCrypto() ? coin(t, size) : isComm() ? token(t, size) : "";
+  // Commodities are drawn as the physical thing that's traded: metals as cast ingots, energy as
+  // drums, grains as sacks, softs as beans, livestock as ear tags. Colours follow the material.
+  const SHAPE = { "Precious metals": "ingot", "Industrial metals": "ingot", Energy: "drum", Grains: "sack", Softs: "bean", Livestock: "tag" };
+  const MATERIAL = { GC: ["#9a6c18", "#f6d77f"], SI: ["#7d858d", "#eef1f4"], PL: ["#6f7c85", "#d9e2e7"], PA: ["#857b6a", "#e3dacb"],
+    HG: ["#7c3d1a", "#e7955d"], CL: ["#0b0a08", "#4b463b", "#efe5cf"], BZ: ["#1c1812", "#665a43", "#efe5cf"], NG: ["#173f8f", "#7ec0ff", "#fff"],
+    RB: ["#9c6a12", "#f2c45c"], HO: ["#6e2716", "#d4774f", "#fff"], ZC: ["#b98a12", "#f5d86a"], ZW: ["#9c7535", "#ead09a"],
+    ZS: ["#8d7d3e", "#ddd295"], KC: ["#2e1a0e", "#8b5a37", "#f3e3cc"], CC: ["#3f2214", "#a0633f", "#f3e3cc"], SB: ["#cfc9bd", "#ffffff"],
+    CT: ["#d9d3c7", "#ffffff"], LE: ["#5d3e24", "#bc8b5d", "#fff"], HE: ["#b86a74", "#f3bcc1"] };
+  function token(t, size = 30) {
+    const s = sym(t), m = MATERIAL[s] || ["#6b5f48", "#c7b58c"], shape = SHAPE[S.stockBy?.[t]?.sector] || "ingot";
+    return `<span class="tok ${shape}" style="--c1:${m[0]};--c2:${m[1]};--tx:${m[2] || "#1d160b"};width:${size}px;height:${size}px;font-size:${Math.round(size * .36)}px" aria-hidden="true"><b>${esc(s)}</b></span>`;
+  }
   const COIN_COLORS = { BTC: ["#f7931a", "#ffb84d"], ETH: ["#627eea", "#a5b4ff"], XRP: ["#3a4a5c", "#8fa3b8"], BNB: ["#f3ba2f", "#ffe08a"], SOL: ["#9945ff", "#14f195"],
     DOGE: ["#c2a633", "#f0d97a"], TRX: ["#ff0013", "#ff6b7a"], ADA: ["#0033ad", "#4d8bff"], LINK: ["#2a5ada", "#7fa2ff"], XLM: ["#1d1d1b", "#9aa0a6"], BCH: ["#0ac18e", "#7cf0cc"],
     AVAX: ["#e84142", "#ff8a8b"], LTC: ["#345d9d", "#a6c0ea"], HBAR: ["#222", "#888"], DOT: ["#e6007a", "#ff6cb8"], XMR: ["#ff6600", "#ffa366"], ETC: ["#328332", "#7fd47f"],
@@ -565,6 +681,7 @@ canvas.hm { display: block; touch-action: pan-y; }
   const PALETTES = {
     stocks: { bg: "#000", up: "#32c48d", down: "#f05a63", grid: "#1b1e24", axis: "#6b727c", accent: "#f2b33d", accent2: "#74a7f5", muted: "#9aa1ab", band: "#74a7f5", shape: "#f2b33d" },
     crypto: { bg: "#07040f", up: "#2cf59a", down: "#ff4f9a", grid: "#1c1530", axis: "#7d73a3", accent: "#b57bff", accent2: "#4de8ff", muted: "#a59cc4", band: "#4de8ff", shape: "#ffd23f" },
+    commodities: { bg: "#0d0b07", up: "#93c46a", down: "#e0574a", grid: "#231e15", axis: "#857a62", accent: "#d4a443", accent2: "#7cc0ad", muted: "#b2a587", band: "#7cc0ad", shape: "#efd27c" },
   };
   function applyPalette() {
     Object.assign(C, PALETTES[S.market] || PALETTES.stocks);
@@ -726,8 +843,8 @@ canvas.hm { display: block; touch-action: pan-y; }
   function alertRow(a, opts = {}) {
     const idx = S.feed.alerts.indexOf(a);
     const sinceTxt = a.since_days > 0 ? `${chg(a.since)} <span style="color:var(--faint)">${a.since_days}d</span>` : `<span style="color:var(--faint)">today</span>`;
-    return `<a class="row alert ${a.side}${isCrypto() && !opts.showDate ? " withcoin" : ""}" href="#alert-${idx}">
-      <span class="stripe"></span>${isCrypto() && !opts.showDate ? coin(a.ticker, 32) : ""}
+    return `<a class="row alert ${a.side}${hasIcon() && !opts.showDate ? " withcoin" : ""}" href="#alert-${idx}">
+      <span class="stripe"></span>${!opts.showDate ? icon(a.ticker, 32) : ""}
       <span class="main"><span class="tk">${esc(opts.showDate ? fmtDate(a.date, { day: "numeric", month: "short" }) : disp(a.ticker))}</span><span class="strat">${esc(stratName(a.strategy))}</span>
         <div class="note">${esc(a.note)}</div>
         <div class="info">${meter(a.strength)}<span class="pill">${a.side}</span></div></span>
@@ -785,7 +902,7 @@ canvas.hm { display: block; touch-action: pan-y; }
     if (!a) return viewAlerts();
     const s = S.byId[a.strategy], st = a.strength, stock = S.stockBy[a.ticker];
     let h = header("", "#alerts");
-    h += `<div class="big2">${isCrypto() ? coin(a.ticker, 40) : ""}<span class="tk">${esc(disp(a.ticker))}</span><span class="px">${money(a.price)}</span><span class="pill ${a.side}">${a.side}</span></div>`;
+    h += `<div class="big2">${icon(a.ticker, 40)}<span class="tk">${esc(disp(a.ticker))}</span><span class="px">${money(a.price)}</span><span class="pill ${a.side}">${a.side}</span></div>`;
     h += `<p class="sub">${stock ? `<a href="#stock-${esc(a.ticker)}">${esc(stock.name)}</a> · ` : ""}${esc(s?.name)} · close of ${esc(fmtDate(a.date, { weekday: "short", day: "numeric", month: "long" }))}</p>`;
     h += `<div class="chartbox" id="achart"><p class="loading">Loading chart…</p></div>`;
     h += `<p class="caption"><strong>${esc(a.note)}</strong></p>`;
@@ -824,6 +941,7 @@ canvas.hm { display: block; touch-action: pan-y; }
   function healthCard() {
     const M = S.stocks, b = M.breadth200;
     if (isCrypto()) return moodCard();
+    if (isComm()) return pitBoard() + ratiosCard();
     const mood = b >= 60 ? ["Broad uptrend", "Most stocks are above their long-term average. Bullish alerts have the wind behind them."]
       : b >= 40 ? ["Mixed market", "The market is split. Be more selective and favour stronger alerts."]
       : ["Weak market", "Most stocks are below their long-term average. Bullish alerts are fighting the tide."];
@@ -850,6 +968,42 @@ canvas.hm { display: block; touch-action: pan-y; }
       <div class="kv"><div><span>Green today</span><b class="up">${M.advancers}</b></div><div><span>Red today</span><b class="down">${M.decliners}</b></div><div><span>Alerts today</span><b>${bu}<span style="display:inline;color:var(--bull);font-size:13px;letter-spacing:0">▲</span> ${today.length - bu}<span style="display:inline;color:var(--bear);font-size:13px;letter-spacing:0">▼</span></b></div></div></div>`;
   }
 
+  // Commodities overview: one line per sector of the futures pit, with the goods traded in it.
+  const SECTORS = ["Precious metals", "Industrial metals", "Energy", "Grains", "Softs", "Livestock"];
+  function pitBoard() {
+    const M = S.stocks, b = M.breadth200, q = (S.q || "").toLowerCase();
+    const avg = (rs, k) => rs.reduce((a, r) => a + (r[k] ?? 0), 0) / rs.length;
+    const rows = SECTORS.map(name => {
+      const m = M.stocks.filter(r => r.sector === name);
+      if (!m.length) return "";
+      const up = m.filter(r => (r.vs200 ?? 0) > 0).length;
+      return `<button class="pit${q === name.toLowerCase() ? " on" : ""}" data-sector="${esc(name)}" aria-pressed="${q === name.toLowerCase()}">
+        <span class="pn">${esc(name)}<small>${up} of ${m.length} above 200-day</small></span>
+        <span class="pt">${m.map(r => token(r.ticker, 24)).join("")}</span>
+        <span class="pc">${chg(avg(m, "chg1d"))}<small>${chg(avg(m, "chg1m"))} 1m</small></span></button>`;
+    }).join("");
+    const mood = b >= 60 ? "Most commodities are above their 200-day average: a broad commodity uptrend."
+      : b >= 40 ? "The complex is split. Metals, energy and crops are moving on their own stories."
+      : "Most commodities are below their 200-day average: a broad commodity downtrend.";
+    const today = (S.feed?.alerts || []).filter(a => a.date === S.feed.as_of), bu = today.filter(a => a.side === "bullish").length;
+    return `<section class="pitboard"><div class="hd"><h3>The pit</h3><span>${M.stocks.filter(r => (r.vs200 ?? 0) > 0).length} of ${M.stocks.length} above their 200-day average</span></div>
+      <div class="pits">${rows}</div>
+      <p class="pfoot">${mood} Tap a sector to show only its contracts. Today: <b class="up">${M.advancers}</b> up, <b class="down">${M.decliners}</b> down, ${bu}▲ ${today.length - bu}▼ alerts.</p></section>`;
+  }
+
+  // Ratios commodity traders watch, from today's settlement prices.
+  function ratiosCard() {
+    const r = t => S.stockBy[t], out = [];
+    const rel = (a, b) => a.chg1m == null || b.chg1m == null ? null : ((1 + a.chg1m / 100) / (1 + b.chg1m / 100) - 1) * 100;
+    const gc = r("GC=F"), si = r("SI=F"), hg = r("HG=F"), cl = r("CL=F"), bz = r("BZ=F");
+    if (gc && si) out.push(["Gold to silver", (gc.price / si.price).toFixed(1), rel(gc, si), "ounces of silver buy one ounce of gold. A high number means silver is cheap next to gold."]);
+    if (hg && gc) out.push(["Copper to gold", (hg.price / gc.price * 1000).toFixed(2), rel(hg, gc), "× 1,000. Copper follows factories and building, gold follows fear: a rising ratio points to growth."]);
+    if (bz && cl) out.push(["Brent over WTI", "$" + (bz.price - cl.price).toFixed(2), null, "a barrel: what the world oil benchmark costs on top of US crude."]);
+    if (!out.length) return "";
+    return `<section class="ratios"><h3>Ratios traders watch</h3><div class="rgrid">${out.map(([n, v, c, t]) =>
+      `<div><span class="rn">${n}</span><b>${v}</b>${c == null ? "" : `<em>${chg(c)} in a month</em>`}<p>${t}</p></div>`).join("")}</div></section>`;
+  }
+
   function moversStrip() {
     const all = S.stocks.stocks.slice().sort((a, b) => b.chg1d - a.chg1d);
     const card = (r, hot) => `<a class="mover ${hot ? "hot" : "cold"}" href="#stock-${esc(r.ticker)}">${coin(r.ticker, 34)}<span class="sym">${esc(disp(r.ticker))}</span><b>${chg(r.chg1d)}</b><small>${money(r.price)}</small></a>`;
@@ -859,14 +1013,16 @@ canvas.hm { display: block; touch-action: pan-y; }
 
   function viewStocks() {
     S.firstSel = null;
-    if (!S.stocks) return header(L().Tab) + `<div class="empty"><strong>No ${L().one} data yet</strong>These pages appear after the next daily scan runs on GitHub.</div>`;
+    if (!S.stocks) return header(L().Title || L().Tab) + `<div class="empty"><strong>No ${L().one} data yet</strong>These pages appear after the next daily scan runs on GitHub.</div>`;
     const sort = pref("stockSort", "ticker");
-    const keys = { ticker: ["Ticker", (a, b) => a.ticker.localeCompare(b.ticker)], chg1d: ["Today", (a, b) => b.chg1d - a.chg1d],
+    // commodities: "Ticker" sorts like the pit board, sector by sector, since GC/CL/ZW mean little to most people
+    const pitOrder = (a, b) => SECTORS.indexOf(a.sector) - SECTORS.indexOf(b.sector) || a.name.localeCompare(b.name);
+    const keys = { ticker: isComm() ? ["Sector", pitOrder] : ["Ticker", (a, b) => a.ticker.localeCompare(b.ticker)], chg1d: ["Today", (a, b) => b.chg1d - a.chg1d],
       chg1m: ["1 month", (a, b) => b.chg1m - a.chg1m], vs200: ["vs 200d", (a, b) => (b.vs200 ?? -999) - (a.vs200 ?? -999)],
       alerts: ["Alerts", (a, b) => (b.bull + b.bear) - (a.bull + a.bear) || a.ticker.localeCompare(b.ticker)] };
     const list = S.stocks.stocks.slice().sort(keys[sort][1]);
     S.firstSel = "stock-" + list[0].ticker;
-    let h = header(L().Tab, null, `<div class="stamp">${esc(S.feed?.universe || "")}<br>close ${fmtDate(S.stocks.as_of, { day: "numeric", month: "short" })}</div>`);
+    let h = header(L().Title || L().Tab, null, `<div class="stamp">${esc(S.feed?.universe || "")}<br>close ${fmtDate(S.stocks.as_of, { day: "numeric", month: "short" })}</div>`);
     h += healthCard();
     if (isCrypto()) h += heatmapCard() + moversStrip();
     h += `<input class="search" id="stocksearch" type="search" placeholder="${L().search}" autocomplete="off" aria-label="Search" value="${esc(S.q || "")}">`;
@@ -875,8 +1031,8 @@ canvas.hm { display: block; touch-action: pan-y; }
     for (const r of list) {
       const right = sort === "chg1m" ? chg(r.chg1m) + `<small style="color:var(--faint)">1 month</small>` : sort === "vs200" ? chg(r.vs200) + `<small style="color:var(--faint)">vs 200d</small>` : `${money(r.price)}<small>${chg(r.chg1d)}</small>`;
       const dots = (r.bull ? `<i style="background:var(--bull)" title="${r.bull} bullish alerts"></i>` : "") + (r.bear ? `<i style="background:var(--bear)" title="${r.bear} bearish alerts"></i>` : "");
-      h += `<a class="row stock${isCrypto() ? " withcoin" : ""}" href="#stock-${esc(r.ticker)}" data-q="${esc((r.ticker + " " + r.name + " " + r.sector).toLowerCase())}">
-        ${isCrypto() ? coin(r.ticker, 32) : ""}<span style="min-width:0"><span class="tk">${esc(disp(r.ticker))}</span>${dots ? `<span class="dots">${dots}</span>` : ""}<span class="nm">${esc(r.name)}</span></span>
+      h += `<a class="row stock${hasIcon() ? " withcoin" : ""}" href="#stock-${esc(r.ticker)}" data-q="${esc((r.ticker + " " + r.name + " " + r.sector).toLowerCase())}">
+        ${icon(r.ticker, 32)}<span style="min-width:0"><span class="tk">${esc(disp(r.ticker))}</span>${dots ? `<span class="dots">${dots}</span>` : ""}<span class="nm">${esc(isComm() ? [sym(r.ticker), r.exch, r.sector].filter(Boolean).join(" · ") : r.name)}</span></span>
         ${spark(r.spark)}<span class="q">${right}</span></a>`;
     }
     h += `</div><p class="empty" id="nomatch" hidden>Nothing matches that search.</p>`;
@@ -895,8 +1051,9 @@ canvas.hm { display: block; touch-action: pan-y; }
     if (!r) return viewStocks();
     const alerts = (S.feed?.alerts || []).filter(a => a.ticker === t);
     let h = header("", "#stocks");
-    h += `<div class="big2">${isCrypto() ? coin(t, 44) : ""}<span class="tk">${esc(disp(t))}</span><span class="px">${money(r.price)}</span>${chg(r.chg1d)}</div>`;
-    h += `<p class="sub">${esc(r.name)}${r.sector ? " · " + esc(r.sector) : ""}</p>`;
+    h += `<div class="big2">${icon(t, 44)}<span class="tk">${esc(disp(t))}</span><span class="px">${money(r.price)}</span>${chg(r.chg1d)}</div>`;
+    h += isComm() ? `<p class="sub">${esc(sym(t))} front-month future on ${esc(r.exch || "–")} · priced in ${esc(r.unit || "–")}</p>`
+      : `<p class="sub">${esc(r.name)}${r.sector ? " · " + esc(r.sector) : ""}</p>`;
     const trend = r.vs200 == null ? "–" : r.vs200 >= 0 ? "Long-term uptrend" : "Long-term downtrend";
     h += `<div class="tiles four" style="margin:0 0 14px">
       <div><span>1 month</span><b>${chg(r.chg1m)}</b><small>&nbsp;</small></div>
@@ -907,7 +1064,8 @@ canvas.hm { display: block; touch-action: pan-y; }
       <div class="ends"><span>${money(r.lo52)}</span><span>${r.pos52 != null ? Math.round(r.pos52) + "% of the way up" : ""}</span><span>${money(r.hi52)}</span></div></div>`;
     h += `<div class="chartbox" id="schart"><p class="loading">Loading chart…</p></div>`;
     h += `<p class="hint">One year of daily candles with the 50- and 200-day averages. Triangles mark alerts from all strategies in the last few weeks.</p>`;
-    if (!isCrypto()) h += `<p style="margin:4px 0 18px"><a class="btn ghost" href="trendlines.html#${encodeURIComponent(t)}">Trendlines on 7 timeframes ›</a></p>`;
+    if (isComm() && r.drivers) h += `<div class="card drivers"><h3>What moves the price</h3><p>${esc(r.drivers)}.</p><p class="hint" style="margin:0">Prices follow the nearest contract, so the chart can jump a little when it rolls to the next month.</p></div>`;
+    if (S.market === "stocks") h += `<p style="margin:4px 0 18px"><a class="btn ghost" href="trendlines.html#${encodeURIComponent(t)}">Trendlines on 7 timeframes ›</a></p>`;
     h += mentionsCard(t) + newsFor(t);
     h += `<h2>Recent alerts on ${esc(disp(t))}</h2>`;
     if (!alerts.length) h += `<p class="tag" style="font-size:14px">No strategy has fired on ${esc(disp(t))} in the last few weeks.</p>`;
@@ -1029,7 +1187,7 @@ canvas.hm { display: block; touch-action: pan-y; }
     h += `<div class="bwgrid">${lst(r.best, "Best alerts (20 days later)")}${lst(r.worst, "Worst alerts (20 days later)")}</div>`;
     h += `<div class="card"><h3>Read this before trusting the numbers</h3><ul class="watch" style="color:var(--muted);font-size:14px">
       <li>No trading costs, taxes or slippage. Strategies that trade often look better here than in real life.</li>
-      <li>It uses ${B.demo ? "the demo list" : esc(B.universe)}. ${isCrypto() ? "Coins that collapsed and dropped out of the top list are missing" : "Companies that collapsed and left the index are missing"}, which flatters every result, buy &amp; hold included.</li>
+      <li>It uses ${B.demo ? "the demo list" : esc(B.universe)}. ${isCrypto() ? "Coins that collapsed and dropped out of the top list are missing" : isComm() ? "Prices are stitched from front-month contracts, so the jumps when one contract rolls into the next count as moves" : "Companies that collapsed and left the index are missing"}, which flatters every result, buy &amp; hold included.</li>
       <li>Past results don't predict future ones. A rule that worked for 15 years can stop working.</li></ul></div>`;
     return { html: h, after: () => {
       drawHist(document.getElementById("bthist"), st.hist);
@@ -1374,7 +1532,7 @@ canvas.hm { display: block; touch-action: pan-y; }
     return t.toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long" });
   }
   function newsItem(n, opts = {}) {
-    const tags = (n.tickers || []).filter(t => S.stockBy[t]).map(t => `<a class="ntag" href="#stock-${esc(t)}">${isCrypto() ? coin(t, 16) : ""}${esc(disp(t))}</a>`).join("");
+    const tags = (n.tickers || []).filter(t => S.stockBy[t]).map(t => `<a class="ntag" href="#stock-${esc(t)}">${icon(t, 16)}${esc(disp(t))}</a>`).join("");
     return `<article class="news${opts.compact ? " compact" : ""}">
       <a class="nlink" href="${esc(n.link)}" target="_blank" rel="noopener noreferrer">
         <span class="nmeta"><b>${esc(n.source)}</b> · ${esc(ago(n.time))}</span>
@@ -1388,7 +1546,7 @@ canvas.hm { display: block; touch-action: pan-y; }
   }
   function viewNews() {
     const N = S.news;
-    let h = header("News", null, N ? `<div class="stamp">${isCrypto() ? "Crypto" : "Markets"}<br>updated ${esc(ago(N.generated_at))}</div>` : "") + newsSwitch("news");
+    let h = header("News", null, N ? `<div class="stamp">${isCrypto() ? "Crypto" : isComm() ? "Commodities" : "Markets"}<br>updated ${esc(ago(N.generated_at))}</div>` : "") + newsSwitch("news");
     if (!N?.items?.length) return h + `<div class="empty"><strong>No headlines yet</strong>News appears after the hourly news update runs on GitHub.</div>`;
     const counts = {}; N.items.forEach(n => counts[n.source] = (counts[n.source] || 0) + 1);
     const srcs = Object.keys(counts).sort((a, b) => counts[b] - counts[a]);
@@ -1397,7 +1555,7 @@ canvas.hm { display: block; touch-action: pan-y; }
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="${d < 0 ? "m15 18-6-6 6-6" : "m9 18 6-6-6-6"}"/></svg></button>`;
     h += `<div class="chipbar">${arrow(-1)}<div class="chips" role="group" aria-label="Filter news">
       <button class="chip" data-nsrc="all" aria-pressed="${f === "all"}">All · ${N.items.length}</button>
-      <button class="chip" data-nsrc="tagged" aria-pressed="${f === "tagged"}">${isCrypto() ? "Mentions a coin" : "Mentions a stock"}</button>
+      <button class="chip" data-nsrc="tagged" aria-pressed="${f === "tagged"}">${isCrypto() ? "Mentions a coin" : isComm() ? "Mentions a commodity" : "Mentions a stock"}</button>
       ${srcs.map(x => `<button class="chip" data-nsrc="${esc(x)}" aria-pressed="${f === x}">${esc(x)} · ${counts[x]}</button>`).join("")}</div>${arrow(1)}</div>`;
     const list = N.items.filter(n => f === "all" || (f === "tagged" ? (n.tickers || []).some(t => S.stockBy[t]) : n.source === f));
     let grp = "";
@@ -1438,15 +1596,15 @@ canvas.hm { display: block; touch-action: pan-y; }
     const hasSurge = M.items.some(m => m.surge != null), daysKnown = Math.max(...M.items.map(m => m.days_known || 1));
     h += `<p class="tag" style="font-size:14px;margin:6px 0 12px">How many news articles mentioned each ${L().one} in the last 24 hours${hasSurge ? ", and how that compares with a usual day" : ""}.</p>`;
     if (trending.length) h += `<div class="trend"><span class="lbl">${isCrypto() ? "🔥 Trending in the news" : "Trending in the news"}</span><div class="tcards">${trending.map(m =>
-      `<a class="tcard" href="#stock-${esc(m.ticker)}">${isCrypto() ? coin(m.ticker, 28) : ""}<span class="tk">${esc(disp(m.ticker))}</span><b>×${m.surge.toFixed(1)}</b><small>${cnt(m)} articles</small></a>`).join("")}</div></div>`;
+      `<a class="tcard" href="#stock-${esc(m.ticker)}">${icon(m.ticker, 28)}<span class="tk">${esc(disp(m.ticker))}</span><b>×${m.surge.toFixed(1)}</b><small>${cnt(m)} articles</small></a>`).join("")}</div></div>`;
     if (!hasSurge || (sort === "week" && daysKnown < 7)) h += `<div class="demo" style="margin:0 0 10px">The app builds its own daily history of mentions. "vs a usual day" appears after 3 days of updates, and the 7-day totals after 7 days (${daysKnown} day${daysKnown > 1 ? "s" : ""} so far).</div>`;
     h += `<div class="tools" style="margin-bottom:6px"><label>Sort</label><div class="seg sm" role="group" aria-label="Sort">${[["last24", "Most mentioned"], ["surge", "Biggest surge"], ["week", "Last 7 days"]].map(([k, t]) =>
       `<button data-bsort="${k}" aria-pressed="${sort === k}">${t}</button>`).join("")}</div></div>`;
     const key = sort === "week" ? "week" : "last24", mx = Math.max(...items.map(m => m[key] || 0)) || 1;
     h += `<div class="rows">` + items.map((m, i) => {
       const v = m[key];
-      return `<a class="row buzz${isCrypto() ? " withcoin" : ""}" href="#stock-${esc(m.ticker)}">
-        <span class="rank">${i + 1}</span>${isCrypto() ? coin(m.ticker, 30) : ""}
+      return `<a class="row buzz${hasIcon() ? " withcoin" : ""}" href="#stock-${esc(m.ticker)}">
+        <span class="rank">${i + 1}</span>${icon(m.ticker, 30)}
         <span style="min-width:0"><span class="tk">${esc(disp(m.ticker))}</span> ${surgeChip(m)}<span class="nm">${esc(m.name)}</span>
           <span class="mbar"><i style="width:${(v || 0) / mx * 100}%"></i></span></span>
         ${bars(m.series)}
@@ -1481,7 +1639,7 @@ canvas.hm { display: block; touch-action: pan-y; }
       h += `<p class="tag">Follow a strategy first, then its channel appears here.</p>`;
     } else {
       followed.forEach(id => {
-        const t = `${pre}-${isCrypto() ? "crypto-" : ""}${id}`;
+        const t = `${pre}-${L().topic}${id}`;
         h += `<div class="topic"><span style="min-width:0"><span style="display:block;font-size:13px;color:var(--muted)">${esc(stratName(id))}</span><code>${esc(t)}</code></span><button data-copy="${esc(t)}">Copy</button></div>`;
       });
     }
@@ -1584,6 +1742,8 @@ canvas.hm { display: block; touch-action: pan-y; }
     if (ms) { setPref("minStr", +ms.dataset.minstr); goList(); return; }
     const so = e.target.closest("[data-sort]");
     if (so) { setPref("sort", so.dataset.sort); goList(); return; }
+    const sc = e.target.closest("[data-sector]");
+    if (sc) { const v = sc.dataset.sector.toLowerCase(); S.q = S.q === v ? "" : v; rerender(); return; }
     const ss = e.target.closest("[data-ssort]");
     if (ss) { setPref("stockSort", ss.dataset.ssort); goList(); return; }
     const ex = e.target.closest("[data-ex]");
@@ -1629,17 +1789,33 @@ canvas.hm { display: block; touch-action: pan-y; }
   // a fading fill, a moving average and a band of candles. Seeded, so it never jumps around.
   function drawBackdrop() {
     const cv = document.getElementById("bgfx"); if (!cv) return;
-    const crypto = S.market === "crypto";
+    const crypto = S.market === "crypto", comm = S.market === "commodities", stocksMk = !crypto && !comm;
     const dpr = Math.min(2, devicePixelRatio || 1), W = innerWidth, H = innerHeight;
     cv.width = W * dpr; cv.height = H * dpr;
     const g = cv.getContext("2d"); g.setTransform(dpr, 0, 0, dpr, 0, 0); g.clearRect(0, 0, W, H);
-    let seed = crypto ? 7350 : 20261027;
+    let seed = crypto ? 7350 : comm ? 1859 : 20261027;
     const rnd = () => { seed |= 0; seed = seed + 0x6D2B79F5 | 0; let t = Math.imul(seed ^ seed >>> 15, 1 | seed); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; };
     const walk = (n, vol, drift) => { const a = [0]; for (let i = 1; i < n; i++) a.push(a[i - 1] + (rnd() - .5) * vol + drift + Math.sin(i / 23) * vol * .18); return a; };
     const gs = W > 1000 ? 64 : 48;
 
-    // grid: plain lines for stocks, a dotted field for crypto
-    if (crypto) {
+    // grid: plain lines for stocks, a dotted field for crypto, a survey map's contour lines for commodities
+    if (comm) {
+      // two "deposits", each ringed by wobbly contours; every fifth line is an index contour, drawn heavier like on a real map
+      const sites = [[W * .84, H * .16, W > 1000 ? 30 : 22], [W * .06, H * .62, W > 1000 ? 26 : 19]];
+      for (const [cx, cy, step] of sites) {
+        const ph = [rnd() * 6, rnd() * 6, rnd() * 6];
+        for (let k = 1; k <= 16; k++) {
+          g.beginPath();
+          for (let a = 0; a <= 6.30; a += .05) {
+            const r = k * step * (1 + .17 * Math.sin(3 * a + ph[0] + k * .11) + .09 * Math.sin(5 * a + ph[1] - k * .07) + .05 * Math.sin(8 * a + ph[2]));
+            const px = cx + Math.cos(a) * r * 1.25, py = cy + Math.sin(a) * r;
+            a ? g.lineTo(px, py) : g.moveTo(px, py);
+          }
+          g.closePath();
+          g.strokeStyle = k % 5 ? "rgba(212,164,67,0.07)" : "rgba(212,164,67,0.15)"; g.lineWidth = k % 5 ? 1 : 1.4; g.stroke();
+        }
+      }
+    } else if (crypto) {
       g.fillStyle = "rgba(181,123,255,0.11)";
       for (let x = gs / 2; x < W; x += gs / 2) for (let y = gs / 2; y < H; y += gs / 2) { g.beginPath(); g.arc(x, y, .9, 0, 7); g.fill(); }
     } else {
@@ -1649,7 +1825,11 @@ canvas.hm { display: block; touch-action: pan-y; }
     }
 
     // long price lines (crypto lines glow)
-    const lines = crypto ? [
+    const lines = comm ? [
+      { top: .2, amp: .14, color: "230,190,90", a: .2, fill: .05, drift: .3, vol: 5 },      // gold
+      { top: .38, amp: .13, color: "239,229,207", a: .12, fill: 0, drift: -.1, vol: 7 },     // crude
+      { top: .52, amp: .1, color: "124,192,173", a: .14, fill: 0, drift: .05, vol: 5 },      // wheat (verdigris so it reads apart from gold)
+    ] : crypto ? [
       { top: .3, amp: .22, color: "77,232,255", a: .22, fill: .06, drift: .5, vol: 9, glow: 14 },
       { top: .48, amp: .18, color: "181,123,255", a: .2, fill: .05, drift: .25, vol: 8, glow: 12 },
       { top: .4, amp: .12, color: "255,79,154", a: .12, fill: 0, drift: -.15, vol: 7, glow: 8 },
@@ -1664,19 +1844,19 @@ canvas.hm { display: block; touch-action: pan-y; }
     // (index + its averages); crypto coins each get their own band.
     const resample = vals => { const a = vals.filter(v => v != null); return Array.from({ length: N }, (_, i) => a[Math.min(a.length - 1, Math.round(i / (N - 1) * (a.length - 1)))]); };
     const realSets = BD ? BD.lines.map(l => resample(l.values)) : null;
-    if (BD && !crypto) { const flat = realSets.flat(); var shLo = Math.min(...flat), shHi = Math.max(...flat); }
-    if (BD && !crypto) lines.forEach(L => { L.top = .42; L.amp = .22; });
+    if (BD && stocksMk) { const flat = realSets.flat(); var shLo = Math.min(...flat), shHi = Math.max(...flat); }
+    if (BD && stocksMk) lines.forEach(L => { L.top = .42; L.amp = .22; });
     for (const [li, L] of lines.entries()) {
       if (realSets && !realSets[li]) continue;
       const v = realSets ? realSets[li] : walk(N, L.vol, L.drift);
-      const lo = realSets && !crypto ? shLo : Math.min(...v), hi = realSets && !crypto ? shHi : Math.max(...v);
+      const lo = realSets && stocksMk ? shLo : Math.min(...v), hi = realSets && stocksMk ? shHi : Math.max(...v);
       const y = i => H * (L.top + L.amp) - (v[i] - lo) / ((hi - lo) || 1) * H * L.amp * 2;
       g.beginPath(); for (let i = 0; i < N; i++) i ? g.lineTo(i * 4, y(i)) : g.moveTo(0, y(0));
       g.save();
       if (L.glow) { g.shadowColor = `rgba(${L.color},.8)`; g.shadowBlur = L.glow; }
       g.strokeStyle = `rgba(${L.color},${L.a})`; g.lineWidth = crypto ? 1.8 : 1.6; g.stroke();
       g.restore();
-      if (L.fill && !(realSets && !crypto && li > 0)) {
+      if (L.fill && !(realSets && stocksMk && li > 0)) {
         g.lineTo((N - 1) * 4, H); g.lineTo(0, H); g.closePath();
         const gr = g.createLinearGradient(0, H * L.top, 0, H * (L.top + L.amp * 2.4));
         gr.addColorStop(0, `rgba(${L.color},${L.fill})`); gr.addColorStop(1, `rgba(${L.color},0)`); g.fillStyle = gr; g.fill();
@@ -1699,6 +1879,22 @@ canvas.hm { display: block; touch-action: pan-y; }
       });
     }
 
+    // commodities: soil strata under the candles, the layers a drill core would show
+    if (comm) {
+      const tints = ["94,70,40", "120,92,52", "70,58,42", "140,108,60", "60,48,34"];
+      let prev = null;
+      for (let k = 0; k < 5; k++) {
+        const top = H * (.74 + k * .055), ph = rnd() * 6, amp = H * (.008 + rnd() * .012);
+        const yAt = x => top + Math.sin(x / (W * .22) + ph) * amp + Math.sin(x / (W * .07) + ph * 2) * amp * .35;
+        g.beginPath(); g.moveTo(0, yAt(0));
+        for (let x = 8; x <= W + 8; x += 8) g.lineTo(x, yAt(x));
+        g.lineTo(W, H); g.lineTo(0, H); g.closePath();
+        g.fillStyle = `rgba(${tints[k]},${.07 + k * .015})`; g.fill();
+        g.beginPath(); g.moveTo(0, yAt(0)); for (let x = 8; x <= W + 8; x += 8) g.lineTo(x, yAt(x));
+        g.strokeStyle = "rgba(212,164,67,0.08)"; g.lineWidth = 1; g.stroke();
+      }
+    }
+
     // candles along the bottom with a moving average
     const RC = BD?.candles;
     let cw = W > 1000 ? 11 : 9, n = Math.ceil(W / cw) + 1;
@@ -1713,7 +1909,7 @@ canvas.hm { display: block; touch-action: pan-y; }
       for (let i = 0; i < 20; i++) c[i] = RC.close[Math.max(0, RC.close.length - k - 20 + i)];
     } else c = walk(n + 20, crypto ? 4.5 : 3.2, .06);
     const allv = RC ? hh.concat(ll) : c, lo = Math.min(...allv), hi = Math.max(...allv), py = v => base - (v - lo) / ((hi - lo) || 1) * span;
-    const upC = crypto ? "rgba(44,245,154,0.17)" : "rgba(50,196,141,0.15)", dnC = crypto ? "rgba(255,79,154,0.17)" : "rgba(240,90,99,0.135)";
+    const upC = crypto ? "rgba(44,245,154,0.17)" : comm ? "rgba(147,196,106,0.16)" : "rgba(50,196,141,0.15)", dnC = crypto ? "rgba(255,79,154,0.17)" : comm ? "rgba(224,87,74,0.15)" : "rgba(240,90,99,0.135)";
     for (let i = 0; i < n; i++) {
       const o = RC ? oo[i] : c[i + 19], cl = c[i + 20], up = cl >= o, x = i * cw + cw / 2;
       const h1 = RC ? hh[i] : Math.max(o, cl) + rnd() * 1.6, l1 = RC ? ll[i] : Math.min(o, cl) - rnd() * 1.6;
@@ -1724,11 +1920,11 @@ canvas.hm { display: block; touch-action: pan-y; }
     g.beginPath();
     for (let i = 0; i < n; i++) { let m = 0; for (let k = 0; k < 10; k++) m += c[i + 20 - k]; m /= 10; const x = i * cw + cw / 2; i ? g.lineTo(x, py(m)) : g.moveTo(x, py(m)); }
     g.save(); if (crypto) { g.shadowColor = "rgba(181,123,255,.8)"; g.shadowBlur = 8; }
-    g.strokeStyle = crypto ? "rgba(181,123,255,0.22)" : "rgba(242,179,61,0.16)"; g.lineWidth = 1.5; g.stroke(); g.restore();
+    g.strokeStyle = crypto ? "rgba(181,123,255,0.22)" : comm ? "rgba(230,190,90,0.2)" : "rgba(242,179,61,0.16)"; g.lineWidth = 1.5; g.stroke(); g.restore();
 
     // darken the middle so text stays easy to read
     const vg = g.createRadialGradient(W / 2, H * .45, Math.min(W, H) * .15, W / 2, H * .45, Math.max(W, H) * .75);
-    vg.addColorStop(0, crypto ? "rgba(11,7,20,0.5)" : "rgba(8,9,11,0.45)"); vg.addColorStop(1, "rgba(0,0,0,0)");
+    vg.addColorStop(0, crypto ? "rgba(11,7,20,0.5)" : comm ? "rgba(19,16,11,0.5)" : "rgba(8,9,11,0.45)"); vg.addColorStop(1, "rgba(0,0,0,0)");
     g.fillStyle = vg; g.fillRect(0, 0, W, H);
   }
   let bgT; addEventListener("resize", () => { clearTimeout(bgT); bgT = setTimeout(drawBackdrop, 200); });
@@ -1747,7 +1943,7 @@ canvas.hm { display: block; touch-action: pan-y; }
     S.stockBy = {}; (c.stocks?.stocks || []).forEach(r => S.stockBy[r.ticker] = r);
     S.q = ""; S.filter = "all";
     document.documentElement.dataset.market = m;
-    document.querySelector('meta[name="theme-color"]').content = m === "crypto" ? "#0b0714" : "#08090b";
+    document.querySelector('meta[name="theme-color"]').content = { crypto: "#0b0714", commodities: "#13100b" }[m] || "#08090b";
     applyPalette();
     drawBackdrop();
     document.querySelectorAll('[data-l="tab"]').forEach(el => el.textContent = MK[m].Tab);
@@ -1755,7 +1951,7 @@ canvas.hm { display: block; touch-action: pan-y; }
     const fd = c.feed;
     document.getElementById("sidefoot").innerHTML = (fd ? `<b>${esc(fd.universe)}</b> · ${fd.tickers} ${MK[m].noun}<br>Close of ${fmtDate(fd.as_of, { day: "numeric", month: "short", year: "numeric" })}` : "");
   }
-  const switchHtml = () => [["stocks", "📈", "Stocks"], ["crypto", "🪙", "Crypto"]].map(([m, ic, t]) =>
+  const switchHtml = () => [["stocks", "📈", "Stocks"], ["crypto", "🪙", "Crypto"], ["commodities", "🛢️", "Commodities"]].map(([m, ic, t]) =>
     `<button data-market="${m}" aria-pressed="${S.market === m}"><span aria-hidden="true">${ic}</span>${t}</button>`).join("");
   async function switchMarket(m) {
     if (m === S.market) return;
@@ -1780,7 +1976,7 @@ canvas.hm { display: block; touch-action: pan-y; }
       const st = await fetch("data/strategies.json", { cache: "no-cache" }).then(r => r.json());
       S.strategies = st.strategies;
       S.strategies.forEach(s => S.byId[s.id] = s);
-      await loadMarket(pref("market", "stocks") === "crypto" ? "crypto" : "stocks");
+      await loadMarket(MK[pref("market", "stocks")] ? pref("market", "stocks") : "stocks");
       route();
     } catch (err) {
       console.error(err);

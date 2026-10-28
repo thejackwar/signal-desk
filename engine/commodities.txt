@@ -1,0 +1,25 @@
+# Commodity futures (Yahoo Finance front-month symbols, "=F"). Edit this list whenever you like.
+# Metals
+GC=F
+SI=F
+PL=F
+PA=F
+HG=F
+# Energy
+CL=F
+BZ=F
+NG=F
+RB=F
+HO=F
+# Grains
+ZC=F
+ZW=F
+ZS=F
+# Softs
+KC=F
+CC=F
+SB=F
+CT=F
+# Livestock
+LE=F
+HE=F

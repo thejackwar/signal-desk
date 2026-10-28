@@ -1,0 +1,33 @@
+name: Daily commodities scan
+
+on:
+  schedule:
+    # 22:40 UTC, Monday to Friday: after the CME/ICE daily settlements in both summer and winter time
+    - cron: "40 22 * * 1-5"
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: pip install -r requirements.txt
+      - name: Scan the commodity futures
+        env:
+          NTFY_PREFIX: ${{ vars.NTFY_PREFIX }}
+        run: python engine/scan.py --market commodities
+      - name: Publish new alerts
+        run: |
+          git config user.name "signal-desk-bot"
+          git config user.email "signal-desk-bot@users.noreply.github.com"
+          git add docs/data/commodities
+          git diff --cached --quiet || git commit -m "Commodity alerts for $(date -u +%F)"
+          git pull --rebase
+          git push

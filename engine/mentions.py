@@ -9,11 +9,11 @@ busy names: 24 hours -> 4 hours -> 1 hour (scaled up to a day and marked as
 an estimate). Each run also stores that day's 24-hour count, so the
 "vs a usual day" comparison builds up over the days.
 
-  python engine/mentions.py                    # both markets
+  python engine/mentions.py                    # every market
   python engine/mentions.py --market crypto
   python engine/mentions.py --demo             # simulated counts, no internet
 
-Writes docs/data/mentions.json and docs/data/crypto/mentions.json.
+Writes docs/data/mentions.json, docs/data/crypto/mentions.json and docs/data/commodities/mentions.json.
 """
 from __future__ import annotations
 
@@ -57,6 +57,18 @@ CRYPTO_QUERY = {
     "BCH-USD": '"Bitcoin Cash"', "ETC-USD": '"Ethereum Classic"',
 }
 CRYPTO_CONTEXT = "(crypto OR cryptocurrency OR token OR blockchain OR coin)"
+COMMODITY_QUERY = {
+    "GC=F": '"gold price" OR "gold prices" OR "gold futures"', "SI=F": '"silver price" OR "silver prices" OR "silver futures"',
+    "PL=F": '"platinum price" OR "platinum prices"', "PA=F": '"palladium price" OR "palladium prices"',
+    "HG=F": '"copper price" OR "copper prices" OR "copper futures"', "CL=F": '"WTI" OR "crude oil price" OR "oil prices"',
+    "BZ=F": '"Brent crude" OR "Brent oil"', "NG=F": '"natural gas prices" OR "natural gas futures"',
+    "RB=F": '"gasoline futures" OR "RBOB"', "HO=F": '"heating oil" OR "diesel futures"', "ZC=F": '"corn futures" OR "corn prices"',
+    "ZW=F": '"wheat futures" OR "wheat prices"', "ZS=F": '"soybean futures" OR "soybean prices"',
+    "KC=F": '"coffee prices" OR "arabica"', "CC=F": '"cocoa prices" OR "cocoa futures"', "SB=F": '"sugar prices" OR "sugar futures"',
+    "CT=F": '"cotton prices" OR "cotton futures"', "LE=F": '"cattle futures" OR "cattle prices"', "HE=F": '"hog futures" OR "hog prices"',
+}
+NAMES_FILE = {"stocks": "names.json", "crypto": "crypto_names.json", "commodities": "commodities_names.json"}
+OUT_FILE = {"stocks": "mentions.json", "crypto": "crypto/mentions.json", "commodities": "commodities/mentions.json"}
 
 
 def _get(url: str, timeout=30):
@@ -66,6 +78,8 @@ def _get(url: str, timeout=30):
 
 
 def query_for(t: str, name: str, market: str) -> str:
+    if market == "commodities":
+        return COMMODITY_QUERY.get(t, f'"{name} prices"')
     if market == "crypto":
         if t in CRYPTO_QUERY:
             return CRYPTO_QUERY[t]
@@ -142,14 +156,14 @@ def summarise(t: str, name: str, c: dict, hist: dict) -> dict:
 
 def run(market: str, demo: bool, previous: dict) -> dict:
     global DAYS_LIST
-    names = json.loads((ENGINE / ("names.json" if market == "stocks" else "crypto_names.json")).read_text())
+    names = json.loads((ENGINE / NAMES_FILE[market]).read_text())
     today = datetime.now(timezone.utc).date()
     days = [(today - timedelta(days=DAYS - 1 - i)).isoformat() for i in range(DAYS)]
     DAYS_LIST = days
     prev_hist = {x["ticker"]: x.get("history", {}) for x in previous.get("items", [])}
     rng = np.random.default_rng(5)
     items = []
-    for t, (name, _) in names.items():
+    for t, (name, *_) in names.items():
         if t in SKIP:
             continue
         if demo:
@@ -173,11 +187,11 @@ def run(market: str, demo: bool, previous: dict) -> dict:
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--demo", action="store_true")
-    ap.add_argument("--market", choices=["stocks", "crypto", "both"], default="both")
+    ap.add_argument("--market", choices=["stocks", "crypto", "commodities", "both"], default="both")   # both = all markets
     args = ap.parse_args()
-    for market in (["stocks", "crypto"] if args.market == "both" else [args.market]):
+    for market in (list(NAMES_FILE) if args.market == "both" else [args.market]):
         print(market)
-        out = ROOT / "docs" / "data" / ("mentions.json" if market == "stocks" else "crypto/mentions.json")
+        out = ROOT / "docs" / "data" / OUT_FILE[market]
         try:
             previous = json.loads(out.read_text()) if out.exists() and not args.demo else {}
         except Exception:

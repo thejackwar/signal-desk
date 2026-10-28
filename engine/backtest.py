@@ -224,7 +224,7 @@ def main():
     args = ap.parse_args()
     scan.configure(args.market)
     out = scan.DATA / "backtest.json"
-    data = fetch_demo(bars=3000, seed=11) if args.demo else fetch_real(load_tickers(), period="15y" if args.market == "stocks" else "max")
+    data = fetch_demo(bars=3000, seed=11) if args.demo else fetch_real(load_tickers(), period="max" if args.market == "crypto" else "15y")
     data = {t: df for t, df in data.items() if len(df) >= 300}
     if not data:
         sys.exit("No price data downloaded; leaving the previous backtest untouched.")

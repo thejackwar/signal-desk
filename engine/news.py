@@ -4,7 +4,8 @@ Collects market news headlines from public RSS feeds.
   python engine/news.py             # both markets
   python engine/news.py --demo      # sample items, no internet
 
-Writes docs/data/news.json (stocks) and docs/data/crypto/news.json (crypto):
+Writes docs/data/news.json (stocks), docs/data/crypto/news.json (crypto) and
+docs/data/commodities/news.json (commodities):
 headline, link, source, time, a short summary, and the tickers / coins the
 headline mentions. Only what the publishers put in their public feeds is
 used, and every item links to the full article on the publisher's site.
@@ -45,7 +46,17 @@ FEEDS = {
         ("Bitcoin Magazine", "https://bitcoinmagazine.com/feed"),
         ("CryptoSlate", "https://cryptoslate.com/feed/"),
     ],
+    "commodities": [
+        ("Investing.com", "https://www.investing.com/rss/news_11.rss"),            # commodities & futures
+        ("OilPrice.com", "https://oilprice.com/rss/main"),
+        ("Mining.com", "https://www.mining.com/feed/"),
+        ("CNBC", "https://www.cnbc.com/id/19836768/device/rss/rss.html"),          # energy
+        ("FXStreet", "https://www.fxstreet.com/rss/commodities"),
+        ("Kitco", "https://www.kitco.com/news/category/mining/rss"),
+    ],
 }
+NAMES_FILE = {"stocks": "names.json", "crypto": "crypto_names.json", "commodities": "commodities_names.json"}
+
 
 # Company names that are also everyday words: only tag them on the ticker itself
 # or with a company word next to them.
@@ -67,13 +78,21 @@ EXTRA_ALIASES = {
     "LINK-USD": ["Chainlink"], "XLM-USD": ["Stellar", "XLM"], "BCH-USD": ["Bitcoin Cash", "BCH"], "AVAX-USD": ["Avalanche", "AVAX"],
     "LTC-USD": ["Litecoin", "LTC"], "HBAR-USD": ["Hedera", "HBAR"], "DOT-USD": ["Polkadot"], "XMR-USD": ["Monero", "XMR"],
     "ETC-USD": ["Ethereum Classic"], "ATOM-USD": ["Cosmos", "ATOM"], "ALGO-USD": ["Algorand", "ALGO"],
+    "GC=F": ["gold", "Gold", "bullion", "XAU"], "SI=F": ["silver", "Silver", "XAG"], "PL=F": ["platinum", "Platinum"],
+    "PA=F": ["palladium", "Palladium"], "HG=F": ["copper", "Copper"],
+    "CL=F": ["WTI", "crude oil", "Crude oil", "Crude", "oil prices", "Oil prices", "OPEC"], "BZ=F": ["Brent"],
+    "NG=F": ["natural gas", "Natural gas", "Natural Gas", "LNG", "nat-gas", "natgas"], "RB=F": ["gasoline", "Gasoline", "RBOB"],
+    "HO=F": ["heating oil", "Heating oil", "diesel", "Diesel"], "ZC=F": ["corn", "Corn"], "ZW=F": ["wheat", "Wheat"],
+    "ZS=F": ["soybean", "Soybean", "soybeans", "Soybeans", "soy"], "KC=F": ["coffee", "Coffee", "arabica", "Arabica"],
+    "CC=F": ["cocoa", "Cocoa"], "SB=F": ["sugar", "Sugar"], "CT=F": ["cotton", "Cotton"],
+    "LE=F": ["cattle", "Cattle", "beef", "Beef"], "HE=F": ["hogs", "Hogs", "pork", "Pork"],
 }
 
 
 def matchers(market: str) -> list[tuple[str, re.Pattern]]:
-    names = json.loads((ENGINE / ("names.json" if market == "stocks" else "crypto_names.json")).read_text())
+    names = json.loads((ENGINE / NAMES_FILE[market]).read_text())
     out = []
-    for t, (name, _) in names.items():
+    for t, (name, *_) in names.items():
         aliases = set(EXTRA_ALIASES.get(t, []))
         if name not in AMBIGUOUS and market == "stocks":
             aliases.add(name)
@@ -176,6 +195,8 @@ def demo(market: str):
                    ("MarketWatch", "Stocks drift as investors await Fed decision"), ("Nasdaq", "Tesla deliveries beat estimates")],
         "crypto": [("CoinDesk", "Bitcoin holds near $80,000 as ETF flows turn positive"), ("Cointelegraph", "Ethereum fees hit yearly low"),
                    ("Decrypt", "Solana network upgrade goes live"), ("The Block", "XRP jumps after court ruling")],
+        "commodities": [("OilPrice.com", "Crude oil slips as US inventories build"), ("Kitco", "Gold holds near record as dollar softens"),
+                        ("Investing.com", "Coffee jumps on Brazil frost risk"), ("Mining.com", "Copper rises on China stimulus hopes")],
     }[market]
     out = []
     for k, (src, title) in enumerate(sample * 3):
@@ -189,7 +210,8 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--demo", action="store_true")
     args = ap.parse_args()
-    for market, path in (("stocks", ROOT / "docs" / "data" / "news.json"), ("crypto", ROOT / "docs" / "data" / "crypto" / "news.json")):
+    for market, path in (("stocks", ROOT / "docs" / "data" / "news.json"), ("crypto", ROOT / "docs" / "data" / "crypto" / "news.json"),
+                         ("commodities", ROOT / "docs" / "data" / "commodities" / "news.json")):
         print(market)
         items, status = demo(market) if args.demo else collect(market)
         if not items:

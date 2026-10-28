@@ -64,6 +64,22 @@ in `engine/crypto.txt` (names in `engine/crypto_names.json`) and writes everythi
 after the daily candle closes, weekends included. The weekly backtest covers both markets.
 Phone notification channels for crypto are `<NTFY_PREFIX>-crypto-<strategy>`.
 
+## Commodities
+
+The third switch, *Commodities*, runs the same nine strategies on 19 front-month futures in
+`engine/commodities.txt` (gold, silver, platinum, palladium, copper, WTI and Brent crude, natural gas,
+gasoline, heating oil, corn, wheat, soybeans, coffee, cocoa, sugar, cotton, live cattle, lean hogs).
+`engine/commodities_names.json` holds each one's name, sector, contract unit, exchange and a line on
+what moves its price. Data goes to `docs/data/commodities/`; the *Daily commodities scan* workflow
+runs Monday to Friday at 22:40 UTC, after the futures settle. Phone channels are
+`<NTFY_PREFIX>-commodities-<strategy>`.
+
+The page has its own look tied to what's traded: each commodity is drawn as the physical good
+(ingots for metals, drums for energy, sacks for grains, beans for softs, ear tags for livestock),
+a *pit* board groups them by sector, and a card tracks the gold/silver, copper/gold and Brent/WTI
+ratios. Yahoo's front-month prices are stitched from successive contracts, so the charts and the
+backtest include small jumps on roll days.
+
 ## BTC/USDT liquidation heatmap
 
 `engine/liquidations.py` estimates where leveraged BTC futures positions would be

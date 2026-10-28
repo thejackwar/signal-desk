@@ -36,6 +36,8 @@ MARKETS = {
                "universe": "S&P 100", "bt_universe": "Today's S&P 100", "topic": ""},
     "crypto": {"dir": ROOT / "docs" / "data" / "crypto", "tickers": "crypto.txt", "names": "crypto_names.json",
                "universe": "Top crypto", "bt_universe": "Today's top cryptocurrencies", "topic": "crypto-"},
+    "commodities": {"dir": ROOT / "docs" / "data" / "commodities", "tickers": "commodities.txt", "names": "commodities_names.json",
+                    "universe": "Commodity futures", "bt_universe": "19 commodity futures (front month)", "topic": "commodities-"},
 }
 MARKET = "stocks"
 
@@ -76,6 +78,9 @@ def fetch_real(tickers: list[str], period: str = "2y") -> dict[str, pd.DataFrame
             # crypto trades around the clock: drop today's unfinished daily candle
             today = pd.Timestamp.now(tz="UTC").normalize().tz_localize(None)
             df = df[df.index.tz_localize(None) < today] if df.index.tz is not None else df[df.index < today]
+        if MARKET == "commodities":
+            # front-month futures: drop bad prints (WTI famously settled below zero in April 2020)
+            df = df[(df[["open", "high", "low", "close"]] > 0).all(axis=1)]
         if len(df) >= 220:
             data[t] = df
     return data
@@ -206,6 +211,17 @@ def backdrop(data: dict[str, pd.DataFrame]) -> dict:
         cdl = src.iloc[-150:]
         return {"label": "Bitcoin, Ethereum and Solana, last 12 months · Bitcoin daily candles",
                 "lines": lines, "candles": {k: series(cdl[k]) for k in ("open", "high", "low", "close")}}
+    if MARKET == "commodities":
+        bars, lines = 260, []
+        for t, name in (("GC=F", "Gold"), ("CL=F", "Crude oil"), ("ZW=F", "Wheat")):
+            if t in data:
+                lines.append({"name": name, "values": series(data[t]["close"].iloc[-bars:])})
+        src = data.get("GC=F")
+        if src is None:
+            return {}
+        cdl = src.iloc[-150:]
+        return {"label": "Gold, crude oil and wheat, last 12 months · gold daily candles",
+                "lines": lines, "candles": {k: series(cdl[k]) for k in ("open", "high", "low", "close")}}
     # stocks: equal-weight average of every stock, each rebased to 1 a year ago
     bars = 260
     frames = []
@@ -249,8 +265,9 @@ def stock_files(data: dict[str, pd.DataFrame], alerts: list[dict], names: dict) 
         ])
         chart = payload(df, res, start)
         mine = by_t.get(t, [])
+        meta = names.get(t, [t, ""])
         row = {
-            "ticker": t, "name": names.get(t, [t, ""])[0], "sector": names.get(t, ["", ""])[1],
+            "ticker": t, "name": meta[0], "sector": meta[1],
             "price": rp(last),
             "chg1d": round((last / prev - 1) * 100, 2),
             "chg1m": round((last / float(c.iloc[-MONTH - 1]) - 1) * 100, 2),
@@ -264,6 +281,8 @@ def stock_files(data: dict[str, pd.DataFrame], alerts: list[dict], names: dict) 
             "bear": sum(a["side"] == "bearish" for a in mine),
             "latest": mine[0]["date"] if mine else None,
         }
+        if len(meta) >= 5:   # commodities: contract unit, exchange and what moves the price
+            row.update(unit=meta[2], exch=meta[3], drivers=meta[4])
         rows.append(row)
         (STOCK_DIR / f"{t}.json").write_text(json.dumps(chart, separators=(",", ":")))
     for f in STOCK_DIR.glob("*.json"):

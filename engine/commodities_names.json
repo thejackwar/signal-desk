@@ -1,0 +1,135 @@
+{
+  "GC=F": [
+    "Gold",
+    "Precious metals",
+    "USD per troy ounce",
+    "COMEX",
+    "Real interest rates, the US dollar and central-bank buying"
+  ],
+  "SI=F": [
+    "Silver",
+    "Precious metals",
+    "USD per troy ounce",
+    "COMEX",
+    "Half money metal, half industrial: solar panels and electronics"
+  ],
+  "PL=F": [
+    "Platinum",
+    "Precious metals",
+    "USD per troy ounce",
+    "NYMEX",
+    "Car catalytic converters and mine supply from South Africa"
+  ],
+  "PA=F": [
+    "Palladium",
+    "Precious metals",
+    "USD per troy ounce",
+    "NYMEX",
+    "Petrol-car catalysts; most supply comes from Russia and South Africa"
+  ],
+  "HG=F": [
+    "Copper",
+    "Industrial metals",
+    "USD per pound",
+    "COMEX",
+    "Construction, power grids, electric cars and Chinese demand"
+  ],
+  "CL=F": [
+    "Crude oil (WTI)",
+    "Energy",
+    "USD per barrel",
+    "NYMEX",
+    "OPEC+ output, US inventories and global growth"
+  ],
+  "BZ=F": [
+    "Brent crude",
+    "Energy",
+    "USD per barrel",
+    "ICE",
+    "The world oil benchmark: Middle East supply and shipping routes"
+  ],
+  "NG=F": [
+    "Natural gas",
+    "Energy",
+    "USD per MMBtu",
+    "NYMEX",
+    "Weather (cold winters, hot summers), storage levels and LNG exports"
+  ],
+  "RB=F": [
+    "Gasoline (RBOB)",
+    "Energy",
+    "USD per gallon",
+    "NYMEX",
+    "US driving season and refinery outages"
+  ],
+  "HO=F": [
+    "Heating oil",
+    "Energy",
+    "USD per gallon",
+    "NYMEX",
+    "Diesel and heating demand, refinery margins"
+  ],
+  "ZC=F": [
+    "Corn",
+    "Grains",
+    "US cents per bushel",
+    "CBOT",
+    "US Midwest weather, ethanol demand and exports"
+  ],
+  "ZW=F": [
+    "Wheat",
+    "Grains",
+    "US cents per bushel",
+    "CBOT",
+    "Black Sea harvests, export flows and weather"
+  ],
+  "ZS=F": [
+    "Soybeans",
+    "Grains",
+    "US cents per bushel",
+    "CBOT",
+    "Chinese imports and the Brazil vs US harvest"
+  ],
+  "KC=F": [
+    "Coffee (Arabica)",
+    "Softs",
+    "US cents per pound",
+    "ICE",
+    "Brazilian weather: frosts and droughts"
+  ],
+  "CC=F": [
+    "Cocoa",
+    "Softs",
+    "USD per tonne",
+    "ICE",
+    "West African harvests in Ivory Coast and Ghana"
+  ],
+  "SB=F": [
+    "Sugar",
+    "Softs",
+    "US cents per pound",
+    "ICE",
+    "Brazil's cane crop, ethanol and Indian export rules"
+  ],
+  "CT=F": [
+    "Cotton",
+    "Softs",
+    "US cents per pound",
+    "ICE",
+    "Texas weather and textile demand in Asia"
+  ],
+  "LE=F": [
+    "Live cattle",
+    "Livestock",
+    "US cents per pound",
+    "CME",
+    "Herd size, feed costs and beef demand"
+  ],
+  "HE=F": [
+    "Lean hogs",
+    "Livestock",
+    "US cents per pound",
+    "CME",
+    "Pork exports and seasonal grilling demand"
+  ]
+}
