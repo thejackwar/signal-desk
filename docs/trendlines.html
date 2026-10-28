@@ -317,6 +317,16 @@ function drawChart(el, tf, candles, res) {
         crosshairMarkerVisible: false, autoscaleInfoProvider: () => null,
       });
       ls.setData([{ time: T(s.from.index), value: s.from.price }, { time: T(s.to.index), value: s.to.price }]);
+      // every line keeps going to the right edge as a faint dotted projection
+      const end = n - 1 + fut;
+      if (s.to.index < end && s.to.index > s.from.index) {
+        const slope = (s.to.price - s.from.price) / (s.to.index - s.from.index);
+        const ext = chart.addLineSeries({
+          color: col + "59", lineWidth: Math.max(1, cfg.width - 1), lineStyle: LightweightCharts.LineStyle.Dotted,
+          lastValueVisible: false, priceLineVisible: false, crosshairMarkerVisible: false, autoscaleInfoProvider: () => null,
+        });
+        ext.setData([{ time: T(s.to.index), value: s.to.price }, { time: T(end), value: s.to.price + slope * (end - s.to.index) }]);
+      }
     }
     if (!segs.length) continue;
     if (ch.broken) marks.push({ i: ch.broken.index, p: ch.broken.price, text: "✕", cls: "x", col, dx: 0, dy: 0 });
