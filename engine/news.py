@@ -51,8 +51,6 @@ FEEDS = {
         ("OilPrice.com", "https://oilprice.com/rss/main"),
         ("Mining.com", "https://www.mining.com/feed/"),
         ("CNBC", "https://www.cnbc.com/id/19836768/device/rss/rss.html"),          # energy
-        ("FXStreet", "https://www.fxstreet.com/rss/commodities"),
-        ("Kitco", "https://www.kitco.com/news/category/mining/rss"),
     ],
 }
 NAMES_FILE = {"stocks": "names.json", "crypto": "crypto_names.json", "commodities": "commodities_names.json"}
@@ -80,10 +78,10 @@ EXTRA_ALIASES = {
     "ETC-USD": ["Ethereum Classic"], "ATOM-USD": ["Cosmos", "ATOM"], "ALGO-USD": ["Algorand", "ALGO"],
     "GC=F": ["gold", "Gold", "bullion", "XAU"], "SI=F": ["silver", "Silver", "XAG"], "PL=F": ["platinum", "Platinum"],
     "PA=F": ["palladium", "Palladium"], "HG=F": ["copper", "Copper"],
-    "CL=F": ["WTI", "crude oil", "Crude oil", "Crude", "oil prices", "Oil prices", "OPEC"], "BZ=F": ["Brent"],
-    "NG=F": ["natural gas", "Natural gas", "Natural Gas", "LNG", "nat-gas", "natgas"], "RB=F": ["gasoline", "Gasoline", "RBOB"],
+    "CL=F": ["WTI", "crude", "Crude", "oil", "Oil", "OPEC", "OPEC+"], "BZ=F": ["Brent"],
+    "NG=F": ["natural gas", "Natural gas", "Natural Gas", "LNG", "nat-gas", "natgas", "gas", "Gas"], "RB=F": ["gasoline", "Gasoline", "RBOB"],
     "HO=F": ["heating oil", "Heating oil", "diesel", "Diesel"], "ZC=F": ["corn", "Corn"], "ZW=F": ["wheat", "Wheat"],
-    "ZS=F": ["soybean", "Soybean", "soybeans", "Soybeans", "soy"], "KC=F": ["coffee", "Coffee", "arabica", "Arabica"],
+    "ZS=F": ["soybean", "Soybean", "soybeans", "Soybeans", "soy", "soymeal", "Soymeal"], "KC=F": ["coffee", "Coffee", "arabica", "Arabica"],
     "CC=F": ["cocoa", "Cocoa"], "SB=F": ["sugar", "Sugar"], "CT=F": ["cotton", "Cotton"],
     "LE=F": ["cattle", "Cattle", "beef", "Beef"], "HE=F": ["hogs", "Hogs", "pork", "Pork"],
 }
@@ -112,6 +110,8 @@ def tag(text: str, ms) -> list[str]:
         found.remove("BTC-USD")
     if "ETC-USD" in found and "ETH-USD" in found and not re.search(r"Ethereum(?! Classic)|\bEther\b|\bETH\b", text):
         found.remove("ETH-USD")
+    if "BZ=F" in found and "CL=F" in found and not re.search(r"\bWTI\b|U\.?S\.? (crude|oil)", text):
+        found.remove("CL=F")                       # "Brent crude" is about Brent, not WTI
     return found[:5]
 
 
