@@ -1492,6 +1492,9 @@ canvas.hm { display: block; touch-action: pan-y; }
     const end = eq * size;
     return { end, profit: end - size, ret: (end / size - 1) * 100, dd: dd * 100, bust };
   }
+  // what each market's strategies are measured against: holding SPY, or holding bitcoin for crypto
+  const benchOf = () => S.bt?.spy?.ticker === "BTC-USD" ? { name: "Bitcoin", short: "BTC", note: "" }
+    : { name: "S&amp;P 500", short: "SPY", note: ", dividends included" };
   function compareCard() {
     const B = S.bt, A = B?.account; if (!A?.dates?.length) return "";
     const D = A.dates, size = A.size || 100000, mk = S.market || "stocks";
@@ -1519,14 +1522,15 @@ canvas.hm { display: block; touch-action: pan-y; }
       <div class="seg sm" role="group" aria-label="Trades">${[["long", "Long only"], ["all", "Long + short"]].map(([k, l]) => `<button data-cmpside="${k}" aria-pressed="${k === side}">${l}</button>`).join("")}</div>
       <div class="seg sm" role="group" aria-label="Leverage">${[1, 2, 3, 4, 5].map(k => `<button data-cmplev="${k}" aria-pressed="${k === lev}">${k}x</button>`).join("")}</div>
       ${B.demo ? `<p class="hint" style="margin:0 0 6px">Demo backtest on simulated prices.</p>` : ""}`;
-    if (spy) h += `<div class="cmp bench"><span class="nm">S&amp;P 500 buy &amp; hold <small>SPY${lev > 1 ? " " + lev + "x" : ""}</small><em>${spy.bust ? "wiped out" : `worst drop −${Math.abs(Math.round(spy.dd))}%`}</em></span>${track(spy, "bench")}
+    const BM = benchOf();
+    if (spy) h += `<div class="cmp bench"><span class="nm">${BM.name} buy &amp; hold <small>${BM.short}${lev > 1 ? " " + lev + "x" : ""}</small><em>${spy.bust ? "wiped out" : `worst drop −${Math.abs(Math.round(spy.dd))}%`}</em></span>${track(spy, "bench")}
       <span class="val">${eurBig(spy.end)}<small class="${spy.ret >= 0 ? "up" : "down"}">${spy.ret >= 0 ? "+" : "−"}${Math.abs(Math.round(spy.ret)).toLocaleString("en-US")}%</small></span></div>`;
     h += rows.map(r => {
       const diff = spy ? r.end - spy.end : null;
       return `<a class="cmp" href="#strategy-${slug(r.s.id)}"><span class="nm">${esc(r.s.name)}<em>${r.bust ? "wiped out" : `worst drop −${Math.abs(Math.round(r.dd))}%`}</em></span>${track(r, r.profit >= 0 ? "pos" : "neg")}
-        <span class="val">${eurBig(r.end)}<small class="${(diff ?? r.profit) >= 0 ? "up" : "down"}">${diff != null ? `${diff >= 0 ? "+" : ""}${kEur(diff)} vs SPY` : `${r.ret >= 0 ? "+" : "−"}${Math.abs(Math.round(r.ret))}%`}</small></span></a>`;
+        <span class="val">${eurBig(r.end)}<small class="${(diff ?? r.profit) >= 0 ? "up" : "down"}">${diff != null ? `${diff >= 0 ? "+" : ""}${kEur(diff)} vs ${BM.short}` : `${r.ret >= 0 ? "+" : "−"}${Math.abs(Math.round(r.ret))}%`}</small></span></a>`;
     }).join("");
-    h += `<p class="hint" style="margin:8px 0 0">Each strategy runs its own ${eurS(size)}, split equally across every open position: it buys on bullish alerts${side === "all" ? " and sells short on bearish ones" : ""}, and with nothing open the money waits in cash.${spy ? ` The S&amp;P 500 line puts the same ${eurS(size)} into SPY in the week of ${esc(when)} and holds it, dividends included; the thin mark on each bar is where it ended.` : ""}${lev > 1 ? ` At ${lev}x every account, SPY included, borrows to hold ${lev} times its money, so each week's gain or loss is multiplied by ${lev} (rebalanced weekly, borrowing free); a week that loses ${Math.round(100 / lev)}% or more wipes it out.` : ""} Worst drop is the biggest fall from a high along the way. No costs, taxes or fees.${mk !== "commodities" && !B.demo ? ` Built on ${esc(B.universe.replace(/^T/, "t"))}, so names that dropped out over the years are missing, which flatters buying.` : ""}${from === last ? ` ${last} so far.` : ""}</p></div>`;
+    h += `<p class="hint" style="margin:8px 0 0">Each strategy runs its own ${eurS(size)}, split equally across every open position: it buys on bullish alerts${side === "all" ? " and sells short on bearish ones" : ""}, and with nothing open the money waits in cash.${spy ? ` The ${BM.name} line puts the same ${eurS(size)} into ${BM.short} in the week of ${esc(when)} and holds it${BM.note}; the thin mark on each bar is where it ended.` : ""}${lev > 1 ? ` At ${lev}x every account, ${BM.short} included, borrows to hold ${lev} times its money, so each week's gain or loss is multiplied by ${lev} (rebalanced weekly, borrowing free); a week that loses ${Math.round(100 / lev)}% or more wipes it out.` : ""} Worst drop is the biggest fall from a high along the way. No costs, taxes or fees.${mk !== "commodities" && !B.demo ? ` Built on ${esc(B.universe.replace(/^T/, "t"))}, so names that dropped out over the years are missing, which flatters buying.` : ""}${from === last ? ` ${last} so far.` : ""}</p></div>`;
     return h;
   }
 
@@ -1556,7 +1560,7 @@ canvas.hm { display: block; touch-action: pan-y; }
     }
     let h = header("", "#strategies");
     h += `<h1 style="font:700 30px/1.1 var(--font-display);margin:4px 0 6px">Strategy Lab</h1>`;
-    h += `<p class="tag">Change an indicator's settings and see how ${eurS(100000)} following it would have done on all ${S.bt?.tickers || ""} ${L().noun}, against just holding the S&amp;P 500.</p>`;
+    h += `<p class="tag">Change an indicator's settings and see how ${eurS(100000)} following it would have done on all ${S.bt?.tickers || ""} ${L().noun}, against just holding ${benchOf().name}.</p>`;
     h += `<div id="lab"><p class="loading">Loading 15 years of prices…</p></div>`;
     return { html: h, after: async () => {
       try { await labEnsure(); renderLab(); }
@@ -1604,17 +1608,17 @@ canvas.hm { display: block; touch-action: pan-y; }
     const sm = M.summary(mine.eq, D, fi), sb = M.summary(base.eq, D, fi), ss = spyEq && M.summary(spyEq, D, fi);
     const pct = v => v == null ? "–" : (v >= -0.05 ? "+" : "−") + Math.abs(v).toFixed(1).replace(/^0\.0$/, "0.0") + "%";
     const diff = ss ? sm.end - ss.end : null;
-    let h = ss ? `<p class="labverdict">With these settings ${eurS(100000)} became <b>${eurS(sm.end)}</b>, <b class="${diff >= 0 ? "up" : "down"}">${diff >= 0 ? kEur(diff) + " more" : kEur(-diff) + " less"}</b> than holding the S&amp;P 500 (${eurS(ss.end)}).</p>` : "";
+    let h = ss ? `<p class="labverdict">With these settings ${eurS(100000)} became <b>${eurS(sm.end)}</b>, <b class="${diff >= 0 ? "up" : "down"}">${diff >= 0 ? kEur(diff) + " more" : kEur(-diff) + " less"}</b> than holding ${benchOf().name} (${eurS(ss.end)}).</p>` : "";
     h += `<div class="tiles four">
-      <div><span>Final value</span><b class="${!ss || sm.end >= ss.end ? "up" : "down"}">${kEur(sm.end)}</b><small>${ss ? `S&amp;P 500 ${kEur(ss.end)}` : pct(sm.ret)}</small></div>
-      <div><span>Per year</span><b class="${!ss || (sm.cagr ?? -99) >= (ss.cagr ?? -99) ? "up" : "down"}">${pct(sm.cagr)}</b><small>${ss ? `S&amp;P 500 ${pct(ss.cagr)}` : ""}</small></div>
-      <div><span>Worst drop</span><b class="${!ss || sm.dd >= ss.dd ? "up" : "down"}">${pct(sm.dd)}</b><small>${ss ? `S&amp;P 500 ${pct(ss.dd)}` : ""}</small></div>
+      <div><span>Final value</span><b class="${!ss || sm.end >= ss.end ? "up" : "down"}">${kEur(sm.end)}</b><small>${ss ? `${benchOf().name} ${kEur(ss.end)}` : pct(sm.ret)}</small></div>
+      <div><span>Per year</span><b class="${!ss || (sm.cagr ?? -99) >= (ss.cagr ?? -99) ? "up" : "down"}">${pct(sm.cagr)}</b><small>${ss ? `${benchOf().name} ${pct(ss.cagr)}` : ""}</small></div>
+      <div><span>Worst drop</span><b class="${!ss || sm.dd >= ss.dd ? "up" : "down"}">${pct(sm.dd)}</b><small>${ss ? `${benchOf().name} ${pct(ss.dd)}` : ""}</small></div>
       <div><span>Trades</span><b>${mine.trades.n.toLocaleString("en-US")}</b><small>${mine.trades.n ? `${Math.round(mine.trades.winRate)}% winners · ${Math.round(mine.inv.share * 100)}% of days invested` : "no alerts"}</small></div>
     </div>`;
     h += `<h3 class="h3">Growth over time</h3><div class="chartbox" id="labchart"></div>`;
     if (!isDef) h += `<p class="hint">Default settings: ${kEur(sb.end)} (${pct(sb.cagr)} a year, worst drop ${pct(sb.dd)}).</p>`;
     const ym = M.byYear(mine.eq, D, fi), ys = spyEq ? M.byYear(spyEq, D, fi) : null;
-    h += `<h3 class="h3">Year by year</h3><div class="tablewrap"><table class="bt labyears"><thead><tr><th>Year</th><th style="text-align:right">Your settings</th>${ys ? `<th style="text-align:right">S&amp;P 500</th><th style="text-align:right">Difference</th>` : ""}</tr></thead><tbody>` +
+    h += `<h3 class="h3">Year by year</h3><div class="tablewrap"><table class="bt labyears"><thead><tr><th>Year</th><th style="text-align:right">Your settings</th>${ys ? `<th style="text-align:right">${benchOf().name}</th><th style="text-align:right">Difference</th>` : ""}</tr></thead><tbody>` +
       ym.slice().reverse().map((y, k) => {
         const sp = ys?.[ym.length - 1 - k], d = sp ? y.ret - sp.ret : null;
         return `<tr><td>${y.year}${k === 0 ? `<small>so far</small>` : ""}</td><td style="text-align:right" class="${y.ret >= 0 ? "up" : "down"}">${pct(y.ret)}</td>${sp ? `<td style="text-align:right" class="${sp.ret >= 0 ? "up" : "down"}">${pct(sp.ret)}</td><td style="text-align:right"><b class="${d >= 0 ? "up" : "down"}">${pct(d)}</b></td>` : ""}</tr>`;
@@ -1622,7 +1626,7 @@ canvas.hm { display: block; touch-action: pan-y; }
     h += `<p class="hint">The account splits its money equally across every open position${st.side === "all" ? " (buying on bullish alerts, selling short on bearish ones)" : " (buying on bullish alerts, selling on bearish ones)"} and rebalances daily; with nothing open the money waits in cash. No trading costs, taxes or borrow fees${S.market !== "commodities" ? `, and the list is today's ${L().index}, which flatters buying` : ""}. Settings that look best on the past usually do worse afterwards.</p>`;
     out.innerHTML = h;
     drawLabChart(document.getElementById("labchart"), D, fi, [
-      ...(spyEq ? [{ name: "S&P 500", vals: spyEq, color: C.muted, w: 1.4 }] : []),
+      ...(spyEq ? [{ name: benchOf().name.replace("&amp;", "&"), vals: spyEq, color: C.muted, w: 1.4 }] : []),
       ...(isDef ? [] : [{ name: "Default settings", vals: base.eq, color: C.accent2, w: 1.3, dash: "4 3" }]),
       { name: "Your settings", vals: mine.eq, color: C.accent, w: 2 },
     ]);
@@ -1633,7 +1637,7 @@ canvas.hm { display: block; touch-action: pan-y; }
     const n = ix.length, all = series.flatMap(s => ix.map(g => s.vals[g])).filter(v => v > 0);
     const lo = Math.log(Math.min(...all) * .92), hi = Math.log(Math.max(...all) * 1.08);
     const x = i => P.l + i / (n - 1) * (W - P.l - P.r), y = v => P.t + (hi - Math.log(Math.max(v, 1))) / (hi - lo) * (H - P.t - P.b);
-    let svg = `<svg class="chart" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" role="img" aria-label="Account growth: your settings versus the S&amp;P 500"><rect width="${W}" height="${H}" fill="${C.bg}"/>`;
+    let svg = `<svg class="chart" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" role="img" aria-label="Account growth: your settings versus ${benchOf().name}"><rect width="${W}" height="${H}" fill="${C.bg}"/>`;
     const grid = []; for (let p = Math.floor(Math.log10(Math.exp(lo))); p <= Math.ceil(Math.log10(Math.exp(hi))); p++) [1, 2, 5].forEach(m => { const v = m * 10 ** p; if (Math.log(v) > lo && Math.log(v) < hi) grid.push(v); });
     (grid.length > 5 ? grid.filter(v => String(v)[0] !== "2") : grid).forEach(v => {
       svg += `<line x1="${P.l}" x2="${W - P.r}" y1="${y(v).toFixed(1)}" y2="${y(v).toFixed(1)}" stroke="${v === 100000 ? "#4a505a" : C.grid}"/>`;

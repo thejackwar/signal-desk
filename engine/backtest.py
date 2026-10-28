@@ -48,6 +48,7 @@ TREND = {"ma200", "golden_cross", "donchian"}   # hold until the opposite alert
 START_CAPITAL = 10_000
 TRADE_SIZE = 1_000      # "take every trade": each alert is a EUR 1,000 position
 BENCH = "SPY"           # buy-and-hold comparison on the strategies page
+BENCH_BY_MARKET = {"crypto": "BTC-USD"}   # crypto is measured against simply holding bitcoin
 ACCOUNT = 100_000       # strategies page: each strategy run as a EUR 100,000 account vs SPY
 BINS = np.arange(-0.20, 0.2001, 0.025)        # histogram of 20-day results
 
@@ -242,17 +243,17 @@ def run(data: dict[str, pd.DataFrame]) -> dict:
     return out
 
 
-def spy_close(demo: bool) -> pd.Series | None:
+def spy_close(demo: bool, bench: str = BENCH) -> pd.Series | None:
     if demo:
         return None
     try:
-        return fetch_real([BENCH], period="max")[BENCH]["close"]
+        return fetch_real([bench], period="max")[bench]["close"]
     except Exception as e:  # a missing benchmark must never sink the backtest
-        print(f"  ! {BENCH}: {e}")
+        print(f"  ! {bench}: {e}")
         return None
 
 
-def spy_hold(weeks: pd.Series, c: pd.Series | None) -> dict | None:
+def spy_hold(weeks: pd.Series, c: pd.Series | None, bench: str = BENCH) -> dict | None:
     """A EUR ACCOUNT account that buys SPY and holds it, valued on the same weekly sessions as the
     strategy accounts (dividends reinvested: adjusted prices). Rebased to ACCOUNT at the first week."""
     if c is None:
@@ -266,7 +267,7 @@ def spy_hold(weeks: pd.Series, c: pd.Series | None) -> dict | None:
     if v.isna().all():
         return None
     v = v.bfill()
-    return {"ticker": BENCH, "account": [round(float(x)) for x in ACCOUNT * v / v.iloc[0]]}
+    return {"ticker": bench, "account": [round(float(x)) for x in ACCOUNT * v / v.iloc[0]]}
 
 
 def lab_prices(data: dict[str, pd.DataFrame], spy_c: pd.Series | None) -> dict:
@@ -318,8 +319,9 @@ def main():
     weeks = strategies.pop("_weeks")
     start = min(df.index[0] for df in data.values())
     end = max(df.index[-1] for df in data.values())
-    spy_c = spy_close(args.demo)
-    spy = spy_hold(weeks, spy_c)
+    bench = BENCH_BY_MARKET.get(args.market, BENCH)
+    spy_c = spy_close(args.demo, bench)
+    spy = spy_hold(weeks, spy_c, bench)
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(json.dumps({
         "generated_at": datetime.now(timezone.utc).isoformat(timespec="minutes"),
