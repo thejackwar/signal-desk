@@ -366,7 +366,12 @@ table.trades td:last-child { font: 600 13.5px var(--font-mono); white-space: now
 .hmchips small { color: var(--faint); }
 .hmchips i { font-style: normal; }
 canvas.hm { display: block; touch-action: pan-y; }
-.hmleg .scale { width: 70px; height: 8px; border-radius: 4px; display: inline-block; background: linear-gradient(90deg, #22104a, #2850be, #18aaaa, #6edc5a, #ffe63c); }
+.hmtools { display: flex; flex-wrap: wrap; gap: 4px 18px; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+.hmtools .seg { margin-bottom: 0; }
+.thr { display: flex; align-items: center; gap: 10px; font: 500 12px var(--font-mono); color: var(--muted); }
+.thr b { color: var(--fg); font-weight: 600; min-width: 32px; }
+.thr input { width: 140px; accent-color: var(--amber); }
+.hmleg .scale { width: 70px; height: 8px; border-radius: 4px; display: inline-block; background: linear-gradient(90deg, #3e1680, #2856be, #18aca8, #78de54, #ffe83a); }
 .clugrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 0 12px; }
 .clu { display: grid; grid-template-columns: 78px 54px 1fr; gap: 10px; align-items: center; padding: 7px 0; border-top: 1px solid var(--line); font: 500 13px var(--font-mono); font-variant-numeric: tabular-nums; }
 .clu .d.up { color: var(--bull); } .clu .d.down { color: var(--bear); }
@@ -819,7 +824,7 @@ canvas.hm { display: block; touch-action: pan-y; }
         ${spark(r.spark)}<span class="q">${right}</span></a>`;
     }
     h += `</div><p class="empty" id="nomatch" hidden>Nothing matches that search.</p>`;
-    return { html: h, after: () => { filterStocks(); const pv = document.getElementById("hmprev"); if (pv && S.liq) drawHeatmap(pv, S.liq, { days: 7, height: 120, compact: true }); } };
+    return { html: h, after: () => { filterStocks(); const pv = document.getElementById("hmprev"); if (pv && S.liq?.views) drawHeatmap(pv, S.liq, { period: "24h", height: 120, compact: true }); } };
   }
 
   function filterStocks() {
@@ -1151,121 +1156,146 @@ canvas.hm { display: block; touch-action: pan-y; }
 
   // ------------------------------------------------- liquidation heatmap
   // Colour scale like the well-known heatmaps: deep violet (little) to yellow (a lot).
-  const HM_STOPS = [[0, [11, 7, 20]], [.18, [52, 18, 110]], [.4, [40, 80, 190]], [.6, [24, 170, 170]], [.8, [110, 220, 90]], [1, [255, 230, 60]]];
+  const HM_STOPS = [[0, [40, 8, 70]], [.2, [62, 22, 128]], [.42, [40, 86, 190]], [.62, [24, 172, 168]], [.82, [120, 222, 84]], [1, [255, 232, 58]]];
   const HM_LUT = Array.from({ length: 256 }, (_, i) => {
     const t = i / 255; let k = 0; while (k < HM_STOPS.length - 2 && t > HM_STOPS[k + 1][0]) k++;
     const [t0, c0] = HM_STOPS[k], [t1, c1] = HM_STOPS[k + 1], f = (t - t0) / (t1 - t0);
     return c0.map((v, j) => Math.round(v + (c1[j] - v) * f));
   });
-  const HM_GAMMA = Array.from({ length: 256 }, (_, v) => Math.round(255 * Math.pow(v / 255, 1.8)));   // more contrast: only real clusters glow
+  const HM_GAMMA = Array.from({ length: 256 }, (_, v) => Math.round(255 * Math.pow(v / 255, 1.8)));   // only real clusters glow
   const usd = v => "$" + Math.round(v).toLocaleString("en-US");
+  const t2 = t => fmtDate(t.slice(0, 10), { day: "numeric", month: "short" }) + " " + t.slice(11, 16);
+  const HM_PERIODS = [["24h", "24 hours"], ["3", "3 days"], ["7", "7 days"], ["30", "30 days"]];
+  const hmView = (D, period) => period === "24h" && D.views.fine ? D.views.fine : D.views.coarse;
 
   function drawHeatmap(box, D, opts = {}) {
-    const days = opts.days || 30, cols = D.times.length, from = Math.max(0, cols - Math.round(days * 12));
-    const n = cols - from, B = D.bins.n, lo = D.bins.lo, hi = D.bins.hi;
-    const W = Math.max(280, box.clientWidth || 340), H = opts.height || 300, P = { l: 0, r: opts.compact ? 0 : 62, t: 8, b: opts.compact ? 0 : 22 };
-    const prof = opts.compact ? 0 : Math.min(70, W * .12);           // current-map profile on the right
+    const period = opts.period || "24h", V = hmView(D, period), fine = V === D.views.fine;
+    const cols = V.times.length, from = fine ? 0 : Math.max(0, cols - Math.round(+period * V.cols_per_day));
+    const n = cols - from, B = V.bins.n, lo = V.bins.lo, hi = V.bins.hi, thr = Math.round((opts.thr || 0) * 255);
+    const W = Math.max(280, box.clientWidth || 340), H = opts.height || 300;
+    const P = { l: opts.compact ? 0 : 20, r: opts.compact ? 0 : 62, t: 8, b: opts.compact ? 0 : 22 };
+    const prof = opts.compact ? 0 : Math.min(70, W * .12);
     const cw = W - P.l - P.r - prof, ch = H - P.t - P.b;
-    // view: price range around the visible price action
-    const cl = D.line.close.slice(from), hs = D.line.high.slice(from), ls = D.line.low.slice(from);
-    const pmin = Math.min(...ls), pmax = Math.max(...hs), pad = (pmax - pmin) * .55 + pmax * .02;
+    const O = { o: V.ohlc.o.slice(from), h: V.ohlc.h.slice(from), l: V.ohlc.l.slice(from), c: V.ohlc.c.slice(from) };
+    const pmin = Math.min(...O.l), pmax = Math.max(...O.h), pad = (pmax - pmin) * (fine ? .9 : .55) + pmax * (fine ? .008 : .02);
     const vlo = Math.max(lo, pmin - pad), vhi = Math.min(hi, pmax + pad);
     const bin = p => (p - lo) / (hi - lo) * B, b0 = Math.max(0, Math.floor(bin(vlo))), b1 = Math.min(B, Math.ceil(bin(vhi)));
     const y = p => P.t + (vhi - p) / (vhi - vlo) * ch, x = i => P.l + (i + .5) / n * cw;
-    box.innerHTML = `${opts.compact ? "" : `<div class="readout"></div>`}<canvas class="hm" width="${W * 2}" height="${H * 2}" style="width:100%;height:${H}px" role="img" aria-label="Estimated BTC/USDT liquidation heatmap"></canvas>`;
-    const cv = box.querySelector("canvas"), g = cv.getContext("2d"); g.scale(2, 2);
+    if (!box.querySelector("canvas") || opts.fresh !== false) box.innerHTML = `${opts.compact ? "" : `<div class="readout"></div>`}<canvas class="hm" role="img" aria-label="Estimated BTC/USDT liquidation heatmap"></canvas>`;
+    const cv = box.querySelector("canvas"); cv.width = W * 2; cv.height = H * 2; cv.style.width = "100%"; cv.style.height = H + "px";
+    const g = cv.getContext("2d"); g.setTransform(2, 0, 0, 2, 0, 0);
     g.fillStyle = "#0b0714"; g.fillRect(0, 0, W, H);
-    // heat cells: paint at data resolution, then scale up smoothly
-    const rows = b1 - b0, img = new ImageData(n, rows);
+    // heat cells at data resolution, scaled up smoothly
+    const rows = b1 - b0, img = new ImageData(n, rows), base = HM_LUT[0];
     for (let r = 0; r < rows; r++) for (let c = 0; c < n; c++) {
-      const v = D.matrix[b1 - 1 - r][from + c], col = HM_LUT[HM_GAMMA[v]], o = (r * n + c) * 4;
+      let v = HM_GAMMA[V.matrix[b1 - 1 - r][from + c]];
+      v = v < thr ? 0 : thr ? Math.round((v - thr) / (255 - thr) * 255) : v;
+      const col = v ? HM_LUT[v] : base, o = (r * n + c) * 4;
       img.data[o] = col[0]; img.data[o + 1] = col[1]; img.data[o + 2] = col[2]; img.data[o + 3] = 255;
     }
     const off = document.createElement("canvas"); off.width = n; off.height = rows; off.getContext("2d").putImageData(img, 0, 0);
-    g.imageSmoothingEnabled = true; g.imageSmoothingQuality = "high";
+    g.imageSmoothingEnabled = !fine; g.imageSmoothingQuality = "high";
     const top = y(lo + b1 / B * (hi - lo)), bot = y(lo + b0 / B * (hi - lo));
     g.save(); g.beginPath(); g.rect(P.l, P.t, cw, ch); g.clip();
     g.drawImage(off, P.l, top, cw, bot - top);
-    // price line
-    g.beginPath(); cl.forEach((v, i) => i ? g.lineTo(x(i), y(v)) : g.moveTo(x(i), y(v)));
-    g.strokeStyle = "rgba(0,0,0,.55)"; g.lineWidth = 3.4; g.stroke();
-    g.strokeStyle = "#fff"; g.lineWidth = 1.5; g.stroke();
-    // current price
-    g.setLineDash([4, 4]); g.strokeStyle = "rgba(255,255,255,.55)"; g.lineWidth = 1;
-    g.beginPath(); g.moveTo(P.l, y(D.price)); g.lineTo(P.l + cw + prof, y(D.price)); g.stroke(); g.setLineDash([]);
-    g.restore();
-    if (!opts.compact) {
-      // profile of what's on the map right now: shorts above price, longs below
-      const tot = D.now.longs.map((v, i) => v + D.now.shorts[i]), mx = Math.max(...tot.slice(b0, b1)) || 1, bh = ch / (b1 - b0);
-      for (let b = b0; b < b1; b++) {
-        const mid = lo + (b + .5) / B * (hi - lo), w = tot[b] / mx * (prof - 6);
-        g.fillStyle = mid > D.price ? "rgba(44,245,154,.75)" : "rgba(255,79,154,.75)";
-        g.fillRect(P.l + cw + 4, y(mid) - bh / 2 + .5, w, Math.max(1, bh - 1));
+    if (opts.compact) {
+      g.beginPath(); O.c.forEach((v, i) => i ? g.lineTo(x(i), y(v)) : g.moveTo(x(i), y(v)));
+      g.strokeStyle = "rgba(0,0,0,.55)"; g.lineWidth = 3.4; g.stroke(); g.strokeStyle = "#fff"; g.lineWidth = 1.5; g.stroke();
+    } else {
+      // candlesticks
+      const bw = Math.max(1, Math.min(8, cw / n * .62));
+      for (let i = 0; i < n; i++) {
+        const up = O.c[i] >= O.o[i], col = up ? "#2cf59a" : "#ff4f9a";
+        g.strokeStyle = col; g.lineWidth = 1; g.beginPath(); g.moveTo(x(i), y(O.h[i])); g.lineTo(x(i), y(O.l[i])); g.stroke();
+        const t0 = y(Math.max(O.o[i], O.c[i])), hb = Math.max(1, Math.abs(y(O.o[i]) - y(O.c[i])));
+        g.fillStyle = col; g.fillRect(x(i) - bw / 2, t0, bw, hb);
       }
-      // axes
-      g.fillStyle = C.axis; g.font = "10.5px IBM Plex Mono, monospace";
-      niceTicks(vlo, vhi, 5).forEach(t => {
-        if (y(t) < P.t + 6 || y(t) > H - P.b - 4 || Math.abs(y(t) - y(D.price)) < 15) return;
-        g.fillStyle = "rgba(255,255,255,.08)"; g.fillRect(P.l, y(t), cw, 1);
-        g.fillStyle = C.axis; g.fillText(Math.round(t / 1000) + "k", W - P.r + 8, y(t) + 4);
-      });
-      g.fillStyle = "#fff"; g.font = "600 10.5px IBM Plex Mono, monospace";
-      g.fillRect(W - P.r + 2, y(D.price) - 8, P.r - 4, 16); g.fillStyle = "#0b0714"; g.fillText(Math.round(D.price).toLocaleString("en-US"), W - P.r + 5, y(D.price) + 4);
-      g.fillStyle = C.axis; g.font = "10.5px IBM Plex Mono, monospace"; g.textAlign = "center";
-      let last = -99;
-      D.times.slice(from).forEach((t, i) => {
-        if (!t.endsWith("T01:00") || x(i) - last < (days > 10 ? 70 : 48) || x(i) < 26 || x(i) > cw - 20) return;
-        last = x(i); g.fillText(fmtDate(t.slice(0, 10), { day: "numeric", month: "short" }), x(i), H - 6);
-      });
-      g.textAlign = "start";
-      const ro = box.querySelector(".readout");
-      const rest = () => ro.innerHTML = `<b>BTC ${usd(D.price)}</b>  ${matchMedia("(hover: hover)").matches ? "point at" : "tap"} the chart to read a level`;
-      rest();
-      const mv = ev => {
-        const r = cv.getBoundingClientRect(), px = (ev.clientX - r.left) * (W / r.width), py = (ev.clientY - r.top) * (H / r.height);
-        if (px > P.l + cw || py < P.t || py > P.t + ch) return rest();
-        const i = Math.max(0, Math.min(n - 1, Math.floor((px - P.l) / cw * n))), price = vhi - (py - P.t) / ch * (vhi - vlo);
-        const bi = Math.max(0, Math.min(B - 1, Math.floor(bin(price)))), v = D.matrix[bi][from + i];
-        const lvl = v > 190 ? "very high" : v > 120 ? "high" : v > 60 ? "medium" : v > 15 ? "low" : "none";
-        ro.innerHTML = `<b>${t2(D.times[from + i])}</b>  level <b>${usd(price)}</b>  liquidations: <b style="color:${v > 120 ? "#ffe63c" : "var(--fg)"}">${lvl}</b>`;
-      };
-      cv.addEventListener("pointermove", mv); cv.addEventListener("pointerdown", mv); cv.addEventListener("pointerleave", rest);
     }
+    g.setLineDash([4, 4]); g.strokeStyle = "rgba(255,255,255,.55)"; g.lineWidth = 1;
+    g.beginPath(); g.moveTo(P.l, y(V.price)); g.lineTo(P.l + cw + prof, y(V.price)); g.stroke(); g.setLineDash([]);
+    g.restore();
+    if (opts.compact) return;
+    // colour scale on the left
+    const sg = g.createLinearGradient(0, P.t + ch, 0, P.t);
+    HM_STOPS.forEach(([t, c]) => sg.addColorStop(t, `rgb(${c})`));
+    g.fillStyle = sg; g.fillRect(4, P.t, 8, ch);
+    g.fillStyle = C.axis; g.font = "9.5px IBM Plex Mono, monospace";
+    // what's at risk right now: shorts above price, longs below
+    const tot = V.now.longs.map((v, i) => v + V.now.shorts[i]), mx = Math.max(...tot.slice(b0, b1)) || 1, bh = ch / (b1 - b0);
+    for (let b = b0; b < b1; b++) {
+      const mid = lo + (b + .5) / B * (hi - lo), w = tot[b] / mx * (prof - 6);
+      if (w < (opts.thr || 0) * (prof - 6) * .6) continue;
+      g.fillStyle = mid > V.price ? "rgba(44,245,154,.75)" : "rgba(255,79,154,.75)";
+      g.fillRect(P.l + cw + 4, y(mid) - bh / 2 + .25, w, Math.max(1, bh - .5));
+    }
+    // axes
+    g.font = "10.5px IBM Plex Mono, monospace";
+    niceTicks(vlo, vhi, 6).forEach(t => {
+      if (y(t) < P.t + 6 || y(t) > H - P.b - 4 || Math.abs(y(t) - y(V.price)) < 15) return;
+      g.fillStyle = "rgba(255,255,255,.07)"; g.fillRect(P.l, y(t), cw, 1);
+      g.fillStyle = C.axis; g.fillText(t >= 1e5 || fine ? Math.round(t).toLocaleString("en-US") : Math.round(t / 1000) + "k", W - P.r + 6, y(t) + 4);
+    });
+    g.fillStyle = "#fff"; g.font = "600 10.5px IBM Plex Mono, monospace";
+    g.fillRect(W - P.r + 2, y(V.price) - 8, P.r - 4, 16); g.fillStyle = "#0b0714"; g.fillText(Math.round(V.price).toLocaleString("en-US"), W - P.r + 5, y(V.price) + 4);
+    g.fillStyle = C.axis; g.font = "10.5px IBM Plex Mono, monospace"; g.textAlign = "center";
+    let last = -99;
+    V.times.slice(from).forEach((t, i) => {
+      const mark = fine ? /T(00|03|06|09|12|15|18|21):00$/.test(t) : t.endsWith("T00:00") || t.endsWith("T01:00");
+      if (!mark || x(i) - last < (fine ? 52 : +period > 10 ? 70 : 48) || x(i) < P.l + 26 || x(i) > P.l + cw - 20) return;
+      last = x(i); g.fillText(fine ? t.slice(11, 16) : fmtDate(t.slice(0, 10), { day: "numeric", month: "short" }), x(i), H - 6);
+    });
+    g.textAlign = "start";
+    const ro = box.querySelector(".readout");
+    const rest = () => ro.innerHTML = `<b>BTC ${usd(V.price)}</b>  ${matchMedia("(hover: hover)").matches ? "point at" : "tap"} the chart to read a level`;
+    rest();
+    cv.onpointermove = cv.onpointerdown = ev => {
+      const r = cv.getBoundingClientRect(), px = (ev.clientX - r.left) * (W / r.width), py = (ev.clientY - r.top) * (H / r.height);
+      if (px < P.l || px > P.l + cw || py < P.t || py > P.t + ch) return rest();
+      const i = Math.max(0, Math.min(n - 1, Math.floor((px - P.l) / cw * n))), price = vhi - (py - P.t) / ch * (vhi - vlo);
+      const bi = Math.max(0, Math.min(B - 1, Math.floor(bin(price)))), v = HM_GAMMA[V.matrix[bi][from + i]];
+      const lvl = v > 150 ? "very high" : v > 80 ? "high" : v > 30 ? "medium" : v > 6 ? "low" : "none";
+      ro.innerHTML = `<b>${t2(V.times[from + i])}</b>  level <b>${usd(price)}</b>  liquidations: <b style="color:${v > 80 ? "#ffe63c" : "var(--fg)"}">${lvl}</b>`;
+    };
+    cv.onpointerleave = rest;
   }
-  const t2 = t => fmtDate(t.slice(0, 10), { day: "numeric", month: "short" }) + " " + t.slice(11, 16);
 
   function heatmapCard() {
-    const D = S.liq; if (!D) return "";
+    const D = S.liq; if (!D?.views) return "";
     const up = D.short_clusters[0], dn = D.long_clusters[0];
-    return `<a class="hmcard" href="#heatmap"><div class="hd"><h3>BTC/USDT Liquidation Heatmap</h3><span class="open">Open ›</span></div>
+    return `<a class="hmcard" href="#heatmap"><div class="hd"><h3>BTC/USDT Liquidation Heatmap</h3><span class="open">24h · Open ›</span></div>
       <div class="hmprev" id="hmprev"></div>
       <div class="hmchips">${up ? `<span><i class="up">▲</i> Shorts ${usd(up.price)} <small>+${up.dist}%</small></span>` : ""}${dn ? `<span><i class="down">▼</i> Longs ${usd(dn.price)} <small>${dn.dist}%</small></span>` : ""}</div></a>`;
   }
 
   function viewHeatmap() {
-    if (!isCrypto() || !S.liq) return viewStocks();
-    const D = S.liq, days = S.hmDays || 7;
-    const rows = (arr, side) => {
-      const mx = Math.max(...D.short_clusters.concat(D.long_clusters).map(c => c.size)) || 1;
-      return arr.map(c => `<div class="clu"><span class="p">${usd(c.price)}</span><span class="d ${side}">${c.dist > 0 ? "+" : ""}${c.dist}%</span><span class="bar"><i class="${side}" style="width:${c.size / mx * 100}%"></i></span></div>`).join("");
-    };
-    const wl = D.wiped_24h, wt = wl.longs + wl.shorts;
+    if (!isCrypto() || !S.liq?.views) return viewStocks();
+    const D = S.liq, period = S.hmPeriod || "24h", V = hmView(D, period), thr = S.hmThr ?? .3;
+    const mx = Math.max(...V.short_clusters.concat(V.long_clusters).map(c => c.size)) || 1;
+    const rows = (arr, side) => arr.map(c => `<div class="clu"><span class="p">${usd(c.price)}</span><span class="d ${side}">${c.dist > 0 ? "+" : ""}${c.dist}%</span><span class="bar"><i class="${side}" style="width:${c.size / mx * 100}%"></i></span></div>`).join("");
+    const wl = V.wiped_24h, wt = wl.longs + wl.shorts;
     let h = header("", "#stocks");
-    h += `<div class="big2">${coin("BTC-USD", 40)}<span class="tk">BTC/USDT</span><span class="px">${usd(D.price)}</span></div>`;
+    h += `<div class="big2">${coin("BTC-USD", 40)}<span class="tk">BTC/USDT</span><span class="px">${usd(V.price)}</span></div>`;
     h += `<p class="sub">Liquidation heatmap · estimated · updated ${esc(t2(D.generated_at.replace("Z", "").slice(0, 16)))} UTC</p>`;
-    h += `<div class="seg" role="group" aria-label="Period">${[[3, "3 days"], [7, "7 days"], [30, "30 days"]].map(([d, t]) => `<button data-hmdays="${d}" aria-pressed="${days === d}">${t}</button>`).join("")}</div>`;
+    h += `<div class="hmtools"><div class="seg" role="group" aria-label="Period">${HM_PERIODS.map(([k, t]) => `<button data-hmperiod="${k}" aria-pressed="${period === k}">${t}</button>`).join("")}</div>
+      <label class="thr" for="hmthr">Liquidity threshold <b id="hmthrv">${thr.toFixed(2)}</b><input id="hmthr" type="range" min="0" max="0.9" step="0.05" value="${thr}"></label></div>`;
     h += `<div class="chartbox" id="hmfull"></div>
-      <div class="legend hmleg" style="padding:8px 2px 0"><span class="scale"></span><span>few → many positions at risk</span><span><i style="background:#fff"></i>price</span><span><i style="background:var(--bull)"></i>shorts at risk now</span><span><i style="background:var(--bear)"></i>longs at risk now</span></div>`;
-    h += `<div class="clugrid"><div class="card"><h3>Above the price</h3><p>Where <b style="color:var(--fg)">short sellers</b> would be liquidated. If price climbs there, forced buying can push it higher, fast.</p>${rows(D.short_clusters, "up")}</div>
-      <div class="card"><h3>Below the price</h3><p>Where <b style="color:var(--fg)">leveraged buyers</b> would be liquidated. If price drops there, forced selling can push it lower, fast.</p>${rows(D.long_clusters, "down")}</div></div>`;
+      <div class="legend hmleg" style="padding:8px 2px 0"><span class="scale"></span><span>few → many positions at risk</span><span><i style="background:var(--bull)"></i>shorts at risk now</span><span><i style="background:var(--bear)"></i>longs at risk now</span></div>
+      <p class="hint">Raise the threshold to hide weaker bands and keep only the biggest clusters.</p>`;
+    h += `<div class="clugrid"><div class="card"><h3>Above the price</h3><p>Where <b style="color:var(--fg)">short sellers</b> would be liquidated. If price climbs there, forced buying can push it higher, fast.</p>${rows(V.short_clusters, "up")}</div>
+      <div class="card"><h3>Below the price</h3><p>Where <b style="color:var(--fg)">leveraged buyers</b> would be liquidated. If price drops there, forced selling can push it lower, fast.</p>${rows(V.long_clusters, "down")}</div></div>`;
     if (wt > 0) h += `<div class="card"><h3>Last 24 hours</h3><p>Estimated liquidations: <b class="down">${Math.round(wl.longs / wt * 100)}% longs</b> · <b class="up">${Math.round(wl.shorts / wt * 100)}% shorts</b>.</p>
       <div class="wlbar"><i class="l" style="width:${wl.longs / wt * 100}%"></i><i class="w" style="width:${wl.shorts / wt * 100}%"></i></div></div>`;
     h += `<h2>How to read it</h2><div class="prose">
       <p>Traders on futures exchanges borrow to make bigger bets. If the price moves against them far enough, the exchange closes the bet for them: a <b>liquidation</b>. The bigger the borrowing (leverage), the closer that price is.</p>
       <p>Bright bands mark prices where many such positions would be closed at once. Price is often drawn toward these zones, and a band that gets hit can cause a sudden spike. Bands disappear once price runs through them.</p>
-      <p>This map is an <b>estimate</b>. Every hour it assumes new positions open near the price, spread across 5×, 10×, 25×, 50× and 100× leverage, and works out where they'd be liquidated. Exchanges don't publish this directly; the well-known heatmap sites use the same kind of model.</p></div>
+      <p>This map is an <b>estimate</b>. For every candle it measures how much new money entered futures positions (the rise in <b>open interest</b>), assumes it's spread across 5×, 10×, 25×, 50× and 100× leverage, and works out where those positions would be liquidated. When open interest falls, that share of positions is taken off the map. Exchanges don't publish liquidation levels; the well-known heatmap sites use the same kind of model.</p></div>
       <p class="fine">Data: ${esc(D.source)}. Updated every 4 hours. For information only.</p>`;
-    return { html: h, after: () => drawHeatmap(document.getElementById("hmfull"), D, { days, height: WIDE.matches ? 420 : 320 }) };
+    const draw = (fresh = true) => drawHeatmap(document.getElementById("hmfull"), D, { period, thr: S.hmThr ?? .3, height: WIDE.matches ? 440 : 330, fresh });
+    return { html: h, after: () => {
+      draw();
+      const sl = document.getElementById("hmthr");
+      sl.addEventListener("input", () => { S.hmThr = +sl.value; document.getElementById("hmthrv").textContent = (+sl.value).toFixed(2); draw(false); });
+    } };
   }
 
   function viewNotify() {
@@ -1393,8 +1423,8 @@ canvas.hm { display: block; touch-action: pan-y; }
     if (ex) { S.exSide[currentStrategy()] = ex.dataset.ex; rerender(); return; }
     const bs = e.target.closest("[data-bt]");
     if (bs) { S.btSide[currentStrategy()] = bs.dataset.bt; rerender(); return; }
-    const hd = e.target.closest("[data-hmdays]");
-    if (hd) { S.hmDays = +hd.dataset.hmdays; rerender(); return; }
+    const hd = e.target.closest("[data-hmperiod]");
+    if (hd) { S.hmPeriod = hd.dataset.hmperiod; rerender(); return; }
     const tb = e.target.closest("[data-tr]");
     if (tb) { S.trSide[currentStrategy()] = tb.dataset.tr; rerender(); return; }
     const cp = e.target.closest("[data-copy]");

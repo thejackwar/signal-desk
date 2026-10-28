@@ -66,12 +66,14 @@ Phone notification channels for crypto are `<NTFY_PREFIX>-crypto-<strategy>`.
 ## BTC/USDT liquidation heatmap
 
 `engine/liquidations.py` estimates where leveraged BTC futures positions would be
-liquidated (the *BTC liquidation heatmap* workflow, every 4 hours). Each hour it assumes
-new positions open near the price, spread over 5×–100× leverage, and keeps them on the
-map until price reaches their liquidation level. Data source, in order of preference:
-Binance BTCUSDT futures with open interest, OKX BTC-USDT perpetual, Yahoo BTC-USD.
-GitHub's servers are in the US, where Binance is blocked, so it usually uses one of the
-other two. It's a model, like the well-known heatmap sites, not exchange data.
+liquidated (the *BTC liquidation heatmap* workflow, every 4 hours). For every candle it
+takes the rise in open interest as new positions, spreads them over 5×–100× leverage and
+keeps them on the map until price reaches their liquidation level; when open interest
+falls, that share is removed. Two maps: 24 hours from 15-minute candles (fine price
+steps) and 30 days from hourly candles. Data, in order of preference: Binance BTCUSDT
+(blocked from GitHub's US servers), OKX BTC-USDT perpetual, Yahoo BTC-USD (volume as a
+stand-in when open interest isn't available). It's a model, like the well-known heatmap
+sites, not exchange data.
 
 ## Signal strength
 
