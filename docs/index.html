@@ -229,6 +229,16 @@ a { color: var(--blue); }
 .fitbar { position: relative; height: 8px; background: var(--surface-2); border-radius: 4px; overflow: hidden; }
 .fitbar i { position: absolute; top: 0; bottom: 0; border-radius: 4px; }
 .fitbar i.pos { background: var(--bull); } .fitbar i.neg { background: var(--bear); }
+.prc { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
+.prc > div { flex: 1 1 220px; } .prc p { margin: 0; }
+.prrow { display: flex; justify-content: space-between; gap: 12px; padding: 12px 0; border-top: 1px solid var(--line); }
+.prrow:first-child { border-top: 0; }
+.prrow .tk { font: 600 15px var(--font-mono); color: var(--fg); text-decoration: none; }
+.prrow small { display: block; color: var(--faint); font-size: 12px; margin-top: 3px; }
+.prr { text-align: right; display: flex; flex-direction: column; align-items: flex-end; gap: 4px; }
+.prr b { font: 600 15px var(--font-mono); }
+.prr small { margin: 0; }
+.prdel { color: var(--faint); font-size: 18px; line-height: 1; padding: 2px 6px; }
 .pill.earn { background: color-mix(in srgb, var(--amber) 18%, transparent); color: var(--amber); margin-left: 6px; }
 .earnwarn { display: flex; gap: 12px; align-items: flex-start; color: var(--fg); text-decoration: none; border: 1px solid color-mix(in srgb, var(--amber) 40%, transparent); }
 .earnwarn .ico { flex: none; width: 24px; height: 24px; border-radius: 50%; background: var(--amber); color: var(--on-accent); font: 700 15px/24px var(--font-display); text-align: center; }
@@ -1057,6 +1067,7 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
   <a class="nav" href="#strategies" data-tab="strategies"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 20h18"/><path d="M6 16V9"/><path d="M4.5 9h3"/><path d="M12 16V5"/><path d="M10.5 5h3"/><path d="M18 16v-5"/><path d="M16.5 11h3"/></svg>Strategies</a>
   <a class="nav" href="#winners" data-tab="winners"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 4h8v5a4 4 0 0 1-8 0Z"/><path d="M8 6H5a3 3 0 0 0 3 4"/><path d="M16 6h3a3 3 0 0 1-3 4"/><path d="M12 13v4"/><path d="M8.5 20.5h7"/><path d="M10 17h4"/></svg>Best trades</a>
   <a class="nav" href="#record" data-tab="record"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3.5" width="16" height="17" rx="2"/><path d="m8 9 1.5 1.5L12 8"/><path d="M14 9.5h3"/><path d="m8 15 1.5 1.5L12 14"/><path d="M14 15.5h3"/></svg>Track record</a>
+  <a class="nav" href="#practice" data-tab="practice"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6.5" width="18" height="13" rx="2"/><path d="M8.5 6.5V5a1.5 1.5 0 0 1 1.5-1.5h4A1.5 1.5 0 0 1 15.5 5v1.5"/><path d="M3 12h18"/><path d="M11 12v2h2v-2"/></svg>Practice</a>
   <a class="nav" href="#learn" data-tab="learn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 6.5C10 5 7 4.5 3.5 5v13.5c3.5-.5 6.5 0 8.5 1.5 2-1.5 5-2 8.5-1.5V5C17 4.5 14 5 12 6.5Z"/><path d="M12 6.5V20"/></svg>Learn</a>
   <a class="nav" href="#notify" data-tab="notify"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="2.5" width="12" height="19" rx="2.5"/><path d="M11 18.5h2"/></svg>Phone alerts</a>
   <a class="nav" href="#brokers" data-tab="brokers"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9.5 12 4l9 5.5"/><path d="M4.5 10v8"/><path d="M9.5 10v8"/><path d="M14.5 10v8"/><path d="M19.5 10v8"/><path d="M3 20.5h18"/></svg>Brokers</a>
@@ -1087,6 +1098,7 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
       <a href="trendlines.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M6 8l13 5"/><path d="M6 18l13-9"/></svg><span>Trendlines</span></a>
       <a href="#winners" data-tab="winners"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 4h8v5a4 4 0 0 1-8 0Z"/><path d="M8 6H5a3 3 0 0 0 3 4"/><path d="M16 6h3a3 3 0 0 1-3 4"/><path d="M12 13v4"/><path d="M8.5 20.5h7"/><path d="M10 17h4"/></svg><span>Best trades</span></a>
       <a href="#record" data-tab="record"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3.5" width="16" height="17" rx="2"/><path d="m8 9 1.5 1.5L12 8"/><path d="M14 9.5h3"/><path d="m8 15 1.5 1.5L12 14"/><path d="M14 15.5h3"/></svg><span>Track record</span></a>
+      <a href="#practice" data-tab="practice"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6.5" width="18" height="13" rx="2"/><path d="M8.5 6.5V5a1.5 1.5 0 0 1 1.5-1.5h4A1.5 1.5 0 0 1 15.5 5v1.5"/><path d="M3 12h18"/><path d="M11 12v2h2v-2"/></svg><span>Practice</span></a>
       <a href="#news" data-tab="news"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h13a1 1 0 0 1 1 1v12a2 2 0 0 0 2 2H6a2 2 0 0 1-2-2Z"/><path d="M18 9h2a1 1 0 0 1 1 1v8a2 2 0 0 1-2 2"/><path d="M8 9h6"/><path d="M8 13h6"/><path d="M8 17h4"/></svg><span>News</span></a>
       <a href="#calendar" data-tab="calendar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5" width="17" height="15.5" rx="2"/><path d="M3.5 10h17"/><path d="M8 3v4"/><path d="M16 3v4"/><path d="M7.5 14h2"/><path d="M11 14h2"/><path d="M14.5 14h2"/><path d="M7.5 17h2"/></svg><span>Calendar</span></a>
       <a href="#strategies" data-tab="strategies"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 20h18"/><path d="M6 16V9"/><path d="M4.5 9h3"/><path d="M12 16V5"/><path d="M10.5 5h3"/><path d="M18 16v-5"/><path d="M16.5 11h3"/></svg><span>Strategies</span></a>
@@ -1478,6 +1490,54 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
     return h;
   }
 
+  // ------------------------------------------------------- practice portfolio
+  // Pretend trades kept only in this browser: follow an alert at the latest close, see how it does.
+  const PRACTICE = "signaldesk.practice", PR_SIZE = 1000;
+  const prLoad = () => { const v = load(PRACTICE, []); return Array.isArray(v) ? v : []; };
+  const prSave = v => save(PRACTICE, v);
+  const PRICES = {};                                       // market -> {ticker: latest close}, as_of
+  async function prPrices(m) {
+    if (!PRICES[m]) {
+      const st = CACHE[m]?.stocks || await opt(MK[m].base + "stocks.json");
+      PRICES[m] = { as_of: st?.as_of, px: Object.fromEntries((st?.stocks || []).map(r => [r.ticker, r.price])) };
+    }
+    return PRICES[m];
+  }
+  function prCard(a) {
+    if (a.strategy === "topdown") return "";
+    const open = prLoad().find(p => p.alert === a.id && p.exit == null);
+    const px = S.stockBy[a.ticker]?.price ?? a.price, bull = a.side === "bullish";
+    if (open) return `<div class="card prc"><div><h3>In your practice portfolio</h3><p>${bull ? "Bought" : "Sold short"} at ${money(open.entry)} on ${esc(fmtDate(open.date, { day: "numeric", month: "short" }))}.</p></div><a class="btn ghost sm" href="#practice">Open portfolio ›</a></div>`;
+    return `<div class="card prc"><div><h3>Practice this alert</h3><p>A pretend ${eurS(PR_SIZE)} trade at the latest close (${money(px)}): ${bull ? "a buy" : "a short sale"}. No money involved, saved only in this browser.</p></div>
+      <button class="btn sm" data-prnew="${esc(a.id)}">${bull ? "Practice buy" : "Practice short"}</button></div>`;
+  }
+  function viewPractice() {
+    const P = prLoad();
+    let h = header("Practice portfolio") + `<p class="tag" style="font-size:14.5px;margin-top:2px">Pretend trades from the alerts, ${eurS(PR_SIZE)} each, at the close of the day you add them. Nothing is real and nothing leaves this browser, so it's a safe way to see how you'd do following the signals.</p>`;
+    if (!P.length) return h + `<div class="empty"><strong>No practice trades yet</strong>Open any alert and tap “Practice buy” (or “Practice short” on a bearish one).<br><br><a class="btn" href="#alerts">Go to alerts</a></div>`;
+    const mks = [...new Set(P.map(p => p.m))];
+    if (mks.some(m => !PRICES[m])) { Promise.all(mks.map(prPrices)).then(() => { if (location.hash === "#practice") rerender(); }); return h + `<p class="loading">Loading prices…</p>`; }
+    const val = p => { const now = p.exit ?? PRICES[p.m]?.px?.[p.t]; return now == null ? null : p.side * (now / p.entry - 1) * 100; };
+    const open = P.filter(p => p.exit == null), closed = P.filter(p => p.exit != null);
+    const sum = xs => xs.reduce((t, p) => t + (val(p) ?? 0) / 100 * PR_SIZE, 0);
+    const wins = closed.filter(p => val(p) > 0).length;
+    h += `<div class="wsum"><div><span>Open</span><b class="${sum(open) >= 0 ? "up" : "down"}">${eurSigned(sum(open))}</b><small style="color:var(--faint);font-size:11.5px">${open.length} trade${open.length === 1 ? "" : "s"}</small></div>
+      <div><span>Closed</span><b class="${sum(closed) >= 0 ? "up" : "down"}">${eurSigned(sum(closed))}</b><small style="color:var(--faint);font-size:11.5px">${closed.length} trade${closed.length === 1 ? "" : "s"}</small></div>
+      <div><span>Won</span><b>${closed.length ? Math.round(wins / closed.length * 100) + "%" : "–"}</b><small style="color:var(--faint);font-size:11.5px">of closed</small></div></div>`;
+    const row = p => {
+      const r = val(p), now = p.exit ?? PRICES[p.m]?.px?.[p.t];
+      return `<div class="prrow"><div><a class="tk" href="${p.m === S.market ? "#stock-" + esc(p.t) : "#practice"}">${esc(disp(p.t))}</a> <span class="pill ${p.side > 0 ? "bullish" : "bearish"}">${p.side > 0 ? "long" : "short"}</span>
+          <small>${esc(stratName(p.s))} · ${money(p.entry)} → ${now == null ? "–" : money(now)} · ${esc(fmtDate(p.date, { day: "numeric", month: "short" }))}${p.exitDate ? " → " + esc(fmtDate(p.exitDate, { day: "numeric", month: "short" })) : ""}${p.m !== "stocks" ? " · " + esc(MK[p.m].Title || MK[p.m].Tab) : ""}</small></div>
+        <div class="prr"><b class="${(r ?? 0) >= 0 ? "up" : "down"}">${r == null ? "–" : pctTxt(r)}</b><small>${r == null ? "" : eurSigned(r / 100 * PR_SIZE)}</small>
+        ${p.exit == null ? `<button class="btn ghost sm" data-prclose="${esc(p.id)}">Close</button>` : `<button class="prdel" data-prdel="${esc(p.id)}" aria-label="Remove ${esc(p.t)} from the list">×</button>`}</div></div>`;
+    };
+    if (open.length) h += `<div class="day"><span>Open</span><span>${open.length}</span></div><div class="card" style="margin-top:0;padding:4px 14px">${open.slice().reverse().map(row).join("")}</div>`;
+    if (closed.length) h += `<div class="day"><span>Closed</span><span>${closed.length}</span></div><div class="card" style="margin-top:0;padding:4px 14px">${closed.slice().reverse().map(row).join("")}</div>`;
+    h += `<p style="margin-top:18px"><button class="btn ghost sm" data-prreset>Clear the portfolio</button></p>`;
+    h += `<p class="fine">Prices are the latest daily closes from the app's scans, so a trade added today is priced at today's close and moves with each new scan. No fees or taxes. Practice only: this is not a real account and not a recommendation.</p>`;
+    return h;
+  }
+
   // Earnings within EARN_DAYS of today: big gaps on the report often undo what the chart said.
   const EARN_DAYS = 7;
   function earnSoon(t) {
@@ -1579,7 +1639,7 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
       const good = (a.side === "bullish") === (a.since >= 0);
       h += `<div class="card since-card"><div><h3>Since the alert</h3><p>${a.since_days} session${a.since_days > 1 ? "s" : ""} later, the price is ${a.since >= 0 ? "up" : "down"}${good ? ", the way the alert pointed" : ", against the alert"}.</p></div><b class="${a.since >= 0 ? "up" : "down"}">${a.since > 0 ? "+" : ""}${a.since.toFixed(1)}%</b></div>`;
     }
-    h += earnCard(a) + wrongIfCard(a);
+    h += earnCard(a) + wrongIfCard(a) + prCard(a);
     if (st) {
       h += `<div class="card"><div class="hd"><h3>Signal strength</h3><span style="display:inline-flex;gap:8px;align-items:center;font:500 12px var(--font-mono)">${meter(st)} ${st.score}/4</span></div>
         <ul class="checks">${st.checks.map(c => `<li class="${c.ok ? "" : "no"}"><span>${esc(c.text)}${c.ids ? `<small>${c.ids.map(stratName).map(esc).join(", ")}</small>` : ""}</span></li>`).join("")}</ul>
@@ -3307,13 +3367,13 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
 
   function route() {
     const r = (location.hash || "#alerts").slice(1);
-    const tab = r === "news" || r === "buzz" ? "news" : r.startsWith("calendar") ? "calendar" : r.startsWith("strateg") ? "strategies" : r.startsWith("stock") || r === "heatmap" ? "stocks" : r === "notify" ? "notify" : r.startsWith("brokers") ? "brokers" : r.startsWith("learn") ? "learn" : "alerts";
+    const tab = r === "news" || r === "buzz" ? "news" : r.startsWith("calendar") ? "calendar" : r.startsWith("strateg") ? "strategies" : r.startsWith("stock") || r === "heatmap" ? "stocks" : r === "notify" ? "notify" : r.startsWith("brokers") ? "brokers" : r.startsWith("learn") ? "learn" : r === "practice" ? "practice" : "alerts";
     if (r === "winners" || r === "record") S.alView = r; else if (tab === "alerts" && !r.startsWith("alert-")) S.alView = "alerts";
-    const list = { alerts: S.alView === "winners" ? viewWinners : S.alView === "record" ? viewRecord : viewAlerts, stocks: viewStocks, strategies: viewStrategies, notify: viewNotify, brokers: viewBrokers, learn: viewLearn, news: r === "buzz" ? viewBuzz : viewNews, calendar: () => viewCalendar(r.slice(9)) }[tab];
+    const list = { alerts: S.alView === "winners" ? viewWinners : S.alView === "record" ? viewRecord : viewAlerts, stocks: viewStocks, strategies: viewStrategies, notify: viewNotify, brokers: viewBrokers, learn: viewLearn, practice: viewPractice, news: r === "buzz" ? viewBuzz : viewNews, calendar: () => viewCalendar(r.slice(9)) }[tab];
     let detail = detailFor(r), sel = detail ? r : null;
     charts.length = 0;
 
-    if (WIDE.matches && tab !== "notify" && tab !== "brokers" && tab !== "learn" && tab !== "news" && tab !== "calendar" && r !== "record") {
+    if (WIDE.matches && tab !== "notify" && tab !== "brokers" && tab !== "learn" && tab !== "news" && tab !== "calendar" && tab !== "practice" && r !== "record") {
       const lp = app.querySelector(".pane.list"), dp = app.querySelector(".pane.detail");
       const listTop = lp?.scrollTop || 0, detTop = dp?.scrollTop || 0;
       const L = norm(list());
@@ -3339,7 +3399,7 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
     if (nsearch) { nsearch.addEventListener("input", () => { S.nq = nsearch.value; filterNews(); }); filterNews(); }
     // the phone tab bar has no Calendar button: it lives under News there
     // phone bar: pages without their own button light up Menu
-    const inBar = { calendar: "menu", brokers: "menu", notify: "menu", learn: "menu" }[tab] || tab;
+    const inBar = { calendar: "menu", brokers: "menu", notify: "menu", learn: "menu", practice: "menu" }[tab] || tab;
     const navTab = tab === "alerts" && (S.alView === "winners" || S.alView === "record") ? S.alView : tab;
     document.querySelectorAll("[data-tab]").forEach(a => a.setAttribute("aria-current", (a.closest(".tabs") ? a.dataset.tab === inBar : a.dataset.tab === navTab) ? "page" : "false"));
     S.routed = true;
@@ -3409,6 +3469,26 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
     if (wsc) { setPref("winScope", wsc.dataset.winscope); goList(); return; }
     const wdr = e.target.closest("[data-windir]");
     if (wdr) { setPref("winDir", wdr.dataset.windir); goList(); return; }
+    const pn = e.target.closest("[data-prnew]");
+    if (pn) {
+      const a = (S.feed?.alerts || []).find(x => x.id === pn.dataset.prnew);
+      if (a) {
+        const P = prLoad();
+        P.push({ id: a.id + "@" + Date.now(), alert: a.id, m: S.market, t: a.ticker, s: a.strategy, side: a.side === "bullish" ? 1 : -1,
+                 entry: S.stockBy[a.ticker]?.price ?? a.price, date: S.stocks?.as_of || S.feed.as_of });
+        prSave(P); delete PRICES[S.market]; rerender();
+      }
+      return;
+    }
+    const pc2 = e.target.closest("[data-prclose]");
+    if (pc2) {
+      const P = prLoad(), p = P.find(x => x.id === pc2.dataset.prclose), px = p && PRICES[p.m];
+      if (p && px?.px?.[p.t] != null) { p.exit = px.px[p.t]; p.exitDate = px.as_of; prSave(P); rerender(); }
+      return;
+    }
+    const pd = e.target.closest("[data-prdel]");
+    if (pd) { prSave(prLoad().filter(x => x.id !== pd.dataset.prdel)); rerender(); return; }
+    if (e.target.closest("[data-prreset]")) { if (confirm("Remove every practice trade? This can't be undone.")) { prSave([]); rerender(); } return; }
     const rh = e.target.closest("[data-rech]");
     if (rh) { setPref("recH", +rh.dataset.rech); rerender(); return; }
     const rsc = e.target.closest("[data-recscope]");
@@ -3699,7 +3779,7 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
     await loadMarket(m);
     S.lastSel = null; S.lastTab = null;
     const tab = (location.hash || "#alerts").slice(1);
-    const base = tab.startsWith("strateg") ? (tab.startsWith("strategy-") ? tab : "strategies") : tab.startsWith("stock") || tab === "heatmap" ? "stocks" : tab === "news" || tab === "buzz" ? tab : tab.startsWith("calendar") ? tab : tab === "notify" ? "notify" : tab.startsWith("brokers") ? "brokers" : tab.startsWith("learn") ? tab : tab === "winners" || tab === "record" ? tab : "alerts";
+    const base = tab.startsWith("strateg") ? (tab.startsWith("strategy-") ? tab : "strategies") : tab.startsWith("stock") || tab === "heatmap" ? "stocks" : tab === "news" || tab === "buzz" ? tab : tab.startsWith("calendar") ? tab : tab === "notify" ? "notify" : tab.startsWith("brokers") ? "brokers" : tab.startsWith("learn") ? tab : tab === "winners" || tab === "record" || tab === "practice" ? tab : "alerts";
     if ("#" + base !== location.hash) location.hash = base; else route();
     scrollTo(0, 0);
   }
