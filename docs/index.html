@@ -138,8 +138,6 @@ a { color: var(--blue); }
 .btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; background: var(--amber); color: #1a1204; font-weight: 600; border-radius: 10px; padding: 10px 16px; }
 .btn.ghost { background: var(--surface-2); color: var(--fg); }
 .btn.ghost:hover { background: var(--line); }
-.tlbtn { display: flex; margin: 0 0 12px; }
-@media (min-width: 1000px) { .tlbtn { display: none; } }
 .btn.on { background: var(--surface-2); color: var(--amber); }
 
 /* stocks */
@@ -443,7 +441,7 @@ canvas.hm { display: block; touch-action: pan-y; }
 /* bottom tabs (phone) */
 .tabs { position: fixed; left: 0; right: 0; bottom: 0; z-index: 25; background: rgba(8,9,11,.92); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); border-top: 1px solid var(--line);
   padding-bottom: env(safe-area-inset-bottom, 0px); padding-left: max(8px, env(safe-area-inset-left, 0px)); padding-right: max(8px, env(safe-area-inset-right, 0px)); }
-.tabs nav { max-width: 560px; margin: 0 auto; display: grid; grid-template-columns: repeat(5, 1fr); height: var(--tabbar); }
+.tabs nav { max-width: 560px; margin: 0 auto; display: grid; grid-template-columns: repeat(6, 1fr); height: var(--tabbar); }
 .tabs a { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; color: var(--faint); text-decoration: none; font-size: 11px; font-weight: 500; position: relative; }
 .tabs a[aria-current="page"] { color: var(--amber); }
 .tabs svg { width: 24px; height: 24px; }
@@ -505,6 +503,7 @@ canvas.hm { display: block; touch-action: pan-y; }
   <nav aria-label="Sections">
     <a href="#alerts" data-tab="alerts"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9a6 6 0 1 1 12 0c0 6 2.5 7.5 2.5 7.5h-17S6 15 6 9Z"/><path d="M10 20a2 2 0 0 0 4 0"/></svg>Alerts<span class="count" hidden></span></a>
     <a href="#stocks" data-tab="stocks"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="m7 15 4-4 3 3 6-7"/></svg><span data-l="tab">Stocks</span></a>
+    <a href="trendlines.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M6 8l13 5"/><path d="M6 18l13-9"/></svg>Trendlines</a>
     <a href="#news" data-tab="news"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h13a1 1 0 0 1 1 1v12a2 2 0 0 0 2 2H6a2 2 0 0 1-2-2Z"/><path d="M18 9h2a1 1 0 0 1 1 1v8a2 2 0 0 1-2 2"/><path d="M8 9h6"/><path d="M8 13h6"/><path d="M8 17h4"/></svg>News</a>
     <a href="#strategies" data-tab="strategies"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 20h18"/><path d="M6 16V9"/><path d="M4.5 9h3"/><path d="M12 16V5"/><path d="M10.5 5h3"/><path d="M18 16v-5"/><path d="M16.5 11h3"/></svg>Strategies</a>
     <a href="#notify" data-tab="notify"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="2.5" width="12" height="19" rx="2.5"/><path d="M11 18.5h2"/></svg>Phone</a>
@@ -870,7 +869,6 @@ canvas.hm { display: block; touch-action: pan-y; }
     let h = header(L().Tab, null, `<div class="stamp">${esc(S.feed?.universe || "")}<br>close ${fmtDate(S.stocks.as_of, { day: "numeric", month: "short" })}</div>`);
     h += healthCard();
     if (isCrypto()) h += heatmapCard() + moversStrip();
-    if (!isCrypto()) h += `<a class="btn ghost tlbtn" href="trendlines.html">Trendlines on 7 timeframes ›</a>`;
     h += `<input class="search" id="stocksearch" type="search" placeholder="${L().search}" autocomplete="off" aria-label="Search" value="${esc(S.q || "")}">`;
     h += `<div class="tools" style="margin-bottom:6px"><label>Sort</label><div class="seg sm" role="group" aria-label="Sort stocks">${Object.entries(keys).map(([k, [t]]) =>
       `<button data-ssort="${k}" aria-pressed="${sort === k}">${t}</button>`).join("")}</div></div><div class="rows" id="stockrows">`;
