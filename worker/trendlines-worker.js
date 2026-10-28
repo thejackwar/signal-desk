@@ -4,6 +4,12 @@
 // Each bar is [t, open, high, low, close]; t = New York wall-clock time written as if UTC (seconds).
 // W/D bars carry their New York date at 00:00. Intraday bars: regular hours only (9:30-16:00).
 // Data exactly as trendlines.py loads it (feed=sip, adjustment=all, end = now - 16 min).
+//
+// Crypto: GET /?symbol=BTC-USD (also BTC, BTCUSD, BTC/USD)  ->  { symbol, market: "crypto", source, end,
+// frames: { W, D, "4H", "1H", "30m", "15m", "5m" } }. Crypto trades around the clock, so every timeframe
+// comes straight from the exchange and t is plain UTC (seconds); daily candles start at 00:00 UTC.
+// Source: Binance's public market data (<COIN>/USDT, no keys needed); if Binance doesn't list the coin
+// or can't be reached, Kraken (<COIN>/USD, last 720 candles per timeframe).
 
 const ALPACA = "https://data.alpaca.markets/v2/stocks/bars";
 const DAY = 86400e3;
@@ -12,6 +18,9 @@ const TICKERS = new Set(("SPY AAPL ABBV ABT ACN ADBE AIG AMD AMGN AMT AMZN AVGO 
   "CHTR CL CMCSA COF COP COST CRM CSCO CVS CVX DE DHR DIS DUK EMR F FDX GD GE GILD GM GOOGL GS HD HON IBM INTC " +
   "INTU ISRG JNJ JPM KO LIN LLY LMT LOW MA MCD MDLZ MDT MET META MMM MO MRK MS MSFT NEE NFLX NKE NOW NVDA ORCL " +
   "PEP PFE PG PLTR PM PYPL QCOM RTX SBUX SCHW SO SPG T TGT TMO TMUS TSLA TXN UBER UNH UNP UPS USB V VZ WFC WMT XOM").split(" "));
+
+// The coins of engine/crypto.txt (Yahoo-style names, as in the rest of the app).
+const COINS = new Set(("BTC ETH XRP BNB SOL DOGE TRX ADA LINK XLM BCH AVAX LTC HBAR DOT XMR ETC ATOM ALGO").split(" "));
 
 // series: Alpaca timeframe, days of history, daily-type (date only) or intraday (regular hours)
 const SERIES = {
@@ -77,6 +86,88 @@ function shape(bars, kind) {
   return out;
 }
 
+// ------------------------------------------------------------------ crypto
+// timeframe -> [Binance interval, candles wanted, Kraken interval in minutes]
+const CRYPTO_SERIES = {
+  W:     ["1w", 520, 10080],
+  D:     ["1d", 1000, 1440],
+  "4H":  ["4h", 1000, 240],
+  "1H":  ["1h", 1000, 60],
+  "30m": ["30m", 1000, 30],
+  "15m": ["15m", 2000, 15],
+  "5m":  ["5m", 2000, 5],
+};
+const BINANCE = "https://data-api.binance.vision/api/v3/klines";   // Binance's public market-data host
+const KRAKEN = "https://api.kraken.com/0/public/OHLC";
+const KRAKEN_NAME = { BTC: "XBT", DOGE: "XDG" };
+
+// "btc", "BTC-USD", "BTCUSD", "BTC/USDT" ... -> "BTC" if it is one of the coins, else null
+function coinOf(sym) {
+  const m = sym.toUpperCase().replace(/[\s/_]/g, "-").match(/^([A-Z0-9]+?)(?:-?USDT?)?$/);
+  return m && COINS.has(m[1]) ? m[1] : null;
+}
+
+async function getJson(url, label) {
+  let r;
+  for (let tries = 0; tries < 3; tries++) {
+    r = await fetch(url, { headers: { "User-Agent": "signal-desk-trendlines" } });
+    if (r.status !== 429 && r.status < 500) break;       // busy: wait and retry
+    await new Promise(ok => setTimeout(ok, 1500 * (tries + 1)));
+  }
+  if (!r.ok) throw new Error(`${label}: HTTP ${r.status} ${(await r.text()).slice(0, 160)}`);
+  return r.json();
+}
+
+// newest `want` candles, 1000 per request, paging back in time
+async function binanceSeries(coin, interval, want) {
+  const rows = [];
+  let endTime = null;
+  while (rows.length < want) {
+    const q = new URLSearchParams({ symbol: `${coin}USDT`, interval, limit: String(Math.min(1000, want - rows.length)) });
+    if (endTime !== null) q.set("endTime", String(endTime));
+    const js = await getJson(`${BINANCE}?${q}`, `Binance ${interval}`);
+    if (!Array.isArray(js) || !js.length) break;
+    rows.unshift(...js);
+    if (js.length < +q.get("limit")) break;              // reached the coin's first candle
+    endTime = js[0][0] - 1;
+  }
+  return rows.map(k => [Math.floor(k[0] / 1000), +k[1], +k[2], +k[3], +k[4]]);
+}
+
+async function krakenSeries(coin, minutes) {
+  const js = await getJson(`${KRAKEN}?pair=${KRAKEN_NAME[coin] || coin}USD&interval=${minutes}`, `Kraken ${minutes}m`);
+  if (js.error && js.error.length) throw new Error(`Kraken: ${js.error.join(", ")}`);
+  const key = Object.keys(js.result || {}).find(k => k !== "last");
+  if (!key) throw new Error(`Kraken: no ${coin}/USD data`);
+  return js.result[key].map(k => [+k[0], +k[1], +k[2], +k[3], +k[4]]);
+}
+
+// sorted, one candle per time
+function clean(rows) {
+  rows.sort((a, b) => a[0] - b[0]);
+  return rows.filter((r, i) => i === 0 || r[0] !== rows[i - 1][0]);
+}
+
+async function cryptoFrames(coin) {
+  const names = Object.keys(CRYPTO_SERIES);
+  const errors = [];
+  for (const [source, get] of [
+    [`Binance ${coin}/USDT`, k => binanceSeries(coin, CRYPTO_SERIES[k][0], CRYPTO_SERIES[k][1])],
+    [`Kraken ${coin}/USD`, k => krakenSeries(coin, CRYPTO_SERIES[k][2])],
+  ]) {
+    try {
+      const got = await Promise.all(names.map(get));
+      if (!got[1].length) throw new Error("no daily candles");
+      const frames = {};
+      names.forEach((k, i) => frames[k] = clean(got[i]));
+      return { source, frames };
+    } catch (e) {
+      errors.push(`${source}: ${e.message || e}`);
+    }
+  }
+  throw new Error(errors.join(" · "));
+}
+
 const cors = { "Access-Control-Allow-Origin": "*", "Access-Control-Allow-Methods": "GET, OPTIONS" };
 const json = (body, status = 200, extra = {}) =>
   new Response(JSON.stringify(body), { status, headers: { "Content-Type": "application/json", ...cors, ...extra } });
@@ -87,7 +178,9 @@ export default {
     const url = new URL(request.url);
     let sym = (url.searchParams.get("symbol") || "").trim().toUpperCase().replace(/\./g, "-");
     if (["SPX", "^SPX", "^GSPC"].includes(sym)) sym = "SPY";       // index: no Alpaca data
-    if (!TICKERS.has(sym)) return json({ error: `${sym || "No ticker"}: only S&P 100 stocks and SPY are available.` }, 400);
+    const coin = TICKERS.has(sym) ? null : coinOf(sym);
+    if (coin) return crypto(coin, ctx);
+    if (!TICKERS.has(sym)) return json({ error: `${sym || "No ticker"}: only S&P 100 stocks, SPY and the app's 19 coins are available.` }, 400);
     if (!env.ALPACA_KEY_ID || !env.ALPACA_SECRET_KEY) return json({ error: "The Alpaca keys are not set on the Worker." }, 500);
 
     // same request within a minute: answer from the cache
@@ -113,3 +206,20 @@ export default {
     }
   },
 };
+
+async function crypto(coin, ctx) {
+  const sym = `${coin}-USD`;
+  const cache = typeof caches !== "undefined" ? caches.default : null;
+  const key = new Request(`https://trendlines.cache/${sym}`);
+  if (cache) { const hit = await cache.match(key); if (hit) return hit; }
+  try {
+    const { source, frames } = await cryptoFrames(coin);
+    const last = Math.max(...Object.values(frames).map(f => f.length ? f[f.length - 1][0] : 0));
+    const end = new Date((last + 5 * 60) * 1000).toISOString();   // end of the newest 5-minute candle
+    const res = json({ symbol: sym, market: "crypto", source, end, frames }, 200, { "Cache-Control": "max-age=60" });
+    if (cache) ctx?.waitUntil?.(cache.put(key, res.clone()));
+    return res;
+  } catch (e) {
+    return json({ error: `No data for ${sym}. ${e.message || e}` }, 502);
+  }
+}

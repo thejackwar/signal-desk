@@ -32,7 +32,14 @@ end = now − 16 min), keeps regular hours (9:30–16:00 New York) for intraday 
 30-min bars and draws the lines itself (`docs/trendlines.js`). Only S&P 100 stocks and SPY are
 accepted (SPX → SPY, BRK.B → BRK-B). Answers are cached for a minute.
 
-If you change the code, paste it again in step 3. Tests: `python tests/trendlines/test_parity.py`.
+**Crypto:** `GET /?symbol=BTC-USD` (or `BTC`, `BTCUSD`) works for the 19 coins in
+`engine/crypto.txt`. Crypto trades around the clock, so the Worker fetches all seven timeframes
+directly (weekly to 5-minute, times in UTC) from Binance's public market data (coin/USDT, no keys).
+If Binance doesn't list a coin (Monero) or can't be reached, it uses Kraken (coin/USD, last 720
+candles per timeframe). No extra secrets are needed.
+
+If you change the code, paste it again in step 3. Tests: `python tests/trendlines/test_parity.py`,
+`node tests/trendlines/test_crypto.mjs`, `node tests/trendlines/test_sr.mjs`.
 
 # Broker link counter (second Worker, optional)
 

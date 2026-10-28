@@ -1402,7 +1402,7 @@ table.bt.ltab td:last-child { color: var(--muted); }
     h += `<div class="chartbox" id="schart"><p class="loading">Loading chart…</p></div>`;
     h += `<p class="hint">One year of daily candles with the 50- and 200-day averages. Triangles mark alerts from all strategies in the last few weeks.</p>`;
     if (isComm() && r.drivers) h += `<div class="card drivers"><h3>What moves the price</h3><p>${esc(r.drivers)}.</p><p class="hint" style="margin:0">Prices follow the nearest contract, so the chart can jump a little when it rolls to the next month.</p></div>`;
-    if (S.market === "stocks") h += `<p style="margin:4px 0 18px"><a class="btn ghost" href="trendlines.html#${encodeURIComponent(t)}">Trendlines on 7 timeframes ›</a></p>`;
+    if (!isComm()) h += `<p style="margin:4px 0 18px"><a class="btn ghost" href="trendlines.html#${encodeURIComponent(t)}">Trendlines on 7 timeframes ›</a></p>`;
     h += nextEarningsCard(t) + mentionsCard(t) + newsFor(t);
     h += `<h2>Recent alerts on ${esc(disp(t))}</h2>`;
     if (!alerts.length) h += `<p class="tag" style="font-size:14px">No strategy has fired on ${esc(disp(t))} in the last few weeks.</p>`;

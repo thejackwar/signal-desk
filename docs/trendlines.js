@@ -82,8 +82,9 @@ export function analyze(c, lookback, swing = 5, breakBy = "close") {
 const emptyChain = () => ({ vertices: [], broken: null, level: null, slope: null });
 
 // ------------------------------------------------------------------ data
-// The data server sends regular-hours bars as [t, o, h, l, c], where t is the New York
-// wall-clock time written as if it were UTC (seconds). W and D bars carry the date at 00:00.
+// The data server sends bars as [t, o, h, l, c]. Stocks: regular hours only, t = New York
+// wall-clock time written as if it were UTC (seconds); W and D bars carry the date at 00:00.
+// Crypto: around the clock, t = UTC.
 const toCandles = rows => rows.map(([time, open, high, low, close]) => ({ time, open, high, low, close }));
 
 // Session-anchored candles from 30-min bars: first one starts 9:30 (1H: 9:30..15:30, 4H: 9:30 and 13:30).
@@ -106,9 +107,11 @@ export function group(bars, minutes) {
   return out;
 }
 
-// Server payload -> the 7 timeframes, oldest candle first.
+// Server payload -> the 7 timeframes, oldest candle first. Crypto payloads (24/7, UTC times)
+// carry all 7 timeframes straight from the exchange; stocks build 1H and 4H from the 30-min bars.
 export function buildFrames(payload) {
   const f = payload.frames;
+  if (f["4H"] && f["1H"]) return Object.fromEntries(ORDER.map(t => [t, toCandles(f[t] || [])]));
   const m30 = toCandles(f["30m"]);
   return {
     W: toCandles(f.W), D: toCandles(f.D),

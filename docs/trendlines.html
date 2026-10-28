@@ -5,12 +5,12 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#08090b">
 <title>Trendlines</title>
-<meta name="description" content="Automatic support and resistance trendlines on weekly, daily and intraday charts for every S&amp;P 100 stock. Free, information only.">
+<meta name="description" content="Automatic support and resistance trendlines on weekly, daily and intraday charts for every S&amp;P 100 stock and the top cryptocurrencies. Free, information only.">
 <!-- Link previews (WhatsApp, LinkedIn, Reddit, X…). Absolute addresses: update SITE if the site moves to its own domain. -->
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Investment Center Signals">
-<meta property="og:title" content="Automatic trendlines for S&amp;P 100 stocks | Investment Center Signals">
-<meta property="og:description" content="Automatic support and resistance trendlines on weekly, daily and intraday charts for every S&amp;P 100 stock. Free, information only.">
+<meta property="og:title" content="Automatic trendlines for S&amp;P 100 stocks and crypto | Investment Center Signals">
+<meta property="og:description" content="Automatic support and resistance trendlines on weekly, daily and intraday charts for every S&amp;P 100 stock and the top cryptocurrencies. Free, information only.">
 <meta property="og:url" content="https://thejackwar.github.io/signal-desk/trendlines.html">
 <meta property="og:image" content="https://thejackwar.github.io/signal-desk/og-image.png">
 <meta property="og:image:width" content="1200">
@@ -59,6 +59,7 @@ header.top { display: flex; align-items: center; gap: 12px; padding: 14px 0 10px
 header h1 { font: 700 26px/1.1 var(--font-display); letter-spacing: -.01em; margin: 0; flex: 1; }
 
 form.pick { display: flex; gap: 8px; margin: 6px 0 12px; }
+.mk { margin: 2px 0 8px; }
 form.pick input { flex: 1; min-width: 0; max-width: 340px; background: var(--surface); border: 1px solid var(--line); border-radius: 10px;
   padding: 10px 12px; color: var(--fg); font: 600 16px var(--font-mono); text-transform: uppercase; letter-spacing: .02em; }
 form.pick input::placeholder { text-transform: none; font: 400 15px var(--font-body); color: var(--faint); letter-spacing: 0; }
@@ -124,6 +125,7 @@ details.settings summary b { color: var(--fg); font-weight: 500; }
     <h1>Trendlines</h1>
   </header>
 
+  <div class="seg mk" id="mk" role="group" aria-label="Market"><button type="button" data-v="stocks">📈 Stocks</button><button type="button" data-v="crypto">🪙 Crypto</button></div>
   <form class="pick" id="pick" autocomplete="off">
     <input id="tk" list="tickers" placeholder="Ticker, e.g. AAPL or SPY" aria-label="Ticker" spellcheck="false" autocapitalize="characters">
     <datalist id="tickers"></datalist>
@@ -152,8 +154,8 @@ details.settings summary b { color: var(--fg); font-weight: 500; }
 
   <p class="status" id="status" role="status"></p>
   <div id="out"></div>
-  <p class="fine" style="margin-bottom:0"><a href="index.html#strategy-topdown" style="color:var(--amber)">Get an alert when one of these lines breaks: Top-Down Analysis ›</a><br>Swing strength 5 and close-based breaks, the defaults, are what the alerts use.</p>
-  <p class="fine">Lines are computed on each timeframe's own candles, regular hours only, Alpaca SIP data about 16 minutes old. For information only. Not investment advice.</p>
+  <p class="fine" id="tdlink" style="margin-bottom:0"><a href="index.html#strategy-topdown" style="color:var(--amber)">Get an alert when one of these lines breaks: Top-Down Analysis ›</a><br>Swing strength 5 and close-based breaks, the defaults, are what the alerts use.</p>
+  <p class="fine" id="foot"></p>
 </div>
 
 <script type="module">
@@ -165,6 +167,12 @@ const TICKERS = ("SPY AAPL ABBV ABT ACN ADBE AIG AMD AMGN AMT AMZN AVGO AXP BA B
   "CHTR CL CMCSA COF COP COST CRM CSCO CVS CVX DE DHR DIS DUK EMR F FDX GD GE GILD GM GOOGL GS HD HON IBM INTC " +
   "INTU ISRG JNJ JPM KO LIN LLY LMT LOW MA MCD MDLZ MDT MET META MMM MO MRK MS MSFT NEE NFLX NKE NOW NVDA ORCL " +
   "PEP PFE PG PLTR PM PYPL QCOM RTX SBUX SCHW SO SPG T TGT TMO TMUS TSLA TXN UBER UNH UNP UPS USB V VZ WFC WMT XOM").split(" ");
+// the app's coins (engine/crypto.txt), shown as BTC-USD etc.
+const COINS = { BTC: "Bitcoin", ETH: "Ethereum", XRP: "XRP", BNB: "BNB", SOL: "Solana", DOGE: "Dogecoin", TRX: "TRON",
+  ADA: "Cardano", LINK: "Chainlink", XLM: "Stellar", BCH: "Bitcoin Cash", AVAX: "Avalanche", LTC: "Litecoin",
+  HBAR: "Hedera", DOT: "Polkadot", XMR: "Monero", ETC: "Ethereum Classic", ATOM: "Cosmos", ALGO: "Algorand" };
+const CRYPTO = Object.keys(COINS).map(c => `${c}-USD`);
+const isCrypto = s => CRYPTO.includes(s);
 const C = { bg: "#131722", grid: "#232835", txt: "#d1d4dc", candleUp: "#26a69a", candleDn: "#ef5350", up: "#4CAF50", dn: "#F23645", sup: "#26c6da", res: "#ffa726" };
 const KEY = "signaldesk.trendlines";
 
@@ -182,6 +190,27 @@ if (qApi) { P.api = qApi; savePrefs(); }
 let state = null;            // { symbol, end, frames, results }
 let charts = [];
 let loadSeq = 0;
+let names = { SPY: "S&P 500 ETF" };
+let mk = "stocks";
+
+// ------------------------------------------------------------------ stocks / crypto
+function setMarket(m) {
+  mk = m;
+  [...$("mk").children].forEach(b => b.setAttribute("aria-pressed", b.dataset.v === m));
+  $("tk").placeholder = m === "crypto" ? "Coin, e.g. BTC or ETH" : "Ticker, e.g. AAPL or SPY";
+  const list = m === "crypto" ? CRYPTO.map(t => [t, COINS[t.slice(0, -4)]]) : TICKERS.map(t => [t, names[t] || ""]);
+  $("tickers").innerHTML = list.map(([t, n]) => `<option value="${t}">${esc(n)}</option>`).join("");
+  $("tdlink").hidden = m === "crypto";
+  $("foot").textContent = m === "crypto"
+    ? "Lines are computed on each timeframe's own candles. Crypto trades around the clock: candles are in UTC (the daily one starts at 00:00 UTC), from Binance's public data (coin/USDT), or Kraken (coin/USD) for coins Binance doesn't list. Top-Down alerts cover stocks only for now. For information only. Not investment advice."
+    : "Lines are computed on each timeframe's own candles, regular hours only, Alpaca SIP data about 16 minutes old. For information only. Not investment advice.";
+}
+$("mk").addEventListener("click", e => {
+  const b = e.target.closest("button"); if (!b || b.dataset.v === mk) return;
+  setMarket(b.dataset.v);
+  if (location.hash) location.hash = ""; else show("");
+  $("tk").focus();
+});
 
 // ------------------------------------------------------------------ settings UI
 function segHtml(items, cur) {
@@ -214,7 +243,15 @@ function changed(recompute) {
 }
 
 // ------------------------------------------------------------------ loading
-const norm = s => { s = (s || "").trim().toUpperCase().replace(/\./g, "-"); return ["SPX", "^SPX", "^GSPC"].includes(s) ? "SPY" : s; };
+const norm = s => {
+  s = (s || "").trim().toUpperCase().replace(/\./g, "-").replace(/[\s/_]+/g, "-");
+  if (["SPX", "^SPX", "^GSPC"].includes(s)) return "SPY";
+  if (TICKERS.includes(s)) return s;
+  const m = s.match(/^([A-Z0-9]+?)(?:-?USDT?)?$/);                // BTC, BTCUSD, BTC-USD, BTC/USDT -> BTC-USD
+  if (m && COINS[m[1]]) return `${m[1]}-USD`;
+  const byName = Object.keys(COINS).find(c => COINS[c].toUpperCase() === s.replace(/-/g, " "));   // "bitcoin"
+  return byName ? `${byName}-USD` : s;
+};
 const current = () => norm(decodeURIComponent(location.hash.slice(1)));
 
 $("pick").addEventListener("submit", e => {
@@ -230,7 +267,9 @@ function setStatus(t, err = false) { $("status").textContent = t; $("status").cl
 async function show(sym) {
   $("tk").value = sym || "";
   if (!sym) { clearCharts(); state = null; setStatus(""); $("out").innerHTML = intro(); return; }
-  if (!TICKERS.includes(sym)) { setStatus(`${sym} isn't available. Pick an S&P 100 stock or SPY.`, true); return; }
+  if (!TICKERS.includes(sym) && !isCrypto(sym)) { setStatus(`${sym} isn't available. Pick an S&P 100 stock, SPY, or one of the coins (BTC, ETH, SOL …).`, true); return; }
+  const m = isCrypto(sym) ? "crypto" : "stocks";
+  if (m !== mk) setMarket(m);
   if (!P.api) {
     clearCharts(); state = null; setStatus("");
     $("out").innerHTML = `<div class="msg"><strong>Connect the data server</strong>Open Settings and paste your Cloudflare Worker's address (it looks like <span class="mono">https://trendlines.&lt;you&gt;.workers.dev</span>). The setup steps are in <span class="mono">worker/README.md</span>.</div>`;
@@ -248,8 +287,10 @@ async function show(sym) {
     if (!r.ok || js.error) throw new Error(js.error || `HTTP ${r.status}`);
     const frames = buildFrames(js);
     state = { symbol: js.symbol, end: js.end, frames, results: analyzeAll(frames, P) };
-    const ny = new Date(js.end).toLocaleString("en-US", { timeZone: "America/New_York", weekday: "short", day: "numeric", month: "short", hour: "2-digit", minute: "2-digit", hour12: false });
-    setStatus(`${js.symbol} · data up to ${ny} New York · lines recomputed in your browser`);
+    const crypto = js.market === "crypto";
+    const at = new Date(js.end).toLocaleString("en-US", { timeZone: crypto ? "UTC" : "America/New_York", weekday: "short", day: "numeric", month: "short", hour: "2-digit", minute: "2-digit", hour12: false });
+    setStatus(crypto ? `${COINS[js.symbol.slice(0, -4)]} · ${js.source} · data up to ${at} UTC · lines recomputed in your browser`
+      : `${js.symbol} · data up to ${at} New York · lines recomputed in your browser`);
     render();
   } catch (e) {
     if (seq !== loadSeq) return;
@@ -259,7 +300,7 @@ async function show(sym) {
   }
 }
 
-const intro = () => `<div class="msg"><strong>Type a ticker</strong>Any S&amp;P 100 stock or SPY. You get one chart per timeframe (W, D, 4H, 1H, 30m, 15m, 5m) with the trendlines drawn from the absolute high and low: red lines touch the swing highs from above, green lines the swing lows from below. The newest line of each side runs on until a candle closes through it (✕). Dashed horizontal lines are support (blue, S1 nearest) and resistance (orange, R1 nearest): prices where several swing highs or lows bunched up.</div>`;
+const intro = () => `<div class="msg"><strong>${mk === "crypto" ? "Type a coin" : "Type a ticker"}</strong>${mk === "crypto" ? "Bitcoin, Ethereum and the other 17 coins in the app (BTC, ETH, SOL …)." : "Any S&amp;P 100 stock or SPY."} You get one chart per timeframe (W, D, 4H, 1H, 30m, 15m, 5m) with the trendlines drawn from the absolute high and low: red lines touch the swing highs from above, green lines the swing lows from below. The newest line of each side runs on until a candle closes through it (✕). Dashed horizontal lines are support (blue, S1 nearest) and resistance (orange, R1 nearest): prices where several swing highs or lows bunched up.</div>`;
 
 // ------------------------------------------------------------------ rendering
 function clearCharts() { charts.forEach(c => c.remove()); charts = []; }
@@ -283,7 +324,10 @@ function render() {
   }
   $("out").innerHTML = h + `</div>`;
   if (!P.tfs.length) $("out").insertAdjacentHTML("beforeend", `<div class="msg">All timeframes are switched off in Settings.</div>`);
-  for (const t of P.tfs) charts.push(drawChart($(`chart-${t}`), t, state.frames[t], results[t]));
+  for (const t of P.tfs) {
+    if (state.frames[t].length) charts.push(drawChart($(`chart-${t}`), t, state.frames[t], results[t]));
+    else $(`chart-${t}`).innerHTML = `<p class="msg" style="margin:14px">No ${TFS[t].label.toLowerCase()} candles for ${esc(symbol)}.</p>`;
+  }
 }
 // nearest support and resistance, with how many swings touched them
 function srCells(sr) {
@@ -387,11 +431,10 @@ function drawChart(el, tf, candles, res) {
 }
 
 // ------------------------------------------------------------------ start
-$("tickers").innerHTML = TICKERS.map(t => `<option value="${t}">`).join("");
+setMarket(isCrypto(current()) ? "crypto" : "stocks");
 fetch("data/stocks.json").then(r => r.json()).then(d => {
-  const nm = Object.fromEntries((d.stocks || []).map(s => [s.ticker, s.name]));
-  nm.SPY = "S&P 500 ETF";
-  $("tickers").innerHTML = TICKERS.map(t => `<option value="${t}">${esc(nm[t] || "")}</option>`).join("");
+  for (const s of d.stocks || []) names[s.ticker] = s.name;
+  if (mk === "stocks") setMarket("stocks");
 }).catch(() => {});
 renderSettings();
 if (typeof LightweightCharts === "undefined") setStatus("The chart library didn't load. Check your connection and reload.", true);
