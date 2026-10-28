@@ -876,9 +876,17 @@ canvas.hm { display: block; touch-action: pan-y; }
 
   function followedAlerts() { return (S.feed?.alerts || []).filter(a => S.follow.has(a.strategy)); }
 
+  // exact time the scan first spotted the alert, in the viewer's local time
+  function foundTime(a) {
+    const iso = a.found_at || S.feed?.generated_at;
+    if (!iso) return "";
+    const d = new Date(iso.replace(/\+00:00$/, "Z"));
+    return isNaN(d) ? "" : " " + d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+  }
+
   function alertRow(a, opts = {}) {
     const idx = S.feed.alerts.indexOf(a);
-    const sinceTxt = a.since_days > 0 ? `${chg(a.since)} <span style="color:var(--faint)">${a.since_days}d</span>` : `<span style="color:var(--faint)">today</span>`;
+    const sinceTxt = a.since_days > 0 ? `${chg(a.since)} <span style="color:var(--faint)">${a.since_days}d</span>` : `<span style="color:var(--faint)">today${foundTime(a)}</span>`;
     return `<a class="row alert ${a.side}${hasIcon() && !opts.showDate ? " withcoin" : ""}" href="#alert-${idx}">
       <span class="stripe"></span>${!opts.showDate ? icon(a.ticker, 32) : ""}
       <span class="main"><span class="tk">${esc(opts.showDate ? fmtDate(a.date, { day: "numeric", month: "short" }) : disp(a.ticker))}</span><span class="strat">${esc(stratName(a.strategy))}</span>

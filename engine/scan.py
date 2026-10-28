@@ -327,6 +327,12 @@ def main():
     new = [a for a in found if a["id"] not in old]
     merged = {a["id"]: a for a in found}
 
+    # remember when each alert was first spotted, so the app can show the exact time
+    now = datetime.now(timezone.utc).isoformat(timespec="minutes")
+    seen = {a["id"]: a.get("found_at") for a in (previous or {}).get("alerts", [])}
+    for a in merged.values():
+        a["found_at"] = seen.get(a["id"]) or now
+
     as_of = max(df.index[-1] for df in data.values())
     cutoff = (as_of - pd.Timedelta(days=KEEP_DAYS)).strftime("%Y-%m-%d")
     alerts = sorted((a for a in merged.values() if a["date"] >= cutoff),
@@ -358,7 +364,7 @@ def main():
 
     OUT.parent.mkdir(parents=True, exist_ok=True)
     OUT.write_text(json.dumps({
-        "generated_at": datetime.now(timezone.utc).isoformat(timespec="minutes"),
+        "generated_at": now,
         "as_of": f"{as_of:%Y-%m-%d}",
         "demo": args.demo,
         "market": MARKET,
