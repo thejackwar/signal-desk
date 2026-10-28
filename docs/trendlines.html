@@ -3,7 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#08090b">
+<meta name="theme-color" content="#f5f5f7" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
 <title>Trendlines</title>
 <meta name="description" content="Automatic support and resistance trendlines on weekly, daily and intraday charts for every S&amp;P 100 stock and the top cryptocurrencies. Free, information only.">
 <!-- Link previews (WhatsApp, LinkedIn, Reddit, X…). Absolute addresses: update SITE if the site moves to its own domain. -->
@@ -32,136 +33,206 @@
 <link rel="icon" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-180.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
 <script src="https://unpkg.com/lightweight-charts@4.2.3/dist/lightweight-charts.standalone.production.js"></script>
 <style>
+/* Clean, Apple-like: system font, lots of air, soft grey canvas with white cards. Follows the device's light/dark setting. */
 :root {
-  --bg: #08090b; --surface: #111317; --surface-2: #191c22; --line: #22262d;
-  --fg: #e9ebee; --muted: #8b929d; --faint: #5b616b; --amber: #f2b33d;
-  --bull: #32c48d; --bear: #f05a63;
-  --chart-bg: #131722; --chart-grid: #232835; --chart-txt: #d1d4dc;
-  --up-line: #4CAF50; --down-line: #F23645; --sup: #26c6da; --res: #ffa726;
-  --font-display: "Bricolage Grotesque", "Avenir Next", system-ui, sans-serif;
-  --font-body: "IBM Plex Sans", -apple-system, "Segoe UI", system-ui, sans-serif;
-  --font-mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
-  color-scheme: dark;
+  --bg: #f5f5f7; --card: #ffffff; --fill: #e8e8ed; --fill-2: #f5f5f7; --hair: #d2d2d7; --hair-2: #e8e8ed;
+  --fg: #1d1d1f; --muted: #6e6e73; --faint: #86868b; --accent: #0071e3; --accent-hover: #0077ed; --link: #0066cc;
+  --shadow: 0 2px 12px rgba(0,0,0,.04), 0 1px 2px rgba(0,0,0,.04);
+  --bar: rgba(245,245,247,.8);
+  /* chart: candles soft, lines strong */
+  --c-bg: #ffffff; --c-grid: #f0f0f2; --c-txt: #86868b; --c-cup: #34c759; --c-cdn: #ff3b30;
+  --up-line: #1d9a3f; --down-line: #e0242b; --sup: #0071e3; --res: #f08c00;
+  --pill-up: rgba(52,199,89,.14); --pill-down: rgba(255,59,48,.12); --pill-sq: rgba(255,149,0,.15); --pill-sq-fg: #c25e00;
+  --font: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", Inter, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #000000; --card: #1c1c1e; --fill: #2c2c2e; --fill-2: #1c1c1e; --hair: #38383a; --hair-2: #2c2c2e;
+    --fg: #f5f5f7; --muted: #a1a1a6; --faint: #6e6e73; --accent: #0a84ff; --accent-hover: #409cff; --link: #2997ff;
+    --shadow: none; --bar: rgba(22,22,23,.8);
+    --c-bg: #1c1c1e; --c-grid: #262628; --c-txt: #8e8e93; --c-cup: #30d158; --c-cdn: #ff453a;
+    --up-line: #32d74b; --down-line: #ff6961; --sup: #0a84ff; --res: #ff9f0a;
+    --pill-up: rgba(48,209,88,.18); --pill-down: rgba(255,69,58,.18); --pill-sq: rgba(255,159,10,.18); --pill-sq-fg: #ff9f0a;
+    color-scheme: dark;
+  }
 }
 * { box-sizing: border-box; }
 html, body { margin: 0; }
-body { background: var(--bg); color: var(--fg); font: 15px/1.5 var(--font-body); -webkit-font-smoothing: antialiased;
-  padding: env(safe-area-inset-top, 0px) 0 calc(24px + env(safe-area-inset-bottom, 0px)); }
-.wrap { max-width: 1280px; margin: 0 auto; padding: 0 16px; }
-.mono { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+body { background: var(--bg); color: var(--fg); font: 17px/1.47 var(--font); letter-spacing: -.022em;
+  -webkit-font-smoothing: antialiased; font-feature-settings: "tnum"; padding-bottom: calc(40px + env(safe-area-inset-bottom, 0px)); }
+a { color: var(--link); text-decoration: none; }
+a:hover { text-decoration: underline; }
+.wrap { max-width: 1080px; margin: 0 auto; padding: 0 22px; }
+@media (max-width: 560px) { .wrap { padding: 0 16px; } }
 
-header.top { display: flex; align-items: center; gap: 12px; padding: 14px 0 10px; }
-.back { color: var(--muted); text-decoration: none; font-size: 14px; display: inline-flex; align-items: center; gap: 4px; }
-.back:hover { color: var(--fg); }
-header h1 { font: 700 26px/1.1 var(--font-display); letter-spacing: -.01em; margin: 0; flex: 1; }
+/* frosted top bar */
+.bar { position: sticky; top: 0; z-index: 20; background: var(--bar); backdrop-filter: saturate(180%) blur(20px); -webkit-backdrop-filter: saturate(180%) blur(20px);
+  border-bottom: 1px solid var(--hair-2); padding-top: env(safe-area-inset-top, 0px); }
+.bar-in { max-width: 1080px; margin: 0 auto; padding: 0 22px; height: 48px; display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; }
+.back { font-size: 14px; color: var(--link); }
+.bar-title { font-size: 15px; font-weight: 600; letter-spacing: -.01em; }
 
-form.pick { display: flex; gap: 8px; margin: 6px 0 12px; }
-.mk { margin: 2px 0 8px; }
-form.pick input { flex: 1; min-width: 0; max-width: 340px; background: var(--surface); border: 1px solid var(--line); border-radius: 10px;
-  padding: 10px 12px; color: var(--fg); font: 600 16px var(--font-mono); text-transform: uppercase; letter-spacing: .02em; }
-form.pick input::placeholder { text-transform: none; font: 400 15px var(--font-body); color: var(--faint); letter-spacing: 0; }
-form.pick input:focus, .set input:focus { outline: 2px solid var(--amber); outline-offset: 1px; }
-.btn { background: var(--fg); color: var(--bg); border: 0; border-radius: 10px; padding: 0 18px; font: 600 15px var(--font-body); cursor: pointer; }
-.btn:disabled { opacity: .5; cursor: default; }
+/* hero */
+.hero { text-align: center; padding: 64px 0 28px; }
+.hero h1 { font-size: clamp(40px, 7vw, 64px); line-height: 1.06; font-weight: 700; letter-spacing: -.035em; margin: 0; }
+.lede { font-size: clamp(19px, 2.4vw, 24px); line-height: 1.33; color: var(--muted); font-weight: 400; letter-spacing: -.015em; margin: 12px auto 0; max-width: 640px; }
+@media (max-width: 560px) { .hero { padding: 40px 0 20px; } }
 
-details.settings { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; margin-bottom: 14px; }
-details.settings summary { cursor: pointer; padding: 10px 14px; color: var(--muted); font-size: 14px; list-style: none; display: flex; gap: 8px; align-items: center; }
+/* segmented control */
+.seg { display: inline-flex; flex-wrap: wrap; gap: 2px; background: var(--fill); border-radius: 10px; padding: 2px; }
+.seg button { appearance: none; border: 0; background: none; color: var(--fg); font: 500 13px/1 var(--font); letter-spacing: -.01em;
+  padding: 8px 14px; border-radius: 8px; cursor: pointer; transition: background .2s, box-shadow .2s; }
+.seg button[aria-pressed="true"] { background: var(--card); font-weight: 600; box-shadow: 0 1px 3px rgba(0,0,0,.12), 0 0 0 .5px rgba(0,0,0,.04); }
+@media (prefers-color-scheme: dark) { .seg button[aria-pressed="true"] { background: #636366; box-shadow: none; } }
+.mk { margin: 32px 0 16px; }
+.mk button { padding: 9px 22px; font-size: 14px; }
+
+/* search */
+form.pick { display: flex; gap: 10px; justify-content: center; max-width: 560px; margin: 0 auto; }
+.field { flex: 1; min-width: 0; position: relative; }
+.field svg { position: absolute; left: 16px; top: 50%; transform: translateY(-50%); width: 18px; height: 18px; color: var(--faint); pointer-events: none; }
+form.pick input { width: 100%; height: 52px; background: var(--card); border: 1px solid var(--hair); border-radius: 14px; padding: 0 16px 0 44px;
+  color: var(--fg); font: 500 17px var(--font); letter-spacing: -.01em; text-transform: uppercase; box-shadow: var(--shadow); transition: border-color .2s, box-shadow .2s; }
+form.pick input::placeholder { text-transform: none; color: var(--faint); font-weight: 400; }
+form.pick input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent) 22%, transparent); }
+.btn { appearance: none; border: 0; background: var(--accent); color: #fff; border-radius: 980px; padding: 0 26px; height: 52px;
+  font: 500 17px var(--font); letter-spacing: -.01em; cursor: pointer; transition: background .2s; }
+.btn:hover { background: var(--accent-hover); }
+.btn:disabled { opacity: .45; cursor: default; }
+
+.status { color: var(--muted); font-size: 14px; margin: 16px 0 0; min-height: 1.4em; letter-spacing: -.01em; }
+.status.err { color: var(--down-line); }
+
+/* settings */
+details.settings { max-width: 720px; margin: 4px auto 40px; }
+details.settings summary { list-style: none; cursor: pointer; text-align: center; color: var(--link); font-size: 15px; }
 details.settings summary::-webkit-details-marker { display: none; }
-details.settings summary::before { content: "▸"; transition: transform .15s; }
-details.settings[open] summary::before { transform: rotate(90deg); }
-details.settings summary b { color: var(--fg); font-weight: 500; }
-.set { display: grid; grid-template-columns: 150px 1fr; gap: 10px 14px; align-items: center; padding: 4px 14px 14px; font-size: 14px; }
-.set > span { color: var(--muted); }
-.seg { display: inline-flex; background: var(--bg); border: 1px solid var(--line); border-radius: 9px; padding: 2px; flex-wrap: wrap; gap: 2px; }
-.seg button { background: none; border: 0; color: var(--muted); font: 500 13px var(--font-body); padding: 5px 11px; border-radius: 7px; cursor: pointer; }
-.seg button[aria-pressed="true"] { background: var(--surface-2); color: var(--fg); font-weight: 600; }
-.set input[type=url] { width: 100%; max-width: 520px; background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 7px 10px; color: var(--fg); font: 13px var(--font-mono); }
-.set small { grid-column: 2; color: var(--faint); font-size: 12.5px; margin-top: -6px; }
-@media (max-width: 560px) { .set { grid-template-columns: 1fr; gap: 4px; } .set small { grid-column: 1; margin: 0 0 6px; } .set > span { margin-top: 6px; } }
+details.settings .cz::after { content: ""; display: inline-block; width: 6px; height: 6px; margin-left: 7px; border: solid currentColor;
+  border-width: 0 1.5px 1.5px 0; transform: translateY(-3px) rotate(45deg); transition: transform .2s; }
+details.settings[open] .cz::after { transform: translateY(0) rotate(-135deg); }
+details.settings summary:hover .cz { text-decoration: underline; }
+#setsum { display: block; color: var(--faint); font-size: 13px; margin-top: 2px; }
+.set { margin-top: 18px; background: var(--card); border-radius: 18px; box-shadow: var(--shadow); padding: 0 22px; text-align: left; }
+.row { display: flex; justify-content: space-between; align-items: center; gap: 18px; padding: 16px 0; }
+.row + .row { border-top: 1px solid var(--hair-2); }
+.row .lbl { min-width: 0; }
+.row .lbl b { display: block; font-size: 15px; font-weight: 600; letter-spacing: -.01em; }
+.row .lbl small { display: block; color: var(--muted); font-size: 13px; line-height: 1.38; margin-top: 2px; letter-spacing: -.005em; }
+.row .seg { flex-shrink: 0; }
+.set input[type=url] { width: 100%; max-width: 320px; height: 36px; background: var(--fill-2); border: 1px solid var(--hair); border-radius: 9px; padding: 0 12px;
+  color: var(--fg); font: 13px ui-monospace, "SF Mono", Menlo, Consolas, monospace; }
+.set input[type=url]:focus { outline: none; border-color: var(--accent); }
+@media (max-width: 640px) { .row { flex-direction: column; align-items: flex-start; gap: 10px; } .set input[type=url] { max-width: none; } }
 
-.status { color: var(--muted); font-size: 13.5px; margin: 0 0 12px; min-height: 1.5em; }
-.status.err { color: var(--bear); }
-.msg { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 18px; color: var(--muted); }
-.msg strong { color: var(--fg); display: block; font: 700 17px/1.3 var(--font-display); margin-bottom: 4px; }
+/* empty / info states */
+.msg { text-align: center; color: var(--muted); max-width: 560px; margin: 0 auto; padding: 8px 0 24px; font-size: 17px; }
+.msg strong { display: block; color: var(--fg); font-size: 24px; font-weight: 600; letter-spacing: -.02em; margin-bottom: 6px; }
+.msg.small { font-size: 15px; padding: 40px 16px; }
 
-.summary { background: var(--chart-bg); border: 1px solid var(--chart-grid); border-radius: 12px; overflow-x: auto; margin-bottom: 16px; }
-.summary table { border-collapse: collapse; width: 100%; font: 13.5px var(--font-mono); font-variant-numeric: tabular-nums; color: var(--chart-txt); }
-.summary th, .summary td { padding: 7px 14px; text-align: right; white-space: nowrap; }
-.summary th { color: var(--faint); font: 500 12px var(--font-body); text-transform: uppercase; letter-spacing: .05em; border-bottom: 1px solid var(--chart-grid); }
+/* section titles */
+.sec { font-size: clamp(24px, 3vw, 32px); font-weight: 700; letter-spacing: -.028em; margin: 0 0 16px; }
+.sec small { font-size: 17px; font-weight: 400; color: var(--muted); letter-spacing: -.015em; margin-left: 8px; }
+
+/* overview table */
+.summary { background: var(--card); border-radius: 18px; box-shadow: var(--shadow); overflow-x: auto; margin-bottom: 56px; }
+.summary table { border-collapse: collapse; width: 100%; font-size: 15px; letter-spacing: -.01em; }
+.summary th, .summary td { padding: 13px 20px; text-align: right; white-space: nowrap; }
+.summary th { color: var(--muted); font-size: 12px; font-weight: 500; letter-spacing: 0; }
 .summary th:first-child, .summary td:first-child { text-align: left; }
-.summary tr + tr td { border-top: 1px solid rgba(35,40,53,.6); }
-.summary td.tf a { color: var(--fg); text-decoration: none; font-weight: 600; }
+.summary tbody td { border-top: 1px solid var(--hair-2); }
+.summary td.tf a { color: var(--fg); font-weight: 600; }
+.summary td.tf a:hover { color: var(--link); text-decoration: none; }
 .summary td.up { color: var(--up-line); } .summary td.down { color: var(--down-line); }
-.summary td.dim { color: var(--faint); }
 .summary td.sup { color: var(--sup); } .summary td.res { color: var(--res); }
-.summary td .tc { color: var(--faint); font-size: 11.5px; }
-.bias { display: inline-block; min-width: 72px; text-align: center; border-radius: 6px; padding: 1px 8px; font: 600 12px var(--font-body); }
-.bias.Up { background: rgba(76,175,80,.16); color: var(--up-line); }
-.bias.Down { background: rgba(242,54,69,.16); color: var(--down-line); }
-.bias.Squeeze { background: rgba(242,179,61,.14); color: var(--amber); }
+.summary td.dim { color: var(--faint); }
+.summary td .tc { color: var(--faint); font-size: 12px; margin-left: 2px; }
+.bias { display: inline-block; border-radius: 980px; padding: 3px 11px; font-size: 12px; font-weight: 600; letter-spacing: 0; }
+.bias.Up { background: var(--pill-up); color: var(--up-line); }
+.bias.Down { background: var(--pill-down); color: var(--down-line); }
+.bias.Squeeze { background: var(--pill-sq); color: var(--pill-sq-fg); }
 .bias.none { color: var(--faint); }
 
-.charts { display: grid; gap: 16px; }
-.card { background: var(--chart-bg); border: 1px solid var(--chart-grid); border-radius: 12px; overflow: hidden; scroll-margin-top: 12px; }
-.card h2 { margin: 0; padding: 10px 14px 4px; font: 600 14px var(--font-body); color: var(--chart-txt); display: flex; gap: 10px; align-items: baseline; flex-wrap: wrap; }
-.card h2 .lv { font: 12.5px var(--font-mono); color: var(--muted); }
-.card h2 .lv i { font-style: normal; }
-.card h2 .lv .u { color: var(--up-line); } .card h2 .lv .d { color: var(--down-line); }
-.card h2 .lv .s { color: var(--sup); } .card h2 .lv .r { color: var(--res); }
-.chart { position: relative; height: clamp(300px, 58vh, 540px); }
+/* chart cards */
+.charts { display: grid; gap: 28px; }
+.card { background: var(--card); border-radius: 22px; box-shadow: var(--shadow); overflow: hidden; scroll-margin-top: 64px; }
+.card header { display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 10px 24px; padding: 22px 24px 12px; }
+.card h2 { margin: 0; font-size: 24px; font-weight: 700; letter-spacing: -.025em; line-height: 1.1; }
+.card h2 span { display: block; font-size: 13px; font-weight: 500; color: var(--muted); letter-spacing: -.005em; margin-bottom: 4px; }
+.lv { display: flex; flex-wrap: wrap; gap: 6px 22px; margin: 0; }
+.lv div { display: flex; flex-direction: column; }
+.lv dt { font-size: 11px; color: var(--muted); font-weight: 500; letter-spacing: 0; }
+.lv dd { margin: 0; font-size: 15px; font-weight: 600; letter-spacing: -.01em; color: var(--faint); }
+.lv .u { color: var(--up-line); } .lv .d { color: var(--down-line); } .lv .s { color: var(--sup); } .lv .r { color: var(--res); }
+.chart { position: relative; height: clamp(300px, 56vh, 520px); margin: 0 8px 10px; }
 .overlay { position: absolute; inset: 0; pointer-events: none; z-index: 3; overflow: hidden; }
-.overlay span { position: absolute; transform: translate(-50%, -50%); font: 700 11px var(--font-body); white-space: nowrap; }
-.overlay span.x { font: 700 15px var(--font-body); }
-.fine { color: var(--faint); font-size: 12.5px; margin-top: 18px; }
+.overlay span { position: absolute; transform: translate(-50%, -50%); font: 600 11px var(--font); letter-spacing: 0; white-space: nowrap; }
+.overlay span.x { font-size: 15px; }
+@media (max-width: 560px) { .lv { display: grid; grid-template-columns: 1fr 1fr; width: 100%; } .card { border-radius: 18px; } .card header { padding: 18px 18px 10px; } .chart { margin: 0 2px 6px; } }
+
+.feat { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+.feat > div { background: var(--card); border-radius: 22px; box-shadow: var(--shadow); padding: 28px 26px; }
+.feat h3 { margin: 14px 0 6px; font-size: 21px; font-weight: 700; letter-spacing: -.022em; }
+.feat p { margin: 0; color: var(--muted); font-size: 15px; line-height: 1.47; letter-spacing: -.01em; }
+.dot { display: block; width: 28px; height: 4px; border-radius: 2px; }
+.dot.dash { height: 0; border-top: 3px dashed; border-radius: 0; margin-top: 2px; }
+@media (max-width: 760px) { .feat { grid-template-columns: 1fr; gap: 14px; } .feat > div { padding: 22px; } }
+
+.fine { color: var(--faint); font-size: 12px; line-height: 1.5; letter-spacing: -.005em; margin: 0; }
+footer.foot { border-top: 1px solid var(--hair); margin-top: 56px; padding-top: 18px; display: grid; gap: 10px; }
 </style>
 </head>
 <body>
-<div class="wrap">
-  <header class="top">
+<nav class="bar" aria-label="Page">
+  <div class="bar-in">
     <a class="back" href="index.html#stocks" aria-label="Back to Signals">‹ Signals</a>
-    <h1>Trendlines</h1>
-  </header>
+    <span class="bar-title">Trendlines</span>
+    <span></span>
+  </div>
+</nav>
 
-  <div class="seg mk" id="mk" role="group" aria-label="Market"><button type="button" data-v="stocks">📈 Stocks</button><button type="button" data-v="crypto">🪙 Crypto</button></div>
-  <form class="pick" id="pick" autocomplete="off">
-    <input id="tk" list="tickers" placeholder="Ticker, e.g. AAPL or SPY" aria-label="Ticker" spellcheck="false" autocapitalize="characters">
-    <datalist id="tickers"></datalist>
-    <button class="btn" id="go">Show</button>
-  </form>
+<main class="wrap">
+  <section class="hero">
+    <h1>Trendlines.</h1>
+    <p class="lede">Drawn automatically from the absolute high and low, with support and resistance, on seven timeframes.</p>
+    <div class="seg mk" id="mk" role="group" aria-label="Market"><button type="button" data-v="stocks">Stocks</button><button type="button" data-v="crypto">Crypto</button></div>
+    <form class="pick" id="pick" autocomplete="off">
+      <div class="field">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg>
+        <input id="tk" list="tickers" placeholder="Ticker, e.g. AAPL or SPY" aria-label="Ticker" spellcheck="false" autocapitalize="characters">
+      </div>
+      <datalist id="tickers"></datalist>
+      <button class="btn" id="go">Show</button>
+    </form>
+    <p class="status" id="status" role="status"></p>
+  </section>
 
   <details class="settings" id="settings">
-    <summary>Settings <b id="setsum"></b></summary>
+    <summary><span class="cz">Customize</span><span id="setsum"></span></summary>
     <div class="set">
-      <span>Swing strength</span>
-      <div class="seg" id="swing"></div>
-      <small>Bars on each side of a swing high/low. 5 matches trendlines.py.</small>
-      <span>Line breaks on</span>
-      <div class="seg" id="brk"></div>
-      <small>Close: a candle closes beyond the line. Wick: its high/low pokes through.</small>
-      <span>Support / resistance</span>
-      <div class="seg" id="srn"></div>
-      <small>Horizontal levels where at least two swing highs or lows cluster. How many to draw on each side of the price.</small>
-      <span>Timeframes</span>
-      <div class="seg" id="tfs"></div>
-      <span>Data server</span>
-      <input type="url" id="api" placeholder="https://trendlines.<you>.workers.dev" spellcheck="false">
-      <small>Your Cloudflare Worker's address. It holds the Alpaca keys, so they never reach this page.</small>
+      <div class="row"><div class="lbl"><b>Swing strength</b><small>Bars on each side of a swing high or low. 5 matches trendlines.py.</small></div><div class="seg" id="swing"></div></div>
+      <div class="row"><div class="lbl"><b>Line breaks on</b><small>Close: a candle closes beyond the line. Wick: its high or low pokes through.</small></div><div class="seg" id="brk"></div></div>
+      <div class="row"><div class="lbl"><b>Support and resistance</b><small>Levels where two or more swing highs or lows cluster, per side of the price.</small></div><div class="seg" id="srn"></div></div>
+      <div class="row"><div class="lbl"><b>Timeframes</b><small>Which charts to show.</small></div><div class="seg" id="tfs"></div></div>
+      <div class="row"><div class="lbl"><b>Data server</b><small>Your Cloudflare Worker. It holds the Alpaca keys, so they never reach this page.</small></div><input type="url" id="api" placeholder="https://trendlines.<you>.workers.dev" spellcheck="false"></div>
     </div>
   </details>
 
-  <p class="status" id="status" role="status"></p>
   <div id="out"></div>
-  <p class="fine" id="tdlink" style="margin-bottom:0"><a href="index.html#strategy-topdown" style="color:var(--amber)">Get an alert when one of these lines breaks: Top-Down Analysis ›</a><br>Swing strength 5 and close-based breaks, the defaults, are what the alerts use.</p>
-  <p class="fine" id="foot"></p>
-</div>
+
+  <footer class="foot">
+    <p class="fine" id="tdlink"><a href="index.html#strategy-topdown">Get an alert when one of these lines breaks: Top-Down Analysis ›</a><br>Swing strength 5 and close-based breaks, the defaults, are what the alerts use.</p>
+    <p class="fine" id="foot"></p>
+  </footer>
+</main>
 
 <script type="module">
 import { TFS, ORDER, buildFrames, analyzeAll, segments, fmtLevel, fmtPrice } from "./trendlines.js";
 
-// Address of the Cloudflare Worker (see worker/README.md). Can also be set in Settings.
+// Address of the Cloudflare Worker (see worker/README.md). Can also be set in Customize.
 const DEFAULT_API = "https://trendlines.guerragiacomo00.workers.dev";
 const TICKERS = ("SPY AAPL ABBV ABT ACN ADBE AIG AMD AMGN AMT AMZN AVGO AXP BA BAC BK BKNG BLK BMY BRK-B C CAT " +
   "CHTR CL CMCSA COF COP COST CRM CSCO CVS CVX DE DHR DIS DUK EMR F FDX GD GE GILD GM GOOGL GS HD HON IBM INTC " +
@@ -173,7 +244,16 @@ const COINS = { BTC: "Bitcoin", ETH: "Ethereum", XRP: "XRP", BNB: "BNB", SOL: "S
   HBAR: "Hedera", DOT: "Polkadot", XMR: "Monero", ETC: "Ethereum Classic", ATOM: "Cosmos", ALGO: "Algorand" };
 const CRYPTO = Object.keys(COINS).map(c => `${c}-USD`);
 const isCrypto = s => CRYPTO.includes(s);
-const C = { bg: "#131722", grid: "#232835", txt: "#d1d4dc", candleUp: "#26a69a", candleDn: "#ef5350", up: "#4CAF50", dn: "#F23645", sup: "#26c6da", res: "#ffa726" };
+// chart colours come from the CSS (light or dark, following the device)
+let C = {};
+function readColors() {
+  const v = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+  C = { bg: v("--c-bg"), grid: v("--c-grid"), txt: v("--c-txt"), candleUp: v("--c-cup"), candleDn: v("--c-cdn"),
+        up: v("--up-line"), dn: v("--down-line"), sup: v("--sup"), res: v("--res"), font: v("--font") };
+}
+readColors();
+const darkMq = matchMedia("(prefers-color-scheme: dark)");
+darkMq.addEventListener?.("change", () => { readColors(); if (state) render(); });
 const KEY = "signaldesk.trendlines";
 
 const $ = id => document.getElementById(id);
@@ -223,7 +303,7 @@ function renderSettings() {
   $("tfs").innerHTML = segHtml(ORDER.map(t => [t, t]), P.tfs);
   $("api").value = P.api || "";
   const off = ORDER.filter(t => !P.tfs.includes(t));
-  $("setsum").textContent = `· swing ${P.swing} · break on ${P.breakBy}` + (P.sr ? ` · ${P.sr} S/R each side` : " · S/R off") + (off.length ? ` · ${off.join(", ")} hidden` : "");
+  $("setsum").textContent = `Swing ${P.swing} · breaks on ${P.breakBy} · ` + (P.sr ? `${P.sr} support/resistance each side` : "support/resistance off") + (off.length ? ` · ${off.join(", ")} hidden` : "");
 }
 $("swing").addEventListener("click", e => { const b = e.target.closest("button"); if (!b) return; P.swing = +b.dataset.v; changed(true); });
 $("brk").addEventListener("click", e => { const b = e.target.closest("button"); if (!b) return; P.breakBy = b.dataset.v; changed(true); });
@@ -272,7 +352,7 @@ async function show(sym) {
   if (m !== mk) setMarket(m);
   if (!P.api) {
     clearCharts(); state = null; setStatus("");
-    $("out").innerHTML = `<div class="msg"><strong>Connect the data server</strong>Open Settings and paste your Cloudflare Worker's address (it looks like <span class="mono">https://trendlines.&lt;you&gt;.workers.dev</span>). The setup steps are in <span class="mono">worker/README.md</span>.</div>`;
+    $("out").innerHTML = `<div class="msg"><strong>Connect the data server</strong>Open Customize and paste your Cloudflare Worker's address (it looks like <span class="mono">https://trendlines.&lt;you&gt;.workers.dev</span>). The setup steps are in <span class="mono">worker/README.md</span>.</div>`;
     $("settings").open = true;
     return;
   }
@@ -300,7 +380,11 @@ async function show(sym) {
   }
 }
 
-const intro = () => `<div class="msg"><strong>${mk === "crypto" ? "Type a coin" : "Type a ticker"}</strong>${mk === "crypto" ? "Bitcoin, Ethereum and the other 17 coins in the app (BTC, ETH, SOL …)." : "Any S&amp;P 100 stock or SPY."} You get one chart per timeframe (W, D, 4H, 1H, 30m, 15m, 5m) with the trendlines drawn from the absolute high and low: red lines touch the swing highs from above, green lines the swing lows from below. The newest line of each side runs on until a candle closes through it (✕). Dashed horizontal lines are support (blue, S1 nearest) and resistance (orange, R1 nearest): prices where several swing highs or lows bunched up.</div>`;
+const intro = () => `<section class="feat">
+  <div><i class="dot" style="background:var(--down-line)"></i><h3>Trendlines</h3><p>Red lines run along the swing highs from the absolute high, green lines along the swing lows from the absolute low. The newest one runs on until a candle closes through it (✕).</p></div>
+  <div><i class="dot dash" style="border-color:var(--sup)"></i><h3>Support and resistance</h3><p>Dashed levels where several swing highs or lows bunched up. Blue below the price, orange above. S1 and R1 are the nearest.</p></div>
+  <div><i class="dot" style="background:var(--fg)"></i><h3>Seven timeframes</h3><p>Weekly down to 5-minute, each from its own candles. ${mk === "crypto" ? "Bitcoin, Ethereum and 17 more coins, around the clock." : "Every S&amp;P 100 stock, plus SPY."}</p></div>
+</section>`;
 
 // ------------------------------------------------------------------ rendering
 function clearCharts() { charts.forEach(c => c.remove()); charts = []; }
@@ -308,25 +392,28 @@ function clearCharts() { charts.forEach(c => c.remove()); charts = []; }
 function render() {
   clearCharts();
   const { symbol, results } = state;
-  let h = `<div class="summary"><table><thead><tr><th>TF</th><th>Up line</th><th>Down line</th><th>Bias</th>${P.sr ? "<th>Support</th><th>Resistance</th>" : ""}</tr></thead><tbody>`;
+  const name = isCrypto(symbol) ? COINS[symbol.slice(0, -4)] : (names[symbol] || "");
+  let h = `<h2 class="sec">${esc(symbol)}${name ? `<small>${esc(name)}</small>` : ""}</h2>
+    <div class="summary"><table><thead><tr><th>Timeframe</th><th>Up line</th><th>Down line</th><th>Bias</th>${P.sr ? "<th>Support</th><th>Resistance</th>" : ""}</tr></thead><tbody>`;
   for (const t of ORDER) {
     const r = results[t];
     const cell = (ch, cls) => `<td class="${ch.level !== null ? cls : "dim"}">${fmtLevel(ch)}</td>`;
-    const tf = P.tfs.includes(t) ? `<a href="#${esc(symbol)}" data-jump="${t}">${t}</a>` : t;
+    const tf = P.tfs.includes(t) ? `<a href="#${esc(symbol)}" data-jump="${t}">${TFS[t].label}</a>` : TFS[t].label;
     h += `<tr><td class="tf">${tf}</td>${cell(r.up, "up")}${cell(r.down, "down")}<td><span class="bias ${r.bias === "-" ? "none" : r.bias}">${r.bias === "-" ? "–" : r.bias}</span></td>${P.sr ? srCells(r.sr) : ""}</tr>`;
   }
   h += `</tbody></table></div><div class="charts">`;
   for (const t of P.tfs) {
     const r = results[t];
-    h += `<section class="card" id="card-${t}"><h2>${esc(symbol)} · ${TFS[t].label}
-      <span class="lv">up <i class="${r.up.level !== null ? "u" : ""}">${fmtLevel(r.up)}</i> · down <i class="${r.down.level !== null ? "d" : ""}">${fmtLevel(r.down)}</i>${P.sr ? srHead(r.sr) : ""}</span></h2>
+    const it = (dt, val, cls) => `<div><dt>${dt}</dt><dd class="${cls}">${val}</dd></div>`;
+    h += `<section class="card" id="card-${t}"><header><h2><span>${esc(symbol)}</span>${TFS[t].label}</h2>
+      <dl class="lv">${it("Up line", fmtLevel(r.up), r.up.level !== null ? "u" : "")}${it("Down line", fmtLevel(r.down), r.down.level !== null ? "d" : "")}${P.sr ? srHead(r.sr, it) : ""}</dl></header>
       <div class="chart" id="chart-${t}"></div></section>`;
   }
   $("out").innerHTML = h + `</div>`;
-  if (!P.tfs.length) $("out").insertAdjacentHTML("beforeend", `<div class="msg">All timeframes are switched off in Settings.</div>`);
+  if (!P.tfs.length) $("out").insertAdjacentHTML("beforeend", `<div class="msg small">All timeframes are switched off in Customize.</div>`);
   for (const t of P.tfs) {
     if (state.frames[t].length) charts.push(drawChart($(`chart-${t}`), t, state.frames[t], results[t]));
-    else $(`chart-${t}`).innerHTML = `<p class="msg" style="margin:14px">No ${TFS[t].label.toLowerCase()} candles for ${esc(symbol)}.</p>`;
+    else $(`chart-${t}`).innerHTML = `<p class="msg small">No ${TFS[t].label.toLowerCase()} candles for ${esc(symbol)}.</p>`;
   }
 }
 // nearest support and resistance, with how many swings touched them
@@ -334,9 +421,9 @@ function srCells(sr) {
   const c = (l, cls) => l ? `<td class="${cls}" title="${l.touches} swings touched ${fmtPrice(l.lo)}–${fmtPrice(l.hi)}">${fmtPrice(l.price)} <span class="tc">${l.touches}×</span></td>` : `<td class="dim">–</td>`;
   return c(sr.support[0], "sup") + c(sr.resistance[0], "res");
 }
-function srHead(sr) {
+function srHead(sr, it) {
   const s = sr.support[0], r = sr.resistance[0];
-  return ` · S <i class="${s ? "s" : ""}">${s ? fmtPrice(s.price) : "–"}</i> · R <i class="${r ? "r" : ""}">${r ? fmtPrice(r.price) : "–"}</i>`;
+  return it("Support", s ? fmtPrice(s.price) : "–", s ? "s" : "") + it("Resistance", r ? fmtPrice(r.price) : "–", r ? "r" : "");
 }
 $("out").addEventListener("click", e => {
   const a = e.target.closest("[data-jump]");
@@ -354,16 +441,16 @@ function drawChart(el, tf, candles, res) {
 
   const chart = LightweightCharts.createChart(el, {
     autoSize: true,
-    layout: { background: { type: "solid", color: C.bg }, textColor: C.txt, fontFamily: "IBM Plex Sans, system-ui, sans-serif", fontSize: 11 },
+    layout: { background: { type: "solid", color: C.bg }, textColor: C.txt, fontFamily: C.font, fontSize: 11 },
     grid: { vertLines: { color: C.grid }, horzLines: { color: C.grid } },
     rightPriceScale: { borderColor: C.grid, scaleMargins: { top: 0.06, bottom: 0.06 } },
     timeScale: { borderColor: C.grid, timeVisible: intraday, secondsVisible: false, minBarSpacing: 0.05, rightOffset: 0 },
-    crosshair: { mode: LightweightCharts.CrosshairMode.Normal },
+    crosshair: { mode: LightweightCharts.CrosshairMode.Normal, vertLine: { color: C.txt, labelBackgroundColor: C.txt }, horzLine: { color: C.txt, labelBackgroundColor: C.txt } },
     localization: { priceFormatter: p => p.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) },
   });
   const cs = chart.addCandlestickSeries({
     upColor: C.candleUp, downColor: C.candleDn, wickUpColor: C.candleUp, wickDownColor: C.candleDn, borderVisible: false,
-    priceLineColor: "#787b86", priceLineStyle: LightweightCharts.LineStyle.Dotted,
+    priceLineColor: C.txt, priceLineStyle: LightweightCharts.LineStyle.Dotted,
   });
   const data = candles.slice(w0).map(c => ({ time: c.time, open: c.open, high: c.high, low: c.low, close: c.close }));
   for (let k = 1; k <= fut; k++) data.push({ time: T(n - 1 + k) });
