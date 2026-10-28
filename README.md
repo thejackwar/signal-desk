@@ -75,6 +75,14 @@ steps) and 30 days from hourly candles. Data, in order of preference: Binance BT
 stand-in when open interest isn't available). It's a model, like the well-known heatmap
 sites, not exchange data.
 
+## News
+
+`engine/news.py` collects headlines every hour (the *News* workflow) from public RSS feeds:
+CNBC, MarketWatch, Investing.com, Nasdaq, Seeking Alpha and Yahoo Finance for stocks;
+CoinDesk, Cointelegraph, Decrypt, The Block, Bitcoin Magazine and CryptoSlate for crypto.
+It keeps the headline, source, time, a short summary and a link to the full article, and
+tags the stocks or coins a headline mentions. Edit `FEEDS` in the file to change sources.
+
 ## Signal strength
 
 Every alert gets a score from 0 to 4, using only what was known on the alert day:

@@ -97,10 +97,13 @@ def tag(text: str, ms) -> list[str]:
 
 
 def clean(s: str) -> str:
-    s = re.sub(r"<[^>]+>", " ", s or "")
+    s = re.sub(r"<(style|script)[^>]*>.*?</\1>", " ", s or "", flags=re.S | re.I)
+    s = re.sub(r"<[^>]+>", " ", s)
     s = html.unescape(s)
+    s = re.sub(r"@media[^{]*\{(?:[^{}]*\{[^{}]*\})*[^{}]*\}", " ", s)   # leftover page CSS
+    s = re.sub(r"[.#]?[\w-]+\s*\{[^{}]*\}", " ", s)
     s = re.sub(r"\s+", " ", s).strip()
-    s = re.sub(r"(The post .* appeared first on .*|Continue reading.*|Read more.*)$", "", s).strip()
+    s = re.sub(r"(The post .* appeared first on .*|Continue reading.*|Read more.*|Read the full story.*|Image source:.*)$", "", s).strip()
     return s
 
 
