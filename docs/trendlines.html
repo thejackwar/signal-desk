@@ -143,6 +143,8 @@ function loadPrefs() { try { return JSON.parse(localStorage.getItem(KEY)) || {};
 function savePrefs() { try { localStorage.setItem(KEY, JSON.stringify(P)); } catch {} }
 
 const P = { swing: 5, breakBy: "close", tfs: ORDER.slice(), api: DEFAULT_API, ...loadPrefs() };
+if (!P.api) P.api = DEFAULT_API;                           // an empty saved address never hides the default
+if (!Array.isArray(P.tfs)) P.tfs = ORDER.slice();
 const qApi = new URLSearchParams(location.search).get("api");
 if (qApi) { P.api = qApi; savePrefs(); }
 let state = null;            // { symbol, end, frames, results }

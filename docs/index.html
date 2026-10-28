@@ -138,6 +138,8 @@ a { color: var(--blue); }
 .btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; background: var(--amber); color: #1a1204; font-weight: 600; border-radius: 10px; padding: 10px 16px; }
 .btn.ghost { background: var(--surface-2); color: var(--fg); }
 .btn.ghost:hover { background: var(--line); }
+.tlbtn { display: flex; margin: 0 0 12px; }
+@media (min-width: 1000px) { .tlbtn { display: none; } }
 .btn.on { background: var(--surface-2); color: var(--amber); }
 
 /* stocks */
@@ -868,6 +870,7 @@ canvas.hm { display: block; touch-action: pan-y; }
     let h = header(L().Tab, null, `<div class="stamp">${esc(S.feed?.universe || "")}<br>close ${fmtDate(S.stocks.as_of, { day: "numeric", month: "short" })}</div>`);
     h += healthCard();
     if (isCrypto()) h += heatmapCard() + moversStrip();
+    if (!isCrypto()) h += `<a class="btn ghost tlbtn" href="trendlines.html">Trendlines on 7 timeframes ›</a>`;
     h += `<input class="search" id="stocksearch" type="search" placeholder="${L().search}" autocomplete="off" aria-label="Search" value="${esc(S.q || "")}">`;
     h += `<div class="tools" style="margin-bottom:6px"><label>Sort</label><div class="seg sm" role="group" aria-label="Sort stocks">${Object.entries(keys).map(([k, [t]]) =>
       `<button data-ssort="${k}" aria-pressed="${sort === k}">${t}</button>`).join("")}</div></div><div class="rows" id="stockrows">`;
