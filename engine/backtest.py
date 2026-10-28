@@ -47,6 +47,7 @@ HOLD_DAYS = 20
 TREND = {"ma200", "golden_cross", "donchian"}   # hold until the opposite alert
 START_CAPITAL = 10_000
 TRADE_SIZE = 1_000      # "take every trade": each alert is a EUR 1,000 position
+BENCH = "SPY"           # buy-and-hold comparison on the strategies page
 BINS = np.arange(-0.20, 0.2001, 0.025)        # histogram of 20-day results
 
 
@@ -102,7 +103,7 @@ def trade_summary(trades: list[dict]) -> dict:
     out["years"] = [{"year": int(y), "all": round(float(g["pnl"].sum())),
                      "long": round(float(g.loc[g["side"] > 0, "pnl"].sum())),
                      "short": round(float(g.loc[g["side"] < 0, "pnl"].sum())),
-                     "n": int(len(g)), "win_rate": pct((g["pnl"] > 0).mean())}
+                     "n": int(len(g)), "wins": int((g["pnl"] > 0).sum()), "win_rate": pct((g["pnl"] > 0).mean())}
                     for y, g in yr.groupby("y")]
     recent = closed.sort_values("out").tail(10).iloc[::-1]
     out["recent"] = [{"ticker": r["t"], "side": "long" if r["side"] > 0 else "short",
@@ -217,6 +218,30 @@ def run(data: dict[str, pd.DataFrame]) -> dict:
     return out
 
 
+def spy_hold(start: pd.Timestamp, end: pd.Timestamp, demo: bool) -> dict | None:
+    """SPY prices for the 'buy and hold the S&P 500' line on the strategies page: the first
+    close of every year in the backtest window plus the last close, so the app can work out
+    buy-and-hold from any starting year. Dividends are included (adjusted prices)."""
+    if demo:
+        return None
+    try:
+        df = fetch_real([BENCH], period="max")[BENCH]
+    except Exception as e:  # a missing benchmark must never sink the backtest
+        print(f"  ! {BENCH}: {e}")
+        return None
+    naive = lambda ts: ts.tz_localize(None) if ts.tzinfo else ts
+    c = df["close"]
+    if c.index.tz is not None:
+        c.index = c.index.tz_localize(None)
+    c = c[(c.index >= naive(start)) & (c.index <= naive(end))]
+    if c.empty:
+        return None
+    first = c.groupby(c.index.year).head(1)
+    return {"ticker": BENCH,
+            "years": [{"year": int(d.year), "date": f"{d:%Y-%m-%d}", "close": round(float(v), 4)} for d, v in first.items()],
+            "last": {"date": f"{c.index[-1]:%Y-%m-%d}", "close": round(float(c.iloc[-1]), 4)}}
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--demo", action="store_true")
@@ -232,6 +257,7 @@ def main():
     strategies = run(data)
     start = min(df.index[0] for df in data.values())
     end = max(df.index[-1] for df in data.values())
+    spy = spy_hold(start, end, args.demo)
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(json.dumps({
         "generated_at": datetime.now(timezone.utc).isoformat(timespec="minutes"),
@@ -243,6 +269,7 @@ def main():
         "capital": START_CAPITAL,
         "trade_size": TRADE_SIZE,
         "strategies": strategies,
+        "spy": spy,
     }, separators=(",", ":")))
     print(f"-> {out.relative_to(ROOT)} ({out.stat().st_size // 1024} KB)")
 

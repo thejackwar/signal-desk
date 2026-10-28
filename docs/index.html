@@ -282,6 +282,14 @@ table.trades td:last-child { font: 600 13.5px var(--font-mono); white-space: now
 .cmp .bar.pos { background: var(--bull); } .cmp .bar.neg { background: var(--bear); }
 .cmp .val { text-align: right; font: 600 13px/1.2 var(--font-mono); font-variant-numeric: tabular-nums; }
 .cmp .val small { display: block; color: var(--faint); font-weight: 500; font-size: 10.5px; }
+.cmp.bench { background: var(--surface-2); margin: 2px -6px; }
+.cmp.bench .nm { font-weight: 600; }
+.cmp.bench .nm small { font: 500 10.5px var(--font-mono); color: var(--faint); margin-left: 4px; }
+.cmp .bar.bench { background: repeating-linear-gradient(135deg, var(--muted) 0 3px, transparent 3px 5px); box-shadow: inset 0 0 0 1px var(--muted); }
+.yrpick { position: relative; display: inline-block; }
+.yrpick select { appearance: none; -webkit-appearance: none; font: inherit; color: var(--fg); background: var(--surface-2); border: 1px solid var(--line); border-radius: 8px; padding: 1px 22px 1px 7px; margin-left: 2px; cursor: pointer; }
+.yrpick select:focus-visible { outline: 2px solid var(--bull); outline-offset: 1px; }
+.yrpick::after { content: ""; position: absolute; right: 8px; top: 50%; width: 5px; height: 5px; border: solid var(--muted); border-width: 0 1.5px 1.5px 0; transform: translateY(-70%) rotate(45deg); pointer-events: none; }
 
 @media (max-width: 520px) { table.trades th:nth-child(3), table.trades td:nth-child(3) { display: none; } }
 
@@ -1375,22 +1383,42 @@ canvas.hm { display: block; touch-action: pan-y; }
     box.innerHTML = svg + `</svg><div class="legend" style="padding-top:8px"><span><i style="background:${C.up}"></i>profitable year</span><span><i style="background:${C.down}"></i>losing year</span><span>${years.filter((yy) => yy[key] > 0).length} of ${n} years positive</span></div>`;
   }
 
+  // Strategies page: every strategy's "take every trade" total from a chosen year on,
+  // next to simply buying the S&P 500 (SPY) that year and holding it.
   function compareCard() {
     const B = S.bt; if (!B) return "";
-    const rows = S.strategies.map(s => ({ s, t: B.strategies[s.id]?.trades?.all })).filter(r => r.t?.n).sort((a, b) => b.t.total - a.t.total);
-    if (!rows.length) return "";
-    const max = Math.max(...rows.map(r => Math.abs(r.t.total)));
-    const anyNeg = rows.some(r => r.t.total < 0);
-    return `<div class="compare"><div class="hd"><h3>Every trade since ${B.start.slice(0, 4)}</h3><span>${eurS(B.trade_size || 1000)} per alert</span></div>
+    const first = +B.start.slice(0, 4), last = +B.end.slice(0, 4);
+    const pk = "cmpFrom." + (S.market || "stocks");
+    const from = Math.min(last, Math.max(first, pref(pk, first)));
+    const rows = S.strategies.map(s => {
+      const T = B.strategies[s.id]?.trades;
+      if (!T?.all?.n) return null;
+      if (from <= first) return { s, total: T.all.total, n: T.all.n, wins: T.all.wins };
+      const ys = (T.years || []).filter(y => y.year >= from);
+      const n = ys.reduce((a, y) => a + y.n, 0);
+      return { s, total: ys.reduce((a, y) => a + y.all, 0), n, wins: ys.reduce((a, y) => a + (y.wins ?? Math.round(y.n * (y.win_rate || 0) / 100)), 0) };
+    }).filter(r => r?.n);
+    // SPY bought with the starting capital on the first trading day of that year, held to the end
+    const P = B.spy, buy = P?.years?.find(y => y.year === from), cap = B.capital || 10000;
+    const spy = buy && P.last ? { total: cap * (P.last.close / buy.close - 1), ret: (P.last.close / buy.close - 1) * 100, bench: true } : null;
+    if (!rows.length && !spy) return "";
+    const all = [...rows, ...(spy ? [spy] : [])].sort((a, b) => b.total - a.total);
+    const max = Math.max(1, ...all.map(r => Math.abs(r.total)));
+    const anyNeg = all.some(r => r.total < 0);
+    const years = []; for (let y = first; y <= last; y++) years.push(y);
+    const pick = `<span class="yrpick"><select data-cmpfrom aria-label="Starting year">${years.map(y => `<option value="${y}"${y === from ? " selected" : ""}>${y}</option>`).join("")}</select></span>`;
+    return `<div class="compare"><div class="hd"><h3>Every trade since ${pick}</h3><span>${eurS(B.trade_size || 1000)} per alert</span></div>
       ${B.demo ? `<p class="hint" style="margin:0 0 6px">Demo backtest on simulated prices.</p>` : ""}
-      ${rows.map(({ s, t }) => {
-        const w = Math.abs(t.total) / max * (anyNeg ? 50 : 100);
-        const bar = t.total >= 0 ? `left:${anyNeg ? 50 : 0}%;width:${w}%` : `right:50%;width:${w}%`;
-        return `<a class="cmp" href="#strategy-${slug(s.id)}"><span class="nm">${esc(s.name)}</span>
-          <span class="track">${anyNeg ? `<i class="zero"></i>` : ""}<i class="bar ${t.total >= 0 ? "pos" : "neg"}" style="${bar}"></i></span>
-          <span class="val ${t.total >= 0 ? "up" : "down"}">${eurSigned(t.total)}<small>${pc(t.win_rate)} wins</small></span></a>`;
+      ${all.map(r => {
+        const w = Math.abs(r.total) / max * (anyNeg ? 50 : 100);
+        const bar = r.total >= 0 ? `left:${anyNeg ? 50 : 0}%;width:${w}%` : `right:50%;width:${w}%`;
+        const track = `<span class="track">${anyNeg ? `<i class="zero"></i>` : ""}<i class="bar ${r.bench ? "bench" : r.total >= 0 ? "pos" : "neg"}" style="${bar}"></i></span>`;
+        if (r.bench) return `<div class="cmp bench"><span class="nm">S&amp;P 500 buy &amp; hold <small>SPY</small></span>${track}
+          <span class="val ${r.total >= 0 ? "up" : "down"}">${eurSigned(r.total)}<small>${r.ret >= 0 ? "+" : "−"}${Math.abs(Math.round(r.ret)).toLocaleString("en-US")}% on €${Math.round(cap / 1000)}k</small></span></div>`;
+        return `<a class="cmp" href="#strategy-${slug(r.s.id)}"><span class="nm">${esc(r.s.name)}</span>${track}
+          <span class="val ${r.total >= 0 ? "up" : "down"}">${eurSigned(r.total)}<small>${pc(r.wins / r.n * 100)} wins</small></span></a>`;
       }).join("")}
-      <p class="hint" style="margin:8px 0 0">Long and short trades combined, no costs. Open a strategy for the full breakdown.</p></div>`;
+      <p class="hint" style="margin:8px 0 0">Long and short trades combined, counted by the year they closed, no costs.${spy ? ` S&amp;P 500: ${eurS(cap)} put into SPY on ${esc(fmtDate(buy.date, { day: "numeric", month: "short", year: "numeric" }))} and held, dividends included.` : ""}${from === last ? ` ${last} so far.` : ""} Open a strategy for the full breakdown.</p></div>`;
   }
 
 
@@ -1843,6 +1871,10 @@ canvas.hm { display: block; touch-action: pan-y; }
       const done = () => { cp.textContent = "Copied"; setTimeout(() => cp.textContent = "Copy", 1500); };
       navigator.clipboard?.writeText(txt).then(done, () => { const r = document.createRange(); r.selectNodeContents(cp.previousElementSibling.querySelector("code")); getSelection().removeAllRanges(); getSelection().addRange(r); });
     }
+  });
+  app.addEventListener("change", e => {
+    const cf = e.target.closest("[data-cmpfrom]");
+    if (cf) { setPref("cmpFrom." + (S.market || "stocks"), +cf.value); rerender(); }
   });
   // a list control changed: on desktop jump to the new first item, on phone just redraw the list
   function goList() {
