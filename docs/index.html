@@ -429,8 +429,8 @@ table.labyears td small { display: inline; color: var(--faint); margin-left: 6px
 @media (max-width: 520px) { .movers { grid-template-columns: 1fr; gap: 10px; } }
 @media (min-width: 1000px) { .mswitch.inline { display: none; } }
 
-/* no backdrop: clean canvas */
-#bgfx { display: none; }
+/* chart backdrop: faint market charts behind the pages (drawn in the market's colours, light or dark) */
+#bgfx { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; opacity: .8; }
 #app { position: relative; z-index: 1; }
 
 /* commodity tokens: the traded good itself */
@@ -3048,15 +3048,20 @@ table.bt td { border-top-color: var(--line); }
     else scrollTo(0, 0);
   });
   WIDE.addEventListener?.("change", () => route());
-  DARK.addEventListener?.("change", () => { applyPalette(); if (S.routed) route(); });
+  DARK.addEventListener?.("change", () => { applyPalette(); drawBackdrop(); if (S.routed) route(); });
 
   // ------------------------------------------------------ chart backdrop
   // Faint, static market charts behind the stock pages: grid, a few long price lines with
   // a fading fill, a moving average and a band of candles. Seeded, so it never jumps around.
   function drawBackdrop() {
-    return;                                   // the clean design has no backdrop (kept for reference)
     const cv = document.getElementById("bgfx"); if (!cv) return;
     const crypto = S.market === "crypto", comm = S.market === "commodities", stocksMk = !crypto && !comm;
+    // Apple colours as "r,g,b", light or dark; glows only in dark mode
+    const dark = DARK.matches;
+    const K = dark
+      ? { ink: "255,255,255", bg: "0,0,0", green: "48,209,88", red: "255,69,58", blue: "10,132,255", orange: "255,159,10", purple: "191,90,242", cyan: "100,210,255", pink: "255,55,95", teal: "64,200,200", grey: "174,174,178" }
+      : { ink: "0,0,0", bg: "245,245,247", green: "52,199,89", red: "255,59,48", blue: "0,113,227", orange: "255,149,0", purple: "142,68,214", cyan: "50,173,230", pink: "255,45,85", teal: "14,138,138", grey: "120,120,128" };
+    const A = dark ? 1.5 : 1.7;                 // light mode needs a touch more ink to show on grey
     const dpr = Math.min(2, devicePixelRatio || 1), W = innerWidth, H = innerHeight;
     cv.width = W * dpr; cv.height = H * dpr;
     const g = cv.getContext("2d"); g.setTransform(dpr, 0, 0, dpr, 0, 0); g.clearRect(0, 0, W, H);
@@ -3079,31 +3084,31 @@ table.bt td { border-top-color: var(--line); }
             a ? g.lineTo(px, py) : g.moveTo(px, py);
           }
           g.closePath();
-          g.strokeStyle = k % 5 ? "rgba(108,196,173,0.06)" : "rgba(108,196,173,0.13)"; g.lineWidth = k % 5 ? 1 : 1.4; g.stroke();
+          g.strokeStyle = `rgba(${K.teal},${(k % 5 ? .06 : .13) * A})`; g.lineWidth = k % 5 ? 1 : 1.4; g.stroke();
         }
       }
     } else if (crypto) {
-      g.fillStyle = "rgba(181,123,255,0.11)";
+      g.fillStyle = `rgba(${K.purple},${.11 * A})`;
       for (let x = gs / 2; x < W; x += gs / 2) for (let y = gs / 2; y < H; y += gs / 2) { g.beginPath(); g.arc(x, y, .9, 0, 7); g.fill(); }
     } else {
-      g.strokeStyle = "rgba(255,255,255,0.03)"; g.lineWidth = 1;
+      g.strokeStyle = `rgba(${K.ink},${dark ? .04 : .035})`; g.lineWidth = 1;
       for (let x = (W % gs) / 2; x < W; x += gs) { g.beginPath(); g.moveTo(x + .5, 0); g.lineTo(x + .5, H); g.stroke(); }
       for (let y = (H % gs) / 2; y < H; y += gs) { g.beginPath(); g.moveTo(0, y + .5); g.lineTo(W, y + .5); g.stroke(); }
     }
 
     // long price lines (crypto lines glow)
     const lines = comm ? [
-      { top: .2, amp: .14, color: "108,196,173", a: .18, fill: .045, drift: .3, vol: 5 },    // gold
-      { top: .38, amp: .13, color: "220,226,228", a: .1, fill: 0, drift: -.1, vol: 7 },      // crude
-      { top: .52, amp: .1, color: "208,138,92", a: .13, fill: 0, drift: .05, vol: 5 },       // wheat
+      { top: .2, amp: .14, color: K.teal, a: .2, fill: .05, drift: .3, vol: 5 },    // gold
+      { top: .38, amp: .13, color: K.grey, a: .14, fill: 0, drift: -.1, vol: 7 },    // crude
+      { top: .52, amp: .1, color: K.orange, a: .14, fill: 0, drift: .05, vol: 5 },   // wheat
     ] : crypto ? [
-      { top: .3, amp: .22, color: "77,232,255", a: .22, fill: .06, drift: .5, vol: 9, glow: 14 },
-      { top: .48, amp: .18, color: "181,123,255", a: .2, fill: .05, drift: .25, vol: 8, glow: 12 },
-      { top: .4, amp: .12, color: "255,79,154", a: .12, fill: 0, drift: -.15, vol: 7, glow: 8 },
+      { top: .3, amp: .22, color: K.cyan, a: .22, fill: .06, drift: .5, vol: 9, glow: 14 },
+      { top: .48, amp: .18, color: K.purple, a: .2, fill: .05, drift: .25, vol: 8, glow: 12 },
+      { top: .4, amp: .12, color: K.pink, a: .13, fill: 0, drift: -.15, vol: 7, glow: 8 },
     ] : [
-      { top: .14, amp: .20, color: "50,196,141", a: .18, fill: .065, drift: .35, vol: 6 },
-      { top: .44, amp: .16, color: "242,179,61", a: .12, fill: .035, drift: .2, vol: 5 },
-      { top: .28, amp: .12, color: "116,167,245", a: .1, fill: 0, drift: -.1, vol: 4 },
+      { top: .14, amp: .20, color: K.green, a: .2, fill: .065, drift: .35, vol: 6 },
+      { top: .44, amp: .16, color: K.blue, a: .15, fill: .035, drift: .2, vol: 5 },
+      { top: .28, amp: .12, color: K.orange, a: .12, fill: 0, drift: -.1, vol: 4 },
     ];
     const N = Math.ceil(W / 4) + 2;
     const BD = S.stocks?.backdrop?.lines?.length ? S.stocks.backdrop : null;
@@ -3120,13 +3125,13 @@ table.bt td { border-top-color: var(--line); }
       const y = i => H * (L.top + L.amp) - (v[i] - lo) / ((hi - lo) || 1) * H * L.amp * 2;
       g.beginPath(); for (let i = 0; i < N; i++) i ? g.lineTo(i * 4, y(i)) : g.moveTo(0, y(0));
       g.save();
-      if (L.glow) { g.shadowColor = `rgba(${L.color},.8)`; g.shadowBlur = L.glow; }
-      g.strokeStyle = `rgba(${L.color},${L.a})`; g.lineWidth = crypto ? 1.8 : 1.6; g.stroke();
+      if (L.glow && dark) { g.shadowColor = `rgba(${L.color},.8)`; g.shadowBlur = L.glow; }
+      g.strokeStyle = `rgba(${L.color},${L.a * A})`; g.lineWidth = crypto ? 1.8 : 1.6; g.stroke();
       g.restore();
       if (L.fill && !(realSets && stocksMk && li > 0)) {
         g.lineTo((N - 1) * 4, H); g.lineTo(0, H); g.closePath();
         const gr = g.createLinearGradient(0, H * L.top, 0, H * (L.top + L.amp * 2.4));
-        gr.addColorStop(0, `rgba(${L.color},${L.fill})`); gr.addColorStop(1, `rgba(${L.color},0)`); g.fillStyle = gr; g.fill();
+        gr.addColorStop(0, `rgba(${L.color},${L.fill * A})`); gr.addColorStop(1, `rgba(${L.color},0)`); g.fillStyle = gr; g.fill();
       }
     }
 
@@ -3135,20 +3140,20 @@ table.bt td { border-top-color: var(--line); }
       const n = W > 1000 ? 7 : 4, bs = W > 1000 ? 22 : 18;
       const pts = [];
       for (let i = 0; i < n; i++) pts.push([W * (.52 + i * (.44 / n)) + (rnd() - .5) * 20, H * (.1 + Math.sin(i * .9) * .05 + i * .012)]);
-      g.save(); g.setLineDash([3, 5]); g.strokeStyle = "rgba(77,232,255,0.16)"; g.lineWidth = 1.2;
+      g.save(); g.setLineDash([3, 5]); g.strokeStyle = `rgba(${K.cyan},${.16 * A})`; g.lineWidth = 1.2;
       g.beginPath(); pts.forEach(([x, y], i) => i ? g.lineTo(x, y) : g.moveTo(x, y)); g.stroke(); g.restore();
       pts.forEach(([x, y], i) => {
-        g.save(); g.shadowColor = "rgba(181,123,255,.7)"; g.shadowBlur = 10;
-        g.strokeStyle = i % 2 ? "rgba(181,123,255,0.24)" : "rgba(77,232,255,0.22)"; g.lineWidth = 1.4;
+        g.save(); if (dark) { g.shadowColor = `rgba(${K.purple},.7)`; g.shadowBlur = 10; }
+        g.strokeStyle = i % 2 ? `rgba(${K.purple},${.24 * A})` : `rgba(${K.cyan},${.22 * A})`; g.lineWidth = 1.4;
         g.beginPath(); g.roundRect ? g.roundRect(x - bs / 2, y - bs / 2, bs, bs, 5) : g.rect(x - bs / 2, y - bs / 2, bs, bs); g.stroke();
         g.restore();
-        g.fillStyle = "rgba(181,123,255,0.18)"; g.fillRect(x - 3, y - 3, 6, 6);
+        g.fillStyle = `rgba(${K.purple},${.18 * A})`; g.fillRect(x - 3, y - 3, 6, 6);
       });
     }
 
     // commodities: soil strata under the candles, the layers a drill core would show
     if (comm) {
-      const tints = ["70,82,88", "92,96,94", "58,66,72", "104,100,92", "48,56,62"];
+      const tints = dark ? ["70,82,88", "92,96,94", "58,66,72", "104,100,92", "48,56,62"] : ["150,160,165", "170,170,165", "140,150,155", "180,172,160", "130,140,148"];
       let prev = null;
       for (let k = 0; k < 5; k++) {
         const top = H * (.74 + k * .055), ph = rnd() * 6, amp = H * (.008 + rnd() * .012);
@@ -3156,9 +3161,9 @@ table.bt td { border-top-color: var(--line); }
         g.beginPath(); g.moveTo(0, yAt(0));
         for (let x = 8; x <= W + 8; x += 8) g.lineTo(x, yAt(x));
         g.lineTo(W, H); g.lineTo(0, H); g.closePath();
-        g.fillStyle = `rgba(${tints[k]},${.07 + k * .015})`; g.fill();
+        g.fillStyle = `rgba(${tints[k]},${(.07 + k * .015) * (dark ? 1 : .8)})`; g.fill();
         g.beginPath(); g.moveTo(0, yAt(0)); for (let x = 8; x <= W + 8; x += 8) g.lineTo(x, yAt(x));
-        g.strokeStyle = "rgba(160,180,186,0.08)"; g.lineWidth = 1; g.stroke();
+        g.strokeStyle = `rgba(${K.grey},.1)`; g.lineWidth = 1; g.stroke();
       }
     }
 
@@ -3176,7 +3181,7 @@ table.bt td { border-top-color: var(--line); }
       for (let i = 0; i < 20; i++) c[i] = RC.close[Math.max(0, RC.close.length - k - 20 + i)];
     } else c = walk(n + 20, crypto ? 4.5 : 3.2, .06);
     const allv = RC ? hh.concat(ll) : c, lo = Math.min(...allv), hi = Math.max(...allv), py = v => base - (v - lo) / ((hi - lo) || 1) * span;
-    const upC = crypto ? "rgba(44,245,154,0.17)" : comm ? "rgba(127,207,138,0.15)" : "rgba(50,196,141,0.15)", dnC = crypto ? "rgba(255,79,154,0.17)" : comm ? "rgba(236,100,85,0.14)" : "rgba(240,90,99,0.135)";
+    const upC = `rgba(${K.green},${.16 * A})`, dnC = `rgba(${crypto ? K.pink : K.red},${.15 * A})`;
     for (let i = 0; i < n; i++) {
       const o = RC ? oo[i] : c[i + 19], cl = c[i + 20], up = cl >= o, x = i * cw + cw / 2;
       const h1 = RC ? hh[i] : Math.max(o, cl) + rnd() * 1.6, l1 = RC ? ll[i] : Math.min(o, cl) - rnd() * 1.6;
@@ -3186,12 +3191,12 @@ table.bt td { border-top-color: var(--line); }
     }
     g.beginPath();
     for (let i = 0; i < n; i++) { let m = 0; for (let k = 0; k < 10; k++) m += c[i + 20 - k]; m /= 10; const x = i * cw + cw / 2; i ? g.lineTo(x, py(m)) : g.moveTo(x, py(m)); }
-    g.save(); if (crypto) { g.shadowColor = "rgba(181,123,255,.8)"; g.shadowBlur = 8; }
-    g.strokeStyle = crypto ? "rgba(181,123,255,0.22)" : comm ? "rgba(108,196,173,0.2)" : "rgba(242,179,61,0.16)"; g.lineWidth = 1.5; g.stroke(); g.restore();
+    g.save(); if (crypto && dark) { g.shadowColor = `rgba(${K.purple},.8)`; g.shadowBlur = 8; }
+    g.strokeStyle = `rgba(${crypto ? K.purple : comm ? K.teal : K.blue},${.2 * A})`; g.lineWidth = 1.5; g.stroke(); g.restore();
 
-    // darken the middle so text stays easy to read
+    // fade the middle into the page colour so text stays easy to read
     const vg = g.createRadialGradient(W / 2, H * .45, Math.min(W, H) * .15, W / 2, H * .45, Math.max(W, H) * .75);
-    vg.addColorStop(0, crypto ? "rgba(11,7,20,0.5)" : comm ? "rgba(15,18,20,0.5)" : "rgba(8,9,11,0.45)"); vg.addColorStop(1, "rgba(0,0,0,0)");
+    vg.addColorStop(0, `rgba(${K.bg},.3)`); vg.addColorStop(1, `rgba(${K.bg},0)`);
     g.fillStyle = vg; g.fillRect(0, 0, W, H);
   }
   let bgT; addEventListener("resize", () => { clearTimeout(bgT); bgT = setTimeout(drawBackdrop, 200); });
