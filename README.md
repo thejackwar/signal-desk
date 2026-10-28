@@ -94,6 +94,14 @@ CoinDesk, Cointelegraph, Decrypt, The Block, Bitcoin Magazine and CryptoSlate fo
 It keeps the headline, source, time, a short summary and a link to the full article, and
 tags the stocks or coins a headline mentions. Edit `FEEDS` in the file to change sources.
 
+## News mentions
+
+`engine/mentions.py` (the *News mentions* workflow, daily) counts news articles that
+mention each stock and coin, using Google News search. Google returns at most 100 results
+per search, so for busy names the window narrows from 30 days to 7 days, 24 hours or 4
+hours (scaled up and marked "~"). Every run stores that day's count, so the comparison
+with a usual day builds up over time.
+
 ## Signal strength
 
 Every alert gets a score from 0 to 4, using only what was known on the alert day:

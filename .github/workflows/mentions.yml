@@ -8,6 +8,10 @@ on:
 permissions:
   contents: write
 
+concurrency:
+  group: mentions
+  cancel-in-progress: true
+
 jobs:
   mentions:
     runs-on: ubuntu-latest
@@ -19,7 +23,7 @@ jobs:
           python-version: "3.12"
           cache: pip
       - run: pip install numpy
-      - name: Count news mentions per stock and coin (GDELT)
+      - name: Count news mentions per stock and coin (Google News)
         run: python engine/mentions.py
       - name: Publish
         run: |

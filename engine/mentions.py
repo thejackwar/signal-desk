@@ -1,14 +1,13 @@
 """
 How often is each stock / coin mentioned in the news?
 
-For every company and coin the app tracks, counts the online news articles
-that mention it, per day, for the last 30 days.
+For every company and coin the app tracks, counts the news articles that
+mention it, using Google News search (news sites worldwide, English).
 
-Source: the GDELT Project (gdeltproject.org), a free database that monitors
-news sites worldwide. Its DOC API returns article counts over time for a
-search, with no cap. If GDELT doesn't answer, Google News search is used as a
-fallback (it returns at most 100 articles per search, so very busy names hit
-that ceiling).
+Google returns at most 100 articles per search, so the window narrows for
+busy names: 30 days -> 7 days -> 24 hours -> 4 hours (scaled up to a day and
+marked as an estimate). Each run also stores that day's 24-hour count, so the
+"vs a usual day" comparison builds up over the days.
 
   python engine/mentions.py                    # both markets
   python engine/mentions.py --market crypto
@@ -36,7 +35,8 @@ from news import EXTRA_ALIASES  # noqa: E402
 ROOT = Path(__file__).resolve().parent.parent
 ENGINE = Path(__file__).parent
 DAYS = 30
-GDELT_PAUSE = 5.5          # GDELT asks for at most one request every 5 seconds
+PAUSE = 1.3                # seconds between searches, to stay polite
+DAYS_LIST: list[str] = []
 
 # what to search for when the plain company name is also an everyday word
 STOCK_QUERY = {
@@ -75,98 +75,99 @@ def query_for(t: str, name: str, market: str) -> str:
     return f'"{EXTRA_ALIASES.get(t, [name])[0]}"'
 
 
-def gdelt_daily(q: str, days: list[str]) -> list[int] | None:
-    url = ("https://api.gdeltproject.org/api/v2/doc/doc?" + urllib.parse.urlencode({
-        "query": f"{q} sourcelang:english", "mode": "timelinevolraw", "timespan": f"{DAYS}d",
-        "format": "json", "timelinesmooth": 0}))
+CAP = 100   # Google News returns at most 100 articles per search
+
+
+def google(q: str, window: str) -> list[datetime] | None:
+    from email.utils import parsedate_to_datetime
     for attempt in range(2):
         try:
-            txt = _get(url)
-            if not txt.strip().startswith("{"):
-                raise ValueError(txt[:80])
-            data = json.loads(txt)
-            series = (data.get("timeline") or [{}])[0].get("data", [])
-            per_day = {}
-            for p in series:
-                d = p["date"][:8]
-                per_day[d] = per_day.get(d, 0) + int(p.get("value", 0))
-            return [per_day.get(d.replace("-", ""), 0) for d in days]
+            xml = _get("https://news.google.com/rss/search?" + urllib.parse.urlencode(
+                {"q": f"{q} when:{window}", "hl": "en-US", "gl": "US", "ceid": "US:en"}))
+            out = []
+            for m in re.finditer(r"<pubDate>([^<]+)</pubDate>", xml):
+                try:
+                    out.append(parsedate_to_datetime(m.group(1)).astimezone(timezone.utc))
+                except Exception:
+                    pass
+            return out
         except Exception as e:
-            print(f"    gdelt retry {attempt + 1}: {str(e)[:90]}")
-            time.sleep(GDELT_PAUSE * 2)
+            print(f"    google news retry ({e})")
+            time.sleep(PAUSE * 4)
     return None
 
 
-def google_daily(q: str, days: list[str]) -> list[int] | None:
-    from email.utils import parsedate_to_datetime
-    try:
-        xml = _get("https://news.google.com/rss/search?" + urllib.parse.urlencode(
-            {"q": f"{q} when:30d", "hl": "en-US", "gl": "US", "ceid": "US:en"}))
-    except Exception as e:
-        print(f"    google news failed: {e}")
-        return None
-    counts = dict.fromkeys(days, 0)
-    for m in re.finditer(r"<pubDate>([^<]+)</pubDate>", xml):
-        try:
-            d = parsedate_to_datetime(m.group(1)).astimezone(timezone.utc).strftime("%Y-%m-%d")
-        except Exception:
-            continue
-        if d in counts:
-            counts[d] += 1
-    return [counts[d] for d in days]
+def count(q: str, days: list[str]) -> dict | None:
+    """Daily article counts. Widest window first; narrow it while Google's 100-article cap is hit."""
+    now = datetime.now(timezone.utc)
+    for window, hours in (("30d", 720), ("7d", 168), ("1d", 24), ("4h", 4)):
+        dates = google(q, window)
+        time.sleep(PAUSE)
+        if dates is None:
+            return None
+        if len(dates) < CAP * .95 or window == "4h":
+            break
+    per = {}
+    for d in dates:
+        k = d.strftime("%Y-%m-%d")
+        per[k] = per.get(k, 0) + 1
+    capped = len(dates) >= CAP * .95
+    known_from = (now - timedelta(hours=hours)).strftime("%Y-%m-%d")
+    last24 = sum(1 for d in dates if (now - d).total_seconds() <= 86400)
+    if hours < 24:                                   # only a few hours seen: scale up to a day
+        last24 = round(len(dates) * 24 / hours)
+    series = [per.get(d, 0) if d > known_from or hours >= 720 else None for d in days]
+    return {"series": series, "last24": last24, "window": window, "estimate": hours < 24 or capped}
 
 
-def summarise(t: str, name: str, series: list[int]) -> dict:
-    s = np.array(series, dtype=float)
-    full = s[:-1]                                     # today's bucket is still filling
-    d1 = float(full[-1]) if len(full) else 0.0
-    d7 = float(full[-7:].sum())
-    usual = float(full[:-1].mean()) if len(full) > 1 else 0.0
-    usual7 = float(full[-8:-1].mean()) if len(full) > 8 else usual
+def summarise(t: str, name: str, c: dict, hist: dict) -> dict:
+    today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+    # history: one 24h count per day, kept across runs (most recent run of the day wins)
+    hist = {d: v for d, v in hist.items() if d >= (datetime.now(timezone.utc) - timedelta(days=DAYS)).strftime("%Y-%m-%d")}
+    hist[today] = c["last24"]
+    prev = [v for d, v in sorted(hist.items()) if d < today]
+    # from an uncapped 30-day search we know the real daily counts too
+    full = [v for v in c["series"][:-1] if v is not None]
+    usual_src = prev[-14:] if len(prev) >= 3 else (full[-15:-1] if c["window"] == "30d" else [])
+    usual = float(np.mean(usual_src)) if usual_src else None
+    series = [hist.get(d) if hist.get(d) is not None else v for d, v in zip(DAYS_LIST, c["series"])]
     return {
-        "ticker": t, "name": name, "series": [int(x) for x in s],
-        "yesterday": int(d1), "today": int(s[-1]), "week": int(d7),
-        "usual": round(usual, 1),
-        "surge": round(d1 / usual7, 2) if usual7 >= 1 else (round(d1, 2) if d1 else 0),
+        "ticker": t, "name": name, "series": series,
+        "last24": c["last24"], "estimate": c["estimate"], "window": c["window"],
+        "week": int(sum(v for v in c["series"][-8:] if v is not None)) if c["window"] in ("30d", "7d") else None,
+        "usual": round(usual, 1) if usual is not None else None,
+        "surge": round(c["last24"] / usual, 2) if usual and usual >= 1 else None,
+        "history": hist,
     }
 
 
-def run(market: str, demo: bool) -> dict:
+def run(market: str, demo: bool, previous: dict) -> dict:
+    global DAYS_LIST
     names = json.loads((ENGINE / ("names.json" if market == "stocks" else "crypto_names.json")).read_text())
     today = datetime.now(timezone.utc).date()
     days = [(today - timedelta(days=DAYS - 1 - i)).isoformat() for i in range(DAYS)]
+    DAYS_LIST = days
+    prev_hist = {x["ticker"]: x.get("history", {}) for x in previous.get("items", [])}
     rng = np.random.default_rng(5)
-    items, used = [], {"GDELT": 0, "Google News": 0}
-    gdelt_fails, gdelt_ok = 0, True
+    items = []
     for t, (name, _) in names.items():
         if t in SKIP:
             continue
-        q = query_for(t, name, market)
         if demo:
-            base = rng.lognormal(3.5, 1.2)
-            series = list(rng.poisson(base * (1 + .3 * np.sin(np.arange(DAYS) / 4))))
+            base = rng.lognormal(3, 1.1)
+            series = [int(x) for x in rng.poisson(base, DAYS)]
             if rng.random() < .15:
-                series[-2] = int(series[-2] * rng.uniform(2, 5))
+                series[-1] = int(series[-1] * rng.uniform(2, 5))
+            c = {"series": series, "last24": series[-1], "window": "30d", "estimate": False}
         else:
-            series = gdelt_daily(q, days) if gdelt_ok else None
-            if gdelt_ok:
-                time.sleep(GDELT_PAUSE)
-                gdelt_fails = 0 if series is not None else gdelt_fails + 1
-                if gdelt_fails >= 3:
-                    print("  GDELT isn't answering; using Google News for the rest")
-                    gdelt_ok = False
-            if series is None:
-                series = google_daily(q, days)
-                if series is None:
-                    continue
-                used["Google News"] += 1
-            else:
-                used["GDELT"] += 1
-        items.append(summarise(t, name, series))
-        print(f"  {t:9s} {items[-1]['yesterday']:6d} yesterday  x{items[-1]['surge']}")
-    src = "Demo (simulated counts)" if demo else " + ".join(f"{k} ({v})" for k, v in used.items() if v)
-    return {"generated_at": datetime.now(timezone.utc).isoformat(timespec="minutes"), "market": market,
-            "demo": demo, "source": src, "days": days, "items": items}
+            c = count(query_for(t, name, market), days)
+            if c is None:
+                continue
+        items.append(summarise(t, name, c, prev_hist.get(t, {})))
+        x = items[-1]
+        print(f"  {t:9s} {x['last24']:5d}{'~' if x['estimate'] else ' '} in 24h ({x['window']})  usual {x['usual']}  x{x['surge']}")
+    return {"generated_at": datetime.now(timezone.utc).isoformat(timespec="minutes"), "market": market, "demo": demo,
+            "source": "Demo (simulated counts)" if demo else "Google News search", "days": days, "items": items}
 
 
 def main():
@@ -176,11 +177,15 @@ def main():
     args = ap.parse_args()
     for market in (["stocks", "crypto"] if args.market == "both" else [args.market]):
         print(market)
-        res = run(market, args.demo)
+        out = ROOT / "docs" / "data" / ("mentions.json" if market == "stocks" else "crypto/mentions.json")
+        try:
+            previous = json.loads(out.read_text()) if out.exists() and not args.demo else {}
+        except Exception:
+            previous = {}
+        res = run(market, args.demo, previous)
         if len(res["items"]) < 3:
             print("  too few results; keeping the previous file")
             continue
-        out = ROOT / "docs" / "data" / ("mentions.json" if market == "stocks" else "crypto/mentions.json")
         out.parent.mkdir(parents=True, exist_ok=True)
         out.write_text(json.dumps(res, separators=(",", ":")))
         print(f"  -> {out.relative_to(ROOT)} ({len(res['items'])} names, {res['source']})")
