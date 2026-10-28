@@ -607,6 +607,20 @@ canvas.hm { display: block; touch-action: pan-y; }
 
 /* news mentions */
 .nsw { margin: 2px 0 12px; }
+/* best trades */
+.wsum { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin: 4px 0 6px; }
+.wsum div { background: var(--surface); border-radius: 12px; padding: 10px 12px; }
+.wsum span { display: block; font: 500 11px/1.2 var(--font-mono); color: var(--faint); text-transform: uppercase; letter-spacing: .06em; }
+.wsum b { display: block; font: 600 19px/1.3 var(--font-mono); font-variant-numeric: tabular-nums; margin-top: 4px; }
+.win .rk { display: inline-grid; place-items: center; min-width: 20px; height: 20px; padding: 0 4px; margin-right: 8px; border-radius: 6px; background: var(--surface-2); color: var(--muted); font: 600 11px/1 var(--font-mono); vertical-align: 2px; }
+.win .rk.r1 { background: color-mix(in srgb, var(--amber) 22%, transparent); color: var(--amber); }
+.win .ret { display: block; font: 600 17px/1.2 var(--font-mono); font-variant-numeric: tabular-nums; }
+.win .since { color: var(--faint); }
+.wday { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+.wday small { font: 500 11.5px/1 var(--font-mono); color: var(--faint); text-transform: none; letter-spacing: 0; }
+.wmore { display: block; width: 100%; margin: 2px 0 6px; padding: 8px; border-radius: 10px; font-size: 13px; color: var(--amber); text-align: center; }
+@media (hover: hover) { .wmore:hover { background: var(--hover); } }
+.bt.wstrat td:nth-child(n+2), .bt.wstrat th:nth-child(n+2) { text-align: right; font-variant-numeric: tabular-nums; }
 .nsw a { padding: 6px 14px; border-radius: 8px; font-size: 13px; color: var(--muted); text-decoration: none; }
 .nsw a[aria-pressed="true"] { background: var(--surface-2); color: var(--fg); font-weight: 600; }
 .buzz { grid-template-columns: 26px minmax(0, 1fr) 96px 78px; align-items: center; }
@@ -1022,6 +1036,7 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
   <a class="nav" href="#news" data-tab="news"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h13a1 1 0 0 1 1 1v12a2 2 0 0 0 2 2H6a2 2 0 0 1-2-2Z"/><path d="M18 9h2a1 1 0 0 1 1 1v8a2 2 0 0 1-2 2"/><path d="M8 9h6"/><path d="M8 13h6"/><path d="M8 17h4"/></svg>News</a>
   <a class="nav" href="#calendar" data-tab="calendar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5" width="17" height="15.5" rx="2"/><path d="M3.5 10h17"/><path d="M8 3v4"/><path d="M16 3v4"/><path d="M7.5 14h2"/><path d="M11 14h2"/><path d="M14.5 14h2"/><path d="M7.5 17h2"/></svg>Calendar</a>
   <a class="nav" href="#strategies" data-tab="strategies"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 20h18"/><path d="M6 16V9"/><path d="M4.5 9h3"/><path d="M12 16V5"/><path d="M10.5 5h3"/><path d="M18 16v-5"/><path d="M16.5 11h3"/></svg>Strategies</a>
+  <a class="nav" href="#winners" data-tab="winners"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 4h8v5a4 4 0 0 1-8 0Z"/><path d="M8 6H5a3 3 0 0 0 3 4"/><path d="M16 6h3a3 3 0 0 1-3 4"/><path d="M12 13v4"/><path d="M8.5 20.5h7"/><path d="M10 17h4"/></svg>Best trades</a>
   <a class="nav" href="#learn" data-tab="learn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 6.5C10 5 7 4.5 3.5 5v13.5c3.5-.5 6.5 0 8.5 1.5 2-1.5 5-2 8.5-1.5V5C17 4.5 14 5 12 6.5Z"/><path d="M12 6.5V20"/></svg>Learn</a>
   <a class="nav" href="#notify" data-tab="notify"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="2.5" width="12" height="19" rx="2.5"/><path d="M11 18.5h2"/></svg>Phone alerts</a>
   <a class="nav" href="#brokers" data-tab="brokers"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9.5 12 4l9 5.5"/><path d="M4.5 10v8"/><path d="M9.5 10v8"/><path d="M14.5 10v8"/><path d="M19.5 10v8"/><path d="M3 20.5h18"/></svg>Brokers</a>
@@ -1050,6 +1065,7 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
       <a href="#alerts" data-tab="alerts"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9a6 6 0 1 1 12 0c0 6 2.5 7.5 2.5 7.5h-17S6 15 6 9Z"/><path d="M10 20a2 2 0 0 0 4 0"/></svg><span>Alerts</span></a>
       <a href="#stocks" data-tab="stocks"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="m7 15 4-4 3 3 6-7"/></svg><span data-l="tab">Stocks</span></a>
       <a href="trendlines.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M6 8l13 5"/><path d="M6 18l13-9"/></svg><span>Trendlines</span></a>
+      <a href="#winners" data-tab="winners"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 4h8v5a4 4 0 0 1-8 0Z"/><path d="M8 6H5a3 3 0 0 0 3 4"/><path d="M16 6h3a3 3 0 0 1-3 4"/><path d="M12 13v4"/><path d="M8.5 20.5h7"/><path d="M10 17h4"/></svg><span>Best trades</span></a>
       <a href="#news" data-tab="news"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h13a1 1 0 0 1 1 1v12a2 2 0 0 0 2 2H6a2 2 0 0 1-2-2Z"/><path d="M18 9h2a1 1 0 0 1 1 1v8a2 2 0 0 1-2 2"/><path d="M8 9h6"/><path d="M8 13h6"/><path d="M8 17h4"/></svg><span>News</span></a>
       <a href="#calendar" data-tab="calendar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5" width="17" height="15.5" rx="2"/><path d="M3.5 10h17"/><path d="M8 3v4"/><path d="M16 3v4"/><path d="M7.5 14h2"/><path d="M11 14h2"/><path d="M14.5 14h2"/><path d="M7.5 17h2"/></svg><span>Calendar</span></a>
       <a href="#strategies" data-tab="strategies"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 20h18"/><path d="M6 16V9"/><path d="M4.5 9h3"/><path d="M12 16V5"/><path d="M10.5 5h3"/><path d="M18 16v-5"/><path d="M16.5 11h3"/></svg><span>Strategies</span></a>
@@ -1353,7 +1369,7 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
     let list = followedAlerts().filter(a => (S.filter === "all" || a.strategy === S.filter) && (a.strength?.score ?? 0) >= minS);
     if (sort === "str") list = list.slice().sort((a, b) => (b.strength?.score ?? 0) - (a.strength?.score ?? 0) || (a.date < b.date ? 1 : -1));
     const stamp = S.feed ? `<div class="stamp">${esc(S.feed.universe)}<br>close ${fmtDate(S.feed.as_of, { day: "numeric", month: "short" })}</div>` : "";
-    let h = header("Alerts", null, stamp) + demoNote() + marketStrip();
+    let h = header("Alerts", null, stamp) + alertsSwitch("alerts") + demoNote() + marketStrip();
     const arrow = d => `<button class="chiparrow ${d < 0 ? "left" : "right"}" data-chipscroll="${d}" aria-label="Scroll ${d < 0 ? "left" : "right"}" hidden>
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="${d < 0 ? "m15 18-6-6 6-6" : "m9 18 6-6-6-6"}"/></svg></button>`;
     h += `<div class="chipbar">${arrow(-1)}<div class="chips" role="group" aria-label="Filter by strategy">` +
@@ -1381,11 +1397,71 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
     return h;
   }
 
+  // ------------------------------------------------------------ best trades
+  // Each alert taken as a trade at that day's close: long on bullish alerts, short on bearish ones,
+  // valued at the latest close. Ranks the winners inside each alert day.
+  const alertsSwitch = which => `<div class="seg nsw" role="group" aria-label="Alerts view"><a href="#alerts" role="button" aria-pressed="${which === "alerts"}">Latest</a><a href="#winners" role="button" aria-pressed="${which === "winners"}">Best trades</a></div>`;
+  const tradeRet = a => a.side === "bearish" ? -a.since : a.since;
+  const pctTxt = (v, d = 1) => (v > 0 ? "+" : v < 0 ? "−" : "") + Math.abs(v).toFixed(d) + "%";
+  function winRow(a, rank, opts = {}) {
+    const idx = S.feed.alerts.indexOf(a), r = tradeRet(a);
+    return `<a class="row alert win ${a.side}${hasIcon() ? " withcoin" : ""}" href="#alert-${idx}">
+      <span class="stripe"></span>${icon(a.ticker, 32)}
+      <span class="main"><span class="tk"><span class="rk${rank === 1 ? " r1" : ""}">${rank}</span>${esc(disp(a.ticker))}</span><span class="strat">${esc(stratName(a.strategy))}${a.tf ? ` · ${esc(a.tf)}` : ""}</span>
+        <div class="note">${opts.showDate ? esc(fmtDate(a.date, { day: "numeric", month: "short" })) + " · " : ""}${a.side === "bullish" ? "Long" : "Short"} from ${money(a.price)}</div>
+        <div class="info">${meter(a.strength)}<span class="pill">${a.side}</span></div></span>
+      <span class="px"><b class="ret ${r >= 0 ? "up" : "down"}">${pctTxt(r)}</b><span class="since">${a.since_days} session${a.since_days > 1 ? "s" : ""}</span></span></a>`;
+  }
+  function viewWinners() {
+    const scope = pref("winScope", "all"), dir = pref("winDir", "both"), per = pref("winPer", 3);
+    S.firstSel = null;
+    let all = (S.feed?.alerts || []).filter(a => a.since_days > 0 && typeof a.since === "number" && forMarket(S.byId[a.strategy]));
+    if (scope === "followed") all = all.filter(a => S.follow.has(a.strategy));
+    if (dir === "long") all = all.filter(a => a.side === "bullish");
+    const stamp = S.feed ? `<div class="stamp">${esc(S.feed.universe)}<br>close ${fmtDate(S.feed.as_of, { day: "numeric", month: "short" })}</div>` : "";
+    let h = header("Best trades", null, stamp) + alertsSwitch("winners") + demoNote();
+    h += `<div class="tools"><span class="tg"><label>Alerts</label><div class="seg sm" role="group" aria-label="Which alerts">${[["all", "All strategies"], ["followed", "Followed"]].map(([v, t]) =>
+      `<button data-winscope="${v}" aria-pressed="${scope === v}">${t}</button>`).join("")}</div></span>
+      <span class="tg"><label>Trades</label><div class="seg sm" role="group" aria-label="Trade direction">${[["both", "Long & short"], ["long", "Long only"]].map(([v, t]) =>
+      `<button data-windir="${v}" aria-pressed="${dir === v}">${t}</button>`).join("")}</div></span>
+      <span class="tg"><label>Per day</label><div class="seg sm" role="group" aria-label="Trades shown per day">${[3, 5, 10].map(v =>
+      `<button data-winper="${v}" aria-pressed="${per === v}">Top ${v}</button>`).join("")}</div></span></div>`;
+    if (!all.length) return h + `<div class="empty"><strong>No finished days yet</strong>${scope === "followed" ? "Your followed strategies have no alerts older than today. Try all strategies." : "Alerts need at least one more session before they can be ranked."}</div>`;
+
+    const by = r => (a, b) => r(b) - r(a);
+    const avg = xs => xs.reduce((t, a) => t + tradeRet(a), 0) / xs.length;
+    const hit = xs => Math.round(xs.filter(a => tradeRet(a) > 0).length / xs.length * 100);
+    const days = [...new Set(all.map(a => a.date))].sort().reverse();
+    const best = all.slice().sort(by(tradeRet))[0];
+    S.firstSel = "alert-" + S.feed.alerts.indexOf(best);
+
+    h += `<div class="wsum"><div><span>Trades</span><b>${all.length}</b></div><div><span>Right way</span><b>${hit(all)}%</b></div><div><span>Average</span><b class="${avg(all) >= 0 ? "up" : "down"}">${pctTxt(avg(all), 2)}</b></div></div>`;
+    h += `<div class="day"><span>Best of the last ${days.length} sessions</span><span></span></div><div class="rows">` +
+      all.slice().sort(by(tradeRet)).slice(0, 5).map((a, i) => winRow(a, i + 1, { showDate: true })).join("") + `</div>`;
+
+    const open = S.winOpen || (S.winOpen = new Set());
+    for (const d of days) {
+      const list = all.filter(a => a.date === d).sort(by(tradeRet)), n = list.length, m = avg(list);
+      const show = open.has(d) ? list : list.slice(0, per);
+      h += `<div class="day wday"><span>${esc(dayLabel(d))}</span><small>${n} trade${n > 1 ? "s" : ""} · ${hit(list)}% right · avg <span class="${m >= 0 ? "up" : "down"}">${pctTxt(m)}</span></small></div><div class="rows">` +
+        show.map((a, i) => winRow(a, i + 1)).join("") + `</div>` +
+        (n > per ? `<button class="wmore" data-winday="${d}">${open.has(d) ? "Show top " + per : "Show all " + n}</button>` : "");
+    }
+
+    const strat = {};
+    all.forEach(a => (strat[a.strategy] ||= []).push(a));
+    const rows = Object.entries(strat).map(([id, xs]) => [id, xs.length, hit(xs), avg(xs)]).sort((a, b) => b[3] - a[3]);
+    h += `<div class="card"><h3>Which strategy did best</h3><p>Same trades, grouped by the strategy that sent the alert.</p><div class="tablewrap"><table class="bt wstrat"><thead><tr><th>Strategy</th><th>Trades</th><th>Right way</th><th>Average</th></tr></thead><tbody>` +
+      rows.map(([id, n, hr, m]) => `<tr><td><a href="#strategy-${slug(id)}">${esc(stratName(id))}</a></td><td>${n}</td><td>${hr}%</td><td class="${m >= 0 ? "up" : "down"}">${pctTxt(m, 2)}</td></tr>`).join("") + `</tbody></table></div></div>`;
+    h += `<p class="fine">Each alert is treated as a trade at that day's close (long when bullish, short when bearish) and valued at the latest close, so older alerts have had more time to move. No fees or slippage. For information only, not a recommendation.</p>`;
+    return h;
+  }
+
   function viewAlert(idx) {
     const a = S.feed?.alerts?.[idx];
     if (!a) return viewAlerts();
     const s = S.byId[a.strategy], st = a.strength, stock = S.stockBy[a.ticker];
-    let h = header("", "#alerts");
+    let h = header("", S.alView === "winners" ? "#winners" : "#alerts");
     h += `<div class="big2">${icon(a.ticker, 40)}<span class="tk">${esc(disp(a.ticker))}</span><span class="px">${money(a.price)}</span><span class="pill ${a.side}">${a.side}</span></div>`;
     const isTd = a.strategy === "topdown";
     h += `<p class="sub">${stock ? `<a href="#stock-${esc(a.ticker)}">${esc(stock.name)}</a> · ` : ""}${esc(s?.name)} · ${isTd
@@ -3047,7 +3123,8 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
   function route() {
     const r = (location.hash || "#alerts").slice(1);
     const tab = r === "news" || r === "buzz" ? "news" : r.startsWith("calendar") ? "calendar" : r.startsWith("strateg") ? "strategies" : r.startsWith("stock") || r === "heatmap" ? "stocks" : r === "notify" ? "notify" : r.startsWith("brokers") ? "brokers" : r.startsWith("learn") ? "learn" : "alerts";
-    const list = { alerts: viewAlerts, stocks: viewStocks, strategies: viewStrategies, notify: viewNotify, brokers: viewBrokers, learn: viewLearn, news: r === "buzz" ? viewBuzz : viewNews, calendar: () => viewCalendar(r.slice(9)) }[tab];
+    if (r === "winners") S.alView = "winners"; else if (tab === "alerts" && !r.startsWith("alert-")) S.alView = "alerts";
+    const list = { alerts: S.alView === "winners" ? viewWinners : viewAlerts, stocks: viewStocks, strategies: viewStrategies, notify: viewNotify, brokers: viewBrokers, learn: viewLearn, news: r === "buzz" ? viewBuzz : viewNews, calendar: () => viewCalendar(r.slice(9)) }[tab];
     let detail = detailFor(r), sel = detail ? r : null;
     charts.length = 0;
 
@@ -3078,9 +3155,10 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
     // the phone tab bar has no Calendar button: it lives under News there
     // phone bar: pages without their own button light up Menu
     const inBar = { calendar: "menu", brokers: "menu", notify: "menu", learn: "menu" }[tab] || tab;
-    document.querySelectorAll("[data-tab]").forEach(a => a.setAttribute("aria-current", (a.closest(".tabs") ? a.dataset.tab === inBar : a.dataset.tab === tab) ? "page" : "false"));
+    const navTab = tab === "alerts" && S.alView === "winners" ? "winners" : tab;
+    document.querySelectorAll("[data-tab]").forEach(a => a.setAttribute("aria-current", (a.closest(".tabs") ? a.dataset.tab === inBar : a.dataset.tab === navTab) ? "page" : "false"));
     S.routed = true;
-    if (tab === "alerts" && !r.startsWith("alert-")) markSeen();
+    if (tab === "alerts" && !r.startsWith("alert-") && r !== "winners") markSeen();
     updateBadge();
   }
 
@@ -3142,6 +3220,14 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
     if (fl) { S.filter = fl.dataset.filter; S.lastSel = null; goList(); return; }
     const ms = e.target.closest("[data-minstr]");
     if (ms) { setPref("minStr", +ms.dataset.minstr); goList(); return; }
+    const wsc = e.target.closest("[data-winscope]");
+    if (wsc) { setPref("winScope", wsc.dataset.winscope); goList(); return; }
+    const wdr = e.target.closest("[data-windir]");
+    if (wdr) { setPref("winDir", wdr.dataset.windir); goList(); return; }
+    const wpr = e.target.closest("[data-winper]");
+    if (wpr) { setPref("winPer", +wpr.dataset.winper); rerender(); return; }
+    const wdy = e.target.closest("[data-winday]");
+    if (wdy) { const o = S.winOpen || (S.winOpen = new Set()), d = wdy.dataset.winday; o.has(d) ? o.delete(d) : o.add(d); rerender(); return; }
     const so = e.target.closest("[data-sort]");
     if (so) { setPref("sort", so.dataset.sort); goList(); return; }
     const sc = e.target.closest("[data-sector]");
@@ -3192,7 +3278,7 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
   app.addEventListener("input", e => labInput(e));
   // a list control changed: on desktop jump to the new first item, on phone just redraw the list
   function goList() {
-    const tab = S.lastTab || "alerts", base = "#" + tab;
+    const tab = S.lastTab || "alerts", base = tab === "alerts" && S.alView === "winners" ? "#winners" : "#" + tab;
     if (WIDE.matches && location.hash !== base) { location.hash = base; return; }
     rerender();
   }
@@ -3419,7 +3505,7 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
     await loadMarket(m);
     S.lastSel = null; S.lastTab = null;
     const tab = (location.hash || "#alerts").slice(1);
-    const base = tab.startsWith("strateg") ? (tab.startsWith("strategy-") ? tab : "strategies") : tab.startsWith("stock") || tab === "heatmap" ? "stocks" : tab === "news" || tab === "buzz" ? tab : tab.startsWith("calendar") ? tab : tab === "notify" ? "notify" : tab.startsWith("brokers") ? "brokers" : tab.startsWith("learn") ? tab : "alerts";
+    const base = tab.startsWith("strateg") ? (tab.startsWith("strategy-") ? tab : "strategies") : tab.startsWith("stock") || tab === "heatmap" ? "stocks" : tab === "news" || tab === "buzz" ? tab : tab.startsWith("calendar") ? tab : tab === "notify" ? "notify" : tab.startsWith("brokers") ? "brokers" : tab.startsWith("learn") ? tab : tab === "winners" ? "winners" : "alerts";
     if ("#" + base !== location.hash) location.hash = base; else route();
     scrollTo(0, 0);
   }
