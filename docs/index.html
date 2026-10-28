@@ -223,6 +223,12 @@ a { color: var(--blue); }
 .since-card { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; flex-wrap: wrap; }
 .since-card b { font: 600 22px var(--font-mono); }
 .pill.lvhit { background: var(--surface-2); color: var(--muted); margin-left: 6px; }
+.fit .fitrows { display: grid; gap: 6px; margin-top: 4px; }
+.fit .fitrows div { display: grid; grid-template-columns: 7.5em 1fr 4.5em; align-items: center; gap: 10px; font-size: 13.5px; }
+.fit .fitrows b { font: 600 13.5px var(--font-mono); text-align: right; }
+.fitbar { position: relative; height: 8px; background: var(--surface-2); border-radius: 4px; overflow: hidden; }
+.fitbar i { position: absolute; top: 0; bottom: 0; border-radius: 4px; }
+.fitbar i.pos { background: var(--bull); } .fitbar i.neg { background: var(--bear); }
 .pill.earn { background: color-mix(in srgb, var(--amber) 18%, transparent); color: var(--amber); margin-left: 6px; }
 .earnwarn { display: flex; gap: 12px; align-items: flex-start; color: var(--fg); text-decoration: none; border: 1px solid color-mix(in srgb, var(--amber) 40%, transparent); }
 .earnwarn .ico { flex: none; width: 24px; height: 24px; border-radius: 50%; background: var(--amber); color: var(--on-accent); font: 700 15px/24px var(--font-display); text-align: center; }
@@ -1779,7 +1785,7 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
     const cats = [...new Set(list.map(s => s.category))];
     const counts = {}; (S.feed?.alerts || []).forEach(a => counts[a.strategy] = (counts[a.strategy] || 0) + 1);
     S.firstSel = "strategy-" + slug(S.strategies[0].id);
-    h += compareCard();
+    h += marketFitCard() + compareCard();
     h += `<a class="labcta" href="#learn"><span><b>Learn</b><small>How every strategy works, plus the basics: charts, risk and backtests</small></span><span aria-hidden="true">›</span></a>`;
     h += `<a class="labcta" href="#strategylab"><span><b>Strategy Lab</b><small>Change the settings of an indicator and test it over 15 years</small></span><span aria-hidden="true">›</span></a>`;
     for (const c of cats) {
@@ -2088,6 +2094,36 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
   // what each market's strategies are measured against: holding SPY, or holding bitcoin for crypto
   const benchOf = () => S.bt?.spy?.ticker === "BTC-USD" ? { name: "Bitcoin", short: "BTC", note: "" }
     : { name: "S&amp;P 500", short: "SPY", note: ", dividends included" };
+  // What has fit the market lately: each strategy's long-only account over the last 13 weeks of the
+  // backtest, averaged by strategy type, next to the market's own trend. Describes the recent past only.
+  const FIT_WEEKS = 13;
+  function marketFitCard() {
+    const B = S.bt, D = B?.account?.dates, M = S.stocks;
+    if (!D || D.length <= FIT_WEEKS || B.demo && !S.feed?.demo) return "";
+    const n = D.length - 1, ret = v => v?.[n] > 0 && v?.[n - FIT_WEEKS] > 0 ? (v[n] / v[n - FIT_WEEKS] - 1) * 100 : null;
+    const rows = S.strategies.filter(s => s.kind !== "lines").map(s => ({ s, r: ret(B.strategies[s.id]?.account?.long) })).filter(x => x.r != null);
+    if (rows.length < 3) return "";
+    const cats = {};
+    rows.forEach(x => (cats[x.s.category] ||= []).push(x.r));
+    const byCat = Object.entries(cats).map(([c, xs]) => ({ c, r: xs.reduce((a, b) => a + b, 0) / xs.length })).sort((a, b) => b.r - a.r);
+    const bench = ret(B.spy?.account), BM = benchOf();
+    const br = M?.breadth200, idx = M?.backdrop?.lines, last = l => l?.values?.filter(v => v != null).pop();
+    const above = idx?.length >= 3 && !isCrypto() && !isComm() ? last(idx[0]) > last(idx[2]) : null;
+    const mood = br == null ? "" : br >= 60 ? "a broad uptrend" : br <= 40 ? "a broad downtrend" : "a mixed, sideways market";
+    const best = byCat[0], worst = byCat[byCat.length - 1];
+    const top = rows.slice().sort((a, b) => b.r - a.r).slice(0, 3);
+    const max = Math.max(1, ...byCat.map(x => Math.abs(x.r)));
+    const bar = r => `<span class="fitbar"><i class="${r >= 0 ? "pos" : "neg"}" style="${r >= 0 ? "left:50%" : "right:50%"};width:${Math.abs(r) / max * 50}%"></i></span>`;
+    const since = fmtDate(D[n - FIT_WEEKS], { day: "numeric", month: "short" });
+    let h = `<div class="card fit"><div class="hd"><h3>What's been working</h3><span class="hint" style="margin:0">since ${esc(since)}</span></div>`;
+    if (mood) h += `<p><b style="color:var(--fg)">${Math.round(br)}%</b> of ${L().noun} are above their 200-day average${above != null ? `, and the ${esc(MK[S.market].index.replace("&amp;", "&"))} average is ${above ? "above" : "below"} its own` : ""}: ${mood}.</p>`;
+    h += `<p>Over the last ${FIT_WEEKS} weeks, <b style="color:var(--fg)">${esc(best.c.toLowerCase())}</b> strategies did best${byCat.length > 1 ? ` and <b style="color:var(--fg)">${esc(worst.c.toLowerCase())}</b> the worst` : ""}${bench != null ? `, while holding ${BM.short} returned ${sgn(bench)}` : ""}.</p>`;
+    h += `<div class="fitrows">${byCat.map(x => `<div><span>${esc(x.c)}</span>${bar(x.r)}<b class="${x.r >= 0 ? "up" : "down"}">${sgn(x.r)}</b></div>`).join("")}</div>`;
+    h += `<p style="margin-top:10px">Best single strategies: ${top.map(x => `<a href="#strategy-${slug(x.s.id)}">${esc(x.s.name)}</a> <span class="${x.r >= 0 ? "up" : "down"}">${sgn(x.r)}</span>`).join(" · ")}</p>`;
+    h += `<p class="hint" style="margin:6px 0 0">Long-only accounts from the backtest (updated weekly), averaged by type. Markets change character: what worked for 3 months often stops working, so treat this as context, not a forecast.</p></div>`;
+    return h;
+  }
+
   function compareCard() {
     const B = S.bt, A = B?.account; if (!A?.dates?.length) return "";
     const D = A.dates, size = A.size || 100000, mk = S.market || "stocks";
