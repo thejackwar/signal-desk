@@ -242,17 +242,22 @@ def run(data: dict[str, pd.DataFrame]) -> dict:
     return out
 
 
-def spy_hold(weeks: pd.Series, demo: bool) -> dict | None:
-    """A EUR ACCOUNT account that buys SPY and holds it, valued on the same weekly sessions as the
-    strategy accounts (dividends reinvested: adjusted prices). Rebased to ACCOUNT at the first week."""
+def spy_close(demo: bool) -> pd.Series | None:
     if demo:
         return None
     try:
-        df = fetch_real([BENCH], period="max")[BENCH]
+        return fetch_real([BENCH], period="max")[BENCH]["close"]
     except Exception as e:  # a missing benchmark must never sink the backtest
         print(f"  ! {BENCH}: {e}")
         return None
-    c = df["close"]
+
+
+def spy_hold(weeks: pd.Series, c: pd.Series | None) -> dict | None:
+    """A EUR ACCOUNT account that buys SPY and holds it, valued on the same weekly sessions as the
+    strategy accounts (dividends reinvested: adjusted prices). Rebased to ACCOUNT at the first week."""
+    if c is None:
+        return None
+    c = c.copy()
     if c.index.tz is not None:
         c.index = c.index.tz_localize(None)
     days = pd.DatetimeIndex(weeks.values)
@@ -262,6 +267,39 @@ def spy_hold(weeks: pd.Series, demo: bool) -> dict | None:
         return None
     v = v.bfill()
     return {"ticker": BENCH, "account": [round(float(x)) for x in ACCOUNT * v / v.iloc[0]]}
+
+
+def lab_prices(data: dict[str, pd.DataFrame], spy_c: pd.Series | None) -> dict:
+    """Compact daily prices for the Strategy Lab, which reruns the indicator strategies in the
+    browser with your own settings. Prices are stored as log-price steps in basis points
+    (0.01%), so 15 years of the whole list stays small:
+      close  -> first value round(ln(close) * 1e4), then the change from the day before
+      high/low -> round((ln(high or low) - ln(close)) * 1e4) for the same day
+    Each ticker runs on its own trading days; "s" is its first day in the shared calendar
+    and "miss" lists shared-calendar days it has no price for (holidays, halts)."""
+    cal = pd.DatetimeIndex(sorted(set().union(*(df.index for df in data.values()))))
+    pos = {d: i for i, d in enumerate(cal)}
+    enc = lambda v: np.round(np.log(np.asarray(v, dtype=float)) * 1e4).astype(np.int64)
+    out = {"dates": [f"{d:%Y-%m-%d}" for d in cal], "tickers": []}
+    for t, df in data.items():
+        ix = [pos[d] for d in df.index]
+        s, e = ix[0], ix[-1]
+        L = enc(df["close"].values)
+        out["tickers"].append({
+            "t": t, "s": s, "miss": sorted(set(range(s, e + 1)) - set(ix)),
+            "c": [int(L[0])] + np.diff(L).tolist(),
+            "h": (enc(df["high"].values) - L).tolist(),
+            "l": (enc(df["low"].values) - L).tolist()})
+    if spy_c is not None:
+        c = spy_c.copy()
+        if c.index.tz is not None:
+            c.index = c.index.tz_localize(None)
+        days = cal.tz_localize(None) if cal.tz is not None else cal
+        c = c.reindex(c.index.union(days)).ffill().reindex(days).bfill()
+        if c.notna().all():
+            L = enc(c.values)
+            out["spy"] = [int(L[0])] + np.diff(L).tolist()
+    return out
 
 
 def main():
@@ -280,7 +318,8 @@ def main():
     weeks = strategies.pop("_weeks")
     start = min(df.index[0] for df in data.values())
     end = max(df.index[-1] for df in data.values())
-    spy = spy_hold(weeks, args.demo)
+    spy_c = spy_close(args.demo)
+    spy = spy_hold(weeks, spy_c)
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(json.dumps({
         "generated_at": datetime.now(timezone.utc).isoformat(timespec="minutes"),
@@ -296,6 +335,9 @@ def main():
         "spy": spy,
     }, separators=(",", ":")))
     print(f"-> {out.relative_to(ROOT)} ({out.stat().st_size // 1024} KB)")
+    lab = scan.DATA / "lab.json"
+    lab.write_text(json.dumps(lab_prices(data, spy_c), separators=(",", ":")))
+    print(f"-> {lab.relative_to(ROOT)} ({lab.stat().st_size // 1024} KB)")
 
 
 if __name__ == "__main__":
