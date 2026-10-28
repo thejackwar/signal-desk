@@ -974,6 +974,42 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
   box-shadow: 0 2px 8px rgba(0,0,0,.35), 0 0 0 5px color-mix(in srgb, var(--amber) 22%, transparent); }
 /* the value next to each slider in the accent colour */
 .lp b { color: var(--amber); font-size: 15px; }
+
+/* technical rating */
+.rating .hd { margin-bottom: 12px; }
+.rsrc { font-size: 12px; color: var(--faint); }
+.rtfs { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; background: var(--surface-2); border-radius: 12px; padding: 3px; }
+.rtfs button { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 8px 4px; border-radius: 9px; color: var(--fg); }
+.rtfs button b { font-size: 13px; font-weight: 600; }
+.rtfs button i { font-style: normal; font-size: 11.5px; font-weight: 600; white-space: nowrap; }
+.rtfs button[aria-pressed="true"] { background: var(--surface); box-shadow: 0 1px 4px rgba(0,0,0,.14); }
+@media (prefers-color-scheme: dark) { .rtfs button[aria-pressed="true"] { background: #48484a; } }
+.rtfs button:disabled { opacity: .55; cursor: default; }
+.rmain { display: flex; flex-direction: column; align-items: center; margin: 14px 0 4px; }
+.rgauge { width: 240px; max-width: 80%; height: auto; }
+.rgauge .g-ssell { stroke: var(--bear); } .rgauge .g-sell { stroke: color-mix(in srgb, var(--bear) 55%, var(--surface)); }
+.rgauge .g-neu { stroke: color-mix(in srgb, var(--fg) 22%, var(--surface)); }
+.rgauge .g-buy { stroke: color-mix(in srgb, var(--bull) 55%, var(--surface)); } .rgauge .g-sbuy { stroke: var(--bull); }
+.rgauge .needle { stroke: var(--fg); } .rgauge .hub { fill: var(--fg); }
+.rlabel { font: 700 30px/1.1 var(--font-display); letter-spacing: -.025em; margin-top: -6px; }
+.rsub { margin: 4px 0 0; color: var(--muted); font-size: 13px; }
+.ssell { color: var(--bear) !important; } .sell { color: color-mix(in srgb, var(--bear) 80%, var(--fg)) !important; } .neu { color: var(--muted) !important; }
+.buy { color: color-mix(in srgb, var(--bull) 80%, var(--fg)) !important; } .sbuy { color: var(--bull) !important; } .na { color: var(--faint) !important; }
+.rgrps { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 16px; }
+@media (max-width: 480px) { .rgrps { grid-template-columns: 1fr; } }
+.rgh { display: flex; justify-content: space-between; align-items: baseline; font-size: 14px; }
+.rgh b { font-weight: 600; }
+.rbar { display: flex; height: 8px; border-radius: 4px; overflow: hidden; margin: 7px 0 5px; background: var(--surface-2); gap: 2px; }
+.rbar i { display: block; height: 100%; }
+.rbar .b { background: var(--bull); } .rbar .n { background: color-mix(in srgb, var(--fg) 22%, transparent); } .rbar .s { background: var(--bear); }
+.rcnt { display: flex; gap: 12px; font-size: 12px; color: var(--muted); }
+.rlist { margin-top: 14px; }
+.rlist summary { cursor: pointer; color: var(--blue); font-size: 14px; font-weight: 500; }
+.rtab { display: grid; margin-top: 8px; }
+.rtab > div { display: grid; grid-template-columns: 1fr auto 96px; gap: 10px; padding: 7px 0; border-top: 1px solid var(--line); font-size: 13.5px; }
+.rtab > div > span:nth-child(2) { color: var(--muted); text-align: right; }
+.rtab > div > span:last-child { text-align: right; font-weight: 600; }
+.rating .hint:last-child { margin-top: 12px; }
 </style>
 </head>
 <body>
@@ -1532,6 +1568,7 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
       <div class="ends"><span>${money(r.lo52)}</span><span>${r.pos52 != null ? Math.round(r.pos52) + "% of the way up" : ""}</span><span>${money(r.hi52)}</span></div></div>`;
     h += `<div class="chartbox" id="schart"><p class="loading">Loading chart…</p></div>`;
     h += `<p class="hint">One year of daily candles with the 50- and 200-day averages. Triangles mark alerts from all strategies in the last few weeks.</p>`;
+    h += `<div class="card rating" id="rating"><div class="hd"><h3>Technical rating</h3></div><p class="loading" style="padding:18px 0">Reading the indicators…</p></div>`;
     if (isComm() && r.drivers) h += `<div class="card drivers"><h3>What moves the price</h3><p>${esc(r.drivers)}.</p><p class="hint" style="margin:0">Prices follow the nearest contract, so the chart can jump a little when it rolls to the next month.</p></div>`;
     if (!isComm()) h += `<p style="margin:4px 0 18px"><a class="btn ghost" href="trendlines.html#${encodeURIComponent(t)}">Trendlines on 7 timeframes ›</a></p>`;
     h += nextEarningsCard(t) + mentionsCard(t) + newsFor(t);
@@ -1540,6 +1577,7 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
     else h += `<div class="rows">` + alerts.map(a => alertRow(a, { showDate: true })).join("") + `</div>`;
     h += `<p class="fine">For information only. Not investment advice.</p>`;
     return { html: h, after: async () => {
+      loadRating(t);
       const box = document.getElementById("schart");
       try {
         const data = S.stockData[t] || (S.stockData[t] = await (await fetch(`${L().base}stocks/${t}.json`, { cache: "no-cache" })).json());
@@ -1914,6 +1952,98 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
     return h;
   }
 
+
+
+  // ------------------------------------------------------- technical rating
+  // Strong sell … Strong buy from common indicators (docs/rating.js) on 1H, 4H, daily and weekly
+  // candles. Intraday candles come from the same sources as the Trendlines page (crypto: Binance
+  // straight from the browser; stocks: the Trendlines Worker). The page's own daily file is shown
+  // first, and is the fallback (daily + weekly only) when those can't be reached, and for futures.
+  const RTFS = [["1H", "1 hour"], ["4H", "4 hours"], ["D", "Daily"], ["W", "Weekly"]];
+  const RATING = {};                               // ticker -> { res: {tf: rating}, src, full }
+  const rtCls = l => ({ "Strong sell": "ssell", "Sell": "sell", "Neutral": "neu", "Buy": "buy", "Strong buy": "sbuy" }[l] || "na");
+  function trendApi() {
+    try { const v = JSON.parse(localStorage.getItem("signaldesk.trendlines") || "{}").api; if (v) return v; } catch {}
+    return "https://trendlines.guerragiacomo00.workers.dev";
+  }
+  async function loadRating(t) {
+    const Rm = await import("./rating.js");
+    const draw = () => { const b = document.getElementById("rating"); if (b && b.dataset.t !== "x" ) renderRating(b, t); };
+    const rateFrames = fr => Object.fromEntries(RTFS.map(([k]) => [k, fr[k] && fr[k].length >= 30 ? Rm.rate(fr[k]) : null]));
+    if (!RATING[t]) {
+      // 1. quick: the daily file this page already uses
+      try {
+        const d = S.stockData[t] || (S.stockData[t] = await (await fetch(`${L().base}stocks/${t}.json`, { cache: "no-cache" })).json());
+        const D = d.dates.map((x, i) => ({ time: Date.parse(x + "T00:00:00Z") / 1000, open: d.o[i], high: d.h[i], low: d.l[i], close: d.c[i] }));
+        RATING[t] = { res: rateFrames({ D, W: Rm.weeklyFrom(D) }), src: "daily closes", full: false };
+      } catch { RATING[t] = { res: {}, src: "", full: false }; }
+      draw();
+      // 2. full: 1H and 4H too, with longer weekly history
+      if (!isComm()) {
+        try {
+          const T = await import("./trendlines.js");
+          let payload = null;
+          if (isCrypto()) { try { payload = await T.binanceCrypto(disp(t)); } catch {} }
+          if (!payload) {
+            const r = await fetch(`${trendApi()}/?symbol=${encodeURIComponent(t)}`);
+            payload = await r.json();
+            if (!r.ok || payload.error) throw new Error(payload.error || r.status);
+          }
+          const fr = T.buildFrames(payload);
+          RATING[t] = { res: rateFrames(fr), src: payload.source || "Alpaca, about 16 minutes delayed", full: true, at: payload.end };
+        } catch { RATING[t].failed = true; }
+      }
+    }
+    draw();
+  }
+  function gaugeSvg(score) {
+    const cx = 120, cy = 112, R = 92, segs = [[-1, -.5, "ssell"], [-.5, -.1, "sell"], [-.1, .1, "neu"], [.1, .5, "buy"], [.5, 1, "sbuy"]];
+    const pt = (v, r) => { const a = Math.PI * (1 - (v + 1) / 2); return [cx + r * Math.cos(a), cy - r * Math.sin(a)]; };
+    let g = `<svg class="rgauge" viewBox="0 0 240 128" aria-hidden="true">`;
+    for (const [a, b, c] of segs) {
+      const [x1, y1] = pt(a + .012, R), [x2, y2] = pt(b - .012, R);
+      g += `<path class="g-${c}" d="M${x1.toFixed(1)} ${y1.toFixed(1)} A${R} ${R} 0 0 1 ${x2.toFixed(1)} ${y2.toFixed(1)}" fill="none" stroke-width="14" stroke-linecap="round"/>`;
+    }
+    if (score !== null) {
+      const [nx, ny] = pt(score, R - 22);
+      g += `<line x1="${cx}" y1="${cy}" x2="${nx.toFixed(1)}" y2="${ny.toFixed(1)}" class="needle" stroke-width="4" stroke-linecap="round"/><circle cx="${cx}" cy="${cy}" r="8" class="hub"/>`;
+    }
+    return g + `</svg>`;
+  }
+  function renderRating(box, t) {
+    const st = RATING[t]; if (!st) return;
+    const tf0 = pref("ratingTf", "D"), tf = st.res[tf0] ? tf0 : (st.res.D ? "D" : RTFS.map(x => x[0]).find(k => st.res[k]) || "D");
+    const r = st.res[tf];
+    const pending = !st.full && !st.failed && !isComm();
+    let h = `<div class="hd"><h3>Technical rating</h3><span class="rsrc">${pending ? "loading 1H and 4H…" : ""}</span></div>`;
+    h += `<div class="rtfs" role="group" aria-label="Timeframe">` + RTFS.map(([k, name]) => {
+      const x = st.res[k];
+      const sub = x ? `<i class="${rtCls(x.label)}">${x.label}</i>` : `<i class="na">${pending && (k === "1H" || k === "4H") ? "…" : "–"}</i>`;
+      return `<button data-rtf="${k}" aria-pressed="${k === tf}" ${x ? "" : "disabled"}><b>${name}</b>${sub}</button>`;
+    }).join("") + `</div>`;
+    if (!r) { box.innerHTML = h + `<p class="hint">Not enough price history for a rating yet.</p>`; return; }
+    const tfName = RTFS.find(x => x[0] === tf)[1].toLowerCase();
+    h += `<div class="rmain">${gaugeSvg(r.score)}<div class="rlabel ${rtCls(r.label)}">${r.label}</div>
+      <p class="rsub">${r.ma.used + r.osc.used} indicators on the ${tf === "D" ? "daily" : tf === "W" ? "weekly" : tfName} chart</p></div>`;
+    const bar = g => { const n = g.used || 1; return `<span class="rbar"><i class="b" style="width:${g.buy / n * 100}%"></i><i class="n" style="width:${g.neutral / n * 100}%"></i><i class="s" style="width:${g.sell / n * 100}%"></i></span>`; };
+    const grp = (name, g) => `<div class="rgrp"><div class="rgh"><span>${name}</span><b class="${rtCls(g.label)}">${g.label || "–"}</b></div>${bar(g)}
+      <div class="rcnt"><span class="up">${g.buy} buy</span><span>${g.neutral} neutral</span><span class="down">${g.sell} sell</span></div></div>`;
+    h += `<div class="rgrps">${grp("Moving averages", r.ma)}${grp("Oscillators", r.osc)}</div>`;
+    const fmtV = v => v === null || v === undefined || !Number.isFinite(v) ? "–" : Math.abs(v) >= 1000 ? v.toLocaleString("en-US", { maximumFractionDigits: 0 }) : v.toFixed(2);
+    const vote = x => x.vote === null ? `<span class="na">not enough data</span>` : x.vote > 0 ? `<span class="up">Buy</span>` : x.vote < 0 ? `<span class="down">Sell</span>` : `<span>Neutral</span>`;
+    h += `<details class="rlist"><summary>See every indicator</summary><div class="rtab">` +
+      [...r.osc.items, ...r.ma.items].map(x => `<div><span>${x.name}</span><span>${fmtV(x.value)}</span>${vote(x)}</div>`).join("") + `</div>
+      <p class="hint">Moving averages: Buy when the average is below the price, Sell when above. RSI, Stochastic, CCI and Williams %R: Buy when oversold and turning up, Sell when overbought and turning down. ADX: the trend's direction when it's strong (above 20). Momentum: its direction. MACD: above or below its signal line.</p></details>`;
+    const src = st.full ? `Candles: ${esc(st.src)}.` : isComm() ? "Daily and weekly only, from the daily closes." : st.failed ? "1H and 4H couldn't load right now, so only daily and weekly are shown." : "";
+    h += `<p class="hint">A count of what common indicators say, not a forecast or advice. Short timeframes change quickly. ${src}</p>`;
+    box.innerHTML = h;
+  }
+  document.addEventListener("click", e => {
+    const b = e.target.closest("[data-rtf]"); if (!b) return;
+    setPref("ratingTf", b.dataset.rtf);
+    const box = document.getElementById("rating"), t = (location.hash.match(/^#stock-(.+)$/) || [])[1];
+    if (box && t) renderRating(box, decodeURIComponent(t));
+  });
 
   // ------------------------------------------------------- strategy lab
   // Rerun an indicator strategy with your own settings, in the browser (docs/lab.js),
