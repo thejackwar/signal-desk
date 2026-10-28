@@ -14,7 +14,7 @@ docs/                    the website (served by GitHub Pages)
   data/backtest.json     backtest results                 (written by engine/backtest.py)
   data/stocks.json       stock list + market health       (written by engine/scan.py)
   data/stocks/           one-year chart per stock
-  trendlines.html/.js    automatic trendlines page (data from worker/)
+  trendlines.html/.js    automatic trendlines + support/resistance page (data from worker/)
   data/calendar.json     upcoming earnings, IPOs, economy (written by engine/events.py)
   data/topdown/          Top-Down alerts (written by engine/topdown.py)
   data/brokers.json      Brokers page: facts and links (edit by hand; affiliate links go here)

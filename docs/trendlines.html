@@ -40,7 +40,7 @@
   --fg: #e9ebee; --muted: #8b929d; --faint: #5b616b; --amber: #f2b33d;
   --bull: #32c48d; --bear: #f05a63;
   --chart-bg: #131722; --chart-grid: #232835; --chart-txt: #d1d4dc;
-  --up-line: #4CAF50; --down-line: #F23645;
+  --up-line: #4CAF50; --down-line: #F23645; --sup: #26c6da; --res: #ffa726;
   --font-display: "Bricolage Grotesque", "Avenir Next", system-ui, sans-serif;
   --font-body: "IBM Plex Sans", -apple-system, "Segoe UI", system-ui, sans-serif;
   --font-mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
@@ -95,6 +95,8 @@ details.settings summary b { color: var(--fg); font-weight: 500; }
 .summary td.tf a { color: var(--fg); text-decoration: none; font-weight: 600; }
 .summary td.up { color: var(--up-line); } .summary td.down { color: var(--down-line); }
 .summary td.dim { color: var(--faint); }
+.summary td.sup { color: var(--sup); } .summary td.res { color: var(--res); }
+.summary td .tc { color: var(--faint); font-size: 11.5px; }
 .bias { display: inline-block; min-width: 72px; text-align: center; border-radius: 6px; padding: 1px 8px; font: 600 12px var(--font-body); }
 .bias.Up { background: rgba(76,175,80,.16); color: var(--up-line); }
 .bias.Down { background: rgba(242,54,69,.16); color: var(--down-line); }
@@ -107,6 +109,7 @@ details.settings summary b { color: var(--fg); font-weight: 500; }
 .card h2 .lv { font: 12.5px var(--font-mono); color: var(--muted); }
 .card h2 .lv i { font-style: normal; }
 .card h2 .lv .u { color: var(--up-line); } .card h2 .lv .d { color: var(--down-line); }
+.card h2 .lv .s { color: var(--sup); } .card h2 .lv .r { color: var(--res); }
 .chart { position: relative; height: clamp(300px, 58vh, 540px); }
 .overlay { position: absolute; inset: 0; pointer-events: none; z-index: 3; overflow: hidden; }
 .overlay span { position: absolute; transform: translate(-50%, -50%); font: 700 11px var(--font-body); white-space: nowrap; }
@@ -136,6 +139,9 @@ details.settings summary b { color: var(--fg); font-weight: 500; }
       <span>Line breaks on</span>
       <div class="seg" id="brk"></div>
       <small>Close: a candle closes beyond the line. Wick: its high/low pokes through.</small>
+      <span>Support / resistance</span>
+      <div class="seg" id="srn"></div>
+      <small>Horizontal levels where at least two swing highs or lows cluster. How many to draw on each side of the price.</small>
       <span>Timeframes</span>
       <div class="seg" id="tfs"></div>
       <span>Data server</span>
@@ -151,7 +157,7 @@ details.settings summary b { color: var(--fg); font-weight: 500; }
 </div>
 
 <script type="module">
-import { TFS, ORDER, buildFrames, analyzeAll, segments, fmtLevel } from "./trendlines.js";
+import { TFS, ORDER, buildFrames, analyzeAll, segments, fmtLevel, fmtPrice } from "./trendlines.js";
 
 // Address of the Cloudflare Worker (see worker/README.md). Can also be set in Settings.
 const DEFAULT_API = "https://trendlines.guerragiacomo00.workers.dev";
@@ -159,7 +165,7 @@ const TICKERS = ("SPY AAPL ABBV ABT ACN ADBE AIG AMD AMGN AMT AMZN AVGO AXP BA B
   "CHTR CL CMCSA COF COP COST CRM CSCO CVS CVX DE DHR DIS DUK EMR F FDX GD GE GILD GM GOOGL GS HD HON IBM INTC " +
   "INTU ISRG JNJ JPM KO LIN LLY LMT LOW MA MCD MDLZ MDT MET META MMM MO MRK MS MSFT NEE NFLX NKE NOW NVDA ORCL " +
   "PEP PFE PG PLTR PM PYPL QCOM RTX SBUX SCHW SO SPG T TGT TMO TMUS TSLA TXN UBER UNH UNP UPS USB V VZ WFC WMT XOM").split(" ");
-const C = { bg: "#131722", grid: "#232835", txt: "#d1d4dc", candleUp: "#26a69a", candleDn: "#ef5350", up: "#4CAF50", dn: "#F23645" };
+const C = { bg: "#131722", grid: "#232835", txt: "#d1d4dc", candleUp: "#26a69a", candleDn: "#ef5350", up: "#4CAF50", dn: "#F23645", sup: "#26c6da", res: "#ffa726" };
 const KEY = "signaldesk.trendlines";
 
 const $ = id => document.getElementById(id);
@@ -167,7 +173,8 @@ const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": 
 function loadPrefs() { try { return JSON.parse(localStorage.getItem(KEY)) || {}; } catch { return {}; } }
 function savePrefs() { try { localStorage.setItem(KEY, JSON.stringify(P)); } catch {} }
 
-const P = { swing: 5, breakBy: "close", tfs: ORDER.slice(), api: DEFAULT_API, ...loadPrefs() };
+const P = { swing: 5, breakBy: "close", sr: 2, tfs: ORDER.slice(), api: DEFAULT_API, ...loadPrefs() };
+if (![0, 1, 2, 3].includes(P.sr)) P.sr = 2;
 if (!P.api) P.api = DEFAULT_API;                           // an empty saved address never hides the default
 if (!Array.isArray(P.tfs)) P.tfs = ORDER.slice();
 const qApi = new URLSearchParams(location.search).get("api");
@@ -183,13 +190,15 @@ function segHtml(items, cur) {
 function renderSettings() {
   $("swing").innerHTML = segHtml([2, 3, 4, 5, 6, 8, 10].map(n => [n, n]), P.swing);
   $("brk").innerHTML = segHtml([["close", "Close"], ["wick", "Wick"]], P.breakBy);
+  $("srn").innerHTML = segHtml([[0, "Off"], [1, "1"], [2, "2"], [3, "3"]], P.sr);
   $("tfs").innerHTML = segHtml(ORDER.map(t => [t, t]), P.tfs);
   $("api").value = P.api || "";
   const off = ORDER.filter(t => !P.tfs.includes(t));
-  $("setsum").textContent = `· swing ${P.swing} · break on ${P.breakBy}` + (off.length ? ` · ${off.join(", ")} hidden` : "");
+  $("setsum").textContent = `· swing ${P.swing} · break on ${P.breakBy}` + (P.sr ? ` · ${P.sr} S/R each side` : " · S/R off") + (off.length ? ` · ${off.join(", ")} hidden` : "");
 }
 $("swing").addEventListener("click", e => { const b = e.target.closest("button"); if (!b) return; P.swing = +b.dataset.v; changed(true); });
 $("brk").addEventListener("click", e => { const b = e.target.closest("button"); if (!b) return; P.breakBy = b.dataset.v; changed(true); });
+$("srn").addEventListener("click", e => { const b = e.target.closest("button"); if (!b) return; P.sr = +b.dataset.v; changed(false); });
 $("tfs").addEventListener("click", e => {
   const b = e.target.closest("button"); if (!b) return;
   const t = b.dataset.v;
@@ -250,7 +259,7 @@ async function show(sym) {
   }
 }
 
-const intro = () => `<div class="msg"><strong>Type a ticker</strong>Any S&amp;P 100 stock or SPY. You get one chart per timeframe (W, D, 4H, 1H, 30m, 15m, 5m) with the trendlines drawn from the absolute high and low: red lines touch the swing highs from above, green lines the swing lows from below. The newest line of each side runs on until a candle closes through it (✕).</div>`;
+const intro = () => `<div class="msg"><strong>Type a ticker</strong>Any S&amp;P 100 stock or SPY. You get one chart per timeframe (W, D, 4H, 1H, 30m, 15m, 5m) with the trendlines drawn from the absolute high and low: red lines touch the swing highs from above, green lines the swing lows from below. The newest line of each side runs on until a candle closes through it (✕). Dashed horizontal lines are support (blue, S1 nearest) and resistance (orange, R1 nearest): prices where several swing highs or lows bunched up.</div>`;
 
 // ------------------------------------------------------------------ rendering
 function clearCharts() { charts.forEach(c => c.remove()); charts = []; }
@@ -258,23 +267,32 @@ function clearCharts() { charts.forEach(c => c.remove()); charts = []; }
 function render() {
   clearCharts();
   const { symbol, results } = state;
-  let h = `<div class="summary"><table><thead><tr><th>TF</th><th>Up line</th><th>Down line</th><th>Bias</th></tr></thead><tbody>`;
+  let h = `<div class="summary"><table><thead><tr><th>TF</th><th>Up line</th><th>Down line</th><th>Bias</th>${P.sr ? "<th>Support</th><th>Resistance</th>" : ""}</tr></thead><tbody>`;
   for (const t of ORDER) {
     const r = results[t];
     const cell = (ch, cls) => `<td class="${ch.level !== null ? cls : "dim"}">${fmtLevel(ch)}</td>`;
     const tf = P.tfs.includes(t) ? `<a href="#${esc(symbol)}" data-jump="${t}">${t}</a>` : t;
-    h += `<tr><td class="tf">${tf}</td>${cell(r.up, "up")}${cell(r.down, "down")}<td><span class="bias ${r.bias === "-" ? "none" : r.bias}">${r.bias === "-" ? "–" : r.bias}</span></td></tr>`;
+    h += `<tr><td class="tf">${tf}</td>${cell(r.up, "up")}${cell(r.down, "down")}<td><span class="bias ${r.bias === "-" ? "none" : r.bias}">${r.bias === "-" ? "–" : r.bias}</span></td>${P.sr ? srCells(r.sr) : ""}</tr>`;
   }
   h += `</tbody></table></div><div class="charts">`;
   for (const t of P.tfs) {
     const r = results[t];
     h += `<section class="card" id="card-${t}"><h2>${esc(symbol)} · ${TFS[t].label}
-      <span class="lv">up <i class="${r.up.level !== null ? "u" : ""}">${fmtLevel(r.up)}</i> · down <i class="${r.down.level !== null ? "d" : ""}">${fmtLevel(r.down)}</i></span></h2>
+      <span class="lv">up <i class="${r.up.level !== null ? "u" : ""}">${fmtLevel(r.up)}</i> · down <i class="${r.down.level !== null ? "d" : ""}">${fmtLevel(r.down)}</i>${P.sr ? srHead(r.sr) : ""}</span></h2>
       <div class="chart" id="chart-${t}"></div></section>`;
   }
   $("out").innerHTML = h + `</div>`;
   if (!P.tfs.length) $("out").insertAdjacentHTML("beforeend", `<div class="msg">All timeframes are switched off in Settings.</div>`);
   for (const t of P.tfs) charts.push(drawChart($(`chart-${t}`), t, state.frames[t], results[t]));
+}
+// nearest support and resistance, with how many swings touched them
+function srCells(sr) {
+  const c = (l, cls) => l ? `<td class="${cls}" title="${l.touches} swings touched ${fmtPrice(l.lo)}–${fmtPrice(l.hi)}">${fmtPrice(l.price)} <span class="tc">${l.touches}×</span></td>` : `<td class="dim">–</td>`;
+  return c(sr.support[0], "sup") + c(sr.resistance[0], "res");
+}
+function srHead(sr) {
+  const s = sr.support[0], r = sr.resistance[0];
+  return ` · S <i class="${s ? "s" : ""}">${s ? fmtPrice(s.price) : "–"}</i> · R <i class="${r ? "r" : ""}">${r ? fmtPrice(r.price) : "–"}</i>`;
 }
 $("out").addEventListener("click", e => {
   const a = e.target.closest("[data-jump]");
@@ -306,6 +324,14 @@ function drawChart(el, tf, candles, res) {
   const data = candles.slice(w0).map(c => ({ time: c.time, open: c.open, high: c.high, low: c.low, close: c.close }));
   for (let k = 1; k <= fut; k++) data.push({ time: T(n - 1 + k) });
   cs.setData(data);
+
+  // horizontal support / resistance: dashed, labelled S1, S2 … / R1, R2 … on the price axis
+  for (const [list, tag, col] of [[res.sr.support, "S", C.sup], [res.sr.resistance, "R", C.res]]) {
+    list.slice(0, P.sr).forEach((l, k) => cs.createPriceLine({
+      price: l.price, color: col, lineWidth: l.touches >= 4 ? 2 : 1, lineStyle: LightweightCharts.LineStyle.Dashed,
+      axisLabelVisible: true, title: `${tag}${k + 1} · ${l.touches}×`,
+    }));
+  }
 
   const marks = [];                                          // ✕ and timeframe labels, drawn on top
   for (const [side, col] of [["up", C.up], ["down", C.dn]]) {

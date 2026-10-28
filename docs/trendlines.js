@@ -119,9 +119,56 @@ export function buildFrames(payload) {
 
 export function analyzeAll(frames, { swing = 5, breakBy = "close" } = {}) {
   const out = {};
-  for (const t of ORDER) out[t] = analyze(frames[t], TFS[t].lookback, swing, breakBy);
+  for (const t of ORDER) {
+    out[t] = analyze(frames[t], TFS[t].lookback, swing, breakBy);
+    out[t].sr = srLevels(frames[t], TFS[t].lookback, swing);
+  }
   return out;
 }
+
+// ------------------------------------------------------------------ support / resistance
+// Horizontal levels, an addition of this page (not in trendlines.py). The swing highs AND lows of
+// the lookback window are sorted by price and grouped into zones no wider than `zone` x the average
+// true range; a zone touched by at least `minTouches` swings is a level, priced at the average of
+// its swings. Highs and lows count together because a broken resistance often turns into support.
+// Levels above the last close are resistance (nearest first), the others support (nearest first).
+// Each level: {price, touches, lo, hi, first, last} with first/last = bar index of the oldest/newest touch.
+export function srLevels(c, lookback, swing = 5, { minTouches = 2, zone = 1 } = {}) {
+  const n = c.length;
+  const res = { support: [], resistance: [], atr: null };
+  if (n < 2) return res;
+  const s0 = Math.max(0, n - lookback);
+  let sum = 0, k = 0;
+  for (let i = Math.max(1, s0); i < n; i++, k++)
+    sum += Math.max(c[i].high - c[i].low, Math.abs(c[i].high - c[i - 1].close), Math.abs(c[i].low - c[i - 1].close));
+  const atr = sum / k;
+  res.atr = atr;
+  const width = atr * zone;
+  const piv = [...findPivots(c, swing, "high"), ...findPivots(c, swing, "low")]
+    .filter(p => p.index >= s0)
+    .sort((a, b) => a.price - b.price || a.index - b.index);
+  const zones = [];
+  let cur = null;
+  for (const p of piv) {
+    if (cur && p.price - cur[0].price <= width) cur.push(p);
+    else zones.push(cur = [p]);
+  }
+  const close = c[n - 1].close;
+  for (const z of zones) {
+    const idx = new Set(z.map(p => p.index));             // a candle that is both a swing high and low counts once
+    if (idx.size < minTouches) continue;
+    const price = z.reduce((s, p) => s + p.price, 0) / z.length;
+    const lvl = { price, touches: idx.size, lo: z[0].price, hi: z[z.length - 1].price,
+                  first: Math.min(...idx), last: Math.max(...idx) };
+    (price > close ? res.resistance : res.support).push(lvl);
+  }
+  res.resistance.sort((a, b) => a.price - b.price);
+  res.support.sort((a, b) => b.price - a.price);
+  return res;
+}
+
+export const fmtPrice = p => p === null || p === undefined ? "–"
+  : p.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
 // ------------------------------------------------------------------ drawing helpers
 // Each segment of a chain as {from, to, last}: points {index, price} in the timeframe's own
