@@ -45,6 +45,12 @@ export const INDICATORS = {
     about: "Bullish on a close above the highest high of the last N days, bearish on a close below the lowest low.",
     params: [{ k: "n", label: "Channel length", min: 5, max: 200, step: 1, def: 20, unit: "days" }],
   },
+  supertrend: {
+    name: "Supertrend", base: "supertrend", exit: "opposite",
+    about: "A line a set number of ATRs from the price that only moves with the trend. Bullish when the price closes above it in a downtrend, bearish when it closes below it in an uptrend.",
+    params: [{ k: "n", label: "ATR length", min: 3, max: 50, step: 1, def: 10, unit: "days" },
+             { k: "mult", label: "Distance", min: 1, max: 6, step: 0.25, def: 3, unit: "ATRs" }],
+  },
 };
 export const HOLD_DEFAULT = 20;
 
@@ -158,6 +164,26 @@ export function signals(T, cfg) {
       hi[i] = mx; lo[i] = mn;
     }
     for (let i = 1; i < n; i++) put(i, above(c, hi, i), below(c, lo, i));
+  } else if (cfg.ind === "supertrend") {
+    // same loop as supertrend() in engine/strategies.py
+    const a = 1 / p.n, atr = new Float64Array(n).fill(NaN);
+    let r = 0;
+    for (let i = 0; i < n; i++) {
+      const tr = i === 0 ? h[i] - l[i] : Math.max(h[i] - l[i], Math.abs(h[i] - c[i - 1]), Math.abs(l[i] - c[i - 1]));
+      r = i === 0 ? tr : (1 - a) * r + a * tr;
+      if (i >= p.n - 1) atr[i] = r;
+    }
+    let up = NaN, lo = NaN, t = 0;
+    for (let i = 0; i < n; i++) {
+      if (!Number.isFinite(atr[i])) continue;
+      const mid = (h[i] + l[i]) / 2, bu = mid + p.mult * atr[i], bl = mid - p.mult * atr[i];
+      if (!Number.isFinite(up)) { up = bu; lo = bl; t = c[i] > bu ? 1 : c[i] < bl ? -1 : 0; continue; }
+      const nu = bu < up || c[i - 1] > up ? bu : up, nl = bl > lo || c[i - 1] < lo ? bl : lo;
+      up = nu; lo = nl;
+      const prev = t;
+      if (prev >= 0 && c[i] < lo) t = -1; else if (prev <= 0 && c[i] > up) t = 1;
+      if (prev !== 0 && t !== prev) sig[i] = t;
+    }
   }
   return sig;
 }

@@ -175,6 +175,123 @@ def golden_cross(df: pd.DataFrame) -> StrategyResult:
     ])
 
 
+def atr(df: pd.DataFrame, n: int = 14) -> pd.Series:
+    """Average true range, Wilder's smoothing (the first bar's true range is just high - low)."""
+    pc = df["close"].shift(1)
+    tr = np.fmax(df["high"] - df["low"], np.fmax((df["high"] - pc).abs(), (df["low"] - pc).abs()))
+    return tr.ewm(alpha=1 / n, adjust=False, min_periods=n).mean()
+
+
+def supertrend(df: pd.DataFrame, n: int = 10, mult: float = 3.0) -> StrategyResult:
+    """A line `mult` ATRs below the price in an uptrend (above it in a downtrend) that only moves
+    in the trend's direction. Closing through it flips the trend: that flip is the alert."""
+    h, l, c = df["high"].values, df["low"].values, df["close"].values
+    a = atr(df, n).values
+    mid = (h + l) / 2
+    N = len(df)
+    up, lo = np.full(N, np.nan), np.full(N, np.nan)
+    trend = np.zeros(N, dtype=int)
+    sig = pd.Series(0, index=df.index, dtype=int)
+    notes = {}
+    for i in range(N):
+        if not np.isfinite(a[i]):
+            continue
+        bu, bl = mid[i] + mult * a[i], mid[i] - mult * a[i]
+        if i == 0 or not np.isfinite(up[i - 1]):
+            up[i], lo[i] = bu, bl
+            trend[i] = 1 if c[i] > bu else -1 if c[i] < bl else 0
+            continue
+        up[i] = bu if bu < up[i - 1] or c[i - 1] > up[i - 1] else up[i - 1]
+        lo[i] = bl if bl > lo[i - 1] or c[i - 1] < lo[i - 1] else lo[i - 1]
+        t = trend[i - 1]
+        if t >= 0 and c[i] < lo[i]:
+            trend[i] = -1
+        elif t <= 0 and c[i] > up[i]:
+            trend[i] = 1
+        else:
+            trend[i] = t
+        if t != 0 and trend[i] != t:               # a real flip, not the first reading
+            sig.iloc[i] = trend[i]
+            notes[i] = (f"Supertrend turned up: closed above {P(up[i])}" if trend[i] > 0
+                        else f"Supertrend turned down: closed below {P(lo[i])}")
+    line_up = np.where(trend > 0, lo, np.nan)      # the line that matters: support in an uptrend
+    line_dn = np.where(trend < 0, up, np.nan)      # resistance in a downtrend
+    return StrategyResult(sig, notes, [
+        {"name": "Supertrend (uptrend)", "values": _vals(pd.Series(line_up)), "style": "accent2"},
+        {"name": "Supertrend (downtrend)", "values": _vals(pd.Series(line_dn)), "style": "accent"},
+    ])
+
+
+def volume_breakout(df: pd.DataFrame, n: int = 20, vol_mult: float = 1.5) -> StrategyResult:
+    """A Donchian breakout that only counts when volume is at least `vol_mult` x its n-day average."""
+    hi = df["high"].rolling(n, min_periods=n).max().shift(1)
+    lo = df["low"].rolling(n, min_periods=n).min().shift(1)
+    c = df["close"]
+    v = df["volume"].astype(float).where(df["volume"] > 0)
+    avg = v.rolling(n, min_periods=n).mean().shift(1)
+    heavy = v >= vol_mult * avg
+    buy = (c > hi) & (c.shift(1) <= hi.shift(1)) & heavy
+    sell = (c < lo) & (c.shift(1) >= lo.shift(1)) & heavy
+    sig = _signals(df, buy, sell)
+    notes = {}
+    for i in np.flatnonzero(sig.values):
+        x = v.iloc[i] / avg.iloc[i]
+        notes[int(i)] = (f"New {n}-day high on {x:.1f}x normal volume: closed above {P(hi.iloc[i])}" if sig.iloc[i] > 0
+                         else f"New {n}-day low on {x:.1f}x normal volume: closed below {P(lo.iloc[i])}")
+    return StrategyResult(sig, notes, [
+        {"name": f"{n}-day high", "values": _vals(hi), "style": "band"},
+        {"name": f"{n}-day low", "values": _vals(lo), "style": "band"},
+    ], {"name": f"Volume vs {n}-day average", "lines": [
+        {"name": "Volume ÷ average", "values": _vals(v / avg), "style": "accent"}], "levels": [1, vol_mult]})
+
+
+# What relative strength is measured against: set by the scanner / backtest before running
+# (SPY for stocks, bitcoin for crypto, the average of all 19 for commodities).
+BENCHMARK = {"close": None, "name": "the market"}
+
+
+def set_benchmark(close: pd.Series | None, name: str):
+    BENCHMARK["close"], BENCHMARK["name"] = close, name
+
+
+def relative_strength(df: pd.DataFrame, n: int = 63) -> StrategyResult:
+    """RS line = price / benchmark. Bullish when it closes at a new n-day high (the stock starts
+    leading the market), bearish at a new n-day low (lagging). Only switches alert: after a bullish
+    alert the next one is bearish, so a leader that keeps making new highs alerts once."""
+    b = BENCHMARK["close"]
+    c = df["close"]
+    if b is None:
+        return StrategyResult(pd.Series(0, index=df.index, dtype=int))
+    b = b.copy()
+    if b.index.tz is not None:
+        b.index = b.index.tz_localize(None)
+    idx = df.index.tz_localize(None) if df.index.tz is not None else df.index
+    b = b.reindex(b.index.union(idx)).ffill().reindex(idx)
+    rs = pd.Series(c.values / b.values * 100, index=df.index)
+    hi = rs.rolling(n, min_periods=n).max().shift(1)
+    lo = rs.rolling(n, min_periods=n).min().shift(1)
+    # alert only on a switch: the first 3-month high since the last 3-month low, and vice versa
+    raw = _signals(df, rs > hi, rs < lo).values
+    sig = pd.Series(0, index=df.index, dtype=int)
+    state = 0
+    for i in np.flatnonzero(raw):
+        if raw[i] != state:
+            state = raw[i]
+            sig.iloc[i] = state
+    notes = {}
+    name = BENCHMARK["name"]
+    for i in np.flatnonzero(sig.values):
+        j = max(0, i - n)
+        diff = ((c.iloc[i] / c.iloc[j]) / (b.iloc[i] / b.iloc[j]) - 1) * 100 if np.isfinite(b.iloc[j]) else np.nan
+        by = f" ({diff:+.1f}% vs {name} over 3 months)" if np.isfinite(diff) else ""
+        notes[int(i)] = (f"Leading {name}: relative strength at a 3-month high{by}" if sig.iloc[i] > 0
+                         else f"Lagging {name}: relative strength at a 3-month low{by}")
+    panel = {"name": f"Relative strength vs {name}", "lines": [
+        {"name": f"Price ÷ {name}", "values": _vals(rs), "style": "accent"},
+        {"name": "3-month high / low", "values": _vals(hi), "style": "muted"}]}
+    return StrategyResult(sig, notes, [], panel)
+
+
 # ----------------------------------------------------------- chart patterns
 
 def pivots(df: pd.DataFrame, k: int = 5):
@@ -331,6 +448,9 @@ REGISTRY = {
     "rsi": rsi_strategy,
     "macd": macd_strategy,
     "golden_cross": golden_cross,
+    "supertrend": supertrend,
+    "volume_breakout": volume_breakout,
+    "relative_strength": relative_strength,
     "double_top_bottom": double_top_bottom,
     "head_shoulders": head_shoulders,
     "triangle": triangle,

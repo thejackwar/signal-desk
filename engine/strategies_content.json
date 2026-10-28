@@ -121,6 +121,66 @@
       "settings": "Simple moving averages, 50 and 200 days."
     },
     {
+      "id": "supertrend",
+      "name": "Supertrend",
+      "category": "Trend",
+      "level": "Beginner",
+      "tagline": "A trailing line that flips when the trend turns.",
+      "how": [
+        "Supertrend draws one line on the chart. In an uptrend it sits below the price, a set distance away; in a downtrend it sits above it. The distance is three times the stock's average daily range (the ATR), so it gives jumpy stocks more room than calm ones.",
+        "The line only moves in the trend's direction: in an uptrend it can rise but never fall, like a trailing stop. When the price closes through it, the trend flips and the line jumps to the other side. That flip is the alert."
+      ],
+      "bullish": "The stock closes above the Supertrend line while it was in a downtrend: the line flips below the price.",
+      "bearish": "The stock closes below the Supertrend line while it was in an uptrend: the line flips above the price.",
+      "why": "It is a trend follower with a built-in exit. Because the line ratchets up behind a rising price, it lets winners run and gives back only part of the move before calling the turn. Measuring the distance in ATRs means the same rule fits a quiet utility and a volatile chip maker.",
+      "watch_out": [
+        "In sideways markets it flips back and forth, giving a run of small false alerts.",
+        "It is always either up or down, never neutral, so it will call a trend even when there isn't much of one.",
+        "After a gap through the line the price can already be far from it, so part of the move is gone."
+      ],
+      "settings": "ATR over 10 days (Wilder's smoothing), line 3 ATRs from the middle of each day's range, signal on the daily close."
+    },
+    {
+      "id": "volume_breakout",
+      "name": "Volume Breakout",
+      "category": "Breakout",
+      "level": "Beginner",
+      "tagline": "A fresh 20-day high or low, backed by heavy trading.",
+      "how": [
+        "This is the Donchian breakout with one extra check. The price must close beyond the highest high (or lowest low) of the previous 20 trading days, as before.",
+        "But it only counts if that day's volume is at least 1.5 times the average of the previous 20 days. Heavy volume means many buyers (or sellers) took part, not just a quiet drift over the line."
+      ],
+      "bullish": "The stock closes above its 20-day high on at least 1.5× its average 20-day volume.",
+      "bearish": "The stock closes below its 20-day low on at least 1.5× its average 20-day volume.",
+      "why": "Most breakouts fail, and the weakest ones tend to happen on light volume. Requiring real participation filters out a large share of the false starts, at the cost of fewer alerts. Big funds can't hide their buying: when they move in, volume shows it.",
+      "watch_out": [
+        "Earnings days and index rebalancing days bring huge volume for reasons that have little to do with the trend.",
+        "Fewer alerts than the plain Donchian breakout, and it can miss trends that start quietly.",
+        "Crypto volume varies a lot between exchanges, so the volume check is rougher there."
+      ],
+      "settings": "20-day channel of highs and lows, volume at least 1.5× its 20-day average, signal on the daily close."
+    },
+    {
+      "id": "relative_strength",
+      "name": "Relative Strength",
+      "category": "Momentum",
+      "level": "Intermediate",
+      "tagline": "Spots the stocks that start beating the market, and those that start falling behind.",
+      "how": [
+        "Relative strength compares a stock with the market, not with its own past. Divide the stock's price by SPY's price every day and you get the RS line: when it rises, the stock is doing better than the S&P 500, whether both are going up or down. (Crypto is compared with bitcoin, commodities with the average of all 19.)",
+        "The alert fires when the RS line closes at its highest level in 3 months (63 sessions): the stock has just become a market leader. A close at a 3-month low means it has become a laggard. Only switches count, so a leader that keeps leading alerts once."
+      ],
+      "bullish": "The stock's RS line closes at a new 3-month high, after its last alert was a 3-month low (or it had none).",
+      "bearish": "The stock's RS line closes at a new 3-month low, after its last alert was a 3-month high (or it had none).",
+      "why": "Momentum is one of the best-documented effects in finance: stocks that have beaten the market over recent months have tended to keep doing so for a while. Many professional investors also watch the RS line for a new high before the price makes one, as an early sign of buying.",
+      "watch_out": [
+        "It says nothing about the market itself. In a falling market a stock can lead simply by falling less.",
+        "Momentum can reverse sharply, especially after a long run or when the market changes leadership.",
+        "It needs the benchmark's data; a run without it produces no alerts for this strategy."
+      ],
+      "settings": "RS line = price ÷ SPY (stocks), ÷ bitcoin (crypto) or ÷ the equal-weight average (commodities); 63-session high or low of the RS line, signal on the daily close."
+    },
+    {
       "id": "double_top_bottom",
       "name": "Double Top / Bottom",
       "category": "Chart pattern",

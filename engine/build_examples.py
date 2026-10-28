@@ -17,7 +17,7 @@ import pandas as pd
 
 sys.path.insert(0, str(Path(__file__).parent))
 from chart import payload  # noqa: E402
-from strategies import REGISTRY  # noqa: E402
+from strategies import REGISTRY, set_benchmark  # noqa: E402
 
 ROOT = Path(__file__).resolve().parent.parent
 AFTER = 20  # sessions shown after the signal, to see what happened next
@@ -67,12 +67,31 @@ SHAPES[("triangle", -1)] = [(0, 114), (12, 100), (24, 112), (36, 100), (48, 108)
 WINDOW = {"ma200": 150, "golden_cross": 150}  # bars of history before the signal
 
 
+def with_volume(df, seed):
+    """Simulated volume: busier on big-move days, with the odd unrelated spike."""
+    vr = np.random.default_rng(seed + 99991)
+    move = df["close"].pct_change().abs().fillna(0).values
+    vol = 1e6 * np.exp(vr.normal(0, 0.25, len(df))) * (1 + 40 * move)
+    return df.assign(volume=np.round(vol))
+
+
+def simulated_market(df, seed):
+    """A calmer random walk on the same days, standing in for SPY in the relative-strength example."""
+    mr = np.random.default_rng(seed + 77773)
+    r = mr.normal(0.0004, 0.009, len(df))
+    return pd.Series(400 * np.exp(np.cumsum(r)), index=df.index)
+
+
 def find_example(sid, side, max_tries=4000):
     fn = REGISTRY[sid]
     for seed in range(max_tries):
         rng = np.random.default_rng(seed * 31 + (7 if side > 0 else 3))
         shaped = (sid, side) in SHAPES
         df = from_waypoints(SHAPES[(sid, side)], rng) if shaped else random_walk(rng)
+        if sid == "volume_breakout":
+            df = with_volume(df, seed)
+        if sid == "relative_strength":
+            set_benchmark(simulated_market(df, seed), "SPY")
         res = fn(df)
         sig = res.signals.values
         hits = [i for i in np.flatnonzero(sig == side) if i + AFTER < len(df) and i >= 60]

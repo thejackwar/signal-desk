@@ -44,7 +44,7 @@ ROOT = Path(__file__).resolve().parent.parent
 OUT = ROOT / "docs" / "data" / "backtest.json"
 HORIZONS = (5, 20, 60)
 HOLD_DAYS = 20
-TREND = {"ma200", "golden_cross", "donchian"}   # hold until the opposite alert
+TREND = {"ma200", "golden_cross", "donchian", "supertrend", "relative_strength"}   # hold until the opposite alert
 START_CAPITAL = 10_000
 TRADE_SIZE = 1_000      # "take every trade": each alert is a EUR 1,000 position
 BENCH = "SPY"           # buy-and-hold comparison on the strategies page
@@ -315,6 +315,7 @@ def main():
     if not data:
         sys.exit("No price data downloaded; leaving the previous backtest untouched.")
     print(f"Backtesting {len(data)} tickers")
+    scan.use_benchmark(data, args.demo, period="max" if args.market == "crypto" else "15y")
     strategies = run(data)
     weeks = strategies.pop("_weeks")
     start = min(df.index[0] for df in data.values())

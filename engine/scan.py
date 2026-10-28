@@ -25,7 +25,7 @@ import pandas as pd
 
 sys.path.insert(0, str(Path(__file__).parent))
 from chart import _r as rp, payload  # noqa: E402
-from strategies import REGISTRY, StrategyResult, rsi  # noqa: E402
+from strategies import REGISTRY, StrategyResult, rsi, set_benchmark  # noqa: E402
 
 ROOT = Path(__file__).resolve().parent.parent
 ENGINE = Path(__file__).parent
@@ -57,6 +57,8 @@ STOCK_BARS = 260          # about one year on the stock page
 KEEP_DAYS = 45            # alerts older than this drop out of the feed
 LOOKBACK_BARS = 32        # every run rescans the last ~45 days so follow-up returns stay current
 CONFLUENCE_BARS = 3       # "other strategies agree" window: alert day and the 3 sessions before
+# near-copies of each other: one firing with the other isn't a second opinion
+SAME_RULE = {"donchian": {"volume_breakout"}, "volume_breakout": {"donchian"}}
 
 
 def load_tickers() -> list[str]:
@@ -108,6 +110,29 @@ def fetch_demo(n_tickers: int = 30, bars: int = 500, seed: int = 7) -> dict[str,
     return data
 
 
+def equal_weight(data: dict[str, pd.DataFrame]) -> pd.Series:
+    """Average of every series' daily % change, compounded: an equal-weight index."""
+    closes = pd.DataFrame({t: df["close"] for t, df in data.items()}).sort_index()
+    return 100 * (1 + closes.pct_change().mean(axis=1, skipna=True).fillna(0)).cumprod()
+
+
+def use_benchmark(data: dict[str, pd.DataFrame], demo: bool, period: str = "2y"):
+    """What the Relative Strength strategy compares against: SPY for stocks, bitcoin for crypto,
+    the average of all the commodities (there's no single commodity 'index' to hold)."""
+    if demo:
+        return set_benchmark(equal_weight(data), "the demo average")
+    if MARKET == "crypto" and "BTC-USD" in data:
+        return set_benchmark(data["BTC-USD"]["close"], "Bitcoin")
+    if MARKET == "commodities":
+        return set_benchmark(equal_weight(data), "the commodity average")
+    try:
+        spy = fetch_real(["SPY"], period=period)["SPY"]["close"]
+        return set_benchmark(spy, "SPY")
+    except Exception as e:   # no benchmark: Relative Strength simply has no alerts this run
+        print(f"  ! SPY benchmark: {e}")
+        return set_benchmark(None, "SPY")
+
+
 def strength(df, sigs: dict, sid: str, i: int, side: int, edge: dict | None) -> dict:
     """Score 0-4: how much backs this alert up. Built only from information known on the alert day."""
     checks, score = [], 0
@@ -121,7 +146,7 @@ def strength(df, sigs: dict, sid: str, i: int, side: int, edge: dict | None) -> 
                        + (" (with the long-term trend)" if ok else " (against the long-term trend)")})
     same, opposite = [], []
     for other, s in sigs.items():
-        if other == sid:
+        if other == sid or other in SAME_RULE.get(sid, ()):
             continue
         w = s[max(0, i - CONFLUENCE_BARS):i + 1]
         if (w == side).any():
@@ -321,6 +346,7 @@ def main():
     print(f"Loaded {len(data)} tickers")
     if not data:
         sys.exit("No price data downloaded; leaving the previous alerts untouched.")
+    use_benchmark(data, args.demo)
 
     found = scan(data, LOOKBACK_BARS, load_edge())
     old = {a["id"] for a in (previous or {}).get("alerts", [])}

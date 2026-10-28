@@ -747,6 +747,7 @@ table.bt.ltab td:last-child { color: var(--muted); }
 .dg .bandf { fill: var(--blue); opacity: .08; stroke: none; }
 .dg .mk { fill: var(--bull); stroke: var(--chart); stroke-width: 2.5; }
 .dg .mk.bear { fill: var(--bear); }
+.dg .vb rect { fill: var(--muted); opacity: .35; stroke: none; } .dg .vbh { fill: var(--blue); stroke: none; }
 .dg .tx { fill: var(--faint); font: 500 9px var(--font-mono); }
 .lfig figcaption { display: flex; flex-wrap: wrap; gap: 3px 12px; padding: 6px 4px 0; font: 400 10.5px/1.3 var(--font-mono); color: var(--muted); }
 .lfig figcaption i { display: inline-block; width: 12px; height: 2px; vertical-align: middle; margin-right: 5px; background: var(--fg); }
@@ -1798,7 +1799,7 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
         <div><span>Worst drop</span><b class="${e.maxdd >= e.bench_maxdd ? "up" : "down"}">${sgn(e.maxdd)}</b><small>Buy &amp; hold ${sgn(e.bench_maxdd)}</small></div>
         <div><span>Time invested</span><b>${pc(e.invested)}</b><small>avg ${e.avg_positions} stocks held</small></div>
       </div>`;
-    const labInd = { ma200: "ma", golden_cross: "cross", bollinger: "bollinger", rsi: "rsi", macd: "macd", donchian: "donchian" }[id];
+    const labInd = { ma200: "ma", golden_cross: "cross", bollinger: "bollinger", rsi: "rsi", macd: "macd", donchian: "donchian", supertrend: "supertrend" }[id];
     if (labInd) h += `<p style="margin:12px 0 4px"><a class="btn ghost" href="#strategylab-${labInd}">Try other settings in the Strategy Lab ›</a></p>`;
     const lst = (arr, title) => arr.length ? `<div class="bw"><h3 class="h3">${title}</h3>${arr.map(x =>
       `<div class="bwrow"><span class="tk" style="font-size:14px">${esc(disp(x.ticker))}</span><span class="pill ${x.side}" style="margin:0">${x.side}</span><span class="d">${esc(fmtDate(x.date, { day: "numeric", month: "short", year: "numeric" }))}</span><span class="${(x.side === "bullish") === (x.ret >= 0) ? "up" : "down"}">${sgn(x.ret)}</span></div>`).join("")}</div>` : "";
@@ -1910,7 +1911,7 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
     } };
   }
   function exitRule(id) {
-    return ["ma200", "golden_cross", "donchian"].includes(id) ? "Each trade closes on the next opposite alert." : "Each trade closes after 20 sessions, or earlier on an opposite alert.";
+    return ["ma200", "golden_cross", "donchian", "supertrend", "relative_strength"].includes(id) ? "Each trade closes on the next opposite alert." : "Each trade closes after 20 sessions, or earlier on an opposite alert.";
   }
 
   function drawCum(box, dates, vals) {
@@ -2886,6 +2887,23 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
       <polyline class="i2" points="10,72 80,70 150,66 230,58"/>
       <polyline class="i1" points="10,92 50,90 90,82 120,72 150,62 190,48 230,40"/>
       <circle class="mk" cx="134" cy="67" r="5"/>` },
+    supertrend: { legend: [["p", "Price"], ["res", "Line above (downtrend)"], ["sup", "Line below (uptrend)"]], svg: `
+      <polyline class="res" points="10,30 40,30 40,38 75,38 75,46 110,46 110,50 138,50"/>
+      <polyline class="sup" points="138,88 165,88 165,76 195,76 195,62 230,62"/>
+      <polyline class="p" points="10,58 25,66 40,72 55,68 70,78 85,74 100,82 115,76 126,66 138,46 152,52 165,42 180,46 195,32 210,36 230,24"/>
+      <circle class="mk" cx="136" cy="50" r="5"/>` },
+    volume_breakout: { legend: [["p", "Price"], ["lv", "20-day high / low"], ["i2", "Volume above 1.5× average"]], svg: `
+      <line class="lv" x1="10" y1="35" x2="172" y2="35"/><line class="lv" x1="10" y1="68" x2="172" y2="68"/>
+      <polyline class="p" points="10,58 25,42 40,62 55,48 70,66 85,44 100,64 115,40 130,60 145,50 160,42 172,28 190,24 210,16 230,12"/>
+      <circle class="mk" cx="168" cy="35" r="5"/>
+      <g class="vb"><rect x="22" y="100" width="6" height="12"/><rect x="52" y="98" width="6" height="14"/><rect x="82" y="101" width="6" height="11"/><rect x="112" y="99" width="6" height="13"/><rect x="142" y="100" width="6" height="12"/><rect x="190" y="96" width="6" height="16"/><rect x="215" y="98" width="6" height="14"/></g>
+      <rect class="vbh" x="166" y="84" width="6" height="28"/>` },
+    relative_strength: { legend: [["p", "Price"], ["i1", "Price ÷ SPY (bottom)"], ["lv", "Its 3-month high"]], svg: `
+      <line class="sep" x1="10" y1="62" x2="230" y2="62"/>
+      <polyline class="p" points="10,40 30,46 50,38 70,48 90,42 110,50 130,44 150,36 170,30 190,26 210,20 230,16"/>
+      <line class="lv" x1="10" y1="84" x2="160" y2="84"/>
+      <polyline class="i1" points="10,92 30,86 50,96 70,90 90,100 110,94 130,98 150,88 160,82 175,78 195,74 215,70 230,68"/>
+      <circle class="mk" cx="157" cy="84" r="5"/>` },
     double_top_bottom: { legend: [["p", "Price"], ["lv", "Neckline"]], svg: `
       <line class="lv" x1="95" y1="58" x2="230" y2="58"/>
       <polyline class="p" points="10,30 40,55 60,90 75,88 95,60 110,58 130,75 145,90 160,88 180,62 195,50 215,40 230,32"/>
@@ -2914,6 +2932,9 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
     rsi: { likes: "Ranges, and pullbacks inside an uptrend", hates: "Powerful trends, where RSI can stay above 70 for months", speed: "Fast", pair: "Like Bollinger, it works better as a “buy the dip” tool when the long-term trend is up." },
     macd: { likes: "Swings with clear shifts in momentum", hates: "Flat, quiet markets that produce many tiny crosses", speed: "Medium", pair: "Crosses above the zero line (both averages agreeing) are generally read as stronger than crosses below it." },
     golden_cross: { likes: "Big, multi-month trends", hates: "Sharp V-shaped reversals: by the time it crosses, the move is old", speed: "Very slow", pair: "Measures much the same thing as the 200-day filter, so following both doesn't give you two independent opinions." },
+    supertrend: { likes: "Clean trends that pull back a little and carry on", hates: "Sideways markets, where the line flips back and forth", speed: "Medium", pair: "Faster than the 200-day filter; a Supertrend turn that agrees with the 200-day trend is the stronger kind." },
+    volume_breakout: { likes: "Breakouts that big buyers are behind", hates: "Earnings and index-rebalancing days, when volume is high for other reasons", speed: "Medium", pair: "A stricter Donchian: if both alert on the same day, the volume check passed." },
+    relative_strength: { likes: "Markets with clear leaders, like a sector rotation", hates: "Sudden reversals in what's leading (the laggards bounce hardest)", speed: "Slow", pair: "Leaders above their 200-day average are the classic combination; a stock that only leads because it falls less than a falling market is weaker." },
     double_top_bottom: { likes: "Turning points after a long move", hates: "Breaks that slip straight back through the neckline", speed: "Medium", pair: "Traders often look for heavier volume on the neckline break as extra confirmation." },
     head_shoulders: { likes: "Tops after a long uptrend (and bottoms after a downtrend, inverted)", hates: "Messy charts: many look-alike shapes never complete", speed: "Slow", pair: "Only counts once the neckline breaks; before that it's just three peaks." },
     topdown: { likes: "Breaks that agree with the bigger timeframes", hates: "Short timeframes, where lines break many times a day", speed: "Intraday", pair: "Check the weekly and daily lines first: a break that goes with them fails less often than one against them." },
@@ -3005,7 +3026,7 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
     h += `<h2 id="learn-basics">Basics</h2><div class="lqs">
       <details class="lq" open><summary>Reading a price chart</summary><div class="prose">
         <p>Each bar (or <em>candle</em>) is one trading day. It shows four prices: where the day opened, its high, its low and where it closed. A green candle closed higher than it opened, a red one lower.</p>
-        <p>The <strong>close</strong> matters most here. ${numW(daily) === "nine" ? "All nine" : "The " + daily} daily strategies only look at daily closes, so a stock that dips below a line during the day but finishes above it doesn't trigger anything. That makes the alerts slower but much less noisy.${strats.some(s => s.kind === "lines") ? " Top-Down Analysis is the exception: it draws trendlines on timeframes from weekly down to 5 minutes and checks them every 30 minutes while the US market is open." : ""}</p></div></details>
+        <p>The <strong>close</strong> matters most here. All ${numW(daily)} daily strategies only look at daily closes, so a stock that dips below a line during the day but finishes above it doesn't trigger anything. That makes the alerts slower but much less noisy.${strats.some(s => s.kind === "lines") ? " Top-Down Analysis is the exception: it draws trendlines on timeframes from weekly down to 5 minutes and checks them every 30 minutes while the US market is open." : ""}</p></div></details>
       <details class="lq"><summary>Moving averages, the building block</summary><div class="prose">
         <p>A moving average is the average closing price of the last N days, recalculated every day. A 20-day average follows the price closely; a 200-day average moves slowly and shows the long-term direction.</p>
         <p>Price above a rising average is the simplest definition of an uptrend. Four of the daily strategies (200-day, Bollinger, golden cross, MACD) are built directly on moving averages.</p></div></details>

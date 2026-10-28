@@ -1,6 +1,6 @@
 # Investment Center Signals
 
-A phone-friendly web app that explains nine trading strategies and shows
+A phone-friendly web app that explains twelve trading strategies and shows
 their alerts on the S&P 100. You pick the strategies you want to follow;
 each one has a plain-English explanation, its exact rules, and worked chart
 examples. **Information only: it doesn't trade and it isn't investment advice.**
@@ -21,12 +21,14 @@ docs/                    the website (served by GitHub Pages)
   data/brokers.json      Brokers page: facts and links (edit by hand; affiliate links go here)
 worker/                  Cloudflare Workers: trendlines data, counted broker links (see worker/README.md)
 engine/
-  strategies.py          the 9 strategy detectors (shared by scanner and examples)
+  strategies.py          the 12 strategy detectors (shared by scanner and examples)
   scan.py                daily scanner
   backtest.py            15-year backtest of every strategy
   build_examples.py      builds the example charts
   strategies_content.json  the written explanations (edit text here)
   tickers.txt            the stock list
+                         (Relative Strength compares with SPY for stocks, bitcoin for crypto and
+                         the equal-weight average for commodities: see use_benchmark in scan.py)
   names.json             company names and sectors
 .github/workflows/scan.yml      runs the scan every weekday after the US close
 .github/workflows/backtest.yml  reruns the backtest every Saturday
@@ -63,7 +65,7 @@ Alerts always show in the app. To also get a push notification:
 
 ## Crypto
 
-The app has a Stocks / Crypto switch. Crypto uses the same nine strategies on the coins
+The app has a Stocks / Crypto switch. Crypto uses the same twelve strategies on the coins
 in `engine/crypto.txt` (names in `engine/crypto_names.json`) and writes everything to
 `docs/data/crypto/`. The *Daily crypto scan* workflow runs every day at 00:20 UTC, just
 after the daily candle closes, weekends included. The weekly backtest covers both markets.
@@ -71,7 +73,7 @@ Phone notification channels for crypto are `<NTFY_PREFIX>-crypto-<strategy>`.
 
 ## Commodities
 
-The third switch, *Commodities*, runs the same nine strategies on 19 front-month futures in
+The third switch, *Commodities*, runs the same twelve strategies on 19 front-month futures in
 `engine/commodities.txt` (gold, silver, platinum, palladium, copper, WTI and Brent crude, natural gas,
 gasoline, heating oil, corn, wheat, soybeans, coffee, cocoa, sugar, cotton, live cattle, lean hogs).
 `engine/commodities_names.json` holds each one's name, sector, contract unit, exchange and a line on
