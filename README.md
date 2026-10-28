@@ -171,3 +171,7 @@ companies that dropped out of the index are missing. Treat it as a rough guide.
 Everything in `engine/` and `docs/data/` stays as it is. A SwiftUI app would read the
 same `alerts.json`, `strategies.json` and chart files from the GitHub Pages address;
 only `index.html` gets replaced by Swift screens.
+
+## License
+
+All rights reserved: the code is public to read, but not to reuse. See [LICENSE](LICENSE).
