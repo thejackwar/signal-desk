@@ -288,6 +288,7 @@ table.trades td:last-child { font: 600 13.5px var(--font-mono); white-space: now
 .cmp .nm em { display: block; font: 500 10.5px var(--font-mono); font-style: normal; color: var(--faint); margin-top: 1px; }
 .cmp .spymark { position: absolute; top: -4px; bottom: -4px; width: 2px; margin-left: -1px; background: var(--muted); border-radius: 1px; opacity: .8; }
 .compare .seg.sm { margin: 2px 0 8px; background: var(--bg); }
+.compare .seg.sm + .seg.sm { margin-left: 6px; }
 .compare .val small.up { color: var(--bull); } .compare .val small.down { color: var(--bear); }
 .cmp .bar.bench { background: repeating-linear-gradient(135deg, var(--muted) 0 3px, transparent 3px 5px); box-shadow: inset 0 0 0 1px var(--muted); }
 .yrpick { position: relative; display: inline-block; }
@@ -1398,12 +1399,19 @@ canvas.hm { display: block; touch-action: pan-y; }
   // Strategies page: each strategy run as its own EUR 100,000 account from a chosen year,
   // next to the same money put into the S&P 500 (SPY) and held.
   const kEur = v => (v < 0 ? "−€" : "€") + (Math.abs(v) >= 1e6 ? (Math.abs(v) / 1e6).toFixed(2) + "M" : Math.abs(v) >= 1e4 ? Math.round(Math.abs(v) / 1e3) + "k" : Math.round(Math.abs(v)).toLocaleString("en-US"));
-  function acctRun(v, i0, size) {
+  // lev > 1 multiplies each week's gain or loss (rebalanced weekly, borrowing free);
+  // a week that loses 1/lev or more wipes the account out for good.
+  const eurBig = v => Math.abs(v) >= 1e7 ? kEur(v) : eurS(v);   // keeps leveraged millions on one line
+  function acctRun(v, i0, size, lev = 1) {
     const base = v[i0]; if (!(base > 0)) return null;
-    let peak = base, dd = 0;
-    for (let i = i0; i < v.length; i++) { if (v[i] > peak) peak = v[i]; dd = Math.min(dd, v[i] / peak - 1); }
-    const end = v[v.length - 1] / base * size;
-    return { end, profit: end - size, ret: (end / size - 1) * 100, dd: dd * 100 };
+    let eq = 1, peak = 1, dd = 0, bust = false;
+    for (let i = i0 + 1; i < v.length && !bust; i++) {
+      eq *= 1 + lev * (v[i] / v[i - 1] - 1);
+      if (eq <= 0) { eq = 0; bust = true; }
+      if (eq > peak) peak = eq; dd = Math.min(dd, eq / peak - 1);
+    }
+    const end = eq * size;
+    return { end, profit: end - size, ret: (end / size - 1) * 100, dd: dd * 100, bust };
   }
   function compareCard() {
     const B = S.bt, A = B?.account; if (!A?.dates?.length) return "";
@@ -1411,10 +1419,11 @@ canvas.hm { display: block; touch-action: pan-y; }
     const first = +D[0].slice(0, 4), last = +D[D.length - 1].slice(0, 4);
     const from = Math.min(last, Math.max(first, pref("cmpFrom." + mk, first)));
     const side = pref("cmpSide", "long") === "all" ? "all" : "long";
+    const lev = Math.min(5, Math.max(1, Math.round(+pref("cmpLev", 1)) || 1));
     let i0 = D.findIndex(d => +d.slice(0, 4) >= from); if (i0 < 0) i0 = 0;
-    const rows = S.strategies.map(s => { const v = B.strategies[s.id]?.account?.[side]; const r = v && acctRun(v, i0, size); return r && { s, ...r }; })
+    const rows = S.strategies.map(s => { const v = B.strategies[s.id]?.account?.[side]; const r = v && acctRun(v, i0, size, lev); return r && { s, ...r }; })
       .filter(Boolean).sort((a, b) => b.end - a.end);
-    const spy = B.spy?.account ? acctRun(B.spy.account, i0, size) : null;
+    const spy = B.spy?.account ? acctRun(B.spy.account, i0, size, lev) : null;
     if (!rows.length) return "";
     const all = spy ? [spy, ...rows] : rows;
     const max = Math.max(1, ...all.map(r => Math.abs(r.profit)));
@@ -1429,15 +1438,16 @@ canvas.hm { display: block; touch-action: pan-y; }
     const when = fmtDate(D[i0], { day: "numeric", month: "short", year: "numeric" });
     let h = `<div class="compare"><div class="hd"><h3>${kEur(size)} account since <span class="yrpick"><select data-cmpfrom aria-label="Starting year">${years.map(y => `<option value="${y}"${y === from ? " selected" : ""}>${y}</option>`).join("")}</select></span></h3></div>
       <div class="seg sm" role="group" aria-label="Trades">${[["long", "Long only"], ["all", "Long + short"]].map(([k, l]) => `<button data-cmpside="${k}" aria-pressed="${k === side}">${l}</button>`).join("")}</div>
+      <div class="seg sm" role="group" aria-label="Leverage">${[1, 2, 3, 4, 5].map(k => `<button data-cmplev="${k}" aria-pressed="${k === lev}">${k}x</button>`).join("")}</div>
       ${B.demo ? `<p class="hint" style="margin:0 0 6px">Demo backtest on simulated prices.</p>` : ""}`;
-    if (spy) h += `<div class="cmp bench"><span class="nm">S&amp;P 500 buy &amp; hold <small>SPY</small><em>worst drop −${Math.abs(Math.round(spy.dd))}%</em></span>${track(spy, "bench")}
-      <span class="val">${eurS(spy.end)}<small class="${spy.ret >= 0 ? "up" : "down"}">${spy.ret >= 0 ? "+" : "−"}${Math.abs(Math.round(spy.ret)).toLocaleString("en-US")}%</small></span></div>`;
+    if (spy) h += `<div class="cmp bench"><span class="nm">S&amp;P 500 buy &amp; hold <small>SPY${lev > 1 ? " " + lev + "x" : ""}</small><em>${spy.bust ? "wiped out" : `worst drop −${Math.abs(Math.round(spy.dd))}%`}</em></span>${track(spy, "bench")}
+      <span class="val">${eurBig(spy.end)}<small class="${spy.ret >= 0 ? "up" : "down"}">${spy.ret >= 0 ? "+" : "−"}${Math.abs(Math.round(spy.ret)).toLocaleString("en-US")}%</small></span></div>`;
     h += rows.map(r => {
       const diff = spy ? r.end - spy.end : null;
-      return `<a class="cmp" href="#strategy-${slug(r.s.id)}"><span class="nm">${esc(r.s.name)}<em>worst drop −${Math.abs(Math.round(r.dd))}%</em></span>${track(r, r.profit >= 0 ? "pos" : "neg")}
-        <span class="val">${eurS(r.end)}<small class="${(diff ?? r.profit) >= 0 ? "up" : "down"}">${diff != null ? `${diff >= 0 ? "+" : ""}${kEur(diff)} vs SPY` : `${r.ret >= 0 ? "+" : "−"}${Math.abs(Math.round(r.ret))}%`}</small></span></a>`;
+      return `<a class="cmp" href="#strategy-${slug(r.s.id)}"><span class="nm">${esc(r.s.name)}<em>${r.bust ? "wiped out" : `worst drop −${Math.abs(Math.round(r.dd))}%`}</em></span>${track(r, r.profit >= 0 ? "pos" : "neg")}
+        <span class="val">${eurBig(r.end)}<small class="${(diff ?? r.profit) >= 0 ? "up" : "down"}">${diff != null ? `${diff >= 0 ? "+" : ""}${kEur(diff)} vs SPY` : `${r.ret >= 0 ? "+" : "−"}${Math.abs(Math.round(r.ret))}%`}</small></span></a>`;
     }).join("");
-    h += `<p class="hint" style="margin:8px 0 0">Each strategy runs its own ${eurS(size)}, split equally across every open position: it buys on bullish alerts${side === "all" ? " and sells short on bearish ones" : ""}, and with nothing open the money waits in cash.${spy ? ` The S&amp;P 500 line puts the same ${eurS(size)} into SPY in the week of ${esc(when)} and holds it, dividends included; the thin mark on each bar is where it ended.` : ""} Worst drop is the biggest fall from a high along the way. No costs, taxes or fees.${mk !== "commodities" && !B.demo ? ` Built on ${esc(B.universe.replace(/^T/, "t"))}, so names that dropped out over the years are missing, which flatters buying.` : ""}${from === last ? ` ${last} so far.` : ""}</p></div>`;
+    h += `<p class="hint" style="margin:8px 0 0">Each strategy runs its own ${eurS(size)}, split equally across every open position: it buys on bullish alerts${side === "all" ? " and sells short on bearish ones" : ""}, and with nothing open the money waits in cash.${spy ? ` The S&amp;P 500 line puts the same ${eurS(size)} into SPY in the week of ${esc(when)} and holds it, dividends included; the thin mark on each bar is where it ended.` : ""}${lev > 1 ? ` At ${lev}x every account, SPY included, borrows to hold ${lev} times its money, so each week's gain or loss is multiplied by ${lev} (rebalanced weekly, borrowing free); a week that loses ${Math.round(100 / lev)}% or more wipes it out.` : ""} Worst drop is the biggest fall from a high along the way. No costs, taxes or fees.${mk !== "commodities" && !B.demo ? ` Built on ${esc(B.universe.replace(/^T/, "t"))}, so names that dropped out over the years are missing, which flatters buying.` : ""}${from === last ? ` ${last} so far.` : ""}</p></div>`;
     return h;
   }
 
@@ -1885,6 +1895,8 @@ canvas.hm { display: block; touch-action: pan-y; }
     if (hd) { S.hmPeriod = hd.dataset.hmperiod; rerender(); return; }
     const cs2 = e.target.closest("[data-cmpside]");
     if (cs2) { setPref("cmpSide", cs2.dataset.cmpside); rerender(); return; }
+    const cl = e.target.closest("[data-cmplev]");
+    if (cl) { setPref("cmpLev", +cl.dataset.cmplev); rerender(); return; }
     const tb = e.target.closest("[data-tr]");
     if (tb) { S.trSide[currentStrategy()] = tb.dataset.tr; rerender(); return; }
     const cp = e.target.closest("[data-copy]");
