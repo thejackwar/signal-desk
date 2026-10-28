@@ -175,3 +175,12 @@ only `index.html` gets replaced by Swift screens.
 ## License
 
 All rights reserved: the code is public to read, but not to reuse. See [LICENSE](LICENSE).
+
+## Link previews and visitor stats
+
+`docs/og-image.png` is the picture shown when the site's link is shared (WhatsApp, LinkedIn,
+Reddit…); the tags at the top of `docs/index.html` and `docs/trendlines.html` point to it with
+the full site address, so update those if the site moves to its own domain.
+Visitor stats: in Cloudflare open *Analytics & Logs → Web Analytics → Add a site*, enter the
+site's address, choose the JavaScript snippet and copy only its token into
+`CF_ANALYTICS_TOKEN` near the top of both pages. Free, no cookies, no banner needed.
