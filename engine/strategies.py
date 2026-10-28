@@ -288,7 +288,7 @@ def relative_strength(df: pd.DataFrame, n: int = 63) -> StrategyResult:
                          else f"Lagging {name}: relative strength at a 3-month low{by}")
     panel = {"name": f"Relative strength vs {name}", "lines": [
         {"name": f"Price ÷ {name}", "values": _vals(rs), "style": "accent"},
-        {"name": "3-month high / low", "values": _vals(hi), "style": "muted"}]}
+        {"name": "Its 3-month high", "values": _vals(hi), "style": "muted"}]}
     return StrategyResult(sig, notes, [], panel)
 
 
