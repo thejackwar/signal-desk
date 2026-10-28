@@ -273,7 +273,7 @@ table.trades td:last-child { font: 600 13.5px var(--font-mono); white-space: now
 .compare .hd { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; margin-bottom: 8px; }
 .compare h3 { margin: 0; font: 700 16px var(--font-display); }
 .compare .hd span { font: 500 11px var(--font-mono); color: var(--faint); }
-.cmp { display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(0, .8fr) 88px; gap: 10px; align-items: center; padding: 6px 6px; margin: 0 -6px; border-radius: 8px; color: inherit; text-decoration: none; }
+.cmp { display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(0, .8fr) 104px; gap: 10px; align-items: center; padding: 6px 6px; margin: 0 -6px; border-radius: 8px; color: inherit; text-decoration: none; }
 @media (hover: hover) { .cmp:hover { background: var(--hover); } }
 .cmp .nm { font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .cmp .track { position: relative; height: 10px; }
@@ -285,6 +285,10 @@ table.trades td:last-child { font: 600 13.5px var(--font-mono); white-space: now
 .cmp.bench { background: var(--surface-2); margin: 2px -6px; }
 .cmp.bench .nm { font-weight: 600; }
 .cmp.bench .nm small { font: 500 10.5px var(--font-mono); color: var(--faint); margin-left: 4px; }
+.cmp .nm em { display: block; font: 500 10.5px var(--font-mono); font-style: normal; color: var(--faint); margin-top: 1px; }
+.cmp .spymark { position: absolute; top: -4px; bottom: -4px; width: 2px; margin-left: -1px; background: var(--muted); border-radius: 1px; opacity: .8; }
+.compare .seg.sm { margin: 2px 0 8px; background: var(--bg); }
+.compare .val small.up { color: var(--bull); } .compare .val small.down { color: var(--bear); }
 .cmp .bar.bench { background: repeating-linear-gradient(135deg, var(--muted) 0 3px, transparent 3px 5px); box-shadow: inset 0 0 0 1px var(--muted); }
 .yrpick { position: relative; display: inline-block; }
 .yrpick select { appearance: none; -webkit-appearance: none; font: inherit; color: var(--fg); background: var(--surface-2); border: 1px solid var(--line); border-radius: 8px; padding: 1px 22px 1px 7px; margin-left: 2px; cursor: pointer; }
@@ -1383,42 +1387,50 @@ canvas.hm { display: block; touch-action: pan-y; }
     box.innerHTML = svg + `</svg><div class="legend" style="padding-top:8px"><span><i style="background:${C.up}"></i>profitable year</span><span><i style="background:${C.down}"></i>losing year</span><span>${years.filter((yy) => yy[key] > 0).length} of ${n} years positive</span></div>`;
   }
 
-  // Strategies page: every strategy's "take every trade" total from a chosen year on,
-  // next to simply buying the S&P 500 (SPY) that year and holding it.
+  // Strategies page: each strategy run as its own EUR 100,000 account from a chosen year,
+  // next to the same money put into the S&P 500 (SPY) and held.
+  const kEur = v => (v < 0 ? "−€" : "€") + (Math.abs(v) >= 1e6 ? (Math.abs(v) / 1e6).toFixed(2) + "M" : Math.abs(v) >= 1e4 ? Math.round(Math.abs(v) / 1e3) + "k" : Math.round(Math.abs(v)).toLocaleString("en-US"));
+  function acctRun(v, i0, size) {
+    const base = v[i0]; if (!(base > 0)) return null;
+    let peak = base, dd = 0;
+    for (let i = i0; i < v.length; i++) { if (v[i] > peak) peak = v[i]; dd = Math.min(dd, v[i] / peak - 1); }
+    const end = v[v.length - 1] / base * size;
+    return { end, profit: end - size, ret: (end / size - 1) * 100, dd: dd * 100 };
+  }
   function compareCard() {
-    const B = S.bt; if (!B) return "";
-    const first = +B.start.slice(0, 4), last = +B.end.slice(0, 4);
-    const pk = "cmpFrom." + (S.market || "stocks");
-    const from = Math.min(last, Math.max(first, pref(pk, first)));
-    const rows = S.strategies.map(s => {
-      const T = B.strategies[s.id]?.trades;
-      if (!T?.all?.n) return null;
-      if (from <= first) return { s, total: T.all.total, n: T.all.n, wins: T.all.wins };
-      const ys = (T.years || []).filter(y => y.year >= from);
-      const n = ys.reduce((a, y) => a + y.n, 0);
-      return { s, total: ys.reduce((a, y) => a + y.all, 0), n, wins: ys.reduce((a, y) => a + (y.wins ?? Math.round(y.n * (y.win_rate || 0) / 100)), 0) };
-    }).filter(r => r?.n);
-    // SPY bought with the starting capital on the first trading day of that year, held to the end
-    const P = B.spy, buy = P?.years?.find(y => y.year === from), cap = B.capital || 10000;
-    const spy = buy && P.last ? { total: cap * (P.last.close / buy.close - 1), ret: (P.last.close / buy.close - 1) * 100, bench: true } : null;
-    if (!rows.length && !spy) return "";
-    const all = [...rows, ...(spy ? [spy] : [])].sort((a, b) => b.total - a.total);
-    const max = Math.max(1, ...all.map(r => Math.abs(r.total)));
-    const anyNeg = all.some(r => r.total < 0);
+    const B = S.bt, A = B?.account; if (!A?.dates?.length) return "";
+    const D = A.dates, size = A.size || 100000, mk = S.market || "stocks";
+    const first = +D[0].slice(0, 4), last = +D[D.length - 1].slice(0, 4);
+    const from = Math.min(last, Math.max(first, pref("cmpFrom." + mk, first)));
+    const side = pref("cmpSide", "all") === "long" ? "long" : "all";
+    let i0 = D.findIndex(d => +d.slice(0, 4) >= from); if (i0 < 0) i0 = 0;
+    const rows = S.strategies.map(s => { const v = B.strategies[s.id]?.account?.[side]; const r = v && acctRun(v, i0, size); return r && { s, ...r }; })
+      .filter(Boolean).sort((a, b) => b.end - a.end);
+    const spy = B.spy?.account ? acctRun(B.spy.account, i0, size) : null;
+    if (!rows.length) return "";
+    const all = spy ? [spy, ...rows] : rows;
+    const max = Math.max(1, ...all.map(r => Math.abs(r.profit)));
+    const anyNeg = all.some(r => r.profit < 0);
+    const pos = v => anyNeg ? 50 + v / max * 50 : v / max * 100;   // % along the track
+    const track = (r, cls) => {
+      const w = Math.abs(r.profit) / max * (anyNeg ? 50 : 100);
+      const bar = r.profit >= 0 ? `left:${anyNeg ? 50 : 0}%;width:${w}%` : `right:50%;width:${w}%`;
+      return `<span class="track">${anyNeg ? `<i class="zero"></i>` : ""}<i class="bar ${cls}" style="${bar}"></i>${spy && cls !== "bench" ? `<i class="spymark" style="left:${pos(spy.profit)}%"></i>` : ""}</span>`;
+    };
     const years = []; for (let y = first; y <= last; y++) years.push(y);
-    const pick = `<span class="yrpick"><select data-cmpfrom aria-label="Starting year">${years.map(y => `<option value="${y}"${y === from ? " selected" : ""}>${y}</option>`).join("")}</select></span>`;
-    return `<div class="compare"><div class="hd"><h3>Every trade since ${pick}</h3><span>${eurS(B.trade_size || 1000)} per alert</span></div>
-      ${B.demo ? `<p class="hint" style="margin:0 0 6px">Demo backtest on simulated prices.</p>` : ""}
-      ${all.map(r => {
-        const w = Math.abs(r.total) / max * (anyNeg ? 50 : 100);
-        const bar = r.total >= 0 ? `left:${anyNeg ? 50 : 0}%;width:${w}%` : `right:50%;width:${w}%`;
-        const track = `<span class="track">${anyNeg ? `<i class="zero"></i>` : ""}<i class="bar ${r.bench ? "bench" : r.total >= 0 ? "pos" : "neg"}" style="${bar}"></i></span>`;
-        if (r.bench) return `<div class="cmp bench"><span class="nm">S&amp;P 500 buy &amp; hold <small>SPY</small></span>${track}
-          <span class="val ${r.total >= 0 ? "up" : "down"}">${eurSigned(r.total)}<small>${r.ret >= 0 ? "+" : "−"}${Math.abs(Math.round(r.ret)).toLocaleString("en-US")}% on €${Math.round(cap / 1000)}k</small></span></div>`;
-        return `<a class="cmp" href="#strategy-${slug(r.s.id)}"><span class="nm">${esc(r.s.name)}</span>${track}
-          <span class="val ${r.total >= 0 ? "up" : "down"}">${eurSigned(r.total)}<small>${pc(r.wins / r.n * 100)} wins</small></span></a>`;
-      }).join("")}
-      <p class="hint" style="margin:8px 0 0">Long and short trades combined, counted by the year they closed, no costs.${spy ? ` S&amp;P 500: ${eurS(cap)} put into SPY on ${esc(fmtDate(buy.date, { day: "numeric", month: "short", year: "numeric" }))} and held, dividends included.` : ""}${from === last ? ` ${last} so far.` : ""} Open a strategy for the full breakdown.</p></div>`;
+    const when = fmtDate(D[i0], { day: "numeric", month: "short", year: "numeric" });
+    let h = `<div class="compare"><div class="hd"><h3>${kEur(size)} account since <span class="yrpick"><select data-cmpfrom aria-label="Starting year">${years.map(y => `<option value="${y}"${y === from ? " selected" : ""}>${y}</option>`).join("")}</select></span></h3></div>
+      <div class="seg sm" role="group" aria-label="Trades">${[["all", "Long + short"], ["long", "Long only"]].map(([k, l]) => `<button data-cmpside="${k}" aria-pressed="${k === side}">${l}</button>`).join("")}</div>
+      ${B.demo ? `<p class="hint" style="margin:0 0 6px">Demo backtest on simulated prices.</p>` : ""}`;
+    if (spy) h += `<div class="cmp bench"><span class="nm">S&amp;P 500 buy &amp; hold <small>SPY</small><em>worst drop −${Math.abs(Math.round(spy.dd))}%</em></span>${track(spy, "bench")}
+      <span class="val">${eurS(spy.end)}<small class="${spy.ret >= 0 ? "up" : "down"}">${spy.ret >= 0 ? "+" : "−"}${Math.abs(Math.round(spy.ret)).toLocaleString("en-US")}%</small></span></div>`;
+    h += rows.map(r => {
+      const diff = spy ? r.end - spy.end : null;
+      return `<a class="cmp" href="#strategy-${slug(r.s.id)}"><span class="nm">${esc(r.s.name)}<em>worst drop −${Math.abs(Math.round(r.dd))}%</em></span>${track(r, r.profit >= 0 ? "pos" : "neg")}
+        <span class="val">${eurS(r.end)}<small class="${(diff ?? r.profit) >= 0 ? "up" : "down"}">${diff != null ? `${diff >= 0 ? "+" : ""}${kEur(diff)} vs SPY` : `${r.ret >= 0 ? "+" : "−"}${Math.abs(Math.round(r.ret))}%`}</small></span></a>`;
+    }).join("");
+    h += `<p class="hint" style="margin:8px 0 0">Each strategy runs its own ${eurS(size)}, split equally across every open position: it buys on bullish alerts${side === "all" ? " and sells short on bearish ones" : ""}, and with nothing open the money waits in cash.${spy ? ` The S&amp;P 500 line puts the same ${eurS(size)} into SPY in the week of ${esc(when)} and holds it, dividends included; the thin mark on each bar is where it ended.` : ""} Worst drop is the biggest fall from a high along the way. No costs, taxes or fees.${mk !== "commodities" && !B.demo ? ` Built on ${esc(B.universe.replace(/^T/, "t"))}, so names that dropped out over the years are missing, which flatters buying.` : ""}${from === last ? ` ${last} so far.` : ""}</p></div>`;
+    return h;
   }
 
 
@@ -1863,6 +1875,8 @@ canvas.hm { display: block; touch-action: pan-y; }
     if (ns) { S.newsSrc = ns.dataset.nsrc; rerender(); return; }
     const hd = e.target.closest("[data-hmperiod]");
     if (hd) { S.hmPeriod = hd.dataset.hmperiod; rerender(); return; }
+    const cs2 = e.target.closest("[data-cmpside]");
+    if (cs2) { setPref("cmpSide", cs2.dataset.cmpside); rerender(); return; }
     const tb = e.target.closest("[data-tr]");
     if (tb) { S.trSide[currentStrategy()] = tb.dataset.tr; rerender(); return; }
     const cp = e.target.closest("[data-copy]");
