@@ -242,7 +242,7 @@ body { background: radial-gradient(1100px 560px at 85% -10%, color-mix(in srgb, 
 </main>
 
 <script type="module">
-import { TFS, ORDER, buildFrames, analyzeAll, segments, fmtLevel, fmtPrice, binanceCrypto } from "./trendlines.js";
+import { TFS, ORDER, buildFrames, analyzeAll, segments, fmtLevel, fmtPrice, binanceCrypto } from "./trendlines.js?v=2";
 
 // Address of the Cloudflare Worker (see worker/README.md). Can also be set in Customize.
 const DEFAULT_API = "https://trendlines.guerragiacomo00.workers.dev";
@@ -354,6 +354,19 @@ $("pick").addEventListener("submit", e => {
 });
 addEventListener("hashchange", () => show(current()));
 
+// A request that never answers would leave "Loading…" up forever: give up after `ms`, retry once, then show an error.
+async function fetchWithTimeout(url, ms, onRetry) {
+  for (let attempt = 0; attempt < 2; attempt++) {
+    const ctl = new AbortController();
+    const timer = setTimeout(() => ctl.abort(), ms);
+    try { return await fetch(url, { signal: ctl.signal, cache: "no-store" }); }
+    catch (e) {
+      if (e.name !== "AbortError" && attempt === 1) throw e;
+      if (attempt === 1) throw new Error("the data server didn't answer in time. Try again in a minute");
+      onRetry?.();
+    } finally { clearTimeout(timer); }
+  }
+}
 function setStatus(t, err = false) { $("status").textContent = t; $("status").className = "status" + (err ? " err" : ""); }
 
 async function show(sym) {
@@ -380,7 +393,9 @@ async function show(sym) {
     }
     if (!js) {
       if (!P.api) throw new Error(direct || "no data server set");
-      const r = await fetch(`${P.api}/?symbol=${encodeURIComponent(sym)}`);
+      const r = await fetchWithTimeout(`${P.api}/?symbol=${encodeURIComponent(sym)}`, 25000, () => {
+        if (seq === loadSeq) setStatus(`Still loading ${sym}, trying again…`);
+      });
       js = await r.json().catch(() => ({ error: `HTTP ${r.status}` }));
       if (!r.ok || js.error) throw new Error((direct ? direct + " · " : "") + (js.error || `HTTP ${r.status}`));
     }

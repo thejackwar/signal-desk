@@ -207,7 +207,7 @@ async function binanceSeries(coin, interval, want) {
   while (rows.length < want) {
     const q = new URLSearchParams({ symbol: `${coin}USDT`, interval, limit: String(Math.min(1000, want - rows.length)) });
     if (endTime !== null) q.set("endTime", String(endTime));
-    const r = await fetch(`${BINANCE}?${q}`);
+    const r = await fetch(`${BINANCE}?${q}`, { signal: AbortSignal.timeout?.(15000) });   // a stalled call falls back to the Worker
     if (!r.ok) throw new Error(`Binance ${interval}: HTTP ${r.status}`);
     const js = await r.json();
     if (!Array.isArray(js) || !js.length) break;
