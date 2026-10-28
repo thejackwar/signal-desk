@@ -773,6 +773,85 @@ html.sheet-open { overflow: hidden; }
   .tiles.four { grid-template-columns: repeat(4, 1fr); }
 }
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; scroll-behavior: auto !important; animation: none !important; } }
+/* Learn page */
+[id^="learn-"] { scroll-margin-top: calc(70px + env(safe-area-inset-top, 0px)); }
+.ljump { margin-bottom: 14px; }
+.ljump a { padding: 7px 12px; font-size: 13px; }
+.lstart { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 14px 16px; }
+.lstart h3 { margin: 0 0 8px; font: 700 16px var(--font-display); }
+.lstart ol { margin: 0; padding-left: 20px; color: var(--muted); font-size: 14px; }
+.lstart li { margin-bottom: 6px; } .lstart li:last-child { margin-bottom: 0; }
+table.bt.ltab td { font-size: 13.5px; vertical-align: top; }
+table.bt.ltab td:first-child { font: 600 14px/1.3 var(--font-body); color: var(--fg); white-space: normal; width: 48%; }
+table.bt.ltab td:first-child a { color: var(--fg); text-decoration: none; }
+table.bt.ltab td:first-child a:hover { color: var(--amber); }
+table.bt.ltab td:first-child small { font: 500 11px/1.4 var(--font-mono); margin-top: 3px; }
+table.bt.ltab td:last-child { color: var(--muted); }
+.lstrat { background: var(--surface); border-radius: 16px; padding: 14px; margin-bottom: 10px; display: grid; gap: 14px; }
+.lfig { margin: 0; background: var(--chart); border: 1px solid var(--line); border-radius: 12px; padding: 8px 8px 6px; align-self: start; }
+.dg { display: block; width: 100%; height: auto; overflow: visible; }
+.dg polyline, .dg line { fill: none; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+.dg .p { stroke: var(--fg); } .dg .p.thin { stroke-width: 1.3; opacity: .45; }
+.dg .i1 { stroke: var(--amber); } .dg .res { stroke: var(--bear); stroke-width: 1.8; } .dg .sup { stroke: var(--bull); stroke-width: 1.8; } .dg .i2 { stroke: var(--blue); }
+.dg .dash { stroke-dasharray: 4 4; stroke-width: 1.6; }
+.dg .lv { stroke: var(--muted); stroke-width: 1.3; stroke-dasharray: 5 4; }
+.dg .sep { stroke: var(--line); stroke-width: 1; }
+.dg .band { stroke: var(--blue); stroke-width: 1.4; }
+.dg .bandf { fill: var(--blue); opacity: .08; stroke: none; }
+.dg .mk { fill: var(--bull); stroke: var(--chart); stroke-width: 2.5; }
+.dg .mk.bear { fill: var(--bear); }
+.dg .tx { fill: var(--faint); font: 500 9px var(--font-mono); }
+.lfig figcaption { display: flex; flex-wrap: wrap; gap: 3px 12px; padding: 6px 4px 0; font: 400 10.5px/1.3 var(--font-mono); color: var(--muted); }
+.lfig figcaption i { display: inline-block; width: 12px; height: 2px; vertical-align: middle; margin-right: 5px; background: var(--fg); }
+.lfig figcaption i.i1 { background: var(--amber); } .lfig figcaption i.res { background: var(--bear); } .lfig figcaption i.sup { background: var(--bull); } .lfig figcaption i.i2, .lfig figcaption i.band { background: var(--blue); }
+.lfig figcaption i.lv { background: repeating-linear-gradient(90deg, var(--muted) 0 4px, transparent 4px 7px); }
+.lfig figcaption i.mkl { width: 8px; height: 8px; border-radius: 50%; background: var(--bull); }
+.lfig figcaption i.mkl.bear { background: var(--bear); }
+.lbody { min-width: 0; }
+.lbody h3 { margin: 8px 0 2px; font: 700 19px/1.25 var(--font-display); }
+.lbody p { margin: 0 0 10px; font-size: 14.5px; }
+.lbody .ltag { color: var(--muted); }
+.lmeta { display: flex; gap: 6px; flex-wrap: wrap; }
+.lrules { display: grid; gap: 6px; margin: 4px 0 12px; }
+.lrules p { margin: 0; font-size: 14px; display: grid; grid-template-columns: 74px 1fr; gap: 8px; align-items: baseline; }
+.lrules .pill { text-align: center; }
+.lfit { display: grid; grid-template-columns: 112px 1fr; margin: 0 0 10px; font-size: 13.5px; }
+.lfit dt, .lfit dd { margin: 0; padding: 7px 0; border-top: 1px solid var(--line); }
+.lfit dt { font: 500 10.5px/1.7 var(--font-mono); text-transform: uppercase; letter-spacing: .06em; color: var(--faint); padding-right: 10px; }
+.lfit dd { color: var(--fg); }
+.lmore { display: inline-flex; gap: 6px; align-items: center; color: var(--amber); font-weight: 600; font-size: 14px; text-decoration: none; padding: 4px 0; }
+.lmore:hover { text-decoration: underline; }
+.lqs { display: grid; gap: 8px; }
+.lq { background: var(--surface); border-radius: 14px; border: 1px solid transparent; }
+.lq[open] { border-color: var(--line); }
+.lq summary { list-style: none; cursor: pointer; padding: 13px 16px; font: 700 16px/1.3 var(--font-display); display: flex; justify-content: space-between; gap: 12px; align-items: center; }
+.lq summary::-webkit-details-marker { display: none; }
+.lq summary::after { content: "+"; font: 400 22px/1 var(--font-body); color: var(--muted); transition: transform .15s; }
+.lq[open] summary::after { transform: rotate(45deg); }
+@media (hover: hover) { .lq summary:hover { color: var(--amber); } }
+.lq .prose { padding: 0 16px 4px; font-size: 14.5px; }
+.lfam { display: grid; gap: 8px; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
+.lfam .card { margin-top: 0; display: flex; flex-direction: column; }
+.lfam .card p { color: var(--fg); }
+.lfam .card .lex { color: var(--amber); font: 500 11.5px/1.4 var(--font-mono); margin-bottom: 8px; }
+.lgb { margin-top: auto; display: grid; gap: 4px; font-size: 13px; padding-top: 8px; border-top: 1px solid var(--line); }
+.lnote { margin-top: 10px; border-left: 3px solid var(--amber); background: var(--amber-bg); border-radius: 0 12px 12px 0; padding: 12px 14px; font-size: 14px; }
+.ddgrid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; margin-top: 8px; }
+.ddgrid div { background: var(--bg); border-radius: 10px; padding: 8px 6px; text-align: center; min-width: 0; }
+.ddgrid span { display: block; font: 500 9.5px/1 var(--font-mono); text-transform: uppercase; letter-spacing: .06em; color: var(--faint); margin-top: 4px; }
+.ddgrid b { display: block; font: 600 16px/1.4 var(--font-mono); font-variant-numeric: tabular-nums; }
+.lmist { display: grid; gap: 8px; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
+.lmist .card { margin-top: 0; }
+.gloss { margin: 0; display: grid; grid-template-columns: 1fr; }
+.gloss > div { padding: 10px 0; border-top: 1px solid var(--line); }
+.gloss dt { font: 700 15px/1.3 var(--font-display); }
+.gloss dd { margin: 3px 0 0; color: var(--muted); font-size: 14px; }
+@media (min-width: 640px) {
+  .lstrat { grid-template-columns: 240px minmax(0, 1fr); padding: 16px; }
+  .lbody h3 { margin-top: 6px; }
+  .gloss { grid-template-columns: 1fr 1fr; column-gap: 24px; }
+}
+@media (max-width: 400px) { .ddgrid b { font-size: 14px; } }
 </style>
 </head>
 <body>
@@ -785,6 +864,7 @@ html.sheet-open { overflow: hidden; }
   <a class="nav" href="#news" data-tab="news"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h13a1 1 0 0 1 1 1v12a2 2 0 0 0 2 2H6a2 2 0 0 1-2-2Z"/><path d="M18 9h2a1 1 0 0 1 1 1v8a2 2 0 0 1-2 2"/><path d="M8 9h6"/><path d="M8 13h6"/><path d="M8 17h4"/></svg>News</a>
   <a class="nav" href="#calendar" data-tab="calendar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5" width="17" height="15.5" rx="2"/><path d="M3.5 10h17"/><path d="M8 3v4"/><path d="M16 3v4"/><path d="M7.5 14h2"/><path d="M11 14h2"/><path d="M14.5 14h2"/><path d="M7.5 17h2"/></svg>Calendar</a>
   <a class="nav" href="#strategies" data-tab="strategies"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 20h18"/><path d="M6 16V9"/><path d="M4.5 9h3"/><path d="M12 16V5"/><path d="M10.5 5h3"/><path d="M18 16v-5"/><path d="M16.5 11h3"/></svg>Strategies</a>
+  <a class="nav" href="#learn" data-tab="learn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 6.5C10 5 7 4.5 3.5 5v13.5c3.5-.5 6.5 0 8.5 1.5 2-1.5 5-2 8.5-1.5V5C17 4.5 14 5 12 6.5Z"/><path d="M12 6.5V20"/></svg>Learn</a>
   <a class="nav" href="#notify" data-tab="notify"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="2.5" width="12" height="19" rx="2.5"/><path d="M11 18.5h2"/></svg>Phone alerts</a>
   <a class="nav" href="#brokers" data-tab="brokers"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9.5 12 4l9 5.5"/><path d="M4.5 10v8"/><path d="M9.5 10v8"/><path d="M14.5 10v8"/><path d="M19.5 10v8"/><path d="M3 20.5h18"/></svg>Brokers</a>
   <div class="foot" id="sidefoot"></div>
@@ -815,6 +895,7 @@ html.sheet-open { overflow: hidden; }
       <a href="#news" data-tab="news"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h13a1 1 0 0 1 1 1v12a2 2 0 0 0 2 2H6a2 2 0 0 1-2-2Z"/><path d="M18 9h2a1 1 0 0 1 1 1v8a2 2 0 0 1-2 2"/><path d="M8 9h6"/><path d="M8 13h6"/><path d="M8 17h4"/></svg><span>News</span></a>
       <a href="#calendar" data-tab="calendar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5" width="17" height="15.5" rx="2"/><path d="M3.5 10h17"/><path d="M8 3v4"/><path d="M16 3v4"/><path d="M7.5 14h2"/><path d="M11 14h2"/><path d="M14.5 14h2"/><path d="M7.5 17h2"/></svg><span>Calendar</span></a>
       <a href="#strategies" data-tab="strategies"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 20h18"/><path d="M6 16V9"/><path d="M4.5 9h3"/><path d="M12 16V5"/><path d="M10.5 5h3"/><path d="M18 16v-5"/><path d="M16.5 11h3"/></svg><span>Strategies</span></a>
+      <a href="#learn" data-tab="learn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 6.5C10 5 7 4.5 3.5 5v13.5c3.5-.5 6.5 0 8.5 1.5 2-1.5 5-2 8.5-1.5V5C17 4.5 14 5 12 6.5Z"/><path d="M12 6.5V20"/></svg><span>Learn</span></a>
       <a href="#notify" data-tab="notify"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="2.5" width="12" height="19" rx="2.5"/><path d="M11 18.5h2"/></svg><span>Phone alerts</span></a>
       <a href="#brokers" data-tab="brokers"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9.5 12 4l9 5.5"/><path d="M4.5 10v8"/><path d="M9.5 10v8"/><path d="M14.5 10v8"/><path d="M19.5 10v8"/><path d="M3 20.5h18"/></svg><span>Brokers</span></a>
     </nav>
@@ -1355,6 +1436,7 @@ html.sheet-open { overflow: hidden; }
     const counts = {}; (S.feed?.alerts || []).forEach(a => counts[a.strategy] = (counts[a.strategy] || 0) + 1);
     S.firstSel = "strategy-" + slug(S.strategies[0].id);
     h += compareCard();
+    h += `<a class="labcta" href="#learn"><span><b>Learn</b><small>How every strategy works, plus the basics: charts, risk and backtests</small></span><span aria-hidden="true">›</span></a>`;
     h += `<a class="labcta" href="#strategylab"><span><b>Strategy Lab</b><small>Change the settings of an indicator and test it over 15 years</small></span><span aria-hidden="true">›</span></a>`;
     for (const c of cats) {
       h += `<div class="cat">${esc(c)}</div>`;
@@ -1400,6 +1482,7 @@ html.sheet-open { overflow: hidden; }
     h += `<h2>Why it can work</h2><div class="prose"><p>${esc(s.why)}</p></div>`;
     h += `<h2>Watch out for</h2><ul class="watch">${s.watch_out.map(w => `<li>${esc(w)}</li>`).join("")}</ul>`;
     if (!isComm()) h += `<a class="labcta" href="#brokers-${isCrypto() ? "crypto" : "stocks"}" style="margin-top:22px"><span><b>Want to try this strategy yourself?</b><small>${isCrypto() ? "Compare crypto exchanges licensed in the EU" : "Compare brokers for stocks and ETFs from Italy"}</small></span><span aria-hidden="true">›</span></a>`;
+    h += `<p class="hint" style="margin-top:14px">New to this? <a href="#learn-${slug(id)}">See it next to the other strategies</a> or read <a href="#learn-basics">the basics</a>.</p>`;
     h += `<h2>Settings used</h2><div class="settings">${esc(s.settings)}</div>`;
     if (recent.length) h += `<h2>Latest alerts</h2><div class="rows">` + recent.map(a => alertRow(a)).join("") + `</div>`;
     h += `<p class="fine">For information and learning only. This is not investment advice.</p>`;
@@ -2430,6 +2513,264 @@ html.sheet-open { overflow: hidden; }
     return { html: h, after: () => { if (target !== "brokers") setTimeout(() => document.getElementById(target)?.scrollIntoView(), 0); } };
   }
 
+  // ---------------------------------------------------------------- learn
+  // Schematic drawings (not real data): one per strategy, showing the moment it alerts.
+  const DG = {
+    ma200: { legend: [["p", "Price"], ["i1", "200-day average"]], svg: `
+      <polyline class="i1" points="10,72 80,70 160,64 230,55"/>
+      <polyline class="p" points="10,95 30,88 45,96 60,85 75,92 90,80 105,86 120,74 135,72 145,58 160,62 175,48 190,52 205,38 220,42 230,30"/>
+      <circle class="mk" cx="141" cy="66" r="5"/>` },
+    bollinger: { legend: [["p", "Price"], ["band", "Bands (±2σ)"], ["i1", "20-day average"]], svg: `
+      <polygon class="bandf" points="10,34 60,32 100,38 140,40 180,36 230,34 230,86 180,88 140,92 100,86 60,88 10,86"/>
+      <polyline class="band" points="10,34 60,32 100,38 140,40 180,36 230,34"/>
+      <polyline class="band" points="10,86 60,88 100,86 140,92 180,88 230,86"/>
+      <polyline class="i1 dash" points="10,60 60,60 100,62 140,66 180,62 230,60"/>
+      <polyline class="p" points="10,62 30,55 50,66 70,60 88,76 104,94 118,104 132,85 150,72 170,64 190,56 210,62 230,54"/>
+      <circle class="mk" cx="132" cy="85" r="5"/>` },
+    donchian: { legend: [["p", "Price"], ["lv", "20-day high / low"]], svg: `
+      <line class="lv" x1="10" y1="45" x2="172" y2="45"/><line class="lv" x1="10" y1="85" x2="172" y2="85"/>
+      <polyline class="p" points="10,70 25,52 40,74 55,60 70,82 85,55 100,78 115,50 130,72 145,62 160,52 172,38 190,34 210,24 230,20"/>
+      <circle class="mk" cx="168" cy="45" r="5"/>` },
+    rsi: { legend: [["p", "Price"], ["i1", "RSI (bottom)"], ["lv", "30 / 70"]], svg: `
+      <line class="sep" x1="10" y1="66" x2="230" y2="66"/>
+      <polyline class="p" points="10,18 40,28 60,24 80,40 100,48 115,54 130,46 150,38 170,32 200,28 230,20"/>
+      <line class="lv" x1="10" y1="80" x2="230" y2="80"/><line class="lv" x1="10" y1="103" x2="230" y2="103"/>
+      <polyline class="i1" points="10,88 40,95 60,92 80,105 100,112 115,110 130,99 150,94 170,90 200,88 230,84"/>
+      <circle class="mk" cx="127" cy="103" r="5"/>
+      <text x="232" y="83" class="tx" text-anchor="end" dy="-4">70</text><text x="232" y="106" class="tx" text-anchor="end" dy="11">30</text>` },
+    macd: { legend: [["i1", "MACD line"], ["i2", "Signal line"], ["lv", "Zero"]], svg: `
+      <line class="lv" x1="10" y1="60" x2="230" y2="60"/>
+      <polyline class="i2" points="10,36 40,46 70,62 95,74 115,79 140,74 170,62 200,52 230,44"/>
+      <polyline class="i1" points="10,40 40,55 70,75 95,85 115,80 140,66 170,52 200,42 230,36"/>
+      <circle class="mk" cx="118" cy="79" r="5"/>` },
+    golden_cross: { legend: [["p", "Price"], ["i1", "50-day"], ["i2", "200-day"]], svg: `
+      <polyline class="p thin" points="10,96 25,88 40,94 55,84 70,88 85,76 100,80 115,66 130,70 145,56 160,60 175,46 190,50 205,36 220,40 230,30"/>
+      <polyline class="i2" points="10,72 80,70 150,66 230,58"/>
+      <polyline class="i1" points="10,92 50,90 90,82 120,72 150,62 190,48 230,40"/>
+      <circle class="mk" cx="134" cy="67" r="5"/>` },
+    double_top_bottom: { legend: [["p", "Price"], ["lv", "Neckline"]], svg: `
+      <line class="lv" x1="95" y1="58" x2="230" y2="58"/>
+      <polyline class="p" points="10,30 40,55 60,90 75,88 95,60 110,58 130,75 145,90 160,88 180,62 195,50 215,40 230,32"/>
+      <circle class="mk" cx="184" cy="58" r="5"/>
+      <text class="tx" x="67" y="104" text-anchor="middle">low 1</text><text class="tx" x="152" y="104" text-anchor="middle">low 2</text>` },
+    head_shoulders: { bear: true, legend: [["p", "Price"], ["lv", "Neckline"]], svg: `
+      <line class="lv" x1="45" y1="65" x2="215" y2="67"/>
+      <polyline class="p" points="10,92 30,62 45,45 60,65 85,22 105,66 125,48 140,46 155,70 175,86 200,96 230,102"/>
+      <circle class="mk bear" cx="153" cy="67" r="5"/>
+      <text class="tx" x="45" y="38" text-anchor="middle">shoulder</text><text class="tx" x="85" y="15" text-anchor="middle">head</text><text class="tx" x="133" y="38" text-anchor="middle">shoulder</text>` },
+    triangle: { legend: [["p", "Price"], ["lv", "Converging lines"]], svg: `
+      <line class="lv" x1="10" y1="25" x2="172" y2="55"/><line class="lv" x1="10" y1="100" x2="172" y2="70"/>
+      <polyline class="p" points="10,95 30,32 55,90 80,40 105,82 125,50 145,73 160,62 180,40 200,30 230,22"/>
+      <circle class="mk" cx="167" cy="54" r="5"/>` },
+    topdown: { legend: [["p", "Price"], ["res", "Falling line (resistance)"], ["sup", "Rising line (support)"]], svg: `
+      <text class="tx" x="12" y="12">weekly → daily → 4H → 1H → … → 5m</text>
+      <line class="res" x1="14" y1="24" x2="200" y2="62"/><line class="sup" x1="14" y1="108" x2="200" y2="80"/>
+      <polyline class="p" points="14,104 30,36 50,98 72,44 94,92 116,52 138,84 156,60 172,74 186,58 200,44 215,34 230,26"/>
+      <circle class="mk" cx="183" cy="59" r="5"/>` }
+  };
+  // What each one likes and dislikes, in a few words (learning summary, not a rule).
+  const LX = {
+    ma200: { likes: "Long, steady trends", hates: "Sideways markets: price crosses back and forth", speed: "Slow", pair: "Most useful as a filter for the faster strategies: only take their bullish alerts above the 200-day." },
+    bollinger: { likes: "Choppy, range-bound markets", hates: "Strong trends, where price can hug a band for weeks", speed: "Fast", pair: "Pairs well with the 200-day filter, so you only buy dips in stocks that are still in an uptrend." },
+    donchian: { likes: "The start of a new, strong trend", hates: "Ranges full of breakouts that fail the next day", speed: "Medium", pair: "Breakouts in the direction of the 200-day trend have a better track record than those against it." },
+    rsi: { likes: "Ranges, and pullbacks inside an uptrend", hates: "Powerful trends, where RSI can stay above 70 for months", speed: "Fast", pair: "Like Bollinger, it works better as a “buy the dip” tool when the long-term trend is up." },
+    macd: { likes: "Swings with clear shifts in momentum", hates: "Flat, quiet markets that produce many tiny crosses", speed: "Medium", pair: "Crosses above the zero line (both averages agreeing) are generally read as stronger than crosses below it." },
+    golden_cross: { likes: "Big, multi-month trends", hates: "Sharp V-shaped reversals: by the time it crosses, the move is old", speed: "Very slow", pair: "Measures much the same thing as the 200-day filter, so following both doesn't give you two independent opinions." },
+    double_top_bottom: { likes: "Turning points after a long move", hates: "Breaks that slip straight back through the neckline", speed: "Medium", pair: "Traders often look for heavier volume on the neckline break as extra confirmation." },
+    head_shoulders: { likes: "Tops after a long uptrend (and bottoms after a downtrend, inverted)", hates: "Messy charts: many look-alike shapes never complete", speed: "Slow", pair: "Only counts once the neckline breaks; before that it's just three peaks." },
+    topdown: { likes: "Breaks that agree with the bigger timeframes", hates: "Short timeframes, where lines break many times a day", speed: "Intraday", pair: "Check the weekly and daily lines first: a break that goes with them fails less often than one against them." },
+    triangle: { likes: "Pauses inside an existing trend", hates: "False breakouts that fall back inside the triangle", speed: "Medium", pair: "Breakouts in the direction of the trend that came before the triangle tend to be more reliable." }
+  };
+  const LEARN_SECTIONS = [["strategies", "Strategies"], ["basics", "Basics"], ["families", "Strategy types"], ["signals", "Reading a signal"], ["risk", "Risk"], ["backtests", "Backtests"], ["mistakes", "Mistakes"], ["glossary", "Glossary"]];
+  const GLOSSARY = [
+    ["Average move", "In this app's backtests: the average % change in price a set number of days after an alert, compared with the average after a random day."],
+    ["Bear market", "A long, broad fall in prices, often defined as a drop of 20% or more from the last high."],
+    ["Benchmark", "What you compare a strategy with. Here it's buy-and-hold SPY (an S&P 500 ETF): if a strategy can't beat simply holding the index, it adds little."],
+    ["Breakout", "Price closing beyond a level it couldn't get past before, such as a 20-day high or a triangle's upper line."],
+    ["Bull market", "A long, broad rise in prices."],
+    ["Buy and hold", "Buying and keeping an investment without trading in and out. The usual yardstick for any strategy."],
+    ["Candle", "One bar on a price chart for one period (here, one day), showing the open, high, low and close."],
+    ["Close", "The last price of the trading day. Every strategy in this app decides on the daily close, so intraday moves don't trigger alerts."],
+    ["Death cross", "The 50-day average falling below the 200-day average. The opposite of a golden cross."],
+    ["Drawdown", "How far a price or account has fallen from its previous peak, in %."],
+    ["EMA", "Exponential moving average: an average that gives more weight to recent days, so it reacts faster than a simple average. MACD is built from EMAs."],
+    ["ETF", "Exchange-traded fund: a fund that trades like a share, often tracking an index (for example SPY tracks the S&P 500)."],
+    ["False signal", "An alert that's followed by a move the wrong way. Every strategy has many; the question is whether the good ones outweigh them."],
+    ["Futures", "Contracts to buy or sell something (oil, gold, wheat…) at a set date. The Commodities section follows the front-month contract, the one closest to expiry."],
+    ["Golden cross", "The 50-day average rising above the 200-day average."],
+    ["Hit rate", "The share of alerts that went the right way after a set number of days. In the app it's shown next to the hit rate of a random day."],
+    ["Index", "A basket of stocks that measures a market, such as the S&P 100 (the 100 largest US companies in the S&P 500)."],
+    ["Leverage", "Borrowing to hold a bigger position than your money alone allows. It multiplies gains and losses alike."],
+    ["Liquidity", "How easily something can be bought or sold without moving its price. Large stocks and big coins are very liquid."],
+    ["Mean reversion", "The idea that a stretched price tends to drift back toward its average."],
+    ["Momentum", "The tendency of something that has been rising (or falling) to keep going for a while."],
+    ["Moving average (SMA)", "Simple moving average: the plain average of the last N closing prices, recalculated every day."],
+    ["Neckline", "The line a double top/bottom or head & shoulders must break to complete the pattern."],
+    ["Overbought / oversold", "RSI above 70 / below 30. It describes a fast move, not a guaranteed turn."],
+    ["Regime", "The kind of market you're in: trending or sideways, calm or volatile. Each strategy suits some regimes better than others."],
+    ["Resistance", "A price area where rises have stalled before, because sellers showed up there."],
+    ["Signal line", "In MACD, a 9-day average of the MACD line. Crosses between the two are the alert."],
+    ["Slippage", "The difference between the price you expected and the price you actually got."],
+    ["Spread", "The gap between the buy and sell price quoted at the same moment. A hidden cost of every trade."],
+    ["Standard deviation (σ)", "A measure of how spread out prices are around their average. Bollinger Bands sit 2σ from the 20-day average."],
+    ["Stop-loss", "An order to sell automatically if the price falls to a chosen level, to cap the loss on one position."],
+    ["Support", "A price area where falls have stopped before, because buyers showed up there."],
+    ["Swing high / low", "A peak or trough higher (or lower) than the bars on either side. The chart-pattern detectors are built from these."],
+    ["Trend", "The general direction of price over a period: up, down or sideways."],
+    ["Volatility", "How much a price moves around. Higher volatility means bigger swings both ways."],
+    ["Whipsaw", "A signal that's quickly reversed by the opposite one, typical of trend strategies in sideways markets."]
+  ];
+
+  function learnStrategyCard(s) {
+    const d = DG[s.id], x = LX[s.id] || {};
+    const fig = d ? `<figure class="lfig"><svg viewBox="0 0 240 120" class="dg" role="img" aria-label="Diagram of a ${esc(s.name)} ${d.bear ? "bearish" : "bullish"} signal">${d.svg}</svg>
+      <figcaption>${d.legend.map(([k, t]) => `<span><i class="${k}"></i>${t}</span>`).join("")}<span><i class="mkl${d.bear ? " bear" : ""}"></i>Alert</span></figcaption></figure>` : "";
+    return `<article class="lstrat" id="learn-${slug(s.id)}">
+      ${fig}
+      <div class="lbody">
+        <div class="lmeta"><span class="badge">${esc(s.category)}</span><span class="badge">${esc(s.level)}</span>${x.speed ? `<span class="badge">${x.speed}</span>` : ""}</div>
+        <h3>${esc(s.name)}</h3>
+        <p class="ltag">${esc(s.tagline)}</p>
+        ${s.how.map(p => `<p>${esc(p)}</p>`).join("")}
+        <div class="lrules"><p><span class="pill bullish">bullish</span>${esc(s.bullish)}</p><p><span class="pill bearish">bearish</span>${esc(s.bearish)}</p></div>
+        ${x.likes ? `<dl class="lfit"><dt>Works best in</dt><dd>${x.likes}</dd><dt>Struggles in</dt><dd>${x.hates}</dd><dt>Tip</dt><dd>${x.pair}</dd></dl>` : ""}
+        <a class="lmore" href="#strategy-${slug(s.id)}">${s.kind === "lines" ? "Timeframes and alerts" : "Examples, backtest and alerts"} <span aria-hidden="true">›</span></a>
+      </div></article>`;
+  }
+
+  function viewLearn() {
+    const strats = S.strategies.filter(forMarket);
+    const daily = strats.filter(s => s.kind !== "lines").length, numW = n => ["zero","one","two","three","four","five","six","seven","eight","nine","ten","eleven","twelve"][n] || n;
+    let h = header("Learn");
+    h += `<p class="tag" style="margin-top:2px;font-size:15px">How every strategy in the app works, and the basics behind them: charts, indicators, risk and how to read a backtest.</p>`;
+    h += `<div class="bjump ljump" role="navigation" aria-label="On this page">${LEARN_SECTIONS.map(([id, t]) => `<a href="#learn-${id}">${t}</a>`).join("")}</div>`;
+
+    h += `<section class="lstart"><h3>New here? A good order</h3><ol>
+      <li><a href="#learn-basics">Read the basics</a>: what a daily chart and a moving average are.</li>
+      <li><a href="#learn-families">Learn the strategy types</a> and which markets each one likes.</li>
+      <li>Pick one or two strategies below and <a href="#strategies">follow them</a> to get their alerts.</li>
+      <li>Before trusting any of them, <a href="#learn-backtests">read how the backtests work</a>.</li></ol></section>`;
+
+    // ---- every strategy
+    h += `<h2 id="learn-strategies">The ${strats.length} strategies</h2>`;
+    h += `<p class="sub">Each drawing is a sketch of the moment the strategy alerts, not real data. Open any strategy for real chart examples and its 15-year track record.</p>`;
+    h += `<div class="tablewrap"><table class="bt ltab"><thead><tr><th>Strategy</th><th>Works best in</th></tr></thead><tbody>` +
+      strats.map(s => `<tr><td><a href="#learn-${slug(s.id)}">${esc(s.name)}</a><small>${esc(s.category)}${LX[s.id]?.speed ? ` · ${LX[s.id].speed}` : ""}</small></td><td>${LX[s.id]?.likes || ""}</td></tr>`).join("") +
+      `</tbody></table></div>`;
+    const cats = [...new Set(strats.map(s => s.category))];
+    for (const c of cats) {
+      h += `<div class="cat">${esc(c)}</div>`;
+      h += strats.filter(s => s.category === c).map(learnStrategyCard).join("");
+    }
+
+    // ---- basics
+    h += `<h2 id="learn-basics">Basics</h2><div class="lqs">
+      <details class="lq" open><summary>Reading a price chart</summary><div class="prose">
+        <p>Each bar (or <em>candle</em>) is one trading day. It shows four prices: where the day opened, its high, its low and where it closed. A green candle closed higher than it opened, a red one lower.</p>
+        <p>The <strong>close</strong> matters most here. ${numW(daily) === "nine" ? "All nine" : "The " + daily} daily strategies only look at daily closes, so a stock that dips below a line during the day but finishes above it doesn't trigger anything. That makes the alerts slower but much less noisy.${strats.some(s => s.kind === "lines") ? " Top-Down Analysis is the exception: it draws trendlines on timeframes from weekly down to 5 minutes and checks them every 30 minutes while the US market is open." : ""}</p></div></details>
+      <details class="lq"><summary>Moving averages, the building block</summary><div class="prose">
+        <p>A moving average is the average closing price of the last N days, recalculated every day. A 20-day average follows the price closely; a 200-day average moves slowly and shows the long-term direction.</p>
+        <p>Price above a rising average is the simplest definition of an uptrend. Four of the daily strategies (200-day, Bollinger, golden cross, MACD) are built directly on moving averages.</p></div></details>
+      <details class="lq"><summary>Trend, support and resistance</summary><div class="prose">
+        <p>A <strong>trend</strong> is a series of higher highs and higher lows (uptrend) or lower highs and lower lows (downtrend). Markets also spend long stretches going sideways.</p>
+        <p><strong>Support</strong> is a price area where falls have stopped before; <strong>resistance</strong> is where rises have stalled. When price finally closes through one of them, that's a breakout. The Donchian channel, triangles and the necklines of chart patterns are all ways of drawing these levels with fixed rules.</p></div></details>
+      <details class="lq"><summary>Volatility</summary><div class="prose">
+        <p>Volatility is how much a price swings. A utility stock might move 1% on a normal day, a small tech stock 4%, bitcoin even more. Bollinger Bands widen and narrow with volatility, which is why the same 2σ rule fits both calm and wild stocks.</p>
+        <p>Volatility also tells you how big a normal move is: a 3% drop is news for one asset and an ordinary Tuesday for another.</p></div></details>
+      <details class="lq"><summary>Stocks, crypto and commodities: what changes</summary><div class="prose">
+        <p><strong>Stocks:</strong> the app scans the S&amp;P 100, the largest US companies. They trade Monday to Friday, and the scan runs after the US close.</p>
+        <p><strong>Crypto</strong> trades around the clock, every day. The “daily close” is the candle that ends at midnight UTC, and prices swing far more than large stocks, so signals fire more often and moves after them are bigger both ways.</p>
+        <p><strong>Commodities</strong> here are futures contracts (gold, oil, wheat…). Their prices react to supply, weather, inventories and the dollar as well as to trends, and each contract eventually expires and is replaced by the next one.</p>
+        <p>The rules of each strategy are the same in all three markets; how well they work isn't. The backtest on each strategy page is shown for the market you have selected.</p></div></details>
+    </div>`;
+
+    // ---- strategy types
+    const fam = [
+      ["Trend following", "200-day filter, golden/death cross", "Prices that have started moving in one direction tend to keep going. You give up the start and the end of each move to catch the middle.", "Long trends", "Sideways markets"],
+      ["Mean reversion", "Bollinger Bands", "Prices that stretch far from their average tend to snap partway back. You bet against the latest move, so timing matters.", "Ranges", "Strong trends"],
+      ["Breakout", "Donchian, triangles", "When price escapes a range it has been stuck in, a new move may be starting.", "Ranges that resolve into trends", "Choppy markets with failed breaks"],
+      ["Momentum", "RSI, MACD", "Measures the speed of recent moves. A change in speed can come before a change in direction.", "Swinging markets", "Very quiet or very one-sided markets"],
+      ["Chart patterns", "Double top/bottom, head & shoulders", "Shapes that show a balance between buyers and sellers tipping one way. They only count once the neckline breaks.", "Turning points", "Messy charts where shapes are ambiguous"]
+    ];
+    if (strats.some(s => s.kind === "lines")) fam.push(["Multi-timeframe", "Top-Down Analysis", "Reads the same stock from the weekly chart down to minutes. A break on a small timeframe means more when the bigger ones point the same way.", "Breaks that agree with the big picture", "Noisy short timeframes"]);
+    h += `<h2 id="learn-families">The ${numW(fam.length)} strategy types</h2><div class="prose"><p>Every strategy in the app belongs to one of ${numW(fam.length)} families. They make different, sometimes opposite, bets about what prices do next, which is why no single one works in every market.</p></div>`;
+    h += `<div class="lfam">${fam.map(([n, ex, idea, good, bad]) => `<div class="card"><h3>${n}</h3><p class="lex">${ex}</p><p>${idea}</p>
+      <div class="lgb"><span class="up">▲ ${good}</span><span class="down">▼ ${bad}</span></div></div>`).join("")}</div>`;
+    h += `<div class="lnote"><strong>Trend vs mean reversion.</strong> After a big up day, a trend strategy says “strength, stay in” while a mean-reversion strategy says “stretched, it may pull back”. Both can be right, on different stocks or in different months. Knowing which kind of market you're in (the <em>regime</em>) is half the job.</div>`;
+
+    // ---- reading a signal
+    h += `<h2 id="learn-signals">Reading a signal</h2><div class="lqs">
+      <details class="lq" open><summary>Bullish doesn't mean “buy”</summary><div class="prose">
+        <p>An alert says a pattern just happened on the chart. A <span class="pill bullish">bullish</span> alert means the pattern has historically leaned toward higher prices afterwards; it's not a recommendation, a price target or a guarantee. Plenty of bullish alerts are followed by falls.</p></div></details>
+      <details class="lq"><summary>Strength and confirmation</summary><div class="prose">
+        <p>The strength meter on each alert counts how many other conditions agree with it, such as the long-term trend pointing the same way. An alert that goes with the bigger trend has more going for it than one that fights it.</p>
+        <p>Two alerts from the <em>same family</em> (say RSI and MACD, both momentum) agreeing is weaker evidence than two from different families agreeing, because they're largely measuring the same thing.</p></div></details>
+      <details class="lq"><summary>Time horizon</summary><div class="prose">
+        <p>The backtests check what happened 5, 20 and 60 trading days after each alert (about a week, a month and a quarter). Fast strategies like RSI and Bollinger usually show their edge early, if they have one; slow ones like the golden cross are about the following months.</p></div></details>
+      <details class="lq"><summary>False signals are normal</summary><div class="prose">
+        <p>Even a useful strategy is often wrong. Many trend systems are right well under half the time and still come out ahead because their winners are bigger than their losers. So judge a strategy on its average result over hundreds of alerts, never on the last one.</p></div></details>
+    </div>`;
+
+    // ---- risk
+    const dd = [10, 20, 30, 50, 75];
+    h += `<h2 id="learn-risk">Risk</h2><div class="prose"><p>Strategies decide <em>when</em>; risk management decides <em>how much</em>. Most of what separates people who last in markets from people who don't is in this section.</p></div>`;
+    h += `<div class="card" style="margin-top:4px"><h3>Losses are harder to win back than they look</h3><p>After a loss, you need a bigger percentage gain just to get back to where you started.</p>
+      <div class="ddgrid">${dd.map(d => `<div><span>Lose</span><b class="down">−${d}%</b><span>Need</span><b class="up">+${Math.round(100 / (1 - d / 100) - 100)}%</b></div>`).join("")}</div></div>`;
+    h += `<div class="lqs" style="margin-top:12px">
+      <details class="lq"><summary>Position size</summary><div class="prose">
+        <p>How much you put into one idea matters more than which idea it is. A common teaching rule is to size each position so that being wrong costs only a small slice of the whole account, often quoted as 1–2%. Then a run of false signals, which will happen, is survivable.</p></div></details>
+      <details class="lq"><summary>Stop-losses</summary><div class="prose">
+        <p>A stop-loss is a level, decided in advance, where you accept you were wrong and get out. Many strategies have a natural one: back below the 200-day, back inside the triangle, back under the neckline. Deciding it before entering stops you from moving it later.</p></div></details>
+      <details class="lq"><summary>Diversification</summary><div class="prose">
+        <p>Ten alerts in ten tech stocks on the same day are closer to one bet than ten. Spreading across sectors, markets and strategy types lowers the chance that one event hits everything at once.</p></div></details>
+      <details class="lq"><summary>Leverage</summary><div class="prose">
+        <p>Leverage (margin, CFDs, leveraged ETFs) multiplies results both ways. With 5× leverage, a 20% drop wipes out the whole position. The strategies here look at moves over weeks and months, where normal swings are large, which is one reason this app doesn't link to leveraged products.</p></div></details>
+      <details class="lq"><summary>Costs</summary><div class="prose">
+        <p>Commissions, the spread, currency conversion on US stocks, and taxes on gains all come out of every trade. A strategy that trades often needs a bigger edge to cover them. The backtests in this app don't include any costs, so real results would be lower.</p></div></details>
+    </div>`;
+
+    // ---- backtests
+    h += `<h2 id="learn-backtests">How to read a backtest</h2><div class="prose">
+      <p>A backtest runs a strategy's exact rules over past prices to see what would have happened. Every strategy page shows one covering the last 15 years, and the comparison card simulates a €100,000 account against buy-and-hold SPY.</p></div>`;
+    h += `<div class="lfam"><div class="card"><h3>Right way vs a random day</h3><p>“Right way” is the share of alerts followed by a move in the expected direction. It's shown next to the result of a random day, because stocks rose on most days of the last 15 years: 55% right means little if a random day was 54%.</p></div>
+      <div class="card"><h3>Average move</h3><p>Being right often isn't enough; the size of the moves matters. A strategy right 40% of the time can still be useful if its average move beats a random day's.</p></div>
+      <div class="card"><h3>Against buy-and-hold</h3><p>The honest test: would a €100k account following the strategy have beaten simply buying the index and doing nothing? Over long bull markets, few do. Some earn their place by falling less in crashes instead.</p></div></div>`;
+    h += `<h3 class="h3">Why past results can mislead</h3><ul class="watch">
+      <li><strong>Overfitting.</strong> In the Strategy Lab you can tune settings until the past looks perfect. Settings tuned to the past usually do worse in the future. Prefer settings that work reasonably across many values, not one magic number.</li>
+      <li><strong>Survivorship.</strong> The backtest uses today's S&amp;P 100 members. Companies that shrank or failed and dropped out of the index aren't in it, which flatters the results somewhat.</li>
+      <li><strong>No costs.</strong> No commissions, spreads, slippage or taxes are deducted.</li>
+      <li><strong>One period.</strong> 15 years were mostly a rising market for US large caps. A different decade might rank the strategies differently.</li></ul>`;
+
+    // ---- mistakes
+    h += `<h2 id="learn-mistakes">Common mistakes</h2><div class="lmist">
+      ${[["Following every alert", "Following every strategy on 100 stocks means dozens of alerts a week. Pick a few that fit how often you want to act."],
+         ["Ignoring the big trend", "Bullish dip signals in a stock that's below its 200-day and falling are where many mean-reversion losses come from."],
+         ["Counting the same evidence twice", "RSI and MACD both firing isn't two independent opinions; they're both momentum."],
+         ["Judging on one result", "A strategy that lost on the last alert may still be fine. One that won may still be poor. Look at hundreds of alerts."],
+         ["Moving the stop", "Deciding where you're wrong after the price gets there turns a small loss into a large one."],
+         ["Tuning until it's perfect", "A backtest that looks flawless is usually describing the past, not predicting the future."]].map(([t, p]) => `<div class="card"><h3>${t}</h3><p>${p}</p></div>`).join("")}
+    </div>`;
+
+    // ---- glossary
+    h += `<h2 id="learn-glossary">Glossary</h2>
+      <input class="search" id="glosssearch" type="search" placeholder="Search ${GLOSSARY.length} terms" aria-label="Search the glossary" autocomplete="off">
+      <dl class="gloss">${GLOSSARY.map(([t, d]) => `<div data-g="${esc((t + " " + d).toLowerCase())}"><dt>${t}</dt><dd>${d}</dd></div>`).join("")}</dl>
+      <p class="tag" id="glossnone" hidden>No term matches.</p>`;
+
+    h += `<p class="fine">For information and learning only. Nothing here is investment advice, and past results don't guarantee future ones. When you invest, your capital is at risk.</p>`;
+
+    const target = location.hash.slice(1);
+    return { html: h, after: () => {
+      const q = document.getElementById("glosssearch");
+      q?.addEventListener("input", () => {
+        const v = q.value.trim().toLowerCase(); let n = 0;
+        document.querySelectorAll(".gloss > div").forEach(el => { const ok = !v || el.dataset.g.includes(v); el.hidden = !ok; n += ok; });
+        document.getElementById("glossnone").hidden = n > 0;
+      });
+      if (target !== "learn") setTimeout(() => { const el = document.getElementById(target); if (el) { if (el.tagName === "DETAILS") el.open = true; el.scrollIntoView(); } }, 0);
+    } };
+  }
+
   // --------------------------------------------------------------- router
   function detailFor(r) {
     if (r.startsWith("alert-")) return () => viewAlert(+r.slice(6));
@@ -2443,12 +2784,12 @@ html.sheet-open { overflow: hidden; }
 
   function route() {
     const r = (location.hash || "#alerts").slice(1);
-    const tab = r === "news" || r === "buzz" ? "news" : r.startsWith("calendar") ? "calendar" : r.startsWith("strateg") ? "strategies" : r.startsWith("stock") || r === "heatmap" ? "stocks" : r === "notify" ? "notify" : r.startsWith("brokers") ? "brokers" : "alerts";
-    const list = { alerts: viewAlerts, stocks: viewStocks, strategies: viewStrategies, notify: viewNotify, brokers: viewBrokers, news: r === "buzz" ? viewBuzz : viewNews, calendar: () => viewCalendar(r.slice(9)) }[tab];
+    const tab = r === "news" || r === "buzz" ? "news" : r.startsWith("calendar") ? "calendar" : r.startsWith("strateg") ? "strategies" : r.startsWith("stock") || r === "heatmap" ? "stocks" : r === "notify" ? "notify" : r.startsWith("brokers") ? "brokers" : r.startsWith("learn") ? "learn" : "alerts";
+    const list = { alerts: viewAlerts, stocks: viewStocks, strategies: viewStrategies, notify: viewNotify, brokers: viewBrokers, learn: viewLearn, news: r === "buzz" ? viewBuzz : viewNews, calendar: () => viewCalendar(r.slice(9)) }[tab];
     let detail = detailFor(r), sel = detail ? r : null;
     charts.length = 0;
 
-    if (WIDE.matches && tab !== "notify" && tab !== "brokers" && tab !== "news" && tab !== "calendar") {
+    if (WIDE.matches && tab !== "notify" && tab !== "brokers" && tab !== "learn" && tab !== "news" && tab !== "calendar") {
       const lp = app.querySelector(".pane.list"), dp = app.querySelector(".pane.detail");
       const listTop = lp?.scrollTop || 0, detTop = dp?.scrollTop || 0;
       const L = norm(list());
@@ -2474,7 +2815,7 @@ html.sheet-open { overflow: hidden; }
     if (nsearch) { nsearch.addEventListener("input", () => { S.nq = nsearch.value; filterNews(); }); filterNews(); }
     // the phone tab bar has no Calendar button: it lives under News there
     // phone bar: pages without their own button light up Menu
-    const inBar = { calendar: "menu", brokers: "menu", notify: "menu" }[tab] || tab;
+    const inBar = { calendar: "menu", brokers: "menu", notify: "menu", learn: "menu" }[tab] || tab;
     document.querySelectorAll("[data-tab]").forEach(a => a.setAttribute("aria-current", (a.closest(".tabs") ? a.dataset.tab === inBar : a.dataset.tab === tab) ? "page" : "false"));
     S.routed = true;
     if (tab === "alerts" && !r.startsWith("alert-")) markSeen();
@@ -2805,7 +3146,7 @@ html.sheet-open { overflow: hidden; }
     await loadMarket(m);
     S.lastSel = null; S.lastTab = null;
     const tab = (location.hash || "#alerts").slice(1);
-    const base = tab.startsWith("strateg") ? (tab.startsWith("strategy-") ? tab : "strategies") : tab.startsWith("stock") || tab === "heatmap" ? "stocks" : tab === "news" || tab === "buzz" ? tab : tab.startsWith("calendar") ? tab : tab === "notify" ? "notify" : tab.startsWith("brokers") ? "brokers" : "alerts";
+    const base = tab.startsWith("strateg") ? (tab.startsWith("strategy-") ? tab : "strategies") : tab.startsWith("stock") || tab === "heatmap" ? "stocks" : tab === "news" || tab === "buzz" ? tab : tab.startsWith("calendar") ? tab : tab === "notify" ? "notify" : tab.startsWith("brokers") ? "brokers" : tab.startsWith("learn") ? tab : "alerts";
     if ("#" + base !== location.hash) location.hash = base; else route();
     scrollTo(0, 0);
   }
