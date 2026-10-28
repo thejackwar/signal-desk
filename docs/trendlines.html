@@ -393,9 +393,19 @@ async function show(sym) {
     }
     if (!js) {
       if (!P.api) throw new Error(direct || "no data server set");
-      const r = await fetchWithTimeout(`${P.api}/?symbol=${encodeURIComponent(sym)}`, 25000, () => {
-        if (seq === loadSeq) setStatus(`Still loading ${sym}, trying again…`);
-      });
+      // the server pulls several years of candles fresh, which can take 10-25 seconds: show the wait
+      const t0 = Date.now();
+      const tick = setInterval(() => {
+        if (seq !== loadSeq) return clearInterval(tick);
+        const sec = Math.round((Date.now() - t0) / 1000);
+        if (sec >= 3) setStatus(`Loading ${sym}… ${sec}s (fetching fresh candles can take up to 30 seconds)`);
+      }, 1000);
+      let r;
+      try {
+        r = await fetchWithTimeout(`${P.api}/?symbol=${encodeURIComponent(sym)}`, 60000, () => {
+          if (seq === loadSeq) setStatus(`Still loading ${sym}, trying again…`);
+        });
+      } finally { clearInterval(tick); }
       js = await r.json().catch(() => ({ error: `HTTP ${r.status}` }));
       if (!r.ok || js.error) throw new Error((direct ? direct + " · " : "") + (js.error || `HTTP ${r.status}`));
     }
