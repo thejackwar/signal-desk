@@ -338,6 +338,19 @@ table.trades td:last-child { font: 600 13.5px var(--font-mono); white-space: now
   .broker dt { padding: 10px 0 0; }
   .broker dd { border-top: 0; padding: 4px 0 10px; }
 }
+.morelist { display: flex; flex-direction: column; gap: 10px; margin-top: 6px; }
+.morelist a { display: flex; align-items: center; gap: 14px; padding: 14px; border-radius: 14px; background: var(--surface); border: 1px solid var(--line); color: inherit; text-decoration: none; }
+.morelist a > svg { width: 26px; height: 26px; flex: none; color: var(--amber); }
+.morelist b { display: block; font: 700 16px var(--font-display); }
+.morelist small { display: block; color: var(--muted); font-size: 13px; margin-top: 2px; }
+.morelist a > span:last-child { margin-left: auto; color: var(--muted); font-size: 22px; }
+@media (hover: hover) { .morelist a:hover { background: var(--hover); } }
+.bjump { display: flex; gap: 8px; flex-wrap: wrap; margin: 0 0 4px; }
+.bjump a { display: inline-flex; align-items: center; gap: 7px; padding: 9px 13px; border-radius: 999px; background: var(--surface); border: 1px solid var(--line); color: var(--fg); text-decoration: none; font-weight: 500; font-size: 14px; }
+@media (hover: hover) { .bjump a:hover { background: var(--hover); } }
+.bsec { scroll-margin-top: 12px; }
+.bsec + .bsec { margin-top: 40px; padding-top: 6px; border-top: 1px solid var(--line); }
+.bsec > h2 { font-size: 22px; }
 .side .disc { margin-top: 8px; padding: 0 8px; font: 500 11px/1.5 var(--font-mono); }
 .side .disc a { color: var(--faint); }
 .side .disc a:hover { color: var(--muted); }
@@ -765,7 +778,7 @@ canvas.hm { display: block; touch-action: pan-y; }
     <a href="trendlines.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M6 8l13 5"/><path d="M6 18l13-9"/></svg>Trendlines</a>
     <a href="#news" data-tab="news"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h13a1 1 0 0 1 1 1v12a2 2 0 0 0 2 2H6a2 2 0 0 1-2-2Z"/><path d="M18 9h2a1 1 0 0 1 1 1v8a2 2 0 0 1-2 2"/><path d="M8 9h6"/><path d="M8 13h6"/><path d="M8 17h4"/></svg>News</a>
     <a href="#strategies" data-tab="strategies"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 20h18"/><path d="M6 16V9"/><path d="M4.5 9h3"/><path d="M12 16V5"/><path d="M10.5 5h3"/><path d="M18 16v-5"/><path d="M16.5 11h3"/></svg>Strategies</a>
-    <a href="#notify" data-tab="notify"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="2.5" width="12" height="19" rx="2.5"/><path d="M11 18.5h2"/></svg>Phone</a>
+    <a href="#more" data-tab="more"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="6.5" height="6.5" rx="1.5"/><rect x="13.5" y="4" width="6.5" height="6.5" rx="1.5"/><rect x="4" y="13.5" width="6.5" height="6.5" rx="1.5"/><circle cx="16.75" cy="16.75" r="3.25"/></svg>More</a>
   </nav>
 </div>
 
@@ -1292,7 +1305,7 @@ canvas.hm { display: block; touch-action: pan-y; }
           <button class="toggle" role="switch" aria-checked="${on}" aria-label="Follow ${esc(s.name)}" data-follow="${s.id}"></button></div>`;
       }
     }
-    if (!isCrypto() && !isComm()) h += `<a class="labcta" href="#brokers" style="margin-top:22px"><span><b>Brokers</b><small>Where to buy stocks and ETFs from Italy</small></span><span aria-hidden="true">›</span></a>`;
+    if (!isComm()) h += `<a class="labcta" href="#brokers-${isCrypto() ? "crypto" : "stocks"}" style="margin-top:22px"><span><b>Brokers</b><small>${isCrypto() ? "Where to buy crypto from Italy" : "Where to buy stocks and ETFs from Italy"}</small></span><span aria-hidden="true">›</span></a>`;
     return h;
   }
 
@@ -1324,7 +1337,7 @@ canvas.hm { display: block; touch-action: pan-y; }
     h += tr.html;
     h += `<h2>Why it can work</h2><div class="prose"><p>${esc(s.why)}</p></div>`;
     h += `<h2>Watch out for</h2><ul class="watch">${s.watch_out.map(w => `<li>${esc(w)}</li>`).join("")}</ul>`;
-    if (!isCrypto() && !isComm()) h += `<a class="labcta" href="#brokers" style="margin-top:22px"><span><b>Want to try this strategy yourself?</b><small>Compare brokers for stocks and ETFs from Italy</small></span><span aria-hidden="true">›</span></a>`;
+    if (!isComm()) h += `<a class="labcta" href="#brokers-${isCrypto() ? "crypto" : "stocks"}" style="margin-top:22px"><span><b>Want to try this strategy yourself?</b><small>${isCrypto() ? "Compare crypto exchanges licensed in the EU" : "Compare brokers for stocks and ETFs from Italy"}</small></span><span aria-hidden="true">›</span></a>`;
     h += `<h2>Settings used</h2><div class="settings">${esc(s.settings)}</div>`;
     if (recent.length) h += `<h2>Latest alerts</h2><div class="rows">` + recent.map(a => alertRow(a)).join("") + `</div>`;
     h += `<p class="fine">For information and learning only. This is not investment advice.</p>`;
@@ -2271,35 +2284,72 @@ canvas.hm { display: block; touch-action: pan-y; }
   // otherwise it links straight to the broker.
   const GO_BASE = "";
   const brokerHref = b => GO_BASE ? `${GO_BASE.replace(/\/+$/, "")}/${encodeURIComponent(b.id)}` : b.url;
-  const TAX = { amministrato: ["Amministrato", "amm"], dichiarativo: ["Dichiarativo", ""], both: ["Your choice", "amm"] };
-  const ccyNote = () => isCrypto() || isComm() ? `<p class="tag" style="font-size:14px">These brokers are listed for stocks and ETFs. Crypto and commodity futures work differently and aren't covered here.</p>` : "";
+  const TAX = { amministrato: ["Amministrato", "amm"], dichiarativo: ["Dichiarativo", ""], both: ["Your choice", "amm"], check: ["Ask", ""] };
+  const SECTION_ICON = { stocks: "📈", crypto: "🪙" };
+  const FEE_LABEL = { stocks: "Fees on stocks &amp; ETFs", crypto: "Trading fees" };
+  // older brokers.json had one flat list: treat it as the stocks section
+  const brokerSections = B => B?.sections || (B?.brokers ? [{ id: "stocks", title: "Best for stocks & ETFs", intro: "", brokers: B.brokers }] : []);
+
+  function brokerCard(b, sec) {
+    const [taxLbl, taxCls] = TAX[b.tax] || [b.tax, ""];
+    return `<article class="broker"><div class="bhead"><h3>${esc(b.name)}</h3>${b.affiliate ? `<span class="aff">Affiliate</span>` : ""}
+      <a class="btn ghost" href="${esc(brokerHref(b))}" target="_blank" rel="${b.affiliate ? "sponsored noopener" : "noopener"}">Visit site ↗</a></div>
+      <dl><dt>${FEE_LABEL[sec] || "Fees"}</dt><dd>${esc(b.fees)}</dd>
+      <dt>Taxes in Italy</dt><dd><span class="taxk ${taxCls}">${esc(taxLbl)}</span>${esc(b.tax_text)}</dd>
+      <dt>Supervised by</dt><dd>${esc(b.regulator)}</dd>
+      <dt>Good to know</dt><dd>${esc(b.good_to_know)}</dd></dl></article>`;
+  }
+  const TAX_HELP = {
+    stocks: `<h3 class="h3">Taxes on stocks and ETFs: amministrato or dichiarativo?</h3><div class="prose">
+      <p><strong>Amministrato:</strong> the broker works out the 26% tax on your gains, pays it for you and offsets losses against later gains. Nothing to add to your tax return.</p>
+      <p><strong>Dichiarativo:</strong> you report gains and the account yourself in your tax return (quadri RT and RW) and pay the tax, plus the 0.2% IVAFE on foreign accounts. Usually cheaper brokers, but more paperwork, and mistakes are yours.</p></div>`,
+    crypto: `<h3 class="h3">Taxes on crypto</h3><div class="prose">
+      <p>From 2026, gains on crypto are taxed at <strong>33%</strong> (26% for euro stablecoins that follow the EU's MiCA rules), from the first euro: the old €2,000 tax-free threshold is gone. On top of that there is a <strong>0.2% yearly tax</strong> on what you hold on 31 December.</p>
+      <p>Unless the exchange pays the taxes for you (amministrato), you report gains in quadro RT and your holdings in quadro RW, every year you hold crypto, even if you didn't sell anything.</p></div>`,
+  };
 
   function viewBrokers() {
     const B = S.brokers;
     let h = header("Brokers");
-    h += `<p class="tag" style="margin-top:2px;font-size:15px">Where you can buy stocks and ETFs from Italy. The strategies in this app describe price patterns; a broker is where you would actually invest.</p>`;
-    h += ccyNote();
-    h += `<div class="disclose">Some links on this page may be affiliate links, marked <span class="aff">Affiliate</span>. If you open an account through one, Investment Center Signals may receive a commission at no cost to you. Brokers are listed in alphabetical order, and payments don't change what's written about them. <a href="#brokers-about" style="color:var(--muted)">More</a></div>`;
+    h += `<p class="tag" style="margin-top:2px;font-size:15px">Where you can invest from Italy. The strategies in this app describe price patterns; a broker or exchange is where you would actually buy.</p>`;
+    h += `<div class="disclose">Some links on this page may be affiliate links, marked <span class="aff">Affiliate</span>. If you open an account through one, Investment Center Signals may receive a commission at no cost to you. Each list is in alphabetical order, and payments don't change what's written about them. <a href="#brokers-about" style="color:var(--muted)">More</a></div>`;
     if (B === undefined) return h + `<p class="tag">Loading…</p>`;
-    if (!B?.brokers?.length) return h + `<div class="card"><p style="margin:0">The broker list couldn't be loaded. Try again later.</p></div>`;
-    for (const b of [...B.brokers].sort((x, y) => x.name.localeCompare(y.name))) {
-      const [taxLbl, taxCls] = TAX[b.tax] || [b.tax, ""];
-      h += `<article class="broker"><div class="bhead"><h3>${esc(b.name)}</h3>${b.affiliate ? `<span class="aff">Affiliate</span>` : ""}
-        <a class="btn ghost" href="${esc(brokerHref(b))}" target="_blank" rel="${b.affiliate ? "sponsored noopener" : "noopener"}">Visit site ↗</a></div>
-        <dl><dt>Fees on stocks &amp; ETFs</dt><dd>${esc(b.fees)}</dd>
-        <dt>Taxes in Italy</dt><dd><span class="taxk ${taxCls}">${esc(taxLbl)}</span>${esc(b.tax_text)}</dd>
-        <dt>Supervised by</dt><dd>${esc(b.regulator)}</dd>
-        <dt>Good to know</dt><dd>${esc(b.good_to_know)}</dd></dl></article>`;
+    let secs = brokerSections(B).filter(x => x.brokers?.length);
+    if (!secs.length) return h + `<div class="card"><p style="margin:0">The broker list couldn't be loaded. Try again later.</p></div>`;
+    // the market you're browsing comes first
+    if (isCrypto()) secs = [...secs].sort((a, b) => (b.id === "crypto") - (a.id === "crypto"));
+    if (secs.length > 1) h += `<div class="bjump" role="navigation" aria-label="Sections">${secs.map(x =>
+      `<a href="#brokers-${esc(x.id)}"><span aria-hidden="true">${SECTION_ICON[x.id] || ""}</span>${esc(x.title)}</a>`).join("")}</div>`;
+    for (const x of secs) {
+      h += `<section class="bsec" id="brokers-${esc(x.id)}"><h2>${SECTION_ICON[x.id] ? `<span aria-hidden="true">${SECTION_ICON[x.id]}</span> ` : ""}${esc(x.title)}</h2>`;
+      if (x.intro) h += `<p class="tag" style="font-size:14.5px;margin-bottom:4px">${esc(x.intro)}</p>`;
+      for (const b of [...x.brokers].sort((p, q) => p.name.localeCompare(q.name))) h += brokerCard(b, x.id);
+      h += TAX_HELP[x.id] || "";
+      h += `</section>`;
     }
-    h += `<h2>Amministrato or dichiarativo?</h2><div class="prose">
-      <p><strong>Amministrato:</strong> the broker works out the 26% tax on your gains, pays it for you and offsets losses against later gains. Nothing to add to your tax return.</p>
-      <p><strong>Dichiarativo:</strong> you report gains and the account yourself in your tax return (quadri RT and RW) and pay the tax, plus the 0.2% IVAFE on foreign accounts. Usually cheaper brokers, but more paperwork, and mistakes are yours.</p></div>`;
-    h += `<h2>What isn't here</h2><div class="prose"><p>No CFDs or other leveraged products. Most retail CFD accounts lose money, and they don't fit long-term strategies like the ones in this app, so this page only links to stock and ETF accounts.</p></div>`;
+    h += `<h2>What isn't here</h2><div class="prose">
+      <p>No CFDs, futures, margin or other leveraged products. Most retail CFD accounts lose money, and leverage doesn't fit the longer-term strategies in this app, so this page only links to stock and ETF accounts and to buying crypto itself.</p>
+      <p>No crypto platforms without an EU MiCA licence. Since 1 July 2026 they can't offer their services in Italy, and MiCA protections only apply to the licensed company, not to other companies using the same brand.</p></div>`;
     h += `<h2 id="brokers-about">About these links</h2><div class="prose">
-      <p>Investment Center Signals is free. Some broker links may pay a commission when someone opens and funds an account; those links carry the <span class="aff">Affiliate</span> tag. You pay nothing extra, the order is alphabetical, and the facts above are the same whether a broker pays or not.</p>
+      <p>Investment Center Signals is free. Some links may pay a commission when someone opens and funds an account; those links carry the <span class="aff">Affiliate</span> tag. You pay nothing extra, each list is alphabetical, and the facts above are the same whether a broker pays or not.</p>
       <p>Clicks on “Visit site” may be counted (just a number per broker, no personal data) to see which links people use.</p></div>`;
-    h += `<p class="fine">Facts checked on ${esc(fmtDate(B.checked, { day: "numeric", month: "long", year: "numeric" }))}. Fees and conditions change, so check the broker's own price list before opening an account. Investment Center Signals isn't a broker and this isn't investment advice. When you invest, your capital is at risk.</p>`;
-    return { html: h, after: () => { if (location.hash === "#brokers-about") setTimeout(() => document.getElementById("brokers-about")?.scrollIntoView(), 0); } };
+    h += `<p class="fine">Facts checked on ${esc(fmtDate(B.checked, { day: "numeric", month: "long", year: "numeric" }))}. Fees and conditions change, so check the platform's own price list before opening an account. Investment Center Signals isn't a broker and this isn't investment advice. When you invest, your capital is at risk; crypto prices can swing very sharply.</p>`;
+    const target = location.hash.slice(1);
+    return { html: h, after: () => { if (target !== "brokers") setTimeout(() => document.getElementById(target)?.scrollIntoView(), 0); } };
+  }
+
+  // ------------------------------------------------------------------ more
+  // The phone tab bar has room for six buttons; everything else is listed here.
+  function viewMore() {
+    const row = (href, icon, title, sub) => `<a href="${href}">${icon}<span><b>${title}</b><small>${sub}</small></span><span aria-hidden="true">›</span></a>`;
+    let h = header("More");
+    h += `<nav class="morelist" aria-label="More sections">
+      ${row("#calendar", `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5" width="17" height="15.5" rx="2"/><path d="M3.5 10h17"/><path d="M8 3v4"/><path d="M16 3v4"/><path d="M7.5 14h2"/><path d="M11 14h2"/><path d="M14.5 14h2"/><path d="M7.5 17h2"/></svg>`, "Calendar", "Upcoming earnings, IPOs and economic data")}
+      ${row("#brokers", `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9.5 12 4l9 5.5"/><path d="M4.5 10v8"/><path d="M9.5 10v8"/><path d="M14.5 10v8"/><path d="M19.5 10v8"/><path d="M3 20.5h18"/></svg>`, "Brokers", "Where to buy stocks, ETFs and crypto from Italy")}
+      ${row("#notify", `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="2.5" width="12" height="19" rx="2.5"/><path d="M11 18.5h2"/></svg>`, "Phone alerts", "Get a notification when a strategy you follow alerts")}
+    </nav>`;
+    h += `<p class="fine"><a href="#brokers-about" style="color:inherit">Affiliate disclosure</a> · Investment Center Signals shows information about price patterns. It doesn't trade and isn't investment advice.</p>`;
+    return h;
   }
 
   // --------------------------------------------------------------- router
@@ -2315,12 +2365,12 @@ canvas.hm { display: block; touch-action: pan-y; }
 
   function route() {
     const r = (location.hash || "#alerts").slice(1);
-    const tab = r === "news" || r === "buzz" ? "news" : r.startsWith("calendar") ? "calendar" : r.startsWith("strateg") ? "strategies" : r.startsWith("stock") || r === "heatmap" ? "stocks" : r === "notify" ? "notify" : r.startsWith("brokers") ? "brokers" : "alerts";
-    const list = { alerts: viewAlerts, stocks: viewStocks, strategies: viewStrategies, notify: viewNotify, brokers: viewBrokers, news: r === "buzz" ? viewBuzz : viewNews, calendar: () => viewCalendar(r.slice(9)) }[tab];
+    const tab = r === "news" || r === "buzz" ? "news" : r.startsWith("calendar") ? "calendar" : r.startsWith("strateg") ? "strategies" : r.startsWith("stock") || r === "heatmap" ? "stocks" : r === "notify" ? "notify" : r === "more" ? "more" : r.startsWith("brokers") ? "brokers" : "alerts";
+    const list = { alerts: viewAlerts, stocks: viewStocks, strategies: viewStrategies, notify: viewNotify, brokers: viewBrokers, more: viewMore, news: r === "buzz" ? viewBuzz : viewNews, calendar: () => viewCalendar(r.slice(9)) }[tab];
     let detail = detailFor(r), sel = detail ? r : null;
     charts.length = 0;
 
-    if (WIDE.matches && tab !== "notify" && tab !== "brokers" && tab !== "news" && tab !== "calendar") {
+    if (WIDE.matches && tab !== "notify" && tab !== "brokers" && tab !== "more" && tab !== "news" && tab !== "calendar") {
       const lp = app.querySelector(".pane.list"), dp = app.querySelector(".pane.detail");
       const listTop = lp?.scrollTop || 0, detTop = dp?.scrollTop || 0;
       const L = norm(list());
@@ -2345,7 +2395,9 @@ canvas.hm { display: block; touch-action: pan-y; }
     const nsearch = app.querySelector("#newssearch");
     if (nsearch) { nsearch.addEventListener("input", () => { S.nq = nsearch.value; filterNews(); }); filterNews(); }
     // the phone tab bar has no Calendar button: it lives under News there
-    document.querySelectorAll("[data-tab]").forEach(a => a.setAttribute("aria-current", a.dataset.tab === tab || (tab === "calendar" && a.dataset.tab === "news" && a.closest(".tabs")) ? "page" : "false"));
+    // phone bar: Calendar also sits under News; More covers the pages it lists
+    const inBar = { calendar: "more", brokers: "more", notify: "more" }[tab] || tab;
+    document.querySelectorAll("[data-tab]").forEach(a => a.setAttribute("aria-current", (a.closest(".tabs") ? a.dataset.tab === inBar : a.dataset.tab === tab) ? "page" : "false"));
     S.routed = true;
     if (tab === "alerts" && !r.startsWith("alert-")) markSeen();
     updateBadge();
@@ -2643,7 +2695,7 @@ canvas.hm { display: block; touch-action: pan-y; }
     await loadMarket(m);
     S.lastSel = null; S.lastTab = null;
     const tab = (location.hash || "#alerts").slice(1);
-    const base = tab.startsWith("strateg") ? (tab.startsWith("strategy-") ? tab : "strategies") : tab.startsWith("stock") || tab === "heatmap" ? "stocks" : tab === "news" || tab === "buzz" ? tab : tab.startsWith("calendar") ? tab : tab === "notify" ? "notify" : tab.startsWith("brokers") ? "brokers" : "alerts";
+    const base = tab.startsWith("strateg") ? (tab.startsWith("strategy-") ? tab : "strategies") : tab.startsWith("stock") || tab === "heatmap" ? "stocks" : tab === "news" || tab === "buzz" ? tab : tab.startsWith("calendar") ? tab : tab === "notify" ? "notify" : tab === "more" ? "more" : tab.startsWith("brokers") ? "brokers" : "alerts";
     if ("#" + base !== location.hash) location.hash = base; else route();
     scrollTo(0, 0);
   }

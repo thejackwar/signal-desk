@@ -14,7 +14,9 @@ async function loadBrokers(env) {
   const r = await fetch(site + "data/brokers.json", { cf: { cacheTtl: 300, cacheEverything: true } });
   if (!r.ok) throw new Error(`brokers.json: HTTP ${r.status}`);
   const js = await r.json();
-  return { site, brokers: Array.isArray(js.brokers) ? js.brokers : [] };
+  // brokers.json has sections (stocks, crypto), each with its own list; older files had one flat list
+  const brokers = Array.isArray(js.sections) ? js.sections.flatMap(x => x.brokers || []) : Array.isArray(js.brokers) ? js.brokers : [];
+  return { site, brokers };
 }
 
 async function count(env, id) {

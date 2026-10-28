@@ -1,50 +1,130 @@
 {
   "checked": "2026-10-28",
-  "_how_to_edit": "Brokers are shown in alphabetical order. To use an affiliate link: replace 'url' with the link the affiliate program gives you and set 'affiliate' to true (that shows the Affiliate tag). Keep 'url' pointing at the stock/ETF account, never a CFD account. Update 'checked' whenever you re-check the facts.",
-  "brokers": [
+  "_how_to_edit": "Two sections: stocks & ETFs, and crypto. Inside each, brokers are shown in alphabetical order. To use an affiliate link: replace 'url' with the link the affiliate program gives you and set 'affiliate' to true (that shows the Affiliate tag). Keep 'url' pointing at the stock/ETF or spot crypto account, never CFDs, futures or margin. Only list crypto platforms with an EU MiCA licence (check the ESMA register). Update 'checked' whenever you re-check the facts. Broker ids must be unique across both sections.",
+  "sections": [
     {
-      "id": "directa",
-      "name": "Directa",
-      "url": "https://www.directa.it/",
-      "affiliate": false,
-      "fees": "Italian shares about €5 flat, or 0.19% (min €1.50, max €18). US shares $9. Many ETFs €0 on orders from €1,000.",
-      "tax": "both",
-      "tax_text": "You choose: Directa pays the taxes for you (amministrato) or you declare them (dichiarativo).",
-      "regulator": "CONSOB and Banca d'Italia (Italy)",
-      "good_to_know": "Italian broker. Real-time quotes cost extra; delayed quotes are free."
+      "id": "stocks",
+      "title": "Best for stocks & ETFs",
+      "intro": "Regulated brokers for buying shares and ETFs. Use these for the stock strategies in this app.",
+      "brokers": [
+        {
+          "id": "directa",
+          "name": "Directa",
+          "url": "https://www.directa.it/",
+          "affiliate": false,
+          "fees": "Italian shares about €5 flat, or 0.19% (min €1.50, max €18). US shares $9. Many ETFs €0 on orders from €1,000.",
+          "tax": "both",
+          "tax_text": "You choose: Directa pays the taxes for you (amministrato) or you declare them (dichiarativo).",
+          "regulator": "CONSOB and Banca d'Italia (Italy)",
+          "good_to_know": "Italian broker. Real-time quotes cost extra; delayed quotes are free."
+        },
+        {
+          "id": "fineco",
+          "name": "Fineco",
+          "url": "https://finecobank.com/it/",
+          "affiliate": false,
+          "fees": "Italian shares and ETFs €2.95–€19 per order, US shares $3.95–$12.95, cheaper the more you trade each month.",
+          "tax": "amministrato",
+          "tax_text": "Fineco works out and pays the taxes for you (amministrato).",
+          "regulator": "Banca d'Italia and CONSOB (Italy)",
+          "good_to_know": "Italian bank, so the current account, cards and investing sit in one place. Check which account type you open, as fees differ."
+        },
+        {
+          "id": "scalable",
+          "name": "Scalable Capital",
+          "url": "https://it.scalable.capital/",
+          "affiliate": false,
+          "fees": "€0.99 per order on the free plan. With PRIME+ (€4.99/month), €0 on orders over €250.",
+          "tax": "both",
+          "tax_text": "Since September 2026 Scalable pays the taxes for you by default (amministrato); you can switch to dichiarativo.",
+          "regulator": "BaFin and Bundesbank (Germany), Banca d'Italia for the Italian branch",
+          "good_to_know": "German bank with a Milan branch and an Italian IBAN for new clients. Free ETF savings plans from €1."
+        },
+        {
+          "id": "trading212",
+          "name": "Trading 212",
+          "url": "https://www.trading212.com/it",
+          "affiliate": false,
+          "fees": "€0 commission on stocks and ETFs. 0.15% currency fee when you buy something not priced in euros.",
+          "tax": "dichiarativo",
+          "tax_text": "You declare and pay the taxes yourself (dichiarativo, quadri RT and RW).",
+          "regulator": "CySEC (Cyprus) for EU clients",
+          "good_to_know": "Open the Invest account, not the CFD account. Fractional shares from €1."
+        }
+      ]
     },
     {
-      "id": "fineco",
-      "name": "Fineco",
-      "url": "https://finecobank.com/it/",
-      "affiliate": false,
-      "fees": "Italian shares and ETFs €2.95–€19 per order, US shares $3.95–$12.95, cheaper the more you trade each month.",
-      "tax": "amministrato",
-      "tax_text": "Fineco works out and pays the taxes for you (amministrato).",
-      "regulator": "Banca d'Italia and CONSOB (Italy)",
-      "good_to_know": "Italian bank, so the current account, cards and investing sit in one place. Check which account type you open, as fees differ."
-    },
-    {
-      "id": "scalable",
-      "name": "Scalable Capital",
-      "url": "https://it.scalable.capital/",
-      "affiliate": false,
-      "fees": "€0.99 per order on the free plan. With PRIME+ (€4.99/month), €0 on orders over €250.",
-      "tax": "both",
-      "tax_text": "Since September 2026 Scalable pays the taxes for you by default (amministrato); you can switch to dichiarativo.",
-      "regulator": "BaFin and Bundesbank (Germany), Banca d'Italia for the Italian branch",
-      "good_to_know": "German bank with a Milan branch and an Italian IBAN for new clients. Free ETF savings plans from €1."
-    },
-    {
-      "id": "trading212",
-      "name": "Trading 212",
-      "url": "https://www.trading212.com/it",
-      "affiliate": false,
-      "fees": "€0 commission on stocks and ETFs. 0.15% currency fee when you buy something not priced in euros.",
-      "tax": "dichiarativo",
-      "tax_text": "You declare and pay the taxes yourself (dichiarativo, quadri RT and RW).",
-      "regulator": "CySEC (Cyprus) for EU clients",
-      "good_to_know": "Open the Invest account, not the CFD account. Fractional shares from €1."
+      "id": "crypto",
+      "title": "Best for crypto",
+      "intro": "Exchanges with an EU MiCA licence, which every platform serving Italy has needed since July 2026. Use these for the crypto strategies in this app.",
+      "brokers": [
+        {
+          "id": "bitpanda",
+          "name": "Bitpanda",
+          "url": "https://www.bitpanda.com/it",
+          "affiliate": false,
+          "fees": "0%–2.49% per trade depending on the coin and how you pay, mostly built into the price you see.",
+          "tax": "dichiarativo",
+          "tax_text": "You declare and pay the taxes yourself (quadri RT and RW).",
+          "regulator": "Austria (FMA), MiCA licence",
+          "good_to_know": "European platform with a simple app. Also offers fractional stocks, ETFs and precious metals."
+        },
+        {
+          "id": "coinbase",
+          "name": "Coinbase",
+          "url": "https://www.coinbase.com/it",
+          "affiliate": false,
+          "fees": "Simple buys cost around 1.5% or more. Advanced Trade is much cheaper, and its fees fall as your monthly volume grows.",
+          "tax": "dichiarativo",
+          "tax_text": "You declare and pay the taxes yourself (quadri RT and RW).",
+          "regulator": "Luxembourg (CSSF), MiCA licence",
+          "good_to_know": "Easiest to start with. Use Advanced Trade to keep fees down; paying by card costs about 4%, bank transfer is free."
+        },
+        {
+          "id": "conio",
+          "name": "Conio",
+          "url": "https://www.conio.com/",
+          "affiliate": false,
+          "fees": "Charged as a margin on each buy and sell; see Conio's price list.",
+          "tax": "check",
+          "tax_text": "Ask Conio whether it pays the taxes for you; otherwise you declare them yourself (quadri RT and RW).",
+          "regulator": "CONSOB and Banca d'Italia (Italy), MiCA licence",
+          "good_to_know": "Italian, Bitcoin-first app. Also behind the crypto offer in some Italian banks' apps."
+        },
+        {
+          "id": "cryptosmart",
+          "name": "Cryptosmart",
+          "url": "https://www.cryptosmart.it/",
+          "affiliate": false,
+          "fees": "Charged on each trade; see Cryptosmart's price list.",
+          "tax": "amministrato",
+          "tax_text": "Pays the taxes for you (amministrato), free since April 2026, including the 0.2% yearly tax on holdings.",
+          "regulator": "CONSOB and Banca d'Italia (Italy), MiCA licence",
+          "good_to_know": "Italian. The first exchange in Italy to handle crypto taxes as sostituto d'imposta."
+        },
+        {
+          "id": "kraken",
+          "name": "Kraken",
+          "url": "https://www.kraken.com/it",
+          "affiliate": false,
+          "fees": "Kraken Pro from 0.40% (maker) and 0.80% (taker) at the lowest volume tier. Instant Buy costs more.",
+          "tax": "dichiarativo",
+          "tax_text": "You declare and pay the taxes yourself (quadri RT and RW).",
+          "regulator": "Ireland (Central Bank of Ireland), MiCA licence",
+          "good_to_know": "Cheapest of the big exchanges if you use Kraken Pro. Skip the futures and margin sections."
+        },
+        {
+          "id": "youngplatform",
+          "name": "Young Platform",
+          "url": "https://youngplatform.com/",
+          "affiliate": false,
+          "fees": "Charged as a spread on each buy and sell, lower in the Pro app; see Young Platform's price list.",
+          "tax": "dichiarativo",
+          "tax_text": "You declare and pay the taxes yourself; the app offers a tax report to help.",
+          "regulator": "CONSOB and Banca d'Italia (Italy), MiCA licence",
+          "good_to_know": "Italian (Turin). App in Italian, made for beginners."
+        }
+      ]
     }
   ]
 }
