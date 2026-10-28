@@ -869,7 +869,6 @@ canvas.hm { display: block; touch-action: pan-y; }
     h += healthCard();
     if (isCrypto()) h += heatmapCard() + moversStrip();
     h += `<input class="search" id="stocksearch" type="search" placeholder="${L().search}" autocomplete="off" aria-label="Search" value="${esc(S.q || "")}">`;
-    if (!hasSurge || (sort === "week" && daysKnown < 7)) h += `<div class="demo" style="margin:0 0 10px">The app builds its own daily history of mentions. "vs a usual day" appears after 3 days of updates, and the 7-day totals after 7 days (${daysKnown} day${daysKnown > 1 ? "s" : ""} so far).</div>`;
     h += `<div class="tools" style="margin-bottom:6px"><label>Sort</label><div class="seg sm" role="group" aria-label="Sort stocks">${Object.entries(keys).map(([k, [t]]) =>
       `<button data-ssort="${k}" aria-pressed="${sort === k}">${t}</button>`).join("")}</div></div><div class="rows" id="stockrows">`;
     for (const r of list) {
@@ -1439,6 +1438,7 @@ canvas.hm { display: block; touch-action: pan-y; }
     h += `<p class="tag" style="font-size:14px;margin:6px 0 12px">How many news articles mentioned each ${L().one} in the last 24 hours${hasSurge ? ", and how that compares with a usual day" : ""}.</p>`;
     if (trending.length) h += `<div class="trend"><span class="lbl">${isCrypto() ? "🔥 Trending in the news" : "Trending in the news"}</span><div class="tcards">${trending.map(m =>
       `<a class="tcard" href="#stock-${esc(m.ticker)}">${isCrypto() ? coin(m.ticker, 28) : ""}<span class="tk">${esc(disp(m.ticker))}</span><b>×${m.surge.toFixed(1)}</b><small>${cnt(m)} articles</small></a>`).join("")}</div></div>`;
+    if (!hasSurge || (sort === "week" && daysKnown < 7)) h += `<div class="demo" style="margin:0 0 10px">The app builds its own daily history of mentions. "vs a usual day" appears after 3 days of updates, and the 7-day totals after 7 days (${daysKnown} day${daysKnown > 1 ? "s" : ""} so far).</div>`;
     h += `<div class="tools" style="margin-bottom:6px"><label>Sort</label><div class="seg sm" role="group" aria-label="Sort">${[["last24", "Most mentioned"], ["surge", "Biggest surge"], ["week", "Last 7 days"]].map(([k, t]) =>
       `<button data-bsort="${k}" aria-pressed="${sort === k}">${t}</button>`).join("")}</div></div>`;
     const key = sort === "week" ? "week" : "last24", mx = Math.max(...items.map(m => m[key] || 0)) || 1;
@@ -1460,7 +1460,7 @@ canvas.hm { display: block; touch-action: pan-y; }
     if (!m) return "";
     const vs = m.surge == null ? "vs a usual day: after 3 days of history" : m.surge >= 1.5 ? `<b class="up">×${m.surge.toFixed(1)}</b> a usual day` : m.surge < .6 ? `<b class="down">×${m.surge.toFixed(1)}</b>, quieter than usual` : `about normal (×${m.surge.toFixed(1)})`;
     return `<div class="card mcard"><div class="hd"><h3>News mentions</h3><a href="#buzz" style="font-size:12.5px;color:var(--amber);text-decoration:none">Ranking ›</a></div>
-      <div class="mstat"><div><span>Last 24 hours</span><b>${cnt(m)}</b><small>${vs}</small></div><div><span>Last 7 days</span><b>${m.week == null ? "100+" : m.week.toLocaleString("en-US")}</b><small>${m.usual != null ? "usual day " + Math.round(m.usual).toLocaleString("en-US") : "articles"}</small></div></div>
+      <div class="mstat"><div><span>Last 24 hours</span><b>${cnt(m)}</b><small>${vs}</small></div><div><span>Last 7 days</span><b>${m.week == null ? "–" : m.week.toLocaleString("en-US")}</b><small>${m.usual != null ? "usual day " + Math.round(m.usual).toLocaleString("en-US") : "articles"}</small></div></div>
       ${bars(m.series, 300, 54)}<div class="gscale"><span>30 days ago</span><span>today</span></div></div>`;
   }
 
