@@ -14,6 +14,7 @@ docs/                    the website (served by GitHub Pages)
   data/backtest.json     backtest results                 (written by engine/backtest.py)
   data/stocks.json       stock list + market health       (written by engine/scan.py)
   data/stocks/           one-year chart per stock
+  trendlines.html/.js    automatic trendlines page (data from worker/)
 engine/
   strategies.py          the 9 strategy detectors (shared by scanner and examples)
   scan.py                daily scanner
@@ -74,6 +75,16 @@ steps) and 30 days from hourly candles. Data, in order of preference: Binance BT
 (blocked from GitHub's US servers), OKX BTC-USDT perpetual, Yahoo BTC-USD (volume as a
 stand-in when open interest isn't available). It's a model, like the well-known heatmap
 sites, not exchange data.
+
+## Trendlines
+
+`docs/trendlines.html` (side menu → *Trendlines*, or the button on any stock page): type an
+S&P 100 ticker or SPY and get W, D, 4H, 1H, 30m, 15m and 5m charts with the trendlines drawn
+automatically, plus a table of the line levels and the bias per timeframe. Same rules as
+`trendlines.py` in the sp500-bot repo (`docs/trendlines.js` is a line-for-line port;
+`tests/trendlines/test_parity.py` checks both give identical lines). The candles come from Alpaca
+through a small free Cloudflare Worker that keeps the keys off the website: setup in
+`worker/README.md`.
 
 ## News
 
