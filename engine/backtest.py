@@ -48,6 +48,7 @@ TREND = {"ma200", "golden_cross", "donchian"}   # hold until the opposite alert
 START_CAPITAL = 10_000
 TRADE_SIZE = 1_000      # "take every trade": each alert is a EUR 1,000 position
 BENCH = "SPY"           # buy-and-hold comparison on the strategies page
+ACCOUNT = 100_000       # strategies page: each strategy run as a EUR 100,000 account vs SPY
 BINS = np.arange(-0.20, 0.2001, 0.025)        # histogram of 20-day results
 
 
@@ -113,6 +114,17 @@ def trade_summary(trades: list[dict]) -> dict:
     return out
 
 
+def weekly_account(pos: pd.DataFrame, rets: pd.DataFrame, weeks: pd.Series) -> list[int]:
+    """A EUR ACCOUNT account that follows the alerts: the money is split equally across every
+    open position (+1 long, -1 short) and rebalanced daily; with nothing open it sits in cash at 0%.
+    Value at the last session of every week. No costs, taxes, borrow fees or slippage."""
+    held = pos.shift(1).fillna(0).where(rets.notna(), 0)
+    k = (held != 0).sum(axis=1)
+    daily = ((rets.fillna(0) * held).sum(axis=1) / k.replace(0, np.nan)).fillna(0)
+    eq = ACCOUNT * (1 + daily).cumprod()
+    return [round(float(v)) for v in eq.reindex(weeks.values)]
+
+
 def run(data: dict[str, pd.DataFrame]) -> dict:
     closes = pd.DataFrame({t: df["close"] for t, df in data.items()}).sort_index()
     rets = closes.pct_change()
@@ -124,11 +136,13 @@ def run(data: dict[str, pd.DataFrame]) -> dict:
         fwd = (closes.shift(-h) / closes - 1).stack()
         base[h] = {"avg": fwd.mean(), "up": (fwd > 0).mean()}
 
-    out = {}
+    weeks = closes.index.to_series().resample("W-FRI").last().dropna()   # last session of each week
+    out = {"_weeks": weeks}
     for sid, fn in REGISTRY.items():
         print(f"  {sid}...", flush=True)
         rows, trades = [], []
         pos = pd.DataFrame(0.0, index=closes.index, columns=closes.columns)
+        pos_ls = pos.copy()
         for t, df in data.items():
             try:
                 res = fn(df)
@@ -167,6 +181,15 @@ def run(data: dict[str, pd.DataFrame]) -> dict:
                 if i < exit_at:
                     held[i] = 1  # held at this close -> earns the next day's return
             pos.loc[df.index, t] = held
+            # same, but a bearish alert also opens a short (the account view's "long + short")
+            held_ls = np.zeros(n)
+            side, exit_at = 0, -1
+            for i in range(n):
+                if sig[i] != 0:
+                    side, exit_at = int(sig[i]), (n if sid in TREND else i + HOLD_DAYS)
+                if i < exit_at:
+                    held_ls[i] = side
+            pos_ls.loc[df.index, t] = held_ls
 
         sig_df = pd.DataFrame(rows)
         result = {"rule": ("Buy on a bullish alert, sell on the next bearish alert"
@@ -213,15 +236,15 @@ def run(data: dict[str, pd.DataFrame]) -> dict:
             "invested": pct((k > 0).mean()),
             "avg_positions": round(float(k[k > 0].mean()), 1) if (k > 0).any() else 0,
         }
+        result["account"] = {"all": weekly_account(pos_ls, rets, weeks), "long": weekly_account(pos, rets, weeks)}
         result["trades"] = trade_summary(trades)
         out[sid] = result
     return out
 
 
-def spy_hold(start: pd.Timestamp, end: pd.Timestamp, demo: bool) -> dict | None:
-    """SPY prices for the 'buy and hold the S&P 500' line on the strategies page: the first
-    close of every year in the backtest window plus the last close, so the app can work out
-    buy-and-hold from any starting year. Dividends are included (adjusted prices)."""
+def spy_hold(weeks: pd.Series, demo: bool) -> dict | None:
+    """A EUR ACCOUNT account that buys SPY and holds it, valued on the same weekly sessions as the
+    strategy accounts (dividends reinvested: adjusted prices). Rebased to ACCOUNT at the first week."""
     if demo:
         return None
     try:
@@ -229,17 +252,16 @@ def spy_hold(start: pd.Timestamp, end: pd.Timestamp, demo: bool) -> dict | None:
     except Exception as e:  # a missing benchmark must never sink the backtest
         print(f"  ! {BENCH}: {e}")
         return None
-    naive = lambda ts: ts.tz_localize(None) if ts.tzinfo else ts
     c = df["close"]
     if c.index.tz is not None:
         c.index = c.index.tz_localize(None)
-    c = c[(c.index >= naive(start)) & (c.index <= naive(end))]
-    if c.empty:
+    days = pd.DatetimeIndex(weeks.values)
+    days = days.tz_localize(None) if days.tz is not None else days
+    v = c.reindex(c.index.union(days)).ffill().reindex(days)   # crypto weeks can end on a weekend
+    if v.isna().all():
         return None
-    first = c.groupby(c.index.year).head(1)
-    return {"ticker": BENCH,
-            "years": [{"year": int(d.year), "date": f"{d:%Y-%m-%d}", "close": round(float(v), 4)} for d, v in first.items()],
-            "last": {"date": f"{c.index[-1]:%Y-%m-%d}", "close": round(float(c.iloc[-1]), 4)}}
+    v = v.bfill()
+    return {"ticker": BENCH, "account": [round(float(x)) for x in ACCOUNT * v / v.iloc[0]]}
 
 
 def main():
@@ -255,9 +277,10 @@ def main():
         sys.exit("No price data downloaded; leaving the previous backtest untouched.")
     print(f"Backtesting {len(data)} tickers")
     strategies = run(data)
+    weeks = strategies.pop("_weeks")
     start = min(df.index[0] for df in data.values())
     end = max(df.index[-1] for df in data.values())
-    spy = spy_hold(start, end, args.demo)
+    spy = spy_hold(weeks, args.demo)
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(json.dumps({
         "generated_at": datetime.now(timezone.utc).isoformat(timespec="minutes"),
@@ -268,6 +291,7 @@ def main():
         "start": f"{start:%Y-%m-%d}", "end": f"{end:%Y-%m-%d}",
         "capital": START_CAPITAL,
         "trade_size": TRADE_SIZE,
+        "account": {"size": ACCOUNT, "dates": [f"{d:%Y-%m-%d}" for d in weeks.values.astype("datetime64[D]").tolist()]},
         "strategies": strategies,
         "spy": spy,
     }, separators=(",", ":")))
