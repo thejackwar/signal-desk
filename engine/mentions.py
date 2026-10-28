@@ -5,8 +5,8 @@ For every company and coin the app tracks, counts the news articles that
 mention it, using Google News search (news sites worldwide, English).
 
 Google returns at most 100 articles per search, so the window narrows for
-busy names: 30 days -> 7 days -> 24 hours -> 4 hours (scaled up to a day and
-marked as an estimate). Each run also stores that day's 24-hour count, so the
+busy names: 24 hours -> 4 hours -> 1 hour (scaled up to a day and marked as
+an estimate). Each run also stores that day's 24-hour count, so the
 "vs a usual day" comparison builds up over the days.
 
   python engine/mentions.py                    # both markets
@@ -100,12 +100,12 @@ def google(q: str, window: str) -> list[datetime] | None:
 def count(q: str, days: list[str]) -> dict | None:
     """Daily article counts. Widest window first; narrow it while Google's 100-article cap is hit."""
     now = datetime.now(timezone.utc)
-    for window, hours in (("30d", 720), ("7d", 168), ("1d", 24), ("4h", 4)):
+    for window, hours in (("1d", 24), ("4h", 4), ("1h", 1)):
         dates = google(q, window)
         time.sleep(PAUSE)
         if dates is None:
             return None
-        if len(dates) < CAP * .95 or window == "4h":
+        if len(dates) < CAP * .95 or window == "1h":
             break
     per = {}
     for d in dates:
@@ -116,27 +116,26 @@ def count(q: str, days: list[str]) -> dict | None:
     last24 = sum(1 for d in dates if (now - d).total_seconds() <= 86400)
     if hours < 24:                                   # only a few hours seen: scale up to a day
         last24 = round(len(dates) * 24 / hours)
-    series = [per.get(d, 0) if d > known_from or hours >= 720 else None for d in days]
-    return {"series": series, "last24": last24, "window": window, "estimate": hours < 24 or capped}
+    return {"last24": last24, "window": window, "estimate": hours < 24 or capped}
 
 
 def summarise(t: str, name: str, c: dict, hist: dict) -> dict:
-    today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
-    # history: one 24h count per day, kept across runs (most recent run of the day wins)
-    hist = {d: v for d, v in hist.items() if d >= (datetime.now(timezone.utc) - timedelta(days=DAYS)).strftime("%Y-%m-%d")}
+    """Google's wide-window searches lean towards recent articles, so daily history only comes
+    from this script's own runs: one 24-hour count stored per day."""
+    now = datetime.now(timezone.utc)
+    today = now.strftime("%Y-%m-%d")
+    hist = {d: v for d, v in hist.items() if d >= (now - timedelta(days=DAYS)).strftime("%Y-%m-%d")}
     hist[today] = c["last24"]
-    prev = [v for d, v in sorted(hist.items()) if d < today]
-    # from an uncapped 30-day search we know the real daily counts too
-    full = [v for v in c["series"][:-1] if v is not None]
-    usual_src = prev[-14:] if len(prev) >= 3 else (full[-15:-1] if c["window"] == "30d" else [])
-    usual = float(np.mean(usual_src)) if usual_src else None
-    series = [hist.get(d) if hist.get(d) is not None else v for d, v in zip(DAYS_LIST, c["series"])]
+    prev = [v for d, v in sorted(hist.items()) if d < today][-14:]
+    usual = float(np.mean(prev)) if len(prev) >= 3 else None
+    last7 = [hist[d] for d in DAYS_LIST[-7:] if d in hist]
     return {
-        "ticker": t, "name": name, "series": series,
+        "ticker": t, "name": name, "series": [hist.get(d) for d in DAYS_LIST],
         "last24": c["last24"], "estimate": c["estimate"], "window": c["window"],
-        "week": int(sum(v for v in c["series"][-8:] if v is not None)) if c["window"] in ("30d", "7d") else None,
+        "week": int(sum(last7)) if len(last7) == 7 else None,
         "usual": round(usual, 1) if usual is not None else None,
         "surge": round(c["last24"] / usual, 2) if usual and usual >= 1 else None,
+        "days_known": len(hist),
         "history": hist,
     }
 
@@ -158,7 +157,8 @@ def run(market: str, demo: bool, previous: dict) -> dict:
             series = [int(x) for x in rng.poisson(base, DAYS)]
             if rng.random() < .15:
                 series[-1] = int(series[-1] * rng.uniform(2, 5))
-            c = {"series": series, "last24": series[-1], "window": "30d", "estimate": False}
+            prev_hist[t] = {d: v for d, v in zip(days[:-1], series[:-1])}
+            c = {"last24": series[-1], "window": "1d", "estimate": False}
         else:
             c = count(query_for(t, name, market), days)
             if c is None:

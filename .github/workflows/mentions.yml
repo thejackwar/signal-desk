@@ -2,7 +2,7 @@ name: News mentions
 
 on:
   schedule:
-    - cron: "20 5 * * *"    # daily, 06:20 Milan time (winter)
+    - cron: "20 */6 * * *"  # every 6 hours; the day's last run is kept in the history
   workflow_dispatch: {}
 
 permissions:

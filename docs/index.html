@@ -869,6 +869,7 @@ canvas.hm { display: block; touch-action: pan-y; }
     h += healthCard();
     if (isCrypto()) h += heatmapCard() + moversStrip();
     h += `<input class="search" id="stocksearch" type="search" placeholder="${L().search}" autocomplete="off" aria-label="Search" value="${esc(S.q || "")}">`;
+    if (!hasSurge || (sort === "week" && daysKnown < 7)) h += `<div class="demo" style="margin:0 0 10px">The app builds its own daily history of mentions. "vs a usual day" appears after 3 days of updates, and the 7-day totals after 7 days (${daysKnown} day${daysKnown > 1 ? "s" : ""} so far).</div>`;
     h += `<div class="tools" style="margin-bottom:6px"><label>Sort</label><div class="seg sm" role="group" aria-label="Sort stocks">${Object.entries(keys).map(([k, [t]]) =>
       `<button data-ssort="${k}" aria-pressed="${sort === k}">${t}</button>`).join("")}</div></div><div class="rows" id="stockrows">`;
     for (const r of list) {
@@ -1434,7 +1435,7 @@ canvas.hm { display: block; touch-action: pan-y; }
     const val = (m, k) => k === "surge" ? (m.last24 >= 5 && m.surge != null ? m.surge : -1) : (m[k] ?? -1);
     const items = M.items.filter(m => S.stockBy[m.ticker]).slice().sort((a, b) => val(b, sort) - val(a, sort) || b.last24 - a.last24);
     const trending = M.items.filter(m => m.last24 >= 5 && m.surge >= 1.5).sort((a, b) => b.surge - a.surge).slice(0, 3);
-    const hasSurge = M.items.some(m => m.surge != null);
+    const hasSurge = M.items.some(m => m.surge != null), daysKnown = Math.max(...M.items.map(m => m.days_known || 1));
     h += `<p class="tag" style="font-size:14px;margin:6px 0 12px">How many news articles mentioned each ${L().one} in the last 24 hours${hasSurge ? ", and how that compares with a usual day" : ""}.</p>`;
     if (trending.length) h += `<div class="trend"><span class="lbl">${isCrypto() ? "🔥 Trending in the news" : "Trending in the news"}</span><div class="tcards">${trending.map(m =>
       `<a class="tcard" href="#stock-${esc(m.ticker)}">${isCrypto() ? coin(m.ticker, 28) : ""}<span class="tk">${esc(disp(m.ticker))}</span><b>×${m.surge.toFixed(1)}</b><small>${cnt(m)} articles</small></a>`).join("")}</div></div>`;
@@ -1448,16 +1449,16 @@ canvas.hm { display: block; touch-action: pan-y; }
         <span style="min-width:0"><span class="tk">${esc(disp(m.ticker))}</span> ${surgeChip(m)}<span class="nm">${esc(m.name)}</span>
           <span class="mbar"><i style="width:${(v || 0) / mx * 100}%"></i></span></span>
         ${bars(m.series)}
-        <span class="q">${key === "week" ? (v == null ? "100+/wk" : v.toLocaleString("en-US")) : cnt(m)}<small>${key === "week" ? "last 7 days" : "last 24h"}</small></span></a>`;
+        <span class="q">${key === "week" ? (v == null ? "–" : v.toLocaleString("en-US")) : cnt(m)}<small>${key === "week" ? "last 7 days" : "last 24h"}</small></span></a>`;
     }).join("") + `</div>`;
-    h += `<p class="fine">Counts: ${esc(M.source)}, news sites worldwide. "~" means an estimate: the name is so busy that Google's 100-result limit was reached, so the count is scaled up from the last few hours. ×2.0 means twice as many articles as on a usual day; the comparison becomes available for every name after a few days of daily updates. Bars: daily articles over 30 days (amber = last 24h, flat = not known yet). Updated daily.</p>`;
+    h += `<p class="fine">Counts: ${esc(M.source)}, news sites worldwide. "~" means an estimate: the name is so busy that Google's 100-result limit was reached, so the count is scaled up from the last few hours. ×2.0 means twice as many articles as on a usual day (the average of the previous days the app has recorded). Bars: one per day over 30 days (amber = latest, flat = not recorded yet). Updated every 6 hours.</p>`;
     return h;
   }
 
   function mentionsCard(t) {
     const m = S.mentions?.items?.find(x => x.ticker === t);
     if (!m) return "";
-    const vs = m.surge == null ? "comparison builds up over the next days" : m.surge >= 1.5 ? `<b class="up">×${m.surge.toFixed(1)}</b> a usual day` : m.surge < .6 ? `<b class="down">×${m.surge.toFixed(1)}</b>, quieter than usual` : `about normal (×${m.surge.toFixed(1)})`;
+    const vs = m.surge == null ? "vs a usual day: after 3 days of history" : m.surge >= 1.5 ? `<b class="up">×${m.surge.toFixed(1)}</b> a usual day` : m.surge < .6 ? `<b class="down">×${m.surge.toFixed(1)}</b>, quieter than usual` : `about normal (×${m.surge.toFixed(1)})`;
     return `<div class="card mcard"><div class="hd"><h3>News mentions</h3><a href="#buzz" style="font-size:12.5px;color:var(--amber);text-decoration:none">Ranking ›</a></div>
       <div class="mstat"><div><span>Last 24 hours</span><b>${cnt(m)}</b><small>${vs}</small></div><div><span>Last 7 days</span><b>${m.week == null ? "100+" : m.week.toLocaleString("en-US")}</b><small>${m.usual != null ? "usual day " + Math.round(m.usual).toLocaleString("en-US") : "articles"}</small></div></div>
       ${bars(m.series, 300, 54)}<div class="gscale"><span>30 days ago</span><span>today</span></div></div>`;
