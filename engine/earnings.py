@@ -155,6 +155,7 @@ def main():
         fresh += 1
         log(f"{k + 1}/{len(tickers)} {t}: {len(events)} reports")
     log(f"updated {fresh}, failed {len(failed)}: {' '.join(failed)}")
+    print(f"::notice title=Earnings reactions::updated {fresh} stocks, failed {len(failed)}: {' '.join(failed)}", flush=True)
 
     # the index covers every stock with a file (this run's or an earlier one's)
     index, totals = [], {}          # totals[year][beat|miss|all][metric] = [n, ups, sum]
@@ -185,4 +186,10 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    import traceback
+    try:
+        main()
+    except BaseException as ex:  # noqa: BLE001 - shown as a GitHub annotation, then re-raised
+        tb = traceback.format_exc().strip().replace("\n", "%0A")
+        print(f"::error title=Earnings reactions failed::{tb}", flush=True)
+        raise
