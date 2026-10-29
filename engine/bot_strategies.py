@@ -137,7 +137,7 @@ def _stop_trades(df, entries: dict, exit_rule="trail", floor_stop=False, no_chas
             skip = (no_chase is not None and o[i] > c[a] * (1 + no_chase)) or o[i] <= stop \
                 or (target is not None and o[i] >= target)
             if not skip:
-                pos = {"side": 1, "sig": a, "in": i, "in_px": o[i], "stop": stop, "risk": o[i] - stop,
+                pos = {"side": 1, "sig": a, "in": i, "in_px": o[i], "stop": stop, "stop0": stop, "risk": o[i] - stop,
                        "target": target, "name": name, "out": None, "out_px": None, "exit_sig": None, "be": False}
                 trades.append(pos)
         exited = False
@@ -182,6 +182,8 @@ def _deck(df: pd.DataFrame, live=False, ma50=False, floor_stop=False) -> Strateg
             entries[i] = (f[2], f[1], None)
             picked[i] = f
     trades = _stop_trades(df, entries, "trail", floor_stop=floor_stop, no_chase=0.02 if live else None)
+    for t in trades:
+        t["rank"] = picked[t["sig"]][0]     # bot money rules: multi-bar first, then short-term, then candles
     notes, stops, shapes = {}, {}, []
     low20 = df["low"].rolling(TRAIL, min_periods=TRAIL).min().shift(1)
     for t in trades:
@@ -273,6 +275,8 @@ def pattern_trader(df: pd.DataFrame) -> StrategyResult:
                for i, (p, s) in brk.items() if p["name"] in names}
         trades += _stop_trades(df, ent, rule)
     trades = _one_at_a_time(trades, len(df))
+    for t in trades:
+        t["rank"] = 0 if t.get("name") == "ABCD" else 1   # the bot placed ABCD (best record) first
     notes, stops, shapes = {}, {}, []
     for t in trades:
         i = t["sig"]
@@ -519,3 +523,19 @@ BOT_RULES = {
 }
 for _sid in BOT_REGISTRY:
     BOT_RULES.setdefault(_sid, "Buy at the next open after the signal, sell at the next open after the rule's exit")
+
+# The trading bot's own money rules, for the second account on each strategy page (backtest.py
+# bot_account). Stocks: risk 1% of equity between entry and stop, at most `cap` of equity per stock,
+# at most 100% invested, `max_pos` positions and `max_new` new trades a day. Crypto: the whole
+# account in one trade at a time (the bot traded Bitcoin only, SIZE = 1.0).
+DECK_MONEY = {"risk": 0.01, "cap": 0.10, "max_pos": 25, "max_new": 8,
+              "text": "risk 1% per trade, max 10% per stock, max 25 positions, 8 new a day"}
+BOT_MONEY = {sid: DECK_MONEY for sid in ("deck_live", "deck_v6", "deck_ma50", "deck_v8")}
+BOT_MONEY["pattern_trader"] = {"risk": 0.01, "cap": 0.20, "max_pos": 10, "max_new": 3,
+                               "text": "risk 1% per trade, max 20% per stock, max 10 positions, 3 new a day"}
+BOT_MONEY["breakout_bot"] = {"risk": 0.01, "cap": 0.20, "max_pos": 10, "max_new": 3,
+                             "text": "risk 1% per trade (stop 2 ATR), max 20% per stock, max 10 positions, 3 new a day"}
+for _sid in BOT_REGISTRY:
+    BOT_MONEY.setdefault(_sid, {"risk": None, "cap": 1.0, "max_pos": 1, "max_new": 1,
+                                "text": "the whole account in one trade at a time"})
+

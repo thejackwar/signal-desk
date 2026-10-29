@@ -2213,6 +2213,17 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
         <div><span>Worst drop</span><b class="${e.maxdd >= e.bench_maxdd ? "up" : "down"}">${sgn(e.maxdd)}</b><small>Buy &amp; hold ${sgn(e.bench_maxdd)}</small></div>
         <div><span>Time invested</span><b>${pc(e.invested)}</b><small>avg ${e.avg_positions} stocks held</small></div>
       </div>`;
+    if (r.bot_money) {      // trading-bot strategies: the same trades with the bot's own money rules
+      const M = r.bot_money, Bt = M.bot, Eq = M.equal;
+      h += `<h3 class="h3">With the bot's money rules</h3>
+        <p class="hint" style="margin-top:0">The same trades in a ${eur(B.account.size)} account, ${B.start.slice(0, 4)}–${B.end.slice(0, 4)}, sized like the trading bot did: ${esc(M.rules)}. Compared with splitting all the money equally across the open trades. No costs or taxes.</p>
+        <div class="tiles">
+          <div><span>Final value</span><b class="${Bt.final >= Eq.final ? "up" : "down"}">${eur(Bt.final)}</b><small>Equal split ${eur(Eq.final)}</small></div>
+          <div><span>Per year</span><b class="${Bt.cagr >= Eq.cagr ? "up" : "down"}">${sgn(Bt.cagr)}</b><small>Equal split ${sgn(Eq.cagr)}</small></div>
+          <div><span>Worst drop</span><b class="${Bt.maxdd >= Eq.maxdd ? "up" : "down"}">${sgn(Bt.maxdd)}</b><small>Equal split ${sgn(Eq.maxdd)}</small></div>
+          <div><span>Better here</span><b>${Bt.cagr >= Eq.cagr ? "Bot's rules" : "Equal split"}</b><small>by return per year</small></div>
+        </div>`;
+    }
     const labInd = LAB_IND[id];
     if (labInd) h += `<p style="margin:12px 0 4px"><a class="btn ghost" href="#strategylab-${labInd}">Try other settings in the Strategy Lab ›</a></p>`;
     const lst = (arr, title) => arr.length ? `<div class="bw"><h3 class="h3">${title}</h3>${arr.map(x =>

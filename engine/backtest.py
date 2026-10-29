@@ -39,7 +39,7 @@ sys.path.insert(0, str(Path(__file__).parent))
 import scan  # noqa: E402
 from scan import MARKETS, fetch_demo, fetch_real, load_tickers  # noqa: E402
 from strategies import DIP_HOLD, DIP_TP, REGISTRY, for_market  # noqa: E402
-from bot_strategies import BOT_RULES  # noqa: E402
+from bot_strategies import BOT_MONEY, BOT_RULES  # noqa: E402
 
 ROOT = Path(__file__).resolve().parent.parent
 OUT = ROOT / "docs" / "data" / "backtest.json"
@@ -198,6 +198,60 @@ def own_trade_days(t: dict, c: np.ndarray, n: int):
     return days, rets
 
 
+def bot_account(trades: list[dict], closes: pd.DataFrame, weeks: pd.Series, money: dict) -> list[int]:
+    """A EUR ACCOUNT account run with the trading bot's own money rules (BOT_MONEY) on the strategy's
+    trades: entries at their fill price, sized by risk (equity x risk / distance to the stop), at most
+    `cap` of equity per position and 100% invested, at most `max_pos` positions and `max_new` new
+    trades a day (lower rank first, then random, like the bot); risk None = everything in one trade.
+    A trade that doesn't fit is skipped. Exits at the trade's own exit price. Weekly values."""
+    C = closes.ffill().values
+    cols = {t: k for k, t in enumerate(closes.columns)}
+    n = len(closes)
+    rng = np.random.default_rng(0)
+    by_in = {}
+    for tr in trades:
+        by_in.setdefault(tr["g_in"], []).append(tr)
+    cash, pos, curve = float(ACCOUNT), {}, np.full(n, np.nan)
+    eq_prev = float(ACCOUNT)
+
+    def val(p, px):
+        return p["qty"] * (p["in_px"] + p["side"] * (px - p["in_px"]))
+    for t in range(n):
+        todays = by_in.get(t, [])
+        if todays:
+            order = sorted(todays, key=lambda x: (x["rank"], rng.random()))
+            placed = 0
+            for tr in order:
+                if tr["t"] in pos or len(pos) >= money["max_pos"] or placed >= money["max_new"]:
+                    continue
+                invested = sum(val(p, C[t - 1, cols[p["t"]]] if t else p["in_px"]) for p in pos.values())
+                room = eq_prev - invested
+                size = min(eq_prev * money["cap"], room)
+                if money["risk"] is not None:
+                    dist = (tr["in_px"] - tr["stop"]) / tr["in_px"] if tr.get("stop") is not None else None
+                    if not dist or dist <= 0:
+                        continue
+                    size = min(size, eq_prev * money["risk"] / dist)
+                if size < 1:
+                    continue
+                pos[tr["t"]] = {**tr, "qty": size / tr["in_px"]}
+                cash -= size
+                placed += 1
+        for k in [k for k, p in pos.items() if p["g_out"] == t]:
+            p = pos.pop(k)
+            cash += val(p, p["out_px"])
+        curve[t] = cash + sum(val(p, C[t, cols[p["t"]]]) for p in pos.values())
+        eq_prev = curve[t]
+    eq = pd.Series(curve, index=closes.index)
+    return [round(float(v)) for v in eq.reindex(weeks.values)]
+
+
+def acct_stats(vals: list[int], dates) -> dict:
+    """Per year, worst drop and final value of a weekly account."""
+    s = pd.Series(vals, index=pd.DatetimeIndex(dates), dtype=float).dropna()
+    return {"cagr": pct(cagr(s)), "maxdd": pct(max_drawdown(s)), "final": round(float(s.iloc[-1]))}
+
+
 def run(data: dict[str, pd.DataFrame]) -> dict:
     closes = pd.DataFrame({t: df["close"] for t, df in data.items()}).sort_index()
     rets = closes.pct_change()
@@ -219,6 +273,7 @@ def run(data: dict[str, pd.DataFrame]) -> dict:
         pos = pd.DataFrame(0.0, index=closes.index, columns=closes.columns)
         pos_ls = pos.copy()
         own = None   # strategies with their own trades: held flags and each day's return, long / long + short
+        own_list = []   # ... and their trades on the shared calendar, for the bot-money-rules account
         ex = EXITS.get(sid)
         hold = ex["hold"] if ex else HOLD_DAYS
         tp = ex["tp"] if ex else 0
@@ -239,9 +294,15 @@ def run(data: dict[str, pd.DataFrame]) -> dict:
                     own = {k: pd.DataFrame(0.0, index=closes.index, columns=closes.columns)
                            for k in ("held_l", "ret_l", "held_a", "ret_a")}
                 hl, rl, ha, ra = (np.zeros(n) for _ in range(4))
+                g = closes.index.get_indexer(idx)
                 for tr in res.trades:
                     if tr.get("in") is None:
                         continue                      # alerted on the last close, bought tomorrow
+                    own_list.append({"t": t, "side": tr["side"], "g_in": int(g[tr["in"]]), "in_px": float(tr["in_px"]),
+                                     "g_out": int(g[tr["out"]]) if tr.get("out") is not None else -1,
+                                     "out_px": float(tr["out_px"]) if tr.get("out") is not None else None,
+                                     "stop": tr.get("stop0"),
+                                     "rank": tr.get("rank", 0 if t in ("BTC-USD",) else 1)})
                     closed = tr.get("out") is not None
                     j = tr["out"] if closed else n - 1
                     px = tr["out_px"] if closed else c[n - 1]
@@ -378,6 +439,13 @@ def run(data: dict[str, pd.DataFrame]) -> dict:
                                  "long": weekly_account(None, own["ret_l"], weeks, held=own["held_l"])}
             result["turnover"] = {"all": weekly_turnover(None, None, weeks, held=own["held_a"]),
                                   "long": weekly_turnover(None, None, weeks, held=own["held_l"])}
+            # the same trades with the trading bot's money rules, next to the equal split
+            mine = [x for x in own_list if x["side"] > 0] if sid != "btc50_both" else own_list
+            bot = bot_account(mine, closes, weeks, BOT_MONEY[sid])
+            eq_key = "all" if sid == "btc50_both" else "long"
+            result["bot_money"] = {"rules": BOT_MONEY[sid]["text"], "values": bot,
+                                   "bot": acct_stats(bot, weeks.values),
+                                   "equal": acct_stats(result["account"][eq_key], weeks.values)}
         else:
             result["account"] = {"all": weekly_account(pos_ls, srets, weeks), "long": weekly_account(pos, srets, weeks)}
             result["turnover"] = {"all": weekly_turnover(pos_ls, rets, weeks), "long": weekly_turnover(pos, rets, weeks)}
