@@ -2880,16 +2880,23 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
   const toneOf = s => s >= (S.sent?.headline_cut ?? .35) ? "bull" : s <= -(S.sent?.headline_cut ?? .35) ? "bear" : "neu";
   const sentItems = () => { if (!S.sent) return {}; if (!S.sent._by) { S.sent._by = {}; (S.sent.items || []).forEach(x => S.sent._by[x.id] = x); } return S.sent._by; };
   const plural = (n, w) => `${n} ${w}${n === 1 ? "" : "s"}`;
+  // "Tone" = the headlines' own tone; "vs usual" = compared with the usual tone of all S&P 100 news this week
+  const moodRel = () => !!pref("moodRel", false) && S.sent?.baseline != null;
+  const moodOf = m => moodRel() && m.rel != null ? { mood: m.rel_mood, score: m.rel } : { mood: m.mood, score: m.score };
+  const sgn2 = v => (v >= 0 ? "+" : "−") + Math.abs(v).toFixed(2);
+  const moodSwitch = () => S.sent?.baseline == null ? "" : `<div class="seg sm" role="group" aria-label="Compare">${[[0, "Tone"], [1, "vs usual"]].map(([k, x]) =>
+    `<button data-moodrel="${k}" aria-pressed="${+moodRel() === k}">${x}</button>`).join("")}</div>`;
 
   function moodCard(t) {
     const m = S.sent?.stocks?.[t];
     if (!m) return S.sent && S.market === "stocks" ? `<div class="card"><div class="hd"><h3>News mood</h3>${moodPill("quiet")}</div><p class="hint" style="margin:8px 0 0">No headlines about ${esc(disp(t))} in the last ${S.sent.window_days || 7} days.</p></div>` : "";
-    const by = sentItems(), quiet = m.mood === "quiet", pos = Math.max(3, Math.min(97, 50 + m.score * 50));
+    const by = sentItems(), quiet = m.mood === "quiet", V = moodOf(m), pos = Math.max(3, Math.min(97, 50 + V.score * 50));
     let h = `<div class="card"><div class="hd"><h3>News mood</h3><a href="#mood" style="font-size:12.5px;color:var(--amber);text-decoration:none">All stocks ›</a></div>
-      <div style="margin-top:10px">${moodPill(m.mood)}</div>`;
+      <div style="margin-top:10px;display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap">${moodPill(quiet ? "quiet" : V.mood)}${quiet ? "" : moodSwitch()}</div>`;
     if (quiet) return h + `<p class="hint" style="margin:10px 0 0">${m.n ? `Only ${plural(m.n, "headline")} named` : "No headlines named"} ${esc(disp(t))} in the last ${S.sent.window_days} days, too few to read a mood.</p></div>`;
-    h += `<div class="mgauge" role="img" aria-label="Tone ${Math.round(m.score * 100)} on a scale from −100 bearish to +100 bullish"><b class="${m.score >= .1 ? "up" : m.score <= -.1 ? "down" : ""}" style="left:${pos}%"></b></div>
-      <div class="mscale"><span>Bearish</span><span>Neutral</span><span>Bullish</span></div>
+    h += `<div class="mgauge" role="img" aria-label="Tone ${Math.round(V.score * 100)} on a scale from −100 bearish to +100 bullish"><b class="${V.score >= .1 ? "up" : V.score <= -.1 ? "down" : ""}" style="left:${pos}%"></b></div>
+      <div class="mscale"><span>Bearish</span><span>${moodRel() ? "Usual" : "Neutral"}</span><span>Bullish</span></div>
+      ${moodRel() ? `<p class="hint" style="margin:8px 0 0">Tone ${sgn2(m.score)} against ${sgn2(S.sent.baseline)} for S&amp;P 100 news overall this week.</p>` : ""}
       <div class="mcount"><span><b class="up">${m.bull}</b> bullish</span><span><b class="down">${m.bear}</b> bearish</span><span><b>${m.neu}</b> neutral</span><span>${plural(m.n, "headline")} in ${S.sent.window_days} days${m.n48 ? ` · ${m.n48} in the last 48h` : ""}</span></div>`;
     const top = m.top.map(id => by[id]).filter(Boolean);
     if (top.length) h += `<ul class="mdrivers">${top.map(x => `<li><a href="${esc(x.url || "#")}" target="_blank" rel="noopener noreferrer"><i class="${toneOf(x.s)}"></i><span>${esc(x.title)}</span><small>${esc(x.src)} · ${esc(ago(x.t))}</small></a></li>`).join("")}</ul>`;
@@ -2905,12 +2912,15 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
     const live = rows.filter(r => r.mood !== "quiet"), quiet = rows.filter(r => r.mood === "quiet");
     // every S&P 100 stock: those with no headlines at all count as quiet too
     const none = Object.keys(S.stockBy).filter(t => !M.stocks[t]).length;
+    live.forEach(r => { const V = moodOf(r); r.mood = V.mood; r.score = V.score; });
     const up = live.filter(r => r.mood.endsWith("bullish")), dn = live.filter(r => r.mood.endsWith("bearish"));
-    h += `<p class="tag" style="font-size:14px;margin:6px 0 12px">Whether the last ${M.window_days} days of headlines about each ${L().one} sound bullish or bearish, newest counting most.</p>`;
+    h += `<p class="tag" style="font-size:14px;margin:6px 0 12px">${moodRel()
+      ? `How the last ${M.window_days} days of headlines about each ${L().one} compare with the usual tone of S&amp;P 100 news (${sgn2(M.baseline)} this week, since company news is mostly upbeat).`
+      : `Whether the last ${M.window_days} days of headlines about each ${L().one} sound bullish or bearish, newest counting most.`}</p>`;
     if (M.demo) h += `<div class="demo">Demo data: made-up headlines, so you can see how this page works.</div>`;
     h += `<div class="moodsum"><div><span>Bullish</span><b class="up">${up.length}</b></div><div><span>Neutral</span><b>${live.length - up.length - dn.length}</b></div><div><span>Bearish</span><b class="down">${dn.length}</b></div></div>`;
-    h += `<div class="tools" style="margin-bottom:6px"><label>Show</label><div class="seg sm" role="group" aria-label="Show">${[["all", "All"], ["bull", "Bullish"], ["bear", "Bearish"]].map(([k, x]) =>
-      `<button data-moodf="${k}" aria-pressed="${f === k}">${x}</button>`).join("")}</div></div>`;
+    h += `<div class="tools" style="margin-bottom:6px;flex-wrap:wrap;gap:8px 14px"><label>Show</label><div class="seg sm" role="group" aria-label="Show">${[["all", "All"], ["bull", "Bullish"], ["bear", "Bearish"]].map(([k, x]) =>
+      `<button data-moodf="${k}" aria-pressed="${f === k}">${x}</button>`).join("")}</div>${moodSwitch()}</div>`;
     const list = (f === "bull" ? up : f === "bear" ? dn : live).slice().sort((a, b) => f === "bear" ? a.score - b.score : b.score - a.score);
     const row = r => {
       const lead = by[r.top[0]], w = Math.min(50, Math.abs(r.score) * 50);
@@ -2922,7 +2932,7 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
     };
     h += list.length ? `<div class="rows">${list.map(row).join("")}</div>` : `<p class="empty">No ${f === "bull" ? "bullish" : "bearish"} stocks right now.</p>`;
     if (f === "all" && quiet.length + none) h += `<h3 class="h3">Not enough news <small style="font-weight:400;color:var(--faint)">fewer than 3 headlines</small></h3><p class="hint" style="margin:0 0 8px">${quiet.concat(Object.keys(S.stockBy).filter(t => !M.stocks[t]).map(t => ({ t }))).map(r => `<a href="#stock-${esc(r.t)}" style="color:inherit">${esc(disp(r.t))}</a>`).join(", ")}</p>`;
-    h += `<p class="fine">Headlines: ${esc(M.source)}, tagged by company. Each headline's tone is scored by ${esc(M.model)}, a free AI model trained on financial news, from −1 (bearish) to +1 (bullish). A stock's mood averages its headlines over ${M.window_days} days: a 2-day-old headline counts half as much as a new one, roundups that tag many companies count less, and a headline that doesn't name the company counts a quarter. Tone, not a forecast. Updated every hour.</p>`;
+    h += `<p class="fine">Headlines: ${esc(M.source)}, tagged by company. Each headline's tone is scored by ${esc(M.model)}, a free AI model trained on financial news, from −1 (bearish) to +1 (bullish). A stock's mood averages its headlines over ${M.window_days} days: a 2-day-old headline counts half as much as a new one, roundups that tag many companies count less, and a headline that doesn't name the company counts a quarter. "vs usual" subtracts the average tone of every S&amp;P 100 headline over the same days, weighted the same way, so a stock is bullish only if its news sounds better than the news on stocks in general. Tone, not a forecast. Updated every hour.</p>`;
     return h;
   }
 
@@ -3669,6 +3679,8 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
     if (bsrt) { S.buzzSort = bsrt.dataset.bsort; rerender(); return; }
     const mf = e.target.closest("[data-moodf]");
     if (mf) { S.moodF = mf.dataset.moodf; rerender(); return; }
+    const mr = e.target.closest("[data-moodrel]");
+    if (mr) { setPref("moodRel", mr.dataset.moodrel === "1"); rerender(); return; }
     const nd = e.target.closest("[data-nsec]");
     if (nd) { S.newsSec = nd.dataset.nsec; S.newsSrc = "all"; rerender(); return; }
     const ns = e.target.closest("[data-nsrc]");

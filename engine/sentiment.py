@@ -13,6 +13,8 @@ News mood: is the latest news on each S&P 100 stock bullish or bearish?
    headlines count more (half-life 2 days), roundups that tag many companies count less, and a
    headline that doesn't name the company itself (it was only tagged) counts a quarter, since
    its tone is usually about someone else.
+4. "vs usual": company news is mostly upbeat, so each stock's score is also published minus the
+   usual tone (the same weighted average over every headline in the window, all stocks together).
 
 Writes docs/data/sentiment.json. Information only: headline tone, not a forecast.
 """
@@ -217,7 +219,13 @@ def mood_of(score: float) -> str:
             "bearish" if score <= -clear else "leaning_bearish" if score <= -lean else "neutral")
 
 
-def aggregate(items: list[dict], tickers: list[str], now: datetime) -> dict:
+def baseline(items: list[dict], now: datetime) -> float:
+    """The usual tone: every headline in the window once, newer counting more (same half-life)."""
+    ws = [0.5 ** (max(0.0, (now - parse(x["t"])).total_seconds() / 3600) / HALF_LIFE_H) for x in items]
+    return sum(w * x["s"] for w, x in zip(ws, items)) / sum(ws) if items else 0.0
+
+
+def aggregate(items: list[dict], tickers: list[str], now: datetime, base: float = 0.0) -> dict:
     """Per stock: the weighted mood over every tagged headline, but the counts, the drivers and
     the "enough news" test use only headlines that name the company."""
     stocks = {}
@@ -235,6 +243,8 @@ def aggregate(items: list[dict], tickers: list[str], now: datetime) -> dict:
         ranked = sorted(pool, key=lambda x: -(weight(x, t, now) * (x["s"] * sign if sign else 1)))
         stocks[t] = {
             "mood": m, "score": round(score, 3), "n": len(named), "tagged": len(mine),
+            # compared with the usual tone of all S&P 100 news in the window ("vs usual" in the app)
+            "rel": round(score - base, 3), "rel_mood": mood_of(score - base) if m != "quiet" else "quiet",
             "bull": labs.count("bull"), "bear": labs.count("bear"), "neu": labs.count("neu"),
             "n48": sum(1 for x in named if (now - parse(x["t"])).total_seconds() <= 48 * 3600),
             "top": [x["id"] for x in ranked[:3]],
@@ -285,12 +295,13 @@ def main():
         x["s"] = adjust(x["title"], x["f"])
     keep = sorted((x for x in items.values() if parse(x["t"]) >= window_start), key=lambda x: x["t"], reverse=True)
     named_in(keep)
-    stocks = aggregate(keep, tickers, now)
+    base = baseline(keep, now)
+    stocks = aggregate(keep, tickers, now, base)
     out = {
         "generated_at": now.strftime("%Y-%m-%dT%H:%M+00:00"), "demo": args.demo,
         "model": "Keyword stand-in (demo)" if args.demo else "FinBERT (ProsusAI/finbert)",
         "source": "Demo headlines" if args.demo else "Alpaca news (Benzinga)",
-        "window_days": WINDOW_DAYS, "half_life_h": HALF_LIFE_H, "headline_cut": HEADLINE_CUT, "mood_cuts": list(MOOD_CUTS),
+        "window_days": WINDOW_DAYS, "baseline": round(base, 3), "half_life_h": HALF_LIFE_H, "headline_cut": HEADLINE_CUT, "mood_cuts": list(MOOD_CUTS),
         "stocks": stocks,
         "items": [{k: x[k] for k in ("id", "t", "title", "url", "src", "syms", "nsym", "about", "f", "s")} for x in keep],
     }
