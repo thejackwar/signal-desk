@@ -23,6 +23,7 @@ import json
 import math
 import os
 import random
+import re
 import sys
 import time
 import urllib.parse
@@ -156,6 +157,34 @@ class KeywordScorer:
         return out
 
 
+# ------------------------------------------------- analyst price targets
+# FinBERT reads "Adjusts Price Target on X to $230 From $240" as positive whether the target went
+# up or down (about 1 headline in 5 is one of these), so those are scored from the numbers:
+# a cut is bearish, a raise bullish, more so the bigger the change; a tiny change stays neutral.
+PT = re.compile(r"price target", re.I)
+PT_FROM = re.compile(r"to \$?([\d,]+(?:\.\d+)?)\s+from \$?([\d,]+(?:\.\d+)?)", re.I)
+PT_UP = re.compile(r"\b(raises?|lifts?|boosts?|increases?|hikes?|ups)\b[^.]*price target", re.I)
+PT_DOWN = re.compile(r"\b(lowers?|cuts?|reduces?|trims?|slashes?|decreases?)\b[^.]*price target", re.I)
+
+
+def adjust(title: str, finbert: float) -> float:
+    """Final tone of a headline: FinBERT's score, except for analyst price-target changes."""
+    if not PT.search(title):
+        return finbert
+    m = PT_FROM.search(title)
+    if m:
+        new, old = (float(g.replace(",", "")) for g in m.groups())
+        if old > 0 and new != old:
+            ch = new / old - 1
+            return round(math.copysign(min(0.8, 0.3 + 3 * abs(ch)), ch), 3)   # 5% raise -> +0.45, 10% cut -> -0.6
+        return 0.0
+    if PT_UP.search(title):
+        return 0.5
+    if PT_DOWN.search(title):
+        return -0.5
+    return round(max(-0.25, min(0.25, finbert)), 3)   # "maintains", "adjusts" with no numbers: about neutral
+
+
 # -------------------------------------------------------------- aggregate
 def label(s: float) -> str:
     return "bull" if s >= HEADLINE_CUT else "bear" if s <= -HEADLINE_CUT else "neu"
@@ -164,8 +193,13 @@ def label(s: float) -> str:
 def weight(item: dict, t: str, now: datetime) -> float:
     age_h = max(0.0, (now - parse(item["t"])).total_seconds() / 3600)
     n = item.get("nsym", len(item["syms"]))
-    named = t in item.get("about", item["syms"])
+    named = is_named(item, t)
     return 0.5 ** (age_h / HALF_LIFE_H) * (1.0 if n <= 1 else 0.7 if n <= 3 else 0.4) * (1.0 if named else NOT_NAMED)
+
+
+def is_named(item: dict, t: str) -> bool:
+    """Is the headline about this company? Named in it, or the only company Alpaca tagged."""
+    return t in item.get("about", item["syms"]) or item.get("nsym", len(item["syms"])) == 1
 
 
 def named_in(items: list[dict]) -> None:
@@ -189,7 +223,7 @@ def aggregate(items: list[dict], tickers: list[str], now: datetime) -> dict:
     stocks = {}
     for t in tickers:
         mine = [x for x in items if t in x["syms"]]
-        named = [x for x in mine if t in x.get("about", x["syms"])]
+        named = [x for x in mine if is_named(x, t)]
         if not mine:
             continue
         ws = [weight(x, t, now) for x in mine]
@@ -244,8 +278,11 @@ def main():
     if new:
         scorer = KeywordScorer() if args.demo else FinBert()
         for x, s in zip(new, scorer([x["title"] for x in new])):
-            x["s"] = round(s, 3)
+            x["f"] = round(s, 3)
             items[x["id"]] = x
+    for x in items.values():   # "f" = FinBERT's own score, "s" = final tone (price targets from their numbers)
+        x.setdefault("f", x.get("s", 0.0))
+        x["s"] = adjust(x["title"], x["f"])
     keep = sorted((x for x in items.values() if parse(x["t"]) >= window_start), key=lambda x: x["t"], reverse=True)
     named_in(keep)
     stocks = aggregate(keep, tickers, now)
@@ -255,7 +292,7 @@ def main():
         "source": "Demo headlines" if args.demo else "Alpaca news (Benzinga)",
         "window_days": WINDOW_DAYS, "half_life_h": HALF_LIFE_H, "headline_cut": HEADLINE_CUT, "mood_cuts": list(MOOD_CUTS),
         "stocks": stocks,
-        "items": [{k: x[k] for k in ("id", "t", "title", "url", "src", "syms", "nsym", "about", "s")} for x in keep],
+        "items": [{k: x[k] for k in ("id", "t", "title", "url", "src", "syms", "nsym", "about", "f", "s")} for x in keep],
     }
     out_path.parent.mkdir(parents=True, exist_ok=True)
     out_path.write_text(json.dumps(out, separators=(",", ":")))
