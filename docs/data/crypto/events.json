@@ -1,0 +1,4 @@
+{
+  "note": "Crypto events added by hand (token unlocks, network upgrades, ETF deadlines). Each: {date: YYYY-MM-DD, name, why, time (optional), big: true for major ones}. Past dates are hidden automatically.",
+  "events": []
+}

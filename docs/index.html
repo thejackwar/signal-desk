@@ -431,6 +431,89 @@ table.labyears td small { display: inline; color: var(--faint); margin-left: 6px
 .yrpick select { appearance: none; -webkit-appearance: none; font: inherit; color: var(--fg); background: var(--surface-2); border: 1px solid var(--line); border-radius: 8px; padding: 1px 22px 1px 7px; margin-left: 2px; cursor: pointer; }
 .yrpick select:focus-visible { outline: 2px solid var(--bull); outline-offset: 1px; }
 .yrpick::after { content: ""; position: absolute; right: 8px; top: 50%; width: 5px; height: 5px; border: solid var(--muted); border-width: 0 1.5px 1.5px 0; transform: translateY(-70%) rotate(45deg); pointer-events: none; }
+/* crypto dashboard */
+:root:not([data-market="crypto"]) .crypto-only { display: none !important; }
+.cxnav { display: flex; width: 100%; }
+#app.single:has(.cxgrid) { max-width: 1180px; }
+.cxgrid { display: grid; gap: 14px; }
+@media (min-width: 900px) { .cxgrid { grid-template-columns: 1fr 1fr; align-items: start; } }
+.cxcard { margin: 0; }
+.cxcard .hd { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
+.cxcard .hd h3 { margin: 0; }
+.cxr, .cxr a { font-size: 12.5px; color: var(--muted); text-decoration: none; }
+.cxr a:hover { color: var(--amber); }
+.cxwhy { margin: 10px 2px 0; line-height: 1.5; }
+.cxsvg { width: 100%; height: auto; display: block; margin-top: 10px; overflow: visible; }
+.cxfng { display: flex; align-items: center; gap: 14px; margin-top: 6px; }
+.cxgauge { width: 140px; flex: none; }
+.cxfng > div { display: grid; gap: 2px; }
+.cxbig { font: 700 40px/1 var(--font-display); letter-spacing: -.03em; }
+.cxlbl { font: 600 15px var(--font-display); }
+.cxfng small { color: var(--faint); font-size: 12px; }
+.cxdom { margin-top: 14px; }
+.cxbar { display: flex; height: 12px; border-radius: 6px; overflow: hidden; gap: 2px; }
+.cxbar i { display: block; height: 100%; }
+.cxdom .legend b { color: var(--fg); }
+.cxalt { display: flex; align-items: baseline; gap: 10px; margin-top: 6px; }
+.cxscale { position: relative; height: 8px; border-radius: 4px; margin: 10px 0 4px; background: linear-gradient(90deg, var(--accent2) 0 25%, var(--surface-2) 25% 75%, var(--bull) 75%); }
+.cxscale i { position: absolute; top: -4px; width: 4px; height: 16px; border-radius: 2px; background: var(--fg); transform: translateX(-2px); }
+.cxscalel { display: flex; justify-content: space-between; font-size: 11.5px; color: var(--faint); }
+table.cxder td small, table.cxrs td small { display: block; color: var(--faint); font-size: 11px; margin-top: 2px; font-weight: 400; }
+table.cxder td, table.cxrs td { vertical-align: middle; }
+table.cxder td img, table.cxrs td img, table.cxder td .coin, table.cxrs td .coin { vertical-align: middle; }
+.cxetf + .cxetf { margin-top: 16px; }
+.cxcoin { display: inline-flex; align-items: center; gap: 8px; }
+.cxcoin > span { display: block; }
+@media (max-width: 600px) { table.cxrs, table.cxder { font-size: 13px; } table.cxrs td small, table.cxder td small { max-width: 92px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; } }
+.cxetfh { display: flex; justify-content: space-between; align-items: baseline; font-size: 13.5px; }
+.cxetfh span { color: var(--muted); font-size: 12.5px; }
+.cxbars { display: flex; align-items: center; height: 90px; gap: 3px; margin-top: 8px; position: relative; }
+.cxbars::before { content: ""; position: absolute; left: 0; right: 0; top: 50%; border-top: 1px solid var(--line); }
+.cxbars i { flex: 1; height: 100%; position: relative; }
+.cxbars i::after { content: ""; position: absolute; left: 0; right: 0; border-radius: 2px; height: calc(var(--h) / 2); }
+.cxbars i.pos::after { bottom: 50%; background: var(--bull); }
+.cxbars i.neg::after { top: 50%; background: var(--bear); }
+.cxbarsx { display: flex; justify-content: space-between; font: 500 11px var(--font-mono); color: var(--faint); margin-top: 4px; }
+.cxprog { height: 8px; border-radius: 4px; background: var(--surface-2); overflow: hidden; margin-top: 12px; }
+.cxprog i { display: block; height: 100%; background: var(--amber); }
+table.cxrs th.on { color: var(--fg); }
+table.cxrs tr.cxbtc td { background: var(--surface-2); }
+table.cxrs td { position: relative; }
+.cxrb { position: absolute; top: 6px; bottom: 6px; right: 0; width: var(--w); max-width: 100%; border-radius: 4px; background: var(--bull); opacity: .14; }
+.cxrb[data-neg="true"] { background: var(--bear); }
+table.cxmon th, table.cxmon td { text-align: center; padding: 6px 4px; font: 500 11.5px var(--font-mono); font-variant-numeric: tabular-nums; white-space: nowrap; }
+table.cxmon thead th { color: var(--faint); }
+table.cxmon tbody th { color: var(--muted); text-align: left; padding-left: 10px; }
+table.cxmon tr.cxavg th, table.cxmon tr.cxavg td { font-weight: 700; border-top: 1px solid var(--line); }
+.cxwd { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; margin-top: 10px; text-align: center; }
+.cxwdb { display: block; height: 70px; position: relative; border-bottom: 1px solid var(--line); margin-bottom: 4px; }
+.cxwdb i { position: absolute; left: 25%; right: 25%; bottom: 0; height: var(--h); border-radius: 4px 4px 0 0; background: var(--bull); }
+.cxwdb i.neg { background: var(--bear); }
+.cxwd b { display: block; font: 600 11.5px var(--font-mono); }
+.cxwd small { display: block; color: var(--faint); font-size: 10.5px; }
+.cxeur { display: inline-flex; align-items: center; gap: 4px; background: var(--surface-2); border-radius: 8px; padding: 3px 8px; font: 600 14px var(--font-mono); }
+.cxeur input { width: 110px; border: 0; background: transparent; color: var(--fg); font: inherit; outline: none; }
+.cxdcaf .cxeur input[data-cxdca="fee"] { width: 52px; }
+.cxchart { padding-bottom: 8px; }
+.cxsub { margin: 6px 0 -4px; font: 700 13px var(--font-display); color: var(--muted); text-transform: uppercase; letter-spacing: .04em; }
+.cxtaxin { grid-template-columns: 1fr; }
+.cxtaxin .cxeur { justify-self: start; }
+.cxtaxin .cxeur input { width: 160px; }
+.cxchk { align-items: flex-start; flex-wrap: nowrap; }
+.cxchk input { margin-top: 3px; accent-color: var(--amber); flex: none; }
+.cxchk span { min-width: 0 !important; }
+.cxtaxnote p { margin: 0 0 6px; font-size: 14px; line-height: 1.5; }
+.cxrules li { margin-bottom: 6px; }
+.cxev .row.cxe { display: flex; gap: 12px; align-items: flex-start; padding: 12px 14px; }
+.cxedot { width: 9px; height: 9px; border-radius: 50%; background: var(--muted); flex: none; margin-top: 6px; }
+.cxe.big .cxedot { background: var(--amber); box-shadow: 0 0 0 4px color-mix(in srgb, var(--amber) 22%, transparent); }
+.cxe small { color: var(--faint); font-size: 12px; margin-left: 8px; }
+.cxe p { margin: 3px 0 0; color: var(--muted); font-size: 13px; line-height: 1.45; }
+.cxrisks { display: grid; gap: 12px; }
+@media (min-width: 760px) { .cxrisks { grid-template-columns: 1fr 1fr; } }
+.cxrisks .card { margin: 0; }
+.cxrisks h3 span { margin-right: 4px; }
+.cxlink { font-size: 13.5px; font-weight: 600; color: var(--amber); text-decoration: none; }
 /* Strategy Lab: settings in folding sections, results in tabs; two columns on wide screens */
 #app.single:has(#lab) { max-width: 1240px; }
 .labgrid { display: grid; gap: 18px; }
@@ -1210,6 +1293,7 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
   <a class="nav" href="#calendar" data-tab="calendar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5" width="17" height="15.5" rx="2"/><path d="M3.5 10h17"/><path d="M8 3v4"/><path d="M16 3v4"/><path d="M7.5 14h2"/><path d="M11 14h2"/><path d="M14.5 14h2"/><path d="M7.5 17h2"/></svg>Calendar</a>
   <a class="nav" href="#strategies" data-tab="strategies"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 20h18"/><path d="M6 16V9"/><path d="M4.5 9h3"/><path d="M12 16V5"/><path d="M10.5 5h3"/><path d="M18 16v-5"/><path d="M16.5 11h3"/></svg>Strategies</a>
   <a class="nav" href="#strategylab" data-tab="lab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3h6"/><path d="M10 3v6.2L4.6 18.8A1.6 1.6 0 0 0 6 21h12a1.6 1.6 0 0 0 1.4-2.2L14 9.2V3"/><path d="M7.2 15h9.6"/></svg>Strategy Lab<span class="new">New</span></a>
+  <a class="nav crypto-only" href="#crypto" data-tab="cryptohub"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><path d="M9.5 8h4a2 2 0 0 1 0 4h-4m0 0h4.5a2 2 0 0 1 0 4H9.5m0-8v8m1.5-9.5V8m0 8v1.5m2-11V8m0 8v1.5"/></svg>Crypto dashboard</a>
   <a class="nav" href="#winners" data-tab="winners"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 4h8v5a4 4 0 0 1-8 0Z"/><path d="M8 6H5a3 3 0 0 0 3 4"/><path d="M16 6h3a3 3 0 0 1-3 4"/><path d="M12 13v4"/><path d="M8.5 20.5h7"/><path d="M10 17h4"/></svg>Best trades</a>
   <a class="nav" href="#record" data-tab="record"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3.5" width="16" height="17" rx="2"/><path d="m8 9 1.5 1.5L12 8"/><path d="M14 9.5h3"/><path d="m8 15 1.5 1.5L12 14"/><path d="M14 15.5h3"/></svg>Track record</a>
   <a class="nav" href="#practice" data-tab="practice"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6.5" width="18" height="13" rx="2"/><path d="M8.5 6.5V5a1.5 1.5 0 0 1 1.5-1.5h4A1.5 1.5 0 0 1 15.5 5v1.5"/><path d="M3 12h18"/><path d="M11 12v2h2v-2"/></svg>Practice</a>
@@ -1249,6 +1333,7 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
       <a href="#calendar" data-tab="calendar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5" width="17" height="15.5" rx="2"/><path d="M3.5 10h17"/><path d="M8 3v4"/><path d="M16 3v4"/><path d="M7.5 14h2"/><path d="M11 14h2"/><path d="M14.5 14h2"/><path d="M7.5 17h2"/></svg><span>Calendar</span></a>
       <a href="#strategies" data-tab="strategies"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 20h18"/><path d="M6 16V9"/><path d="M4.5 9h3"/><path d="M12 16V5"/><path d="M10.5 5h3"/><path d="M18 16v-5"/><path d="M16.5 11h3"/></svg><span>Strategies</span></a>
       <a href="#strategylab" data-tab="lab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3h6"/><path d="M10 3v6.2L4.6 18.8A1.6 1.6 0 0 0 6 21h12a1.6 1.6 0 0 0 1.4-2.2L14 9.2V3"/><path d="M7.2 15h9.6"/></svg><span>Strategy Lab</span></a>
+      <a class="crypto-only" href="#crypto" data-tab="cryptohub"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><path d="M9.5 8h4a2 2 0 0 1 0 4h-4m0 0h4.5a2 2 0 0 1 0 4H9.5m0-8v8m1.5-9.5V8m0 8v1.5m2-11V8m0 8v1.5"/></svg><span>Crypto dashboard</span></a>
       <a href="#learn" data-tab="learn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 6.5C10 5 7 4.5 3.5 5v13.5c3.5-.5 6.5 0 8.5 1.5 2-1.5 5-2 8.5-1.5V5C17 4.5 14 5 12 6.5Z"/><path d="M12 6.5V20"/></svg><span>Learn</span></a>
       <a href="#notify" data-tab="notify"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="2.5" width="12" height="19" rx="2.5"/><path d="M11 18.5h2"/></svg><span>Phone alerts</span></a>
       <a href="#brokers" data-tab="brokers"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9.5 12 4l9 5.5"/><path d="M4.5 10v8"/><path d="M9.5 10v8"/><path d="M14.5 10v8"/><path d="M19.5 10v8"/><path d="M3 20.5h18"/></svg><span>Brokers</span></a>
@@ -1504,7 +1589,7 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
   // the daily feed plus the Top-Down alerts for the picked timeframes, newest first
   function buildFeed(c) {
     if (!c.feed) return c.feed;
-    const td = S.market === "stocks" ? (c.td?.alerts || []).filter(a => tdTfs().includes(a.tf)) : [];
+    const td = S.market !== "commodities" ? (c.td?.alerts || []).filter(a => tdTfs().includes(a.tf)) : [];
     if (!td.length) return c.feed;
     const key = a => (a.date || "") + (a.found_at || "");
     return { ...c.feed, alerts: [...td, ...c.feed.alerts].sort((a, b) => key(a) < key(b) ? 1 : key(a) > key(b) ? -1 : 0) };
@@ -1903,7 +1988,7 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
     S.firstSel = "stock-" + list[0].ticker;
     let h = header(L().Title || L().Tab, null, `<div class="stamp">${esc(S.feed?.universe || "")}<br>close ${fmtDate(S.stocks.as_of, { day: "numeric", month: "short" })}</div>`);
     h += healthCard();
-    if (isCrypto()) h += heatmapCard() + moversStrip();
+    if (isCrypto()) h += cryptoHero() + heatmapCard() + moversStrip();
     h += `<input class="search" id="stocksearch" type="search" placeholder="${L().search}" autocomplete="off" aria-label="Search" value="${esc(S.q || "")}">`;
     h += `<div class="tools" style="margin-bottom:6px"><label>Sort</label><div class="seg sm" role="group" aria-label="Sort stocks">${Object.entries(keys).map(([k, [t]]) =>
       `<button data-ssort="${k}" aria-pressed="${sort === k}">${t}</button>`).join("")}</div></div><div class="rows" id="stockrows">`;
@@ -2056,7 +2141,7 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
     h += `<p class="tag">${esc(s.tagline)}</p>`;
     h += `<div class="lede"><span class="badge">${esc(s.category)}</span><span class="badge">${esc(s.level)}</span><span class="badge">7 timeframes</span>
       <span style="flex:1"></span><button class="btn ${on ? "on" : ""}" data-follow="${id}">${on ? "✓ Following" : "Follow"}</button></div>`;
-    if (!forMarket(s)) h += `<div class="card"><p style="margin:0">Top-Down alerts cover the S&amp;P 100 stocks and SPY. Switch to <b>Stocks</b> at the top to see them.</p></div>`;
+    if (!forMarket(s)) h += `<div class="card"><p style="margin:0">Top-Down alerts cover the S&amp;P 100 stocks and SPY, and the top coins around the clock. Switch to <b>Stocks</b> or <b>Crypto</b> at the top to see them.</p></div>`;
     h += `<div class="prose">${s.how.map(p => `<p>${esc(p)}</p>`).join("")}</div>`;
     h += `<h2>Timeframes that alert</h2><div class="tfpick" role="group" aria-label="Timeframes that alert">${TD_TFS.map(tf =>
       `<button data-tdtf="${tf}" aria-pressed="${picked.includes(tf)}"><b>${tf}</b><small>${TD_LABEL[tf]}</small></button>`).join("")}</div>
@@ -2064,13 +2149,13 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
     h += `<h2>When it alerts</h2><div class="rules">
       <div class="rule bullish"><span class="pill bullish">bullish</span><p>${esc(s.bullish)}</p></div>
       <div class="rule bearish"><span class="pill bearish">bearish</span><p>${esc(s.bearish)}</p></div></div>`;
-    h += `<a class="labcta" href="trendlines.html" style="margin-top:18px"><span><b>See the lines</b><small>The Trendlines page draws all seven timeframes for any S&amp;P 100 stock</small></span><span aria-hidden="true">›</span></a>`;
+    h += `<a class="labcta" href="trendlines.html" style="margin-top:18px"><span><b>See the lines</b><small>The Trendlines page draws all seven timeframes for any S&amp;P 100 stock or coin</small></span><span aria-hidden="true">›</span></a>`;
     h += `<h2>Why it can work</h2><div class="prose"><p>${esc(s.why)}</p></div>`;
     h += `<h2>Watch out for</h2><ul class="watch">${s.watch_out.map(w => `<li>${esc(w)}</li>`).join("")}</ul>`;
-    h += `<a class="labcta" href="#brokers-stocks" style="margin-top:22px"><span><b>Want to try this strategy yourself?</b><small>Compare brokers for stocks and ETFs from Italy</small></span><span aria-hidden="true">›</span></a>`;
+    h += `<a class="labcta" href="#brokers-${isCrypto() ? "crypto" : "stocks"}" style="margin-top:22px"><span><b>Want to try this strategy yourself?</b><small>${isCrypto() ? "Compare crypto exchanges licensed in the EU" : "Compare brokers for stocks and ETFs from Italy"}</small></span><span aria-hidden="true">›</span></a>`;
     h += `<h2>Settings used</h2><div class="settings">${esc(s.settings)}</div>`;
     if (recent.length) h += `<h2>Latest alerts</h2><div class="rows">` + recent.map(a => alertRow(a)).join("") + `</div>`;
-    else if (forMarket(s)) h += `<h2>Latest alerts</h2><p class="tag" style="font-size:14px">No line breaks on your picked timeframes yet. The scan runs every 30 minutes while the US market is open.</p>`;
+    else if (forMarket(s)) h += `<h2>Latest alerts</h2><p class="tag" style="font-size:14px">No line breaks on your picked timeframes yet. The scan runs every 30 minutes ${isCrypto() ? "around the clock, weekends included" : "while the US market is open"}.</p>`;
     h += `<p class="fine">For information and learning only. No backtest yet: trendlines are redrawn as new candles arrive, so past breaks can't be replayed the same way as the other strategies. This is not investment advice.</p>`;
     return h;
   }
@@ -3090,6 +3175,451 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
   }
 
 
+  // ------------------------------------------------------- crypto dashboard
+  // #crypto: market overview (fear & greed, dominance, altcoin season, ETH/BTC, leverage, ETF flows,
+  // correlations, halving), #crypto-strength (coins vs Bitcoin), #crypto-season (halving cycles,
+  // months, weekdays), #crypto-dca (DCA calculator in euro), #crypto-tax (Italian tax helper),
+  // #crypto-events (what's coming up), #crypto-risks (the basics). Data: data/crypto/market.json
+  // (every 4 hours) and data/crypto/long.json (daily), from engine/crypto_market.py.
+  const CX = {};
+  function cxGet(k, url) {
+    if (!(k in CX)) {
+      CX[k] = undefined;
+      opt(url).then(j => { CX[k] = j || null; if (/^#crypto/.test(location.hash)) rerender(); });
+    }
+    return CX[k];
+  }
+  const CX_TABS = [["crypto", "Overview"], ["crypto-strength", "Vs Bitcoin"], ["crypto-season", "Cycles"], ["crypto-dca", "DCA calculator"], ["crypto-tax", "Tax"], ["crypto-events", "Events"], ["crypto-risks", "Risks"]];
+  const cxNav = which => `<div class="seg nsw cxnav" role="group" aria-label="Crypto dashboard">${CX_TABS.map(([k, t]) =>
+    `<a href="#${k}" role="button" aria-pressed="${k === which}">${t}</a>`).join("")}</div>`;
+  const usdK = v => v == null ? "–" : "$" + (Math.abs(v) >= 1e12 ? (v / 1e12).toFixed(2) + "T" : Math.abs(v) >= 1e9 ? (v / 1e9).toFixed(2) + "B" : Math.abs(v) >= 1e6 ? Math.round(v / 1e6) + "M" : Math.round(v).toLocaleString("en-US"));
+  const pp = (v, d = 1) => v == null || !Number.isFinite(v) ? "–" : (v >= 0 ? "+" : "−") + Math.abs(v).toFixed(d) + "%";
+  const cxDate = (d, o = { day: "numeric", month: "short", year: "numeric" }) => esc(fmtDate(d, o));
+  const CX_FLASK = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><path d="M9.5 8h4a2 2 0 0 1 0 4h-4m0 0h4.5a2 2 0 0 1 0 4H9.5m0-8v8m1.5-9.5V8m0 8v1.5m2-11V8m0 8v1.5"/></svg>`;
+  function cryptoHero() {
+    return `<a class="labhero" href="#crypto"><span class="ico">${CX_FLASK}</span><span><b>Crypto dashboard</b><small>Fear &amp; greed, leverage, ETF flows, altcoin season, halving cycles, a DCA calculator and Italian tax help.</small></span><span class="go">Open ›</span></a>`;
+  }
+
+  // a small line chart: series = [{ pts: [[date, value]...], color, w, dash }], shared dates by position
+  function cxLine(series, o = {}) {
+    const W = o.w || (matchMedia("(max-width: 600px)").matches ? 380 : 600), H = Math.round((o.h || 150) * (matchMedia("(max-width: 600px)").matches ? .85 : 1)), P = { l: 4, r: o.right ?? 46, t: 8, b: o.noX ? 6 : 20 };
+    const all = series.flatMap(s => s.pts.map(p => p[1])).filter(Number.isFinite);
+    if (!all.length) return "";
+    let lo = o.min ?? Math.min(...all), hi = o.max ?? Math.max(...all);
+    if (o.log) { lo = Math.log(lo); hi = Math.log(hi); }
+    if (hi === lo) { hi += 1; lo -= 1; }
+    const pad = (hi - lo) * (o.min != null ? 0 : .06); lo -= pad; hi += pad;
+    const n = Math.max(...series.map(s => s.pts.length));
+    const x = i => P.l + i / Math.max(1, n - 1) * (W - P.l - P.r), y = v => P.t + (hi - (o.log ? Math.log(v) : v)) / (hi - lo) * (H - P.t - P.b);
+    const f = o.fmt || (v => v.toFixed(2));
+    let s = `<svg class="cxsvg" viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(o.label || "Chart")}">`;
+    for (const z of o.zones || []) s += `<rect x="${P.l}" width="${W - P.l - P.r}" y="${y(Math.min(z[1], o.max ?? z[1]))}" height="${Math.max(0, y(z[0]) - y(z[1]))}" fill="${z[2]}" opacity=".12"/>`;
+    for (const g of o.grid || []) {
+      if ((o.log ? Math.log(g) : g) < lo || (o.log ? Math.log(g) : g) > hi) continue;
+      s += `<line x1="${P.l}" x2="${W - P.r}" y1="${y(g).toFixed(1)}" y2="${y(g).toFixed(1)}" stroke="${g === o.zero ? C.zero : C.grid}"/><text x="${W - P.r + 5}" y="${(y(g) + 4).toFixed(1)}" fill="${C.axis}" font-size="11" font-family="${FONT.replace(/"/g, "'")}">${f(g)}</text>`;
+    }
+    if (!o.noX) {
+      const pts = series[0].pts, yrs = new Set(); let last = "";
+      pts.forEach((p, i) => { const k = o.xKey ? o.xKey(p[0], i) : String(p[0]).slice(0, 4); if (k !== last && i > 0 && k != null) { yrs.add(i); } last = k; });
+      const every = Math.ceil(yrs.size / 6) || 1;
+      [...yrs].filter((_, k) => k % every === 0).forEach(i => {
+        const lab = o.xLabel ? o.xLabel(pts[i][0], i) : String(pts[i][0]).slice(0, 4);
+        s += `<line x1="${x(i).toFixed(1)}" x2="${x(i).toFixed(1)}" y1="${P.t}" y2="${H - P.b}" stroke="${C.grid}"/><text x="${x(i).toFixed(1)}" y="${H - 6}" fill="${C.axis}" font-size="11" text-anchor="middle" font-family="${FONT.replace(/"/g, "'")}">${esc(lab)}</text>`;
+      });
+    }
+    for (const sr of series) {
+      const d = sr.pts.map((p, i) => Number.isFinite(p[1]) && (!o.log || p[1] > 0) ? `${i && Number.isFinite(sr.pts[i - 1]?.[1]) ? "L" : "M"}${x(i).toFixed(1)} ${y(p[1]).toFixed(1)}` : "").join("");
+      if (sr.area) s += `<path d="${d}L${x(sr.pts.length - 1).toFixed(1)} ${H - P.b}L${x(0)} ${H - P.b}Z" fill="${sr.color}" opacity=".1"/>`;
+      s += `<path d="${d}" fill="none" stroke="${sr.color}" stroke-width="${sr.w || 1.8}"${sr.dash ? ` stroke-dasharray="${sr.dash}"` : ""} stroke-linejoin="round"/>`;
+      const lp = [...sr.pts].reverse().find(p => Number.isFinite(p[1]));
+      if (lp && !sr.noDot) s += `<circle cx="${x(sr.pts.lastIndexOf(lp)).toFixed(1)}" cy="${y(lp[1]).toFixed(1)}" r="3" fill="${sr.color}"/>`;
+    }
+    return s + `</svg>`;
+  }
+  const cxLegend = items => `<div class="legend">${items.map(([c, t]) => `<span><i style="background:${c}"></i>${t}</span>`).join("")}</div>`;
+  const cxCard = (title, right, body, cls = "") => `<div class="card cxcard ${cls}"><div class="hd"><h3>${title}</h3>${right ? `<span class="cxr">${right}</span>` : ""}</div>${body}</div>`;
+  const cxWhy = t => `<p class="hint cxwhy">${t}</p>`;
+  function cxNeedCrypto(which) {
+    let h = header("Crypto") + cxNav(which);
+    return h + `<div class="card"><p style="margin:0 0 10px">The crypto dashboard works on the crypto side of the app.</p><button class="btn" data-market="crypto">Switch to Crypto</button></div>`;
+  }
+
+  function viewCrypto(r) {
+    const which = CX_TABS.some(t => t[0] === r) ? r : "crypto";
+    if (!isCrypto()) return cxNeedCrypto(which);
+    return ({ crypto: cxOverview, "crypto-strength": cxStrength, "crypto-season": cxSeason, "crypto-dca": cxDca, "crypto-tax": cxTax, "crypto-events": cxEvents, "crypto-risks": cxRisks }[which])();
+  }
+
+  // ------------------------------------------------------------ overview
+  function cxOverview() {
+    const M = cxGet("m", "data/crypto/market.json");
+    let h = header("Crypto", null, M ? `<div class="stamp">market data<br>updated ${esc(ago(M.generated_at))}</div>` : "") + cxNav("crypto");
+    if (M === undefined) return h + `<p class="loading">Loading…</p>`;
+    if (!M) return h + `<div class="empty"><strong>No market data yet</strong>It's created every 4 hours by the heatmap update on GitHub.</div>`;
+    h += `<div class="cxgrid">`;
+    // fear & greed
+    if (M.fng) {
+      const v = M.fng.value, col = v < 25 ? C.down : v < 45 ? "#ff9500" : v <= 55 ? C.muted : v <= 75 ? "#34c759" : C.up;
+      const ang = Math.PI * (1 - v / 100), cx = 70, cy = 66, R = 54;
+      const arc = (a0, a1, c) => `<path d="M${cx + R * Math.cos(Math.PI * (1 - a0))} ${cy - R * Math.sin(Math.PI * (1 - a0))} A${R} ${R} 0 0 1 ${cx + R * Math.cos(Math.PI * (1 - a1))} ${cy - R * Math.sin(Math.PI * (1 - a1))}" stroke="${c}" stroke-width="11" fill="none"/>`;
+      const gauge = `<svg viewBox="0 0 140 78" class="cxgauge" aria-hidden="true">${arc(0, .25, C.down)}${arc(.25, .45, "#ff9500")}${arc(.45, .55, C.zero)}${arc(.55, .75, "#34c759")}${arc(.75, 1, C.up)}
+        <line x1="${cx}" y1="${cy}" x2="${cx + (R - 14) * Math.cos(ang)}" y2="${cy - (R - 14) * Math.sin(ang)}" stroke="${C.xhair}" stroke-width="3" stroke-linecap="round"/><circle cx="${cx}" cy="${cy}" r="5" fill="${C.xhair}"/></svg>`;
+      const H = M.fng.hist, ago7 = H[H.length - 8]?.[1], ago30 = H[H.length - 31]?.[1];
+      h += cxCard("Fear &amp; Greed", `<a href="https://alternative.me/crypto/fear-and-greed-index/" target="_blank" rel="noopener">alternative.me</a>`,
+        `<div class="cxfng">${gauge}<div><b class="cxbig" style="color:${col}">${v}</b><span class="cxlbl">${esc(M.fng.label)}</span><small>a week ago ${ago7 ?? "–"} · a month ago ${ago30 ?? "–"}</small></div></div>
+        ${cxLine([{ pts: H, color: col, w: 1.6, area: true }], { h: 110, min: 0, max: 100, grid: [25, 50, 75], fmt: v => v, zones: [[0, 25, C.down], [75, 100, C.up]], xKey: d => d.slice(0, 7), xLabel: d => fmtDate(d, { month: "short" }), label: "Fear and greed over the last year" })}`
+        + cxWhy("0 is extreme fear, 100 extreme greed, from price swings, momentum, social media and Bitcoin's share. Extreme fear has often come near lows and extreme greed near highs, but it can stay extreme for weeks."));
+    }
+    // market totals
+    if (M.global) {
+      const G = M.global;
+      h += cxCard("The whole market", `<a href="https://www.coingecko.com/en/global-charts" target="_blank" rel="noopener">CoinGecko</a>`,
+        `<div class="tiles"><div><span>Total value</span><b>${usdK(G.mcap_usd)}</b><small class="${G.chg24h >= 0 ? "up" : "down"}">${pp(G.chg24h)} in 24h</small></div>
+          <div><span>Traded in 24h</span><b>${usdK(G.vol_usd)}</b><small>${(G.vol_usd / G.mcap_usd * 100).toFixed(1)}% of the total</small></div></div>
+        <div class="cxdom"><div class="cxbar">${[["Bitcoin", G.btc_dom, C.accent2], ["Ethereum", G.eth_dom, C.accent], ["Stablecoins", G.stable_dom, C.muted], ["Everything else", Math.max(0, 100 - G.btc_dom - G.eth_dom - G.stable_dom), C.zero]].map(([n, v, c]) =>
+          `<i style="width:${v}%;background:${c}" title="${n} ${v.toFixed(1)}%"></i>`).join("")}</div>
+          ${cxLegend([[C.accent2, `Bitcoin <b>${G.btc_dom.toFixed(1)}%</b>`], [C.accent, `Ethereum <b>${G.eth_dom.toFixed(1)}%</b>`], [C.muted, `Stablecoins <b>${G.stable_dom.toFixed(1)}%</b>`], [C.zero, "Everything else"]])}</div>`
+        + cxWhy("Bitcoin's share (dominance) usually rises when money is cautious and falls when it chases smaller coins. A big stablecoin share means a lot of money is waiting on the side."));
+    }
+    // altcoin season
+    if (M.altseason) {
+      const A = M.altseason, v = A.value, lbl = v >= 75 ? "Altcoin season" : v <= 25 ? "Bitcoin season" : "Neither";
+      h += cxCard("Altcoin season", `<a href="#crypto-strength">${A.coins} coins ›</a>`,
+        `<div class="cxalt"><b class="cxbig">${v}</b><span class="cxlbl">${lbl}</span></div>
+        <div class="cxscale"><i style="left:${v}%"></i></div><div class="cxscalel"><span>Bitcoin season</span><span>Altcoin season</span></div>
+        ${cxLine([{ pts: A.hist, color: C.accent, w: 1.6, area: true }], { h: 100, min: 0, max: 100, grid: [25, 75], fmt: v => v, zones: [[0, 25, C.accent2], [75, 100, C.up]], xKey: d => d.slice(0, 7), xLabel: d => fmtDate(d, { month: "short" }), label: "Altcoin season index over the last year" })}`
+        + cxWhy(`How many of the app's ${A.coins} other coins did better than Bitcoin over the last 90 days, in %. 75 or more is called altcoin season, 25 or less Bitcoin season. A smaller list than the well-known index, which uses the top 50.`));
+    }
+    // ETH/BTC
+    if (M.ethbtc?.length) {
+      const E = M.ethbtc, now = E[E.length - 1][1], y1 = E[Math.max(0, E.length - 366)][1];
+      h += cxCard("ETH / BTC", `<span>${now.toFixed(4)} · <span class="${now >= y1 ? "up" : "down"}">${pp((now / y1 - 1) * 100)}</span> in a year</span>`,
+        cxLine([{ pts: E, color: C.accent, w: 1.7 }], { h: 120, grid: [0.02, 0.03, 0.04, 0.05, 0.06, 0.07, 0.08], fmt: v => v.toFixed(2), label: "Ethereum priced in Bitcoin" })
+        + cxWhy("Ethereum's price in bitcoin. Rising means Ethereum is doing better than Bitcoin; it often leads the rest of the altcoins."));
+    }
+    // leverage
+    if (M.derivs?.length) {
+      const fcol = v => v > 0.03 ? "down" : v < 0 ? "up" : "";
+      h += cxCard("Leverage", `<a href="#heatmap">Liquidation heatmap ›</a>`,
+        `<div class="tablewrap"><table class="bt cxder"><thead><tr><th>Coin</th><th style="text-align:right">Funding now</th><th style="text-align:right">7-day avg</th><th style="text-align:right">Open interest</th><th style="text-align:right">7d</th></tr></thead><tbody>` +
+        M.derivs.map(d => `<tr><td><span class="cxcoin">${coin(d.coin + "-USD", 20)}<span><b>${esc(d.coin)}</b>${d.long_short ? `<small>long/short ${d.long_short.toFixed(2)}</small>` : ""}</span></span></td>
+          <td style="text-align:right" class="${fcol(d.funding)}">${d.funding.toFixed(4)}%</td><td style="text-align:right" class="${fcol(d.funding7d)}">${d.funding7d?.toFixed(4) ?? "–"}%<small>${d.funding7d != null ? pp(d.funding7d * 3 * 365, 0) + " a year" : ""}</small></td>
+          <td style="text-align:right">${usdK(d.oi_usd)}</td><td style="text-align:right" class="${(d.oi_chg7d ?? 0) >= 0 ? "up" : "down"}">${pp(d.oi_chg7d, 0)}</td></tr>`).join("") + `</tbody></table></div>`
+        + cxWhy("Perpetual futures on OKX. Funding is what one side pays the other every 8 hours: positive means buyers with leverage pay sellers, so more people are betting on a rise. Above about 0.03% (over 30% a year) the trade is crowded, and crowded longs tend to get flushed out by a sharp drop. Open interest is how much money sits in these bets; the long/short ratio counts accounts, not money."));
+    }
+    // ETF flows
+    if (M.etf?.btc?.length || M.etf?.eth?.length) {
+      const sets = [["btc", "Bitcoin ETFs"], ["eth", "Ethereum ETFs"]].filter(([k]) => M.etf[k]?.length);
+      const body = sets.map(([k, t]) => {
+        const rows = M.etf[k].slice(-20), mx = Math.max(...rows.map(r => Math.abs(r[1])), 1);
+        const wk = M.etf[k].slice(-5).reduce((a, r) => a + r[1], 0);
+        return `<div class="cxetf"><div class="cxetfh"><b>${t}</b><span>last 5 days <b class="${wk >= 0 ? "up" : "down"}">${wk >= 0 ? "+" : "−"}$${Math.abs(wk).toFixed(0)}M</b></span></div>
+          <div class="cxbars">${rows.map(r => `<i class="${r[1] >= 0 ? "pos" : "neg"}" style="--h:${Math.max(2, Math.abs(r[1]) / mx * 100)}%" title="${esc(fmtDate(r[0], { day: "numeric", month: "short" }))}: ${r[1] >= 0 ? "+" : "−"}$${Math.abs(r[1]).toFixed(1)}M"></i>`).join("")}</div>
+          <div class="cxbarsx"><span>${esc(fmtDate(rows[0][0], { day: "numeric", month: "short" }))}</span><span>${esc(fmtDate(rows[rows.length - 1][0], { day: "numeric", month: "short" }))}</span></div></div>`;
+      }).join("");
+      h += cxCard("US spot ETF flows", `<a href="https://farside.co.uk/btc/" target="_blank" rel="noopener">Farside</a>`, body
+        + cxWhy("Money going into (green) or out of (red) the US exchange-traded funds that hold bitcoin and ether, in US$ million a day. Big funds and advisers buy through these, so steady inflows mean steady buying."));
+    }
+    // correlation
+    if (M.corr) {
+      const K = M.corr, n = K.nasdaq?.hist || [], g = K.gold?.hist || [];
+      h += cxCard("Moves with…", "",
+        `<div class="tiles"><div><span>Nasdaq 100</span><b>${K.nasdaq?.now30?.toFixed(2) ?? "–"}</b><small>last 30 days · 90 days ${K.nasdaq?.now90?.toFixed(2) ?? "–"}</small></div>
+          <div><span>Gold</span><b>${K.gold?.now30?.toFixed(2) ?? "–"}</b><small>last 30 days · 90 days ${K.gold?.now90?.toFixed(2) ?? "–"}</small></div></div>
+        ${cxLine([{ pts: n.map(r => [r[0], r[2]]), color: C.accent, w: 1.7 }, { pts: g.map(r => [r[0], r[2]]), color: "#c88a12", w: 1.7 }], { h: 130, min: -1, max: 1, grid: [-0.5, 0, 0.5], zero: 0, fmt: v => v.toFixed(1), label: "90-day correlation of Bitcoin with the Nasdaq and gold" })}
+        ${cxLegend([[C.accent, "Nasdaq 100 (QQQ)"], ["#c88a12", "Gold (GLD)"], [C.grid, "90-day correlation"]])}`
+        + cxWhy("Correlation of Bitcoin's daily moves with the Nasdaq 100 and with gold, from −1 (opposite) to +1 (in step). When it's high with the Nasdaq, Bitcoin trades like a tech stock and reacts to the same news, like the Fed."));
+    }
+    // halving
+    if (M.halving) {
+      const Hv = M.halving, days = Math.round((Date.parse(Hv.eta) - Date.now()) / 864e5), since = Math.round((Date.now() - Date.parse(Hv.past[Hv.past.length - 1])) / 864e5);
+      h += cxCard("Next Bitcoin halving", `<a href="#crypto-season">Cycles ›</a>`,
+        `<div class="tiles"><div><span>Estimated</span><b>${cxDate(Hv.eta, { month: "short", year: "numeric" })}</b><small>in about ${days.toLocaleString("en-US")} days</small></div>
+          <div><span>Blocks left</span><b>${Hv.left.toLocaleString("en-US")}</b><small>block ${Hv.next.toLocaleString("en-US")}</small></div></div>
+        <div class="cxprog"><i style="width:${Math.min(100, 100 - Hv.left / 2100)}%"></i></div><p class="hint" style="margin:6px 2px 0">Day ${since.toLocaleString("en-US")} since the April 2024 halving.</p>`
+        + cxWhy("Every 210,000 blocks (about four years) the new bitcoin created per block is cut in half. The date is an estimate from today's block speed."));
+    }
+    h += `</div>`;
+    h += `<p class="fine">Sources: ${(M.sources || []).map(esc).join(", ")}. Updated every 4 hours. For information only, not investment advice.</p>`;
+    return h;
+  }
+
+  // ------------------------------------------------------------ vs bitcoin
+  function cxStrength() {
+    const M = cxGet("m", "data/crypto/market.json");
+    let h = header("Crypto") + cxNav("crypto-strength");
+    const rows = (S.stocks?.stocks || []).slice();
+    const btc = S.stockBy["BTC-USD"];
+    if (!rows.length || !btc) return h + `<p class="loading">Loading…</p>`;
+    const r7 = s => s.spark?.length > 8 ? (s.spark[s.spark.length - 1] / s.spark[s.spark.length - 8] - 1) * 100 : null;
+    const r90 = s => M?.altseason?.r90?.[s.ticker.replace("-USD", "")] ?? null;
+    const cols = [["w", "7 days", r7], ["m", "30 days", s => s.chg1m], ["q", "90 days", r90], ["y", "1 year", s => s.chg1y]];
+    const rel = (a, b) => a == null || b == null ? null : ((1 + a / 100) / (1 + b / 100) - 1) * 100;
+    const sortBy = cols.some(c => c[0] === pref("cxSort")) ? pref("cxSort") : "m";
+    const by = cols.find(c => c[0] === sortBy)[2];
+    const list = rows.filter(s => s.ticker !== "BTC-USD").map(s => ({ s, v: cols.map(c => rel(c[2](s), c[2](btc))) }))
+      .sort((a, b) => (b.v[cols.findIndex(c => c[0] === sortBy)] ?? -1e9) - (a.v[cols.findIndex(c => c[0] === sortBy)] ?? -1e9));
+    const k = cols.findIndex(c => c[0] === sortBy), beat = list.filter(x => (x.v[k] ?? -1) > 0).length;
+    h += `<p class="tag" style="margin-top:0">Each coin's move compared with Bitcoin's over the same days. <b>+10%</b> means it did 10% better than holding bitcoin. Over ${cols[k][1]}, <b>${beat} of ${list.length}</b> coins beat Bitcoin.</p>`;
+    h += `<div class="tools"><span class="tg"><label>Sort by</label><div class="seg sm" role="group" aria-label="Sort by">${cols.map(c => `<button data-cxsort="${c[0]}" aria-pressed="${c[0] === sortBy}">${c[1]}</button>`).join("")}</div></span></div>`;
+    const mx = Math.max(...list.map(x => Math.abs(x.v[k] ?? 0)), 1);
+    h += `<div class="tablewrap"><table class="bt cxrs"><thead><tr><th>Coin</th>${cols.map((c, i) => `<th style="text-align:right"${i === k ? ' class="on"' : ""}>${c[1]}</th>`).join("")}</tr></thead><tbody>
+      <tr class="cxbtc"><td><span class="cxcoin">${coin("BTC-USD", 22)}<span><b>BTC</b><small>Bitcoin itself</small></span></span></td>${cols.map(c => `<td style="text-align:right"><small style="margin:0">${pp(c[2](btc))}</small></td>`).join("")}</tr>` +
+      list.map(x => `<tr><td><span class="cxcoin">${coin(x.s.ticker, 22)}<span><a href="#stock-${esc(x.s.ticker)}" class="tk">${esc(disp(x.s.ticker))}</a><small>${esc(x.s.name)}</small></span></span></td>${x.v.map((v, i) =>
+        `<td style="text-align:right" class="${v == null ? "" : v >= 0 ? "up" : "down"}">${i === k && v != null ? `<span class="cxrb" style="--w:${Math.abs(v) / mx * 100}%" data-neg="${v < 0}"></span>` : ""}${pp(v, 0)}</td>`).join("")}</tr>`).join("") +
+      `</tbody></table></div>`;
+    h += `<p class="hint">The Bitcoin row shows Bitcoin's own move. Coins that keep beating Bitcoin are what the <a href="#strategy-relative-strength">Relative strength</a> strategy looks for; Bitcoin's run-ups usually come first and the altcoins follow, or fall harder.</p>`;
+    return h;
+  }
+
+  // ------------------------------------------------------------ cycles and seasons
+  function cxSeries(L, cur, sym) {
+    const s = L?.[cur]?.[sym]; if (!s) return null;
+    const t0 = Date.parse(L.start + "T00:00:00Z");
+    return s.c.map((v, i) => [new Date(t0 + (s.s + i) * 864e5).toISOString().slice(0, 10), v]);
+  }
+  function cxSeason() {
+    const L = cxGet("long", "data/crypto/long.json");
+    let h = header("Crypto") + cxNav("crypto-season");
+    if (L === undefined) return h + `<p class="loading">Loading 12 years of prices…</p>`;
+    const B = cxSeries(L, "usd", "BTC");
+    if (!B) return h + `<div class="empty"><strong>No price history yet</strong>It's created by the daily crypto scan on GitHub.</div>`;
+    const idx = Object.fromEntries(B.map((p, i) => [p[0], i]));
+    const halvings = ["2016-07-09", "2020-05-11", "2024-04-20"], cols = [C.muted, "#c88a12", C.accent];
+    const span = 1460, cyc = halvings.map(d => { const i0 = idx[d]; return i0 == null ? null : B.slice(i0, i0 + span).map((p, k) => [k, p[1] / B[i0][1]]); });
+    const nowDay = B.length - 1 - idx[halvings[2]];
+    const at = k => cyc.map(c => c?.[Math.min(k, c.length - 1)]?.[1]);
+    const a = at(nowDay);
+    h += `<p class="tag" style="margin-top:0">Bitcoin has moved in rough four-year cycles around its halvings. Each line is the price after one halving, with the halving day as 1×.</p>`;
+    h += cxCard("Halving cycles", `day ${nowDay.toLocaleString("en-US")} of 1,460`,
+      cxLine(cyc.map((c, i) => ({ pts: c || [], color: cols[i], w: i === 2 ? 2.4 : 1.5 })), { h: 210, log: true, grid: [0.5, 1, 2, 5, 10, 20], zero: 1, fmt: v => v + "×", xKey: (_, i) => Math.floor(i / 365), xLabel: (_, i) => "year " + (Math.floor(i / 365) + 1), label: "Bitcoin after each halving" })
+      + cxLegend(halvings.map((d, i) => [cols[i], `${d.slice(0, 4)} halving${i === 2 ? " (now)" : ""}`]))
+      + `<p style="margin:10px 0 0;font-size:14.5px">Today, ${nowDay} days after the 2024 halving, Bitcoin is at <b>${a[2]?.toFixed(2)}×</b> its halving-day price. At the same point the 2016 cycle was at <b>${a[0]?.toFixed(2)}×</b> and the 2020 cycle at <b>${a[1]?.toFixed(2)}×</b>.</p>`
+      + cxWhy("Only three full cycles in the data (prices start in late 2014), so treat the pattern as history, not a rule. Each cycle so far gained less than the one before."));
+    // months
+    const mret = {};
+    for (let i = 1; i < B.length; i++) {
+      const [d] = B[i], y = d.slice(0, 4), m = +d.slice(5, 7);
+      if (d.slice(5, 7) !== B[i - 1][0].slice(5, 7)) { (mret[y] ||= {})[m] = { o: B[i - 1][1] }; }
+      if (mret[y]?.[m]) mret[y][m].c = B[i][1];
+    }
+    const years = Object.keys(mret).sort().reverse(), MN = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+    const cell = v => v == null ? `<td></td>` : `<td style="background:color-mix(in srgb, ${v >= 0 ? "var(--bull)" : "var(--bear)"} ${Math.min(55, Math.round(Math.abs(v) * 1.4))}%, transparent)">${Math.round(v)}</td>`;
+    const avg = MN.map((_, m) => { const xs = years.map(y => mret[y][m + 1]).filter(x => x?.c).map(x => (x.c / x.o - 1) * 100); return { n: xs.length, a: xs.reduce((p, q) => p + q, 0) / (xs.length || 1), up: xs.filter(x => x > 0).length }; });
+    h += cxCard("Month by month", "Bitcoin, % change",
+      `<div class="tablewrap"><table class="bt cxmon"><thead><tr><th></th>${MN.map(m => `<th>${m}</th>`).join("")}</tr></thead><tbody>` +
+      years.map(y => `<tr><th>${y}</th>${MN.map((_, m) => { const x = mret[y][m + 1]; return cell(x?.c ? (x.c / x.o - 1) * 100 : null); }).join("")}</tr>`).join("") +
+      `<tr class="cxavg"><th>Avg</th>${avg.map(x => cell(x.a)).join("")}</tr><tr class="cxavg"><th>Up</th>${avg.map(x => `<td>${x.n ? Math.round(x.up / x.n * 100) + "%" : ""}</td>`).join("")}</tr></tbody></table></div>`
+      + cxWhy(`Each month's change, from the last close of the month before. "Up" is how often that month rose. Twelve years is a small sample: one huge month can make an average look meaningful when it isn't.`));
+    // weekdays
+    const WD = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"], wd = WD.map(() => []);
+    for (let i = 1; i < B.length; i++) wd[(new Date(B[i][0] + "T00:00:00Z").getUTCDay() + 6) % 7].push((B[i][1] / B[i - 1][1] - 1) * 100);
+    const wm = wd.map(xs => ({ a: xs.reduce((p, q) => p + q, 0) / xs.length, up: xs.filter(x => x > 0).length / xs.length * 100, sd: Math.sqrt(xs.reduce((p, q) => p + q * q, 0) / xs.length) }));
+    const wmx = Math.max(...wm.map(x => Math.abs(x.a)));
+    h += cxCard("Day of the week", "average daily move",
+      `<div class="cxwd">${wm.map((x, i) => `<div><span class="cxwdb"><i class="${x.a >= 0 ? "pos" : "neg"}" style="--h:${Math.abs(x.a) / wmx * 100}%"></i></span><b class="${x.a >= 0 ? "up" : "down"}">${x.a >= 0 ? "+" : "−"}${Math.abs(x.a).toFixed(2)}%</b><small>${WD[i]}<br>${Math.round(x.up)}% up</small></div>`).join("")}</div>`
+      + cxWhy(`Daily closes in UTC since ${L.start.slice(0, 4)}. The differences between days are tiny next to a normal day's swing (about ±${wm[0].sd.toFixed(1)}%), so they're mostly noise. Weekends are quieter because the US funds and big desks are closed.`));
+    return h;
+  }
+
+  // ------------------------------------------------------------ DCA calculator
+  function cxDcaState() {
+    const st = pref("cxDca", {}) || {};
+    return { coin: st.coin || "BTC", amt: +st.amt > 0 ? +st.amt : 100, freq: st.freq === "w" ? "w" : "m", from: st.from || "2020-01", fee: Number.isFinite(+st.fee) ? +st.fee : 0.5, tax: st.tax !== false };
+  }
+  function cxDca() {
+    const L = cxGet("long", "data/crypto/long.json");
+    let h = header("Crypto") + cxNav("crypto-dca");
+    if (L === undefined) return h + `<p class="loading">Loading price history…</p>`;
+    if (!L?.eur) return h + `<div class="empty"><strong>No price history yet</strong>It's created by the daily crypto scan on GitHub.</div>`;
+    const st = cxDcaState(), coins = Object.keys(L.eur), cn = coins.includes(st.coin) ? st.coin : "BTC";
+    const P = cxSeries(L, "eur", cn), first = P[0][0], last = P[P.length - 1][0];
+    const months = []; for (let y = +first.slice(0, 4); y <= +last.slice(0, 4); y++) for (let m = 1; m <= 12; m++) { const k = `${y}-${String(m).padStart(2, "0")}`; if (k >= first.slice(0, 7) && k <= last.slice(0, 7)) months.push(k); }
+    const from = months.includes(st.from) ? st.from : months[0];
+    const name = S.stockBy[cn + "-USD"]?.name || cn;
+    h += `<p class="tag" style="margin-top:0">Dollar-cost averaging: putting the same amount in every week or month, whatever the price. See what it would have done, in euro, from any month you choose.</p>`;
+    h += `<div class="labbox cxdcaf">
+      <label class="lrow"><span>Coin</span><span class="yrpick"><select data-cxdca="coin">${coins.map(c => `<option value="${c}"${c === cn ? " selected" : ""}>${esc(S.stockBy[c + "-USD"]?.name || c)} (${c})</option>`).join("")}</select></span></label>
+      <label class="lrow"><span>Put in</span><span class="cxeur">€<input type="number" inputmode="decimal" min="1" step="10" value="${st.amt}" data-cxdca="amt" aria-label="Amount each time"></span>
+        ${labSeg("cxdcafreq", st.freq, [["w", "every week"], ["m", "every month"]], "How often")}</label>
+      <label class="lrow"><span>Starting</span><span class="yrpick"><select data-cxdca="from">${months.map(m => `<option value="${m}"${m === from ? " selected" : ""}>${esc(fmtDate(m + "-01", { month: "short", year: "numeric" }))}</option>`).join("")}</select></span><span style="color:var(--faint)">until today</span></label>
+      <label class="lrow"><span>Fee per buy</span><span class="cxeur"><input type="number" inputmode="decimal" min="0" max="5" step="0.1" value="${st.fee}" data-cxdca="fee" aria-label="Fee per buy in percent">%</span><small style="color:var(--faint)">exchange fee + spread</small></label>
+      <div class="lrow"><span>Selling today</span>${labSeg("cxdcatax", st.tax ? 1 : 0, [[0, "Before tax"], [1, "After 33% Italian tax"]], "Tax")}</div>
+    </div><div id="cxdcaout"></div>`;
+    const R = cxDcaRun(P, from, st), f = v => eurS(v);
+    if (!R.buys) return h + `<p class="hint">No buys in that period.</p>`;
+    const sell = R.value, gain = sell - R.invested, tax = st.tax && gain > 0 ? gain * 0.33 : 0, net = sell - tax;
+    const lumpGain = R.lump - R.invested, lumpNet = R.lump - (st.tax && lumpGain > 0 ? lumpGain * 0.33 : 0);
+    h += `<p class="labverdict">${f(st.amt)} every ${st.freq === "w" ? "week" : "month"} into ${esc(name)} since ${cxDate(from + "-01", { month: "long", year: "numeric" })}: <b>${f(R.invested)}</b> put in became <b class="${net >= R.invested ? "up" : "down"}">${f(net)}</b>${st.tax ? " after tax" : ""}.</p>`;
+    h += `<div class="tiles four">
+      <div><span>Put in</span><b>${kEur(R.invested)}</b><small>${R.buys} buys</small></div>
+      <div><span>Worth today</span><b class="${sell >= R.invested ? "up" : "down"}">${kEur(sell)}</b><small>${pp((sell / R.invested - 1) * 100, 0)}</small></div>
+      <div><span>${st.tax ? "After tax" : "Gain"}</span><b class="${(st.tax ? net - R.invested : gain) >= 0 ? "up" : "down"}">${st.tax ? kEur(net) : (gain >= 0 ? "+" : "−") + kEur(Math.abs(gain)).replace("−", "")}</b><small>${st.tax ? (tax ? `${kEur(tax)} tax` : "no tax on a loss") : "before tax"}</small></div>
+      <div><span>Average price</span><b>€${money(R.avg)}</b><small>today €${money(R.px)}</small></div>
+      <div><span>Coins owned</span><b>${R.units < 1 ? R.units.toFixed(5) : R.units.toLocaleString("en-US", { maximumFractionDigits: 3 })}</b><small>${esc(cn)}</small></div>
+      <div><span>Fees paid</span><b>${kEur(R.fees)}</b><small>${st.fee}% per buy</small></div>
+      <div><span>Worst moment</span><b class="down">${pp(R.worst, 0)}</b><small>${R.worstAt ? cxDate(R.worstAt, { month: "short", year: "numeric" }) : ""}, vs what was in</small></div>
+      <div><span>All at the start</span><b class="${lumpNet >= net ? "up" : "down"}">${kEur(lumpNet)}</b><small>${lumpNet >= net ? "would have done better" : "would have done worse"}</small></div>
+    </div>`;
+    h += `<h3 class="h3">Value over time</h3><div class="chartbox cxchart">${cxLine([
+      { pts: R.inv, color: C.muted, w: 1.4, dash: "4 3", noDot: true },
+      { pts: R.lumpSeries, color: C.accent2, w: 1.3, noDot: true },
+      { pts: R.val, color: C.accent, w: 2.2, area: true }], { h: 220, min: 0, grid: cxGrid(Math.max(R.maxVal, R.maxLump)), fmt: v => v >= 1e6 ? "€" + v / 1e6 + "M" : v >= 1000 ? "€" + v / 1000 + "k" : "€" + v, label: "DCA value over time" })}
+      ${cxLegend([[C.accent, "Your DCA"], [C.muted, "Money put in"], [C.accent2, "Same money all at the start"]])}</div>`;
+    h += `<p class="hint">Buys at the day's closing price in euro (Yahoo Finance), on the first day of each ${st.freq === "w" ? "week from the start date" : "month"}, minus the fee. "All at the start" puts the same total in on the first day. ${st.tax ? "Tax: 33% of the gain when you sell everything today (the rate on crypto from 2026), ignoring the 0.2% a year holding tax and earlier losses you could offset — the Tax tab does those. " : ""}Past prices; crypto can fall 70–80% and stay down for years.</p>`;
+    h += `<a class="labcta" href="#brokers-crypto" style="margin-top:14px"><span><b>Where to set up a recurring buy</b><small>Crypto exchanges licensed in the EU, with their fees</small></span><span aria-hidden="true">›</span></a>`;
+    return h;
+  }
+  const cxGrid = mx => { const out = []; const p = 10 ** Math.floor(Math.log10(Math.max(1, mx))); for (const m of [0, 1, 2, 3, 4, 5, 6, 8, 10]) { const v = m * p; if (v <= mx * 1.05) out.push(v); } return out.length > 6 ? out.filter((_, i) => i % 2 === 0) : out; };
+  function cxDcaRun(P, from, st) {
+    const fee = Math.max(0, Math.min(5, st.fee)) / 100;
+    let i0 = P.findIndex(p => p[0] >= from + "-01"); if (i0 < 0) i0 = P.length - 1;
+    let units = 0, invested = 0, buys = 0, fees = 0, lastKey = "", worst = 0, worstAt = null, maxVal = 0;
+    const val = [], inv = [], lumpSeries = [];
+    const nBuys = (() => { let n = 0, lk = ""; for (let i = i0; i < P.length; i++) { const k = st.freq === "w" ? Math.floor((i - i0) / 7) : P[i][0].slice(0, 7); if (k !== lk) { n++; lk = k; } } return n; })();
+    const total = nBuys * st.amt, lumpUnits = total * (1 - fee) / P[i0][1];
+    for (let i = i0; i < P.length; i++) {
+      const [d, px] = P[i], key = st.freq === "w" ? Math.floor((i - i0) / 7) : d.slice(0, 7);
+      if (key !== lastKey) { units += st.amt * (1 - fee) / px; invested += st.amt; fees += st.amt * fee; buys++; lastKey = key; }
+      const v = units * px; if (v > maxVal) maxVal = v;
+      const dd = (v / invested - 1) * 100; if (dd < worst) { worst = dd; worstAt = d; }
+      if ((i - i0) % 3 === 0 || i === P.length - 1) { val.push([d, v]); inv.push([d, invested]); lumpSeries.push([d, lumpUnits * px]); }
+    }
+    const px = P[P.length - 1][1];
+    return { units, invested, buys, fees, value: units * px, px, avg: invested ? (invested - fees) / units : 0, worst, worstAt, val, inv, lumpSeries, lump: lumpUnits * px, maxVal, maxLump: Math.max(...lumpSeries.map(p => p[1])) };
+  }
+
+  // ------------------------------------------------------------ Italian tax helper
+  function cxTaxState() {
+    const st = pref("cxTax", {}) || {};
+    const n = k => Number.isFinite(+st[k]) && +st[k] >= 0 ? +st[k] : 0;
+    return { year: [2025, 2026, 2027].includes(+st.year) ? +st.year : 2026, sold: n("sold"), cost: n("cost"), fees: n("fees"), carry: n("carry"), emt: !!st.emt, hold: n("hold"), days: Math.min(366, Math.max(1, +st.days || 365)), amm: !!st.amm };
+  }
+  function cxTax() {
+    const st = cxTaxState();
+    let h = header("Crypto") + cxNav("crypto-tax");
+    h += `<p class="tag" style="margin-top:0">A quick estimate of the Italian tax on crypto for a person resident in Italy, with the rules as they stand for 2026. Not tax advice: check your case with a commercialista or a CAF.</p>`;
+    const inp = (k, lbl, small) => `<label class="lp cxtaxin"><span>${lbl}${small ? ` <small>${small}</small>` : ""}</span><span class="cxeur">€<input type="number" inputmode="decimal" min="0" step="any" value="${st[k] || ""}" placeholder="0" data-cxtax="${k}" aria-label="${lbl.replace(/<[^>]+>/g, "")}"></span></label>`;
+    h += `<div class="labbox cxtaxf">
+      <div class="lrow"><span>Year you sold</span>${labSeg("cxtaxyear", st.year, [[2025, "2025"], [2026, "2026"], [2027, "2027"]], "Year of sale")}</div>
+      <h4 class="cxsub">Gains: what you sold</h4>
+      ${inp("sold", "Money from sales", "euro received when you sold or swapped into euro or other assets")}
+      ${inp("cost", "What those coins cost you", "the purchase cost of the coins you sold")}
+      ${inp("fees", "Fees on those trades")}
+      ${inp("carry", "Losses from earlier years", "declared, from the last 4 years")}
+      <label class="lrow cxchk"><input type="checkbox" data-cxtaxc="emt"${st.emt ? " checked" : ""}> <span>These were euro stablecoins that meet the EU MiCA rules (e-money tokens)</span></label>
+      <h4 class="cxsub">Holdings: the 0.2% a year tax</h4>
+      ${inp("hold", "Value of all your crypto on 31 December")}
+      <label class="lp"><span>Days you held crypto that year</span><b data-cxdays>${st.days}</b><input type="range" min="1" max="365" value="${st.days}" data-cxtax="days" aria-label="Days held"></label>
+      <label class="lrow cxchk"><input type="checkbox" data-cxtaxc="amm"${st.amm ? " checked" : ""}> <span>An Italian intermediary handles the tax for me (regime amministrato)</span></label>
+    </div><div id="cxtaxout">${cxTaxOut(st)}</div>`;
+    h += `<div class="card"><h3>The rules in short</h3><ul class="watch cxrules">
+      <li><b>33%</b> on gains made from 1 January 2026; <b>26%</b> on gains made up to the end of 2025, and on euro e-money tokens that meet the MiCA rules.</li>
+      <li>No tax-free amount: the old €2,000 threshold ended with 2024.</li>
+      <li>Losses can be set against gains of the following years, up to the fourth, if you declared them in the year you made them.</li>
+      <li>Moving coins between your own wallets or exchanges is not a sale. Turning euro into euro e-money tokens and back isn't either.</li>
+      <li>Swaps between coins: only swaps between assets "with different features and functions" count as a sale, and the line isn't fully settled. Keep a record of every swap.</li>
+      <li>The 0.2% a year (imposta sul valore delle cripto-attività) is on what you hold, for the days you held it, wherever it is kept.</li>
+      <li>Gains and losses go in <b>quadro RT</b> of the Redditi PF return; holdings in <b>quadro RW</b> (monitoring and the 0.2%), even if you sold nothing, unless an Italian intermediary does it for you.</li>
+      <li>Cost basis: there's no single official method for crypto bought at different prices. Keep records of every purchase in euro and ask your adviser which method to use.</li>
+    </ul><p class="hint" style="margin:10px 0 0">Checked on 29 October 2026 against Law 207/2024 and published guides, e.g. <a href="https://divly.com/it/guides/nuove-regole-tasse-crypto-italia-2026" target="_blank" rel="noopener">Divly</a> and <a href="https://www.money.it/tasse-bitcoin-criptovalute-guida-dichiarazione" target="_blank" rel="noopener">Money.it</a>. Rules change; the Agenzia delle Entrate's instructions for the year's return are what count.</p></div>`;
+    return h;
+  }
+  function cxTaxOut(st) {
+    const rate = st.emt || st.year <= 2025 ? 0.26 : 0.33, gain = st.sold - st.cost - st.fees;
+    const used = gain > 0 ? Math.min(gain, st.carry) : 0, taxable = Math.max(0, gain - used), tax = taxable * rate;
+    const vtax = st.hold * 0.002 * st.days / 365, f = v => eurS(v);
+    let h = `<div class="tiles four">
+      <div><span>${gain >= 0 ? "Gain" : "Loss"}</span><b class="${gain >= 0 ? "up" : "down"}">${f(Math.abs(gain))}</b><small>sales − cost − fees</small></div>
+      <div><span>Taxable</span><b>${f(taxable)}</b><small>${used ? `after ${f(used)} of old losses` : "no old losses used"}</small></div>
+      <div><span>Tax on gains</span><b>${f(tax)}</b><small>${Math.round(rate * 100)}%${st.emt ? " (euro e-money tokens)" : st.year <= 2025 ? " (gains made in 2025)" : ""}</small></div>
+      <div><span>0.2% on holdings</span><b>${f(vtax)}</b><small>${st.days} days</small></div>
+    </div>`;
+    const notes = [];
+    if (gain < 0) notes.push(`A loss of <b>${f(-gain)}</b>: declare it in quadro RT this year and you can use it against gains until <b>${st.year + 4}</b>.`);
+    if (gain > 0 && st.carry > used) notes.push(`<b>${f(st.carry - used)}</b> of old losses left for later years, each until 4 years after it was made.`);
+    notes.push(st.amm ? "With an Italian intermediary in the amministrato regime, the intermediary works out and pays these taxes; check its yearly statement." :
+      `To declare: gains and losses in <b>quadro RT</b>, holdings and the 0.2% in <b>quadro RW</b> of the Redditi PF return${gain === 0 && !st.sold ? " (RW is due even if you sold nothing)" : ""}.`);
+    return h + `<div class="card cxtaxnote">${notes.map(n => `<p>${n}</p>`).join("")}<p class="hint" style="margin:6px 0 0">An estimate with the numbers you typed. Not tax advice.</p></div>`;
+  }
+
+  // ------------------------------------------------------------ events
+  function cxEvents() {
+    const M = cxGet("m", "data/crypto/market.json"), E = cxGet("ev", "data/crypto/events.json");
+    let h = header("Crypto") + cxNav("crypto-events");
+    const today = localToday(), end = isoDay(new Date(parse(today).getTime() + 75 * DAY)), ev = [];
+    // last Friday of each month, 08:00 UTC: monthly crypto options and futures expiry (Deribit, CME)
+    for (let k = 0; k < 4; k++) {
+      const d0 = parse(today); const y = d0.getFullYear(), m = d0.getMonth() + k;
+      const lastDay = new Date(Date.UTC(y, m + 1, 0)); const back = (lastDay.getUTCDay() + 2) % 7;
+      const d = new Date(lastDay.getTime() - back * DAY).toISOString().slice(0, 10), q = [2, 5, 8, 11].includes(((m % 12) + 12) % 12);
+      if (d >= today && d <= end) ev.push({ date: d, time: "08:00 UTC", name: q ? "Quarterly options and futures expiry" : "Monthly options and futures expiry", kind: q ? "big" : "", why: q ? "The biggest expiry of the quarter on Deribit and CME. Prices are often pulled around the strike levels in the days before." : "Bitcoin and Ether options on Deribit and CME futures settle; expect some extra swings around it." });
+    }
+    for (const x of S.cal?.economy || []) if (x.date >= today && x.date <= end && /Fed|CPI|inflation|payroll|jobs|PCE/i.test(x.kind + " " + x.name))
+      ev.push({ date: x.date, time: x.time ? x.time + " New York" : "", name: x.name, kind: /Fed/.test(x.kind) ? "big" : "", why: (x.why || "") + " Crypto often reacts to interest-rate news like tech stocks do." });
+    if (M?.halving?.eta && M.halving.eta <= end) ev.push({ date: M.halving.eta, name: "Bitcoin halving (estimate)", kind: "big", why: "New supply per block is cut in half." });
+    for (const x of E?.events || []) if (x.date >= today && x.date <= end) ev.push({ ...x, kind: x.big ? "big" : "" });
+    ev.sort((a, b) => a.date < b.date ? -1 : a.date > b.date ? 1 : 0);
+    h += `<p class="tag" style="margin-top:0">What's coming in the next ten weeks that tends to move crypto: US interest rates and inflation, options expiries${E?.events?.length ? ", and crypto events we track by hand" : ""}.</p>`;
+    if (!ev.length) h += `<div class="empty"><strong>Nothing scheduled yet</strong>Check back once the calendar update has run.</div>`;
+    let lastDay = "";
+    h += `<div class="rows cxev">` + ev.map(x => {
+      const head = x.date !== lastDay ? `<div class="day"><span>${cxDate(x.date, { weekday: "long", day: "numeric", month: "long" })}</span><span>${inDays(Math.round((parse(x.date) - parse(today)) / DAY))}</span></div>` : "";
+      lastDay = x.date;
+      return head + `<div class="row cxe ${x.kind}"><span class="cxedot" aria-hidden="true"></span><div><b>${esc(x.name)}</b>${x.time ? `<small>${esc(x.time)}</small>` : ""}<p>${esc(x.why || "")}</p></div></div>`;
+    }).join("") + `</div>`;
+    h += `<p class="hint">Fed and inflation dates come from the app's market calendar (Yahoo Finance, Federal Reserve). Expiries are the last Friday of each month. Token unlocks and network upgrades need a paid data feed, so they're added by hand to <code>docs/data/crypto/events.json</code> when known.</p>`;
+    return h;
+  }
+
+  // ------------------------------------------------------------ risks
+  function cxRisks() {
+    const L = cxGet("long", "data/crypto/long.json");
+    const B = cxSeries(L, "usd", "BTC");
+    let dd = null;
+    if (B) { let pk = 0, w = 0; for (const [, v] of B) { pk = Math.max(pk, v); w = Math.min(w, v / pk - 1); } dd = Math.round(-w * 100); }
+    let h = header("Crypto") + cxNav("crypto-risks");
+    const R = [
+      ["📉", "Big falls are normal", `Bitcoin has fallen ${dd ? `as much as ${dd}%` : "more than 70%"} from a high since 2014, and smaller coins often lose 90% or vanish. Only put in money you could leave alone for years.`],
+      ["🏦", "The exchange can fail", "When FTX collapsed in November 2022, customers couldn't withdraw for years. Prefer exchanges licensed in the EU under MiCA, and don't keep more on an exchange than you need.", "#brokers-crypto", "EU-licensed exchanges"],
+      ["🔑", "Your keys, your coins", "In your own wallet nobody can freeze your coins, but nobody can recover them either. Write the recovery phrase on paper, keep it offline, and never type it into a website or share it."],
+      ["🪙", "Stablecoins can break", "TerraUSD lost its $1 peg in May 2022 and went to almost zero. Even big stablecoins can slip briefly in a panic. Under MiCA, euro and dollar e-money tokens must hold reserves."],
+      ["🎣", "Scams look professional", "Fake support agents, \"double your crypto\" giveaways, investment groups on WhatsApp or Telegram, romance contacts with a trading tip. No real exchange or helper asks for your recovery phrase or to send coins first."],
+      ["⚡", "Leverage cuts both ways", "With 10× leverage a 10% move against you wipes the position out. Most liquidations happen in sharp moves that reverse minutes later.", "#heatmap", "Liquidation heatmap"],
+      ["🧾", "Taxes still apply", "Gains are taxed at 33% from 2026, swaps can count as sales, and holdings must be declared in quadro RW. Keep records of every trade.", "#crypto-tax", "Tax helper"],
+    ];
+    h += `<div class="cxrisks">${R.map(([i, t, p, href, lbl]) => `<div class="card"><h3><span aria-hidden="true">${i}</span> ${t}</h3><p>${p}</p>${href ? `<a class="cxlink" href="${href}">${lbl} ›</a>` : ""}</div>`).join("")}</div>`;
+    h += `<p class="fine">General information, not investment advice. Crypto-assets are high-risk and you can lose all the money you invest.</p>`;
+    return h;
+  }
+
+  function cxClick(e) {
+    const t = e.target.closest("[data-cxsort], [data-cxdcafreq], [data-cxdcatax], [data-cxtaxyear]"); if (!t) return false;
+    const d = t.dataset;
+    if (d.cxsort) setPref("cxSort", d.cxsort);
+    else if (d.cxdcafreq) setPref("cxDca", { ...cxDcaState(), freq: d.cxdcafreq });
+    else if (d.cxdcatax != null) setPref("cxDca", { ...cxDcaState(), tax: d.cxdcatax === "1" });
+    else if (d.cxtaxyear) setPref("cxTax", { ...cxTaxState(), year: +d.cxtaxyear });
+    rerender(); return true;
+  }
+  function cxInput(e) {
+    const t = e.target.closest("[data-cxdca], [data-cxtax], [data-cxtaxc]"); if (!t) return false;
+    if (t.dataset.cxdca) {
+      const k = t.dataset.cxdca, st = cxDcaState(); st[k] = k === "amt" || k === "fee" ? +t.value : t.value;
+      if ((k === "amt" && !(st.amt > 0)) || (k === "fee" && !(st.fee >= 0))) return true;
+      setPref("cxDca", st);
+      if (e.type === "change") rerender();     // typing saves; the result updates when you leave the box or press Done
+      return true;
+    }
+    const st = cxTaxState();
+    if (t.dataset.cxtaxc) st[t.dataset.cxtaxc] = t.checked; else st[t.dataset.cxtax] = +t.value || 0;
+    setPref("cxTax", st);
+    const b = document.querySelector("[data-cxdays]"); if (b) b.textContent = cxTaxState().days;
+    const o = document.getElementById("cxtaxout"); if (o) o.innerHTML = cxTaxOut(cxTaxState());
+    return true;
+  }
+
+
   // ------------------------------------------------- liquidation heatmap
   // Colour scale like the well-known heatmaps: deep violet (little) to yellow (a lot).
   const HM_STOPS = [[0, [40, 8, 70]], [.2, [62, 22, 128]], [.42, [40, 86, 190]], [.62, [24, 172, 168]], [.82, [120, 222, 84]], [1, [255, 232, 58]]];
@@ -3765,7 +4295,7 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
     } else {
       followed.forEach(id => {
         // Top-Down Analysis has one channel per timeframe, so you can pick which ones ping you
-        const chans = S.byId[id]?.kind === "lines" ? tdTfs().map(tf => [`${stratName(id)} · ${tf}`, `${pre}-${id}-${tf.toLowerCase()}`]) : [[stratName(id), `${pre}-${L().topic}${id}`]];
+        const chans = S.byId[id]?.kind === "lines" ? tdTfs().map(tf => [`${stratName(id)} · ${tf}`, `${pre}-${L().topic}${id}-${tf.toLowerCase()}`]) : [[stratName(id), `${pre}-${L().topic}${id}`]];
         chans.forEach(([lbl, t]) => {
           h += `<div class="topic"><span style="min-width:0"><span style="display:block;font-size:13px;color:var(--muted)">${esc(lbl)}</span><code>${esc(t)}</code></span><button data-copy="${esc(t)}">Copy</button></div>`;
         });
@@ -4153,13 +4683,13 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
 
   function route() {
     const r = (location.hash || "#alerts").slice(1);
-    const tab = r === "news" || r === "buzz" || r === "mood" || r === "earnings" || r.startsWith("earnings-") ? "news" : r.startsWith("calendar") ? "calendar" : r.startsWith("strategylab") ? "lab" : r.startsWith("strateg") ? "strategies" : r.startsWith("stock") || r === "heatmap" ? "stocks" : r === "notify" ? "notify" : r.startsWith("brokers") ? "brokers" : r.startsWith("learn") ? "learn" : r === "practice" ? "practice" : "alerts";
+    const tab = r === "news" || r === "buzz" || r === "mood" || r === "earnings" || r.startsWith("earnings-") ? "news" : r.startsWith("calendar") ? "calendar" : r === "crypto" || r.startsWith("crypto-") ? "cryptohub" : r.startsWith("strategylab") ? "lab" : r.startsWith("strateg") ? "strategies" : r.startsWith("stock") || r === "heatmap" ? "stocks" : r === "notify" ? "notify" : r.startsWith("brokers") ? "brokers" : r.startsWith("learn") ? "learn" : r === "practice" ? "practice" : "alerts";
     if (r === "winners" || r === "record") S.alView = r; else if (tab === "alerts" && !r.startsWith("alert-")) S.alView = "alerts";
-    const list = { alerts: S.alView === "winners" ? viewWinners : S.alView === "record" ? viewRecord : viewAlerts, stocks: viewStocks, strategies: viewStrategies, notify: viewNotify, brokers: viewBrokers, learn: viewLearn, practice: viewPractice, lab: () => viewLab(r.slice(11)), news: r === "buzz" ? viewBuzz : r === "mood" ? viewMood : r === "earnings" || r.startsWith("earnings-") ? () => viewEarnings(r.slice(9)) : viewNews, calendar: () => viewCalendar(r.slice(9)) }[tab];
+    const list = { alerts: S.alView === "winners" ? viewWinners : S.alView === "record" ? viewRecord : viewAlerts, stocks: viewStocks, strategies: viewStrategies, notify: viewNotify, brokers: viewBrokers, learn: viewLearn, practice: viewPractice, lab: () => viewLab(r.slice(11)), cryptohub: () => viewCrypto(r), news: r === "buzz" ? viewBuzz : r === "mood" ? viewMood : r === "earnings" || r.startsWith("earnings-") ? () => viewEarnings(r.slice(9)) : viewNews, calendar: () => viewCalendar(r.slice(9)) }[tab];
     let detail = detailFor(r), sel = detail ? r : null;
     charts.length = 0;
 
-    if (WIDE.matches && tab !== "notify" && tab !== "brokers" && tab !== "learn" && tab !== "news" && tab !== "calendar" && tab !== "practice" && tab !== "lab" && r !== "record") {
+    if (WIDE.matches && tab !== "notify" && tab !== "brokers" && tab !== "learn" && tab !== "news" && tab !== "calendar" && tab !== "practice" && tab !== "lab" && tab !== "cryptohub" && r !== "record") {
       const lp = app.querySelector(".pane.list"), dp = app.querySelector(".pane.detail");
       const listTop = lp?.scrollTop || 0, detTop = dp?.scrollTop || 0;
       const L = norm(list());
@@ -4185,7 +4715,7 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
     if (nsearch) { nsearch.addEventListener("input", () => { S.nq = nsearch.value; filterNews(); }); filterNews(); }
     // the phone tab bar has no Calendar button: it lives under News there
     // phone bar: pages without their own button light up Menu
-    const inBar = { calendar: "menu", brokers: "menu", notify: "menu", learn: "menu", practice: "menu" }[tab] || tab;
+    const inBar = { calendar: "menu", brokers: "menu", notify: "menu", learn: "menu", practice: "menu", cryptohub: "menu" }[tab] || tab;
     const navTab = tab === "alerts" && (S.alView === "winners" || S.alView === "record") ? S.alView : tab;
     document.querySelectorAll("[data-tab]").forEach(a => a.setAttribute("aria-current", (a.closest(".tabs") ? a.dataset.tab === inBar : a.dataset.tab === navTab) ? "page" : "false"));
     S.routed = true;
@@ -4228,6 +4758,7 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
 
   app.addEventListener("click", e => {
     if (labClick(e)) return;
+    if (cxClick(e)) return;
     const bk = e.target.closest("[data-back]");
     if (bk && S.navs > 0) { e.preventDefault(); history.back(); return; }
     const tf = e.target.closest("[data-tdtf]");
@@ -4338,12 +4869,13 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
   });
   app.addEventListener("change", e => {
     if (labChange(e)) return;
+    if (cxInput(e)) return;
     const ey = e.target.closest("[data-ernfrom], [data-ernto]");
     if (ey) { setPref(ey.matches("[data-ernfrom]") ? "ernFrom" : "ernTo", +ey.value); rerender(); return; }
     const cf = e.target.closest("[data-cmpfrom]");
     if (cf) { setPref("cmpFrom." + (S.market || "stocks"), +cf.value); rerender(); }
   });
-  app.addEventListener("input", e => labInput(e));
+  app.addEventListener("input", e => { if (!labInput(e)) cxInput(e); });
   app.addEventListener("submit", e => {
     if (labSubmit(e)) return;
     const f = e.target.closest("[data-ernform]");
@@ -4570,7 +5102,7 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
   async function loadMarket(m) {
     if (!CACHE[m]) {
       const b = MK[m].base;
-      const [feed, bt, stocks, liq, news, mentions, td, sent] = await Promise.all([opt(b + "alerts.json"), opt(b + "backtest.json"), opt(b + "stocks.json"), m === "crypto" ? opt(b + "liquidations.json") : null, opt(b + "news.json"), opt(b + "mentions.json"), m === "stocks" ? opt("data/topdown/alerts.json") : null, m === "stocks" ? opt("data/sentiment.json") : null]);
+      const [feed, bt, stocks, liq, news, mentions, td, sent] = await Promise.all([opt(b + "alerts.json"), opt(b + "backtest.json"), opt(b + "stocks.json"), m === "crypto" ? opt(b + "liquidations.json") : null, opt(b + "news.json"), opt(b + "mentions.json"), m === "stocks" ? opt("data/topdown/alerts.json") : m === "crypto" ? opt(b + "topdown.json") : null, m === "stocks" ? opt("data/sentiment.json") : null]);
       CACHE[m] = { feed, bt, stocks, liq, news, mentions, td, sent, stockData: {} };
     }
     const c = CACHE[m];
@@ -4593,7 +5125,7 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
     await loadMarket(m);
     S.lastSel = null; S.lastTab = null;
     const tab = (location.hash || "#alerts").slice(1);
-    const base = tab.startsWith("strategylab") ? tab : tab.startsWith("strateg") ? (tab.startsWith("strategy-") ? tab : "strategies") : tab.startsWith("stock") || tab === "heatmap" ? "stocks" : tab === "news" || tab === "buzz" || tab === "mood" ? tab : tab.startsWith("calendar") ? tab : tab === "notify" ? "notify" : tab.startsWith("brokers") ? "brokers" : tab.startsWith("learn") ? tab : tab === "winners" || tab === "record" || tab === "practice" ? tab : "alerts";
+    const base = tab.startsWith("strategylab") || tab === "crypto" || tab.startsWith("crypto-") ? tab : tab.startsWith("strateg") ? (tab.startsWith("strategy-") ? tab : "strategies") : tab.startsWith("stock") || tab === "heatmap" ? "stocks" : tab === "news" || tab === "buzz" || tab === "mood" ? tab : tab.startsWith("calendar") ? tab : tab === "notify" ? "notify" : tab.startsWith("brokers") ? "brokers" : tab.startsWith("learn") ? tab : tab === "winners" || tab === "record" || tab === "practice" ? tab : "alerts";
     if ("#" + base !== location.hash) location.hash = base; else route();
     scrollTo(0, 0);
   }

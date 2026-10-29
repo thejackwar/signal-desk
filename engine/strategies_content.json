@@ -266,7 +266,8 @@
       "name": "Top-Down Analysis",
       "kind": "lines",
       "markets": [
-        "stocks"
+        "stocks",
+        "crypto"
       ],
       "category": "Multi-timeframe",
       "level": "Intermediate",
