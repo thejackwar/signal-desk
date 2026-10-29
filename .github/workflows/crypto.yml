@@ -24,6 +24,8 @@ jobs:
         env:
           NTFY_PREFIX: ${{ vars.NTFY_PREFIX }}
         run: python engine/scan.py --market crypto
+      - name: Long euro price history (DCA calculator, seasonality)
+        run: python engine/crypto_market.py --long || echo "long history skipped"
       - name: Publish new alerts
         run: |
           git config user.name "signal-desk-bot"

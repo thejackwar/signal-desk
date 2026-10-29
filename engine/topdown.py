@@ -11,7 +11,12 @@ NTFY_PREFIX is set, sends a phone notification on the topic <NTFY_PREFIX>-topdow
 Each line alerts once. The app shows only the timeframes the viewer picked (W, D, 4H and 1H
 by default).
 
+Crypto (--market crypto): the same lines on the coins of engine/crypto.txt, from OKX spot candles
+(USDT pairs, UTC, only finished candles), every 30 minutes around the clock, weekends included.
+Alerts go to docs/data/crypto/topdown.json and the phone topics <NTFY_PREFIX>-crypto-topdown-<tf>.
+
 Run:  ALPACA_KEY_ID=... ALPACA_SECRET_KEY=... python engine/topdown.py
+      python engine/topdown.py --market crypto
       python engine/topdown.py --demo --force      (simulated prices, no keys needed)
 """
 from __future__ import annotations
@@ -278,11 +283,13 @@ def scan_ticker(ticker: str, frames: dict[str, pd.DataFrame], data_end: pd.Times
                 continue
             price = float(df["Close"].iloc[-1])
             word = "above the falling" if side == "bullish" else "below the rising"
+            rp = lambda v: round(float(v), 2) if abs(v) >= 10 else float(f"{float(v):.4g}")   # cheap coins keep their digits
+            lv = f"{level:,.2f}" if abs(level) >= 10 else f"{float(level):.4g}"
             new.append({
                 "id": aid, "strategy": "topdown", "ticker": ticker, "tf": tf,
                 "date": data_end.strftime("%Y-%m-%d"), "side": side,
-                "price": round(price, 2), "level": round(float(level), 2),
-                "note": f"{label}: crossed {word} trendline ({level:,.2f})",
+                "price": rp(price), "level": rp(level),
+                "note": f"{label}: crossed {word} trendline ({lv})",
                 "break_at": tstr(idx[bi]), "since": 0.0, "since_days": 0,
                 "strength": strength(tf, side, res),
             })
@@ -333,6 +340,103 @@ def notify(alerts: list[dict], prefix: str):
             print(f"  ! notification failed: {e}")
 
 
+# ===================================================================== crypto (OKX, 24/7)
+OKX_BARS = {"W": ("1Wutc", 300), "D": ("1Dutc", 300), "4H": ("4H", 400), "1H": ("1H", 500),
+            "30m": ("30m", 600), "15m": ("15m", 1200), "5m": ("5m", 1200)}
+
+
+def crypto_tickers() -> list[str]:
+    raw = (ROOT / "engine" / "crypto.txt").read_text().splitlines()
+    return [x.strip() for x in raw if x.strip() and not x.startswith("#")]
+
+
+def _okx(url: str):
+    for attempt in range(4):
+        try:
+            with urllib.request.urlopen(urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"}), timeout=30) as r:
+                js = json.load(r)
+            if js.get("code") == "0":
+                return js["data"]
+            if js.get("code") == "50011":                # too many requests
+                time.sleep(2 * (attempt + 1))
+                continue
+            raise RuntimeError(js.get("msg") or js.get("code"))
+        except urllib.error.HTTPError as e:
+            if e.code == 429 and attempt < 3:
+                time.sleep(2 * (attempt + 1))
+                continue
+            raise
+    raise RuntimeError("OKX kept refusing")
+
+
+def fetch_okx(tickers: list[str]) -> dict[str, dict[str, pd.DataFrame]]:
+    """ticker (BTC-USD) -> our timeframe -> DataFrame in UTC, finished candles only."""
+    out = {}
+    for t in tickers:
+        inst = t.split("-")[0] + "-USDT"
+        frames = {}
+        try:
+            for tf, (bar, need) in OKX_BARS.items():
+                rows, after = [], ""
+                while len(rows) < need:
+                    d = _okx(f"https://www.okx.com/api/v5/market/candles?instId={inst}&bar={bar}&limit=300{after}")
+                    if not d:
+                        break
+                    rows += d
+                    after = f"&after={d[-1][0]}"
+                    time.sleep(0.07)
+                    if len(d) < 300:
+                        break
+                rows = [r for r in rows if r[8] == "1"]   # confirm = 1: the candle has closed
+                if not rows:
+                    continue
+                df = pd.DataFrame([[float(x) for x in r[1:5]] for r in rows], columns=["Open", "High", "Low", "Close"],
+                                  index=pd.to_datetime([int(r[0]) for r in rows], unit="ms", utc=True))
+                frames[tf] = df[~df.index.duplicated()].sort_index()
+        except Exception as e:
+            print(f"  ! {t}: {e}")
+            continue
+        if "D" in frames and "1H" in frames:
+            out[t] = frames
+        else:
+            print(f"  ! {t}: not on OKX, skipped")
+    return out
+
+
+def main_crypto(args, now: dt.datetime):
+    global ET
+    ET = ZoneInfo("UTC")                                 # crypto candles and alert times are in UTC
+    tickers = args.tickers.split(",") if args.tickers else crypto_tickers()
+    out = Path(args.out if args.out != str(OUT) else ROOT / "docs" / "data" / "crypto" / "topdown.json")
+    print(f"Fetching {len(tickers)} coins from OKX…")
+    data = fetch_okx(tickers)
+    old = json.loads(out.read_text()) if out.exists() else {"alerts": []}
+    cutoff = (now.date() - dt.timedelta(days=KEEP_DAYS)).isoformat()
+    alerts = [a for a in old.get("alerts", []) if a["date"] >= cutoff]
+    known = {a["id"]: a for a in alerts}
+    new = []
+    for t, frames in data.items():
+        # "now" for each timeframe is the end of its last finished candle; alerts only on fresh breaks
+        data_end = max(df.index[-1] for df in frames.values())
+        found = scan_ticker(t, frames, data_end, known)
+        for a in found:
+            a["found_at"] = now.strftime("%Y-%m-%dT%H:%M+00:00")
+            known[a["id"]] = a
+        new += found
+    print(f"{len(new)} new line break(s).")
+    for a in new:
+        print(f"  {a['side']:8} {a['ticker']:9} {a['tf']:4} {a['note']}")
+    alerts = new + alerts
+    update_since(alerts, {t: {"1Day": f["D"]} for t, f in data.items()})
+    alerts.sort(key=lambda a: (a["date"], a.get("found_at", "")), reverse=True)
+    out.parent.mkdir(parents=True, exist_ok=True)
+    out.write_text(json.dumps({"generated_at": now.strftime("%Y-%m-%dT%H:%M+00:00"), "as_of": now.date().isoformat(),
+                               "demo": False, "market": "crypto", "alerts": alerts}, separators=(",", ":")))
+    prefix = os.environ.get("NTFY_PREFIX", "").strip()
+    if prefix and new:
+        notify(new, prefix + "-crypto")
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--demo", action="store_true", help="simulated prices, no Alpaca keys needed")
@@ -340,9 +444,12 @@ def main():
     ap.add_argument("--tickers", help="comma-separated subset, e.g. SPY,AAPL")
     ap.add_argument("--out", default=str(OUT))
     ap.add_argument("--now", help="pretend it is this UTC time, e.g. 2026-10-27T18:30 (for testing)")
+    ap.add_argument("--market", default="stocks", choices=["stocks", "crypto"])
     args = ap.parse_args()
 
     now = dt.datetime.fromisoformat(args.now).replace(tzinfo=dt.timezone.utc) if args.now else dt.datetime.now(dt.timezone.utc)
+    if args.market == "crypto":
+        return main_crypto(args, now)
     ny = now.astimezone(ET)
     minutes = ny.hour * 60 + ny.minute
     if not args.force and (ny.weekday() >= 5 or not 570 <= minutes <= 985):   # 9:30 to 16:25 New York

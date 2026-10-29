@@ -21,11 +21,13 @@ jobs:
       - run: pip install -r requirements.txt
       - name: Estimate the BTC/USDT liquidation heatmap
         run: python engine/liquidations.py
+      - name: Crypto market overview (fear & greed, funding, ETF flows, correlations)
+        run: python engine/crypto_market.py || echo "market overview skipped"
       - name: Publish
         run: |
           git config user.name "signal-desk-bot"
           git config user.email "signal-desk-bot@users.noreply.github.com"
-          git add docs/data/crypto/liquidations.json
+          git add docs/data/crypto/liquidations.json docs/data/crypto/market.json 2>/dev/null || git add docs/data/crypto/liquidations.json
           git diff --cached --quiet || git commit -m "Liquidation heatmap $(date -u +%FT%H:%M)"
           git pull --rebase
           git push
