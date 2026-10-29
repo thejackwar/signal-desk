@@ -25,11 +25,14 @@ jobs:
       - run: pip install -r requirements.txt "yfinance>=1.0" requests
       - name: Upcoming earnings, IPOs and economic releases
         run: python engine/events.py
+      - name: Past earnings reactions of every S&P 100 stock (Earnings page)
+        continue-on-error: true   # a bad download here must not hold back the calendar
+        run: python engine/earnings.py
       - name: Publish
         run: |
           git config user.name "signal-desk-bot"
           git config user.email "signal-desk-bot@users.noreply.github.com"
-          git add docs/data/calendar.json
+          git add docs/data/calendar.json docs/data/earnings
           git diff --cached --quiet || git commit -m "Calendar $(date -u +%FT%H:%M)"
           git pull --rebase
           git push
