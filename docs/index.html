@@ -1605,6 +1605,9 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
     return isNaN(d) ? "" : " " + d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
   }
 
+  // The trading-bot strategies send sell alerts (and cover alerts for the long + short one): they close a trade
+  // instead of opening one. Their buy-only strategies label bullish alerts "buy".
+  const sideLbl = a => a.exit ? (a.side === "bearish" ? "sell" : "cover") : (S.byId[a.strategy]?.long_only ? "buy" : a.side);
   function alertRow(a, opts = {}) {
     const idx = S.feed.alerts.indexOf(a);
     const sinceTxt = a.since_days > 0 ? `${chg(a.since)} <span style="color:var(--faint)">${a.since_days}d</span>` : `<span style="color:var(--faint)">today${foundTime(a)}</span>`;
@@ -1612,14 +1615,14 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
       <span class="stripe"></span>${!opts.showDate ? icon(a.ticker, 32) : ""}
       <span class="main"><span class="tk">${esc(opts.showDate ? fmtDate(a.date, { day: "numeric", month: "short" }) : disp(a.ticker))}</span><span class="strat">${esc(stratName(a.strategy))}${a.tf ? ` · ${esc(a.tf)}` : ""}</span>
         <div class="note">${esc(a.note)}</div>
-        <div class="info">${meter(a.strength)}<span class="pill">${a.side}</span>${S.market === "stocks" && earnSoon(a.ticker) ? `<span class="pill earn" title="Earnings ${inDays(earnSoon(a.ticker).days)}">earnings ${earnSoon(a.ticker).days === 0 ? "today" : earnSoon(a.ticker).days + "d"}</span>` : ""}${a.stop_hit ? `<span class="pill lvhit" title="Closed beyond its “wrong if” level on ${esc(fmtDate(a.stop_hit, { day: "numeric", month: "short" }))}">level hit</span>` : ""}</div></span>
+        <div class="info">${meter(a.strength)}<span class="pill">${sideLbl(a)}</span>${S.market === "stocks" && earnSoon(a.ticker) ? `<span class="pill earn" title="Earnings ${inDays(earnSoon(a.ticker).days)}">earnings ${earnSoon(a.ticker).days === 0 ? "today" : earnSoon(a.ticker).days + "d"}</span>` : ""}${a.stop_hit ? `<span class="pill lvhit" title="Closed beyond its “wrong if” level on ${esc(fmtDate(a.stop_hit, { day: "numeric", month: "short" }))}">level hit</span>` : ""}</div></span>
       <span class="px">${money(a.price)}<span class="since">${sinceTxt}</span></span></a>`;
   }
 
   function marketStrip() {
     const M = S.stocks; if (!M) return "";
     const today = (S.feed?.alerts || []).filter(a => a.date === S.feed.as_of);
-    const bu = today.filter(a => a.side === "bullish").length, be = today.length - bu;
+    const bu = today.filter(a => a.side === "bullish" && !a.exit).length, be = today.filter(a => a.side === "bearish" && !a.exit).length;
     return `<div class="strip"><a href="#stocks"><b>${Math.round(M.breadth200)}%</b> above 200-day</a><span><b class="up">${M.advancers}</b> up · <b class="down">${M.decliners}</b> down</span><span><b>${bu}</b>▲ <b>${be}</b>▼ alerts today</span></div>`;
   }
 
@@ -1674,14 +1677,15 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
       <span class="stripe"></span>${icon(a.ticker, 32)}
       <span class="main"><span class="tk"><span class="rk${rank === 1 ? " r1" : ""}">${rank}</span>${esc(disp(a.ticker))}</span><span class="strat">${esc(stratName(a.strategy))}${a.tf ? ` · ${esc(a.tf)}` : ""}</span>
         <div class="note">${opts.showDate ? esc(fmtDate(a.date, { day: "numeric", month: "short" })) + " · " : ""}${a.side === "bullish" ? "Long" : "Short"} from ${money(a.price)}</div>
-        <div class="info">${meter(a.strength)}<span class="pill">${a.side}</span></div></span>
+        <div class="info">${meter(a.strength)}<span class="pill">${sideLbl(a)}</span></div></span>
       <span class="px"><b class="ret ${r >= 0 ? "up" : "down"}">${pctTxt(r)}</b><span class="since">${a.since_days} session${a.since_days > 1 ? "s" : ""}</span></span></a>`;
   }
   function viewWinners() {
     // Long only is the default. Saved as "winSide" (older versions saved "winDir", which defaulted to long & short).
     const scope = pref("winScope", "all"), dir = pref("winSide", "long"), per = pref("winPer", 3), span = pref("winSpan", "all");
     S.firstSel = null;
-    let all = (S.feed?.alerts || []).filter(a => a.since_days > 0 && typeof a.since === "number" && forMarket(S.byId[a.strategy]));
+    // sell / cover alerts close a trade, so they aren't trades themselves
+    let all = (S.feed?.alerts || []).filter(a => !a.exit && a.since_days > 0 && typeof a.since === "number" && forMarket(S.byId[a.strategy]));
     if (scope === "followed") all = all.filter(a => S.follow.has(a.strategy));
     if (dir === "long") all = all.filter(a => a.side === "bullish");
     // Period: the latest finished alert day, the last 5 sessions (a week), the last 21 sessions (a month), or everything kept.
@@ -1743,7 +1747,7 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
     return PRICES[m];
   }
   function prCard(a) {
-    if (a.strategy === "topdown") return "";
+    if (a.strategy === "topdown" || a.exit) return "";
     const open = prLoad().find(p => p.alert === a.id && p.exit == null);
     const px = S.stockBy[a.ticker]?.price ?? a.price, bull = a.side === "bullish";
     if (open) return `<div class="card prc"><div><h3>In your practice portfolio</h3><p>${bull ? "Bought" : "Sold short"} at ${money(open.entry)} on ${esc(fmtDate(open.date, { day: "numeric", month: "short" }))}.</p></div><a class="btn ghost sm" href="#practice">Open portfolio ›</a></div>`;
@@ -1798,6 +1802,8 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
     if (!a.stop_why) return "";
     const bull = a.side === "bullish", now = S.stockBy[a.ticker]?.price;
     if (a.stop == null && a.strategy === "buy_the_dip") return `<div class="card wrongif"><h3>Wrong if</h3><p>No price level: this strategy has no stop loss. It sells at +10% or after 60 sessions, whichever comes first, so a dip that keeps falling is only sold at the time limit.</p></div>`;
+    if (a.exit) return `<div class="card wrongif"><h3>No “wrong if” level</h3><p>This alert closes a trade: ${a.side === "bearish" ? "it sells, it doesn't open a short" : "it covers a short, it doesn't open a long"}. The next ${a.side === "bearish" ? "buy" : "short"} needs a new alert.</p></div>`;
+    if (a.stop == null && S.byId[a.strategy]?.own_trades) return `<div class="card wrongif"><h3>Wrong if</h3><p>No price level: ${esc(a.stop_why)}.</p></div>`;
     if (a.stop == null) return `<div class="card wrongif"><h3>Wrong if</h3><p>The alert is cancelled ${esc(a.stop_why)}. It has no single price level, because it compares the price with the market.</p></div>`;
     const dist = now ? (bull ? (now - a.stop) / now : (a.stop - now) / now) * 100 : null;
     const status = a.stop_hit
@@ -1866,7 +1872,7 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
     if (!a) return viewAlerts();
     const s = S.byId[a.strategy], st = a.strength, stock = S.stockBy[a.ticker];
     let h = header("", S.alView === "winners" ? "#winners" : "#alerts");
-    h += `<div class="big2">${icon(a.ticker, 40)}<span class="tk">${esc(disp(a.ticker))}</span><span class="px">${money(a.price)}</span><span class="pill ${a.side}">${a.side}</span></div>`;
+    h += `<div class="big2">${icon(a.ticker, 40)}<span class="tk">${esc(disp(a.ticker))}</span><span class="px">${money(a.price)}</span><span class="pill ${a.side}">${sideLbl(a)}</span></div>`;
     const isTd = a.strategy === "topdown";
     h += `<p class="sub">${stock ? `<a href="#stock-${esc(a.ticker)}">${esc(stock.name)}</a> · ` : ""}${esc(s?.name)} · ${isTd
       ? `${esc(TD_LABEL[a.tf] || a.tf)} chart · ${esc(fmtDate(a.date, { weekday: "short", day: "numeric", month: "long" }))}${foundTime(a)}`
@@ -2117,11 +2123,13 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
       <span style="flex:1"></span><button class="btn ${on ? "on" : ""}" data-follow="${id}">${on ? "✓ Following" : "Follow"}</button></div>`;
     h += `<div class="prose">${s.how.map(p => `<p>${esc(p)}</p>`).join("")}</div>`;
     h += `<h2>When it alerts</h2><div class="rules">
-      <div class="rule bullish"><span class="pill bullish">${s.buys_only ? "buy" : "bullish"}</span><p>${esc(s.bullish)}</p></div>
-      ${s.bearish ? `<div class="rule bearish"><span class="pill bearish">bearish</span><p>${esc(s.bearish)}</p></div>` : ""}</div>`;
+      <div class="rule bullish"><span class="pill bullish">${s.buys_only || s.long_only ? "buy" : "bullish"}</span><p>${esc(s.bullish)}</p></div>
+      ${s.bearish ? `<div class="rule bearish"><span class="pill bearish">${s.long_only ? "sell" : "bearish"}</span><p>${esc(s.bearish)}</p></div>` : ""}</div>`;
+    if (s.long_only) h += `<p class="hint" style="margin:8px 2px 0">It only buys: a sell alert closes the trade, it never opens a short.</p>`;
+    if (s.source) h += `<p class="hint" style="margin:8px 2px 0">${esc(s.source)}</p>`;
     if (s.buys_only) h += `<p class="hint" style="margin:8px 2px 0">It only buys: there are no bearish alerts. ${esc(exitRule(id))}</p>`;
     h += `<h2>Example</h2>${s.examples.length > 1 ? `<div class="seg" role="group" aria-label="Example">${s.examples.map(e =>
-      `<button data-ex="${e.side}" aria-pressed="${e.side === side}">${e.side === "bullish" ? "Bullish" : "Bearish"}</button>`).join("")}</div>` : ""}`;
+      `<button data-ex="${e.side}" aria-pressed="${e.side === side}">${e.side === "bullish" ? (s.long_only ? "Buy" : "Bullish") : (s.long_only ? "Sell" : "Bearish")}</button>`).join("")}</div>` : ""}`;
     h += `<div class="chartbox" id="exchart"></div>`;
     const mv = ex.after_move;
     h += `<p class="caption">The triangle marks the alert: <strong>${esc(ex.signal)}</strong>. Over the next ${ex.after_days} sessions the price went <span class="${mv >= 0 ? "up" : "down"}">${mv >= 0 ? "up" : "down"} ${Math.abs(mv)}%</span>.
@@ -2177,12 +2185,13 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
     let h = `<h2 id="bt">How it did in the past</h2>`;
     if (!r) return { html: h + `<div class="card" style="margin-top:0"><p style="margin:0">Results appear here after the weekly backtest runs on GitHub (or run it once by hand from the Actions tab).</p></div>` };
     const buyOnly = !!S.byId[id]?.buys_only, side = buyOnly ? "bullish" : S.btSide[id] || "bullish", st = r[side];
+    const lo = !!S.byId[id]?.long_only, own = !!S.byId[id]?.own_trades, word = sd => lo ? (sd === "bullish" ? "buy" : "sell") : sd;
     if (B.demo) h += `<div class="demo">Demo backtest on simulated prices. Real results replace these once the backtest runs on GitHub.</div>`;
     if (!buyOnly) h += `<div class="seg" role="group" aria-label="Alert type">${["bullish", "bearish"].map(sd =>
-      `<button data-bt="${sd}" aria-pressed="${sd === side}">${sd === "bullish" ? "Bullish" : "Bearish"} alerts</button>`).join("")}</div>`;
-    h += `<p class="sub" style="margin-bottom:10px"><strong style="color:var(--fg)">${st.n.toLocaleString("en-US")}</strong> ${side} alerts on ${B.tickers} ${L().noun}, ${B.start.slice(0, 4)}–${B.end.slice(0, 4)}. ` +
+      `<button data-bt="${sd}" aria-pressed="${sd === side}">${lo ? (sd === "bullish" ? "Buy" : "Sell") : sd === "bullish" ? "Bullish" : "Bearish"} alerts</button>`).join("")}</div>`;
+    h += `<p class="sub" style="margin-bottom:10px"><strong style="color:var(--fg)">${st.n.toLocaleString("en-US")}</strong> ${word(side)} alerts on ${B.tickers} ${L().noun}, ${B.start.slice(0, 4)}–${B.end.slice(0, 4)}. ` +
       `“Right way” means the price ${side === "bullish" ? "rose" : "fell"} afterwards. Each result is compared with a random day in the same stocks.</p>`;
-    if (!st.n) return { html: h + `<p class="tag">No ${side} alerts in this period.</p>` };
+    if (!st.n) return { html: h + `<p class="tag">No ${word(side)} alerts in this period.</p>` };
     h += `<div class="tablewrap"><table class="bt"><thead><tr><th>After</th><th>Right way</th><th>Average move</th></tr></thead><tbody>`;
     for (const k of ["5", "20", "60"]) {
       const c = st[k];
@@ -2195,7 +2204,7 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
     h += `<h3 class="h3">Spread of 20-day results</h3><div class="chartbox" id="bthist"></div>`;
 
     const e = r.equity;
-    h += `<h3 class="h3">${eur(B.capital)} following the bullish alerts</h3>
+    h += `<h3 class="h3">${eur(B.capital)} following ${own ? "its trades" : "the bullish alerts"}</h3>
       <p class="hint" style="margin-top:0">${esc(r.rule)}. Money is split equally across open positions; idle cash earns nothing.</p>
       <div class="chartbox" id="bteq"></div>
       <div class="tiles">
@@ -2283,9 +2292,10 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
   function tradesSection(id) {
     const T = S.bt?.strategies?.[id]?.trades;
     if (!T || !T.all?.n) return { html: "" };
-    const buyOnly = !!S.byId[id]?.buys_only, key = buyOnly ? "long" : S.trSide[id] || "all", st = T[key], size = T.size;
+    const own = !!S.byId[id]?.own_trades, buyOnly = !!S.byId[id]?.buys_only || !!S.byId[id]?.long_only;
+    const key = buyOnly ? "long" : S.trSide[id] || "all", st = T[key], size = T.size;
     let h = `<h2 id="trades">If you took every trade</h2>
-      <p class="hint" style="margin:0 2px 12px">Every alert since ${S.bt.start.slice(0, 4)} as a ${eurS(size)} trade: ${buyOnly ? `<b style="color:var(--muted)">buy</b> on each alert.` : `<b style="color:var(--muted)">buy</b> on a bullish alert, <b style="color:var(--muted)">sell short</b> on a bearish one.`} ${esc(exitRule(id))} No trading costs or taxes.</p>
+      <p class="hint" style="margin:0 2px 12px">${own ? `Every trade the strategy made since ${S.bt.start.slice(0, 4)}, ${eurS(size)} each: ${buyOnly ? `<b style="color:var(--muted)">bought</b> at the open after a buy alert.` : `<b style="color:var(--muted)">bought</b> after a bullish alert, <b style="color:var(--muted)">sold short</b> after a bearish one, at the next open.`}` : `Every alert since ${S.bt.start.slice(0, 4)} as a ${eurS(size)} trade: ${buyOnly ? `<b style="color:var(--muted)">buy</b> on each alert.` : `<b style="color:var(--muted)">buy</b> on a bullish alert, <b style="color:var(--muted)">sell short</b> on a bearish one.`}`} ${esc(exitRule(id))} No trading costs or taxes.</p>
       ${buyOnly ? "" : `<div class="seg" role="group" aria-label="Trades">${["all", "long", "short"].map(k =>
         `<button data-tr="${k}" aria-pressed="${k === key}">${SIDE_LBL[k]}</button>`).join("")}</div>`}`;
     if (!st.n) return { html: h + `<p class="tag">No ${key} trades in this period.</p>` };
@@ -2316,6 +2326,7 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
     } };
   }
   function exitRule(id) {
+    if (S.byId[id]?.exit_text) return S.byId[id].exit_text;
     if (id === "buy_the_dip") return "Each trade closes at +10% (checked on each day's high) or after 60 sessions, whichever comes first.";
     return ["ma200", "golden_cross", "donchian", "supertrend", "relative_strength"].includes(id) ? "Each trade closes on the next opposite alert." : "Each trade closes after 20 sessions, or earlier on an opposite alert.";
   }
@@ -4539,7 +4550,7 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
         <h3>${esc(s.name)}</h3>
         <p class="ltag">${esc(s.tagline)}</p>
         ${s.how.map(p => `<p>${esc(p)}</p>`).join("")}
-        <div class="lrules"><p><span class="pill bullish">${s.buys_only ? "buy" : "bullish"}</span>${esc(s.bullish)}</p>${s.bearish ? `<p><span class="pill bearish">bearish</span>${esc(s.bearish)}</p>` : ""}</div>
+        <div class="lrules"><p><span class="pill bullish">${s.buys_only || s.long_only ? "buy" : "bullish"}</span>${esc(s.bullish)}</p>${s.bearish ? `<p><span class="pill bearish">${s.long_only ? "sell" : "bearish"}</span>${esc(s.bearish)}</p>` : ""}</div>
         ${x.likes ? `<dl class="lfit"><dt>Works best in</dt><dd>${x.likes}</dd><dt>Struggles in</dt><dd>${x.hates}</dd><dt>Tip</dt><dd>${x.pair}</dd></dl>` : ""}
         <a class="lmore" href="#strategy-${slug(s.id)}">${s.kind === "lines" ? "Timeframes and alerts" : "Examples, backtest and alerts"} <span aria-hidden="true">›</span></a>
       </div></article>`;

@@ -38,7 +38,8 @@ import pandas as pd
 sys.path.insert(0, str(Path(__file__).parent))
 import scan  # noqa: E402
 from scan import MARKETS, fetch_demo, fetch_real, load_tickers  # noqa: E402
-from strategies import DIP_HOLD, DIP_TP, REGISTRY  # noqa: E402
+from strategies import DIP_HOLD, DIP_TP, REGISTRY, for_market  # noqa: E402
+from bot_strategies import BOT_RULES  # noqa: E402
 
 ROOT = Path(__file__).resolve().parent.parent
 OUT = ROOT / "docs" / "data" / "backtest.json"
@@ -154,28 +155,47 @@ def own_exit_positions(sig, c, hi, lo, hold: int, tp: float):
     return held, set(taken), fills
 
 
-def weekly_account(pos: pd.DataFrame, rets: pd.DataFrame, weeks: pd.Series) -> list[int]:
+def weekly_account(pos: pd.DataFrame, rets: pd.DataFrame, weeks: pd.Series, held: pd.DataFrame | None = None) -> list[int]:
     """A EUR ACCOUNT account that follows the alerts: the money is split equally across every
     open position (+1 long, -1 short) and rebalanced daily; with nothing open it sits in cash at 0%.
-    Value at the last session of every week. No costs, taxes, borrow fees or slippage."""
-    held = pos.shift(1).fillna(0).where(rets.notna(), 0)
+    Value at the last session of every week. No costs, taxes, borrow fees or slippage.
+    held: the position on each day, already aligned with that day's return (strategies with their
+    own trades pass it, with rets = what each trade earned that day; pos is then ignored)."""
+    if held is None:
+        held = pos.shift(1).fillna(0).where(rets.notna(), 0)
     k = (held != 0).sum(axis=1)
     daily = ((rets.fillna(0) * held).sum(axis=1) / k.replace(0, np.nan)).fillna(0)
     eq = ACCOUNT * (1 + daily).cumprod()
     return [round(float(v)) for v in eq.reindex(weeks.values)]
 
 
-def weekly_turnover(pos: pd.DataFrame, rets: pd.DataFrame, weeks: pd.Series) -> list[float]:
+def weekly_turnover(pos: pd.DataFrame, rets: pd.DataFrame, weeks: pd.Series, held: pd.DataFrame | None = None) -> list[float]:
     """How much of the weekly_account() account was bought or sold each week, as a fraction of it:
     opening or closing a position trades its share (1 / positions held), a flip from short to long
     trades it twice. Daily rebalancing between open positions isn't counted (a real account
     wouldn't do it). The app uses this to charge broker fees in its "after costs" view."""
-    held = pos.shift(1).fillna(0).where(rets.notna(), 0)
+    if held is None:
+        held = pos.shift(1).fillna(0).where(rets.notna(), 0)
     k = (held != 0).sum(axis=1)
     denom = pd.concat([k, k.shift(1).fillna(0)], axis=1).max(axis=1).replace(0, np.nan)
     traded = ((held - held.shift(1).fillna(0)).abs().sum(axis=1) / denom).fillna(0)
     wk = traded.resample("W-FRI").sum().reindex(weeks.index, fill_value=0)
     return [round(float(x), 3) for x in wk]
+
+
+def own_trade_days(t: dict, c: np.ndarray, n: int):
+    """The days a bot strategy's trade is held and what it earns on each (bot_strategies.py trades:
+    in at an open or a close, out at a stop, a close or an open). Returns (days, returns)."""
+    a, pa = t["in"], t["in_px"]
+    b = t["out"] if t.get("out") is not None else n - 1
+    pb = t["out_px"] if t.get("out") is not None else c[n - 1]
+    days, rets = [], []
+    for d in range(a, b + 1):
+        start = pa if d == a else c[d - 1]
+        end = pb if d == b else c[d]
+        days.append(d)
+        rets.append(t["side"] * (end / start - 1))
+    return days, rets
 
 
 def run(data: dict[str, pd.DataFrame]) -> dict:
@@ -192,10 +212,13 @@ def run(data: dict[str, pd.DataFrame]) -> dict:
     weeks = closes.index.to_series().resample("W-FRI").last().dropna()   # last session of each week
     out = {"_weeks": weeks}
     for sid, fn in REGISTRY.items():
+        if not for_market(sid, scan.MARKET):
+            continue
         print(f"  {sid}...", flush=True)
         rows, trades = [], []
         pos = pd.DataFrame(0.0, index=closes.index, columns=closes.columns)
         pos_ls = pos.copy()
+        own = None   # strategies with their own trades: held flags and each day's return, long / long + short
         ex = EXITS.get(sid)
         hold = ex["hold"] if ex else HOLD_DAYS
         tp = ex["tp"] if ex else 0
@@ -211,6 +234,34 @@ def run(data: dict[str, pd.DataFrame]) -> dict:
             sig = res.signals.values
             n = len(df)
             idx = df.index
+            if res.trades is not None:
+                if own is None:
+                    own = {k: pd.DataFrame(0.0, index=closes.index, columns=closes.columns)
+                           for k in ("held_l", "ret_l", "held_a", "ret_a")}
+                hl, rl, ha, ra = (np.zeros(n) for _ in range(4))
+                for tr in res.trades:
+                    if tr.get("in") is None:
+                        continue                      # alerted on the last close, bought tomorrow
+                    closed = tr.get("out") is not None
+                    j = tr["out"] if closed else n - 1
+                    px = tr["out_px"] if closed else c[n - 1]
+                    if j > tr["in"] or closed:
+                        trades.append({"t": t, "side": tr["side"], "in": idx[tr["in"]], "out": idx[j],
+                                       "days": max(1, j - tr["in"]), "ret": tr["side"] * (px / tr["in_px"] - 1),
+                                       "closed": bool(closed)})
+                    days, rr = own_trade_days(tr, c, n)
+                    for d, r in zip(days, rr):
+                        ha[d], ra[d] = tr["side"], ra[d] + r
+                        if tr["side"] > 0:
+                            hl[d], rl[d] = 1, rl[d] + r
+                for k, v in (("held_l", hl), ("ret_l", rl), ("held_a", ha), ("ret_a", ra)):
+                    own[k].loc[idx, t] = v
+                for i in np.flatnonzero(sig):
+                    row = {"t": t, "d": idx[i], "side": int(sig[i])}
+                    for h in HORIZONS:
+                        row[h] = c[i + h] / c[i] - 1 if i + h < n else np.nan
+                    rows.append(row)
+                continue
             if tp:
                 held_own, taken, fills = own_exit_positions(sig, c, hi, lo, hold, tp)
             for i in np.flatnonzero(sig):
@@ -267,7 +318,7 @@ def run(data: dict[str, pd.DataFrame]) -> dict:
             pos_ls.loc[df.index, t] = held_ls
 
         sig_df = pd.DataFrame(rows)
-        result = {"rule": (f"Buy on an alert, sell at +{tp * 100:.0f}% or after {hold} sessions, whichever comes first"
+        result = {"rule": BOT_RULES[sid] if own is not None else (f"Buy on an alert, sell at +{tp * 100:.0f}% or after {hold} sessions, whichever comes first"
                            if tp else
                            "Buy on a bullish alert, sell on the next bearish alert"
                            if sid in TREND else
@@ -296,10 +347,16 @@ def run(data: dict[str, pd.DataFrame]) -> dict:
         result["best"] = sorted(best, key=lambda x: -abs(x["ret"]))[:4]
         result["worst"] = sorted(worst, key=lambda x: abs(x["ret"]) * -1)[:4]
 
-        held_prev = pos.shift(1).fillna(0)
-        held_prev = held_prev.where(rets.notna(), 0)
-        k = held_prev.sum(axis=1)
-        strat_daily = ((srets.fillna(0) * held_prev).sum(axis=1) / k.replace(0, np.nan)).fillna(0)
+        if own is not None:
+            # each held position earns what its trade made that day (fills at opens and stops included)
+            held_prev = own["held_l"]
+            k = held_prev.sum(axis=1)
+            strat_daily = (own["ret_l"].sum(axis=1) / k.replace(0, np.nan)).fillna(0)
+        else:
+            held_prev = pos.shift(1).fillna(0)
+            held_prev = held_prev.where(rets.notna(), 0)
+            k = held_prev.sum(axis=1)
+            strat_daily = ((srets.fillna(0) * held_prev).sum(axis=1) / k.replace(0, np.nan)).fillna(0)
         eq = START_CAPITAL * (1 + strat_daily).cumprod()
         bench = START_CAPITAL * (1 + bench_daily).cumprod()
         wk_eq, wk_b = eq.resample("W-FRI").last().dropna(), bench.resample("W-FRI").last().dropna()
@@ -313,8 +370,17 @@ def run(data: dict[str, pd.DataFrame]) -> dict:
             "invested": pct((k > 0).mean()),
             "avg_positions": round(float(k[k > 0].mean()), 1) if (k > 0).any() else 0,
         }
-        result["account"] = {"all": weekly_account(pos_ls, srets, weeks), "long": weekly_account(pos, srets, weeks)}
-        result["turnover"] = {"all": weekly_turnover(pos_ls, rets, weeks), "long": weekly_turnover(pos, rets, weeks)}
+        if own is not None:
+            # held flags in absolute value for the split; the returns already carry the side
+            # weekly_account multiplies each day's return by the side held (+1 / -1); the trade returns
+            # already carry the side, so multiply them by it once more (side x side = 1)
+            result["account"] = {"all": weekly_account(None, own["ret_a"] * own["held_a"], weeks, held=own["held_a"]),
+                                 "long": weekly_account(None, own["ret_l"], weeks, held=own["held_l"])}
+            result["turnover"] = {"all": weekly_turnover(None, None, weeks, held=own["held_a"]),
+                                  "long": weekly_turnover(None, None, weeks, held=own["held_l"])}
+        else:
+            result["account"] = {"all": weekly_account(pos_ls, srets, weeks), "long": weekly_account(pos, srets, weeks)}
+            result["turnover"] = {"all": weekly_turnover(pos_ls, rets, weeks), "long": weekly_turnover(pos, rets, weeks)}
         result["trades"] = trade_summary(trades)
         out[sid] = result
     return out

@@ -262,6 +262,418 @@
       "settings": "Swing points use 4 bars each side, last 70 days, line fit through the last 2-3 swing highs and lows."
     },
     {
+      "id": "deck_live",
+      "name": "Deck Patterns (Live Rules)",
+      "category": "Trading bot",
+      "level": "Advanced",
+      "tagline": "The trading bot's live chart-pattern rules: up breakouts in an uptrend, no chasing.",
+      "how": [
+        "The trading bot looks for the chart patterns in Fidelity's guide \"Identifying Chart Patterns with Technical Analysis\" (Kirkpatrick): double and triple bottoms, rectangles, triangles, wedges, inverse head and shoulders, cup and handle, bull flags and pennants, gaps, pipe bottoms and six reversal candlesticks. Each day it reads the last 290 daily candles, finds the swing points and fits the pattern's lines.",
+        "Only upward breakouts are traded. A pattern counts on the day a candle closes above its breakout line by at least 0.2 ATR (a fifth of a normal day's range). The bot buys at the next day's open with the guide's protective stop just under the breakout candle, and has no target: it sells on a close below the lowest low of the previous 20 days, so winners can run.",
+        "The live rules add three filters, all judged on the breakout day: the close must be above its 50-day average; the trade is skipped if the next open is more than 2% above the breakout close (no chasing); and four patterns that lost money in the tests are never traded (double bottom, cup and handle, pipe bottom, hanging man)."
+      ],
+      "bullish": "A chart pattern breaks out upward on a close above its 50-day average: buy at the next open unless it opens more than 2% higher.",
+      "bearish": "Sell when the price hits the protective stop, or on a close below the lowest low of the previous 20 days.",
+      "why": "Breakouts from a clean pattern often start a new move, and the 50-day filter keeps it to stocks already trending up. With no target, the trades that work can run for months while the 20-day-low exit cuts the ones that don't.",
+      "watch_out": [
+        "About three trades in four lose, mostly small; the result depends on a few big winners, so skipping trades changes it a lot.",
+        "Pattern detection is mechanical: some patterns a person would draw are missed, and some found ones look odd.",
+        "The pattern list and settings were tuned on the same 2018-2026 S&P 100 data they were tested on, and that list contains only today's members."
+      ],
+      "settings": "Daily candles, last 290 per day. Zigzag swings 1.5 and 3 ATR (ATR 14); equal prices within 0.75 ATR; patterns at least 2.5 ATR tall and 10 candles long. Breakout close ≥ 0.2 ATR beyond the line. Entry next open; stop under the breakout candle; exit on a close below the 20-day low. Filters: close above the 50-day SMA; skip if the open is > 2% above the breakout close; no double bottom, cup and handle, pipe bottom or hanging man.",
+      "markets": [
+        "stocks"
+      ],
+      "own_trades": true,
+      "long_only": true,
+      "exit_text": "Each trade is bought at the next open and sold at the stop or on a close below the 20-day low.",
+      "source": "From the trading bot project (its live rules). Its own test, S&P 100 2018-2026: +23.9% a year against SPY's +15.5-16.0%, worst drop −20.6%, beat SPY in 10 of 10 start dates. This page runs it on this site's own backtest (money split equally across open trades, no costs), so its numbers differ from the bot's."
+    },
+    {
+      "id": "deck_v6",
+      "name": "Deck Patterns",
+      "category": "Trading bot",
+      "level": "Advanced",
+      "tagline": "Every up breakout of a textbook chart pattern, held until a close below the 20-day low.",
+      "how": [
+        "The trading bot looks for the chart patterns in Fidelity's guide \"Identifying Chart Patterns with Technical Analysis\" (Kirkpatrick): double and triple bottoms, rectangles, triangles, wedges, inverse head and shoulders, cup and handle, bull flags and pennants, gaps, pipe bottoms and six reversal candlesticks. Each day it reads the last 290 daily candles, finds the swing points and fits the pattern's lines.",
+        "Only upward breakouts are traded. A pattern counts on the day a candle closes above its breakout line by at least 0.2 ATR (a fifth of a normal day's range). The bot buys at the next day's open with the guide's protective stop just under the breakout candle, and has no target: it sells on a close below the lowest low of the previous 20 days, so winners can run."
+      ],
+      "bullish": "A chart pattern breaks out upward (a close above its breakout line by 0.2 ATR): buy at the next open.",
+      "bearish": "Sell when the price hits the protective stop, or on a close below the lowest low of the previous 20 days.",
+      "why": "Breakouts from a clean pattern often start a new move. With no target, the trades that work can run for months while the 20-day-low exit cuts the ones that don't.",
+      "watch_out": [
+        "About three trades in four lose, mostly small; the result depends on a few big winners, so skipping trades changes it a lot.",
+        "Pattern detection is mechanical: some patterns a person would draw are missed, and some found ones look odd.",
+        "The pattern list and settings were tuned on the same 2018-2026 S&P 100 data they were tested on, and that list contains only today's members."
+      ],
+      "settings": "Daily candles, last 290 per day. Zigzag swings 1.5 and 3 ATR (ATR 14); equal prices within 0.75 ATR; patterns at least 2.5 ATR tall and 10 candles long. Breakout close ≥ 0.2 ATR beyond the line. Entry next open; stop under the breakout candle; exit on a close below the 20-day low.",
+      "markets": [
+        "stocks"
+      ],
+      "own_trades": true,
+      "long_only": true,
+      "exit_text": "Each trade is bought at the next open and sold at the stop or on a close below the 20-day low.",
+      "source": "From the trading bot project (version 6, the base of the live rules). Its own test, S&P 100 2018-2026: +23.2% a year against SPY's +15.5-16.0%, worst drop −25.0%. This page runs it on this site's own backtest (money split equally across open trades, no costs), so its numbers differ from the bot's."
+    },
+    {
+      "id": "deck_ma50",
+      "name": "Deck Patterns + 50-Day Filter",
+      "category": "Trading bot",
+      "level": "Advanced",
+      "tagline": "Pattern breakouts, only in stocks closing above their 50-day average.",
+      "how": [
+        "The trading bot looks for the chart patterns in Fidelity's guide \"Identifying Chart Patterns with Technical Analysis\" (Kirkpatrick): double and triple bottoms, rectangles, triangles, wedges, inverse head and shoulders, cup and handle, bull flags and pennants, gaps, pipe bottoms and six reversal candlesticks. Each day it reads the last 290 daily candles, finds the swing points and fits the pattern's lines.",
+        "Only upward breakouts are traded. A pattern counts on the day a candle closes above its breakout line by at least 0.2 ATR (a fifth of a normal day's range). The bot buys at the next day's open with the guide's protective stop just under the breakout candle, and has no target: it sells on a close below the lowest low of the previous 20 days, so winners can run.",
+        "This version adds one filter: the breakout day's close must be above the stock's 50-day average, so it only buys breakouts in stocks that are already trending up."
+      ],
+      "bullish": "A chart pattern breaks out upward on a close above its 50-day average: buy at the next open.",
+      "bearish": "Sell when the price hits the protective stop, or on a close below the lowest low of the previous 20 days.",
+      "why": "Breakouts work better with the trend behind them: the 50-day filter skips the ones in stocks that are still falling.",
+      "watch_out": [
+        "About three trades in four lose, mostly small; the result depends on a few big winners, so skipping trades changes it a lot.",
+        "Pattern detection is mechanical: some patterns a person would draw are missed, and some found ones look odd.",
+        "The pattern list and settings were tuned on the same 2018-2026 S&P 100 data they were tested on, and that list contains only today's members."
+      ],
+      "settings": "Daily candles, last 290 per day. Zigzag swings 1.5 and 3 ATR (ATR 14); equal prices within 0.75 ATR; patterns at least 2.5 ATR tall and 10 candles long. Breakout close ≥ 0.2 ATR beyond the line. Entry next open; stop under the breakout candle; exit on a close below the 20-day low. Filter: close above the 50-day SMA.",
+      "markets": [
+        "stocks"
+      ],
+      "own_trades": true,
+      "long_only": true,
+      "exit_text": "Each trade is bought at the next open and sold at the stop or on a close below the 20-day low.",
+      "source": "From the trading bot project. Its own test, S&P 100 2018-2026: +22.8% a year, worst drop −19.9%. This page runs it on this site's own backtest (money split equally across open trades, no costs), so its numbers differ from the bot's."
+    },
+    {
+      "id": "deck_v8",
+      "name": "Deck Patterns, Break-Even Stop",
+      "category": "Trading bot",
+      "level": "Advanced",
+      "tagline": "Pattern breakouts with a stop that follows the price and locks in break-even.",
+      "how": [
+        "The trading bot looks for the chart patterns in Fidelity's guide \"Identifying Chart Patterns with Technical Analysis\" (Kirkpatrick): double and triple bottoms, rectangles, triangles, wedges, inverse head and shoulders, cup and handle, bull flags and pennants, gaps, pipe bottoms and six reversal candlesticks. Each day it reads the last 290 daily candles, finds the swing points and fits the pattern's lines.",
+        "Only upward breakouts are traded. A pattern counts on the day a candle closes above its breakout line by at least 0.2 ATR (a fifth of a normal day's range). The bot buys at the next day's open with the guide's protective stop just under the breakout candle, and has no target: it sells on a close below the lowest low of the previous 20 days, so winners can run.",
+        "This version moves the stop every day: it is reset to the latest close minus the starting risk (entry minus stop), so it can move up or down. Once it reaches the entry price it never goes below it again, so a trade that has gone well can't turn into a loss."
+      ],
+      "bullish": "A chart pattern breaks out upward: buy at the next open.",
+      "bearish": "Sell when the price hits the moving stop, or on a close below the lowest low of the previous 20 days.",
+      "why": "The moving stop protects gains sooner, so more trades end in profit (32% won in the bot's test) and drops are smaller.",
+      "watch_out": [
+        "The tighter stop cuts some of the big winners the plain version keeps, which is where most of the profit comes from.",
+        "Pattern detection is mechanical: some patterns a person would draw are missed, and some found ones look odd.",
+        "The pattern list and settings were tuned on the same 2018-2026 S&P 100 data they were tested on, and that list contains only today's members."
+      ],
+      "settings": "Daily candles, last 290 per day. Zigzag swings 1.5 and 3 ATR (ATR 14); equal prices within 0.75 ATR; patterns at least 2.5 ATR tall and 10 candles long. Breakout close ≥ 0.2 ATR beyond the line. Entry next open; stop under the breakout candle; exit on a close below the 20-day low. Stop: close − starting risk, every day; never below the entry once it has reached it.",
+      "markets": [
+        "stocks"
+      ],
+      "own_trades": true,
+      "long_only": true,
+      "exit_text": "Each trade is bought at the next open and sold at the moving stop or on a close below the 20-day low.",
+      "source": "From the trading bot project (version 8). Its own test, S&P 100 2018-2026: +18.5% a year, worst drop −22.6%. This page runs it on this site's own backtest (money split equally across open trades, no costs), so its numbers differ from the bot's."
+    },
+    {
+      "id": "pattern_trader",
+      "name": "Pattern Trader",
+      "category": "Trading bot",
+      "level": "Advanced",
+      "tagline": "The bot's first pattern trader: five up patterns that made money in every test period.",
+      "how": [
+        "The trading bot's older pattern detector finds swing points with a zigzag (a swing counts once price reverses 2 ATR), then looks for five up patterns that made money in all four of its test periods: ABCD, falling wedge, inverse head and shoulders, triple bottom and Gartley.",
+        "A breakout must close past the pattern's entry level by 0.1 ATR on at least 1.3 times the usual volume. It buys at the next open with the pattern's own stop. ABCD trades sell at the pattern's target; the others have no target and sell on a close below the lowest low of the previous 20 days."
+      ],
+      "bullish": "One of the five patterns breaks out upward on strong volume: buy at the next open.",
+      "bearish": "Sell at the pattern's stop, at the ABCD target, or (other patterns) on a close below the 20-day low.",
+      "why": "It trades rarely and only the patterns with the best record, so it was in cash a lot: the smallest drop of all the bot's stock strategies (−12.5%).",
+      "watch_out": [
+        "The five patterns were picked on the same 8 years they were tested on, so the record flatters them.",
+        "Very few trades per stock; many stocks never trade at all.",
+        "Harmonic patterns (ABCD, Gartley) depend on exact ratios, so small price differences change what is found."
+      ],
+      "settings": "Daily candles, last 250. Zigzag 2 ATR (fine 1.2 ATR), ATR 14. Breakout ≥ 0.1 ATR past the level on ≥ 1.3× the 20-day volume. Entry next open; pattern stop; ABCD target, others close below the 20-day low.",
+      "markets": [
+        "stocks"
+      ],
+      "own_trades": true,
+      "long_only": true,
+      "exit_text": "Each trade is bought at the next open and sold at the pattern's stop, at the ABCD target, or on a close below the 20-day low.",
+      "source": "From the trading bot project. Its own test, S&P 100 2018-2026: +18.3% a year, worst drop −12.5%, beat SPY in 10 of 10 start dates. This page runs it on this site's own backtest (money split equally across open trades, no costs), so its numbers differ from the bot's."
+    },
+    {
+      "id": "breakout_bot",
+      "name": "Breakout Bot",
+      "category": "Trading bot",
+      "level": "Intermediate",
+      "tagline": "New 20-day highs above the 200-day average, confirmed by Bollinger Bands.",
+      "how": [
+        "The trading bot's first strategy, on the daily chart. It needs three things on the same day: the close is above the 200-day average, the close breaks above the highest high of the previous 20 days (the Donchian channel), and Bollinger Bands confirm it: the close is above the upper band, or the bands were at their narrowest in 6 months (a squeeze) within the last 10 days.",
+        "It buys at the next open with a stop 2 ATR below the entry and sells on a close below the lowest low of the previous 20 days. No target, no shorts."
+      ],
+      "bullish": "A close above the 200-day average breaks a new 20-day high, above the upper Bollinger band or after a squeeze: buy at the next open.",
+      "bearish": "Sell at the stop (2 ATR under the entry) or on a close below the 20-day low.",
+      "why": "Breakouts out of quiet periods (squeezes) in stocks that are already in an uptrend are a classic way to catch the start of a strong move.",
+      "watch_out": [
+        "The bot also checked 15-minute and hourly charts; this page uses the daily chart only, which did much worse in the bot's test (+9.1% a year instead of +17.7%).",
+        "Since 2021 it lagged buy and hold, so the bot switched it off on 23 Oct 2026.",
+        "Many breakouts fail: the 20-day-low exit keeps those losses small, but they add up in sideways markets."
+      ],
+      "settings": "Daily: SMA 200; Bollinger 20, 2 std; squeeze = narrowest width in 125 days, any in the last 10; Donchian 20. Entry next open, stop 2 × ATR 14 below it, exit on a close below the 20-day low.",
+      "markets": [
+        "stocks"
+      ],
+      "own_trades": true,
+      "long_only": true,
+      "exit_text": "Each trade is bought at the next open and sold at a stop 2 ATR below it or on a close below the 20-day low.",
+      "source": "From the trading bot project. Its own test, S&P 100 2018-2026 with the 15-minute signals: +17.7% a year, worst drop −27.7%. This page runs it on this site's own backtest (money split equally across open trades, no costs), so its numbers differ from the bot's."
+    },
+    {
+      "id": "btc50_f1",
+      "name": "50-Day Rule (Live)",
+      "category": "Trading bot",
+      "level": "Advanced",
+      "tagline": "Your live Bitcoin rule: buy the cross of a rising 50-day, sell on a failed high.",
+      "how": [
+        "Your Bitcoin rule from the trading bot. It buys when the daily close crosses above the 50-day average while that average is rising (higher than 10 days ago), at the next day's open (00:00 UTC). After a sell it waits for a fresh cross.",
+        "After the buy it tracks the highest high so far. A swing high below it (a day with a high above the 3 days before it, followed by lower days) is a lower high: the bounce failed, so it sells. It also has a starting stop under the last swing low before the entry, kept between 1 and 3 ATR below the entry, judged on closes, not wicks.",
+        "This version also sells on a close below the 50-day average, and confirms a lower high after just 1 lower day."
+      ],
+      "bullish": "The close crosses above a rising 50-day average: buy at the next open.",
+      "bearish": "Sell at the next open after a lower high (confirmed by 1 lower day), a close below the 50-day average, or a close below the starting stop.",
+      "why": "It only buys once the 50-day trend is already rising, then gets out as soon as the bounce fails. Losses stay small (about −2.7% on average on Bitcoin) while the trades that catch a trend run for weeks.",
+      "watch_out": [
+        "Built and tested on Bitcoin. In the bot's tests it mostly failed on other coins (SOL, XRP, DOGE); here it runs on every coin in the list.",
+        "It beat holding Bitcoin from 2021 to 2026, but not from 2015 to 2026 (+43.3% a year against +66.8%): it misses part of the biggest bull runs.",
+        "Few trades (about 21 in 5.7 years on Bitcoin) and the top 2 made 74% of the profit, so the result rests on very few trades."
+      ],
+      "settings": "Daily candles (UTC). SMA 50 rising vs 10 days ago. Lower high: high above the 3 days before, 1 lower day after. Exit also on a close below the SMA 50. Starting stop under the last swing low, 1-3 ATR 14 below the entry, on closes. No re-entry before a new cross.",
+      "markets": [
+        "crypto"
+      ],
+      "own_trades": true,
+      "long_only": true,
+      "exit_text": "Each trade is bought at the next open after the cross and sold at the next open after a lower high (confirmed by 1 lower day), a close below the 50-day average, or a close below the starting stop.",
+      "source": "From the trading bot project (the live Bitcoin bot). Its own test, BTC only, Jan 2021-Oct 2026: +23.7% a year against BTC's +17.2%, worst drop −16.9%. This page runs it on this site's own backtest (money split equally across open trades, no costs), so its numbers differ from the bot's."
+    },
+    {
+      "id": "btc50_touch_f1",
+      "name": "50-Day Rule, Touch Exit",
+      "category": "Trading bot",
+      "level": "Advanced",
+      "tagline": "Like the live rule, but sells when the price touches the 50-day again.",
+      "how": [
+        "Your Bitcoin rule from the trading bot. It buys when the daily close crosses above the 50-day average while that average is rising (higher than 10 days ago), at the next day's open (00:00 UTC). After a sell it waits for a fresh cross.",
+        "After the buy it tracks the highest high so far. A swing high below it (a day with a high above the 3 days before it, followed by lower days) is a lower high: the bounce failed, so it sells. It also has a starting stop under the last swing low before the entry, kept between 1 and 3 ATR below the entry, judged on closes, not wicks.",
+        "This version sells as soon as a day's low comes back to the 50-day average (once the price has been fully above it), instead of waiting for a close below it."
+      ],
+      "bullish": "The close crosses above a rising 50-day average: buy at the next open.",
+      "bearish": "Sell at the next open after a lower high (confirmed by 1 lower day), a day whose low comes back down to the 50-day average, or a close below the starting stop.",
+      "why": "It only buys once the 50-day trend is already rising, then gets out as soon as the bounce fails. Losses stay small (about −2.7% on average on Bitcoin) while the trades that catch a trend run for weeks.",
+      "watch_out": [
+        "Built and tested on Bitcoin. In the bot's tests it mostly failed on other coins (SOL, XRP, DOGE); here it runs on every coin in the list.",
+        "It beat holding Bitcoin from 2021 to 2026, but not from 2015 to 2026 (+43.3% a year against +66.8%): it misses part of the biggest bull runs.",
+        "Few trades (about 21 in 5.7 years on Bitcoin) and the top 2 made 74% of the profit, so the result rests on very few trades."
+      ],
+      "settings": "As the live rule, but the 50-day exit is a touch: a day whose low reaches the SMA 50, once price has traded fully above it since the buy. Lower high after 1 day.",
+      "markets": [
+        "crypto"
+      ],
+      "own_trades": true,
+      "long_only": true,
+      "exit_text": "Each trade is bought at the next open after the cross and sold at the next open after a lower high (confirmed by 1 lower day), a day whose low comes back down to the 50-day average, or a close below the starting stop.",
+      "source": "From the trading bot project. Its own test, BTC only, 2021-2026: +23.7% a year, worst drop −18.1%. This page runs it on this site's own backtest (money split equally across open trades, no costs), so its numbers differ from the bot's."
+    },
+    {
+      "id": "btc50_touch_f2",
+      "name": "50-Day Rule, Touch Exit (2 Days)",
+      "category": "Trading bot",
+      "level": "Advanced",
+      "tagline": "Touch exit, with a lower high confirmed after 2 days.",
+      "how": [
+        "Your Bitcoin rule from the trading bot. It buys when the daily close crosses above the 50-day average while that average is rising (higher than 10 days ago), at the next day's open (00:00 UTC). After a sell it waits for a fresh cross.",
+        "After the buy it tracks the highest high so far. A swing high below it (a day with a high above the 3 days before it, followed by lower days) is a lower high: the bounce failed, so it sells. It also has a starting stop under the last swing low before the entry, kept between 1 and 3 ATR below the entry, judged on closes, not wicks."
+      ],
+      "bullish": "The close crosses above a rising 50-day average: buy at the next open.",
+      "bearish": "Sell at the next open after a lower high (confirmed by 2 lower days), a day whose low comes back down to the 50-day average, or a close below the starting stop.",
+      "why": "It only buys once the 50-day trend is already rising, then gets out as soon as the bounce fails. Losses stay small (about −2.7% on average on Bitcoin) while the trades that catch a trend run for weeks.",
+      "watch_out": [
+        "Built and tested on Bitcoin. In the bot's tests it mostly failed on other coins (SOL, XRP, DOGE); here it runs on every coin in the list.",
+        "It beat holding Bitcoin from 2021 to 2026, but not from 2015 to 2026 (+43.3% a year against +66.8%): it misses part of the biggest bull runs.",
+        "Few trades (about 21 in 5.7 years on Bitcoin) and the top 2 made 74% of the profit, so the result rests on very few trades."
+      ],
+      "settings": "As the touch-exit version, but a lower high needs 2 lower days after it.",
+      "markets": [
+        "crypto"
+      ],
+      "own_trades": true,
+      "long_only": true,
+      "exit_text": "Each trade is bought at the next open after the cross and sold at the next open after a lower high (confirmed by 2 lower days), a day whose low comes back down to the 50-day average, or a close below the starting stop.",
+      "source": "From the trading bot project. Its own test, BTC only, 2021-2026: +23.5% a year, worst drop −18.4%. This page runs it on this site's own backtest (money split equally across open trades, no costs), so its numbers differ from the bot's."
+    },
+    {
+      "id": "btc50_touch",
+      "name": "50-Day Rule, Touch Exit (3 Days)",
+      "category": "Trading bot",
+      "level": "Advanced",
+      "tagline": "Touch exit, with a lower high confirmed after 3 days.",
+      "how": [
+        "Your Bitcoin rule from the trading bot. It buys when the daily close crosses above the 50-day average while that average is rising (higher than 10 days ago), at the next day's open (00:00 UTC). After a sell it waits for a fresh cross.",
+        "After the buy it tracks the highest high so far. A swing high below it (a day with a high above the 3 days before it, followed by lower days) is a lower high: the bounce failed, so it sells. It also has a starting stop under the last swing low before the entry, kept between 1 and 3 ATR below the entry, judged on closes, not wicks."
+      ],
+      "bullish": "The close crosses above a rising 50-day average: buy at the next open.",
+      "bearish": "Sell at the next open after a lower high (confirmed by 3 lower days), a day whose low comes back down to the 50-day average, or a close below the starting stop.",
+      "why": "It only buys once the 50-day trend is already rising, then gets out as soon as the bounce fails. Losses stay small (about −2.7% on average on Bitcoin) while the trades that catch a trend run for weeks.",
+      "watch_out": [
+        "Built and tested on Bitcoin. In the bot's tests it mostly failed on other coins (SOL, XRP, DOGE); here it runs on every coin in the list.",
+        "It beat holding Bitcoin from 2021 to 2026, but not from 2015 to 2026 (+43.3% a year against +66.8%): it misses part of the biggest bull runs.",
+        "Few trades (about 21 in 5.7 years on Bitcoin) and the top 2 made 74% of the profit, so the result rests on very few trades."
+      ],
+      "settings": "As the touch-exit version, but a lower high needs 3 lower days after it (the rule's default).",
+      "markets": [
+        "crypto"
+      ],
+      "own_trades": true,
+      "long_only": true,
+      "exit_text": "Each trade is bought at the next open after the cross and sold at the next open after a lower high (confirmed by 3 lower days), a day whose low comes back down to the 50-day average, or a close below the starting stop.",
+      "source": "From the trading bot project. Its own test, BTC only, 2021-2026: +23.4% a year, worst drop −18.9%. This page runs it on this site's own backtest (money split equally across open trades, no costs), so its numbers differ from the bot's."
+    },
+    {
+      "id": "btc50_ma",
+      "name": "50-Day Rule (3 Days)",
+      "category": "Trading bot",
+      "level": "Advanced",
+      "tagline": "The live rule with a lower high confirmed after 3 days.",
+      "how": [
+        "Your Bitcoin rule from the trading bot. It buys when the daily close crosses above the 50-day average while that average is rising (higher than 10 days ago), at the next day's open (00:00 UTC). After a sell it waits for a fresh cross.",
+        "After the buy it tracks the highest high so far. A swing high below it (a day with a high above the 3 days before it, followed by lower days) is a lower high: the bounce failed, so it sells. It also has a starting stop under the last swing low before the entry, kept between 1 and 3 ATR below the entry, judged on closes, not wicks."
+      ],
+      "bullish": "The close crosses above a rising 50-day average: buy at the next open.",
+      "bearish": "Sell at the next open after a lower high (confirmed by 3 lower days), a close below the 50-day average, or a close below the starting stop.",
+      "why": "It only buys once the 50-day trend is already rising, then gets out as soon as the bounce fails. Losses stay small (about −2.7% on average on Bitcoin) while the trades that catch a trend run for weeks.",
+      "watch_out": [
+        "Built and tested on Bitcoin. In the bot's tests it mostly failed on other coins (SOL, XRP, DOGE); here it runs on every coin in the list.",
+        "It beat holding Bitcoin from 2021 to 2026, but not from 2015 to 2026 (+43.3% a year against +66.8%): it misses part of the biggest bull runs.",
+        "Few trades (about 21 in 5.7 years on Bitcoin) and the top 2 made 74% of the profit, so the result rests on very few trades."
+      ],
+      "settings": "As the live rule, but a lower high needs 3 lower days after it.",
+      "markets": [
+        "crypto"
+      ],
+      "own_trades": true,
+      "long_only": true,
+      "exit_text": "Each trade is bought at the next open after the cross and sold at the next open after a lower high (confirmed by 3 lower days), a close below the 50-day average, or a close below the starting stop.",
+      "source": "From the trading bot project. Its own test, BTC only, 2021-2026: +21.5% a year, worst drop −16.9%. This page runs it on this site's own backtest (money split equally across open trades, no costs), so its numbers differ from the bot's."
+    },
+    {
+      "id": "btc50_maonly",
+      "name": "50-Day Cross, Average Exit",
+      "category": "Trading bot",
+      "level": "Advanced",
+      "tagline": "Buy the cross of a rising 50-day, sell on a close back below it.",
+      "how": [
+        "Your Bitcoin rule from the trading bot. It buys when the daily close crosses above the 50-day average while that average is rising (higher than 10 days ago), at the next day's open (00:00 UTC). After a sell it waits for a fresh cross.",
+        "After the buy it tracks the highest high so far. A swing high below it (a day with a high above the 3 days before it, followed by lower days) is a lower high: the bounce failed, so it sells. It also has a starting stop under the last swing low before the entry, kept between 1 and 3 ATR below the entry, judged on closes, not wicks.",
+        "This version has no lower-high exit: it only sells on a close below the 50-day average or the starting stop."
+      ],
+      "bullish": "The close crosses above a rising 50-day average: buy at the next open.",
+      "bearish": "Sell at the next open after a close below the 50-day average or below the starting stop.",
+      "why": "It only buys once the 50-day trend is already rising, then gets out as soon as the bounce fails. Losses stay small (about −2.7% on average on Bitcoin) while the trades that catch a trend run for weeks.",
+      "watch_out": [
+        "Built and tested on Bitcoin. In the bot's tests it mostly failed on other coins (SOL, XRP, DOGE); here it runs on every coin in the list.",
+        "It beat holding Bitcoin from 2021 to 2026, but not from 2015 to 2026 (+43.3% a year against +66.8%): it misses part of the biggest bull runs.",
+        "Few trades (about 21 in 5.7 years on Bitcoin) and the top 2 made 74% of the profit, so the result rests on very few trades."
+      ],
+      "settings": "SMA 50 rising vs 10 days ago. Exit on a close below the SMA 50 or the starting stop (1-3 ATR). No lower-high exit.",
+      "markets": [
+        "crypto"
+      ],
+      "own_trades": true,
+      "long_only": true,
+      "exit_text": "Each trade is bought at the next open after the cross and sold at the next open after a close below the 50-day average or below the starting stop.",
+      "source": "From the trading bot project. Its own test, BTC only, 2021-2026: +18.2% a year, worst drop −22.2%. This page runs it on this site's own backtest (money split equally across open trades, no costs), so its numbers differ from the bot's."
+    },
+    {
+      "id": "btc50_lhonly",
+      "name": "50-Day Rule, Lower-High Exit",
+      "category": "Trading bot",
+      "level": "Advanced",
+      "tagline": "Buy the cross of a rising 50-day, sell only on a failed high.",
+      "how": [
+        "Your Bitcoin rule from the trading bot. It buys when the daily close crosses above the 50-day average while that average is rising (higher than 10 days ago), at the next day's open (00:00 UTC). After a sell it waits for a fresh cross.",
+        "After the buy it tracks the highest high so far. A swing high below it (a day with a high above the 3 days before it, followed by lower days) is a lower high: the bounce failed, so it sells. It also has a starting stop under the last swing low before the entry, kept between 1 and 3 ATR below the entry, judged on closes, not wicks.",
+        "This version has no 50-day exit: it only sells on a lower high or the starting stop."
+      ],
+      "bullish": "The close crosses above a rising 50-day average: buy at the next open.",
+      "bearish": "Sell at the next open after a lower high (confirmed by 1 lower day) or a close below the starting stop.",
+      "why": "It only buys once the 50-day trend is already rising, then gets out as soon as the bounce fails. Losses stay small (about −2.7% on average on Bitcoin) while the trades that catch a trend run for weeks.",
+      "watch_out": [
+        "Built and tested on Bitcoin. In the bot's tests it mostly failed on other coins (SOL, XRP, DOGE); here it runs on every coin in the list.",
+        "It beat holding Bitcoin from 2021 to 2026, but not from 2015 to 2026 (+43.3% a year against +66.8%): it misses part of the biggest bull runs.",
+        "Few trades (about 21 in 5.7 years on Bitcoin) and the top 2 made 74% of the profit, so the result rests on very few trades."
+      ],
+      "settings": "SMA 50 rising vs 10 days ago. Exit on a lower high (1 day) or the starting stop (1-3 ATR). No 50-day exit.",
+      "markets": [
+        "crypto"
+      ],
+      "own_trades": true,
+      "long_only": true,
+      "exit_text": "Each trade is bought at the next open after the cross and sold at the next open after a lower high (confirmed by 1 lower day) or a close below the starting stop.",
+      "source": "From the trading bot project. Its own test, BTC only, 2021-2026: +17.9% a year, worst drop −31.4%. This page runs it on this site's own backtest (money split equally across open trades, no costs), so its numbers differ from the bot's."
+    },
+    {
+      "id": "btc_trend_50_200",
+      "name": "Above the 50 & 200-Day",
+      "category": "Trading bot",
+      "level": "Beginner",
+      "tagline": "Hold while the price is above both its 50- and 200-day averages, otherwise cash.",
+      "how": [
+        "The simplest of the bot's crypto rules. After a daily close above both the 50-day and the 200-day average it buys at the next open (00:00 UTC); after a close below either one it sells at the next open and waits in cash.",
+        "There is no stop and no target: the two averages do all the work. On Bitcoin it was in the market about a third of the time."
+      ],
+      "bullish": "The close is above both the 50-day and the 200-day average: buy at the next open.",
+      "bearish": "The close falls below the 50-day or the 200-day average: sell at the next open.",
+      "why": "Crypto's worst crashes happen below the long averages. Staying out then kept it at 0% in 2022, while Bitcoin fell 64%. It was set up before looking at any trades, so it's the least tuned of the bot's rules.",
+      "watch_out": [
+        "Late in and late out: it gives up the start of every rally and part of every drop.",
+        "In sideways markets the price crosses the 50-day back and forth, with several small losses in a row.",
+        "Its edge was against holding Bitcoin from 2021; over longer periods holding did better."
+      ],
+      "settings": "Daily candles (UTC). SMA 50 and SMA 200 of the close. Buy at the next open after a close above both; sell at the next open after a close below either.",
+      "markets": [
+        "crypto"
+      ],
+      "own_trades": true,
+      "long_only": true,
+      "exit_text": "Each trade is bought at the next open after a close above both averages and sold at the next open after a close below either.",
+      "source": "From the trading bot project (the most robust of its rules: it also beat holding ETH and SOL). Its own test, BTC only, 2021-2026: +21.3% a year against BTC's +17.2%, worst drop −26.6%. This page runs it on this site's own backtest (money split equally across open trades, no costs), so its numbers differ from the bot's."
+    },
+    {
+      "id": "btc50_both",
+      "name": "50-Day Rule, Long + Short",
+      "category": "Trading bot",
+      "level": "Advanced",
+      "tagline": "Your 50-day rule both ways: long on a rising 50-day, short on a falling one.",
+      "how": [
+        "Longs follow the live 50-day rule: buy when the close crosses above a rising 50-day average; sell on a lower high, a close below the 50-day or the starting stop.",
+        "Shorts are the exact mirror, the same rule on the chart turned upside down: sell short when the close crosses below a falling 50-day average; cover on a higher low, a close back above the 50-day or the starting stop above the last swing high. One position at a time; it can flip from long to short at the same open."
+      ],
+      "bullish": "Buy at the next open: the close crosses above a rising 50-day average. A short is covered on a higher low, a close back above the 50-day or its stop.",
+      "bearish": "Sell short at the next open: the close crosses below a falling 50-day average. A long is sold on a lower high, a close below the 50-day or its stop.",
+      "why": "It earns in both directions, so it can make money in bear markets too. In the bot's test the shorts alone lost money (−3.9% a year), but they cut the drops of the long-only version.",
+      "watch_out": [
+        "Shorting crypto needs futures or margin, with funding costs this backtest doesn't include.",
+        "The short side alone lost money in the bot's test.",
+        "Built and tested on Bitcoin; here it runs on every coin in the list."
+      ],
+      "settings": "As the live 50-day rule for longs; the mirror (prices × −1) for shorts. Lower high / higher low after 1 day. One position at a time.",
+      "markets": [
+        "crypto"
+      ],
+      "own_trades": true,
+      "long_only": false,
+      "exit_text": "Each trade starts at the next open after the signal and ends at the next open after the rule's exit (a lower high or higher low, a close back through the 50-day, or the stop).",
+      "source": "From the trading bot project. Its own test, BTC only, 2021-2026: +18.9% a year, worst drop −35.3%, beat BTC in 10 of 10 start dates. This page runs it on this site's own backtest (money split equally across open trades, no costs), so its numbers differ from the bot's."
+    },
+    {
       "id": "topdown",
       "name": "Top-Down Analysis",
       "kind": "lines",

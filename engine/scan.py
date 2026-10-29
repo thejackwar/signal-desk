@@ -25,7 +25,7 @@ import pandas as pd
 
 sys.path.insert(0, str(Path(__file__).parent))
 from chart import _r as rp, payload  # noqa: E402
-from strategies import REGISTRY, StrategyResult, rsi, set_benchmark, stop_for  # noqa: E402
+from strategies import REGISTRY, StrategyResult, for_market, rsi, set_benchmark, stop_for  # noqa: E402
 
 ROOT = Path(__file__).resolve().parent.parent
 ENGINE = Path(__file__).parent
@@ -60,6 +60,12 @@ LOOKBACK_BARS = 32        # every run rescans the last ~45 days so follow-up ret
 CONFLUENCE_BARS = 3       # "other strategies agree" window: alert day and the 3 sessions before
 # near-copies of each other: one firing with the other isn't a second opinion
 SAME_RULE = {"donchian": {"volume_breakout"}, "volume_breakout": {"donchian"}}
+# versions of the same bot rule don't count as "other strategies agree"
+for _group in ({"deck_live", "deck_v6", "deck_ma50", "deck_v8"},
+               {"btc50_f1", "btc50_touch_f1", "btc50_touch_f2", "btc50_touch", "btc50_ma", "btc50_both",
+                "btc50_maonly", "btc50_lhonly"}):
+    for _sid in _group:
+        SAME_RULE[_sid] = _group - {_sid}
 
 
 def load_tickers() -> list[str]:
@@ -246,6 +252,8 @@ def scan(data: dict[str, pd.DataFrame], lookback_bars: int, edge: dict | None) -
         n = len(df)
         results = {}
         for sid, fn in REGISTRY.items():
+            if not for_market(sid, MARKET):
+                continue
             try:
                 results[sid] = fn(df)
             except Exception as e:  # one bad series must not stop the scan
@@ -274,6 +282,7 @@ def scan(data: dict[str, pd.DataFrame], lookback_bars: int, edge: dict | None) -
                     "stop_why": stop_why,
                     "stop_hit": f"{df.index[hit]:%Y-%m-%d}" if hit is not None else None,
                     "chart": payload(df, res, start, n, only_marker=i),
+                    **({"exit": True} if i in res.exits else {}),   # a sell alert: closes a trade, opens nothing
                 })
     return alerts
 

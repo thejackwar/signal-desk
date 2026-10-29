@@ -12,6 +12,9 @@ StrategyResult:
   shapes   -> pattern drawings [{name, points: [[bar_index, price], ...]}]
   stops    -> {bar_index: (price or None, reason)}: where the alert would be proven wrong
               (a close beyond that price), known on the alert day
+  trades   -> only for the strategies from the trading bot (bot_strategies.py), which buy on an
+              alert and sell on their own exit: the trades themselves, used by the backtest
+  exits    -> those strategies' sell alerts (bar indexes), which close a trade instead of opening one
 
 The same functions power both the live scanner (scan.py) and the
 worked examples shown in the app (build_examples.py), so what you read
@@ -35,6 +38,8 @@ class StrategyResult:
     panel: dict | None = None
     shapes: list = field(default_factory=list)
     stops: dict = field(default_factory=dict)
+    trades: list | None = None      # strategies that run their own trades (bot_strategies.py)
+    exits: set = field(default_factory=set)   # bars whose alert closes a trade ("Sell"), not opens one
 
 
 def P(v) -> str:
@@ -536,3 +541,13 @@ REGISTRY = {
     "head_shoulders": head_shoulders,
     "triangle": triangle,
 }
+
+# Strategies from the trading-bot project, each limited to the market it was built for.
+from bot_strategies import BOT_MARKETS, BOT_REGISTRY  # noqa: E402  (imports from this module)
+
+REGISTRY.update(BOT_REGISTRY)
+MARKETS_OF = dict(BOT_MARKETS)   # strategy id -> the markets it runs in (missing = every market)
+
+
+def for_market(sid: str, market: str) -> bool:
+    return market in MARKETS_OF.get(sid, (market,))

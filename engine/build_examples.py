@@ -82,7 +82,8 @@ def simulated_market(df, seed):
     return pd.Series(400 * np.exp(np.cumsum(r)), index=df.index)
 
 
-def find_example(sid, side, max_tries=4000):
+def find_example(sid, side, max_tries=4000, entries_only=False):
+    """entries_only: skip alerts that close a trade (the long + short bot rule: show a buy and a short sale)."""
     fn = REGISTRY[sid]
     for seed in range(max_tries):
         rng = np.random.default_rng(seed * 31 + (7 if side > 0 else 3))
@@ -94,7 +95,8 @@ def find_example(sid, side, max_tries=4000):
             set_benchmark(simulated_market(df, seed), "SPY")
         res = fn(df)
         sig = res.signals.values
-        hits = [i for i in np.flatnonzero(sig == side) if i + AFTER < len(df) and i >= 60]
+        hits = [i for i in np.flatnonzero(sig == side) if i + AFTER < len(df) and i >= 60
+                and not (entries_only and i in res.exits)]
         for i in reversed(hits):
             back = WINDOW.get(sid, 100)
             start = max(0, i - back)
@@ -117,7 +119,8 @@ def main():
         if s.get("kind") == "lines":                     # Top-Down: drawn live on the Trendlines page instead
             continue
         for side in ((1,) if s.get("buys_only") else (1, -1)):   # buy-only strategies have no bearish example
-            df, res, i, start, end, move = find_example(s["id"], side)
+            df, res, i, start, end, move = find_example(s["id"], side,
+                                                        entries_only=s.get("own_trades") and not s.get("long_only"))
             chart = payload(df, res, start, end)
             chart["focus"] = i - start
             label = "Bullish" if side > 0 else "Bearish"

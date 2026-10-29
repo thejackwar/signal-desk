@@ -27,7 +27,10 @@ docs/                    the website (served by GitHub Pages)
                          the Track record page). Crypto and commodities keep their own in their folders.
 worker/                  Cloudflare Workers: trendlines data, counted broker links (see worker/README.md)
 engine/
-  strategies.py          the 12 strategy detectors (shared by scanner and examples)
+  strategies.py          the strategy detectors (shared by scanner and examples)
+  bot_strategies.py      the strategies from the trading-bot project (see below), with their own trades
+  deck_patterns.py, pattern_finder.py, rule50.py
+                         the bot's detectors, copied unchanged from thejackwar/sp500-bot
   scan.py                daily scanner
   backtest.py            15-year backtest of every strategy
   build_examples.py      builds the example charts
@@ -163,6 +166,24 @@ EUR 10,000 following the bullish alerts (trend strategies hold until the opposit
 the others for 20 sessions), split equally across open positions, against holding all the
 stocks equally. No costs, taxes or slippage, and it uses today's S&P 100 list, so
 companies that dropped out of the index are missing. Treat it as a rough guide.
+
+## Strategies from the trading bot
+
+The *Trading bot* category holds the rules from the trading-bot project
+(thejackwar/sp500-bot) that beat buy and hold in that project's own tests, added on
+29 Oct 2026: six for stocks (deck patterns live rules, plain, + 50-day filter and with the
+break-even stop; the old pattern trader; the breakout bot, daily chart only) and nine for
+crypto (the 50-day rule and its variants, long + short, and above the 50- and 200-day).
+The deck patterns on the S&P 500 were left out: the rules are the same as the plain deck
+patterns and this site only scans the S&P 100.
+
+Unlike the other strategies they don't trade on opposite alerts: each one buys at the next
+open after a buy alert and sells on its own exit (a stop, a close below the 20-day low, a
+lower high...), which shows up as a *sell* alert. The backtest uses their trades directly
+(`StrategyResult.trades`), with the fills at opens and stop prices. The bot's money rules
+(1% risk, 10% per stock, 25 positions) are not used: like every strategy here, the money
+is split equally across the open trades, so the numbers differ from the bot's reports.
+Stock rules run on stocks only and crypto rules on crypto only (`MARKETS_OF` in strategies.py).
 
 ## Change things
 
