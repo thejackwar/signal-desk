@@ -2402,6 +2402,8 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
           <button data-labexit="hold" aria-pressed="${cfg.exit === "hold"}">After a time limit</button></div></div>
         ${cfg.exit === "hold" ? `<label class="lp"><span>Time limit <small>or earlier on an opposite alert</small></span><b id="lpv-hold">${cfg.hold} days</b>
           <input type="range" data-labhold min="2" max="120" step="1" value="${cfg.hold}"></label>` : ""}
+        ${Object.entries(M.RISK).map(([k, R]) => `<label class="lp"><span>${esc(R.label)} <small>${esc(R.about)}</small></span><b id="lpv-${k}">${labRiskTxt(cfg[k])}</b>
+          <input type="range" data-labrisk="${k}" min="${R.min}" max="${R.max}" step="${R.step}" value="${cfg[k]}"></label>`).join("")}
         <div class="lrow"><span>Trades</span><div class="seg sm" role="group" aria-label="Trades">
           <button data-labside="long" aria-pressed="${st.side === "long"}">Long only</button>
           <button data-labside="all" aria-pressed="${st.side === "all"}">Long + short</button></div></div>
@@ -2413,6 +2415,7 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
     box.innerHTML = h;
     runLab();
   }
+  const labRiskTxt = v => v > 0 ? (+v).toFixed(1).replace(/\.0$/, "") + "%" : "Off";
   function runLab() {
     const out = document.getElementById("labout"), M = LAB.mod, data = LAB.data[S.market || "stocks"];
     if (!out || !M || !data) return;
@@ -2432,6 +2435,9 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
       <div><span>Worst drop</span><b class="${!ss || sm.dd >= ss.dd ? "up" : "down"}">${pct(sm.dd)}</b><small>${ss ? `${benchOf().name} ${pct(ss.dd)}` : ""}</small></div>
       <div><span>Trades</span><b>${mine.trades.n.toLocaleString("en-US")}</b><small>${mine.trades.n ? `${Math.round(mine.trades.winRate)}% winners · ${Math.round(mine.inv.share * 100)}% of days invested` : "no alerts"}</small></div>
     </div>`;
+    if (cfg.tp > 0 || cfg.sl > 0) h += `<p class="hint" style="margin:8px 2px 0">${[
+      cfg.tp > 0 ? `<b>${Math.round(mine.trades.tp / Math.max(1, mine.trades.n) * 100)}%</b> of trades reached the ${labRiskTxt(cfg.tp)} take profit` : "",
+      cfg.sl > 0 ? `<b>${Math.round(mine.trades.sl / Math.max(1, mine.trades.n) * 100)}%</b> hit the ${labRiskTxt(cfg.sl)} stop loss` : ""].filter(Boolean).join(", ")}${mine.trades.n ? `; the rest closed on the exit rule. Worst single trade ${pct(mine.trades.worst)}.` : "."}</p>`;
     h += `<h3 class="h3">Growth over time</h3><div class="chartbox" id="labchart"></div>`;
     if (!isDef) h += `<p class="hint">Default settings: ${kEur(sb.end)} (${pct(sb.cagr)} a year, worst drop ${pct(sb.dd)}).</p>`;
     const ym = M.byYear(mine.eq, D, fi), ys = spyEq ? M.byYear(spyEq, D, fi) : null;
@@ -2440,7 +2446,7 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
         const sp = ys?.[ym.length - 1 - k], d = sp ? y.ret - sp.ret : null;
         return `<tr><td>${y.year}${k === 0 ? `<small>so far</small>` : ""}</td><td style="text-align:right" class="${y.ret >= 0 ? "up" : "down"}">${pct(y.ret)}</td>${sp ? `<td style="text-align:right" class="${sp.ret >= 0 ? "up" : "down"}">${pct(sp.ret)}</td><td style="text-align:right"><b class="${d >= 0 ? "up" : "down"}">${pct(d)}</b></td>` : ""}</tr>`;
       }).join("") + `</tbody></table></div>`;
-    h += `<p class="hint">The account splits its money equally across every open position${st.side === "all" ? " (buying on bullish alerts, selling short on bearish ones)" : " (buying on bullish alerts, selling on bearish ones)"} and rebalances daily; with nothing open the money waits in cash. No trading costs, taxes or borrow fees${S.market !== "commodities" ? `, and the list is today's ${L().index}, which flatters buying` : ""}. Settings that look best on the past usually do worse afterwards.</p>`;
+    h += `<p class="hint">The account splits its money equally across every open position${st.side === "all" ? " (buying on bullish alerts, selling short on bearish ones)" : " (buying on bullish alerts, selling on bearish ones)"} and rebalances daily; with nothing open the money waits in cash. ${cfg.tp > 0 || cfg.sl > 0 ? " Take profit and stop loss are checked against each day's high and low: a level touched during the day fills at the level, a price that opens past it fills at the middle of that day's range, and a day that touches both counts as the stop." : ""} No trading costs, taxes or borrow fees${S.market !== "commodities" ? `, and the list is today's ${L().index}, which flatters buying` : ""}. Settings that look best on the past usually do worse afterwards.</p>`;
     out.innerHTML = h;
     drawLabChart(document.getElementById("labchart"), D, fi, [
       ...(spyEq ? [{ name: benchOf().name.replace("&amp;", "&"), vals: spyEq, color: C.muted, w: 1.4 }] : []),
@@ -2483,7 +2489,7 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
   }
   function labInput(e) {
     const M = LAB.mod; if (!M) return false;
-    const pi = e.target.closest("[data-labp], [data-labhold]"); if (!pi) return false;
+    const pi = e.target.closest("[data-labp], [data-labhold], [data-labrisk]"); if (!pi) return false;
     const st = labState(); st.cfg = M.clean(st.cfg);
     if (pi.dataset.labp != null) {
       st.cfg.p[pi.dataset.labp] = +pi.value; st.cfg = M.clean(st.cfg);
@@ -2493,6 +2499,9 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
         if (b) b.textContent = (q.step < 1 ? v.toFixed(2).replace(/0$/, "") : v) + (q.unit ? " " + q.unit : "");
         if (inp && q !== x && +inp.value !== v) inp.value = v;
       });
+    } else if (pi.dataset.labrisk) {
+      const k = pi.dataset.labrisk; st.cfg[k] = +pi.value; st.cfg = M.clean(st.cfg);
+      const b = document.getElementById("lpv-" + k); if (b) b.textContent = labRiskTxt(st.cfg[k]);
     } else {
       st.cfg.hold = +pi.value; const b = document.getElementById("lpv-hold"); if (b) b.textContent = pi.value + " days";
     }
@@ -2506,7 +2515,7 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
     const M = LAB.mod; if (!M) return false;
     const t = e.target.closest("[data-labind], [data-labexit], [data-labside], [data-labreset]"); if (!t) return false;
     const st = labState();
-    if (t.dataset.labind) st.cfg = { ind: t.dataset.labind };
+    if (t.dataset.labind) { const o = M.clean(st.cfg); st.cfg = { ind: t.dataset.labind, tp: o.tp, sl: o.sl }; }   // keep the exits across indicators
     else if (t.dataset.labexit) st.cfg = { ...M.clean(st.cfg), exit: t.dataset.labexit };
     else if (t.dataset.labside) st.side = t.dataset.labside;
     else { st.cfg = M.defaults(M.clean(st.cfg).ind); st.side = "long"; }

@@ -53,11 +53,17 @@ export const INDICATORS = {
   },
 };
 export const HOLD_DEFAULT = 20;
+// Take profit / stop loss, in % from the entry price. 0 = off (the default, so the app's own
+// backtest is unchanged). They work on top of the exit rule: whichever comes first closes the trade.
+export const RISK = {
+  tp: { label: "Take profit", min: 0, max: 50, step: 0.5, about: "above the entry for a buy, below it for a short" },
+  sl: { label: "Stop loss", min: 0, max: 30, step: 0.5, about: "below the entry for a buy, above it for a short" },
+};
 
 export function defaults(ind) {
   const I = INDICATORS[ind], p = {};
   I.params.forEach(x => p[x.k] = x.def);
-  return { ind, p, exit: I.exit, hold: HOLD_DEFAULT };
+  return { ind, p, exit: I.exit, hold: HOLD_DEFAULT, tp: 0, sl: 0 };
 }
 // keep a setting set valid (fast < slow, oversold < overbought, numbers in range)
 export function clean(cfg) {
@@ -70,6 +76,10 @@ export function clean(cfg) {
   if (I === "macd" && out.p.fast >= out.p.slow) out.p.slow = Math.min(60, out.p.fast + 1), out.p.fast = Math.min(out.p.fast, out.p.slow - 1);
   out.exit = out.exit === "hold" ? "hold" : "opposite";
   out.hold = Math.min(120, Math.max(2, Math.round(+out.hold || HOLD_DEFAULT)));
+  for (const k of ["tp", "sl"]) {
+    const R = RISK[k], v = +out[k];
+    out[k] = Number.isFinite(v) ? Math.min(R.max, Math.max(R.min, Math.round(v / R.step) * R.step)) : 0;
+  }
   return out;
 }
 export const sameCfg = (a, b) => JSON.stringify(clean(a)) === JSON.stringify(clean(b));
@@ -189,28 +199,59 @@ export function signals(T, cfg) {
 }
 
 // ------------------------------------------------------------------ run it
+// Take profit / stop loss check on one daily bar for a position of `side` (+1 buy, -1 short)
+// entered at `entry`. Returns { px, why } when the bar reaches a level, else null.
+// Daily bars have no open: a level touched inside the bar fills at the level; a bar that
+// opened beyond it (the whole range past the level, a gap) fills at the middle of its range.
+// When one bar reaches both, the stop is counted, since the order inside the day is unknown.
+export function riskHit(side, entry, h, l, cfg) {
+  const mid = (h + l) / 2;
+  if (cfg.sl) {
+    const lv = entry * (1 - side * cfg.sl / 100);
+    if (side > 0 ? l <= lv : h >= lv) return { px: (side > 0 ? h < lv : l > lv) ? mid : lv, why: "sl" };
+  }
+  if (cfg.tp) {
+    const lv = entry * (1 + side * cfg.tp / 100);
+    if (side > 0 ? h >= lv : l <= lv) return { px: (side > 0 ? l > lv : h < lv) ? mid : lv, why: "tp" };
+  }
+  return null;
+}
+
 // Every ticker's alerts drive one EUR ACCOUNT account: the money is split equally across every
 // open position and rebalanced daily, idle money earns 0%. No costs, taxes or borrow fees.
 export function run(data, cfg, fromIdx = 0) {
   cfg = clean(cfg);
-  const D = data.dates.length, trend = cfg.exit === "opposite", H = cfg.hold;
+  const D = data.dates.length, trend = cfg.exit === "opposite", H = cfg.hold, risk = cfg.tp > 0 || cfg.sl > 0;
   const sum = { ls: new Float64Array(D), long: new Float64Array(D) }, cnt = { ls: new Int32Array(D), long: new Int32Array(D) };
   const trades = [];
   for (const T of data.tickers) {
-    const sig = signals(T, cfg), n = sig.length, c = T.c, idx = T.idx;
+    const sig = signals(T, cfg), n = sig.length, c = T.c, h = T.h, l = T.l, idx = T.idx;
     // positions held at each close (earn the next session's return)
     let side = 0, exitLS = -1, exitL = -1;
+    let heldLS = 0, heldL = 0, entLS = 0, entL = 0;   // held at the previous close, and its entry price
     for (let i = 0; i < n; i++) {
+      // 1) the session from the previous close to this one: take profit / stop loss inside the bar
+      let pxLS = c[i], pxL = c[i], stoppedLS = false, stoppedL = false;
+      if (risk && i > 0) {
+        const a = heldLS ? riskHit(heldLS, entLS, h[i], l[i], cfg) : null, b = heldL ? riskHit(1, entL, h[i], l[i], cfg) : null;
+        if (a) { pxLS = a.px; exitLS = i; stoppedLS = true; }   // closed during the day: flat at this close unless a new alert opens one
+        if (b) { pxL = b.px; exitL = -1; stoppedL = true; }
+      }
+      // next session must be the very next calendar day for this ticker, like pct_change on the shared calendar
+      if (i > 0 && idx[i] === idx[i - 1] + 1) {
+        const g = idx[i];
+        if (heldLS) { sum.ls[g] += heldLS * (pxLS / c[i - 1] - 1); cnt.ls[g]++; }
+        if (heldL) { sum.long[g] += pxL / c[i - 1] - 1; cnt.long[g]++; }
+      }
+      // 2) this close's alert
       const s = sig[i];
       if (s) { side = s; exitLS = trend ? n : i + H; }
       if (s === -1) exitL = -1; else if (s === 1) exitL = trend ? n : i + H;
       const hLS = i < exitLS ? side : 0, hL = i < exitL ? 1 : 0;
-      // next session must be the very next calendar day for this ticker, like pct_change on the shared calendar
-      if (i + 1 < n && idx[i + 1] === idx[i] + 1) {
-        const g = idx[i + 1], r = c[i + 1] / c[i] - 1;
-        if (hLS) { sum.ls[g] += hLS * r; cnt.ls[g]++; }
-        if (hL) { sum.long[g] += r; cnt.long[g]++; }
-      }
+      // a new position (or one reopened after a stop) is entered at this close
+      if (hLS && (hLS !== heldLS || stoppedLS)) entLS = c[i];
+      if (hL && (!heldL || stoppedL)) entL = c[i];
+      heldLS = hLS; heldL = hL;
     }
     // every alert as a trade, for the win rate (same rule as trade_summary in backtest.py)
     for (let i = 0; i < n; i++) {
@@ -218,9 +259,14 @@ export function run(data, cfg, fromIdx = 0) {
       let j = n - 1, opp = false;
       for (let q = i + 1; q < n; q++) if (sig[q] === -s) { j = q; opp = true; break; }
       if (!trend) j = Math.min(j, i + H);
-      const closed = j < n - 1 || (!trend && i + H <= n - 1) || opp;
+      let closed = j < n - 1 || (!trend && i + H <= n - 1) || opp;
       j = Math.min(j, n - 1);
-      if (j > i && closed) trades.push({ side: s, ret: s * (c[j] / c[i] - 1), days: j - i });
+      let px = c[j], why = "rule";
+      if (risk) for (let q = i + 1; q <= j; q++) {
+        const r = riskHit(s, c[i], h[q], l[q], cfg);
+        if (r) { j = q; px = r.px; why = r.why; closed = true; break; }
+      }
+      if (j > i && closed) trades.push({ side: s, ret: s * (px / c[i] - 1), days: j - i, why });
     }
   }
   const curve = key => {
@@ -231,7 +277,9 @@ export function run(data, cfg, fromIdx = 0) {
   const invested = key => { let k = 0, s = 0; for (let g = fromIdx + 1; g < D; g++) if (cnt[key][g]) { k++; s += cnt[key][g]; } return { share: k / Math.max(1, D - fromIdx - 1), avg: k ? s / k : 0 }; };
   const stat = list => {
     const n = list.length, w = list.filter(t => t.ret > 0).length;
-    return { n, wins: w, winRate: n ? w / n * 100 : null, avg: n ? list.reduce((a, t) => a + t.ret, 0) / n * 100 : null };
+    const by = k => list.filter(t => t.why === k).length;
+    return { n, wins: w, winRate: n ? w / n * 100 : null, avg: n ? list.reduce((a, t) => a + t.ret, 0) / n * 100 : null, tp: by("tp"), sl: by("sl"),
+             worst: n ? list.reduce((m, t) => Math.min(m, t.ret), Infinity) * 100 : null };
   };
   return {
     cfg,
