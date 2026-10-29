@@ -664,6 +664,40 @@ canvas.hm { display: block; touch-action: pan-y; }
 .mbar { display: block; height: 3px; background: var(--surface-2); border-radius: 2px; margin-top: 6px; overflow: hidden; }
 .mbar i { display: block; height: 100%; background: var(--amber); border-radius: 2px; opacity: .8; }
 .mbars { display: block; }
+/* News mood: headline tone per stock (data/sentiment.json, engine/sentiment.py) */
+.mood { display: inline-flex; align-items: center; gap: 5px; padding: 3px 9px; border-radius: 999px; font-size: 12px; font-weight: 600; white-space: nowrap; background: var(--surface-2); color: var(--muted); }
+.mood::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+.mood.bullish, .mood.leaning_bullish { color: var(--bull); background: var(--bull-bg); }
+.mood.bearish, .mood.leaning_bearish { color: var(--bear); background: var(--bear-bg); }
+.mood.leaning_bullish, .mood.leaning_bearish { background: transparent; box-shadow: inset 0 0 0 1px currentColor; }
+.mood.quiet::before { background: var(--faint); }
+.mgauge { position: relative; height: 8px; border-radius: 4px; margin: 14px 0 4px; background: linear-gradient(90deg, var(--bear-bg), var(--surface-2) 40%, var(--surface-2) 60%, var(--bull-bg)); }
+.mgauge::after { content: ""; position: absolute; left: 50%; top: -3px; bottom: -3px; width: 1px; background: var(--line); }
+.mgauge b { position: absolute; top: 50%; width: 14px; height: 14px; margin: -7px 0 0 -7px; border-radius: 50%; background: var(--surface); border: 3px solid var(--muted); z-index: 1; }
+.mgauge b.up { border-color: var(--bull); } .mgauge b.down { border-color: var(--bear); }
+.mscale { display: flex; justify-content: space-between; font-size: 11px; color: var(--faint); }
+.mcount { display: flex; gap: 14px; flex-wrap: wrap; font-size: 13px; color: var(--muted); margin: 12px 0 4px; }
+.mcount b { font-variant-numeric: tabular-nums; }
+.mdrivers { margin: 8px 0 0; padding: 0; list-style: none; }
+.mdrivers li { border-top: 1px solid var(--line); }
+.mdrivers a { display: grid; grid-template-columns: 10px 1fr; gap: 0 10px; padding: 10px 0; color: inherit; text-decoration: none; font-size: 14px; line-height: 1.35; }
+.mdrivers a small { grid-column: 2; color: var(--faint); font-size: 12px; margin-top: 3px; }
+.mdrivers i { width: 8px; height: 8px; border-radius: 50%; margin-top: 6px; background: var(--faint); }
+.mdrivers i.bull { background: var(--bull); } .mdrivers i.bear { background: var(--bear); }
+.moodrow { grid-template-columns: minmax(0, 1fr) 132px; align-items: center; }
+.moodrow.withcoin { grid-template-columns: 30px minmax(0, 1fr) 132px; }
+.moodrow .tk { font-weight: 600; }
+.moodrow .nm, .moodrow .hl { display: block; color: var(--muted); font-size: 12.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 1px; }
+.moodrow .hl { color: var(--faint); margin-top: 4px; }
+.moodrow .mside { text-align: right; }
+.moodrow .mside small { display: block; color: var(--faint); font-size: 11px; margin-top: 5px; font-variant-numeric: tabular-nums; }
+.mbar2 { display: block; position: relative; height: 4px; border-radius: 2px; background: var(--surface-2); margin-top: 7px; }
+.mbar2 i { position: absolute; top: 0; bottom: 0; border-radius: 2px; }
+.mbar2 i.up { left: 50%; background: var(--bull); } .mbar2 i.down { right: 50%; background: var(--bear); }
+.moodsum { display: flex; gap: 8px; margin: 4px 0 14px; }
+.moodsum > div { flex: 1; background: var(--surface); border-radius: 12px; padding: 10px 12px; }
+.moodsum span { display: block; font-size: 11px; text-transform: uppercase; letter-spacing: .05em; color: var(--faint); }
+.moodsum b { font-size: 22px; font-variant-numeric: tabular-nums; }
 .surge { font: 600 10.5px var(--font-mono); color: var(--faint); margin-left: 6px; padding: 2px 6px; border-radius: 5px; background: var(--surface-2); vertical-align: 2px; }
 .surge.hot { color: var(--bull); background: var(--bull-bg); }
 .surge.cold { color: var(--bear); background: var(--bear-bg); }
@@ -1818,7 +1852,7 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
     if (isComm() && r.drivers) h += `<div class="card drivers"><h3>What moves the price</h3><p>${esc(r.drivers)}.</p><p class="hint" style="margin:0">Prices follow the nearest contract, so the chart can jump a little when it rolls to the next month.</p></div>`;
     if (isComm()) h += etcCard(t);
     if (!isComm()) h += `<p style="margin:4px 0 18px"><a class="btn ghost" href="trendlines.html#${encodeURIComponent(t)}">Trendlines on 7 timeframes ›</a></p>`;
-    h += nextEarningsCard(t) + mentionsCard(t) + newsFor(t);
+    h += nextEarningsCard(t) + moodCard(t) + mentionsCard(t) + newsFor(t);
     h += `<h2>Recent alerts on ${esc(disp(t))}</h2>`;
     if (!alerts.length) h += `<p class="tag" style="font-size:14px">No strategy has fired on ${esc(disp(t))} in the last few weeks.</p>`;
     else h += `<div class="rows">` + alerts.map(a => alertRow(a, { showDate: true })).join("") + `</div>`;
@@ -2795,7 +2829,7 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
 
 
   // -------------------------------------------------------- news mentions
-  const newsSwitch = which => `<div class="seg nsw" role="group" aria-label="News view"><a href="#news" role="button" aria-pressed="${which === "news"}">Headlines</a><a href="#buzz" role="button" aria-pressed="${which === "buzz"}">Most mentioned</a><a href="#calendar" role="button" aria-pressed="${which === "calendar"}">Calendar</a></div>`;
+  const newsSwitch = which => `<div class="seg nsw" role="group" aria-label="News view"><a href="#news" role="button" aria-pressed="${which === "news"}">Headlines</a>${S.market === "stocks" ? `<a href="#mood" role="button" aria-pressed="${which === "mood"}">Mood</a>` : ""}<a href="#buzz" role="button" aria-pressed="${which === "buzz"}">Most mentioned</a><a href="#calendar" role="button" aria-pressed="${which === "calendar"}">Calendar</a></div>`;
   function bars(series, W = 96, H = 26) {
     const n = series.length, vals = series.filter(v => v != null), mx = Math.max(1, ...vals), bw = W / n;
     return `<svg class="mbars" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" preserveAspectRatio="none" aria-hidden="true">${series.map((v, i) => {
@@ -2835,6 +2869,60 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
         <span class="q">${key === "week" ? (v == null ? "–" : v.toLocaleString("en-US")) : cnt(m)}<small>${key === "week" ? "last 7 days" : "last 24h"}</small></span></a>`;
     }).join("") + `</div>`;
     h += `<p class="fine">Counts: ${esc(M.source)}, news sites worldwide. "~" means an estimate: the name is so busy that Google's 100-result limit was reached, so the count is scaled up from the last few hours. ×2.0 means twice as many articles as on a usual day (the average of the previous days the app has recorded). Bars: one per day over 30 days (amber = latest, flat = not recorded yet). Updated every 6 hours.</p>`;
+    return h;
+  }
+
+  // ------------------------------------------------------------ news mood
+  // Is the latest news on a stock bullish or bearish? Each headline's tone is scored by FinBERT,
+  // and the stock's mood is their weighted average over 7 days (engine/sentiment.py).
+  const MOODS = { bullish: "Bullish", leaning_bullish: "Leaning bullish", neutral: "Neutral", leaning_bearish: "Leaning bearish", bearish: "Bearish", quiet: "Not enough news" };
+  const moodPill = m => `<span class="mood ${m}">${MOODS[m] || m}</span>`;
+  const toneOf = s => s >= (S.sent?.headline_cut ?? .35) ? "bull" : s <= -(S.sent?.headline_cut ?? .35) ? "bear" : "neu";
+  const sentItems = () => { if (!S.sent) return {}; if (!S.sent._by) { S.sent._by = {}; (S.sent.items || []).forEach(x => S.sent._by[x.id] = x); } return S.sent._by; };
+  const plural = (n, w) => `${n} ${w}${n === 1 ? "" : "s"}`;
+
+  function moodCard(t) {
+    const m = S.sent?.stocks?.[t];
+    if (!m) return S.sent && S.market === "stocks" ? `<div class="card"><div class="hd"><h3>News mood</h3>${moodPill("quiet")}</div><p class="hint" style="margin:8px 0 0">No headlines about ${esc(disp(t))} in the last ${S.sent.window_days || 7} days.</p></div>` : "";
+    const by = sentItems(), quiet = m.mood === "quiet", pos = Math.max(3, Math.min(97, 50 + m.score * 50));
+    let h = `<div class="card"><div class="hd"><h3>News mood</h3><a href="#mood" style="font-size:12.5px;color:var(--amber);text-decoration:none">All stocks ›</a></div>
+      <div style="margin-top:10px">${moodPill(m.mood)}</div>`;
+    if (quiet) return h + `<p class="hint" style="margin:10px 0 0">${m.n ? `Only ${plural(m.n, "headline")} named` : "No headlines named"} ${esc(disp(t))} in the last ${S.sent.window_days} days, too few to read a mood.</p></div>`;
+    h += `<div class="mgauge" role="img" aria-label="Tone ${Math.round(m.score * 100)} on a scale from −100 bearish to +100 bullish"><b class="${m.score >= .1 ? "up" : m.score <= -.1 ? "down" : ""}" style="left:${pos}%"></b></div>
+      <div class="mscale"><span>Bearish</span><span>Neutral</span><span>Bullish</span></div>
+      <div class="mcount"><span><b class="up">${m.bull}</b> bullish</span><span><b class="down">${m.bear}</b> bearish</span><span><b>${m.neu}</b> neutral</span><span>${plural(m.n, "headline")} in ${S.sent.window_days} days${m.n48 ? ` · ${m.n48} in the last 48h` : ""}</span></div>`;
+    const top = m.top.map(id => by[id]).filter(Boolean);
+    if (top.length) h += `<ul class="mdrivers">${top.map(x => `<li><a href="${esc(x.url || "#")}" target="_blank" rel="noopener noreferrer"><i class="${toneOf(x.s)}"></i><span>${esc(x.title)}</span><small>${esc(x.src)} · ${esc(ago(x.t))}</small></a></li>`).join("")}</ul>`;
+    return h + `<p class="hint" style="margin:10px 0 0">The tone of recent headlines, read by an AI model trained on financial news. It isn't a forecast: prices often move before the news, and good news can already be in the price.</p></div>`;
+  }
+
+  function viewMood() {
+    const M = S.sent;
+    let h = header("News mood", null, M ? `<div class="stamp">${esc(M.window_days)} days of headlines<br>updated ${esc(ago(M.generated_at))}</div>` : "") + newsSwitch("mood");
+    if (!M?.stocks) return h + `<div class="empty"><strong>No news mood yet</strong>It appears after the hourly news update runs on GitHub.</div>`;
+    const by = sentItems(), f = S.moodF || "all";
+    const rows = Object.entries(M.stocks).filter(([t]) => S.stockBy[t]).map(([t, v]) => ({ t, ...v }));
+    const live = rows.filter(r => r.mood !== "quiet"), quiet = rows.filter(r => r.mood === "quiet");
+    // every S&P 100 stock: those with no headlines at all count as quiet too
+    const none = Object.keys(S.stockBy).filter(t => !M.stocks[t]).length;
+    const up = live.filter(r => r.mood.endsWith("bullish")), dn = live.filter(r => r.mood.endsWith("bearish"));
+    h += `<p class="tag" style="font-size:14px;margin:6px 0 12px">Whether the last ${M.window_days} days of headlines about each ${L().one} sound bullish or bearish, newest counting most.</p>`;
+    if (M.demo) h += `<div class="demo">Demo data: made-up headlines, so you can see how this page works.</div>`;
+    h += `<div class="moodsum"><div><span>Bullish</span><b class="up">${up.length}</b></div><div><span>Neutral</span><b>${live.length - up.length - dn.length}</b></div><div><span>Bearish</span><b class="down">${dn.length}</b></div></div>`;
+    h += `<div class="tools" style="margin-bottom:6px"><label>Show</label><div class="seg sm" role="group" aria-label="Show">${[["all", "All"], ["bull", "Bullish"], ["bear", "Bearish"]].map(([k, x]) =>
+      `<button data-moodf="${k}" aria-pressed="${f === k}">${x}</button>`).join("")}</div></div>`;
+    const list = (f === "bull" ? up : f === "bear" ? dn : live).slice().sort((a, b) => f === "bear" ? a.score - b.score : b.score - a.score);
+    const row = r => {
+      const lead = by[r.top[0]], w = Math.min(50, Math.abs(r.score) * 50);
+      return `<a class="row moodrow${hasIcon() ? " withcoin" : ""}" href="#stock-${esc(r.t)}">${hasIcon() ? icon(r.t, 30) : ""}
+        <span style="min-width:0"><span class="tk">${esc(disp(r.t))}</span><span class="nm">${esc(S.stockBy[r.t]?.name || "")}</span>
+          ${lead && r.mood !== "quiet" ? `<span class="hl">“${esc(lead.title)}”</span>` : ""}</span>
+        <span class="mside">${moodPill(r.mood)}${r.mood !== "quiet" ? `<span class="mbar2"><i class="${r.score >= 0 ? "up" : "down"}" style="width:${w}%"></i></span>` : ""}
+          <small>${r.mood === "quiet" ? plural(r.n, "headline") : `${r.bull} up · ${r.bear} down · ${r.n} total`}</small></span></a>`;
+    };
+    h += list.length ? `<div class="rows">${list.map(row).join("")}</div>` : `<p class="empty">No ${f === "bull" ? "bullish" : "bearish"} stocks right now.</p>`;
+    if (f === "all" && quiet.length + none) h += `<h3 class="h3">Not enough news <small style="font-weight:400;color:var(--faint)">fewer than 3 headlines</small></h3><p class="hint" style="margin:0 0 8px">${quiet.concat(Object.keys(S.stockBy).filter(t => !M.stocks[t]).map(t => ({ t }))).map(r => `<a href="#stock-${esc(r.t)}" style="color:inherit">${esc(disp(r.t))}</a>`).join(", ")}</p>`;
+    h += `<p class="fine">Headlines: ${esc(M.source)}, tagged by company. Each headline's tone is scored by ${esc(M.model)}, a free AI model trained on financial news, from −1 (bearish) to +1 (bullish). A stock's mood averages its headlines over ${M.window_days} days: a 2-day-old headline counts half as much as a new one, roundups that tag many companies count less, and a headline that doesn't name the company counts a quarter. Tone, not a forecast. Updated every hour.</p>`;
     return h;
   }
 
@@ -3424,9 +3512,9 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
 
   function route() {
     const r = (location.hash || "#alerts").slice(1);
-    const tab = r === "news" || r === "buzz" ? "news" : r.startsWith("calendar") ? "calendar" : r.startsWith("strateg") ? "strategies" : r.startsWith("stock") || r === "heatmap" ? "stocks" : r === "notify" ? "notify" : r.startsWith("brokers") ? "brokers" : r.startsWith("learn") ? "learn" : r === "practice" ? "practice" : "alerts";
+    const tab = r === "news" || r === "buzz" || r === "mood" ? "news" : r.startsWith("calendar") ? "calendar" : r.startsWith("strateg") ? "strategies" : r.startsWith("stock") || r === "heatmap" ? "stocks" : r === "notify" ? "notify" : r.startsWith("brokers") ? "brokers" : r.startsWith("learn") ? "learn" : r === "practice" ? "practice" : "alerts";
     if (r === "winners" || r === "record") S.alView = r; else if (tab === "alerts" && !r.startsWith("alert-")) S.alView = "alerts";
-    const list = { alerts: S.alView === "winners" ? viewWinners : S.alView === "record" ? viewRecord : viewAlerts, stocks: viewStocks, strategies: viewStrategies, notify: viewNotify, brokers: viewBrokers, learn: viewLearn, practice: viewPractice, news: r === "buzz" ? viewBuzz : viewNews, calendar: () => viewCalendar(r.slice(9)) }[tab];
+    const list = { alerts: S.alView === "winners" ? viewWinners : S.alView === "record" ? viewRecord : viewAlerts, stocks: viewStocks, strategies: viewStrategies, notify: viewNotify, brokers: viewBrokers, learn: viewLearn, practice: viewPractice, news: r === "buzz" ? viewBuzz : r === "mood" ? viewMood : viewNews, calendar: () => viewCalendar(r.slice(9)) }[tab];
     let detail = detailFor(r), sel = detail ? r : null;
     charts.length = 0;
 
@@ -3579,6 +3667,8 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
     if (cmod) { setPref("calMode", cmod.dataset.cmode); rerender(); return; }
     const bsrt = e.target.closest("[data-bsort]");
     if (bsrt) { S.buzzSort = bsrt.dataset.bsort; rerender(); return; }
+    const mf = e.target.closest("[data-moodf]");
+    if (mf) { S.moodF = mf.dataset.moodf; rerender(); return; }
     const nd = e.target.closest("[data-nsec]");
     if (nd) { S.newsSec = nd.dataset.nsec; S.newsSrc = "all"; rerender(); return; }
     const ns = e.target.closest("[data-nsrc]");
@@ -3813,11 +3903,11 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
   async function loadMarket(m) {
     if (!CACHE[m]) {
       const b = MK[m].base;
-      const [feed, bt, stocks, liq, news, mentions, td] = await Promise.all([opt(b + "alerts.json"), opt(b + "backtest.json"), opt(b + "stocks.json"), m === "crypto" ? opt(b + "liquidations.json") : null, opt(b + "news.json"), opt(b + "mentions.json"), m === "stocks" ? opt("data/topdown/alerts.json") : null]);
-      CACHE[m] = { feed, bt, stocks, liq, news, mentions, td, stockData: {} };
+      const [feed, bt, stocks, liq, news, mentions, td, sent] = await Promise.all([opt(b + "alerts.json"), opt(b + "backtest.json"), opt(b + "stocks.json"), m === "crypto" ? opt(b + "liquidations.json") : null, opt(b + "news.json"), opt(b + "mentions.json"), m === "stocks" ? opt("data/topdown/alerts.json") : null, m === "stocks" ? opt("data/sentiment.json") : null]);
+      CACHE[m] = { feed, bt, stocks, liq, news, mentions, td, sent, stockData: {} };
     }
     const c = CACHE[m];
-    S.market = m; S.liq = c.liq; S.news = c.news; S.mentions = c.mentions; S.newsSrc = "all"; S.newsSec = "all"; S.nq = ""; S.feed = buildFeed(c); S.bt = c.bt; S.stocks = c.stocks; S.stockData = c.stockData;
+    S.market = m; S.liq = c.liq; S.news = c.news; S.mentions = c.mentions; S.sent = c.sent; S.newsSrc = "all"; S.newsSec = "all"; S.nq = ""; S.feed = buildFeed(c); S.bt = c.bt; S.stocks = c.stocks; S.stockData = c.stockData;
     S.stockBy = {}; (c.stocks?.stocks || []).forEach(r => S.stockBy[r.ticker] = r);
     S.q = ""; S.filter = "all";
     document.documentElement.dataset.market = m;
@@ -3836,7 +3926,7 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
     await loadMarket(m);
     S.lastSel = null; S.lastTab = null;
     const tab = (location.hash || "#alerts").slice(1);
-    const base = tab.startsWith("strateg") ? (tab.startsWith("strategy-") ? tab : "strategies") : tab.startsWith("stock") || tab === "heatmap" ? "stocks" : tab === "news" || tab === "buzz" ? tab : tab.startsWith("calendar") ? tab : tab === "notify" ? "notify" : tab.startsWith("brokers") ? "brokers" : tab.startsWith("learn") ? tab : tab === "winners" || tab === "record" || tab === "practice" ? tab : "alerts";
+    const base = tab.startsWith("strateg") ? (tab.startsWith("strategy-") ? tab : "strategies") : tab.startsWith("stock") || tab === "heatmap" ? "stocks" : tab === "news" || tab === "buzz" || tab === "mood" ? tab : tab.startsWith("calendar") ? tab : tab === "notify" ? "notify" : tab.startsWith("brokers") ? "brokers" : tab.startsWith("learn") ? tab : tab === "winners" || tab === "record" || tab === "practice" ? tab : "alerts";
     if ("#" + base !== location.hash) location.hash = base; else route();
     scrollTo(0, 0);
   }
