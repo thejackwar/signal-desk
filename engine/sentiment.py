@@ -71,6 +71,13 @@ TRUSTED = {
     "spglobal.com": "S&P Global", "americanbanker.com": "American Banker", "freightwaves.com": "FreightWaves",
     "nikkei.com": "Nikkei Asia", "asia.nikkei.com": "Nikkei Asia", "politico.com": "Politico",
 }
+# Opinion, comparison and listicle headlines (mostly syndicated on Yahoo Finance): not news, dropped.
+FILLER = re.compile(r"key facts|here'?s why|here'?s what|should you|is it (time|too late)|what to (know|expect|watch)|"
+                    r"buy or sell|buy,? sell,? or hold|stocks? to (buy|watch|own)|better (buy|stock)|reasons? to|top pick|"
+                    r"\bvs\.?\b.*\bwhich\b|\bwhich\b.*\b(better|buy)\b|jim cramer|cramer (says|on)|(could|will) .* make you|"
+                    r"millionaire|retire|dividend stocks?|\(\w+(-\w)?\) (rises|falls|dips|gains|outpaces|lags|trails|surpasses|"
+                    r"stock (sinks|rises|falls|moves))( (higher|lower) than| as)? market|is .* (a buy|undervalued|overvalued)\??$", re.I)
+SYNDICATOR = {"Yahoo Finance": 0.5}   # an aggregator's own copy counts half unless another outlet ran the story too
 STOP = set("the a an and or of to in on for with at by from as is are its it this that after over into says said new than "
            "will be has have shares stock stocks".split())
 
@@ -151,7 +158,7 @@ def fetch_google(tickers: list[str], window: str) -> list[dict]:
             title = html_unescape(g("title"))
             title = re.sub(r"\s+-\s+[^-]+$", "", title).strip()        # Google adds " - Outlet"
             named = t in news.tag(title, ms) or any(p in title for p in phrases)
-            if not title or not named:
+            if not title or not named or FILLER.search(title):
                 continue
             try:
                 when = parsedate_to_datetime(g("pubDate")).astimezone(timezone.utc)
@@ -317,7 +324,8 @@ def weight(item: dict, t: str, now: datetime) -> float:
     age_h = max(0.0, (now - parse(item["t"])).total_seconds() / 3600)
     n = item.get("nsym", len(item["syms"]))
     named = is_named(item, t)
-    return 0.5 ** (age_h / HALF_LIFE_H) * (1.0 if n <= 1 else 0.7 if n <= 3 else 0.4) * (1.0 if named else NOT_NAMED)
+    syn = 1.0 if item.get("also") else SYNDICATOR.get(item.get("src"), 1.0)
+    return 0.5 ** (age_h / HALF_LIFE_H) * (1.0 if n <= 1 else 0.7 if n <= 3 else 0.4) * (1.0 if named else NOT_NAMED) * syn
 
 
 def is_named(item: dict, t: str) -> bool:
@@ -425,7 +433,8 @@ def main():
     for x in items.values():   # "f" = FinBERT's own score, "s" = final tone (price targets from their numbers)
         x.setdefault("f", x.get("s", 0.0))
         x["s"] = adjust(x["title"], x["f"])
-    keep = sorted((x for x in items.values() if parse(x["t"]) >= window_start), key=lambda x: x["t"], reverse=True)
+    keep = sorted((x for x in items.values() if parse(x["t"]) >= window_start
+                   and not (x.get("k") == "g" and FILLER.search(x["title"]))), key=lambda x: x["t"], reverse=True)
     named_in(keep)
     base = baseline(keep, now)
     stocks = aggregate(keep, tickers, now, base)
