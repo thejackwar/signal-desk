@@ -25,7 +25,7 @@ import backtest  # noqa: E402
 import strategies  # noqa: E402
 from scan import fetch_demo  # noqa: E402
 
-CONFIGS = {"ma200": "ma", "golden_cross": "cross", "bollinger": "bollinger", "rsi": "rsi", "macd": "macd", "donchian": "donchian", "supertrend": "supertrend"}
+CONFIGS = {"ma200": "ma", "golden_cross": "cross", "bollinger": "bollinger", "rsi": "rsi", "macd": "macd", "donchian": "donchian", "supertrend": "supertrend", "buy_the_dip": "dip"}
 
 
 def decoded(lab: dict) -> dict:

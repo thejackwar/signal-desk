@@ -38,13 +38,16 @@ import pandas as pd
 sys.path.insert(0, str(Path(__file__).parent))
 import scan  # noqa: E402
 from scan import MARKETS, fetch_demo, fetch_real, load_tickers  # noqa: E402
-from strategies import REGISTRY  # noqa: E402
+from strategies import DIP_HOLD, DIP_TP, REGISTRY  # noqa: E402
 
 ROOT = Path(__file__).resolve().parent.parent
 OUT = ROOT / "docs" / "data" / "backtest.json"
 HORIZONS = (5, 20, 60)
 HOLD_DAYS = 20
 TREND = {"ma200", "golden_cross", "donchian", "supertrend", "relative_strength"}   # hold until the opposite alert
+# strategies with their own exit: a take profit (checked on each day's high, like the Strategy Lab's
+# riskHit) and a time limit instead of HOLD_DAYS
+EXITS = {"buy_the_dip": {"tp": DIP_TP, "hold": DIP_HOLD}}
 START_CAPITAL = 10_000
 TRADE_SIZE = 1_000      # "take every trade": each alert is a EUR 1,000 position
 BENCH = "SPY"           # buy-and-hold comparison on the strategies page
@@ -115,6 +118,42 @@ def trade_summary(trades: list[dict]) -> dict:
     return out
 
 
+def tp_fill(side: int, entry: float, high: float, low: float, tp: float):
+    """Take-profit fill on one daily bar, same rule as riskHit() in docs/lab.js: a level touched
+    inside the bar fills at the level; a bar entirely past it (a gap) fills at the middle of its range."""
+    lv = entry * (1 + side * tp)
+    if (high >= lv) if side > 0 else (low <= lv):
+        return (high + low) / 2 if ((low > lv) if side > 0 else (high < lv)) else lv
+    return None
+
+
+def own_exit_positions(sig, c, hi, lo, hold: int, tp: float):
+    """Long positions for a buy-only strategy with its own exit (EXITS), same loop as the long side of
+    run() in docs/lab.js: buy at an alert's close, sell at the take profit (inside the day) or at the
+    close `hold` sessions later. Alerts while a position is open are ignored, so the time limit
+    counts from the buy. Returns the held flags, the alerts that opened a trade, and the
+    take-profit days with their fill prices."""
+    n = len(c)
+    held, taken, fills = np.zeros(n), [], {}
+    exit_at, entry = -1, 0.0
+    for i in range(n):
+        hit = False
+        if i > 0 and held[i - 1]:
+            f = tp_fill(1, entry, hi[i], lo[i], tp)
+            if f is not None:
+                exit_at, hit = -1, True
+                fills[i] = f
+        new = sig[i] == 1 and not (i > 0 and held[i - 1] and not hit and i < exit_at)
+        if new:
+            exit_at = i + hold
+            taken.append(i)
+        if i < exit_at:
+            held[i] = 1
+            if new or hit or i == 0 or not held[i - 1]:
+                entry = c[i]
+    return held, set(taken), fills
+
+
 def weekly_account(pos: pd.DataFrame, rets: pd.DataFrame, weeks: pd.Series) -> list[int]:
     """A EUR ACCOUNT account that follows the alerts: the money is split equally across every
     open position (+1 long, -1 short) and rebalanced daily; with nothing open it sits in cash at 0%.
@@ -157,6 +196,10 @@ def run(data: dict[str, pd.DataFrame]) -> dict:
         rows, trades = [], []
         pos = pd.DataFrame(0.0, index=closes.index, columns=closes.columns)
         pos_ls = pos.copy()
+        ex = EXITS.get(sid)
+        hold = ex["hold"] if ex else HOLD_DAYS
+        tp = ex["tp"] if ex else 0
+        srets = rets.copy() if tp else rets   # a take-profit day earns up to the fill, not the close
         for t, df in data.items():
             try:
                 res = fn(df)
@@ -164,9 +207,12 @@ def run(data: dict[str, pd.DataFrame]) -> dict:
                 print(f"    ! {t}: {e}")
                 continue
             c = df["close"].values
+            hi, lo = df["high"].values, df["low"].values
             sig = res.signals.values
             n = len(df)
             idx = df.index
+            if tp:
+                held_own, taken, fills = own_exit_positions(sig, c, hi, lo, hold, tp)
             for i in np.flatnonzero(sig):
                 side = int(sig[i])
                 # every alert is a trade: in at the alert's close, out on the opposite alert
@@ -174,39 +220,56 @@ def run(data: dict[str, pd.DataFrame]) -> dict:
                 opp = np.flatnonzero(sig[i + 1:] == -side)
                 j = i + 1 + int(opp[0]) if len(opp) else n - 1
                 if sid not in TREND:
-                    j = min(j, i + HOLD_DAYS)
-                closed = j < n - 1 or (sid not in TREND and i + HOLD_DAYS <= n - 1) or len(opp) > 0
+                    j = min(j, i + hold)
+                closed = j < n - 1 or (sid not in TREND and i + hold <= n - 1) or len(opp) > 0
                 j = min(j, n - 1)
-                if j > i:
+                px = c[j]
+                if tp and i in taken:
+                    for q in range(i + 1, j + 1):
+                        f = tp_fill(side, c[i], hi[q], lo[q], tp)
+                        if f is not None:
+                            j, px, closed = q, f, True
+                            break
+                if j > i and not (tp and i not in taken):
                     trades.append({"t": t, "side": side, "in": idx[i], "out": idx[j], "days": j - i,
-                                   "ret": side * (c[j] / c[i] - 1), "closed": bool(closed)})
+                                   "ret": side * (px / c[i] - 1), "closed": bool(closed)})
                 row = {"t": t, "d": df.index[i], "side": int(sig[i])}
                 for h in HORIZONS:
                     row[h] = c[i + h] / c[i] - 1 if i + h < n else np.nan
                 rows.append(row)
             # positions for the equity curve (long-only, bullish alerts)
-            held = np.zeros(n)
-            exit_at = -1
-            for i in range(n):
-                if sig[i] == -1:
-                    exit_at = -1
-                elif sig[i] == 1:
-                    exit_at = n if sid in TREND else i + HOLD_DAYS
-                if i < exit_at:
-                    held[i] = 1  # held at this close -> earns the next day's return
+            if tp:
+                held = held_own
+                for i, f in fills.items():   # a take-profit day earns up to the fill, not the close
+                    if np.isfinite(srets.at[idx[i], t]):
+                        srets.at[idx[i], t] = f / c[i - 1] - 1
+            else:
+                held = np.zeros(n)
+                exit_at = -1
+                for i in range(n):
+                    if sig[i] == -1:
+                        exit_at = -1
+                    elif sig[i] == 1:
+                        exit_at = n if sid in TREND else i + HOLD_DAYS
+                    if i < exit_at:
+                        held[i] = 1  # held at this close -> earns the next day's return
             pos.loc[df.index, t] = held
             # same, but a bearish alert also opens a short (the account view's "long + short")
             held_ls = np.zeros(n)
             side, exit_at = 0, -1
             for i in range(n):
                 if sig[i] != 0:
-                    side, exit_at = int(sig[i]), (n if sid in TREND else i + HOLD_DAYS)
+                    side, exit_at = int(sig[i]), (n if sid in TREND else i + hold)
                 if i < exit_at:
                     held_ls[i] = side
+            if tp:
+                held_ls = held   # strategies with their own exit only buy, so long + short is the long account
             pos_ls.loc[df.index, t] = held_ls
 
         sig_df = pd.DataFrame(rows)
-        result = {"rule": ("Buy on a bullish alert, sell on the next bearish alert"
+        result = {"rule": (f"Buy on an alert, sell at +{tp * 100:.0f}% or after {hold} sessions, whichever comes first"
+                           if tp else
+                           "Buy on a bullish alert, sell on the next bearish alert"
                            if sid in TREND else
                            f"Buy on a bullish alert, sell after {HOLD_DAYS} sessions or on a bearish alert")}
         best, worst = [], []
@@ -236,7 +299,7 @@ def run(data: dict[str, pd.DataFrame]) -> dict:
         held_prev = pos.shift(1).fillna(0)
         held_prev = held_prev.where(rets.notna(), 0)
         k = held_prev.sum(axis=1)
-        strat_daily = ((rets.fillna(0) * held_prev).sum(axis=1) / k.replace(0, np.nan)).fillna(0)
+        strat_daily = ((srets.fillna(0) * held_prev).sum(axis=1) / k.replace(0, np.nan)).fillna(0)
         eq = START_CAPITAL * (1 + strat_daily).cumprod()
         bench = START_CAPITAL * (1 + bench_daily).cumprod()
         wk_eq, wk_b = eq.resample("W-FRI").last().dropna(), bench.resample("W-FRI").last().dropna()
@@ -250,7 +313,7 @@ def run(data: dict[str, pd.DataFrame]) -> dict:
             "invested": pct((k > 0).mean()),
             "avg_positions": round(float(k[k > 0].mean()), 1) if (k > 0).any() else 0,
         }
-        result["account"] = {"all": weekly_account(pos_ls, rets, weeks), "long": weekly_account(pos, rets, weeks)}
+        result["account"] = {"all": weekly_account(pos_ls, srets, weeks), "long": weekly_account(pos, srets, weeks)}
         result["turnover"] = {"all": weekly_turnover(pos_ls, rets, weeks), "long": weekly_turnover(pos, rets, weeks)}
         result["trades"] = trade_summary(trades)
         out[sid] = result

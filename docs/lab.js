@@ -51,6 +51,13 @@ export const INDICATORS = {
     params: [{ k: "n", label: "ATR length", min: 3, max: 50, step: 1, def: 10, unit: "days" },
              { k: "mult", label: "Distance", min: 1, max: 6, step: 0.25, def: 3, unit: "ATRs" }],
   },
+  dip: {
+    name: "Buy the dip", base: "buy_the_dip", exit: "hold", hold: 60, tp: 10, buysOnly: true,
+    about: "Buys when a stock closes a set % below its highest close of the last N days, then sells at the take profit or after the time limit. It never sells on a loss by itself, so with no time limit losing positions are held until they recover.",
+    exitLabels: { opposite: "No time limit", hold: "After a time limit" },
+    params: [{ k: "drop", label: "Buy after a drop of", min: 1, max: 30, step: 0.5, def: 5, unit: "%" },
+             { k: "n", label: "From the highest close of the last", min: 5, max: 120, step: 1, def: 20, unit: "days" }],
+  },
 };
 export const HOLD_DEFAULT = 20;
 // Take profit / stop loss, in % from the entry price. 0 = off (the default, so the app's own
@@ -63,7 +70,7 @@ export const RISK = {
 export function defaults(ind) {
   const I = INDICATORS[ind], p = {};
   I.params.forEach(x => p[x.k] = x.def);
-  return { ind, p, exit: I.exit, hold: HOLD_DEFAULT, tp: 0, sl: 0 };
+  return { ind, p, exit: I.exit, hold: I.hold ?? HOLD_DEFAULT, tp: I.tp ?? 0, sl: 0 };
 }
 // keep a setting set valid (fast < slow, oversold < overbought, numbers in range)
 export function clean(cfg) {
@@ -174,6 +181,14 @@ export function signals(T, cfg) {
       hi[i] = mx; lo[i] = mn;
     }
     for (let i = 1; i < n; i++) put(i, above(c, hi, i), below(c, lo, i));
+  } else if (cfg.ind === "dip") {
+    // same rule as buy_the_dip() in engine/strategies.py: first close at least drop% below the n-day high close
+    const top = new Float64Array(n).fill(NaN), d = p.drop / 100, eps = 1e-12;
+    for (let i = p.n - 1; i < n; i++) { let mx = -Infinity; for (let j = i - p.n + 1; j <= i; j++) if (c[j] > mx) mx = c[j]; top[i] = mx; }
+    for (let i = 0; i < n; i++) {
+      const now = c[i] / top[i] - 1 <= -d + eps, before = i > 0 && c[i - 1] / top[i - 1] - 1 <= -d + eps;
+      if (now && !before) sig[i] = 1;
+    }
   } else if (cfg.ind === "supertrend") {
     // same loop as supertrend() in engine/strategies.py
     const a = 1 / p.n, atr = new Float64Array(n).fill(NaN);
@@ -222,13 +237,16 @@ export function riskHit(side, entry, h, l, cfg) {
 export function run(data, cfg, fromIdx = 0) {
   cfg = clean(cfg);
   const D = data.dates.length, trend = cfg.exit === "opposite", H = cfg.hold, risk = cfg.tp > 0 || cfg.sl > 0;
+  // buy-only strategies (Buy the dip) ignore alerts while a position is open, so the time limit counts
+  // from the buy (own_exit_positions in engine/backtest.py)
+  const once = !!INDICATORS[cfg.ind].buysOnly;
   const sum = { ls: new Float64Array(D), long: new Float64Array(D) }, cnt = { ls: new Int32Array(D), long: new Int32Array(D) };
-  const trades = [];
+  const trades = [], openL = [];
   for (const T of data.tickers) {
-    const sig = signals(T, cfg), n = sig.length, c = T.c, h = T.h, l = T.l, idx = T.idx;
+    const sig = signals(T, cfg), n = sig.length, c = T.c, h = T.h, l = T.l, idx = T.idx, taken = new Uint8Array(n);
     // positions held at each close (earn the next session's return)
     let side = 0, exitLS = -1, exitL = -1;
-    let heldLS = 0, heldL = 0, entLS = 0, entL = 0;   // held at the previous close, and its entry price
+    let heldLS = 0, heldL = 0, entLS = 0, entL = 0, sinceL = 0;   // held at the previous close, and its entry price (and day)
     for (let i = 0; i < n; i++) {
       // 1) the session from the previous close to this one: take profit / stop loss inside the bar
       let pxLS = c[i], pxL = c[i], stoppedLS = false, stoppedL = false;
@@ -244,18 +262,21 @@ export function run(data, cfg, fromIdx = 0) {
         if (heldL) { sum.long[g] += pxL / c[i - 1] - 1; cnt.long[g]++; }
       }
       // 2) this close's alert
-      const s = sig[i];
+      let s = sig[i];
+      if (once && s === 1 && heldL && !stoppedL && i < exitL) s = 0;   // already holding it
+      if (once && s === 1) taken[i] = 1;
       if (s) { side = s; exitLS = trend ? n : i + H; }
       if (s === -1) exitL = -1; else if (s === 1) exitL = trend ? n : i + H;
       const hLS = i < exitLS ? side : 0, hL = i < exitL ? 1 : 0;
       // a new position (or one reopened after a stop) is entered at this close
-      if (hLS && (hLS !== heldLS || stoppedLS)) entLS = c[i];
-      if (hL && (!heldL || stoppedL)) entL = c[i];
+      if (hLS && (hLS !== heldLS || stoppedLS || taken[i])) entLS = c[i];
+      if (hL && (!heldL || stoppedL || taken[i])) { entL = c[i]; sinceL = idx[i]; }
       heldLS = hLS; heldL = hL;
     }
+    if (heldL && n && idx[n - 1] === data.dates.length - 1) openL.push({ t: T.t, since: data.dates[sinceL], ret: (c[n - 1] / entL - 1) * 100 });
     // every alert as a trade, for the win rate (same rule as trade_summary in backtest.py)
     for (let i = 0; i < n; i++) {
-      const s = sig[i]; if (!s || idx[i] < fromIdx) continue;
+      const s = sig[i]; if (!s || idx[i] < fromIdx || (once && !taken[i])) continue;
       let j = n - 1, opp = false;
       for (let q = i + 1; q < n; q++) if (sig[q] === -s) { j = q; opp = true; break; }
       if (!trend) j = Math.min(j, i + H);
@@ -285,6 +306,7 @@ export function run(data, cfg, fromIdx = 0) {
     cfg,
     all: { eq: curve("ls"), inv: invested("ls"), trades: stat(trades) },
     long: { eq: curve("long"), inv: invested("long"), trades: stat(trades.filter(t => t.side > 0)) },
+    open: openL.sort((a, b) => a.ret - b.ret),   // long positions still held on the last day, worst first
   };
 }
 

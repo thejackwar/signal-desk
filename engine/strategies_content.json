@@ -181,6 +181,27 @@
       "settings": "RS line = price ÷ SPY (stocks), ÷ bitcoin (crypto) or ÷ the equal-weight average (commodities); 63-session high or low of the RS line, signal on the daily close."
     },
     {
+      "id": "buy_the_dip",
+      "name": "Buy the Dip",
+      "category": "Mean reversion",
+      "level": "Beginner",
+      "buys_only": true,
+      "tagline": "Buys a big stock after a sharp drop and sells into the bounce.",
+      "how": [
+        "The idea is that large, established companies tend to recover after a sudden drop. The strategy watches each stock's highest close of the last 20 sessions and alerts the first time it closes 5% or more below it.",
+        "It only buys. The trade is closed by a profit target (+10% from the buy price) or a time limit (60 sessions), whichever comes first. While it holds a stock it ignores new dips in that stock, so the time limit always counts from the buy; after selling, the next dip can buy it again. It also needs a close back above the line before it can alert on the same stock again, so one long slide gives one alert, not a new one every day."
+      ],
+      "bullish": "The stock closes 5% or more below its highest close of the last 20 sessions, for the first time in this dip.",
+      "bearish": null,
+      "why": "Short, sharp drops in big companies often come from news that the market overreacts to, and the price partly snaps back. Selling at a fixed profit locks in those bounces, and in a rising market most dips do recover, which is why this rule shows a high share of winning trades.",
+      "watch_out": [
+        "A drop can be the start of a real decline, not a dip. Without the time limit a losing position is kept until it recovers, which can take years or never happen; in the 15-year test some positions sat 50–80% down for years and tied up the money.",
+        "A high win rate hides the size of the losses: many small +10% wins can be wiped out by a few large losers sold at the time limit.",
+        "The test uses today's S&P 100, so companies that fell and left the index are missing. That flatters buying dips more than almost any other rule."
+      ],
+      "settings": "Dip: a close at least 5% below the highest close of the last 20 sessions (today included). Exit: +10% take profit, checked against each day's high, or after 60 sessions. New dips in a stock already held are ignored. Try other values in the Strategy Lab."
+    },
+    {
       "id": "double_top_bottom",
       "name": "Double Top / Bottom",
       "category": "Chart pattern",

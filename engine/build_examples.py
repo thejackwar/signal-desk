@@ -116,7 +116,7 @@ def main():
         s["examples"] = []
         if s.get("kind") == "lines":                     # Top-Down: drawn live on the Trendlines page instead
             continue
-        for side in (1, -1):
+        for side in ((1,) if s.get("buys_only") else (1, -1)):   # buy-only strategies have no bearish example
             df, res, i, start, end, move = find_example(s["id"], side)
             chart = payload(df, res, start, end)
             chart["focus"] = i - start

@@ -341,6 +341,31 @@ def relative_strength(df: pd.DataFrame, n: int = 63) -> StrategyResult:
     return StrategyResult(sig, notes, [], panel, stops=stops)
 
 
+DIP_TP, DIP_HOLD = 0.10, 60   # its exit, used by the backtest and the Lab: +10% or after 60 sessions
+
+
+def buy_the_dip(df: pd.DataFrame, drop: float = 0.05, n: int = 20) -> StrategyResult:
+    """Bullish when the close falls `drop` or more below the highest close of the last n sessions
+    (today included). Alerts on the first close of a dip only: it needs a close above that line
+    before it can alert on the same stock again. Buys only, no bearish alerts; trades are closed
+    by a take profit or a time limit (DIP_TP / DIP_HOLD), not by an opposite alert."""
+    c = df["close"]
+    top = c.rolling(n, min_periods=n).max()
+    line = top * (1 - drop)
+    dd = c / top - 1
+    buy = (dd <= -drop + 1e-12) & ~(dd.shift(1) <= -drop + 1e-12)
+    sig = _signals(df, buy & top.notna(), pd.Series(False, index=df.index))
+    notes = {int(i): f"Closed {abs(dd.iloc[i]) * 100:.1f}% below its {n}-day high ({P(top.iloc[i])})"
+             for i in np.flatnonzero(sig.values)}
+    stops = {int(i): (None, f"no price level: the strategy has no stop loss, it sells at +{DIP_TP * 100:.0f}% "
+                            f"or after {DIP_HOLD} sessions, whichever comes first")
+             for i in np.flatnonzero(sig.values)}
+    return StrategyResult(sig, notes, stops=stops, overlays=[
+        {"name": f"{n}-day high", "values": _vals(top), "style": "muted"},
+        {"name": f"{drop * 100:.0f}% below it", "values": _vals(line), "style": "band"},
+    ])
+
+
 # ----------------------------------------------------------- chart patterns
 
 def pivots(df: pd.DataFrame, k: int = 5):
@@ -506,6 +531,7 @@ REGISTRY = {
     "supertrend": supertrend,
     "volume_breakout": volume_breakout,
     "relative_strength": relative_strength,
+    "buy_the_dip": buy_the_dip,
     "double_top_bottom": double_top_bottom,
     "head_shoulders": head_shoulders,
     "triangle": triangle,
