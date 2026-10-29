@@ -35,9 +35,10 @@
 <meta name="apple-mobile-web-app-title" content="IC Signals">
 <meta name="theme-color" content="#f5f5f7" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
-<link rel="manifest" href="manifest.json">
-<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
-<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="manifest" href="manifest.json?v=2">
+<link rel="icon" href="favicon.ico?v=2" sizes="any">
+<link rel="icon" type="image/svg+xml" href="logo.svg?v=2">
+<link rel="apple-touch-icon" href="icon-180.png?v=2">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
 <style>
@@ -804,7 +805,7 @@ html.sheet-open { overflow: hidden; }
   .tabs { display: none; }
   .side { display: flex; flex-direction: column; position: fixed; inset: 0 auto 0 0; width: var(--side); border-right: 1px solid var(--line); padding: 20px 12px 16px; background: var(--bg); z-index: 25; }
   .brand { display: flex; align-items: center; gap: 10px; padding: 0 8px 24px; font: 700 19px var(--font-display); }
-  .brand img { width: 28px; height: 28px; border-radius: 7px; }
+  .brand img { width: 30px; height: 30px; border-radius: 7px; box-shadow: 0 0 0 1px rgba(255,255,255,.08); }
   .brand span { line-height: 1.1; font-size: 16.5px; }
   .brand em { font-style: normal; color: var(--amber); }
   .side a.nav { display: flex; align-items: center; gap: 12px; padding: 10px 10px; border-radius: 10px; color: var(--muted); text-decoration: none; font-weight: 500; position: relative; }
@@ -1137,7 +1138,7 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
 </head>
 <body>
 <aside class="side" aria-label="Sections">
-  <div class="brand"><img src="icon-192.png" alt=""><span>Investment Center<br><em>Signals</em></span></div>
+  <div class="brand"><img src="logo.svg?v=2" alt=""><span>Investment Center<br><em>Signals</em></span></div>
   <div class="mswitch side-sw" role="group" aria-label="Market"></div>
   <a class="nav" href="#alerts" data-tab="alerts"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9a6 6 0 1 1 12 0c0 6 2.5 7.5 2.5 7.5h-17S6 15 6 9Z"/><path d="M10 20a2 2 0 0 0 4 0"/></svg>Alerts<span class="count" hidden></span></a>
   <a class="nav" href="#stocks" data-tab="stocks"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="m7 15 4-4 3 3 6-7"/></svg><span data-l="tab">Stocks</span></a>
