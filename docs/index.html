@@ -398,6 +398,16 @@ table.trades td:last-child { font: 600 13.5px var(--font-mono); white-space: now
 .side .disc { margin-top: 8px; padding: 0 8px; font: 500 11px/1.5 var(--font-mono); }
 .side .disc a { color: var(--faint); }
 .side .disc a:hover { color: var(--muted); }
+.side .new { margin-left: auto; font: 600 9.5px/1 var(--font-mono); text-transform: uppercase; letter-spacing: .06em; padding: 3px 6px; border-radius: 6px; background: var(--amber); color: #fff; }
+.labhero { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 14px; margin: 6px 0 16px; padding: 16px 18px; border-radius: 20px; text-decoration: none; color: inherit;
+  background: linear-gradient(135deg, color-mix(in srgb, var(--amber) 16%, var(--surface)), var(--surface)); border: 1px solid color-mix(in srgb, var(--amber) 30%, var(--line)); }
+.labhero .ico { width: 44px; height: 44px; border-radius: 13px; display: grid; place-items: center; background: var(--amber); color: #fff; }
+.labhero .ico svg { width: 24px; height: 24px; }
+.labhero b { display: block; font: 700 17px/1.2 var(--font-display); letter-spacing: -.015em; }
+.labhero small { display: block; color: var(--muted); font-size: 13px; line-height: 1.4; margin-top: 3px; }
+.labhero .go { font: 600 13px var(--font-body); color: var(--amber); white-space: nowrap; }
+@media (hover: hover) { .labhero:hover { border-color: var(--amber); } }
+@media (max-width: 420px) { .labhero { grid-template-columns: auto 1fr; } .labhero .go { grid-column: 1 / -1; } }
 .labinds { display: flex; flex-wrap: wrap; gap: 6px; }
 .labinds button { padding: 7px 11px; border-radius: 999px; font-size: 13px; color: var(--muted); background: var(--surface); border: 1px solid var(--line); }
 .labinds button:hover { color: var(--fg); }
@@ -421,6 +431,59 @@ table.labyears td small { display: inline; color: var(--faint); margin-left: 6px
 .yrpick select { appearance: none; -webkit-appearance: none; font: inherit; color: var(--fg); background: var(--surface-2); border: 1px solid var(--line); border-radius: 8px; padding: 1px 22px 1px 7px; margin-left: 2px; cursor: pointer; }
 .yrpick select:focus-visible { outline: 2px solid var(--bull); outline-offset: 1px; }
 .yrpick::after { content: ""; position: absolute; right: 8px; top: 50%; width: 5px; height: 5px; border: solid var(--muted); border-width: 0 1.5px 1.5px 0; transform: translateY(-70%) rotate(45deg); pointer-events: none; }
+/* Strategy Lab: settings in folding sections, results in tabs; two columns on wide screens */
+#app.single:has(#lab) { max-width: 1240px; }
+.labgrid { display: grid; gap: 18px; }
+@media (min-width: 1000px) {
+  .labgrid { grid-template-columns: minmax(320px, 390px) minmax(0, 1fr); gap: 28px; align-items: start; }
+  .labset { position: sticky; top: 12px; max-height: calc(100vh - 24px); overflow-y: auto; padding-right: 4px; scrollbar-width: thin; }
+}
+.lsecs { display: grid; gap: 8px; }
+.lsec { background: var(--surface); border-radius: 16px; }
+.lsec > summary { list-style: none; cursor: pointer; display: flex; align-items: baseline; justify-content: space-between; gap: 10px; padding: 13px 16px; font: 600 14.5px var(--font-display); }
+.lsec > summary::-webkit-details-marker { display: none; }
+.lsec > summary::after { content: ""; flex: none; width: 6px; height: 6px; border: solid var(--muted); border-width: 0 1.6px 1.6px 0; transform: translateY(-2px) rotate(45deg); transition: transform .15s; }
+.lsec[open] > summary::after { transform: translateY(1px) rotate(-135deg); }
+.lsec > summary em { font: 500 12px var(--font-body); font-style: normal; color: var(--muted); margin-left: auto; text-align: right; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 62%; }
+.lsbody { display: grid; gap: 14px; padding: 2px 16px 16px; }
+.lsbody .seg.sm { background: var(--bg); margin: 0; flex-wrap: wrap; }
+.lsbody .seg.sm button { padding: 5px 10px; font-size: 12.5px; }
+.lfoot { display: flex; gap: 8px; flex-wrap: wrap; margin: 12px 2px 0; }
+.ltabs { display: flex; width: 100%; overflow-x: auto; scrollbar-width: none; margin-bottom: 14px; }
+.ltabs::-webkit-scrollbar { display: none; }
+.ltabs button { flex: 1 0 auto; white-space: nowrap; }
+.lpicks { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.lpick { display: inline-flex; align-items: center; gap: 6px; padding: 5px 8px 5px 11px; border-radius: 999px; background: var(--surface-2); font: 600 12.5px var(--font-mono); color: var(--fg); }
+.lpick span { color: var(--faint); font-size: 15px; line-height: 1; }
+.lpick:hover span { color: var(--bear); }
+.lpadd { margin: 4px 0 0; padding-left: 12px !important; background-image: none !important; flex: 1 1 100%; }
+.labres .tiles.four { grid-template-columns: repeat(2, 1fr); }
+@media (min-width: 560px) { .labres .tiles.four { grid-template-columns: repeat(4, 1fr); } }
+.lkv { grid-template-columns: repeat(3, 1fr); margin-top: 0; }
+.lkv > div { background: var(--surface); border-radius: 14px; padding: 11px 12px; }
+.lkv b { display: block; margin-top: 6px; font: 600 16px var(--font-mono); font-variant-numeric: tabular-nums; }
+@media (max-width: 420px) { .lkv { grid-template-columns: repeat(2, 1fr); } }
+table.ltrades td small, table.lstocks td small { display: block; color: var(--faint); font-size: 11px; margin-top: 2px; }
+table.lstocks td small { max-width: 160px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.lopt { margin-bottom: 12px; }
+.lopt .lrow > span:first-child { min-width: 70px; color: var(--muted); }
+.lpickcard p { font-size: 14.5px; line-height: 1.5; }
+table.lheat th, table.lheat td { text-align: center; padding: 4px 3px; white-space: nowrap; }
+table.lheat thead th { font: 500 11px var(--font-mono); color: var(--faint); }
+table.lheat tbody th { font: 600 12px var(--font-mono); color: var(--muted); text-align: left; padding-left: 10px; }
+.lcell { width: 100%; min-width: 58px; padding: 8px 4px; border-radius: 8px; font: 600 12.5px var(--font-mono); font-variant-numeric: tabular-nums; color: var(--fg); border: 2px solid transparent; }
+.lcell small { display: block; font: 500 9.5px var(--font-body); color: var(--faint); }
+.lcell.best { border-color: var(--amber); }
+.lcell:hover { border-color: var(--muted); }
+.lsave { display: flex; gap: 8px; align-items: center; margin-bottom: 12px; }
+.lsave .search { margin: 0; padding-left: 12px; background-image: none; }
+.lsaved { display: grid; gap: 6px; }
+.lsrow { display: flex; align-items: center; gap: 12px; background: var(--surface); border-radius: 14px; padding: 10px 12px; }
+.lsrow > span { flex: 1; min-width: 0; }
+.lsrow b { display: block; font-size: 14px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.lsrow small { color: var(--faint); font-size: 12px; }
+.ldot { display: inline-block; width: 9px; height: 9px; border-radius: 50%; margin-right: 7px; vertical-align: 0; }
+@media (max-width: 520px) { table.lcmp th:nth-child(5), table.lcmp td:nth-child(5) { display: none; } }
 
 @media (max-width: 520px) { table.trades th:nth-child(3), table.trades td:nth-child(3) { display: none; } }
 
@@ -769,7 +832,7 @@ a.chip { text-decoration: none; color: var(--fg); }
 /* bottom tabs (phone) */
 .tabs { position: fixed; left: 0; right: 0; bottom: 0; z-index: 25; background: var(--bar); backdrop-filter: saturate(180%) blur(20px); -webkit-backdrop-filter: saturate(180%) blur(20px); border-top: 1px solid var(--bar-line);
   padding-bottom: env(safe-area-inset-bottom, 0px); padding-left: max(8px, env(safe-area-inset-left, 0px)); padding-right: max(8px, env(safe-area-inset-right, 0px)); }
-.tabs nav { max-width: 560px; margin: 0 auto; display: grid; grid-template-columns: repeat(5, 1fr); height: var(--tabbar); }
+.tabs nav { max-width: 560px; margin: 0 auto; display: grid; grid-template-columns: repeat(6, 1fr); height: var(--tabbar); }
 .tabs .menubtn { background: none; border: 0; font: inherit; cursor: pointer; padding: 0; }
 .tabs a, .tabs .menubtn { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; color: var(--faint); text-decoration: none; font-size: 11px; font-weight: 500; position: relative; }
 .tabs a[aria-current="page"], .tabs .menubtn[aria-current="page"], .tabs .menubtn[aria-expanded="true"] { color: var(--amber); }
@@ -1146,6 +1209,7 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
   <a class="nav" href="#news" data-tab="news"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h13a1 1 0 0 1 1 1v12a2 2 0 0 0 2 2H6a2 2 0 0 1-2-2Z"/><path d="M18 9h2a1 1 0 0 1 1 1v8a2 2 0 0 1-2 2"/><path d="M8 9h6"/><path d="M8 13h6"/><path d="M8 17h4"/></svg>News</a>
   <a class="nav" href="#calendar" data-tab="calendar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5" width="17" height="15.5" rx="2"/><path d="M3.5 10h17"/><path d="M8 3v4"/><path d="M16 3v4"/><path d="M7.5 14h2"/><path d="M11 14h2"/><path d="M14.5 14h2"/><path d="M7.5 17h2"/></svg>Calendar</a>
   <a class="nav" href="#strategies" data-tab="strategies"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 20h18"/><path d="M6 16V9"/><path d="M4.5 9h3"/><path d="M12 16V5"/><path d="M10.5 5h3"/><path d="M18 16v-5"/><path d="M16.5 11h3"/></svg>Strategies</a>
+  <a class="nav" href="#strategylab" data-tab="lab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3h6"/><path d="M10 3v6.2L4.6 18.8A1.6 1.6 0 0 0 6 21h12a1.6 1.6 0 0 0 1.4-2.2L14 9.2V3"/><path d="M7.2 15h9.6"/></svg>Strategy Lab<span class="new">New</span></a>
   <a class="nav" href="#winners" data-tab="winners"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 4h8v5a4 4 0 0 1-8 0Z"/><path d="M8 6H5a3 3 0 0 0 3 4"/><path d="M16 6h3a3 3 0 0 1-3 4"/><path d="M12 13v4"/><path d="M8.5 20.5h7"/><path d="M10 17h4"/></svg>Best trades</a>
   <a class="nav" href="#record" data-tab="record"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3.5" width="16" height="17" rx="2"/><path d="m8 9 1.5 1.5L12 8"/><path d="M14 9.5h3"/><path d="m8 15 1.5 1.5L12 14"/><path d="M14 15.5h3"/></svg>Track record</a>
   <a class="nav" href="#practice" data-tab="practice"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6.5" width="18" height="13" rx="2"/><path d="M8.5 6.5V5a1.5 1.5 0 0 1 1.5-1.5h4A1.5 1.5 0 0 1 15.5 5v1.5"/><path d="M3 12h18"/><path d="M11 12v2h2v-2"/></svg>Practice</a>
@@ -1165,6 +1229,7 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
     <a href="#stocks" data-tab="stocks"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="m7 15 4-4 3 3 6-7"/></svg><span data-l="tab">Stocks</span></a>
     <a href="#news" data-tab="news"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h13a1 1 0 0 1 1 1v12a2 2 0 0 0 2 2H6a2 2 0 0 1-2-2Z"/><path d="M18 9h2a1 1 0 0 1 1 1v8a2 2 0 0 1-2 2"/><path d="M8 9h6"/><path d="M8 13h6"/><path d="M8 17h4"/></svg>News</a>
     <a href="#strategies" data-tab="strategies"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 20h18"/><path d="M6 16V9"/><path d="M4.5 9h3"/><path d="M12 16V5"/><path d="M10.5 5h3"/><path d="M18 16v-5"/><path d="M16.5 11h3"/></svg>Strategies</a>
+    <a href="#strategylab" data-tab="lab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3h6"/><path d="M10 3v6.2L4.6 18.8A1.6 1.6 0 0 0 6 21h12a1.6 1.6 0 0 0 1.4-2.2L14 9.2V3"/><path d="M7.2 15h9.6"/></svg>Lab</a>
     <button type="button" class="menubtn" data-tab="menu" aria-haspopup="dialog" aria-expanded="false" aria-controls="menusheet"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16"/><path d="M4 12h16"/><path d="M4 17h16"/></svg>Menu</button>
   </nav>
 </div>
@@ -1183,6 +1248,7 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
       <a href="#news" data-tab="news"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h13a1 1 0 0 1 1 1v12a2 2 0 0 0 2 2H6a2 2 0 0 1-2-2Z"/><path d="M18 9h2a1 1 0 0 1 1 1v8a2 2 0 0 1-2 2"/><path d="M8 9h6"/><path d="M8 13h6"/><path d="M8 17h4"/></svg><span>News</span></a>
       <a href="#calendar" data-tab="calendar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5" width="17" height="15.5" rx="2"/><path d="M3.5 10h17"/><path d="M8 3v4"/><path d="M16 3v4"/><path d="M7.5 14h2"/><path d="M11 14h2"/><path d="M14.5 14h2"/><path d="M7.5 17h2"/></svg><span>Calendar</span></a>
       <a href="#strategies" data-tab="strategies"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 20h18"/><path d="M6 16V9"/><path d="M4.5 9h3"/><path d="M12 16V5"/><path d="M10.5 5h3"/><path d="M18 16v-5"/><path d="M16.5 11h3"/></svg><span>Strategies</span></a>
+      <a href="#strategylab" data-tab="lab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3h6"/><path d="M10 3v6.2L4.6 18.8A1.6 1.6 0 0 0 6 21h12a1.6 1.6 0 0 0 1.4-2.2L14 9.2V3"/><path d="M7.2 15h9.6"/></svg><span>Strategy Lab</span></a>
       <a href="#learn" data-tab="learn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 6.5C10 5 7 4.5 3.5 5v13.5c3.5-.5 6.5 0 8.5 1.5 2-1.5 5-2 8.5-1.5V5C17 4.5 14 5 12 6.5Z"/><path d="M12 6.5V20"/></svg><span>Learn</span></a>
       <a href="#notify" data-tab="notify"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="2.5" width="12" height="19" rx="2.5"/><path d="M11 18.5h2"/></svg><span>Phone alerts</span></a>
       <a href="#brokers" data-tab="brokers"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9.5 12 4l9 5.5"/><path d="M4.5 10v8"/><path d="M9.5 10v8"/><path d="M14.5 10v8"/><path d="M19.5 10v8"/><path d="M3 20.5h18"/></svg><span>Brokers</span></a>
@@ -1729,7 +1795,7 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
     }
     h += newsFor(a.ticker, 3);
     if (s) h += `<div class="card"><h3>What this means</h3><p>${esc(a.side === "bullish" ? s.bullish : s.bearish)}</p>
-      <p>${esc(s.watch_out[0])}</p><div style="display:flex;gap:8px;flex-wrap:wrap"><a class="btn ghost" href="#strategy-${slug(s.id)}">How ${esc(s.name)} works</a>${stock ? `<a class="btn ghost" href="#stock-${esc(a.ticker)}">${esc(disp(a.ticker))} ${L().one} page</a>` : ""}</div></div>`;
+      <p>${esc(s.watch_out[0])}</p><div style="display:flex;gap:8px;flex-wrap:wrap"><a class="btn ghost" href="#strategy-${slug(s.id)}">How ${esc(s.name)} works</a>${LAB_IND[s.id] ? `<a class="btn ghost" href="#strategylab-${LAB_IND[s.id]}">Backtest it in the Lab</a>` : ""}${stock ? `<a class="btn ghost" href="#stock-${esc(a.ticker)}">${esc(disp(a.ticker))} ${L().one} page</a>` : ""}</div></div>`;
     h += `<p class="fine">For information only. An alert describes what the chart did; it is not a recommendation to buy or sell.</p>`;
     return { html: h, after: async () => {
       const box = document.getElementById("achart");
@@ -1894,7 +1960,7 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
     h += `<div class="card rating" id="rating"><div class="hd"><h3>Technical rating</h3></div><p class="loading" style="padding:18px 0">Reading the indicators…</p></div>`;
     if (isComm() && r.drivers) h += `<div class="card drivers"><h3>What moves the price</h3><p>${esc(r.drivers)}.</p><p class="hint" style="margin:0">Prices follow the nearest contract, so the chart can jump a little when it rolls to the next month.</p></div>`;
     if (isComm()) h += etcCard(t);
-    if (!isComm()) h += `<p class="btnrow" style="margin:4px 0 18px"><a class="btn ghost" href="trendlines.html#${encodeURIComponent(t)}">Trendlines on 7 timeframes ›</a>${S.market === "stocks" ? `<a class="btn ghost" href="#earnings-${encodeURIComponent(t)}">How it moves after earnings ›</a>` : ""}</p>`;
+    h += `<p class="btnrow" style="margin:4px 0 18px"><a class="btn ghost" href="#strategylab?s=${encodeURIComponent(t)}">Backtest a strategy on ${esc(disp(t))} ›</a>${isComm() ? "" : `<a class="btn ghost" href="trendlines.html#${encodeURIComponent(t)}">Trendlines on 7 timeframes ›</a>`}${S.market === "stocks" ? `<a class="btn ghost" href="#earnings-${encodeURIComponent(t)}">How it moves after earnings ›</a>` : ""}</p>`;
     h += nextEarningsCard(t) + moodCard(t) + mentionsCard(t) + newsFor(t);
     h += `<h2>Recent alerts on ${esc(disp(t))}</h2>`;
     if (!alerts.length) h += `<p class="tag" style="font-size:14px">No strategy has fired on ${esc(disp(t))} in the last few weeks.</p>`;
@@ -1928,9 +1994,8 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
     const cats = [...new Set(list.map(s => s.category))];
     const counts = {}; (S.feed?.alerts || []).forEach(a => counts[a.strategy] = (counts[a.strategy] || 0) + 1);
     S.firstSel = "strategy-" + slug(S.strategies[0].id);
-    h += marketFitCard() + compareCard();
+    h += labHero() + marketFitCard() + compareCard();
     h += `<a class="labcta" href="#learn"><span><b>Learn</b><small>How every strategy works, plus the basics: charts, risk and backtests</small></span><span aria-hidden="true">›</span></a>`;
-    h += `<a class="labcta" href="#strategylab"><span><b>Strategy Lab</b><small>Change the settings of an indicator and test it over 15 years</small></span><span aria-hidden="true">›</span></a>`;
     for (const c of cats) {
       h += `<div class="cat">${esc(c)}</div>`;
       for (const s of list.filter(s => s.category === c)) {
@@ -2047,7 +2112,7 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
         <div><span>Worst drop</span><b class="${e.maxdd >= e.bench_maxdd ? "up" : "down"}">${sgn(e.maxdd)}</b><small>Buy &amp; hold ${sgn(e.bench_maxdd)}</small></div>
         <div><span>Time invested</span><b>${pc(e.invested)}</b><small>avg ${e.avg_positions} stocks held</small></div>
       </div>`;
-    const labInd = { ma200: "ma", golden_cross: "cross", bollinger: "bollinger", rsi: "rsi", macd: "macd", donchian: "donchian", supertrend: "supertrend", buy_the_dip: "dip" }[id];
+    const labInd = LAB_IND[id];
     if (labInd) h += `<p style="margin:12px 0 4px"><a class="btn ghost" href="#strategylab-${labInd}">Try other settings in the Strategy Lab ›</a></p>`;
     const lst = (arr, title) => arr.length ? `<div class="bw"><h3 class="h3">${title}</h3>${arr.map(x =>
       `<div class="bwrow"><span class="tk" style="font-size:14px">${esc(disp(x.ticker))}</span><span class="pill ${x.side}" style="margin:0">${x.side}</span><span class="d">${esc(fmtDate(x.date, { day: "numeric", month: "short", year: "numeric" }))}</span><span class="${(x.side === "bullish") === (x.ret >= 0) ? "up" : "down"}">${sgn(x.ret)}</span></div>`).join("")}</div>` : "";
@@ -2432,127 +2497,482 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
   });
 
   // ------------------------------------------------------- strategy lab
-  // Rerun an indicator strategy with your own settings, in the browser (docs/lab.js),
-  // as a EUR 100,000 account on the whole list, against the same money in SPY.
-  const LAB = { mod: null, data: {}, busy: null, timer: 0 };
+  // Build and backtest an indicator strategy your way, in the browser (docs/lab.js): settings, exits
+  // and stops, filters, which stocks, the account, costs, taxes and the period. Results, every trade,
+  // a per-stock view, an optimizer with an out-of-sample check, and saved setups to compare.
+  const LAB = { mod: null, data: {}, sub: {}, timer: 0, opt: null, optRun: 0 };
+  const LAB_IND = { ma200: "ma", golden_cross: "cross", bollinger: "bollinger", rsi: "rsi", macd: "macd", donchian: "donchian", supertrend: "supertrend", buy_the_dip: "dip" };
+  const LAB_FLASK = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3h6"/><path d="M10 3v6.2L4.6 18.8A1.6 1.6 0 0 0 6 21h12a1.6 1.6 0 0 0 1.4-2.2L14 9.2V3"/><path d="M7.2 15h9.6"/></svg>`;
+  const LAB_CAPS = [1000, 5000, 10000, 25000, 50000, 100000, 250000, 1000000];
+  const LAB_TABS = [["overview", "Results"], ["trades", "Trades"], ["stocks", "By " + "stock"], ["optimize", "Optimize"], ["compare", "Compare"]];
+  const labMk = () => S.market || "stocks";
   function labState() {
     const st = pref("lab", null) || {};
     // Long only is the default. Saved as "trades" (older versions saved "side", which defaulted to long + short).
-    return { cfg: st.cfg || { ind: "ma" }, side: st.trades === "all" ? "all" : "long", from: st.from || null };
+    return {
+      cfg: st.cfg || { ind: "ma" }, side: st.trades === "all" ? "all" : "long", from: st.from || null, to: st.to || null,
+      uni: st.uni?.[labMk()] || { mode: "all" }, cap: LAB_CAPS.includes(st.cap) ? st.cap : 100000, tax: !!st.tax,
+      tab: LAB_TABS.some(t => t[0] === st.tab) ? st.tab : "overview", open: Array.isArray(st.open) ? st.open : ["signal"],
+      opt: st.opt || {}, _uni: st.uni || {},
+    };
   }
-  const saveLab = ({ side, ...st }) => setPref("lab", { ...st, trades: side });
+  const saveLab = st => { const { side, uni, _uni, ...rest } = st; setPref("lab", { ...rest, trades: side, uni: { ..._uni, [labMk()]: uni } }); };
+  const labSaved = () => (pref("labSaved", []) || []).filter(x => x.mk === labMk());
   async function labEnsure() {
     LAB.mod = LAB.mod || await import("./lab.js");
-    const mk = S.market || "stocks";
+    const mk = labMk();
     if (!LAB.data[mk]) {
       const raw = await fetch(`${L().base}lab.json`, { cache: "no-cache" }).then(r => { if (!r.ok) throw new Error(r.status); return r.json(); });
       LAB.data[mk] = LAB.mod.decode(raw);
     }
     return LAB.data[mk];
   }
-  function viewLab(preset) {
-    if (preset) {
+  function labHero() {
+    return `<a class="labhero" href="#strategylab"><span class="ico">${LAB_FLASK}</span><span><b>Strategy Lab</b><small>Backtest any strategy your way: your own settings, stops, filters, ${L().noun}, account, costs and years.</small></span><span class="go">Open the Lab ›</span></a>`;
+  }
+  // share links carry the settings: #strategylab?c=<base64url of JSON>
+  const labPack = st => btoa(unescape(encodeURIComponent(JSON.stringify({ m: labMk(), cfg: LAB.mod ? LAB.mod.clean(st.cfg) : st.cfg, side: st.side, from: st.from, to: st.to, uni: st.uni, cap: st.cap, tax: st.tax }))))
+    .replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+  const labUnpack = s => JSON.parse(decodeURIComponent(escape(atob(s.replace(/-/g, "+").replace(/_/g, "/")))));
+
+  function viewLab(arg = "") {
+    arg = arg.replace(/^[-?]/, "");
+    if (arg) {
       const st = labState();
-      if (st.cfg.ind !== preset) { st.cfg = { ind: preset }; saveLab(st); }
+      if (Object.values(LAB_IND).includes(arg)) { if (st.cfg.ind !== arg) st.cfg = { ind: arg }; st.tab = "overview"; }
+      else {
+        const q = new URLSearchParams(arg);
+        if (q.get("s")) { st.uni = { mode: "pick", picks: [q.get("s").toUpperCase()] }; st.tab = "overview"; st.open = [...new Set([...st.open, "uni"])]; }
+        if (q.get("c")) try {
+          const o = labUnpack(q.get("c"));
+          if (o.m && o.m !== labMk() && ["stocks", "crypto", "commodities"].includes(o.m)) {   // switch market first, then come back here
+            switchMarket(o.m);
+            return { html: header("Strategy Lab") + `<p class="loading">Loading…</p>` };
+          }
+          Object.assign(st, { cfg: o.cfg || st.cfg, side: o.side === "all" ? "all" : "long", from: o.from || null, to: o.to || null, uni: o.uni || { mode: "all" }, cap: LAB_CAPS.includes(o.cap) ? o.cap : 100000, tax: !!o.tax, tab: "overview" });
+        } catch { /* a broken link just opens the Lab */ }
+      }
+      saveLab(st);
+      history.replaceState(null, "", "#strategylab");
     }
-    let h = header("", "#strategies");
-    h += `<h1 style="font:700 30px/1.1 var(--font-display);margin:4px 0 6px">Strategy Lab</h1>`;
-    h += `<p class="tag">Change an indicator's settings and see how ${eurS(100000)} following it would have done on all ${S.bt?.tickers || ""} ${L().noun}, against just holding ${benchOf().name}.</p>`;
+    let h = header("Strategy Lab");
+    h += `<p class="tag" style="margin-top:2px;font-size:14.5px">Build a strategy your way and test it on up to 15 years of daily prices: pick an indicator and its settings, your exits and stops, filters, the ${L().noun} to trade, the account, costs and years. It all runs on your device.</p>`;
     h += `<div id="lab"><p class="loading">Loading 15 years of prices…</p></div>`;
     return { html: h, after: async () => {
       try { await labEnsure(); renderLab(); }
-      catch { const b = document.getElementById("lab"); if (b) b.innerHTML = `<div class="card"><p style="margin:0">The price history for the lab isn't available yet. It's created by the weekly backtest; try again after it runs.</p></div>`; }
+      catch (err) { console.error(err); const b = document.getElementById("lab"); if (b) b.innerHTML = `<div class="card"><p style="margin:0">The price history for the lab isn't available yet. It's created by the weekly backtest; try again after it runs.</p></div>`; }
     } };
   }
-  function renderLab() {
-    const box = document.getElementById("lab"), M = LAB.mod, data = LAB.data[S.market || "stocks"];
-    if (!box || !M || !data) return;
-    const st = labState(), cfg = M.clean(st.cfg), I = M.INDICATORS[cfg.ind];
-    const first = +data.dates[0].slice(0, 4), last = +data.dates[data.dates.length - 1].slice(0, 4);
-    const from = Math.min(last, Math.max(first, st.from || first));
-    const num = (x, v) => (x.step < 1 ? v.toFixed(2).replace(/0$/, "") : v) + (x.unit ? " " + x.unit : "");
+
+  // the chosen stocks (a Set) or null for all of them
+  function labTickers(uni, data) {
+    if (uni.mode === "sector" && uni.sector) {
+      const s = new Set(data.tickers.filter(T => S.stockBy[T.t]?.sector === uni.sector).map(T => T.t));
+      return s.size ? s : null;
+    }
+    if (uni.mode === "pick" && uni.picks?.length) {
+      const have = new Set(data.tickers.map(T => T.t)), s = new Set(uni.picks.filter(t => have.has(t)));
+      return s.size ? s : null;
+    }
+    return null;
+  }
+  // the market's data, cut to the chosen stocks and last year (cached)
+  function labData(st) {
+    const M = LAB.mod, data = LAB.data[labMk()], D = data.dates, last = +D[D.length - 1].slice(0, 4);
+    const to = st.to && st.to < last ? st.to : null, set = labTickers(st.uni, data);
+    if (!set && !to) return data;
+    const key = labMk() + "|" + (to || "") + "|" + (set ? [...set].sort().join(",") : "*");
+    if (!LAB.sub[key]) {
+      let ti = D.length - 1; if (to) while (ti > 0 && +D[ti].slice(0, 4) > to) ti--;
+      LAB.sub[key] = M.subset(data, { tickers: set, to: to ? ti : null });
+    }
+    return LAB.sub[key];
+  }
+  const labYears = () => { const D = LAB.data[labMk()].dates; return [+D[0].slice(0, 4), +D[D.length - 1].slice(0, 4)]; };
+  const labFi = (D, from) => { const fy = Math.max(+D[0].slice(0, 4), from || 0); const i = D.findIndex(d => +d.slice(0, 4) >= fy); return i < 0 ? 0 : i; };
+  const labTaxRate = () => S.market === "crypto" ? 0.33 : 0.26;
+  // buy & hold after Italian tax: stamp duty every year, 26% of the gain when it sells at the end
+  function labHoldTax(eq, fi) {
+    const out = new Float64Array(eq.length).fill(NaN); let v = eq[fi]; out[fi] = v;
+    for (let g = fi + 1; g < eq.length; g++) { v *= eq[g] / eq[g - 1]; v -= v * 0.002 / 252; out[g] = v; }
+    out[eq.length - 1] = v - Math.max(0, v - eq[fi]) * labTaxRate();
+    return out;
+  }
+  // one run with these settings, in the account's size, before or after tax
+  function labCompute(st, opts = {}) {
+    const M = LAB.mod, data = labData(st), D = data.dates, cfg = M.clean(st.cfg), fi = labFi(D, st.from);
+    const f = st.cap / M.ACCOUNT, view = eq => (st.tax ? M.afterTax(eq, D, fi, labTaxRate()).eq : eq).map(v => v * f);
+    const R = M.run(data, cfg, fi), side = M.INDICATORS[cfg.ind].buysOnly ? "long" : st.side, mine = R[side];
+    const out = { data, D, fi, cfg, R, side, mine, eq: view(mine.eq) };
+    if (opts.full) {
+      const spy = M.spyCurve(data, fi);
+      out.spyEq = spy ? (st.tax ? labHoldTax(spy, fi) : spy).map(v => v * f) : null;
+      const def = M.defaults(cfg.ind);
+      out.isDef = M.sameCfg(cfg, def);
+      out.baseEq = out.isDef ? out.eq : view(M.run(data, def, fi)[side].eq);
+    }
+    return out;
+  }
+
+  // ------------------------------------------------------------ settings
+  const labNum = (x, v) => (x.step < 1 ? (+v).toFixed(2).replace(/\.?0+$/, "") : v) + (x.unit ? " " + x.unit : "");
+  const labRiskTxt = v => v > 0 ? (+v).toFixed(1).replace(/\.0$/, "") + "%" : "Off";
+  const labVal = (cfg, k) => k.startsWith("p.") ? cfg.p[k.slice(2)] : cfg[k];
+  function labTxt(cfg, k) {
+    const M = LAB.mod, I = M.INDICATORS[cfg.ind], v = labVal(cfg, k);
+    if (k.startsWith("p.")) return labNum(I.params.find(x => x.k === k.slice(2)), v);
+    if (k === "hold") return v + " days";
+    if (k === "tp" || k === "sl" || k === "trail") return labRiskTxt(v);
+    if (k === "fMa") return v ? v + "-day" : "Off";
+    if (k === "maxPos") return v ? v + " at once" : "No limit";
+    if (k === "cost") return v ? v.toFixed(2).replace(/0$/, "") + "%" : "None";
+    return String(v);
+  }
+  const labSlider = (cfg, k, label, small, min, max, step) =>
+    `<label class="lp"><span>${label}${small ? ` <small>${small}</small>` : ""}</span><b data-lpv="${k}">${labTxt(cfg, k)}</b>
+      <input type="range" data-lab="${k}" min="${min}" max="${max}" step="${step}" value="${labVal(cfg, k)}" aria-label="${label.replace(/<[^>]+>/g, "")}"></label>`;
+  const labSeg = (attr, cur, opts, label) => `<div class="seg sm" role="group" aria-label="${label}">${opts.map(([v, t]) => `<button data-${attr}="${v}" aria-pressed="${String(v) === String(cur)}">${t}</button>`).join("")}</div>`;
+  function labUniTxt(st, data) {
+    const set = labTickers(st.uni, data);
+    if (!set) return `All ${data.tickers.length} ${L().noun}`;
+    if (st.uni.mode === "sector") return `${esc(st.uni.sector)} (${set.size})`;
+    const l = [...set].map(disp); return esc(l.length > 3 ? l.slice(0, 3).join(", ") + ` +${l.length - 3}` : l.join(", "));
+  }
+  function labSettings(st, cfg, data) {
+    const M = LAB.mod, I = M.INDICATORS[cfg.ind], [first, last] = labYears();
+    const sec = (id, title, sum, body) => `<details class="lsec" data-labsec="${id}"${st.open.includes(id) ? " open" : ""}><summary><span>${title}</span><em>${sum}</em></summary><div class="lsbody">${body}</div></details>`;
+    const R = M.RISK;
+    // 1) the signal
     let h = `<div class="labinds" role="group" aria-label="Indicator">${Object.entries(M.INDICATORS).map(([k, v]) =>
       `<button data-labind="${k}" aria-pressed="${k === cfg.ind}">${esc(v.name)}</button>`).join("")}</div>
-      <p class="hint" style="margin:8px 2px 14px">${esc(I.about)}</p>
-      <div class="labbox">
-        ${I.params.map(x => `<label class="lp"><span>${esc(x.label)}</span><b id="lpv-${x.k}">${num(x, cfg.p[x.k])}</b>
-          <input type="range" data-labp="${x.k}" min="${x.min}" max="${x.max}" step="${x.step}" value="${cfg.p[x.k]}"></label>`).join("")}
-        <div class="lrow"><span>Close a trade</span><div class="seg sm" role="group" aria-label="Exit">
-          <button data-labexit="opposite" aria-pressed="${cfg.exit === "opposite"}">${esc(I.exitLabels?.opposite || "On the opposite alert")}</button>
-          <button data-labexit="hold" aria-pressed="${cfg.exit === "hold"}">${esc(I.exitLabels?.hold || "After a time limit")}</button></div></div>
-        ${cfg.exit === "hold" ? `<label class="lp"><span>Time limit <small>${I.buysOnly ? "or earlier at the take profit" : "or earlier on an opposite alert"}</small></span><b id="lpv-hold">${cfg.hold} days</b>
-          <input type="range" data-labhold min="2" max="120" step="1" value="${cfg.hold}"></label>` : ""}
-        ${Object.entries(M.RISK).map(([k, R]) => `<label class="lp"><span>${esc(R.label)} <small>${esc(R.about)}</small></span><b id="lpv-${k}">${labRiskTxt(cfg[k])}</b>
-          <input type="range" data-labrisk="${k}" min="${R.min}" max="${R.max}" step="${R.step}" value="${cfg[k]}"></label>`).join("")}
-        ${I.buysOnly ? "" : `<div class="lrow"><span>Trades</span><div class="seg sm" role="group" aria-label="Trades">
-          <button data-labside="long" aria-pressed="${st.side === "long"}">Long only</button>
-          <button data-labside="all" aria-pressed="${st.side === "all"}">Long + short</button></div></div>`}
-        <div class="lrow"><span>Start in</span><span class="yrpick"><select data-labfrom aria-label="Starting year">${Array.from({ length: last - first + 1 }, (_, i) => first + i).map(y =>
-          `<option value="${y}"${y === from ? " selected" : ""}>${y}</option>`).join("")}</select></span>
-          <span style="flex:1"></span><button class="btn ghost sm" data-labreset ${M.sameCfg(cfg, M.defaults(cfg.ind)) && st.side === "long" ? "disabled" : ""}>Reset to default</button></div>
-      </div>
-      <div id="labout" aria-live="polite"></div>`;
-    box.innerHTML = h;
+      <p class="hint" style="margin:8px 2px 12px">${esc(I.about)}</p><div class="lsecs">`;
+    h += sec("signal", "Entry signal", I.params.map(x => labNum(x, cfg.p[x.k]).replace(/ (days|std devs|ATRs)$/, "")).join(" · "),
+      I.params.map(x => labSlider(cfg, "p." + x.k, esc(x.label), "", x.min, x.max, x.step)).join(""));
+    // 2) exits and risk
+    const exitSum = [cfg.exit === "hold" ? `${cfg.hold}-day limit` : (I.buysOnly ? "No time limit" : "Opposite alert"),
+      cfg.tp ? "TP " + labRiskTxt(cfg.tp) : "", cfg.sl ? "SL " + labRiskTxt(cfg.sl) : "", cfg.trail ? "Trail " + labRiskTxt(cfg.trail) : ""].filter(Boolean).join(" · ");
+    h += sec("exits", "Exits &amp; risk", exitSum,
+      `<div class="lrow"><span>Close a trade</span>${labSeg("labexit", cfg.exit, [["opposite", esc(I.exitLabels?.opposite || "On the opposite alert")], ["hold", esc(I.exitLabels?.hold || "After a time limit")]], "Exit")}</div>
+      ${cfg.exit === "hold" ? labSlider(cfg, "hold", "Time limit", I.buysOnly ? "or earlier at the take profit" : "or earlier on an opposite alert", 2, 120, 1) : ""}
+      ${labSlider(cfg, "tp", "Take profit", esc(R.tp.about), R.tp.min, R.tp.max, R.tp.step)}
+      ${labSlider(cfg, "sl", "Stop loss", esc(R.sl.about), R.sl.min, R.sl.max, R.sl.step)}
+      ${labSlider(cfg, "trail", "Trailing stop", esc(R.trail.about), R.trail.min, R.trail.max, R.trail.step)}
+      <p class="hint" style="margin:0">Whichever comes first closes the trade. Stops are checked on each day's high and low.</p>`);
+    // 3) filters
+    const nF = [cfg.fMa, cfg.fMkt, cfg.fInd].filter(Boolean).length, bm = benchOf().name;
+    h += sec("filters", "Filters", nF ? `${nF} on` : "Off",
+      `${labSlider(cfg, "fMa", `Only buy above the ${L().one}'s average`, I.buysOnly ? "" : "and only short below it", 0, 300, 10)}
+      <div class="lrow"><span>Market trend</span>${labSeg("labmkt", cfg.fMkt, [[0, "Off"], [1, `${bm} above its 200-day`]], "Market filter")}</div>
+      <label class="lrow"><span>Confirm with</span><span class="yrpick"><select data-labfind aria-label="Second indicator">${Object.entries(M.FILTER_IND).map(([k, v]) =>
+        `<option value="${k}"${k === cfg.fInd ? " selected" : ""}>${esc(v)}</option>`).join("")}</select></span></label>
+      <p class="hint" style="margin:0">A filtered alert doesn't open a trade, but still closes one on the other side.${I.buysOnly ? "" : " Shorts need the opposite: below the average, a falling market, a bearish second indicator."}</p>`);
+    // 4) what to trade
+    const sectors = [...new Set(data.tickers.map(T => S.stockBy[T.t]?.sector).filter(Boolean))].sort();
+    const picks = st.uni.picks || [];
+    const all = LAB.data[labMk()];
+    h += sec("uni", `What to trade`, labUniTxt(st, all) + (I.buysOnly ? "" : st.side === "all" ? " · long + short" : " · long only"),
+      `<div class="lrow">${labSeg("labmode", st.uni.mode || "all", [["all", `All ${all.tickers.length}`], ...(sectors.length > 1 ? [["sector", "A sector"]] : []), ["pick", `Pick ${L().noun}`]], "Which " + L().noun)}</div>
+      ${st.uni.mode === "sector" ? `<label class="lrow"><span>Sector</span><span class="yrpick"><select data-labsector aria-label="Sector"><option value="">Choose…</option>${sectors.map(s =>
+        `<option${s === st.uni.sector ? " selected" : ""}>${esc(s)}</option>`).join("")}</select></span></label>` : ""}
+      ${st.uni.mode === "pick" ? `<div class="lpicks">${picks.map(t => `<button class="lpick" data-labunpick="${esc(t)}" aria-label="Remove ${esc(disp(t))}">${esc(disp(t))} <span aria-hidden="true">×</span></button>`).join("")}
+        <input class="search lpadd" data-labadd list="labtk" placeholder="${picks.length ? "Add another" : `Add a ${L().one}, e.g. ${esc(disp(all.tickers[0].t))}`}" autocomplete="off" aria-label="Add a ${L().one}">
+        <datalist id="labtk">${all.tickers.filter(T => !picks.includes(T.t)).map(T => `<option value="${esc(disp(T.t))}">${esc(S.stockBy[T.t]?.name || "")}</option>`).join("")}</datalist></div>
+        ${picks.length ? "" : `<p class="hint" style="margin:0">With none picked, all ${all.tickers.length} are tested.</p>`}` : ""}
+      ${I.buysOnly ? "" : `<div class="lrow"><span>Trades</span>${labSeg("labside", st.side, [["long", "Long only"], ["all", "Long + short"]], "Trades")}</div>`}`);
+    // 5) account, costs, period
+    const yrs = (cur, attr, lbl, lo, hi) => `<span class="yrpick"><select data-${attr} aria-label="${lbl}">${Array.from({ length: hi - lo + 1 }, (_, i) => lo + i).map(y =>
+      `<option value="${y}"${y === cur ? " selected" : ""}>${y}</option>`).join("")}</select></span>`;
+    const from = Math.min(last, Math.max(first, st.from || first)), to = Math.max(from, Math.min(last, st.to || last));
+    h += sec("acct", "Account &amp; costs", [kEur(st.cap), cfg.maxPos ? `max ${cfg.maxPos} positions` : "", cfg.cost ? `${labTxt(cfg, "cost")} costs` : "", st.tax ? "after tax" : "", `${from}–${to === last ? "now" : to}`].filter(Boolean).join(" · "),
+      `<label class="lrow"><span>Start with</span><span class="yrpick"><select data-labcap aria-label="Starting money">${LAB_CAPS.map(v => `<option value="${v}"${v === st.cap ? " selected" : ""}>${eurS(v)}</option>`).join("")}</select></span></label>
+      ${labSlider(cfg, "maxPos", "Positions", cfg.maxPos ? `each gets 1/${cfg.maxPos} of the account` : "the money is split across every open one", 0, 50, 1)}
+      ${labSlider(cfg, "cost", "Costs per buy and per sell", "commission + spread", 0, 1, 0.05)}
+      <div class="lrow"><span>Taxes</span>${labSeg("labtax", st.tax ? 1 : 0, [[0, "Before tax"], [1, `After Italian tax (${Math.round(labTaxRate() * 100)}%)`]], "Taxes")}</div>
+      <div class="lrow"><span>Years</span>${yrs(from, "labfrom", "Starting year", first, last)}<span style="color:var(--faint)">to</span>${yrs(to, "labto", "Last year", from, last)}</div>`);
+    const custom = !M.sameCfg(cfg, M.defaults(cfg.ind)) || st.side !== "long" || st.uni.mode !== "all" || st.cap !== 100000 || st.tax || st.from || st.to;
+    h += `</div><div class="lfoot"><button class="btn ghost sm" data-labreset ${custom ? "" : "disabled"}>Reset</button><button class="btn ghost sm" data-labtab="compare" data-labsavefocus>Save…</button><button class="btn ghost sm" data-labshare>Copy link</button></div>`;
+    return h;
+  }
+
+  function renderLab() {
+    const box = document.getElementById("lab"), M = LAB.mod, data = LAB.data[labMk()];
+    if (!box || !M || !data) return;
+    const st = labState(), cfg = M.clean(st.cfg);
+    box.innerHTML = `<div class="labgrid"><div class="labset">${labSettings(st, cfg, labData(st))}</div>
+      <div class="labres"><div class="seg ltabs" role="tablist" aria-label="Lab results">${LAB_TABS.map(([k, t]) =>
+        `<button role="tab" data-labtab="${k}" aria-selected="${k === st.tab}" aria-pressed="${k === st.tab}">${k === "stocks" ? "By " + L().one : t}</button>`).join("")}</div>
+      <div id="labout" aria-live="polite"></div></div></div>`;
     runLab();
   }
-  const labRiskTxt = v => v > 0 ? (+v).toFixed(1).replace(/\.0$/, "") + "%" : "Off";
+  function labRefreshSettings() {   // the summaries in the section headers
+    const set = document.querySelector(".labset"); if (!set) return;
+    const st = labState(), cfg = LAB.mod.clean(st.cfg), open = new Set([...set.querySelectorAll("details[open]")].map(d => d.dataset.labsec));
+    const tmp = document.createElement("div"); tmp.innerHTML = labSettings({ ...st, open: [...open] }, cfg, labData(st));
+    set.querySelectorAll("details.lsec").forEach(d => { const n = tmp.querySelector(`details[data-labsec="${d.dataset.labsec}"] summary em`); const o = d.querySelector("summary em"); if (n && o) o.innerHTML = n.innerHTML; });
+    const rb = set.querySelector("[data-labreset]"), nb = tmp.querySelector("[data-labreset]"); if (rb && nb) rb.disabled = nb.disabled;
+  }
+
+  // ------------------------------------------------------------- results
+  const labPct = (v, d = 1) => v == null || !Number.isFinite(v) ? "–" : (v >= -0.05 ? "+" : "−") + Math.abs(v).toFixed(d) + "%";
+  const labRatio = v => v == null || !Number.isFinite(v) ? (v === Infinity ? "∞" : "–") : v.toFixed(2);
   function runLab() {
-    const out = document.getElementById("labout"), M = LAB.mod, data = LAB.data[S.market || "stocks"];
-    if (!out || !M || !data) return;
-    const st = labState(), cfg = M.clean(st.cfg), D = data.dates, I = M.INDICATORS[cfg.ind];
-    const fromYear = Math.max(+D[0].slice(0, 4), st.from || 0);
-    let fi = D.findIndex(d => +d.slice(0, 4) >= fromYear); if (fi < 0) fi = 0;
-    const def = M.defaults(cfg.ind), isDef = M.sameCfg(cfg, def);
-    const R = M.run(data, cfg, fi), mine = R[st.side], base = isDef ? mine : M.run(data, def, fi)[st.side];
-    const spyEq = M.spyCurve(data, fi);
-    const sm = M.summary(mine.eq, D, fi), sb = M.summary(base.eq, D, fi), ss = spyEq && M.summary(spyEq, D, fi);
-    const pct = v => v == null ? "–" : (v >= -0.05 ? "+" : "−") + Math.abs(v).toFixed(1).replace(/^0\.0$/, "0.0") + "%";
-    const diff = ss ? sm.end - ss.end : null;
-    let h = ss ? `<p class="labverdict">With these settings ${eurS(100000)} became <b>${eurS(sm.end)}</b>, <b class="${diff >= 0 ? "up" : "down"}">${diff >= 0 ? kEur(diff) + " more" : kEur(-diff) + " less"}</b> than holding ${benchOf().name} (${eurS(ss.end)}).</p>` : "";
+    const out = document.getElementById("labout"); if (!out || !LAB.mod) return;
+    const st = labState();
+    try { out.innerHTML = ({ overview: labOverview, trades: labTrades, stocks: labStocks, optimize: labOptimizeView, compare: labCompare }[st.tab] || labOverview)(st, out); }
+    catch (err) { console.error(err); out.innerHTML = `<div class="card"><p style="margin:0">Something went wrong running these settings. Try Reset.</p></div>`; }
+    LAB.after?.(); LAB.after = null;
+  }
+  function labOverview(st) {
+    const M = LAB.mod, X = labCompute(st, { full: true }), { D, fi, cfg, mine, eq, spyEq } = X, I = M.INDICATORS[cfg.ind], T = mine.trades;
+    const bn = benchOf().name, sm = M.summary(eq, D, fi), ss = spyEq && M.summary(spyEq, D, fi), sb = M.summary(X.baseEq, D, fi);
+    const diff = ss ? sm.end - ss.end : null, few = X.data.tickers.length;
+    let h = "";
+    if (few < (LAB.data[labMk()].tickers.length) && few <= 3) h += `<p class="hint" style="margin:0 2px 8px">Testing on ${few} ${few > 1 ? L().noun : L().one} only: a small sample, so luck plays a big part.</p>`;
+    h += ss ? `<p class="labverdict">${eurS(st.cap)} became <b>${eurS(sm.end)}</b>${st.tax ? " after tax" : ""}, <b class="${diff >= 0 ? "up" : "down"}">${diff >= 0 ? kEur(diff) + " more" : kEur(-diff) + " less"}</b> than holding ${bn} (${eurS(ss.end)}).</p>`
+      : `<p class="labverdict">${eurS(st.cap)} became <b>${eurS(sm.end)}</b>${st.tax ? " after tax" : ""}.</p>`;
+    const better = (a, b) => !ss || (a ?? -1e9) >= (b ?? -1e9) ? "up" : "down";
     h += `<div class="tiles four">
-      <div><span>Final value</span><b class="${!ss || sm.end >= ss.end ? "up" : "down"}">${kEur(sm.end)}</b><small>${ss ? `${benchOf().name} ${kEur(ss.end)}` : pct(sm.ret)}</small></div>
-      <div><span>Per year</span><b class="${!ss || (sm.cagr ?? -99) >= (ss.cagr ?? -99) ? "up" : "down"}">${pct(sm.cagr)}</b><small>${ss ? `${benchOf().name} ${pct(ss.cagr)}` : ""}</small></div>
-      <div><span>Worst drop</span><b class="${!ss || sm.dd >= ss.dd ? "up" : "down"}">${pct(sm.dd)}</b><small>${ss ? `${benchOf().name} ${pct(ss.dd)}` : ""}</small></div>
-      <div><span>Trades</span><b>${mine.trades.n.toLocaleString("en-US")}</b><small>${mine.trades.n ? `${Math.round(mine.trades.winRate)}% winners · ${Math.round(mine.inv.share * 100)}% of days invested` : "no alerts"}</small></div>
+      <div><span>Final value</span><b class="${better(sm.end, ss?.end)}">${kEur(sm.end)}</b><small>${ss ? `${bn} ${kEur(ss.end)}` : labPct(sm.ret)}</small></div>
+      <div><span>Per year</span><b class="${better(sm.cagr, ss?.cagr)}">${labPct(sm.cagr)}</b><small>${ss ? `${bn} ${labPct(ss.cagr)}` : ""}</small></div>
+      <div><span>Worst drop</span><b class="${better(sm.dd, ss?.dd)}">${labPct(sm.dd)}</b><small>${ss ? `${bn} ${labPct(ss.dd)}` : ""}</small></div>
+      <div><span>Trades</span><b>${T.n.toLocaleString("en-US")}</b><small>${T.n ? `${Math.round(mine.inv.share * 100)}% of days invested` : "no alerts"}</small></div>
+      <div><span>Win rate</span><b>${T.n ? Math.round(T.winRate) + "%" : "–"}</b><small>avg win ${labPct(T.avgWin)} · loss ${labPct(T.avgLoss)}</small></div>
+      <div><span>Profit factor</span><b class="${T.pf == null ? "" : T.pf >= 1 ? "up" : "down"}">${labRatio(T.pf)}</b><small>won ÷ lost, on every trade</small></div>
+      <div><span>Sharpe</span><b class="${better(sm.sharpe, ss?.sharpe)}">${labRatio(sm.sharpe)}</b><small>${ss ? `${bn} ${labRatio(ss.sharpe)}` : "return per unit of risk"}</small></div>
+      <div><span>Longest under water</span><b>${sm.under >= 252 ? (sm.under / 252).toFixed(1) + " yrs" : Math.round(sm.under / 21) + " mo"}</b><small>${ss ? `${bn} ${ss.under >= 252 ? (ss.under / 252).toFixed(1) + " yrs" : Math.round(ss.under / 21) + " mo"}` : "below a previous high"}</small></div>
     </div>`;
-    if (cfg.tp > 0 || cfg.sl > 0) h += `<p class="hint" style="margin:8px 2px 0">${[
-      cfg.tp > 0 ? `<b>${Math.round(mine.trades.tp / Math.max(1, mine.trades.n) * 100)}%</b> of trades reached the ${labRiskTxt(cfg.tp)} take profit` : "",
-      cfg.sl > 0 ? `<b>${Math.round(mine.trades.sl / Math.max(1, mine.trades.n) * 100)}%</b> hit the ${labRiskTxt(cfg.sl)} stop loss` : ""].filter(Boolean).join(", ")}${mine.trades.n ? `; the rest closed on the exit rule. Worst single trade ${pct(mine.trades.worst)}.` : "."}</p>`;
-    if (I.buysOnly && cfg.exit === "opposite" && !(cfg.tp > 0)) h += `<p class="hint" style="margin:8px 2px 0"><b>With no time limit and no take profit nothing is ever sold</b>: every position is held to the end.</p>`;
+    if (cfg.tp || cfg.sl || cfg.trail) h += `<p class="hint" style="margin:8px 2px 0">${[
+      cfg.tp ? `<b>${Math.round(T.tp / Math.max(1, T.n) * 100)}%</b> of trades reached the ${labRiskTxt(cfg.tp)} take profit` : "",
+      cfg.sl ? `<b>${Math.round(T.sl / Math.max(1, T.n) * 100)}%</b> hit the ${labRiskTxt(cfg.sl)} stop loss` : "",
+      cfg.trail ? `<b>${Math.round(T.trail / Math.max(1, T.n) * 100)}%</b> hit the ${labRiskTxt(cfg.trail)} trailing stop` : ""].filter(Boolean).join(", ")}${T.n ? `; the rest closed on the exit rule. Worst single trade ${labPct(T.worst)}.` : "."}</p>`;
+    if (I.buysOnly && cfg.exit === "opposite" && !cfg.tp && !cfg.sl && !cfg.trail) h += `<p class="hint" style="margin:8px 2px 0"><b>With no time limit, take profit or stop nothing is ever sold</b>: every position is held to the end.</p>`;
     h += `<h3 class="h3">Growth over time</h3><div class="chartbox" id="labchart"></div>`;
-    if (!isDef) h += `<p class="hint">Default settings: ${kEur(sb.end)} (${pct(sb.cagr)} a year, worst drop ${pct(sb.dd)}).</p>`;
-    const ym = M.byYear(mine.eq, D, fi), ys = spyEq ? M.byYear(spyEq, D, fi) : null;
-    h += `<h3 class="h3">Year by year</h3><div class="tablewrap"><table class="bt labyears"><thead><tr><th>Year</th><th style="text-align:right">Your settings</th>${ys ? `<th style="text-align:right">${benchOf().name}</th><th style="text-align:right">Difference</th>` : ""}</tr></thead><tbody>` +
+    if (!X.isDef) h += `<p class="hint">Default ${esc(I.name)} settings: ${kEur(sb.end)} (${labPct(sb.cagr)} a year, worst drop ${labPct(sb.dd)}).</p>`;
+    const ym = M.byYear(eq, D, fi), ys = spyEq ? M.byYear(spyEq, D, fi) : null, live = !(st.to && st.to < labYears()[1]);
+    h += `<h3 class="h3">Year by year</h3><div class="tablewrap"><table class="bt labyears"><thead><tr><th>Year</th><th style="text-align:right">Your settings</th>${ys ? `<th style="text-align:right">${bn}</th><th style="text-align:right">Difference</th>` : ""}</tr></thead><tbody>` +
       ym.slice().reverse().map((y, k) => {
         const sp = ys?.[ym.length - 1 - k], d = sp ? y.ret - sp.ret : null;
-        return `<tr><td>${y.year}${k === 0 ? `<small>so far</small>` : ""}</td><td style="text-align:right" class="${y.ret >= 0 ? "up" : "down"}">${pct(y.ret)}</td>${sp ? `<td style="text-align:right" class="${sp.ret >= 0 ? "up" : "down"}">${pct(sp.ret)}</td><td style="text-align:right"><b class="${d >= 0 ? "up" : "down"}">${pct(d)}</b></td>` : ""}</tr>`;
+        return `<tr><td>${y.year}${k === 0 && live ? `<small>so far</small>` : ""}</td><td style="text-align:right" class="${y.ret >= 0 ? "up" : "down"}">${labPct(y.ret)}</td>${sp ? `<td style="text-align:right" class="${sp.ret >= 0 ? "up" : "down"}">${labPct(sp.ret)}</td><td style="text-align:right"><b class="${d >= 0 ? "up" : "down"}">${labPct(d)}</b></td>` : ""}</tr>`;
       }).join("") + `</tbody></table></div>`;
+    const R = X.R;
     if (I.buysOnly && R.open.length) {
       const age = d => { const n = D.length - 1 - D.indexOf(d); return n >= 252 ? (n / 252).toFixed(1) + " yrs" : n + " sessions"; };
       const down = R.open.filter(o => o.ret < 0).length;
-      h += `<h3 class="h3">Still open on the last day</h3><p class="hint" style="margin-top:0">${R.open.length} position${R.open.length > 1 ? "s" : ""} not yet sold, ${down} of them at a loss. Losing positions wait for the take profit${cfg.exit === "hold" ? " or the time limit" : ", with no time limit to end them"}; worst first.</p>
-        <div class="tablewrap"><table class="bt"><thead><tr><th>Stock</th><th>Bought</th><th style="text-align:right">Held</th><th style="text-align:right">Since buying</th></tr></thead><tbody>` +
-        R.open.slice(0, 10).map(o => `<tr><td><a href="#stock-${esc(o.t)}" class="tk">${esc(disp(o.t))}</a></td><td>${esc(fmtDate(o.since, { day: "numeric", month: "short", year: "numeric" }))}</td><td style="text-align:right">${age(o.since)}</td><td style="text-align:right" class="${o.ret >= 0 ? "up" : "down"}">${pct(o.ret)}</td></tr>`).join("") +
+      h += `<h3 class="h3">Still open on the last day</h3><p class="hint" style="margin-top:0">${R.open.length} position${R.open.length > 1 ? "s" : ""} not yet sold, ${down} of them at a loss; worst first.</p>
+        <div class="tablewrap"><table class="bt"><thead><tr><th>${esc(L().one[0].toUpperCase() + L().one.slice(1))}</th><th>Bought</th><th style="text-align:right">Held</th><th style="text-align:right">Since buying</th></tr></thead><tbody>` +
+        R.open.slice(0, 10).map(o => `<tr><td><a href="#stock-${esc(o.t)}" class="tk">${esc(disp(o.t))}</a></td><td>${esc(fmtDate(o.since, { day: "numeric", month: "short", year: "numeric" }))}</td><td style="text-align:right">${age(o.since)}</td><td style="text-align:right" class="${o.ret >= 0 ? "up" : "down"}">${labPct(o.ret)}</td></tr>`).join("") +
         `</tbody></table></div>`;
     }
-    h += `<p class="hint">The account splits its money equally across every open position${I.buysOnly ? " (buying on each alert)" : st.side === "all" ? " (buying on bullish alerts, selling short on bearish ones)" : " (buying on bullish alerts, selling on bearish ones)"} and rebalances daily; with nothing open the money waits in cash. ${cfg.tp > 0 || cfg.sl > 0 ? " Take profit and stop loss are checked against each day's high and low: a level touched during the day fills at the level, a price that opens past it fills at the middle of that day's range, and a day that touches both counts as the stop." : ""} No trading costs, taxes or borrow fees${S.market !== "commodities" ? `, and the list is today's ${L().index}, which flatters buying` : ""}. Settings that look best on the past usually do worse afterwards.</p>`;
-    out.innerHTML = h;
-    drawLabChart(document.getElementById("labchart"), D, fi, [
-      ...(spyEq ? [{ name: benchOf().name.replace("&amp;", "&"), vals: spyEq, color: C.muted, w: 1.4 }] : []),
-      ...(isDef ? [] : [{ name: "Default settings", vals: base.eq, color: C.accent2, w: 1.3, dash: "4 3" }]),
-      { name: "Your settings", vals: mine.eq, color: C.accent, w: 2 },
-    ]);
+    h += labNotes(st, cfg, I);
+    LAB.after = () => drawLabChart(document.getElementById("labchart"), D, fi, [
+      ...(spyEq ? [{ name: bn.replace("&amp;", "&"), vals: spyEq, color: C.muted, w: 1.4 }] : []),
+      ...(X.isDef ? [] : [{ name: "Default settings", vals: X.baseEq, color: C.accent2, w: 1.3, dash: "4 3" }]),
+      { name: "Your settings", vals: eq, color: C.accent, w: 2 },
+    ], st.cap);
+    return h;
   }
-  function drawLabChart(box, dates, fi, series) {
+  function labNotes(st, cfg, I) {
+    const parts = [];
+    parts.push(cfg.maxPos ? `The account has ${cfg.maxPos} slot${cfg.maxPos > 1 ? "s" : ""} of 1/${cfg.maxPos} each: an alert that comes while every slot is full is skipped (same-day alerts in a fixed random order), and empty slots wait in cash.`
+      : `The account splits its money equally across every open position and rebalances daily; with nothing open the money waits in cash.`);
+    parts.push(I.buysOnly ? "It buys on each alert." : st.side === "all" ? "It buys on bullish alerts and sells short on bearish ones." : "It buys on bullish alerts and sells on bearish ones.");
+    if (cfg.tp || cfg.sl || cfg.trail) parts.push("A level touched during the day fills at the level, a price that opens past it fills at the middle of that day's range, and a day that touches a stop and the take profit counts as the stop.");
+    parts.push(cfg.cost ? `Each buy and each sell costs ${labTxt(cfg, "cost")}.` : "No trading costs.");
+    parts.push(st.tax ? `After tax: ${Math.round(labTaxRate() * 100)}% on each year's net gain (losses carried forward 4 years) and 0.2% a year stamp duty; ${benchOf().name} pays its tax when sold at the end. Simplified.` : "No taxes or borrow fees.");
+    if (S.market !== "commodities") parts.push(`The list is today's ${L().index}, which flatters buying.`);
+    parts.push("Settings that look best on the past usually do worse afterwards.");
+    return `<p class="hint">${parts.join(" ")}</p>`;
+  }
+
+  function labTrades(st) {
+    const X = labCompute(st), { D, mine } = X, T = mine.trades, list = mine.list;
+    if (!list.length) return `<div class="empty"><strong>No closed trades</strong>No alert closed a trade with these settings in these years.</div>`;
+    const pc = k => Math.round(T[k] / T.n * 100);
+    let h = `<div class="kv lkv">
+      <div><span>Average trade</span><b class="${T.avg >= 0 ? "up" : "down"}">${labPct(T.avg, 2)}</b></div>
+      <div><span>Average win</span><b class="up">${labPct(T.avgWin, 2)}</b></div>
+      <div><span>Average loss</span><b class="down">${labPct(T.avgLoss, 2)}</b></div>
+      <div><span>Best trade</span><b class="up">${labPct(T.best)}</b></div>
+      <div><span>Worst trade</span><b class="down">${labPct(T.worst)}</b></div>
+      <div><span>Held on average</span><b>${Math.round(T.days)} days</b></div>
+      <div><span>Win rate</span><b>${Math.round(T.winRate)}%</b></div>
+      <div><span>Profit factor</span><b>${labRatio(T.pf)}</b></div>
+      <div><span>Losers in a row</span><b>${T.streak}</b></div>
+    </div>
+    <p class="hint">Closed by the exit rule ${pc("n") - pc("tp") - pc("sl") - pc("trail")}%${T.tp ? `, take profit ${pc("tp")}%` : ""}${T.sl ? `, stop loss ${pc("sl")}%` : ""}${T.trail ? `, trailing stop ${pc("trail")}%` : ""}. Trade returns are per trade, after the costs you set, before tax; "days" are trading sessions.</p>`;
+    h += `<div class="hd" style="display:flex;align-items:center;justify-content:space-between;margin:20px 0 8px"><h3 class="h3" style="margin:0">Latest trades</h3><button class="btn ghost sm" data-labcsv>Download all ${list.length.toLocaleString("en-US")} (CSV)</button></div>`;
+    const why = { rule: "rule", tp: "take profit", sl: "stop", trail: "trailing" };
+    h += `<div class="tablewrap"><table class="bt ltrades"><thead><tr><th>${esc(L().one[0].toUpperCase() + L().one.slice(1))}</th><th>In → out</th><th style="text-align:right">Return</th><th style="text-align:right">Exit</th></tr></thead><tbody>` +
+      list.slice(-25).reverse().map(t => `<tr><td><a href="#stock-${esc(t.t)}" class="tk">${esc(disp(t.t))}</a> <span class="pill ${t.side > 0 ? "bullish" : "bearish"}">${t.side > 0 ? "long" : "short"}</span></td>
+        <td style="white-space:nowrap">${esc(fmtDate(D[t.g0], { day: "numeric", month: "short", year: "2-digit" }))}<small>→ ${esc(fmtDate(D[t.g1], { day: "numeric", month: "short", year: "2-digit" }))} · ${t.days}d</small></td>
+        <td style="text-align:right" class="${t.ret >= 0 ? "up" : "down"}">${labPct(t.ret * 100)}</td><td style="text-align:right"><small style="margin:0">${why[t.why]}</small></td></tr>`).join("") + `</tbody></table></div>`;
+    return h;
+  }
+  function labCsv() {
+    const st = labState(), X = labCompute(st), D = X.D;
+    const rows = [["ticker", "side", "entry_date", "exit_date", "sessions", "return_pct", "exit"]].concat(
+      X.mine.list.map(t => [t.t, t.side > 0 ? "long" : "short", D[t.g0], D[t.g1], t.days, (t.ret * 100).toFixed(3), t.why]));
+    const blob = new Blob([rows.map(r => r.join(",")).join("\n")], { type: "text/csv" });
+    const a = document.createElement("a"); a.href = URL.createObjectURL(blob);
+    a.download = `strategy-lab-${X.cfg.ind}-${labMk()}.csv`; document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+  }
+
+  function labStocks(st) {
+    const X = labCompute(st), list = X.mine.list;
+    if (!list.length) return `<div class="empty"><strong>No closed trades</strong>Nothing to group yet with these settings.</div>`;
+    const by = {};
+    for (const t of list) { const b = by[t.t] || (by[t.t] = { t: t.t, n: 0, w: 0, s: 0, c: 1 }); b.n++; b.w += t.ret > 0; b.s += t.ret; b.c *= 1 + t.ret; }
+    const rows = Object.values(by).sort((a, b) => b.c - a.c), pos = rows.filter(r => r.c > 1).length;
+    let h = `<p class="labverdict">Trades on <b>${pos}</b> of ${rows.length} ${L().noun} made money in total.</p>
+      <p class="hint" style="margin:0 2px 12px">Each trade's return chained together per ${L().one}, as if every trade on it used the same money. Picking only the best ones afterwards is hindsight: they won't necessarily stay the best.</p>`;
+    h += `<div class="tablewrap"><table class="bt lstocks"><thead><tr><th>${esc(L().one[0].toUpperCase() + L().one.slice(1))}</th><th style="text-align:right">Trades</th><th style="text-align:right">Right</th><th style="text-align:right">Average</th><th style="text-align:right">Chained</th></tr></thead><tbody>` +
+      rows.map(r => `<tr><td><a href="#stock-${esc(r.t)}" class="tk">${esc(disp(r.t))}</a>${S.stockBy[r.t]?.name ? `<small>${esc(S.stockBy[r.t].name)}</small>` : ""}</td><td style="text-align:right">${r.n}</td><td style="text-align:right">${Math.round(r.w / r.n * 100)}%</td>
+        <td style="text-align:right" class="${r.s >= 0 ? "up" : "down"}">${labPct(r.s / r.n * 100, 2)}</td><td style="text-align:right"><b class="${r.c >= 1 ? "up" : "down"}">${labPct((r.c - 1) * 100, 0)}</b></td></tr>`).join("") + `</tbody></table></div>`;
+    return h;
+  }
+
+  // ------------------------------------------------------------ optimizer
+  // Tries a grid of values for one or two settings. It picks the best in the earlier years
+  // ("training") and shows how that pick did in the later years it never saw ("check").
+  function labOptKeys(cfg) {
+    const M = LAB.mod, I = M.INDICATORS[cfg.ind];
+    const k = I.params.map(x => ["p." + x.k, x.label]);
+    if (cfg.exit === "hold") k.push(["hold", "Time limit"]);
+    k.push(["tp", "Take profit"], ["sl", "Stop loss"], ["trail", "Trailing stop"], ["fMa", "Trend filter average"], ["maxPos", "Max positions"]);
+    return k;
+  }
+  function labOptVals(cfg, key, n) {
+    const fixed = { tp: [0, 3, 5, 8, 12, 20, 30], sl: [0, 2, 3, 5, 8, 12, 20], trail: [0, 3, 5, 8, 12, 20, 30], hold: [5, 10, 20, 40, 60, 90, 120], fMa: [0, 20, 50, 100, 150, 200, 300], maxPos: [1, 3, 5, 10, 20, 30, 0] }[key];
+    if (fixed) return fixed.slice(0, n);
+    const x = LAB.mod.INDICATORS[cfg.ind].params.find(q => q.k === key.slice(2));
+    const out = []; for (let i = 0; i < n; i++) { const v = Math.round((x.min + (x.max - x.min) * i / (n - 1)) / x.step) * x.step; if (!out.includes(v)) out.push(+v.toFixed(4)); }
+    return out;
+  }
+  const labSet = (cfg, key, v) => { const c = JSON.parse(JSON.stringify(cfg)); if (key.startsWith("p.")) c.p[key.slice(2)] = v; else c[key] = v; return c; };
+  function labOptCtx(st) { const { opt, tab, open, ...rest } = st; return JSON.stringify({ ...rest, cfg: LAB.mod.clean(st.cfg), m: labMk() }); }
+  function labOptimizeView(st) {
+    const M = LAB.mod, cfg = M.clean(st.cfg), keys = labOptKeys(cfg), [first, last] = labYears();
+    const o = st.opt, a = keys.some(k => k[0] === o.a) ? o.a : keys[0][0], b = o.b === "" || keys.some(k => k[0] === o.b && k[0] !== a) ? (o.b ?? (keys[1]?.[0] !== a ? keys[1]?.[0] : "")) : "";
+    const lo = Math.max(first, st.from || first), hi = Math.min(last, st.to || last), split = Math.min(hi - 1, Math.max(lo + 1, o.split || Math.round((lo + hi) / 2)));
+    const by = ["cagr", "sharpe", "dd"].includes(o.by) ? o.by : "cagr";
+    const sel = (attr, cur, opts, lbl) => `<span class="yrpick"><select data-labopt="${attr}" aria-label="${lbl}">${opts.map(([v, t]) => `<option value="${v}"${String(v) === String(cur) ? " selected" : ""}>${esc(t)}</option>`).join("")}</select></span>`;
+    let h = `<p class="hint" style="margin:0 2px 12px">Tries many values at once. To keep it honest it picks the best settings using only the earlier years, then shows how they did in the later years they never saw. If the pick falls apart there, it was luck, not an edge.</p>
+      <div class="labbox lopt">
+        <label class="lrow"><span>Try</span>${sel("a", a, keys, "First setting")}</label>
+        <label class="lrow"><span>Against</span>${sel("b", b, [["", "Nothing (one setting)"], ...keys.filter(k => k[0] !== a)], "Second setting")}</label>
+        <label class="lrow"><span>Best by</span>${sel("by", by, [["cagr", "Return per year"], ["sharpe", "Sharpe ratio"], ["dd", "Smallest worst drop"]], "Score")}</label>
+        <label class="lrow"><span>Pick with</span>${lo}–${sel("split", split, Array.from({ length: hi - lo }, (_, i) => [lo + i, String(lo + i)]), "Training ends")}<span style="color:var(--faint)">check on ${split + 1}–${hi === last ? "now" : hi}</span></label>
+        <div class="lrow"><button class="btn sm" data-labrunopt>Run ${labOptVals(cfg, a, 7).length * (b ? labOptVals(cfg, b, 6).length : 1)} backtests</button><span class="hint" id="labprog" style="margin:0"></span></div>
+      </div><div id="labopt"></div>`;
+    if (LAB.opt && LAB.opt.ctx === labOptCtx(st) && LAB.opt.a === a && LAB.opt.b === b && LAB.opt.split === split && LAB.opt.by === by) LAB.after = () => labOptDraw();
+    else if (LAB.opt) LAB.after = () => { const el = document.getElementById("labopt"); if (el) el.innerHTML = `<p class="hint">Settings changed since the last run: run it again.</p>`; };
+    return h;
+  }
+  async function labOptimize() {
+    const M = LAB.mod, st = labState(), cfg = M.clean(st.cfg), keys = labOptKeys(cfg), [first, last] = labYears();
+    const o = st.opt, a = keys.some(k => k[0] === o.a) ? o.a : keys[0][0];
+    const b = o.b === "" || keys.some(k => k[0] === o.b && k[0] !== a) ? (o.b ?? (keys[1]?.[0] !== a ? keys[1]?.[0] : "")) : "";
+    const lo = Math.max(first, st.from || first), hi = Math.min(last, st.to || last), split = Math.min(hi - 1, Math.max(lo + 1, o.split || Math.round((lo + hi) / 2)));
+    const by = ["cagr", "sharpe", "dd"].includes(o.by) ? o.by : "cagr";
+    const A = labOptVals(cfg, a, 7), B = b ? labOptVals(cfg, b, 6) : [null];
+    const token = ++LAB.optRun, prog = () => document.getElementById("labprog");
+    const btn = document.querySelector("[data-labrunopt]"); if (btn) btn.disabled = true;
+    const data = labData(st), D = data.dates, fi = labFi(D, st.from);
+    let si = D.findIndex(d => +d.slice(0, 4) > split); if (si < 0) si = D.length - 1;
+    const score = s => by === "dd" ? s.dd : by === "sharpe" ? s.sharpe ?? -99 : s.cagr ?? -99;
+    const cells = [];
+    for (let i = 0; i < A.length; i++) for (let j = 0; j < B.length; j++) {
+      if (token !== LAB.optRun) return;
+      let c = labSet(cfg, a, A[i]); if (b) c = labSet(c, b, B[j]);
+      const cc = M.clean(c), r = M.run(data, cc, fi)[M.INDICATORS[cc.ind].buysOnly ? "long" : st.side];
+      cells.push({ i, j, va: labVal(cc, a), vb: b ? labVal(cc, b) : null, cfg: cc, n: r.trades.n,
+        tr: M.summary(r.eq, D, fi, si), te: M.summary(r.eq, D, si, D.length - 1), all: M.summary(r.eq, D, fi) });
+      if (prog()) prog().textContent = `${cells.length} of ${A.length * B.length}…`;
+      await new Promise(ok => setTimeout(ok, 0));
+    }
+    const mineR = M.run(data, cfg, fi)[M.INDICATORS[cfg.ind].buysOnly ? "long" : st.side], spy = M.spyCurve(data, fi);
+    const okCells = cells.filter(c => c.n >= 5), best = (okCells.length ? okCells : cells).reduce((m, c) => score(c.tr) > score(m.tr) ? c : m);
+    LAB.opt = { ctx: labOptCtx(st), a, b, split, by, A, B, cells, best, view: "tr",
+      mine: { tr: M.summary(mineR.eq, D, fi, si), te: M.summary(mineR.eq, D, si, D.length - 1) },
+      spy: spy ? { tr: M.summary(spy, D, fi, si), te: M.summary(spy, D, si, D.length - 1) } : null,
+      years: { tr: `${lo}–${split}`, te: `${split + 1}–${hi === last ? "now" : hi}` } };
+    if (prog()) prog().textContent = "";
+    if (btn) btn.disabled = false;
+    labOptDraw();
+  }
+  function labOptDraw() {
+    const el = document.getElementById("labopt"), O = LAB.opt; if (!el || !O) return;
+    const M = LAB.mod, keys = Object.fromEntries(labOptKeys(M.clean(labState().cfg))), st = labState();
+    const lbl = k => esc(keys[k] || k), vt = (k, v) => esc(labTxt(labSet(M.clean(st.cfg), k, v), k));
+    const sc = s => O.by === "dd" ? s.dd : O.by === "sharpe" ? s.sharpe : s.cagr, fmt = s => O.by === "sharpe" ? labRatio(s.sharpe) : labPct(sc(s));
+    const unit = O.by === "cagr" ? " a year" : O.by === "dd" ? " worst drop" : " Sharpe";
+    const B = O.best, bn = benchOf().name;
+    const held = sc(B.te), mine = sc(O.mine.te), spy = O.spy ? sc(O.spy.te) : null;
+    let h = `<div class="card lpickcard"><p style="margin:0 0 6px">Best in <b>${O.years.tr}</b>: ${lbl(O.a)} <b>${vt(O.a, B.va)}</b>${O.b ? `, ${lbl(O.b)} <b>${vt(O.b, B.vb)}</b>` : ""}, with <b>${fmt(B.tr)}</b>${unit}.</p>
+      <p style="margin:0">Then in <b>${O.years.te}</b>, which it never saw: <b class="${held >= mine ? "up" : "down"}">${fmt(B.te)}</b>${unit}, against <b>${fmt(O.mine.te)}</b> for your current settings${spy != null ? ` and <b>${fmt(O.spy.te)}</b> for ${bn}` : ""}.
+      ${held >= mine ? "The pick held up this time." : "The pick did worse than your settings once it met new prices: a sign the best past result was partly luck."}</p>
+      <p style="margin:10px 0 0"><button class="btn ghost sm" data-labapply="${O.cells.indexOf(B)}">Use these settings</button></p></div>`;
+    h += `<div class="lrow" style="margin:14px 0 8px"><span>Show</span>${labSeg("laboptview", O.view, [["tr", O.years.tr + " (pick)"], ["te", O.years.te + " (check)"], ["all", "All years"]], "Years shown")}</div>`;
+    const vals = O.cells.map(c => sc(c[O.view])).filter(Number.isFinite), lo = Math.min(...vals), hi = Math.max(...vals);
+    const tint = v => { if (!Number.isFinite(v) || hi === lo) return ""; const x = (v - lo) / (hi - lo); return `background:color-mix(in srgb, ${x >= .5 ? "var(--bull)" : "var(--bear)"} ${Math.round(Math.abs(x - .5) * 2 * 38)}%, transparent)`; };
+    const cell = c => `<td><button class="lcell${c === B ? " best" : ""}" style="${tint(sc(c[O.view]))}" data-labapply="${O.cells.indexOf(c)}" title="Use these settings">${fmt(c[O.view])}${c.n < 5 ? "<small>few trades</small>" : ""}</button></td>`;
+    if (O.b) {
+      h += `<div class="tablewrap"><table class="bt lheat"><thead><tr><th>${lbl(O.a)} ↓ · ${lbl(O.b)} →</th>${O.B.map(v => `<th>${vt(O.b, v)}</th>`).join("")}</tr></thead><tbody>` +
+        O.A.map((v, i) => `<tr><th>${vt(O.a, v)}</th>${O.B.map((_, j) => cell(O.cells.find(c => c.i === i && c.j === j))).join("")}</tr>`).join("") + `</tbody></table></div>`;
+    } else {
+      h += `<div class="tablewrap"><table class="bt lheat"><thead><tr><th>${lbl(O.a)}</th><th>${O.by === "cagr" ? "Per year" : O.by === "dd" ? "Worst drop" : "Sharpe"}</th><th style="text-align:right">Trades</th></tr></thead><tbody>` +
+        O.cells.map(c => `<tr><th>${vt(O.a, c.va)}</th>${cell(c)}<td style="text-align:right">${c.n.toLocaleString("en-US")}</td></tr>`).join("") + `</tbody></table></div>`;
+    }
+    h += `<p class="hint">Tap a result to use those settings. The outlined one is the best in the training years. Cells with fewer than 5 trades aren't picked.</p>`;
+    el.innerHTML = h;
+  }
+
+  // -------------------------------------------------------------- compare
+  const LAB_COLORS = () => [C.accent, "#ff9500", "#34c759", "#af52de", "#ff2d55", "#5ac8fa"];
+  function labCompare(st) {
+    const M = LAB.mod, saved = labSaved();
+    let h = `<form class="lsave" data-labsaveform><input class="search" name="n" maxlength="40" placeholder="Name these settings, e.g. RSI dip with 8% stop" aria-label="Name for these settings" autocomplete="off"><button class="btn sm">Save</button></form>`;
+    if (!saved.length) return h + `<div class="empty"><strong>No saved setups yet</strong>Save the settings you like, change something, and compare them side by side here. Saved on this device.</div>`;
+    const on = saved.filter(x => x.on !== false);
+    h += `<div class="lsaved">${saved.map(x => `<div class="lsrow"><button class="toggle" role="switch" aria-checked="${x.on !== false}" aria-label="Compare ${esc(x.name)}" data-labcmp="${esc(x.id)}"></button>
+      <span><b>${esc(x.name)}</b><small>${esc(M.INDICATORS[M.clean(x.st.cfg).ind]?.name || "")}${M.extrasOn(M.clean(x.st.cfg)) ? ` · ${M.extrasOn(M.clean(x.st.cfg))} extra rule${M.extrasOn(M.clean(x.st.cfg)) > 1 ? "s" : ""}` : ""}</small></span>
+      <button class="btn ghost sm" data-labload="${esc(x.id)}">Load</button><button class="prdel" data-labdel="${esc(x.id)}" aria-label="Delete ${esc(x.name)}">×</button></div>`).join("")}</div>`;
+    // everything over the current years and account size, each with its own stocks and rules
+    const runs = [{ name: "Current settings", st }, ...on.map(x => ({ name: x.name, st: { ...st, ...x.st, from: st.from, to: st.to, cap: st.cap, tax: st.tax } }))];
+    const X = runs.map(r => ({ ...r, X: labCompute(r.st, { full: r === runs[0] }) }));
+    const D = X[0].X.D, fi = X[0].X.fi, spy = X[0].X.spyEq, cols = LAB_COLORS(), bn = benchOf().name;
+    const rows = X.map((r, k) => { const e = r.X.D.length === D.length ? r.X.eq : null; return { ...r, e, s: e ? M.summary(e, D, fi) : null, color: cols[k % cols.length] }; }).filter(r => r.s);
+    h += `<div class="chartbox" id="labchart" style="margin-top:14px"></div>`;
+    h += `<div class="tablewrap"><table class="bt lcmp"><thead><tr><th>Setup</th><th style="text-align:right">Final</th><th style="text-align:right">Per year</th><th style="text-align:right">Worst drop</th><th style="text-align:right">Sharpe</th><th style="text-align:right">Trades</th></tr></thead><tbody>` +
+      rows.map(r => `<tr><td><i class="ldot" style="background:${r.color}"></i>${esc(r.name)}</td><td style="text-align:right">${kEur(r.s.end)}</td><td style="text-align:right" class="${(r.s.cagr ?? 0) >= 0 ? "up" : "down"}">${labPct(r.s.cagr)}</td><td style="text-align:right">${labPct(r.s.dd)}</td><td style="text-align:right">${labRatio(r.s.sharpe)}</td><td style="text-align:right">${r.X.mine.trades.n.toLocaleString("en-US")}</td></tr>`).join("") +
+      (spy ? (s => `<tr><td><i class="ldot" style="background:${C.muted}"></i>${bn} buy &amp; hold</td><td style="text-align:right">${kEur(s.end)}</td><td style="text-align:right">${labPct(s.cagr)}</td><td style="text-align:right">${labPct(s.dd)}</td><td style="text-align:right">${labRatio(s.sharpe)}</td><td style="text-align:right">1</td></tr>`)(M.summary(spy, D, fi)) : "") +
+      `</tbody></table></div><p class="hint">All over the years and account size set now${st.tax ? ", after tax" : ""}; each setup keeps its own ${L().noun}, rules and costs.</p>`;
+    LAB.after = () => drawLabChart(document.getElementById("labchart"), D, fi, [
+      ...(spy ? [{ name: bn.replace("&amp;", "&"), vals: spy, color: C.muted, w: 1.3 }] : []),
+      ...rows.slice().reverse().map((r, k) => ({ name: r.name, vals: r.e, color: r.color, w: k === rows.length - 1 ? 2.2 : 1.5 })),
+    ], st.cap);
+    return h;
+  }
+  function labSave(name) {
+    const st = labState(), all = pref("labSaved", []) || [];
+    const item = { id: Date.now().toString(36), name: name.trim() || `Setup ${labSaved().length + 1}`, mk: labMk(), on: true,
+      st: { cfg: LAB.mod.clean(st.cfg), side: st.side, uni: st.uni } };
+    setPref("labSaved", [...all, item].slice(-24));
+  }
+
+  function drawLabChart(box, dates, fi, series, cap = 100000) {
+    if (!box) return;
     const W = Math.max(280, box.clientWidth || 340), H = W > 640 ? 260 : 220, P = { l: 6, r: 58, t: 12, b: 22 };
     const ix = []; for (let g = fi; g < dates.length; g += 3) ix.push(g); if (ix[ix.length - 1] !== dates.length - 1) ix.push(dates.length - 1);
     const n = ix.length, all = series.flatMap(s => ix.map(g => s.vals[g])).filter(v => v > 0);
+    if (n < 2 || !all.length) { box.innerHTML = `<p class="hint" style="padding:12px">Not enough days to draw.</p>`; return; }
     const lo = Math.log(Math.min(...all) * .92), hi = Math.log(Math.max(...all) * 1.08);
     const x = i => P.l + i / (n - 1) * (W - P.l - P.r), y = v => P.t + (hi - Math.log(Math.max(v, 1))) / (hi - lo) * (H - P.t - P.b);
-    let svg = `<svg class="chart" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" role="img" aria-label="Account growth: your settings versus ${benchOf().name}"><rect width="${W}" height="${H}" fill="${C.bg}"/>`;
+    let svg = `<svg class="chart" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" role="img" aria-label="Account growth over time"><rect width="${W}" height="${H}" fill="${C.bg}"/>`;
     const grid = []; for (let p = Math.floor(Math.log10(Math.exp(lo))); p <= Math.ceil(Math.log10(Math.exp(hi))); p++) [1, 2, 5].forEach(m => { const v = m * 10 ** p; if (Math.log(v) > lo && Math.log(v) < hi) grid.push(v); });
     (grid.length > 5 ? grid.filter(v => String(v)[0] !== "2") : grid).forEach(v => {
-      svg += `<line x1="${P.l}" x2="${W - P.r}" y1="${y(v).toFixed(1)}" y2="${y(v).toFixed(1)}" stroke="${v === 100000 ? C.zero : C.grid}"/>`;
+      svg += `<line x1="${P.l}" x2="${W - P.r}" y1="${y(v).toFixed(1)}" y2="${y(v).toFixed(1)}" stroke="${v === cap ? C.zero : C.grid}"/>`;
       svg += `<text x="${W - P.r + 6}" y="${(y(v) + 4).toFixed(1)}" fill="${C.axis}" font-size="10.5" font-family="${FONT.replace(/"/g, "'")}">${v >= 1e6 ? "€" + v / 1e6 + "M" : v >= 1000 ? "€" + v / 1000 + "k" : "€" + v}</text>`;
     });
     const span = +dates[ix[n - 1]].slice(0, 4) - +dates[ix[0]].slice(0, 4), step = Math.ceil(span / 5) || 1;
@@ -2576,42 +2996,97 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
     el.addEventListener("pointermove", mv); el.addEventListener("pointerdown", mv);
     el.addEventListener("pointerleave", () => { xh.setAttribute("visibility", "hidden"); show(n - 1); });
   }
-  function labInput(e) {
-    const M = LAB.mod; if (!M) return false;
-    const pi = e.target.closest("[data-labp], [data-labhold], [data-labrisk]"); if (!pi) return false;
-    const st = labState(); st.cfg = M.clean(st.cfg);
-    if (pi.dataset.labp != null) {
-      st.cfg.p[pi.dataset.labp] = +pi.value; st.cfg = M.clean(st.cfg);
-      const x = M.INDICATORS[st.cfg.ind].params.find(q => q.k === pi.dataset.labp);
-      M.INDICATORS[st.cfg.ind].params.forEach(q => {   // a linked setting may have moved (fast < slow)
-        const v = st.cfg.p[q.k], b = document.getElementById("lpv-" + q.k), inp = document.querySelector(`[data-labp="${q.k}"]`);
-        if (b) b.textContent = (q.step < 1 ? v.toFixed(2).replace(/0$/, "") : v) + (q.unit ? " " + q.unit : "");
-        if (inp && q !== x && +inp.value !== v) inp.value = v;
-      });
-    } else if (pi.dataset.labrisk) {
-      const k = pi.dataset.labrisk; st.cfg[k] = +pi.value; st.cfg = M.clean(st.cfg);
-      const b = document.getElementById("lpv-" + k); if (b) b.textContent = labRiskTxt(st.cfg[k]);
-    } else {
-      st.cfg.hold = +pi.value; const b = document.getElementById("lpv-hold"); if (b) b.textContent = pi.value + " days";
-    }
-    saveLab(st);
-    const rb = document.querySelector("[data-labreset]"); if (rb) rb.disabled = M.sameCfg(st.cfg, M.defaults(st.cfg.ind)) && st.side === "long";
+
+  // --------------------------------------------------------------- events
+  function labRerun() {
     clearTimeout(LAB.timer); document.getElementById("labout")?.classList.add("busy");
     LAB.timer = setTimeout(() => { runLab(); document.getElementById("labout")?.classList.remove("busy"); }, 180);
+  }
+  function labInput(e) {
+    const M = LAB.mod; if (!M) return false;
+    const pi = e.target.closest("[data-lab]"); if (!pi) return false;
+    const st = labState(), k = pi.dataset.lab; let cfg = M.clean(st.cfg);
+    cfg = M.clean(labSet(cfg, k, +pi.value)); st.cfg = cfg; saveLab(st);
+    // a linked setting may have moved (fast < slow): update every label and slider
+    document.querySelectorAll("[data-lpv]").forEach(b => { b.textContent = labTxt(cfg, b.dataset.lpv); });
+    document.querySelectorAll("[data-lab]").forEach(inp => { if (inp !== pi && +inp.value !== labVal(cfg, inp.dataset.lab)) inp.value = labVal(cfg, inp.dataset.lab); });
+    if (k === "maxPos") { const sm = pi.closest(".lp")?.querySelector("small"); if (sm) sm.textContent = cfg.maxPos ? `each gets 1/${cfg.maxPos} of the account` : "the money is split across every open one"; }
+    labRefreshSettings(); labRerun();
     return true;
+  }
+  function labChange(e) {
+    const M = LAB.mod; if (!M) return false;
+    const t = e.target.closest("[data-labfrom], [data-labto], [data-labcap], [data-labsector], [data-labfind], [data-labadd], [data-labopt]"); if (!t) return false;
+    const st = labState(), [first, last] = labYears();
+    if (t.matches("[data-labfrom]")) { st.from = +t.value === first ? null : +t.value; if (st.to && st.to < st.from) st.to = null; }
+    else if (t.matches("[data-labto]")) st.to = +t.value === last ? null : +t.value;
+    else if (t.matches("[data-labcap]")) st.cap = +t.value;
+    else if (t.matches("[data-labsector]")) st.uni = { ...st.uni, mode: "sector", sector: t.value };
+    else if (t.matches("[data-labfind]")) st.cfg = { ...M.clean(st.cfg), fInd: t.value };
+    else if (t.matches("[data-labopt]")) { st.opt = { ...st.opt, [t.dataset.labopt]: t.dataset.labopt === "b" ? t.value : t.dataset.labopt === "split" ? +t.value : t.value }; saveLab(st); runLab(); return true; }
+    else {   // add a stock to the picks: matches the ticker as shown, or the start of a name
+      const q = t.value.trim().toUpperCase(); if (!q) return true;
+      const list = LAB.data[labMk()].tickers.map(T => T.t);
+      const hit = list.find(x => disp(x).toUpperCase() === q || x.toUpperCase() === q) || list.find(x => (S.stockBy[x]?.name || "").toUpperCase().startsWith(q));
+      if (!hit) { t.setCustomValidity?.("Not in the list"); t.reportValidity?.(); return true; }
+      st.uni = { mode: "pick", picks: [...new Set([...(st.uni.picks || []), hit])] };
+    }
+    saveLab(st); renderLab(); return true;
   }
   function labClick(e) {
     const M = LAB.mod; if (!M) return false;
-    const t = e.target.closest("[data-labind], [data-labexit], [data-labside], [data-labreset]"); if (!t) return false;
-    const st = labState();
-    if (t.dataset.labind) {   // keep the exits across indicators, except to or from one with its own default exit (Buy the dip)
-      const o = M.clean(st.cfg), own = k => M.INDICATORS[k]?.buysOnly;
-      st.cfg = own(o.ind) || own(t.dataset.labind) ? { ind: t.dataset.labind } : { ind: t.dataset.labind, tp: o.tp, sl: o.sl };
+    const sm = e.target.closest(".lsec > summary");
+    if (sm) {   // remember which sections are open
+      setTimeout(() => { const st = labState(); st.open = [...document.querySelectorAll(".lsec[open]")].map(d => d.dataset.labsec); saveLab(st); }, 0);
+      return false;
     }
-    else if (t.dataset.labexit) st.cfg = { ...M.clean(st.cfg), exit: t.dataset.labexit };
-    else if (t.dataset.labside) st.side = t.dataset.labside;
-    else { st.cfg = M.defaults(M.clean(st.cfg).ind); st.side = "long"; }
+    const t = e.target.closest("[data-labind], [data-labexit], [data-labside], [data-labreset], [data-labtab], [data-labmkt], [data-labtax], [data-labmode], [data-labunpick], [data-labshare], [data-labcsv], [data-labrunopt], [data-labapply], [data-laboptview], [data-labcmp], [data-labdel], [data-labload]");
+    if (!t) return false;
+    const st = labState(), d = t.dataset;
+    if (d.labind) {   // keep the exits and extras across indicators, except to or from one with its own default exit (Buy the dip)
+      const o = M.clean(st.cfg), own = k => M.INDICATORS[k]?.buysOnly, keep = { tp: o.tp, sl: o.sl, trail: o.trail, fMa: o.fMa, fMkt: o.fMkt, fInd: o.fInd, maxPos: o.maxPos, cost: o.cost };
+      st.cfg = own(o.ind) || own(d.labind) ? { ind: d.labind, sl: o.sl, trail: o.trail, fMa: o.fMa, fMkt: o.fMkt, fInd: o.fInd, maxPos: o.maxPos, cost: o.cost } : { ind: d.labind, ...keep };
+    }
+    else if (d.labexit) st.cfg = { ...M.clean(st.cfg), exit: d.labexit };
+    else if (d.labside) st.side = d.labside;
+    else if (d.labmkt != null) st.cfg = { ...M.clean(st.cfg), fMkt: +d.labmkt };
+    else if (d.labtax != null) st.tax = d.labtax === "1";
+    else if (d.labmode) st.uni = { ...st.uni, mode: d.labmode };
+    else if (d.labunpick) st.uni = { ...st.uni, picks: (st.uni.picks || []).filter(x => x !== d.labunpick) };
+    else if (d.labtab) {
+      st.tab = d.labtab; saveLab(st);
+      document.querySelectorAll(".ltabs [data-labtab]").forEach(b => { const on = b.dataset.labtab === st.tab; b.setAttribute("aria-pressed", on); b.setAttribute("aria-selected", on); });
+      runLab();
+      if (d.labsavefocus != null) { const f = document.querySelector("[data-labsaveform] input"); f?.scrollIntoView({ block: "center", behavior: "smooth" }); f?.focus({ preventScroll: true }); }
+      return true;
+    }
+    else if (d.labshare != null) {
+      const url = location.href.split("#")[0] + "#strategylab?c=" + labPack(st), done = () => { t.textContent = "Link copied"; setTimeout(() => t.textContent = "Copy link", 1800); };
+      (navigator.clipboard?.writeText(url) || Promise.reject()).then(done, () => prompt("Copy this link:", url));
+      return true;
+    }
+    else if (d.labcsv != null) { labCsv(); return true; }
+    else if (d.labrunopt != null) { labOptimize(); return true; }
+    else if (d.laboptview) { if (LAB.opt) { LAB.opt.view = d.laboptview; labOptDraw(); } return true; }
+    else if (d.labapply != null) {
+      const c = LAB.opt?.cells[+d.labapply]; if (!c) return true;
+      st.cfg = c.cfg; st.tab = "overview"; LAB.opt = null; saveLab(st); renderLab();
+      document.getElementById("lab")?.scrollIntoView({ behavior: "smooth", block: "start" });
+      return true;
+    }
+    else if (d.labcmp || d.labdel || d.labload) {
+      const all = pref("labSaved", []) || [], id = d.labcmp || d.labdel || d.labload;
+      if (d.labcmp) setPref("labSaved", all.map(x => x.id === id ? { ...x, on: x.on === false } : x));
+      else if (d.labdel) setPref("labSaved", all.filter(x => x.id !== id));
+      else { const x = all.find(q => q.id === id); if (x) { Object.assign(st, { cfg: x.st.cfg, side: x.st.side || "long", uni: x.st.uni || { mode: "all" }, tab: "overview" }); saveLab(st); renderLab(); } return true; }
+      runLab(); return true;
+    }
+    else { st.cfg = M.defaults(M.clean(st.cfg).ind); st.side = "long"; st.uni = { mode: "all" }; st.cap = 100000; st.tax = false; st.from = null; st.to = null; LAB.opt = null; }
     saveLab(st); renderLab(); return true;
+  }
+  function labSubmit(e) {
+    const f = e.target.closest("[data-labsaveform]"); if (!f) return false;
+    e.preventDefault(); labSave(f.n.value); runLab(); return true;
   }
 
 
@@ -3671,7 +4146,6 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
     if (r.startsWith("alert-")) return () => viewAlert(+r.slice(6));
     if (r.startsWith("stock-")) return () => viewStock(r.slice(6));
     if (r === "heatmap") return () => viewHeatmap();
-    if (r.startsWith("strategylab")) return () => viewLab(r.slice(12));
     if (r.startsWith("strategy-")) return () => viewStrategy(unslug(r.slice(9)));
     return null;
   }
@@ -3679,13 +4153,13 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
 
   function route() {
     const r = (location.hash || "#alerts").slice(1);
-    const tab = r === "news" || r === "buzz" || r === "mood" || r === "earnings" || r.startsWith("earnings-") ? "news" : r.startsWith("calendar") ? "calendar" : r.startsWith("strateg") ? "strategies" : r.startsWith("stock") || r === "heatmap" ? "stocks" : r === "notify" ? "notify" : r.startsWith("brokers") ? "brokers" : r.startsWith("learn") ? "learn" : r === "practice" ? "practice" : "alerts";
+    const tab = r === "news" || r === "buzz" || r === "mood" || r === "earnings" || r.startsWith("earnings-") ? "news" : r.startsWith("calendar") ? "calendar" : r.startsWith("strategylab") ? "lab" : r.startsWith("strateg") ? "strategies" : r.startsWith("stock") || r === "heatmap" ? "stocks" : r === "notify" ? "notify" : r.startsWith("brokers") ? "brokers" : r.startsWith("learn") ? "learn" : r === "practice" ? "practice" : "alerts";
     if (r === "winners" || r === "record") S.alView = r; else if (tab === "alerts" && !r.startsWith("alert-")) S.alView = "alerts";
-    const list = { alerts: S.alView === "winners" ? viewWinners : S.alView === "record" ? viewRecord : viewAlerts, stocks: viewStocks, strategies: viewStrategies, notify: viewNotify, brokers: viewBrokers, learn: viewLearn, practice: viewPractice, news: r === "buzz" ? viewBuzz : r === "mood" ? viewMood : r === "earnings" || r.startsWith("earnings-") ? () => viewEarnings(r.slice(9)) : viewNews, calendar: () => viewCalendar(r.slice(9)) }[tab];
+    const list = { alerts: S.alView === "winners" ? viewWinners : S.alView === "record" ? viewRecord : viewAlerts, stocks: viewStocks, strategies: viewStrategies, notify: viewNotify, brokers: viewBrokers, learn: viewLearn, practice: viewPractice, lab: () => viewLab(r.slice(11)), news: r === "buzz" ? viewBuzz : r === "mood" ? viewMood : r === "earnings" || r.startsWith("earnings-") ? () => viewEarnings(r.slice(9)) : viewNews, calendar: () => viewCalendar(r.slice(9)) }[tab];
     let detail = detailFor(r), sel = detail ? r : null;
     charts.length = 0;
 
-    if (WIDE.matches && tab !== "notify" && tab !== "brokers" && tab !== "learn" && tab !== "news" && tab !== "calendar" && tab !== "practice" && r !== "record") {
+    if (WIDE.matches && tab !== "notify" && tab !== "brokers" && tab !== "learn" && tab !== "news" && tab !== "calendar" && tab !== "practice" && tab !== "lab" && r !== "record") {
       const lp = app.querySelector(".pane.list"), dp = app.querySelector(".pane.detail");
       const listTop = lp?.scrollTop || 0, detTop = dp?.scrollTop || 0;
       const L = norm(list());
@@ -3863,15 +4337,15 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
     }
   });
   app.addEventListener("change", e => {
+    if (labChange(e)) return;
     const ey = e.target.closest("[data-ernfrom], [data-ernto]");
     if (ey) { setPref(ey.matches("[data-ernfrom]") ? "ernFrom" : "ernTo", +ey.value); rerender(); return; }
     const cf = e.target.closest("[data-cmpfrom]");
     if (cf) { setPref("cmpFrom." + (S.market || "stocks"), +cf.value); rerender(); }
-    const lf = e.target.closest("[data-labfrom]");
-    if (lf) { const st = labState(); st.from = +lf.value; saveLab(st); runLab(); }
   });
   app.addEventListener("input", e => labInput(e));
   app.addEventListener("submit", e => {
+    if (labSubmit(e)) return;
     const f = e.target.closest("[data-ernform]");
     if (!f) return;
     e.preventDefault();
@@ -4119,7 +4593,7 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
     await loadMarket(m);
     S.lastSel = null; S.lastTab = null;
     const tab = (location.hash || "#alerts").slice(1);
-    const base = tab.startsWith("strateg") ? (tab.startsWith("strategy-") ? tab : "strategies") : tab.startsWith("stock") || tab === "heatmap" ? "stocks" : tab === "news" || tab === "buzz" || tab === "mood" ? tab : tab.startsWith("calendar") ? tab : tab === "notify" ? "notify" : tab.startsWith("brokers") ? "brokers" : tab.startsWith("learn") ? tab : tab === "winners" || tab === "record" || tab === "practice" ? tab : "alerts";
+    const base = tab.startsWith("strategylab") ? tab : tab.startsWith("strateg") ? (tab.startsWith("strategy-") ? tab : "strategies") : tab.startsWith("stock") || tab === "heatmap" ? "stocks" : tab === "news" || tab === "buzz" || tab === "mood" ? tab : tab.startsWith("calendar") ? tab : tab === "notify" ? "notify" : tab.startsWith("brokers") ? "brokers" : tab.startsWith("learn") ? tab : tab === "winners" || tab === "record" || tab === "practice" ? tab : "alerts";
     if ("#" + base !== location.hash) location.hash = base; else route();
     scrollTo(0, 0);
   }
