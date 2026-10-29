@@ -176,7 +176,10 @@ def from_yahoo(out: dict, sources: list):
         ERRORS.append(f"altseason: {type(e).__name__}: {e}"[:300])
     # correlation with the Nasdaq 100 and gold, on US trading days
     try:
-        us = px[["BTC-USD", "QQQ", "GLD"]].dropna()
+        # crypto and US stocks come with different timestamps: line them up by calendar day
+        by_day = lambda x: x.dropna().groupby(x.dropna().index.strftime("%Y-%m-%d")).last()
+        us = pd.concat({t: by_day(px[t]) for t in ("BTC-USD", "QQQ", "GLD")}, axis=1).dropna()
+        us.index = pd.DatetimeIndex(us.index)
         ret = us.pct_change().dropna()
         corr = {}
         for k, t in (("nasdaq", "QQQ"), ("gold", "GLD")):
@@ -246,6 +249,11 @@ def build_market():
     from_yahoo(out, sources)
     part("etf", etf_flows, out, sources, "Farside Investors")
     part("halving", halving, out, sources, "blockchain.info")
+    if "etf" in out and "etf" in old:           # Farside shows the last few weeks: keep a longer history here
+        for k, rows in out["etf"].items():
+            merged = {d: v for d, v in old["etf"].get(k, [])}
+            merged.update({d: v for d, v in rows})
+            out["etf"][k] = [[d, merged[d]] for d in sorted(merged)][-400:]
     for k, v in old.items():                     # a source that failed this time keeps its last copy
         if k not in out and k not in ("generated_at", "sources", "errors"):
             out[k] = v
