@@ -5,6 +5,9 @@ on:
     branches: [earnings-research]
   workflow_dispatch: {}
 
+permissions:
+  contents: write
+
 jobs:
   research:
     runs-on: ubuntu-latest
@@ -17,7 +20,10 @@ jobs:
           cache: pip
       - run: pip install -r requirements.txt "yfinance>=1.0" lxml tabulate
       - run: python engine/earnings_research.py
-      - uses: actions/upload-artifact@v4
-        with:
-          name: earnings-research
-          path: research/
+      - name: Commit results to this branch
+        run: |
+          git config user.name "signal-desk-bot"
+          git config user.email "signal-desk-bot@users.noreply.github.com"
+          git add -f research/earnings_results.json research/earnings_report.md
+          git commit -m "Earnings research results [skip ci]"
+          git push
