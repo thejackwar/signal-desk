@@ -695,6 +695,47 @@ canvas.hm { display: block; touch-action: pan-y; }
 .mbar2 { display: block; position: relative; height: 4px; border-radius: 2px; background: var(--surface-2); margin-top: 7px; }
 .mbar2 i { position: absolute; top: 0; bottom: 0; border-radius: 2px; }
 .mbar2 i.up { left: 50%; background: var(--bull); } .mbar2 i.down { right: 50%; background: var(--bear); }
+.ernform { display: flex; gap: 8px; align-items: flex-start; }
+.ernform .search { flex: 1; margin-bottom: 10px; }
+.ernform .btn { flex: none; }
+.ernyears { flex-wrap: wrap; gap: 8px 10px; margin-bottom: 14px; align-items: center; }
+.ernyears .to { color: var(--muted); font-size: 13px; }
+.ernyears .yrpick select { padding: 4px 22px 4px 9px; font-size: 14px; }
+.ernhead { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; margin: 4px 0 12px; }
+.ernhead h2 span { font-weight: 500; color: var(--muted); font-size: .8em; }
+.ernhead .btn { flex: none; }
+.ernsum p { margin: 0; font-size: 15px; line-height: 1.5; }
+.ernsum { margin: 0 0 12px; }
+.erngrid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 12px; }
+a.chip { text-decoration: none; color: var(--fg); }
+.ernfew { font-size: 12px; color: var(--faint); margin: 0 0 6px; }
+.nsw a { white-space: nowrap; }
+.ernbox { background: var(--surface); border-radius: 14px; padding: 14px; min-width: 0; }
+.ernbox h3 { margin: 0 0 8px; font-size: 16px; display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+.ernbox h3 span { font-size: 12px; font-weight: 500; color: var(--faint); }
+.ernrow { padding: 8px 0; border-top: 1px solid var(--line); display: grid; grid-template-columns: 1fr auto; gap: 3px 10px; }
+.ernrow .l { font-size: 13px; color: var(--muted); }
+.ernrow .v { font-size: 13px; color: var(--muted); text-align: right; white-space: nowrap; }
+.ernrow .v b { font-size: 16px; font-variant-numeric: tabular-nums; }
+.ernrow .bar { grid-column: 1 / -1; position: relative; height: 6px; border-radius: 3px; background: var(--surface-2); overflow: visible; }
+.ernrow .bar i { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 3px; background: var(--amber); }
+.ernrow .bar u { position: absolute; top: -3px; bottom: -3px; width: 2px; margin-left: -1px; background: var(--fg); opacity: .55; border-radius: 1px; }
+.ernrow .s { grid-column: 1 / -1; font-size: 12px; color: var(--faint); font-variant-numeric: tabular-nums; }
+.ernchart { margin-top: 14px; }
+.ernchart .hd { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; flex-wrap: wrap; }
+.ernchart h3 { margin: 0 0 8px; }
+.ernchart .lg { font-size: 12px; color: var(--muted); display: inline-flex; align-items: center; gap: 5px; }
+.ernchart .lg i { width: 9px; height: 9px; border-radius: 2px; display: inline-block; margin-left: 6px; }
+.ernchart .lg i.b { background: var(--bull); } .ernchart .lg i.m { background: var(--bear); }
+.ernchart svg { width: 100%; height: 150px; display: block; }
+.ernchart .ticks { position: relative; height: 16px; font-size: 11px; color: var(--faint); font-variant-numeric: tabular-nums; }
+.ernchart .ticks span { position: absolute; top: 2px; }
+.erntab td small { display: block; font-size: 11px; color: var(--faint); }
+.erntab td, .erntab th { white-space: nowrap; }
+.btnrow { display: flex; flex-wrap: wrap; gap: 8px; }
+.nsw { overflow-x: auto; scrollbar-width: none; max-width: 100%; }
+.nsw::-webkit-scrollbar { display: none; }
+@media (max-width: 560px) { .erngrid { grid-template-columns: 1fr; } }
 .moodsum { display: flex; gap: 8px; margin: 4px 0 14px; }
 .moodsum > div { flex: 1; background: var(--surface); border-radius: 12px; padding: 10px 12px; }
 .moodsum span { display: block; font-size: 11px; text-transform: uppercase; letter-spacing: .05em; color: var(--faint); }
@@ -1852,7 +1893,7 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
     h += `<div class="card rating" id="rating"><div class="hd"><h3>Technical rating</h3></div><p class="loading" style="padding:18px 0">Reading the indicators…</p></div>`;
     if (isComm() && r.drivers) h += `<div class="card drivers"><h3>What moves the price</h3><p>${esc(r.drivers)}.</p><p class="hint" style="margin:0">Prices follow the nearest contract, so the chart can jump a little when it rolls to the next month.</p></div>`;
     if (isComm()) h += etcCard(t);
-    if (!isComm()) h += `<p style="margin:4px 0 18px"><a class="btn ghost" href="trendlines.html#${encodeURIComponent(t)}">Trendlines on 7 timeframes ›</a></p>`;
+    if (!isComm()) h += `<p class="btnrow" style="margin:4px 0 18px"><a class="btn ghost" href="trendlines.html#${encodeURIComponent(t)}">Trendlines on 7 timeframes ›</a>${S.market === "stocks" ? `<a class="btn ghost" href="#earnings-${encodeURIComponent(t)}">How it moves after earnings ›</a>` : ""}</p>`;
     h += nextEarningsCard(t) + moodCard(t) + mentionsCard(t) + newsFor(t);
     h += `<h2>Recent alerts on ${esc(disp(t))}</h2>`;
     if (!alerts.length) h += `<p class="tag" style="font-size:14px">No strategy has fired on ${esc(disp(t))} in the last few weeks.</p>`;
@@ -2830,7 +2871,7 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
 
 
   // -------------------------------------------------------- news mentions
-  const newsSwitch = which => `<div class="seg nsw" role="group" aria-label="News view"><a href="#news" role="button" aria-pressed="${which === "news"}">Headlines</a>${S.market === "stocks" ? `<a href="#mood" role="button" aria-pressed="${which === "mood"}">Mood</a>` : ""}<a href="#buzz" role="button" aria-pressed="${which === "buzz"}">Most mentioned</a><a href="#calendar" role="button" aria-pressed="${which === "calendar"}">Calendar</a></div>`;
+  const newsSwitch = which => `<div class="seg nsw" role="group" aria-label="News view"><a href="#news" role="button" aria-pressed="${which === "news"}">Headlines</a>${S.market === "stocks" ? `<a href="#mood" role="button" aria-pressed="${which === "mood"}">Mood</a>` : ""}<a href="#buzz" role="button" aria-pressed="${which === "buzz"}">Most mentioned</a>${S.market === "stocks" ? `<a href="#earnings" role="button" aria-pressed="${which === "earnings"}">Earnings</a>` : ""}<a href="#calendar" role="button" aria-pressed="${which === "calendar"}">Calendar</a></div>`;
   function bars(series, W = 96, H = 26) {
     const n = series.length, vals = series.filter(v => v != null), mx = Math.max(1, ...vals), bw = W / n;
     return `<svg class="mbars" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" preserveAspectRatio="none" aria-hidden="true">${series.map((v, i) => {
@@ -3035,6 +3076,118 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
     }
     return h;
   }
+
+  // -------------------------------------------------------- earnings reactions
+  // How one S&P 100 stock moved after its past earnings reports, split by beats and misses,
+  // over the years the user picks. Data: data/earnings/ (engine/earnings.py, refreshed with the calendar).
+  const ernPct = v => v == null || !isFinite(v) ? "–" : (v >= 0 ? "+" : "−") + Math.abs(v).toFixed(1) + "%";
+  const ernKind = e => e.r > e.e ? "beat" : e.r < e.e ? "miss" : "inline";
+  const ERN_MET = [["m", "On earnings day"], ["d1", "The next day"], ["d5", "5 days later"], ["d20", "20 days later"], ["d20x", "Beat the S&P 500 (20 days)"]];
+  function ernLoad(t) {
+    const E = S.ern || (S.ern = { files: {} });
+    if (E.index === undefined) { E.index = null; opt("data/earnings/index.json").then(x => { E.index = x || false; rerender(); }); }
+    if (t && E.files[t] === undefined) { E.files[t] = null; opt(`data/earnings/${encodeURIComponent(t)}.json`).then(x => { E.files[t] = x || false; rerender(); }); }
+  }
+  function ernStats(evs, k) {
+    const v = evs.map(e => e[k]).filter(x => x != null);
+    return v.length ? { n: v.length, up: v.filter(x => x > 0).length / v.length * 100, avg: v.reduce((a, b) => a + b, 0) / v.length } : null;
+  }
+  // the whole S&P 100 over the same years, from the per-year totals in index.json
+  function ernBase(grp, k, from, to) {
+    let n = 0, up = 0, sum = 0;
+    for (const [y, g] of Object.entries(S.ern.index?.totals || {})) {
+      if (+y < from || +y > to) continue;
+      const a = g[grp]?.[k]; if (a) { n += a[0]; up += a[1]; sum += a[2]; }
+    }
+    return n ? { n, up: up / n * 100, avg: sum / n } : null;
+  }
+  function ernCard(title, cls, evs, grp, from, to) {
+    if (!evs.length) return `<div class="ernbox"><h3 class="${cls}">${title}</h3><p class="tag" style="font-size:14px;margin:6px 0 0">No reports like this in these years.</p></div>`;
+    const rows = ERN_MET.map(([k, lbl]) => {
+      const s = ernStats(evs, k), b = ernBase(grp, k, from, to);
+      if (!s) return "";
+      const w = Math.round(s.up);
+      return `<div class="ernrow"><span class="l">${lbl}</span><span class="v"><b class="${s.up >= 50 ? "up" : "down"}">${w}%</b> ${k === "d20x" ? "of the time" : "went up"}</span>
+        <span class="bar" aria-hidden="true"><i style="width:${w}%"></i>${b ? `<u style="left:${b.up.toFixed(1)}%" title="S&amp;P 100: ${Math.round(b.up)}%"></u>` : ""}</span>
+        <span class="s">avg ${ernPct(s.avg)}${b ? ` · S&amp;P 100 ${Math.round(b.up)}%, ${ernPct(b.avg)}` : ""}</span></div>`;
+    }).join("");
+    return `<div class="ernbox"><h3 class="${cls}">${title}<span>${evs.length} report${evs.length === 1 ? "" : "s"}</span></h3>${evs.length < 8 ? `<p class="ernfew">Only ${evs.length}: too few to rely on these percentages.</p>` : ""}${rows}</div>`;
+  }
+  function ernChart(evs) {
+    const xs = evs.filter(e => e.m != null).slice().reverse();
+    if (xs.length < 2) return "";
+    const W = 640, H = 150, mid = H / 2, mx = Math.max(4, ...xs.map(e => Math.abs(e.m))), bw = W / xs.length;
+    const bars = xs.map((e, i) => {
+      const k = ernKind(e), h = Math.max(1, Math.abs(e.m) / mx * (mid - 6)), y = e.m >= 0 ? mid - h : mid;
+      return `<rect x="${(i * bw + bw * .12).toFixed(1)}" y="${y.toFixed(1)}" width="${Math.max(1, bw * .76).toFixed(1)}" height="${h.toFixed(1)}" rx="${bw > 8 ? 2 : 0}" fill="${k === "beat" ? "var(--bull)" : k === "miss" ? "var(--bear)" : "var(--faint)"}"><title>${fmtDate(e.d, { day: "numeric", month: "short", year: "numeric" })}: ${k === "beat" ? "beat" : k === "miss" ? "missed" : "in line"} (${e.s == null ? "" : ernPct(e.s).replace("%", "% surprise")}), ${ernPct(e.m)} on the day</title></rect>`;
+    }).join("");
+    const yr = [...new Set(xs.map(e => e.d.slice(0, 4)))], step = Math.ceil(yr.length / 8);
+    const ticks = yr.filter((_, i) => i % step === 0).map(y => { const i = xs.findIndex(e => e.d.startsWith(y)); return `<span style="left:${(i / xs.length * 100).toFixed(1)}%">${y}</span>`; }).join("");
+    return `<div class="card ernchart"><div class="hd"><h3>Move on each earnings day</h3><span class="lg"><i class="b"></i>Beat <i class="m"></i>Missed</span></div>
+      <svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" role="img" aria-label="Price move on each earnings day, green for beats and red for misses"><line x1="0" x2="${W}" y1="${mid}" y2="${mid}" stroke="var(--line)"/>${bars}</svg>
+      <div class="ticks">${ticks}</div><p class="hint" style="margin:6px 0 0">Tallest bars: ${ernPct(mx)} / ${ernPct(-mx)}. Hover a bar to see its date and surprise.</p></div>`;
+  }
+  function viewEarnings(arg) {
+    let h = header("Earnings reactions", null, S.ern?.index ? `<div class="stamp">S&amp;P 100<br>updated ${esc(ago(S.ern.index.generated_at))}</div>` : "") + newsSwitch("earnings");
+    if (S.market !== "stocks") return h + `<div class="empty"><strong>Stocks only</strong>Earnings reactions are for S&amp;P 100 stocks. Switch the market to Stocks.</div>`;
+    const t = (arg || "").toUpperCase();
+    ernLoad(t);
+    const I = S.ern.index;
+    if (I === null) return h + `<p class="loading">Loading…</p>`;
+    if (!I) return h + `<div class="empty"><strong>No earnings history yet</strong>It appears after the <em>Market calendar</em> update runs on GitHub.</div>`;
+    const have = new Set(I.stocks.map(s => s.t));
+    const yrs = Object.keys(I.totals).map(Number), y0 = Math.min(...yrs), y1 = Math.max(...yrs);
+    let from = Math.max(y0, Math.min(y1, pref("ernFrom", y0))), to = Math.max(y0, Math.min(y1, pref("ernTo", y1)));
+    if (from > to) [from, to] = [to, from];
+    const sel = (k, v) => `<span class="yrpick"><select data-ern${k} aria-label="${k === "from" ? "From year" : "To year"}">${yrs.map(y => `<option value="${y}"${y === v ? " selected" : ""}>${y}</option>`).join("")}</select></span>`;
+    h += `<p class="tag" style="font-size:14px;margin:6px 0 12px">Pick a stock and the years to test: see how often it went up after beating or missing the analysts' earnings estimate.</p>`;
+    h += `<form class="ernform" data-ernform><input class="search" name="t" type="search" list="ernlist" placeholder="Ticker or company, e.g. AAPL" autocomplete="off" aria-label="Stock" value="${esc(t ? sym(t) : "")}"><button class="btn" type="submit">Test</button></form>
+      <datalist id="ernlist">${I.stocks.map(s => `<option value="${esc(sym(s.t))}">${esc(S.stockBy[s.t]?.name || "")}</option>`).join("")}</datalist>`;
+    h += `<div class="tools ernyears"><label>Years</label>${sel("from", from)}<span class="to">to</span>${sel("to", to)}
+      <div class="seg sm" role="group" aria-label="Quick range">${[[y0, "All"], [y1 - 9, "10y"], [y1 - 4, "5y"], [y1 - 1, "2y"]].map(([a, l]) => `<button data-ernrange="${Math.max(y0, a)}" aria-pressed="${from === Math.max(y0, a) && to === y1}">${l}</button>`).join("")}</div></div>`;
+    const quick = ["AAPL", "MSFT", "NVDA", "AMZN", "META", "GOOGL", "TSLA", "JPM", "NFLX"].filter(x => have.has(x));
+    if (!t) {
+      h += `<div class="chips" role="group" aria-label="Popular stocks" style="margin:2px 0 16px">${quick.map(x => `<a class="chip" href="#earnings-${x}">${x}</a>`).join("")}</div>`;
+      const n = ernBase("all", "m", from, to)?.n || 0, nb = ernBase("beat", "m", from, to)?.n || 0;
+      h += `<h2>All S&amp;P 100 stocks, ${from === to ? from : `${from}–${to}`}</h2><p class="tag" style="font-size:14px;margin:0 0 10px">${n.toLocaleString("en-US")} reports · ${n ? Math.round(nb / n * 100) : 0}% beat the estimate. Pick a stock above to compare it with these numbers.</p>`;
+      h += `<div class="erngrid">${["beat", "miss"].map(g => {
+        const rows = ERN_MET.map(([k, lbl]) => { const b = ernBase(g, k, from, to); return b ? `<div class="ernrow"><span class="l">${lbl}</span><span class="v"><b class="${b.up >= 50 ? "up" : "down"}">${Math.round(b.up)}%</b> ${k === "d20x" ? "of the time" : "went up"}</span><span class="bar" aria-hidden="true"><i style="width:${Math.round(b.up)}%"></i></span><span class="s">avg ${ernPct(b.avg)}</span></div>` : ""; }).join("");
+        return `<div class="ernbox"><h3 class="${g === "beat" ? "up" : "down"}">After a ${g}<span>${(ernBase(g, "m", from, to)?.n || 0).toLocaleString("en-US")} reports</span></h3>${rows}</div>`;
+      }).join("")}</div>`;
+      return h + ernFine();
+    }
+    if (!have.has(t)) return h + `<div class="empty"><strong>${esc(t)} isn't covered</strong>Earnings reactions are available for the ${I.stocks.length} S&amp;P 100 stocks. Try one of: ${quick.map(x => `<a href="#earnings-${x}">${x}</a>`).join(", ")}.</div>`;
+    const F = S.ern.files[t];
+    if (F === null) return h + `<p class="loading">Loading ${esc(sym(t))}…</p>`;
+    if (!F) return h + `<div class="empty"><strong>Couldn't load ${esc(sym(t))}</strong>Try again in a moment.</div>`;
+    const evs = F.events.filter(e => +e.d.slice(0, 4) >= from && +e.d.slice(0, 4) <= to);
+    const beats = evs.filter(e => ernKind(e) === "beat"), miss = evs.filter(e => ernKind(e) === "miss");
+    const name = S.stockBy[t]?.name || F.name || t;
+    h += `<div class="ernhead"><div><h2 style="margin:0">${esc(sym(t))} <span>${esc(name)}</span></h2>
+      <p class="tag" style="font-size:14px;margin:2px 0 0">${evs.length} reports ${from === to ? `in ${from}` : `from ${from} to ${to}`}${evs.length ? ` · beat the estimate ${beats.length} times (${Math.round(beats.length / evs.length * 100)}%), missed ${miss.length}` : ""}</p></div>
+      <a class="btn ghost" href="#stock-${encodeURIComponent(t)}">Stock page ›</a></div>`;
+    if (!evs.length) return h + `<div class="empty"><strong>No reports in these years</strong>${esc(sym(t))} has data from ${F.events.at(-1).d.slice(0, 4)} to ${F.events[0].d.slice(0, 4)}.</div>`;
+    if (evs.length < 8) h += `<div class="demo">Only ${evs.length} reports in this range: too few to read much into the percentages. Pick more years.</div>`;
+    // the plain-language summary
+    const sb = ernStats(beats, "m"), sm = ernStats(miss, "m"), a20 = ernStats(beats, "d20");
+    const parts = [];
+    if (sb) parts.push(`When ${esc(sym(t))} beat the estimate, it rose on the earnings day <b>${Math.round(sb.up)}%</b> of the time (average ${ernPct(sb.avg)}).`);
+    if (sm) parts.push(`When it missed, it rose <b>${Math.round(sm.up)}%</b> of the time (average ${ernPct(sm.avg)}).`);
+    if (a20) parts.push(`Buying at the close of a beat day, it was higher 20 trading days later <b>${Math.round(a20.up)}%</b> of the time (average ${ernPct(a20.avg)}).`);
+    h += `<div class="card ernsum"><p>${parts.join(" ")}</p></div>`;
+    const today = localToday(), nx = (S.cal?.earnings || []).find(x => x.ticker === t && x.date >= today);
+    if (nx) h += nextEarningsCard(t);
+    h += `<div class="erngrid">${ernCard("After a beat", "up", beats, "beat", from, to)}${ernCard("After a miss", "down", miss, "miss", from, to)}</div>`;
+    h += `<p class="hint" style="margin:6px 0 14px">"On earnings day" is the close before the report to the close of the first session that trades on it. The later columns start from that close, so they show what happened if you bought <em>after</em> the news. The thin mark on each bar is the S&amp;P 100 average in the same years.</p>`;
+    h += ernChart(evs);
+    h += `<h2>Every report</h2><div class="tablewrap"><table class="bt erntab"><thead><tr><th>Date</th><th>EPS est.</th><th>Reported</th><th>Surprise</th><th>Earnings day</th><th>20 days later</th></tr></thead><tbody>${evs.slice(0, S.ernAll ? evs.length : 12).map(e => {
+      const k = ernKind(e);
+      return `<tr><td>${fmtDate(e.d, { day: "numeric", month: "short", year: "numeric" })}${e.t ? `<small>${e.t === "bmo" ? "before open" : "after close"}</small>` : ""}</td><td>${eps(e.e)}</td><td>${eps(e.r)}</td>
+        <td class="${k === "beat" ? "up" : k === "miss" ? "down" : ""}">${e.s == null ? "–" : ernPct(e.s)}</td><td class="${e.m >= 0 ? "up" : "down"}">${ernPct(e.m)}</td><td class="${e.d20 == null ? "" : e.d20 >= 0 ? "up" : "down"}">${e.d20 == null ? "–" : ernPct(e.d20)}</td></tr>`;
+    }).join("")}</tbody></table></div>${evs.length > 12 && !S.ernAll ? `<p style="margin:10px 0 0"><button class="btn ghost" data-ernall>Show all ${evs.length} reports</button></p>` : ""}`;
+    return h + ernFine();
+  }
+  const ernFine = () => `<p class="fine">Past reports since 2010 from Yahoo Finance: analysts' EPS estimate and reported EPS (adjusted), daily prices with dividends and splits. Beat = reported EPS above the estimate. Prices only, no fees or taxes. Past reactions don't promise future ones. For information only, not investment advice.</p>`;
 
   function viewCalendar(arg) {
     const C = S.cal;
@@ -3525,9 +3678,9 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
 
   function route() {
     const r = (location.hash || "#alerts").slice(1);
-    const tab = r === "news" || r === "buzz" || r === "mood" ? "news" : r.startsWith("calendar") ? "calendar" : r.startsWith("strateg") ? "strategies" : r.startsWith("stock") || r === "heatmap" ? "stocks" : r === "notify" ? "notify" : r.startsWith("brokers") ? "brokers" : r.startsWith("learn") ? "learn" : r === "practice" ? "practice" : "alerts";
+    const tab = r === "news" || r === "buzz" || r === "mood" || r === "earnings" || r.startsWith("earnings-") ? "news" : r.startsWith("calendar") ? "calendar" : r.startsWith("strateg") ? "strategies" : r.startsWith("stock") || r === "heatmap" ? "stocks" : r === "notify" ? "notify" : r.startsWith("brokers") ? "brokers" : r.startsWith("learn") ? "learn" : r === "practice" ? "practice" : "alerts";
     if (r === "winners" || r === "record") S.alView = r; else if (tab === "alerts" && !r.startsWith("alert-")) S.alView = "alerts";
-    const list = { alerts: S.alView === "winners" ? viewWinners : S.alView === "record" ? viewRecord : viewAlerts, stocks: viewStocks, strategies: viewStrategies, notify: viewNotify, brokers: viewBrokers, learn: viewLearn, practice: viewPractice, news: r === "buzz" ? viewBuzz : r === "mood" ? viewMood : viewNews, calendar: () => viewCalendar(r.slice(9)) }[tab];
+    const list = { alerts: S.alView === "winners" ? viewWinners : S.alView === "record" ? viewRecord : viewAlerts, stocks: viewStocks, strategies: viewStrategies, notify: viewNotify, brokers: viewBrokers, learn: viewLearn, practice: viewPractice, news: r === "buzz" ? viewBuzz : r === "mood" ? viewMood : r === "earnings" || r.startsWith("earnings-") ? () => viewEarnings(r.slice(9)) : viewNews, calendar: () => viewCalendar(r.slice(9)) }[tab];
     let detail = detailFor(r), sel = detail ? r : null;
     charts.length = 0;
 
@@ -3680,6 +3833,9 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
     if (cmod) { setPref("calMode", cmod.dataset.cmode); rerender(); return; }
     const bsrt = e.target.closest("[data-bsort]");
     if (bsrt) { S.buzzSort = bsrt.dataset.bsort; rerender(); return; }
+    if (e.target.closest("[data-ernall]")) { S.ernAll = true; rerender(); return; }
+    const er = e.target.closest("[data-ernrange]");
+    if (er) { setPref("ernFrom", +er.dataset.ernrange); setPref("ernTo", 9999); rerender(); return; }
     const mf = e.target.closest("[data-moodf]");
     if (mf) { S.moodF = mf.dataset.moodf; rerender(); return; }
     const mr = e.target.closest("[data-moodrel]");
@@ -3706,12 +3862,33 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
     }
   });
   app.addEventListener("change", e => {
+    const ey = e.target.closest("[data-ernfrom], [data-ernto]");
+    if (ey) { setPref(ey.matches("[data-ernfrom]") ? "ernFrom" : "ernTo", +ey.value); rerender(); return; }
     const cf = e.target.closest("[data-cmpfrom]");
     if (cf) { setPref("cmpFrom." + (S.market || "stocks"), +cf.value); rerender(); }
     const lf = e.target.closest("[data-labfrom]");
     if (lf) { const st = labState(); st.from = +lf.value; saveLab(st); runLab(); }
   });
   app.addEventListener("input", e => labInput(e));
+  app.addEventListener("submit", e => {
+    const f = e.target.closest("[data-ernform]");
+    if (!f) return;
+    e.preventDefault();
+    const q = f.t.value.trim(), ql = q.toLowerCase(), list = S.ern?.index?.stocks?.map(x => x.t) || [];
+    // a ticker (BRK.B or BRK-B) or a company name
+    const t = list.find(x => x.toLowerCase() === ql.replace(".", "-") || sym(x).toLowerCase() === ql)
+      || list.find(x => (S.stockBy[x]?.name || "").toLowerCase() === ql)
+      || list.find(x => (S.stockBy[x]?.name || "").toLowerCase().startsWith(ql))
+      || q.toUpperCase().replace(".", "-");
+    if (t) location.hash = "earnings-" + t;
+  });
+  // picking a stock from the suggestions runs the test straight away
+  app.addEventListener("input", e => {
+    if (!e.target.closest("[data-ernform]") || (e.inputType && e.inputType !== "insertReplacementText")) return;
+    const v = e.target.value.trim().toLowerCase();
+    const t = S.ern?.index?.stocks?.find(x => sym(x.t).toLowerCase() === v);
+    if (t) location.hash = "earnings-" + t.t;
+  });
   // a list control changed: on desktop jump to the new first item, on phone just redraw the list
   function goList() {
     const tab = S.lastTab || "alerts", base = tab === "alerts" && (S.alView === "winners" || S.alView === "record") ? "#" + S.alView : "#" + tab;

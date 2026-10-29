@@ -46,17 +46,23 @@ def load_names() -> dict:
     return json.loads(p.read_text()) if p.exists() else {}
 
 
+PAUSE = 2.0          # seconds between stocks: Yahoo throttles fast bursts of these lookups
+BACKOFF = [15, 45, 90]
+
+
 def get_reports(t: str) -> pd.DataFrame:
-    for attempt in range(3):
+    for wait in BACKOFF + [None]:
         try:
             df = yf.Ticker(t).get_earnings_dates(limit=100)
             if df is not None and len(df):
                 break
+            log("  empty answer", t)
         except Exception as ex:  # noqa: BLE001
-            log("  retry", t, ex)
-        time.sleep(2 + attempt * 3)
-    else:
-        return pd.DataFrame()
+            log("  failed", t, str(ex)[:120])
+        if wait is None:
+            return pd.DataFrame()
+        log(f"  waiting {wait}s")
+        time.sleep(wait)
     df = df.rename(columns={"EPS Estimate": "est", "Reported EPS": "rep"})
     df = df.dropna(subset=["est", "rep"]).sort_index()
     idx = df.index.tz_convert("America/New_York") if df.index.tz is not None else df.index
@@ -106,8 +112,10 @@ def main():
     spy = prices.pop("SPY")["close"]
     log("prices:", len(prices))
 
-    index, totals = [], {}          # totals[year][beat|miss|all][metric] = [n, ups, sum]
+    fresh, failed = 0, []
     for k, t in enumerate(tickers):
+        if k:
+            time.sleep(PAUSE)
         px = prices.get(t)
         if px is None:
             continue
@@ -137,7 +145,27 @@ def main():
                   "g": pct(ro / pre - 1), "m": pct(rc / pre - 1), "mx": pct(rc / pre - 1 - spy_ret(d0, dr)),
                   "d1": pct(fwd(1)), "d5": pct(fwd(5)), "d20": pct(fwd(20)), "d20x": pct(fwd_x(20))}
             events.append(ev)
-            kind = "beat" if rep > est else "miss" if rep < est else "inline"
+        events.sort(key=lambda x: x["d"], reverse=True)
+        if not events:
+            failed.append(t)            # its previous file (if any) is kept
+            log(f"{k + 1}/{len(tickers)} {t}: no reports, keeping the last file")
+            continue
+        (OUT / f"{t}.json").write_text(json.dumps({"ticker": t, "name": names.get(t, t), "events": events},
+                                                  separators=(",", ":")))
+        fresh += 1
+        log(f"{k + 1}/{len(tickers)} {t}: {len(events)} reports")
+    log(f"updated {fresh}, failed {len(failed)}: {' '.join(failed)}")
+
+    # the index covers every stock with a file (this run's or an earlier one's)
+    index, totals = [], {}          # totals[year][beat|miss|all][metric] = [n, ups, sum]
+    for t in tickers:
+        f = OUT / f"{t}.json"
+        if not f.exists():
+            continue
+        events = json.loads(f.read_text())["events"]
+        index.append({"t": t, "n": len(events), "from": events[-1]["d"][:4], "to": events[0]["d"][:4]})
+        for ev in events:
+            kind = "beat" if ev["r"] > ev["e"] else "miss" if ev["r"] < ev["e"] else "inline"
             y = totals.setdefault(ev["d"][:4], {})
             for grp in ("all", kind):
                 g = y.setdefault(grp, {})
@@ -147,22 +175,13 @@ def main():
                         continue
                     a = g.setdefault(mtr, [0, 0, 0.0])
                     a[0] += 1; a[1] += v > 0; a[2] = round(a[2] + v, 2)
-        events.sort(key=lambda x: x["d"], reverse=True)
-        if not events:
-            log(f"{k + 1}/{len(tickers)} {t}: no reports")
-            continue
-        (OUT / f"{t}.json").write_text(json.dumps({"ticker": t, "name": names.get(t, t), "events": events},
-                                                  separators=(",", ":")))
-        index.append({"t": t, "n": len(events), "from": events[-1]["d"][:4], "to": events[0]["d"][:4]})
-        log(f"{k + 1}/{len(tickers)} {t}: {len(events)} reports")
-
-    if len(index) < len(tickers) * 0.6:
-        raise SystemExit(f"only {len(index)} stocks came back: keeping the old files")
+    if not index:
+        raise SystemExit("no earnings data at all")
     (OUT / "index.json").write_text(json.dumps({
         "generated_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
         "source": "Yahoo Finance (EPS estimates and reported EPS, daily prices)",
         "stocks": index, "totals": dict(sorted(totals.items()))}, separators=(",", ":")))
-    log("written", len(index), "stocks")
+    log("index:", len(index), "stocks")
 
 
 if __name__ == "__main__":
