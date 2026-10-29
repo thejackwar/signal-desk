@@ -17,7 +17,8 @@ docs/                    the website (served by GitHub Pages)
   lab.js                 Strategy Lab (indicator settings, exit rule, take profit / stop loss); tests: tests/lab/test_parity.py, tests/lab/test_stops.mjs
   rating.js              technical rating (Strong sell … Strong buy) on each stock page; test: tests/rating/test_rating.py
   trendlines.html/.js    automatic trendlines + support/resistance, stocks and crypto (data from worker/)
-  data/sentiment.json    News mood: per-stock headline tone (written by engine/sentiment.py, FinBERT, in the hourly news job)
+  data/sentiment.json    News mood: per-stock headline tone from Google News, established outlets (engine/sentiment.py, FinBERT, hourly news job)
+  research/mood-compare/ News mood source test, Google vs Alpaca, moods only (engine/mood_compare.py; until 3 Nov 2026)
   data/calendar.json     upcoming earnings, IPOs, economy (written by engine/events.py)
   data/topdown/          Top-Down alerts (written by engine/topdown.py)
   data/brokers.json      Brokers page: facts and links (edit by hand; affiliate links go here)

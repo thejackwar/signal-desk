@@ -21,7 +21,7 @@ jobs:
       - run: pip install feedparser
       - name: Collect stock, crypto and commodity headlines
         run: python engine/news.py
-      # News mood: per-stock headlines from Alpaca, scored by FinBERT (engine/sentiment.py).
+      # News mood: per-stock Google News headlines from established outlets, scored by FinBERT (engine/sentiment.py).
       # Kept separate from the headlines: if anything here fails, the headlines still publish.
       - name: Cache the FinBERT model
         uses: actions/cache@v4
@@ -34,18 +34,43 @@ jobs:
         run: |
           pip install torch --index-url https://download.pytorch.org/whl/cpu
           pip install "transformers>=4.40"
-      - name: News mood for each stock
+      - name: News mood for each stock (Google News, shown on the website)
         if: steps.finbert.outcome == 'success'
+        continue-on-error: true
+        run: python engine/sentiment.py
+      # Source test until 3 Nov 2026: the same scoring on Alpaca/Benzinga headlines, kept in the
+      # Actions cache (private), never published. Only each stock's mood is saved, in research/.
+      - name: "Source test: restore Alpaca state"
+        if: steps.finbert.outcome == 'success'
+        uses: actions/cache/restore@v4
+        with:
+          path: ~/mood-test
+          key: alpaca-mood-${{ github.run_id }}
+          restore-keys: alpaca-mood-
+      - name: "Source test: Alpaca mood + daily comparison"
+        if: steps.finbert.outcome == 'success'
+        id: moodtest
         continue-on-error: true
         env:
           ALPACA_KEY_ID: ${{ secrets.ALPACA_KEY_ID }}
           ALPACA_SECRET_KEY: ${{ secrets.ALPACA_SECRET_KEY }}
-        run: python engine/sentiment.py
+        run: |
+          if [[ "$(date -u +%F)" > "2026-11-03" ]]; then echo "Source test finished"; exit 0; fi
+          python engine/sentiment.py --source alpaca --out ~/mood-test/alpaca.json
+          python engine/mood_compare.py docs/data/sentiment.json ~/mood-test/alpaca.json research/mood-compare
+      - name: "Source test: keep Alpaca state"
+        if: steps.moodtest.outcome == 'success'
+        continue-on-error: true
+        uses: actions/cache/save@v4
+        with:
+          path: ~/mood-test
+          key: alpaca-mood-${{ github.run_id }}
       - name: Publish
         run: |
           git config user.name "signal-desk-bot"
           git config user.email "signal-desk-bot@users.noreply.github.com"
           git add docs/data    # a market with nothing new yet may have no file, so add the folder
+          git add research 2>/dev/null || true   # news mood source test snapshots (until 3 Nov 2026)
           git diff --cached --quiet || git commit -m "News $(date -u +%FT%H:%M)"
           git pull --rebase
           git push

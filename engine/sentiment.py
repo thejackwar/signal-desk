@@ -1,11 +1,16 @@
 """
 News mood: is the latest news on each S&P 100 stock bullish or bearish?
 
-  ALPACA_KEY_ID=... ALPACA_SECRET_KEY=... python engine/sentiment.py
-  python engine/sentiment.py --demo        # made-up headlines and a simple stand-in scorer, no internet
+  python engine/sentiment.py                       # Google News (what the website shows)
+  ALPACA_KEY_ID=... ALPACA_SECRET_KEY=... python engine/sentiment.py --source alpaca --out FILE
+  python engine/sentiment.py --demo                # made-up headlines and a simple stand-in scorer, no internet
 
-1. Headlines tagged with each stock come from Alpaca's news feed (Benzinga), the same Alpaca
-   account the Top-Down alerts use (secrets ALPACA_KEY_ID / ALPACA_SECRET_KEY).
+1. Headlines: Google News searches per company (the same searches as the "Most mentioned" page),
+   kept only from established news outlets (TRUSTED below), only when the headline names the
+   company, and with the same story from several outlets merged into one. Each hourly run
+   refreshes a third of the stocks, so every stock is searched every 3 hours.
+   "--source alpaca" uses Alpaca's news feed (Benzinga) instead; Alpaca's terms don't allow
+   republishing its data, so that is only for private comparisons, never the public site.
 2. Each new headline is scored by FinBERT (ProsusAI/finbert), a free language model trained on
    financial news: probability positive minus probability negative, from -1 to +1.
    Scores are kept in the output file, so each run only scores headlines it hasn't seen.
@@ -47,6 +52,27 @@ HEADLINE_CUT = 0.35      # a headline scoring above +0.35 is bullish, below -0.3
 MOOD_CUTS = (0.10, 0.35) # stock score: leaning beyond 0.10, clear beyond 0.35
 MAX_PAGES = 80
 NOT_NAMED = 0.25         # weight of a headline that is tagged with the stock but doesn't name it
+GOOGLE_PAUSE = 1.3       # seconds between Google News searches, to stay polite
+SAME_STORY = 0.5         # headlines sharing this share of their words are the same story
+
+# Established outlets kept from Google News (domain -> name shown). Left out on purpose: press-release
+# wires (always upbeat), and sites built on "3 stocks to buy now" style articles.
+TRUSTED = {
+    "reuters.com": "Reuters", "apnews.com": "AP", "bloomberg.com": "Bloomberg", "wsj.com": "WSJ",
+    "ft.com": "Financial Times", "cnbc.com": "CNBC", "marketwatch.com": "MarketWatch", "barrons.com": "Barron's",
+    "finance.yahoo.com": "Yahoo Finance", "yahoo.com": "Yahoo Finance", "investors.com": "Investor's Business Daily",
+    "morningstar.com": "Morningstar", "economist.com": "The Economist", "nytimes.com": "New York Times",
+    "washingtonpost.com": "Washington Post", "theguardian.com": "The Guardian", "bbc.com": "BBC", "bbc.co.uk": "BBC",
+    "cnn.com": "CNN", "foxbusiness.com": "Fox Business", "axios.com": "Axios", "fortune.com": "Fortune",
+    "forbes.com": "Forbes", "businessinsider.com": "Business Insider", "latimes.com": "Los Angeles Times",
+    "usatoday.com": "USA Today", "nbcnews.com": "NBC News", "cbsnews.com": "CBS News", "abcnews.go.com": "ABC News",
+    "techcrunch.com": "TechCrunch", "theverge.com": "The Verge", "theinformation.com": "The Information",
+    "statnews.com": "STAT", "fiercepharma.com": "Fierce Pharma", "fiercebiotech.com": "Fierce Biotech",
+    "spglobal.com": "S&P Global", "americanbanker.com": "American Banker", "freightwaves.com": "FreightWaves",
+    "nikkei.com": "Nikkei Asia", "asia.nikkei.com": "Nikkei Asia", "politico.com": "Politico",
+}
+STOP = set("the a an and or of to in on for with at by from as is are its it this that after over into says said new than "
+           "will be has have shares stock stocks".split())
 
 
 def iso(dt: datetime) -> str:
@@ -70,6 +96,101 @@ def alpaca_symbol(t: str) -> str:
 
 
 # ------------------------------------------------------------------ fetch
+def words(title: str) -> set[str]:
+    return {w for w in re.findall(r"[a-z0-9$%.]+", title.lower()) if len(w) > 2 and w not in STOP}
+
+
+def same_story(a: set[str], b: set[str]) -> bool:
+    return bool(a and b) and len(a & b) / len(a | b) >= SAME_STORY
+
+
+def trusted(url: str) -> str | None:
+    host = urllib.parse.urlparse(url).netloc.lower().removeprefix("www.")
+    while host:
+        if host in TRUSTED:
+            return TRUSTED[host]
+        host = host.partition(".")[2] if host.count(".") > 1 else ""
+    return None
+
+
+def fetch_google(tickers: list[str], window: str) -> list[dict]:
+    """Google News RSS per company, trusted outlets only, headline must name the company."""
+    import hashlib
+    from email.utils import parsedate_to_datetime
+    sys.path.insert(0, str(ENGINE))
+    import news
+    from mentions import query_for
+    ms = news.matchers("stocks")
+    out = []
+    for k, t in enumerate(tickers):
+        name = NAMES.get(t, [t])[0]
+        q = query_for(t, name, "stocks")
+        phrases = re.findall(r'"([^"]+)"', q)
+        url = "https://news.google.com/rss/search?" + urllib.parse.urlencode(
+            {"q": f"{q} when:{window}", "hl": "en-US", "gl": "US", "ceid": "US:en"})
+        xml = None
+        for attempt in range(3):
+            try:
+                req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0 (InvestmentCenterSignals)"})
+                with urllib.request.urlopen(req, timeout=30) as r:
+                    xml = r.read().decode("utf-8", "replace")
+                break
+            except Exception as e:
+                print(f"  {t}: google news retry ({e})")
+                time.sleep(GOOGLE_PAUSE * 4)
+        time.sleep(GOOGLE_PAUSE)
+        if xml is None:
+            continue
+        kept = 0
+        for it in re.findall(r"<item>(.*?)</item>", xml, re.S):
+            g = lambda tag: (re.search(rf"<{tag}[^>]*>(.*?)</{tag}>", it, re.S) or [None, ""])[1]
+            src_url = (re.search(r'<source url="([^"]+)"', it) or [None, ""])[1]
+            src = trusted(src_url)
+            if not src:
+                continue
+            title = html_unescape(g("title"))
+            title = re.sub(r"\s+-\s+[^-]+$", "", title).strip()        # Google adds " - Outlet"
+            named = t in news.tag(title, ms) or any(p in title for p in phrases)
+            if not title or not named:
+                continue
+            try:
+                when = parsedate_to_datetime(g("pubDate")).astimezone(timezone.utc)
+            except Exception:
+                continue
+            out.append({"id": "g" + hashlib.sha1(title.lower().encode()).hexdigest()[:12], "t": iso(when), "title": title,
+                        "url": html_unescape(g("link")).strip(), "src": src, "syms": [t], "nsym": 1, "about": [t], "k": "g"})
+            kept += 1
+        print(f"  {t}: {kept} headlines")
+    return out
+
+
+def html_unescape(s: str) -> str:
+    import html
+    s = re.sub(r"<!\[CDATA\[(.*?)\]\]>", r"\1", s, flags=re.S)
+    return html.unescape(html.unescape(s))
+
+
+def merge_google(items: dict, fetched: list[dict]) -> list[dict]:
+    """Add fetched Google headlines to items, merging the same story (from any outlet, found for any
+    stock) into one headline that lists every stock it names. Returns the headlines that are new."""
+    new = []
+    sig = {i: words(x["title"]) for i, x in items.items()}
+    for x in sorted(fetched, key=lambda x: x["t"]):
+        w = words(x["title"])
+        twin = x["id"] if x["id"] in items else next((i for i, ws in sig.items() if same_story(w, ws)), None)
+        if twin:
+            y = items[twin]
+            y["syms"] = y["about"] = sorted(set(y["syms"]) | set(x["syms"]))
+            y["nsym"] = len(y["syms"])
+            if x["src"] not in y.get("also", []) and x["src"] != y["src"]:
+                y.setdefault("also", []).append(x["src"])   # other outlets that ran the story
+            continue
+        items[x["id"]] = x
+        sig[x["id"]] = w
+        new.append(x)
+    return new
+
+
 def fetch_alpaca(tickers: list[str], start: datetime, end: datetime) -> list[dict]:
     key, secret = os.environ.get("ALPACA_KEY_ID"), os.environ.get("ALPACA_SECRET_KEY")
     by_alp = {alpaca_symbol(t): t for t in tickers}
@@ -200,8 +321,8 @@ def weight(item: dict, t: str, now: datetime) -> float:
 
 
 def is_named(item: dict, t: str) -> bool:
-    """Is the headline about this company? Named in it, or the only company Alpaca tagged."""
-    return t in item.get("about", item["syms"]) or item.get("nsym", len(item["syms"])) == 1
+    """Is the headline about this company? Named in it, or (Alpaca) the only company tagged."""
+    return t in item.get("about", item["syms"]) or (item.get("k") != "g" and item.get("nsym", len(item["syms"])) == 1)
 
 
 def named_in(items: list[dict]) -> None:
@@ -210,7 +331,8 @@ def named_in(items: list[dict]) -> None:
     import news
     ms = news.matchers("stocks")
     for x in items:
-        x["about"] = [t for t in news.tag(x["title"], ms) if t in x["syms"]]
+        if x.get("k") != "g":   # Google headlines were matched to their company when fetched
+            x["about"] = [t for t in news.tag(x["title"], ms) if t in x["syms"]]
 
 
 def mood_of(score: float) -> str:
@@ -258,13 +380,16 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--demo", action="store_true")
     ap.add_argument("--out", default=str(OUT))
+    ap.add_argument("--source", choices=["google", "alpaca"], default="google")
+    ap.add_argument("--all", action="store_true", help="search every stock this run (default: a third, by the hour)")
     args = ap.parse_args()
+    src = "demo" if args.demo else args.source
     out_path = Path(args.out)
     tickers = load_tickers()
     now = datetime.now(timezone.utc)
     window_start = now - timedelta(days=WINDOW_DAYS)
 
-    if not args.demo and not (os.environ.get("ALPACA_KEY_ID") and os.environ.get("ALPACA_SECRET_KEY")):
+    if src == "alpaca" and not (os.environ.get("ALPACA_KEY_ID") and os.environ.get("ALPACA_SECRET_KEY")):
         print("Skipped: add the ALPACA_KEY_ID and ALPACA_SECRET_KEY secrets to the repository (see README).")
         return
 
@@ -272,19 +397,26 @@ def main():
     if out_path.exists() and not args.demo:
         try:
             prev = json.loads(out_path.read_text())
-            old = {x["id"]: x for x in prev.get("items", []) if parse(x["t"]) >= window_start}
+            if prev.get("source_id", "alpaca") == src:   # a file from the other source starts over
+                old = {x["id"]: x for x in prev.get("items", []) if parse(x["t"]) >= window_start}
         except (ValueError, KeyError):
             old = {}
-    # refetch the last 6 hours too, in case a headline was tagged late; older ones are kept from the file
-    since = window_start if not old else max(window_start, max(parse(x["t"]) for x in old.values()) - timedelta(hours=6))
-    fetched = (fetch_demo if args.demo else fetch_alpaca)(tickers, since, now)
-    print(f"{len(fetched)} headlines since {iso(since)} ({len(old)} already scored)")
-
     items = dict(old)
-    new = [x for x in fetched if x["id"] not in old and x["nsym"] <= MAX_SYMBOLS]
-    for x in fetched:   # keep tags fresh on ones we already scored
-        if x["id"] in items:
-            items[x["id"]].update(syms=x["syms"], nsym=x["nsym"])
+    if src == "google":
+        # first run: every stock over the whole window; then a third of the stocks each hour, last day
+        part = tickers if (args.all or not old) else [t for i, t in enumerate(tickers) if i % 3 == now.hour % 3]
+        fetched = fetch_google(part, f"{WINDOW_DAYS}d" if not old else "1d")
+        print(f"{len(fetched)} trusted headlines for {len(part)} stocks ({len(old)} already scored)")
+        new = merge_google(items, [x for x in fetched if parse(x["t"]) >= window_start])
+    else:
+        # refetch the last 6 hours too, in case a headline was tagged late; older ones are kept from the file
+        since = window_start if not old else max(window_start, max(parse(x["t"]) for x in old.values()) - timedelta(hours=6))
+        fetched = (fetch_demo if args.demo else fetch_alpaca)(tickers, since, now)
+        print(f"{len(fetched)} headlines since {iso(since)} ({len(old)} already scored)")
+        new = [x for x in fetched if x["id"] not in old and x["nsym"] <= MAX_SYMBOLS]
+        for x in fetched:   # keep tags fresh on ones we already scored
+            if x["id"] in items:
+                items[x["id"]].update(syms=x["syms"], nsym=x["nsym"])
     if new:
         scorer = KeywordScorer() if args.demo else FinBert()
         for x, s in zip(new, scorer([x["title"] for x in new])):
@@ -300,10 +432,11 @@ def main():
     out = {
         "generated_at": now.strftime("%Y-%m-%dT%H:%M+00:00"), "demo": args.demo,
         "model": "Keyword stand-in (demo)" if args.demo else "FinBERT (ProsusAI/finbert)",
-        "source": "Demo headlines" if args.demo else "Alpaca news (Benzinga)",
+        "source": {"demo": "Demo headlines", "alpaca": "Alpaca news (Benzinga)", "google": "Google News, established outlets only"}[src],
+        "source_id": src,
         "window_days": WINDOW_DAYS, "baseline": round(base, 3), "half_life_h": HALF_LIFE_H, "headline_cut": HEADLINE_CUT, "mood_cuts": list(MOOD_CUTS),
         "stocks": stocks,
-        "items": [{k: x[k] for k in ("id", "t", "title", "url", "src", "syms", "nsym", "about", "f", "s")} for x in keep],
+        "items": [{k: x[k] for k in ("id", "t", "title", "url", "src", "syms", "nsym", "about", "f", "s", "k", "also") if k in x} for x in keep],
     }
     out_path.parent.mkdir(parents=True, exist_ok=True)
     out_path.write_text(json.dumps(out, separators=(",", ":")))
