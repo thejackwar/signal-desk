@@ -44,6 +44,7 @@ UA = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.3
 DERIV_COINS = ["BTC", "ETH", "SOL", "XRP", "DOGE", "BNB", "ADA", "LINK", "AVAX", "LTC"]
 LONG_COINS = ["BTC", "ETH", "XRP", "BNB", "SOL", "DOGE", "ADA", "TRX", "LINK", "LTC", "DOT", "AVAX"]
 HALVING_EVERY = 210_000
+ERRORS: list[str] = []          # written into the file, so a failing source shows up without the logs
 
 
 def get(url: str, raw: bool = False, tries: int = 3):
@@ -67,6 +68,7 @@ def part(name: str, fn, out: dict, sources: list, label: str):
             print(f"  ok   {name}")
     except Exception as e:
         print(f"  !    {name}: {e}")
+        ERRORS.append(f"{name}: {type(e).__name__}: {e}"[:300])
 
 
 # ------------------------------------------------------------------ sources
@@ -144,6 +146,7 @@ def from_yahoo(out: dict, sources: list):
         px = yahoo(coins + ["QQQ", "GLD"], "3y")
     except Exception as e:
         print(f"  !    yahoo: {e}")
+        ERRORS.append(f"yahoo: {type(e).__name__}: {e}"[:300])
         return
     day = lambda i: i.strftime("%Y-%m-%d")
     btc = px["BTC-USD"].dropna()
@@ -154,6 +157,7 @@ def from_yahoo(out: dict, sources: list):
         print("  ok   ethbtc")
     except Exception as e:
         print(f"  !    ethbtc: {e}")
+        ERRORS.append(f"ethbtc: {type(e).__name__}: {e}"[:300])
     # altcoin season: share of the other coins with a better 90-day return than Bitcoin
     try:
         crypto = px[[c for c in coins if c in px]].dropna(how="all")
@@ -169,6 +173,7 @@ def from_yahoo(out: dict, sources: list):
         print("  ok   altseason")
     except Exception as e:
         print(f"  !    altseason: {e}")
+        ERRORS.append(f"altseason: {type(e).__name__}: {e}"[:300])
     # correlation with the Nasdaq 100 and gold, on US trading days
     try:
         us = px[["BTC-USD", "QQQ", "GLD"]].dropna()
@@ -184,6 +189,7 @@ def from_yahoo(out: dict, sources: list):
         print("  ok   corr")
     except Exception as e:
         print(f"  !    corr: {e}")
+        ERRORS.append(f"corr: {type(e).__name__}: {e}"[:300])
     sources.append("Yahoo Finance")
     return btc
 
@@ -241,11 +247,11 @@ def build_market():
     part("etf", etf_flows, out, sources, "Farside Investors")
     part("halving", halving, out, sources, "blockchain.info")
     for k, v in old.items():                     # a source that failed this time keeps its last copy
-        if k not in out and k not in ("generated_at", "sources"):
+        if k not in out and k not in ("generated_at", "sources", "errors"):
             out[k] = v
     if len(out) < 2:
         sys.exit("Too few sources worked: market.json left as it was.")
-    out = {"generated_at": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M+00:00"), "sources": sources, **out}
+    out = {"generated_at": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M+00:00"), "sources": sources, "errors": ERRORS, **out}
     path.write_text(json.dumps(out, separators=(",", ":")))
     print(f"Wrote {path.relative_to(ROOT)} ({path.stat().st_size // 1024} KB)")
 
