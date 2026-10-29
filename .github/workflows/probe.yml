@@ -1,0 +1,42 @@
+name: Probe data sources (temporary)
+on: { workflow_dispatch: {} }
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - run: pip install yfinance requests
+      - run: |
+          python - <<'PY'
+          import requests, json
+          U = {
+           "fng": "https://api.alternative.me/fng/?limit=3",
+           "cg_global": "https://api.coingecko.com/api/v3/global",
+           "cg_dom_chart": "https://api.coingecko.com/api/v3/global/market_cap_chart?days=30",
+           "okx_fund": "https://www.okx.com/api/v5/public/funding-rate?instId=BTC-USDT-SWAP",
+           "okx_fundhist": "https://www.okx.com/api/v5/public/funding-rate-history?instId=BTC-USDT-SWAP&limit=3",
+           "okx_oi": "https://www.okx.com/api/v5/public/open-interest?instType=SWAP&instId=BTC-USDT-SWAP",
+           "okx_ls": "https://www.okx.com/api/v5/rubik/stat/contracts/long-short-account-ratio?ccy=BTC&period=1D",
+           "okx_candles": "https://www.okx.com/api/v5/market/candles?instId=HBAR-USDT&bar=5m&limit=3",
+           "farside_btc": "https://farside.co.uk/btc/",
+           "farside_eth": "https://farside.co.uk/eth/",
+           "llama_emissions": "https://api.llama.fi/emissions",
+           "llama_unlocks": "https://defillama-datasets.llama.fi/emissions/index",
+           "cryptorank": "https://api.cryptorank.io/v0/token-unlock-dashboard",
+           "tftc": "https://www.tftc.io/bitcoin-etf-flows",
+           "blockchain_info": "https://api.blockchain.info/stats",
+           "mempool_diff": "https://mempool.space/api/v1/difficulty-adjustment",
+           "cmc_fng": "https://api.coinmarketcap.com/data-api/v3/fear-greed/chart?start=1700000000&end=1700500000",
+          }
+          for k, u in U.items():
+              try:
+                  r = requests.get(u, timeout=20, headers={"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124 Safari/537.36"})
+                  print(f"### {k} {r.status_code} {r.headers.get('content-type')} {len(r.text)}\n{r.text[:700]}\n")
+              except Exception as e:
+                  print(f"### {k} ERROR {e}\n")
+          import yfinance as yf
+          for t in ["BTC-EUR", "ETH-EUR", "QQQ", "GC=F", "IBIT", "EURUSD=X"]:
+              df = yf.download(t, period="max", progress=False, auto_adjust=False)
+              print(t, len(df), df.index[0] if len(df) else None)
+          PY
