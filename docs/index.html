@@ -1678,19 +1678,26 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
       <span class="px"><b class="ret ${r >= 0 ? "up" : "down"}">${pctTxt(r)}</b><span class="since">${a.since_days} session${a.since_days > 1 ? "s" : ""}</span></span></a>`;
   }
   function viewWinners() {
-    const scope = pref("winScope", "all"), dir = pref("winDir", "both"), per = pref("winPer", 3);
+    // Long only is the default. Saved as "winSide" (older versions saved "winDir", which defaulted to long & short).
+    const scope = pref("winScope", "all"), dir = pref("winSide", "long"), per = pref("winPer", 3), span = pref("winSpan", "all");
     S.firstSel = null;
     let all = (S.feed?.alerts || []).filter(a => a.since_days > 0 && typeof a.since === "number" && forMarket(S.byId[a.strategy]));
     if (scope === "followed") all = all.filter(a => S.follow.has(a.strategy));
     if (dir === "long") all = all.filter(a => a.side === "bullish");
+    // Period: the latest finished alert day, the last 5 sessions (a week), the last 21 sessions (a month), or everything kept.
+    if (span === "day") { const last = all.reduce((m, a) => a.date > m ? a.date : m, ""); all = all.filter(a => a.date === last); }
+    else if (span === "week") all = all.filter(a => a.since_days <= 5);
+    else if (span === "month") all = all.filter(a => a.since_days <= 21);
     const stamp = S.feed ? `<div class="stamp">${esc(S.feed.universe)}<br>close ${fmtDate(S.feed.as_of, { day: "numeric", month: "short" })}</div>` : "";
     let h = header("Best trades", null, stamp) + alertsSwitch("winners") + demoNote();
     h += `<div class="tools"><span class="tg"><label>Alerts</label><div class="seg sm" role="group" aria-label="Which alerts">${[["all", "All strategies"], ["followed", "Followed"]].map(([v, t]) =>
       `<button data-winscope="${v}" aria-pressed="${scope === v}">${t}</button>`).join("")}</div></span>
-      <span class="tg"><label>Trades</label><div class="seg sm" role="group" aria-label="Trade direction">${[["both", "Long & short"], ["long", "Long only"]].map(([v, t]) =>
+      <span class="tg"><label>Trades</label><div class="seg sm" role="group" aria-label="Trade direction">${[["long", "Long only"], ["both", "Long & short"]].map(([v, t]) =>
       `<button data-windir="${v}" aria-pressed="${dir === v}">${t}</button>`).join("")}</div></span>
       <span class="tg"><label>Per day</label><div class="seg sm" role="group" aria-label="Trades shown per day">${[3, 5, 10].map(v =>
-      `<button data-winper="${v}" aria-pressed="${per === v}">Top ${v}</button>`).join("")}</div></span></div>`;
+      `<button data-winper="${v}" aria-pressed="${per === v}">Top ${v}</button>`).join("")}</div></span>
+      <span class="tg"><label>Period</label><div class="seg sm" role="group" aria-label="Time period">${[["day", "Last day"], ["week", "1 week"], ["month", "1 month"], ["all", "All"]].map(([v, t]) =>
+      `<button data-winspan="${v}" aria-pressed="${span === v}">${t}</button>`).join("")}</div></span></div>`;
     if (!all.length) return h + `<div class="empty"><strong>No finished days yet</strong>${scope === "followed" ? "Your followed strategies have no alerts older than today. Try all strategies." : "Alerts need at least one more session before they can be ranked."}</div>`;
 
     const by = r => (a, b) => r(b) - r(a);
@@ -1701,7 +1708,7 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
     S.firstSel = "alert-" + S.feed.alerts.indexOf(best);
 
     h += `<div class="wsum"><div><span>Trades</span><b>${all.length}</b></div><div><span>Right way</span><b>${hit(all)}%</b></div><div><span>Average</span><b class="${avg(all) >= 0 ? "up" : "down"}">${pctTxt(avg(all), 2)}</b></div></div>`;
-    h += `<div class="day"><span>Best of the last ${days.length} sessions</span><span></span></div><div class="rows">` +
+    h += `<div class="day"><span>${days.length === 1 ? "Best of " + esc(dayLabel(days[0])) : `Best of the last ${days.length} sessions`}</span><span></span></div><div class="rows">` +
       all.slice().sort(by(tradeRet)).slice(0, 5).map((a, i) => winRow(a, i + 1, { showDate: true })).join("") + `</div>`;
 
     const open = S.winOpen || (S.winOpen = new Set());
@@ -4785,7 +4792,9 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
     const wsc = e.target.closest("[data-winscope]");
     if (wsc) { setPref("winScope", wsc.dataset.winscope); goList(); return; }
     const wdr = e.target.closest("[data-windir]");
-    if (wdr) { setPref("winDir", wdr.dataset.windir); goList(); return; }
+    if (wdr) { setPref("winSide", wdr.dataset.windir); goList(); return; }
+    const wsp = e.target.closest("[data-winspan]");
+    if (wsp) { setPref("winSpan", wsp.dataset.winspan); goList(); return; }
     const pn = e.target.closest("[data-prnew]");
     if (pn) {
       const a = (S.feed?.alerts || []).find(x => x.id === pn.dataset.prnew);
