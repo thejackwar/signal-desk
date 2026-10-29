@@ -1,14 +1,16 @@
 name: Probe data sources (temporary)
 on: { workflow_dispatch: {} }
+permissions: { contents: write }
 jobs:
   probe:
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with: { python-version: "3.12" }
       - run: pip install yfinance requests
       - run: |
-          python - <<'PY'
+          python - <<'PY' > probe.txt 2>&1
           import requests, json
           U = {
            "fng": "https://api.alternative.me/fng/?limit=3",
@@ -40,3 +42,6 @@ jobs:
               df = yf.download(t, period="max", progress=False, auto_adjust=False)
               print(t, len(df), df.index[0] if len(df) else None)
           PY
+      - run: |
+          git config user.name bot; git config user.email bot@users.noreply.github.com
+          git checkout -b probe-results; git add -f probe.txt; git commit -qm probe; git push -f origin probe-results
