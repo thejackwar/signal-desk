@@ -1,0 +1,252 @@
+### btc 3 48141
+TABLE len 26104
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; |  |  |  |  |  |  |  |  |  |  |  |  | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Total
+ | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;IBIT | &nbsp;&nbsp;FBTC | &nbsp;&nbsp;&nbsp;BITB | &nbsp;&nbsp;ARKB | BTCO | EZBC | BRRR | HODL | BTCW | MSBT | &nbsp;&nbsp;&nbsp;&nbsp;GBTC | &nbsp;&nbsp;&nbsp;&nbsp;BTC | 
+Fee | 0.25% | 0.25% | 0.20% | 0.21% | 0.25% | 0.19% | 0.25% | 0.20% | 0.25% | 0.14% | 1.50% | 0.15% | 
+12 Oct 2026 | (65.4) | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | (65.4)
+26 Oct 2026 | 110.3 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 110.3
+27 Oct 2026 | 151.5 | 24.5 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 176.0
+28 Oct 2026 | 136.0 | 0.0 | 1.3 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 137.3
+29 Oct 2026 | - | - | - | - | - | - | - | - | - | - | - | - | 0.0
+Total | 66,531 | 10,373 | 2,027 | 1,099 | 136 | 335 | 329 | 1,008 | 78 | 806 | (27,995) | 2,947 | 57,674
+Average | 94.8 | 14.8 | 2.9 | 1.6 | 0.2 | 0.5 | 0.5 | 1.4 | 0.1 | 5.7 | (39.9) | 5.2 | 82.2
+Maximum | 1,119.9 | 473.4 | 237.9 | 289.1 | 63.4 | 60.9 | 43.4 | 118.8 | 118.5 | 99.0 | 102.5 | 191.1 | 1,373.8
+Minimum | (528.3) | (356.6) | (280.7) | (327.9) | (62.0) | (74.1) | (74.8) | (38.4) | (53.8) | (5.3) | (642.5) | (318.2) | (1,113.7)
+TABLE len 478
+How can we assist you?
+
+
+Talk to us
+How can we assist you?
+
+
+Talk to us
+TABLE len 4877
+&#9993;&nbsp;[email&#160;protected]
+25 St James's Street, London, SW1A 1HA
+
+
+&nbsp;
+
+
+
+
+
+FS Investors Limited (14044760) is an Appointed Representative of Brooklands Fund Management Limited which is authorised and regulated by the Financial Conduct Authority with the registered number 757575 and registered with the Securities and Exchange Commission with the registered number 286221.
+
+Today's date is 29 October 2026. Your IP: 172.69.196.162 
+
+
+&copy; 2025 Farside Investors. All rights reserved.
+
+
+
+
+
+
+
+
+
+
+
+
+
+Market Data
+Bitcoin ETF Flow
+Ethereum ETF Flow
+Solana ETF Flow
+Hyperliquid ETF Flow
+Zcash ETF Flow
+BTC Derivative Charts
+
+
+
+
+
+
+
+Company
+Fund
+Books
+Research Blog
+About
+Contact
+Privacy Policy
+Complaints
+&#9993;&nbsp;[email&#160;protected]
+25 St James's Street, London, SW1A 1HA
+
+
+&nbsp;
+
+
+
+
+
+FS Investors Limited (14044760) is an Appointed Representative of Brooklands Fund Management Limited which is authorised and regulated by the Financial Conduct Authority with the registered number 757575 and registered with the Securities and Exchange Commission with the registered number 286221.
+
+Today's date is 29 October 2026. Your IP: 172.69.196.162 
+
+
+&copy; 2025 Farside Investors. All rights reserved.
+
+
+
+
+
+
+
+
+
+
+
+
+
+Market Data
+Bitcoin ETF Flow
+Ethereum ETF Flow
+Solana ETF Flow
+Hyperliquid ETF Flow
+Zcash ETF Flow
+BTC Derivative Charts
+
+
+
+
+
+
+
+Company
+Fund
+Books
+Research Blog
+About
+Contact
+Privacy Policy
+Complaints
+### eth 3 51614
+TABLE len 26348
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; |  |  |  |  |  |  |  |  |  |  |  | &nbsp;&nbsp;&nbsp;Total
+ | ETHA | ETHB | FETH | ETHW | TETH | ETHV | QETH | EZET | MSSE | ETHE | ETH | 
+Fee | 0.25% | 0.25% | 0.25% | 0.20% | 0.21% | 0.20% | 0.25% | 0.19% | 0.14% | 2.50% | 0.15% | 
+Staking fee | N/A | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;10% | N/A | N/A | 25% | N/A | N/A | N/A | 5% | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;23% | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;6% | 
+26 Oct 2026 | (104.7) | 0.0 | 16.1 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | (88.6)
+27 Oct 2026 | (93.3) | 0.0 | 28.6 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 4.5 | (60.2)
+28 Oct 2026 | (44.8) | 0.0 | 18.8 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 1.0 | 0.0 | 3.6 | (21.4)
+29 Oct 2026 | - | - | - | - | - | - | - | - | - | - | - | 0.0
+Total | 12,017 | 868 | 2,438 | 393 | 36 | 153 | 25 | 65 | 45 | (5,502) | 2,039 | 12,578
+Average | 21.1 | 5.4 | 4.3 | 0.7 | 0.1 | 0.3 | 0.0 | 0.1 | 0.7 | (9.7) | 3.6 | 22.1
+Maximum | 639.8 | 96.8 | 276.9 | 204.0 | 8.0 | 19.8 | 6.7 | 13.2 | 14.3 | 53.7 | 99.8 | 1,018.8
+Minimum | (375.0) | (37.5) | (272.2) | (56.1) | (14.7) | (18.7) | (8.4) | (6.6) | 0.0 | (484.1) | (88.5) | (465.1)
+TABLE len 478
+How can we assist you?
+
+
+Talk to us
+How can we assist you?
+
+
+Talk to us
+TABLE len 4876
+&#9993;&nbsp;[email&#160;protected]
+25 St James's Street, London, SW1A 1HA
+
+
+&nbsp;
+
+
+
+
+
+FS Investors Limited (14044760) is an Appointed Representative of Brooklands Fund Management Limited which is authorised and regulated by the Financial Conduct Authority with the registered number 757575 and registered with the Securities and Exchange Commission with the registered number 286221.
+
+Today's date is 29 October 2026. Your IP: 172.68.150.98 
+
+
+&copy; 2025 Farside Investors. All rights reserved.
+
+
+
+
+
+
+
+
+
+
+
+
+
+Market Data
+Bitcoin ETF Flow
+Ethereum ETF Flow
+Solana ETF Flow
+Hyperliquid ETF Flow
+Zcash ETF Flow
+BTC Derivative Charts
+
+
+
+
+
+
+
+Company
+Fund
+Books
+Research Blog
+About
+Contact
+Privacy Policy
+Complaints
+&#9993;&nbsp;[email&#160;protected]
+25 St James's Street, London, SW1A 1HA
+
+
+&nbsp;
+
+
+
+
+
+FS Investors Limited (14044760) is an Appointed Representative of Brooklands Fund Management Limited which is authorised and regulated by the Financial Conduct Authority with the registered number 757575 and registered with the Securities and Exchange Commission with the registered number 286221.
+
+Today's date is 29 October 2026. Your IP: 172.68.150.98 
+
+
+&copy; 2025 Farside Investors. All rights reserved.
+
+
+
+
+
+
+
+
+
+
+
+
+
+Market Data
+Bitcoin ETF Flow
+Ethereum ETF Flow
+Solana ETF Flow
+Hyperliquid ETF Flow
+Zcash ETF Flow
+BTC Derivative Charts
+
+
+
+
+
+
+
+Company
+Fund
+Books
+Research Blog
+About
+Contact
+Privacy Policy
+Complaints
