@@ -123,7 +123,7 @@ def main():
         events = []
         for _, e in reps.iterrows():
             ri, when = reaction_index(px, e["day"], int(e["hour"]))
-            if ri is None or ri < 1 or px.index[ri].year < FIRST_YEAR:
+            if ri is None or ri < 1 or ri >= len(px) or px.index[ri].year < FIRST_YEAR:   # not traded on yet: skip
                 continue
             c = px["close"].values
             pre, rc, ro = c[ri - 1], c[ri], px["open"].iat[ri]
