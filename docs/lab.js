@@ -460,10 +460,12 @@ export function run(data, cfg, fromIdx = 0) {
     return list.sort((a, b) => a.g1 - b.g1 || a.g0 - b.g0);
   };
   const L = { ls: pick("ls"), long: pick("long") };
+  // held[g]: how many positions earned session g's return (to size each trade in euro, see the calendar)
+  const held = key => books ? books[key].k : cnt[key];
   return {
     cfg,
-    all: { eq: curve("ls"), inv: invested("ls"), trades: stat(L.ls), list: L.ls },
-    long: { eq: curve("long"), inv: invested("long"), trades: stat(L.long), list: L.long },
+    all: { eq: curve("ls"), inv: invested("ls"), trades: stat(L.ls), list: L.ls, held: held("ls") },
+    long: { eq: curve("long"), inv: invested("long"), trades: stat(L.long), list: L.long, held: held("long") },
     open: openL.sort((a, b) => a.ret - b.ret),   // long positions still held on the last day, worst first
   };
 }

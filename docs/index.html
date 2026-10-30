@@ -558,6 +558,33 @@ table.lheat tbody th { font: 600 12px var(--font-mono); color: var(--muted); tex
 .lcell small { display: block; font: 500 9.5px var(--font-body); color: var(--faint); }
 .lcell.best { border-color: var(--amber); }
 .lcell:hover { border-color: var(--muted); }
+/* Strategy Lab calendar: every closed trade on the day it closed */
+.lcalctl { background: var(--surface); border-radius: 16px; padding: 14px 16px; margin-bottom: 14px; }
+.lcalctl .lrow > span:first-child { min-width: 150px; }
+.lcalnav { display: flex; align-items: center; gap: 8px; margin: 2px 0 10px; }
+.lcalnav > b { font: 600 18px var(--font-display); min-width: 0; flex: 1; text-align: center; }
+.lcalnav .btn.sm { min-width: 36px; font-size: 18px; line-height: 1; padding: 6px 10px; }
+.lcalnav .yrpick { margin-left: 4px; }
+.lcalyear { display: grid; grid-template-columns: repeat(6, 1fr); gap: 4px; }
+.lcalyear button { display: grid; gap: 2px; padding: 6px 2px; border-radius: 10px; background: var(--surface); border: 2px solid transparent; font: 500 11px var(--font-body); color: var(--muted); text-align: center; }
+.lcalyear button b { font: 600 11.5px var(--font-mono); font-variant-numeric: tabular-nums; color: var(--fg); white-space: nowrap; }
+.lcalyear button b.up { color: var(--bull); } .lcalyear button b.down { color: var(--bear); }
+.lcalyear button[aria-pressed="true"] { border-color: var(--amber); }
+.lcalyear button:disabled { opacity: .35; }
+.lcal { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 4px; }
+.lcalwd { text-align: center; font: 500 11px var(--font-body); color: var(--faint); padding: 2px 0; }
+.lcald { position: relative; display: flex; flex-direction: column; justify-content: space-between; min-height: 52px; padding: 5px 4px; border-radius: 10px; background: var(--surface); border: 2px solid transparent; text-align: left; color: var(--fg); min-width: 0; }
+.lcald.wk { opacity: .55; }
+.lcald i { font: 500 11px var(--font-body); font-style: normal; color: var(--muted); }
+.lcald b { font: 600 11px var(--font-mono); font-variant-numeric: tabular-nums; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; letter-spacing: -.02em; }
+.lcald em, .lcaldot { display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--amber); }
+.lcald em { position: absolute; top: 6px; right: 5px; }
+button.lcald { cursor: pointer; }
+button.lcald:hover { border-color: var(--muted); }
+.lcald.sel { border-color: var(--fg); }
+@media (min-width: 560px) { .lcald { min-height: 64px; padding: 7px 8px; } .lcald b { font-size: 12.5px; } }
+.lcalday { margin-top: 16px; }
+.linkbtn { padding: 0; background: none; border: 0; color: var(--blue); font: inherit; cursor: pointer; text-decoration: underline; text-underline-offset: 2px; }
 .lsave { display: flex; gap: 8px; align-items: center; margin-bottom: 12px; }
 .lsave .search { margin: 0; padding-left: 12px; background-image: none; }
 .lsaved { display: grid; gap: 6px; }
@@ -2618,7 +2645,7 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
   const LAB_IND = { ma200: "ma", golden_cross: "cross", bollinger: "bollinger", rsi: "rsi", macd: "macd", donchian: "donchian", supertrend: "supertrend", buy_the_dip: "dip" };
   const LAB_FLASK = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3h6"/><path d="M10 3v6.2L4.6 18.8A1.6 1.6 0 0 0 6 21h12a1.6 1.6 0 0 0 1.4-2.2L14 9.2V3"/><path d="M7.2 15h9.6"/></svg>`;
   const LAB_CAPS = [1000, 5000, 10000, 25000, 50000, 100000, 250000, 1000000];
-  const LAB_TABS = [["overview", "Results"], ["trades", "Trades"], ["stocks", "By " + "stock"], ["optimize", "Optimize"], ["compare", "Compare"]];
+  const LAB_TABS = [["overview", "Results"], ["trades", "Trades"], ["calendar", "Calendar"], ["stocks", "By " + "stock"], ["optimize", "Optimize"], ["compare", "Compare"]];
   const labMk = () => S.market || "stocks";
   function labState() {
     const st = pref("lab", null) || {};
@@ -2627,7 +2654,7 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
       cfg: st.cfg || { ind: "ma" }, side: st.trades === "all" ? "all" : "long", from: st.from || null, to: st.to || null,
       uni: st.uni?.[labMk()] || { mode: "all" }, cap: LAB_CAPS.includes(st.cap) ? st.cap : 100000, tax: !!st.tax,
       tab: LAB_TABS.some(t => t[0] === st.tab) ? st.tab : "overview", open: Array.isArray(st.open) ? st.open : ["signal"],
-      opt: st.opt || {}, _uni: st.uni || {},
+      opt: st.opt || {}, cal: st.cal || {}, _uni: st.uni || {},
     };
   }
   const saveLab = st => { const { side, uni, _uni, ...rest } = st; setPref("lab", { ...rest, trades: side, uni: { ..._uni, [labMk()]: uni } }); };
@@ -2832,7 +2859,7 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
   function runLab() {
     const out = document.getElementById("labout"); if (!out || !LAB.mod) return;
     const st = labState();
-    try { out.innerHTML = ({ overview: labOverview, trades: labTrades, stocks: labStocks, optimize: labOptimizeView, compare: labCompare }[st.tab] || labOverview)(st, out); }
+    try { out.innerHTML = ({ overview: labOverview, trades: labTrades, calendar: labCalendar, stocks: labStocks, optimize: labOptimizeView, compare: labCompare }[st.tab] || labOverview)(st, out); }
     catch (err) { console.error(err); out.innerHTML = `<div class="card"><p style="margin:0">Something went wrong running these settings. Try Reset.</p></div>`; }
     LAB.after?.(); LAB.after = null;
   }
@@ -2922,6 +2949,172 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
         <td style="text-align:right" class="${t.ret >= 0 ? "up" : "down"}">${labPct(t.ret * 100)}</td><td style="text-align:right"><small style="margin:0">${why[t.why]}</small></td></tr>`).join("") + `</tbody></table></div>`;
     return h;
   }
+  // ------------------------------------------------------------ calendar
+  // Every closed trade on a month calendar, on the day it closed, green or red by its result in euro.
+  // Two switches of its own: with or without the take profit / stop loss, and before or after
+  // Italian tax and fees. A trade's euro size is its share of the account on the day it opened
+  // (1/N of the account with N positions open, or 1/maxPos with a position limit).
+  const LAB_FEE = 0.1;   // % per buy and per sell with "after tax & fees" on and no cost set in the Lab
+  const LAB_MON = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  const labCal = st => ({ risk: st.cal?.risk !== false, tax: st.cal?.tax ?? !!st.tax, ym: st.cal?.ym || null, day: st.cal?.day || null });
+  function labCalCfg(st) {
+    const M = LAB.mod, base = M.clean(st.cfg), c = labCal(st);
+    return M.clean({ ...base, ...(c.risk ? {} : { tp: 0, sl: 0, trail: 0 }), cost: c.tax ? (base.cost || LAB_FEE) : 0 });
+  }
+  function labCalCompute(st) {
+    const M = LAB.mod, data = labData(st), D = data.dates, cfg = labCalCfg(st), c = labCal(st), fi = labFi(D, st.from);
+    const key = JSON.stringify([labMk(), cfg, st.side, st.uni, st.from, st.to, st.cap, c.tax]);
+    if (LAB.calc?.key === key) return LAB.calc;
+    const R = M.run(data, cfg, fi), side = M.INDICATORS[cfg.ind].buysOnly ? "long" : st.side, mine = R[side];
+    const f = st.cap / M.ACCOUNT, rate = labTaxRate(), losses = [], byT = new Map(data.tickers.map(T => [T.t, T])), fee = cfg.cost / 100;
+    // A trade's euros are what it added to the account each day it was held (the account's value the
+    // day before ÷ the positions open, × the day's move), so the trades add up to the account's result.
+    // Trades that overlap on one ticker were one position in the account: each day counts once, for the earlier trade.
+    const claim = new Map(), eur = new Map();
+    const euros = t => {
+      const T = byT.get(t.t), eq = mine.eq, n = g => cfg.maxPos || mine.held[g] || 1;
+      let got = claim.get(t.t); if (!got) claim.set(t.t, got = new Set());
+      let i = T.idx.indexOf(t.g0), sum = 0;
+      const i0 = i, px = T.c[i0] * (1 + t.side * (t.ret + 2 * fee));   // the exit price, from the trade's return
+      for (i++; i < T.idx.length && T.idx[i] <= t.g1; i++) {
+        const g = T.idx[i]; if (g !== T.idx[i - 1] + 1 || got.has(g)) continue;
+        got.add(g);
+        let r = t.side * ((g === t.g1 ? px : T.c[i]) / T.c[i - 1] - 1);
+        if (i === i0 + 1) r -= fee;
+        if (g === t.g1) r -= fee;
+        sum += eq[g - 1] * r / n(g);
+      }
+      return sum * f;
+    };
+    mine.list.slice().sort((a, b) => a.g0 - b.g0).forEach(t => eur.set(t, euros(t)));
+    // in the order they closed, so a loss can lower the tax on later gains (carried 4 years)
+    const trades = mine.list.map(t => {
+      const size = mine.eq[t.g0] * f / (cfg.maxPos || mine.held[t.g0 + 1] || 1), gross = eur.get(t);
+      let net = gross, tax = 0, stamp = 0;
+      if (c.tax) {
+        stamp = size * 0.002 * t.days / 252; net -= stamp;
+        const y = +D[t.g1].slice(0, 4);
+        if (net < 0) losses.push({ y, a: -net });
+        else {
+          let g = net;
+          for (const L of losses) if (y - L.y <= 4 && L.a > 0 && g > 0) { const u = Math.min(g, L.a); L.a -= u; g -= u; }
+          tax = g * rate; net -= tax;
+        }
+      }
+      return { ...t, size, gross, net, tax, stamp };
+    });
+    const closed = {}, opened = {}, months = {};
+    for (const t of trades) {
+      const d1 = D[t.g1], d0 = D[t.g0], m = d1.slice(0, 7);
+      (closed[d1] = closed[d1] || []).push(t); (opened[d0] = opened[d0] || []).push(t);
+      const o = months[m] = months[m] || { net: 0, n: 0, w: 0, cost: 0, best: null, worst: null };
+      o.net += t.net; o.n++; o.w += t.net > 0 ? 1 : 0; o.cost += t.tax + t.stamp + 2 * fee * t.size;
+      if (!o.best || t.net > o.best.net) o.best = t;
+      if (!o.worst || t.net < o.worst.net) o.worst = t;
+    }
+    return LAB.calc = { key, D, cfg, side, trades, closed, opened, months, first: D[fi].slice(0, 7), last: D[D.length - 1].slice(0, 7) };
+  }
+  // compact euro for the small day cells: +€840, +€1.2k, −€15k
+  const labCalEur = v => {
+    const a = Math.abs(v), s = v >= 0 ? "+" : "−";
+    return s + "€" + (a >= 1e6 ? (a / 1e6).toFixed(1) + "M" : a >= 1e4 ? Math.round(a / 1e3) + "k" : a >= 1e3 ? (a / 1e3).toFixed(1) + "k" : Math.round(a));
+  };
+  const labCalSum = l => l.reduce((s, t) => s + t.net, 0);
+  function labCalendar(st) {
+    const M = LAB.mod, base = M.clean(st.cfg), c = labCal(st), I = M.INDICATORS[base.ind], R = M.RISK;
+    let h = `<div class="lcalctl lsbody">
+      <label class="lrow"><span>Strategy</span><span class="yrpick"><select data-labcalind aria-label="Strategy">${Object.entries(M.INDICATORS).map(([k, v]) =>
+        `<option value="${k}"${k === base.ind ? " selected" : ""}>${esc(v.name)}</option>`).join("")}</select></span></label>
+      ${I.buysOnly ? "" : `<div class="lrow"><span>Trades</span>${labSeg("labside", st.side, [["long", "Long only"], ["all", "Long + short"]], "Trades")}</div>`}
+      <div class="lrow"><span>Take profit / stop loss</span>${labSeg("labcalrisk", c.risk ? 1 : 0, [[0, "Off"], [1, "On"]], "Take profit and stop loss")}</div>
+      ${c.risk ? `${labSlider(base, "tp", "Take profit", esc(R.tp.about), R.tp.min, R.tp.max, R.tp.step)}
+        ${labSlider(base, "sl", "Stop loss", esc(R.sl.about), R.sl.min, R.sl.max, R.sl.step)}
+        ${!base.tp && !base.sl && !base.trail ? `<p class="hint" style="margin:0">Both are off: move a slider to set a level.</p>` : ""}
+        ${base.trail ? `<p class="hint" style="margin:0">Your ${labRiskTxt(base.trail)} trailing stop from Exits &amp; risk is on too.</p>` : ""}` : ""}
+      <div class="lrow"><span>Italian tax &amp; fees</span>${labSeg("labcaltax", c.tax ? 1 : 0, [[0, "Before"], [1, `After (${Math.round(labTaxRate() * 100)}% tax)`]], "Italian tax and fees")}</div>
+      ${c.tax ? `<p class="hint" style="margin:0">${Math.round(labTaxRate() * 100)}% on each gain after past losses (carried 4 years), 0.2% a year stamp duty while held, and ${labTxt({ ...base, cost: base.cost || LAB_FEE }, "cost")} per buy and per sell${base.cost ? " (your cost setting)" : ""}. Simplified.</p>` : ""}
+    </div>`;
+    return h + `<div id="lcalbody">${labCalBody(st)}</div>`;
+  }
+  function labCalBody(st) {
+    const X = labCalCompute(st), c = labCal(st), D = X.D;
+    if (!X.trades.length) return `<div class="empty"><strong>No closed trades</strong>No trade closed with these settings in these years.</div>`;
+    const ms = Object.keys(X.months).sort();
+    let ym = c.ym || ms[ms.length - 1];
+    if (ym < X.first) ym = X.first; if (ym > X.last) ym = X.last;
+    const y = +ym.slice(0, 4), mo = +ym.slice(5, 7), pad = n => String(n).padStart(2, "0");
+    const shift = k => { const d = new Date(Date.UTC(y, mo - 1 + k, 1)); return d.getUTCFullYear() + "-" + pad(d.getUTCMonth() + 1); };
+    const prev = shift(-1), next = shift(1), fy = +X.first.slice(0, 4), ly = +X.last.slice(0, 4);
+    const tone = v => v > 0 ? "up" : v < 0 ? "down" : "";
+    // month, year and the twelve months of the year
+    const yTot = ms.filter(m => +m.slice(0, 4) === y).reduce((s, m) => s + X.months[m].net, 0);
+    let h = `<div class="lcalnav"><button class="btn ghost sm" data-labcalm="${prev}"${prev < X.first ? " disabled" : ""} aria-label="Previous month">‹</button>
+      <b>${esc(fmtDate(ym + "-01", { month: "long", year: "numeric" }))}</b>
+      <button class="btn ghost sm" data-labcalm="${next}"${next > X.last ? " disabled" : ""} aria-label="Next month">›</button>
+      <span class="yrpick"><select data-labcalyr aria-label="Year">${Array.from({ length: ly - fy + 1 }, (_, i) => ly - i).map(v =>
+        `<option value="${v}"${v === y ? " selected" : ""}>${v}</option>`).join("")}</select></span></div>`;
+    h += `<div class="lcalyear" role="group" aria-label="Months of ${y}">${LAB_MON.map((n, i) => {
+      const m = y + "-" + pad(i + 1), o = X.months[m], off = m < X.first || m > X.last;
+      return `<button data-labcalm="${m}"${off ? " disabled" : ""} aria-pressed="${m === ym}"><span>${n}</span><b class="${o ? tone(o.net) : ""}">${o ? labCalEur(o.net) : "–"}</b></button>`;
+    }).join("")}</div>
+      <p class="hint" style="margin:6px 2px 14px">${y}: <b class="${tone(yTot)}">${eurSigned(yTot)}</b> from the trades that closed in the year${c.tax ? ", after tax and fees" : ""}.</p>`;
+    // the month's summary
+    const o = X.months[ym];
+    h += o ? `<p class="labverdict">${esc(fmtDate(ym + "-01", { month: "long" }))}: <b class="${tone(o.net)}">${eurSigned(o.net)}</b> from ${o.n} closed trade${o.n > 1 ? "s" : ""}, ${o.w} in profit (${Math.round(o.w / o.n * 100)}%).</p>
+      <p class="hint" style="margin:0 2px 12px">Best ${esc(disp(o.best.t))} ${eurSigned(o.best.net)} · worst ${esc(disp(o.worst.t))} ${eurSigned(o.worst.net)}${c.tax && o.cost > 0.5 ? ` · ${eurS(o.cost)} paid in tax, stamp duty and fees` : ""}.</p>`
+      : `<p class="labverdict">No trade closed in ${esc(fmtDate(ym + "-01", { month: "long" }))}.</p>`;
+    // the grid, Monday first
+    const nd = new Date(Date.UTC(y, mo, 0)).getUTCDate(), lead = (new Date(Date.UTC(y, mo - 1, 1)).getUTCDay() + 6) % 7;
+    const val = {}; let mx = 0, sel = null;
+    for (let d = 1; d <= nd; d++) {
+      const k = ym + "-" + pad(d);
+      if (X.closed[k]) { val[k] = labCalSum(X.closed[k]); mx = Math.max(mx, Math.abs(val[k])); sel = k; }
+    }
+    if (c.day && c.day.slice(0, 7) === ym && (X.closed[c.day] || X.opened[c.day])) sel = c.day;
+    h += `<div class="lcal" role="grid" aria-label="Trades in ${esc(fmtDate(ym + "-01", { month: "long", year: "numeric" }))}">${["M", "T", "W", "T", "F", "S", "S"].map(d => `<span class="lcalwd" aria-hidden="true">${d}</span>`).join("")}`;
+    for (let i = 0; i < lead; i++) h += `<span></span>`;
+    for (let d = 1; d <= nd; d++) {
+      const k = ym + "-" + pad(d), v = val[k], cl = X.closed[k], op = X.opened[k], wk = (lead + d - 1) % 7 >= 5;
+      if (!cl && !op) { h += `<span class="lcald${wk ? " wk" : ""}"><i>${d}</i></span>`; continue; }
+      const a = cl ? Math.round(14 + 52 * Math.pow(Math.min(1, Math.abs(v) / (mx || 1)), 0.6)) : 0;
+      const bg = cl ? `style="background:color-mix(in srgb, var(--${v >= 0 ? "bull" : "bear"}) ${a}%, var(--surface))"` : "";
+      const lbl = `${fmtDate(k, { day: "numeric", month: "long" })}: ${cl ? `${cl.length} closed, ${eurSigned(v)}` : "no trade closed"}${op ? `, ${op.length} opened` : ""}`;
+      h += `<button class="lcald${cl ? " has" : ""}${k === sel ? " sel" : ""}" data-labcalday="${k}" ${bg} aria-label="${esc(lbl)}" aria-pressed="${k === sel}"><i>${d}</i>${cl ? `<b>${labCalEur(v)}</b>` : ""}${op ? `<em title="${op.length} opened"></em>` : ""}</button>`;
+    }
+    h += `</div><p class="hint" style="margin:8px 2px 0">Each trade is counted on the day it closed; <span class="lcaldot"></span> marks a day trades were opened. Tap a day for its trades.</p>`;
+    if (sel) h += labCalDay(X, sel, c);
+    h += `<p class="hint" style="margin-top:14px">Euro amounts are what each trade added to the account day by day (${X.cfg.maxPos ? `each position is 1/${X.cfg.maxPos} of the account` : "the account is split across every open position"}), so together they come to the Results tab's gain before tax, apart from trades still open. When alerts overlap on one ${L().one}, the shared days count for the first trade. "On" is the position's size when it opened. ${c.tax ? "Tax is applied trade by trade as each one closes; simplified." : "Before tax and with no fees."}</p>`;
+    return h;
+  }
+  function labCalDay(X, day, c) {
+    const D = X.D, cl = X.closed[day] || [], op = X.opened[day] || [], why = { rule: "exit rule", tp: "take profit", sl: "stop loss", trail: "trailing stop" };
+    const sd = d => esc(fmtDate(d, { day: "numeric", month: "short", year: "2-digit" }));
+    const tk = t => `<a href="#stock-${esc(t.t)}" class="tk">${esc(disp(t.t))}</a> <span class="pill ${t.side > 0 ? "bullish" : "bearish"}">${t.side > 0 ? "long" : "short"}</span>`;
+    let h = `<div class="lcalday"><h3 class="h3">${esc(fmtDate(day, { weekday: "long", day: "numeric", month: "long", year: "numeric" }))}</h3>`;
+    if (cl.length) {
+      const v = labCalSum(cl);
+      h += `<p class="hint" style="margin:0 2px 8px">${cl.length} trade${cl.length > 1 ? "s" : ""} closed: <b class="${v >= 0 ? "up" : "down"}">${eurSigned(v)}</b></p>
+      <div class="tablewrap"><table class="bt ltrades"><thead><tr><th>${esc(L().one[0].toUpperCase() + L().one.slice(1))}</th><th>In → out</th><th style="text-align:right">Return</th><th style="text-align:right">Result</th></tr></thead><tbody>` +
+        cl.slice().sort((a, b) => b.net - a.net).map(t => `<tr><td>${tk(t)}<small>${why[t.why]}</small></td>
+          <td style="white-space:nowrap">${sd(D[t.g0])}<small>→ ${sd(D[t.g1])} · ${t.days}d</small></td>
+          <td style="text-align:right" class="${t.ret >= 0 ? "up" : "down"}">${labPct(t.ret * 100)}</td>
+          <td style="text-align:right"><b class="${t.net >= 0 ? "up" : "down"}">${eurSigned(t.net)}</b><small>on ${kEur(t.size)}${c.tax && t.tax + t.stamp > 0.5 ? ` · ${eurS(t.tax + t.stamp)} ${t.tax > 0.5 ? "tax + duty" : "stamp duty"}` : ""}</small></td></tr>`).join("") + `</tbody></table></div>`;
+    }
+    if (op.length) {
+      h += `<p class="hint" style="margin:14px 2px 8px">${op.length} trade${op.length > 1 ? "s" : ""} opened this day, and how ${op.length > 1 ? "they" : "it"} ended:</p>
+      <div class="tablewrap"><table class="bt ltrades"><tbody>` +
+        op.map(t => `<tr><td>${tk(t)}</td><td style="white-space:nowrap"><button class="linkbtn" data-labcalday="${D[t.g1]}">closed ${sd(D[t.g1])}</button><small>${t.days}d · ${why[t.why]}</small></td>
+          <td style="text-align:right" class="${t.ret >= 0 ? "up" : "down"}">${labPct(t.ret * 100)}</td><td style="text-align:right"><b class="${t.net >= 0 ? "up" : "down"}">${eurSigned(t.net)}</b></td></tr>`).join("") + `</tbody></table></div>`;
+    }
+    return h + `</div>`;
+  }
+  const labCalRefresh = () => { const b = document.getElementById("lcalbody"); if (b) b.innerHTML = labCalBody(labState()); };
+  // pick an indicator: keep the exits and extras, except to or from one with its own default exit (Buy the dip)
+  function labPickInd(st, ind) {
+    const M = LAB.mod, o = M.clean(st.cfg), own = k => M.INDICATORS[k]?.buysOnly, keep = { tp: o.tp, sl: o.sl, trail: o.trail, fMa: o.fMa, fMkt: o.fMkt, fInd: o.fInd, maxPos: o.maxPos, cost: o.cost };
+    return own(o.ind) || own(ind) ? { ind, sl: o.sl, trail: o.trail, fMa: o.fMa, fMkt: o.fMkt, fInd: o.fInd, maxPos: o.maxPos, cost: o.cost } : { ind, ...keep };
+  }
+
   function labCsv() {
     const st = labState(), X = labCompute(st), D = X.D;
     const rows = [["ticker", "side", "entry_date", "exit_date", "sessions", "return_pct", "exit"]].concat(
@@ -3125,18 +3318,26 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
     document.querySelectorAll("[data-lpv]").forEach(b => { b.textContent = labTxt(cfg, b.dataset.lpv); });
     document.querySelectorAll("[data-lab]").forEach(inp => { if (inp !== pi && +inp.value !== labVal(cfg, inp.dataset.lab)) inp.value = labVal(cfg, inp.dataset.lab); });
     if (k === "maxPos") { const sm = pi.closest(".lp")?.querySelector("small"); if (sm) sm.textContent = cfg.maxPos ? `each gets 1/${cfg.maxPos} of the account` : "the money is split across every open one"; }
+    if (pi.closest(".lcalctl")) {   // a slider on the calendar: redraw the calendar only, not the slider being dragged
+      labRefreshSettings(); clearTimeout(LAB.timer); LAB.timer = setTimeout(labCalRefresh, 180); return true;
+    }
     labRefreshSettings(); labRerun();
     return true;
   }
   function labChange(e) {
     const M = LAB.mod; if (!M) return false;
-    const t = e.target.closest("[data-labfrom], [data-labto], [data-labcap], [data-labsector], [data-labfind], [data-labadd], [data-labopt]"); if (!t) return false;
+    const t = e.target.closest("[data-labfrom], [data-labto], [data-labcap], [data-labsector], [data-labfind], [data-labadd], [data-labopt], [data-labcalyr], [data-labcalind]"); if (!t) return false;
     const st = labState(), [first, last] = labYears();
     if (t.matches("[data-labfrom]")) { st.from = +t.value === first ? null : +t.value; if (st.to && st.to < st.from) st.to = null; }
     else if (t.matches("[data-labto]")) st.to = +t.value === last ? null : +t.value;
     else if (t.matches("[data-labcap]")) st.cap = +t.value;
     else if (t.matches("[data-labsector]")) st.uni = { ...st.uni, mode: "sector", sector: t.value };
     else if (t.matches("[data-labfind]")) st.cfg = { ...M.clean(st.cfg), fInd: t.value };
+    else if (t.matches("[data-labcalind]")) st.cfg = labPickInd(st, t.value);
+    else if (t.matches("[data-labcalyr]")) {   // same month in that year (kept inside the data's years)
+      const m = (labCal(st).ym || LAB.calc?.last || "").slice(5, 7) || "12";
+      st.cal = { ...st.cal, ym: t.value + "-" + m, day: null }; saveLab(st); labCalRefresh(); return true;
+    }
     else if (t.matches("[data-labopt]")) { st.opt = { ...st.opt, [t.dataset.labopt]: t.dataset.labopt === "b" ? t.value : t.dataset.labopt === "split" ? +t.value : t.value }; saveLab(st); runLab(); return true; }
     else {   // add a stock to the picks: matches the ticker as shown, or the start of a name
       const q = t.value.trim().toUpperCase(); if (!q) return true;
@@ -3154,12 +3355,19 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
       setTimeout(() => { const st = labState(); st.open = [...document.querySelectorAll(".lsec[open]")].map(d => d.dataset.labsec); saveLab(st); }, 0);
       return false;
     }
-    const t = e.target.closest("[data-labind], [data-labexit], [data-labside], [data-labreset], [data-labtab], [data-labmkt], [data-labtax], [data-labmode], [data-labunpick], [data-labshare], [data-labcsv], [data-labrunopt], [data-labapply], [data-laboptview], [data-labcmp], [data-labdel], [data-labload]");
+    const t = e.target.closest("[data-labind], [data-labexit], [data-labside], [data-labreset], [data-labtab], [data-labmkt], [data-labtax], [data-labmode], [data-labunpick], [data-labshare], [data-labcsv], [data-labrunopt], [data-labapply], [data-laboptview], [data-labcmp], [data-labdel], [data-labload], [data-labcalrisk], [data-labcaltax], [data-labcalm], [data-labcalday]");
     if (!t) return false;
     const st = labState(), d = t.dataset;
-    if (d.labind) {   // keep the exits and extras across indicators, except to or from one with its own default exit (Buy the dip)
-      const o = M.clean(st.cfg), own = k => M.INDICATORS[k]?.buysOnly, keep = { tp: o.tp, sl: o.sl, trail: o.trail, fMa: o.fMa, fMkt: o.fMkt, fInd: o.fInd, maxPos: o.maxPos, cost: o.cost };
-      st.cfg = own(o.ind) || own(d.labind) ? { ind: d.labind, sl: o.sl, trail: o.trail, fMa: o.fMa, fMkt: o.fMkt, fInd: o.fInd, maxPos: o.maxPos, cost: o.cost } : { ind: d.labind, ...keep };
+    if (d.labind) st.cfg = labPickInd(st, d.labind);
+    else if (d.labcalrisk != null || d.labcaltax != null) {
+      st.cal = { ...st.cal, ...(d.labcalrisk != null ? { risk: d.labcalrisk === "1" } : { tax: d.labcaltax === "1" }) };
+      saveLab(st); runLab(); return true;
+    }
+    else if (d.labcalm || d.labcalday) {   // another month or day: only the calendar below the switches changes
+      st.cal = d.labcalm ? { ...st.cal, ym: d.labcalm, day: null } : { ...st.cal, ym: d.labcalday.slice(0, 7), day: d.labcalday };
+      saveLab(st); labCalRefresh();
+      if (d.labcalday && t.closest(".lcalday")) document.querySelector(".lcalday")?.scrollIntoView({ block: "nearest", behavior: "smooth" });
+      return true;
     }
     else if (d.labexit) st.cfg = { ...M.clean(st.cfg), exit: d.labexit };
     else if (d.labside) st.side = d.labside;
