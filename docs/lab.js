@@ -59,6 +59,61 @@ export const INDICATORS = {
              { k: "n", label: "From the highest close of the last", min: 5, max: 120, step: 1, def: 20, unit: "days" }],
   },
 };
+// Strategies the Lab can't recompute itself: their alerts (pre) or whole trades (own) come from the
+// weekly backtest (lab.json "pre", written by engine/backtest.py). They have no settings of their
+// own, but the stops, filters, account, costs, taxes and years still apply.
+const FIXED = "Fixed rules, as on its strategy page.";
+Object.assign(INDICATORS, {
+  volume_breakout: {
+    name: "Volume breakout", base: "volume_breakout", exit: "hold", group: "Breakouts & strength", needs: "v",
+    about: "A Donchian breakout that only counts on heavy volume: bullish on a close above the highest high of the last N days with volume at least X times its N-day average, bearish on a close below the lowest low on heavy volume.",
+    params: [{ k: "n", label: "Channel and volume length", min: 5, max: 100, step: 1, def: 20, unit: "days" },
+             { k: "mult", label: "Volume at least", min: 1, max: 4, step: 0.1, def: 1.5, unit: "× average" }],
+  },
+  relative_strength: {
+    name: "Relative strength", base: "relative_strength", exit: "opposite", group: "Breakouts & strength", needs: "bench",
+    about: "Price ÷ the market (SPY, Bitcoin or the commodity average). Bullish when that line makes a new N-day high (it starts leading), bearish at a new N-day low; it only alerts when it switches.",
+    params: [{ k: "n", label: "New high or low over", min: 20, max: 252, step: 1, def: 63, unit: "days" }],
+  },
+  double_top_bottom: { name: "Double top / bottom", base: "double_top_bottom", exit: "hold", group: "Chart patterns", pre: true, params: [],
+    about: "Bullish when the price breaks above the neckline of a double bottom, bearish when it breaks below the neckline of a double top. " + FIXED },
+  head_shoulders: { name: "Head & shoulders", base: "head_shoulders", exit: "hold", group: "Chart patterns", pre: true, params: [],
+    about: "Bearish on a close below the neckline of a head & shoulders top, bullish on a close above the neckline of an inverse one. " + FIXED },
+  triangle: { name: "Triangle breakout", base: "triangle", exit: "hold", group: "Chart patterns", pre: true, params: [],
+    about: "Bullish when the price breaks out above a tightening triangle, bearish when it breaks down below it. " + FIXED },
+});
+const BOT = (name, about, rule, markets = ["stocks"], extra = {}) =>
+  ({ name, base: "", exit: "opposite", group: markets[0] === "crypto" ? "50-day rule (crypto)" : "Trading-bot strategies", own: true, buysOnly: true, params: [], markets, about, rule, ...extra });
+const DECK_RULE = "Buys at the next open after a breakout, sells at the pattern's stop or on a close below the 20-day low.";
+const R50 = "Buys at the next open after a close above a rising 50-day average.";
+Object.assign(INDICATORS, {
+  deck_live: BOT("Deck patterns (live rules)", "Breakouts of the deck's chart and candle patterns, with the bot's live rules: only above the 50-day average, no buying more than 2% above the alert, weaker patterns left out.", DECK_RULE),
+  deck_v6: BOT("Deck patterns", "Breakouts of the deck's chart and candle patterns, every pattern included.", DECK_RULE),
+  deck_ma50: BOT("Deck patterns + 50-day filter", "Breakouts of the deck's chart and candle patterns, only while the price is above its 50-day average.", DECK_RULE),
+  deck_v8: BOT("Deck patterns, break-even stop", "Breakouts of the deck's chart and candle patterns; the stop follows the price and never goes back below the entry once it gets there.", "Buys at the next open after a breakout, sells at the moving stop or on a close below the 20-day low."),
+  pattern_trader: BOT("Pattern Trader", "Breakouts of five patterns (ABCD, falling wedge, inverse head & shoulders, triple bottom, Gartley), one trade at a time per stock.", "Buys at the next open, sells at the pattern's stop, at the target (ABCD) or on a close below the 20-day low."),
+  breakout_bot: BOT("Breakout Bot", "A new 20-day high above the 200-day average, confirmed by Bollinger (above the upper band, or after a squeeze).", "Buys at the next open, sells at a stop 2 ATR below or on a close below the 20-day low."),
+  btc50_f1: BOT("50-Day Rule (live)", "The live crypto bot's rule.", R50 + " Sells at the next open after a lower high (1-day confirmation) or a close below the 50-day.", ["crypto"]),
+  btc50_touch_f1: BOT("50-Day Rule, touch exit", "Like the live rule, but it sells when the price just touches the 50-day average.", R50 + " Sells after a lower high (1 day) or a touch of the 50-day.", ["crypto"]),
+  btc50_touch_f2: BOT("50-Day Rule, touch exit (2 days)", "Touch exit, with a 2-day confirmation of the lower high.", R50 + " Sells after a lower high (2 days) or a touch of the 50-day.", ["crypto"]),
+  btc50_touch: BOT("50-Day Rule, touch exit (3 days)", "Touch exit, with a 3-day confirmation of the lower high.", R50 + " Sells after a lower high (3 days) or a touch of the 50-day.", ["crypto"]),
+  btc50_ma: BOT("50-Day Rule (3 days)", "Close exit, with a 3-day confirmation of the lower high.", R50 + " Sells after a lower high (3 days) or a close below the 50-day.", ["crypto"]),
+  btc50_maonly: BOT("50-Day cross, average exit", "Only the 50-day average: no lower-high exit.", R50 + " Sells at the next open after a close below the 50-day.", ["crypto"]),
+  btc50_lhonly: BOT("50-Day Rule, lower-high exit", "Sells only on a lower high (1-day confirmation) or the starting stop.", R50 + " Sells after a lower high or a close below the starting stop.", ["crypto"]),
+  btc_trend_50_200: BOT("Above the 50 & 200-day", "Holds while the close is above both the 50- and the 200-day average, else cash.", "Buys at the next open after a close above both averages, sells at the next open after a close below either.", ["crypto"]),
+  btc50_both: BOT("50-Day Rule, long + short", "The live rule both ways: long above a rising 50-day, short below a falling one.", "Long or short at the next open after the signal, out at the next open after the rule's exit.", ["crypto"], { buysOnly: false }),
+});
+for (const [k, I] of Object.entries(INDICATORS)) { if (!I.base) I.base = k; I.group = I.group || "Indicators"; }
+export const GROUPS = ["Indicators", "Breakouts & strength", "Chart patterns", "Trading-bot strategies", "50-day rule (crypto)"];
+// can this strategy run on this market's data? (some need the weekly backtest's extra data)
+export function available(data, ind, market) {
+  const I = INDICATORS[ind];
+  if (!I || (I.markets && market && !I.markets.includes(market))) return false;
+  if (I.pre || I.own) return data.tickers.some(T => T.pre?.[I.base]);
+  if (I.needs === "v") return data.tickers.some(T => T.v);
+  if (I.needs === "bench") return !!data.bench;
+  return true;
+}
 export const HOLD_DEFAULT = 20;
 // Take profit / stop loss, in % from the entry price. 0 = off (the default, so the app's own
 // backtest is unchanged). They work on top of the exit rule: whichever comes first closes the trade.
@@ -134,14 +189,23 @@ export function decode(raw) {
       L += T.c[i];
       c[i] = Math.exp(L / 1e4); h[i] = Math.exp((L + T.h[i]) / 1e4); l[i] = Math.exp((L + T.l[i]) / 1e4);
     }
-    return { t: T.t, idx, c, h, l };
+    let v = null;
+    if (T.v?.length === n) { v = new Float64Array(n); for (let i = 0; i < n; i++) v[i] = T.v[i] > 0 ? Math.exp(T.v[i] / (raw.v_scale || 100)) : NaN; }
+    let pre = null;
+    for (const [sid, by] of Object.entries(raw.pre || {})) if (by[T.t]) (pre = pre || {})[sid] = Int32Array.from(by[T.t]);
+    return { t: T.t, idx, c, h, l, v, pre };
   });
   let spy = null;
   if (raw.spy?.length === D) {
     spy = new Float64Array(D); let L = 0;
     raw.spy.forEach((d, i) => { L += d; spy[i] = Math.exp(L / 1e4); });
   }
-  return { dates: raw.dates, tickers, spy };
+  let bench = null;
+  if (raw.bench?.length === D) {
+    bench = new Float64Array(D); let L = 0;
+    raw.bench.forEach((d, i) => { L += d; bench[i] = Math.exp(L / 1e4); });
+  }
+  return { dates: raw.dates, tickers, spy, bench, benchName: raw.bench_name || "the market" };
 }
 
 // -------------------------------------------------------------- indicators
@@ -219,6 +283,31 @@ export function signals(T, cfg) {
       const now = c[i] / top[i] - 1 <= -d + eps, before = i > 0 && c[i - 1] / top[i - 1] - 1 <= -d + eps;
       if (now && !before) sig[i] = 1;
     }
+  } else if (cfg.ind === "volume_breakout") {
+    // volume_breakout() in engine/strategies.py: a Donchian breakout on volume >= mult x its n-day average
+    const v = T.v; if (!v) return sig;
+    const hi = new Float64Array(n).fill(NaN), lo = new Float64Array(n).fill(NaN), avg = new Float64Array(n).fill(NaN);
+    for (let i = p.n; i < n; i++) {
+      let mx = -Infinity, mn = Infinity, s = 0, k = 0;
+      for (let j = i - p.n; j < i; j++) { if (h[j] > mx) mx = h[j]; if (l[j] < mn) mn = l[j]; if (v[j] === v[j]) { s += v[j]; k++; } }
+      hi[i] = mx; lo[i] = mn; if (k === p.n) avg[i] = s / k;
+    }
+    for (let i = 1; i < n; i++) { const heavy = v[i] >= p.mult * avg[i]; put(i, heavy && above(c, hi, i), heavy && below(c, lo, i)); }
+  } else if (cfg.ind === "relative_strength") {
+    // relative_strength() in engine/strategies.py: price / benchmark at a new n-day high or low, switches only
+    const b = T._bench; if (!b) return sig;
+    const rs = new Float64Array(n); for (let i = 0; i < n; i++) rs[i] = c[i] / b[T.idx[i]] * 100;
+    let state = 0;
+    for (let i = p.n; i < n; i++) {
+      let mx = -Infinity, mn = Infinity;
+      for (let j = i - p.n; j < i; j++) { if (rs[j] > mx) mx = rs[j]; if (rs[j] < mn) mn = rs[j]; }
+      const raw = rs[i] < mn ? -1 : rs[i] > mx ? 1 : 0;
+      if (raw && raw !== state) { state = raw; sig[i] = raw; }
+    }
+  } else if (INDICATORS[cfg.ind]?.pre) {
+    // alerts saved by the weekly backtest: +(row + 1) bullish, -(row + 1) bearish
+    const raw = T.pre?.[INDICATORS[cfg.ind].base];
+    if (raw) for (const x of raw) { const i = Math.abs(x) - 1; if (i < n) sig[i] = Math.sign(x); }
   } else if (cfg.ind === "supertrend") {
     // same loop as supertrend() in engine/strategies.py
     const a = 1 / p.n, atr = new Float64Array(n).fill(NaN);
@@ -288,12 +377,14 @@ function gates(T, cfg, data) {
 // A smaller copy of the data: only some tickers, and/or ending on day `to` (index into dates).
 export function subset(data, { tickers = null, to = null } = {}) {
   const end = to == null ? data.dates.length - 1 : Math.min(to, data.dates.length - 1);
-  const out = { dates: data.dates.slice(0, end + 1), spy: data.spy ? data.spy.subarray(0, end + 1) : null, tickers: [] };
+  const out = { dates: data.dates.slice(0, end + 1), spy: data.spy ? data.spy.subarray(0, end + 1) : null,
+    bench: data.bench ? data.bench.subarray(0, end + 1) : null, benchName: data.benchName, tickers: [] };
   for (const T of data.tickers) {
     if (tickers && !tickers.has(T.t)) continue;
     let k = T.idx.length; while (k > 0 && T.idx[k - 1] > end) k--;
     if (k < 2) continue;
-    out.tickers.push(k === T.idx.length ? T : { t: T.t, idx: T.idx.subarray(0, k), c: T.c.subarray(0, k), h: T.h.subarray(0, k), l: T.l.subarray(0, k) });
+    out.tickers.push(k === T.idx.length ? T : { t: T.t, idx: T.idx.subarray(0, k), c: T.c.subarray(0, k), h: T.h.subarray(0, k), l: T.l.subarray(0, k),
+      v: T.v ? T.v.subarray(0, k) : null, pre: T.pre });
   }
   return out;
 }
@@ -330,6 +421,7 @@ export function riskHit(side, entry, h, l, cfg, peak = entry) {
 // every slot is taken is skipped, and empty slots wait in cash. `cost` is taken on every buy and sell.
 export function run(data, cfg, fromIdx = 0) {
   cfg = clean(cfg);
+  if (INDICATORS[cfg.ind].own) return runOwn(data, cfg, fromIdx);
   const D = data.dates.length, trend = cfg.exit === "opposite", H = cfg.hold, risk = cfg.tp > 0 || cfg.sl > 0 || cfg.trail > 0;
   // buy-only strategies (Buy the dip) ignore alerts while a position is open, so the time limit counts
   // from the buy (own_exit_positions in engine/backtest.py)
@@ -337,6 +429,7 @@ export function run(data, cfg, fromIdx = 0) {
   const sum = { ls: new Float64Array(D), long: new Float64Array(D) }, cnt = { ls: new Int32Array(D), long: new Int32Array(D) };
   const trades = [], openL = [], book = { ls: [], long: [] };   // book: every position, kept only with a position limit
   for (const T of data.tickers) {
+    T._bench = data.bench;
     const sig = signals(T, cfg), gate = gates(T, cfg, data), n = sig.length, c = T.c, h = T.h, l = T.l, idx = T.idx, taken = new Uint8Array(n);
     // positions held at each close (earn the next session's return)
     let side = 0, exitLS = -1, exitL = -1;
@@ -422,9 +515,59 @@ export function run(data, cfg, fromIdx = 0) {
         if (r) { j = q; px = r.px; why = r.why; closed = true; break; }
         pk = s > 0 ? Math.max(pk, h[q]) : Math.min(pk, l[q]);
       }
-      if (j > i && closed) trades.push({ t: T.t, side: s, g0: idx[i], g1: idx[j], ret: s * (px / c[i] - 1) - 2 * fee, days: j - i, why });
+      if (j > i && closed) trades.push({ t: T.t, side: s, g0: idx[i], g1: idx[j], ret: s * (px / c[i] - 1) - 2 * fee, days: j - i, why, p0: c[i], p1: px });
     }
   }
+  return finish(data, cfg, fromIdx, sum, cnt, book, trades, openL);
+}
+
+// The trading-bot strategies run their own trades (bot_strategies.py, saved by the weekly backtest):
+// bought at the open after the alert, sold at their own exit. A take profit / stop loss / trailing
+// stop from the Lab is checked on top from the day after the buy; filters are checked on the alert's
+// close. Each held day earns from the buy price (first day) or the close before, to the exit price
+// (last day) or the close, like own_trade_days() in engine/backtest.py.
+function runOwn(data, cfg, fromIdx) {
+  const D = data.dates.length, I = INDICATORS[cfg.ind], fee = cfg.cost / 100, slots = cfg.maxPos, risk = cfg.tp > 0 || cfg.sl > 0 || cfg.trail > 0;
+  const sum = { ls: new Float64Array(D), long: new Float64Array(D) }, cnt = { ls: new Int32Array(D), long: new Int32Array(D) };
+  const trades = [], openL = [], book = { ls: [], long: [] }, WHY = ["rule", "tp", "sl"];
+  for (const T of data.tickers) {
+    const raw = T.pre?.[I.base]; if (!raw) continue;
+    const gate = gates(T, cfg, data), { c, h, l, idx } = T, n = c.length;
+    for (let k = 0; k + 6 < raw.length; k += 7) {
+      const s0 = raw[k], a = raw[k + 1], side = raw[k + 5], o = raw[k + 3];
+      if (a >= n || s0 >= n) continue;                                  // bought after a shortened period ends
+      if (gate && !(side > 0 ? gate.buy[s0] : gate.short[s0])) continue;
+      const pin = c[a] * Math.exp(raw[k + 2] / 1e4);
+      let closed = o >= 0 && o < n, b = closed ? o : n - 1, pout = closed ? c[o] * Math.exp(raw[k + 4] / 1e4) : c[n - 1];
+      let why = closed ? WHY[raw[k + 6]] || "rule" : "rule";
+      if (risk) for (let q = a + 1, pk = pin; q <= b; q++) {
+        const r = riskHit(side, pin, h[q], l[q], cfg, pk);
+        if (r) { b = q; pout = r.px; why = r.why; closed = true; break; }
+        pk = side > 0 ? Math.max(pk, h[q]) : Math.min(pk, l[q]);
+      }
+      const g = [], r = [];
+      for (let d = a; d <= b; d++) {
+        let x = side * ((d === b ? pout : c[d]) / (d === a ? pin : c[d - 1]) - 1);
+        if (d === a) x -= fee;
+        if (d === b && closed) x -= fee;
+        g.push(idx[d]); r.push(x);
+      }
+      const keys = side > 0 ? ["ls", "long"] : ["ls"];
+      for (const key of keys) {
+        if (slots) book[key].push({ t: T.t, g0: idx[s0], gE: closed ? idx[b] : Infinity, g, r });
+        else for (let m = 0; m < g.length; m++) { sum[key][g[m]] += r[m]; cnt[key][g[m]]++; }
+      }
+      if (!closed && side > 0 && idx[n - 1] === D - 1) openL.push({ t: T.t, since: data.dates[idx[a]], ret: (c[n - 1] / pin - 1) * 100 });
+      if (closed && idx[s0] >= fromIdx)
+        trades.push({ t: T.t, side, g0: idx[s0], g1: idx[b], ret: side * (pout / pin - 1) - 2 * fee, days: b - s0, why, p0: pin, p1: pout });
+    }
+  }
+  return finish(data, cfg, fromIdx, sum, cnt, book, trades, openL);
+}
+
+// the account, trade lists and statistics from each day's position returns
+function finish(data, cfg, fromIdx, sum, cnt, book, trades, openL) {
+  const D = data.dates.length, slots = cfg.maxPos;
   // with a position limit: fill the slots in date order (same-day alerts in a fixed shuffled order)
   const mix = s => { let x = 2166136261; for (let k = 0; k < s.length; k++) x = Math.imul(x ^ s.charCodeAt(k), 16777619); return x >>> 0; };
   const fill = key => {

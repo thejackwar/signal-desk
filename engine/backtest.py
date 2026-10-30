@@ -38,7 +38,7 @@ import pandas as pd
 sys.path.insert(0, str(Path(__file__).parent))
 import scan  # noqa: E402
 from scan import MARKETS, fetch_demo, fetch_real, load_tickers  # noqa: E402
-from strategies import DIP_HOLD, DIP_TP, REGISTRY, for_market  # noqa: E402
+from strategies import BENCHMARK, DIP_HOLD, DIP_TP, REGISTRY, for_market  # noqa: E402
 from bot_strategies import BOT_MONEY, BOT_RULES  # noqa: E402
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -252,6 +252,29 @@ def acct_stats(vals: list[int], dates) -> dict:
     return {"cagr": pct(cagr(s)), "maxdd": pct(max_drawdown(s)), "final": round(float(s.iloc[-1]))}
 
 
+# What the Strategy Lab can't recompute in the browser, saved from this run for lab.json ("pre"):
+#   chart patterns: their alerts per ticker, as signed (row + 1): +12 = bullish on row 11
+#   trading-bot strategies: their trades per ticker, 7 numbers each:
+#     alert row, entry row, entry price vs that row's close (log, basis points),
+#     exit row (-1 still open), exit price vs that row's close (same), side, why (0 rule, 1 target, 2 stop)
+LAB_SIGNALS = {"double_top_bottom", "head_shoulders", "triangle"}
+LAB_PRE: dict[str, dict[str, list[int]]] = {}
+
+
+def lab_trades(trades: list[dict], c: np.ndarray) -> list[int]:
+    out = []
+    bp = lambda px, i: int(round(np.log(px / c[i]) * 1e4))
+    for tr in trades:
+        if tr.get("in") is None:
+            continue                          # alerted on the last close, bought tomorrow
+        o = tr.get("out")
+        why = str(tr.get("why") or "")
+        code = 1 if "target" in why else 2 if "stop" in why else 0
+        out += [int(tr["sig"]), int(tr["in"]), bp(tr["in_px"], tr["in"]),
+                int(o) if o is not None else -1, bp(tr["out_px"], o) if o is not None else 0, int(tr["side"]), code]
+    return out
+
+
 def run(data: dict[str, pd.DataFrame]) -> dict:
     closes = pd.DataFrame({t: df["close"] for t, df in data.items()}).sort_index()
     rets = closes.pct_change()
@@ -289,6 +312,10 @@ def run(data: dict[str, pd.DataFrame]) -> dict:
             sig = res.signals.values
             n = len(df)
             idx = df.index
+            if res.trades is not None:
+                LAB_PRE.setdefault(sid, {})[t] = lab_trades(res.trades, c)
+            elif sid in LAB_SIGNALS:
+                LAB_PRE.setdefault(sid, {})[t] = [(int(i) + 1) * int(sig[i]) for i in np.flatnonzero(sig)]
             if res.trades is not None:
                 if own is None:
                     own = {k: pd.DataFrame(0.0, index=closes.index, columns=closes.columns)
@@ -488,11 +515,15 @@ def lab_prices(data: dict[str, pd.DataFrame], spy_c: pd.Series | None) -> dict:
       close  -> first value round(ln(close) * 1e4), then the change from the day before
       high/low -> round((ln(high or low) - ln(close)) * 1e4) for the same day
     Each ticker runs on its own trading days; "s" is its first day in the shared calendar
-    and "miss" lists shared-calendar days it has no price for (holidays, halts)."""
+    and "miss" lists shared-calendar days it has no price for (holidays, halts).
+    Also: "v" volume per day as round(ln(volume) * v_scale), 0 = none (Volume breakout); "bench" and
+    "bench_name" the series Relative strength compares against (SPY, Bitcoin or the commodity
+    average), encoded like "spy"; "pre" the alerts and trades of the strategies the Lab can't
+    recompute (LAB_PRE above)."""
     cal = pd.DatetimeIndex(sorted(set().union(*(df.index for df in data.values()))))
     pos = {d: i for i, d in enumerate(cal)}
     enc = lambda v: np.round(np.log(np.asarray(v, dtype=float)) * 1e4).astype(np.int64)
-    out = {"dates": [f"{d:%Y-%m-%d}" for d in cal], "tickers": []}
+    out = {"dates": [f"{d:%Y-%m-%d}" for d in cal], "tickers": [], "v_scale": 1000}
     for t, df in data.items():
         ix = [pos[d] for d in df.index]
         s, e = ix[0], ix[-1]
@@ -501,7 +532,8 @@ def lab_prices(data: dict[str, pd.DataFrame], spy_c: pd.Series | None) -> dict:
             "t": t, "s": s, "miss": sorted(set(range(s, e + 1)) - set(ix)),
             "c": [int(L[0])] + np.diff(L).tolist(),
             "h": (enc(df["high"].values) - L).tolist(),
-            "l": (enc(df["low"].values) - L).tolist()})
+            "l": (enc(df["low"].values) - L).tolist(),
+            "v": [int(round(np.log(x) * 1000)) if x > 0 else 0 for x in df["volume"].fillna(0).astype(float).values]})
     if spy_c is not None:
         c = spy_c.copy()
         if c.index.tz is not None:
@@ -511,6 +543,18 @@ def lab_prices(data: dict[str, pd.DataFrame], spy_c: pd.Series | None) -> dict:
         if c.notna().all():
             L = enc(c.values)
             out["spy"] = [int(L[0])] + np.diff(L).tolist()
+    b = BENCHMARK["close"]
+    if b is not None:
+        b = b.copy()
+        if b.index.tz is not None:
+            b.index = b.index.tz_localize(None)
+        days = cal.tz_localize(None) if cal.tz is not None else cal
+        b = b.reindex(b.index.union(days)).ffill().reindex(days).bfill()
+        if b.notna().all():
+            L = enc(b.values)
+            out["bench"], out["bench_name"] = [int(L[0])] + np.diff(L).tolist(), BENCHMARK["name"]
+    if LAB_PRE:
+        out["pre"] = LAB_PRE
     return out
 
 
