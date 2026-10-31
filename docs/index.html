@@ -606,6 +606,11 @@ button.lcald:hover { border-color: var(--muted); }
 .lcald.sel { border-color: var(--fg); }
 @media (min-width: 560px) { .lcald { min-height: 64px; padding: 7px 8px; } .lcald b { font-size: 12.5px; } }
 .lcalday { margin-top: 16px; }
+.ltchart .legend { padding: 4px 12px 10px; }
+table.lcpick tbody tr { cursor: pointer; }
+table.lcpick tbody tr:hover td { background: var(--hover); }
+table.lcpick tbody tr.on td { background: var(--amber-bg); }
+table.lcpick tbody tr.on td:first-child { box-shadow: inset 3px 0 0 var(--amber); }
 .linkbtn { padding: 0; background: none; border: 0; color: var(--blue); font: inherit; cursor: pointer; text-decoration: underline; text-underline-offset: 2px; }
 .lsave { display: flex; gap: 8px; align-items: center; margin-bottom: 12px; }
 .lsave .search { margin: 0; padding-left: 12px; background-image: none; }
@@ -3052,7 +3057,7 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
       if (!o.best || t.net > o.best.net) o.best = t;
       if (!o.worst || t.net < o.worst.net) o.worst = t;
     }
-    return LAB.calc = { key, D, cfg, side, trades, closed, opened, months, first: D[fi].slice(0, 7), last: D[D.length - 1].slice(0, 7) };
+    return LAB.calc = { key, D, cfg, I, byT, side, trades, closed, opened, months, first: D[fi].slice(0, 7), last: D[D.length - 1].slice(0, 7) };
   }
   // compact euro for the small day cells: +€840, +€1.2k, −€15k
   const labCalEur = v => {
@@ -3130,25 +3135,129 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
     const D = X.D, cl = X.closed[day] || [], op = X.opened[day] || [], why = { rule: "exit rule", tp: "take profit", sl: "stop loss", trail: "trailing stop" };
     const sd = d => esc(fmtDate(d, { day: "numeric", month: "short", year: "2-digit" }));
     const tk = t => `<a href="#stock-${esc(t.t)}" class="tk">${esc(disp(t.t))}</a> <span class="pill ${t.side > 0 ? "bullish" : "bearish"}">${t.side > 0 ? "long" : "short"}</span>`;
+    // the chart of one trade (the first one, or the row last tapped): tap any row to switch
+    const clS = cl.slice().sort((a, b) => b.net - a.net), all = clS.concat(op.filter(t => !cl.includes(t)));
+    const pick = all.find(t => labTradeKey(t) === LAB.calPick) || all[0];
+    LAB.calDraw = pick ? { X, t: pick } : null; LAB.after = labTradeDraw;
+    const row = t => `data-labcaltrade="${esc(labTradeKey(t))}" class="${t === pick ? "on" : ""}" aria-selected="${t === pick}" title="Show this trade on the chart"`;
     let h = `<div class="lcalday"><h3 class="h3">${esc(fmtDate(day, { weekday: "long", day: "numeric", month: "long", year: "numeric" }))}</h3>`;
+    if (pick) h += `<div class="chartbox ltchart" id="lcaltc"></div>${all.length > 1 ? `<p class="hint" style="margin:6px 2px 12px">Tap a trade below to see it on the chart.</p>` : `<div style="height:12px"></div>`}`;
     if (cl.length) {
       const v = labCalSum(cl);
       h += `<p class="hint" style="margin:0 2px 8px">${cl.length} trade${cl.length > 1 ? "s" : ""} closed: <b class="${v >= 0 ? "up" : "down"}">${eurSigned(v)}</b></p>
-      <div class="tablewrap"><table class="bt ltrades"><thead><tr><th>${esc(L().one[0].toUpperCase() + L().one.slice(1))}</th><th>In → out</th><th style="text-align:right">Return</th><th style="text-align:right">Result</th></tr></thead><tbody>` +
-        cl.slice().sort((a, b) => b.net - a.net).map(t => `<tr><td>${tk(t)}<small>${why[t.why]}</small></td>
+      <div class="tablewrap"><table class="bt ltrades lcpick"><thead><tr><th>${esc(L().one[0].toUpperCase() + L().one.slice(1))}</th><th>In → out</th><th style="text-align:right">Return</th><th style="text-align:right">Result</th></tr></thead><tbody>` +
+        clS.map(t => `<tr ${row(t)}><td>${tk(t)}<small>${why[t.why]}</small></td>
           <td style="white-space:nowrap">${sd(D[t.g0])}<small>→ ${sd(D[t.g1])} · ${t.days}d</small></td>
           <td style="text-align:right" class="${t.ret >= 0 ? "up" : "down"}">${labPct(t.ret * 100)}</td>
           <td style="text-align:right"><b class="${t.net >= 0 ? "up" : "down"}">${eurSigned(t.net)}</b><small>on ${kEur(t.size)}${c.tax && t.tax + t.stamp > 0.5 ? ` · ${eurS(t.tax + t.stamp)} ${t.tax > 0.5 ? "tax + duty" : "stamp duty"}` : ""}</small></td></tr>`).join("") + `</tbody></table></div>`;
     }
     if (op.length) {
       h += `<p class="hint" style="margin:14px 2px 8px">${op.length} trade${op.length > 1 ? "s" : ""} opened this day, and how ${op.length > 1 ? "they" : "it"} ended:</p>
-      <div class="tablewrap"><table class="bt ltrades"><tbody>` +
-        op.map(t => `<tr><td>${tk(t)}</td><td style="white-space:nowrap"><button class="linkbtn" data-labcalday="${D[t.g1]}">closed ${sd(D[t.g1])}</button><small>${t.days}d · ${why[t.why]}</small></td>
+      <div class="tablewrap"><table class="bt ltrades lcpick"><tbody>` +
+        op.map(t => `<tr ${row(t)}><td>${tk(t)}</td><td style="white-space:nowrap"><button class="linkbtn" data-labcalday="${D[t.g1]}">closed ${sd(D[t.g1])}</button><small>${t.days}d · ${why[t.why]}</small></td>
           <td style="text-align:right" class="${t.ret >= 0 ? "up" : "down"}">${labPct(t.ret * 100)}</td><td style="text-align:right"><b class="${t.net >= 0 ? "up" : "down"}">${eurSigned(t.net)}</b></td></tr>`).join("") + `</tbody></table></div>`;
     }
     return h + `</div>`;
   }
-  const labCalRefresh = () => { const b = document.getElementById("lcalbody"); if (b) b.innerHTML = labCalBody(labState()); };
+  const labCalRefresh = () => { const b = document.getElementById("lcalbody"); if (b) { b.innerHTML = labCalBody(labState()); LAB.after = null; labTradeDraw(); } };
+  const labTradeKey = t => `${t.t}|${t.g0}|${t.g1}|${t.side}`;
+  // One trade on a price chart: the days before, the holding period (shaded), the entry and exit,
+  // and the take profit, stop loss and trailing stop levels it was tested against. The Lab's prices
+  // are rebuilt from daily moves, so the scale is % from the entry price rather than dollars.
+  function labTradeDraw() {
+    const box = document.getElementById("lcaltc"), s = LAB.calDraw;
+    if (!box || !s) return;
+    const { X, t } = s, T = X.byT.get(t.t), cfg = X.cfg, D = X.D, side = t.side;
+    const i0 = T ? T.idx.indexOf(t.g0) : -1, i1 = T ? T.idx.indexOf(t.g1) : -1;
+    if (i0 < 0 || i1 < 0) { box.innerHTML = `<p class="hint" style="padding:12px">No price data for this trade.</p>`; return; }
+    const ie = X.I.own ? Math.min(i0 + 1, i1) : i0;   // the trading-bot strategies buy at the next open
+    const hold = i1 - ie, pre = Math.min(60, Math.max(12, Math.round(hold * .6))), post = Math.min(40, Math.max(6, Math.round(hold * .35)));
+    const a = Math.max(0, ie - pre), b = Math.min(T.c.length - 1, i1 + post), n = b - a + 1;
+    const p0 = t.p0 ?? T.c[ie], p1 = t.p1 ?? T.c[i1], pc = v => (v / p0 - 1) * 100;
+    const tp = cfg.tp ? p0 * (1 + side * cfg.tp / 100) : null, sl = cfg.sl ? p0 * (1 - side * cfg.sl / 100) : null;
+    // trailing stop: the level each day, from the best price since the entry up to the day before
+    const trail = [];
+    if (cfg.trail) for (let q = ie + 1, pk = p0; q <= i1; q++) {
+      trail.push([q, pk * (1 - side * cfg.trail / 100)]);
+      pk = side > 0 ? Math.max(pk, T.h[q]) : Math.min(pk, T.l[q]);
+    }
+    const vals = [p0, p1];
+    for (let i = a; i <= b; i++) vals.push(T.h[i], T.l[i]);
+    if (tp) vals.push(tp); if (sl) vals.push(sl); trail.forEach(([, v]) => vals.push(v));
+    let lo = pc(Math.min(...vals)), hi = pc(Math.max(...vals)); const pad = Math.max(.6, (hi - lo) * .08); lo -= pad; hi += pad;
+    const W = Math.max(280, box.clientWidth || 340), H = W > 640 ? 280 : 236, P = { l: 8, r: 78, t: 26, b: 24 };
+    const x = i => P.l + (i - a) / Math.max(1, n - 1) * (W - P.l - P.r), y = v => P.t + (hi - pc(v)) / (hi - lo) * (H - P.t - P.b);
+    const F = FONT.replace(/"/g, "'"), f = (v, d = 1) => (+v).toFixed(d);
+    const txt = (xx, yy, s, col, o = "") => `<text x="${f(xx)}" y="${f(yy)}" fill="${col}" font-size="10.5" font-family="${F}" ${o}>${s}</text>`;
+    let svg = `<svg class="chart" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" role="img" aria-label="${esc(disp(t.t))} trade with entry, exit${tp ? ", take profit" : ""}${sl ? ", stop loss" : ""}"><rect width="${W}" height="${H}" fill="${C.bg}"/>`;
+    // holding period
+    svg += `<rect x="${f(x(ie))}" y="${P.t}" width="${f(Math.max(1, x(i1) - x(ie)))}" height="${H - P.t - P.b}" fill="${C.accent}" fill-opacity=".07"/>`;
+    // % grid
+    const span = hi - lo, step = [1, 2, 2.5, 5, 10, 20, 25, 50, 100].find(s => span / s <= 5) || 200;
+    for (let v = Math.ceil(lo / step) * step; v <= hi; v += step) {
+      const yy = P.t + (hi - v) / (hi - lo) * (H - P.t - P.b);
+      if (Math.abs(v) < 1e-9) continue;
+      svg += `<line x1="${P.l}" x2="${W - P.r}" y1="${f(yy)}" y2="${f(yy)}" stroke="${C.grid}"/>`;
+    }
+    // levels: dashed over the holding period, faint before and after; labels on the right
+    const labels = [], lvl = (v, col, name) => {
+      const yy = y(v);
+      svg += `<line x1="${P.l}" x2="${W - P.r}" y1="${f(yy)}" y2="${f(yy)}" stroke="${col}" stroke-opacity=".28" stroke-dasharray="2 4"/>`;
+      svg += `<line x1="${f(x(ie))}" x2="${f(x(i1))}" y1="${f(yy)}" y2="${f(yy)}" stroke="${col}" stroke-width="1.6" stroke-dasharray="6 4"/>`;
+      labels.push({ y: yy, col, s: `${name} ${labPct(pc(v))}` });
+    };
+    lvl(p0, C.axis, "Entry");
+    if (tp) lvl(tp, C.up, "TP");
+    if (sl) lvl(sl, C.down, "SL");
+    if (trail.length) {
+      svg += `<path d="${trail.map(([q, v], k) => (k ? `L${f(x(q - 1))} ${f(y(v))}` : `M${f(x(q - 1))} ${f(y(v))}`) + `L${f(x(q))} ${f(y(v))}`).join("")}" fill="none" stroke="${C.down}" stroke-width="1.4" stroke-dasharray="1.5 3" stroke-linecap="round"/>`;
+      labels.push({ y: y(trail[trail.length - 1][1]), col: C.down, s: `Trail ${labPct(pc(trail[trail.length - 1][1]))}` });
+    }
+    // labels can't overlap: push apart, keep inside the plot
+    labels.sort((p, q) => p.y - q.y);
+    for (let k = 1; k < labels.length; k++) labels[k].y = Math.max(labels[k].y, labels[k - 1].y + 13);
+    for (let k = labels.length - 1; k >= 0; k--) { labels[k].y = Math.min(labels[k].y, (k === labels.length - 1 ? H - P.b : labels[k + 1].y - 13)); labels[k].y = Math.max(labels[k].y, 9); }
+    labels.forEach(L2 => svg += txt(W - P.r + 6, L2.y + 3.5, esc(L2.s), L2.col, `font-weight="600"`));
+    // daily high–low ranges and the close
+    if (n <= 160) for (let i = a; i <= b; i++) svg += `<line x1="${f(x(i))}" x2="${f(x(i))}" y1="${f(y(T.h[i]))}" y2="${f(y(T.l[i]))}" stroke="${C.muted}" stroke-opacity="${i >= ie && i <= i1 ? .55 : .3}" stroke-width="${n > 90 ? 1 : 1.6}"/>`;
+    const path = (from, to) => { let d = ""; for (let i = from; i <= to; i++) d += (i === from ? "M" : "L") + f(x(i)) + " " + f(y(T.c[i])); return d; };
+    svg += `<path d="${path(a, b)}" fill="none" stroke="${C.accent}" stroke-opacity=".45" stroke-width="1.4"/>`;
+    // the trade itself, from the buy price to the sell price (a take profit or stop fills during the day)
+    let dT = `M${f(x(ie))} ${f(y(p0))}`; for (let i = ie + 1; i < i1; i++) dT += `L${f(x(i))} ${f(y(T.c[i]))}`; dT += `L${f(x(i1))} ${f(y(p1))}`;
+    svg += `<path d="${dT}" fill="none" stroke="${C.accent}" stroke-width="2.2" stroke-linejoin="round"/>`;
+    // entry and exit points
+    const win = t.ret >= 0, ec = win ? C.up : C.down, why = { rule: "Exit rule", tp: "Take profit", sl: "Stop loss", trail: "Trailing stop" }[t.why] || "Exit";
+    const ex = x(ie), ey = y(p0), xx = x(i1), xy = y(p1);
+    svg += `<line x1="${f(xx)}" x2="${f(xx)}" y1="${P.t}" y2="${H - P.b}" stroke="${ec}" stroke-opacity=".35"/>`;
+    svg += `<circle cx="${f(ex)}" cy="${f(ey)}" r="5" fill="${C.accent}" stroke="${C.edge}" stroke-width="2"/>`;
+    svg += `<circle cx="${f(xx)}" cy="${f(xy)}" r="5" fill="${ec}" stroke="${C.edge}" stroke-width="2"/>`;
+    const tag = (cx, cy, s, col, up) => txt(Math.min(Math.max(cx, P.l + 22), W - P.r - 22), up ? cy - 10 : cy + 18, esc(s), col, `text-anchor="middle" font-weight="600"`);
+    const entryUp = side > 0, exitUp = side > 0 ? win : !win;   // put each label on the side away from the move
+    svg += tag(ex, ey, side > 0 ? "Buy" : "Short", C.accent, !entryUp);
+    svg += tag(xx, xy, `${why} ${labPct(t.ret * 100)}`, ec, exitUp);
+    // dates: entry and exit, the window's ends when there is room
+    const dl = [[ie, 1], [i1, 1], [a, 0], [b, 0]], put = [];
+    for (const [i, must] of dl) {
+      const px = x(i);
+      if (put.some(q => Math.abs(q - px) < (must ? 52 : 70))) continue;
+      put.push(px);
+      svg += txt(Math.min(Math.max(px, P.l + 26), W - P.r - 26), H - 7, esc(fmtDate(D[T.idx[i]], { day: "numeric", month: "short", ...(+D[T.idx[a]].slice(0, 4) !== +D[T.idx[b]].slice(0, 4) || i === a ? { year: "2-digit" } : {}) })), must ? C.xhair : C.axis, `text-anchor="middle"${must ? ` font-weight="600"` : ""}`);
+    }
+    svg += `<line class="xhair" x1="0" x2="0" y1="${P.t}" y2="${H - P.b}" stroke="${C.xhair}" stroke-opacity=".3" visibility="hidden"/></svg>`;
+    const head = `<b>${esc(disp(t.t))}</b> ${side > 0 ? "long" : "short"} · ${hold || 1}d · <b class="${win ? "up" : "down"}">${labPct(t.ret * 100)}</b> · ${esc(why.toLowerCase())}`;
+    const leg = [`<span><i style="background:${C.accent}"></i>Price</span>`, `<span><i style="background:${C.accent};opacity:.25;height:8px"></i>Holding period</span>`,
+      tp ? `<span><i style="background:${C.up}"></i>Take profit ${labPct(side * cfg.tp)}</span>` : "", sl ? `<span><i style="background:${C.down}"></i>Stop loss ${labPct(-side * cfg.sl)}</span>` : "",
+      trail.length ? `<span><i style="background:repeating-linear-gradient(90deg, ${C.down} 0 2px, transparent 2px 5px)"></i>Trailing stop ${labRiskTxt(cfg.trail)}</span>` : ""].join("");
+    box.innerHTML = `<div class="readout">${head}</div>${svg}<div class="legend">${leg}<span>% from entry</span></div>${!tp && !sl && !trail.length ? `<p class="hint" style="margin:0;padding:0 12px 10px">Take profit and stop loss are ${labCal(labState()).risk ? "set to 0" : "off"}: ${labCal(labState()).risk ? "move a slider" : "turn them on"} above to see their levels on the chart.</p>` : ""}`;
+    const ro = box.querySelector(".readout"), el = box.querySelector("svg"), xh = box.querySelector(".xhair");
+    const show = i => {
+      const r = side * (T.c[i] / p0 - 1) * 100, inT = i > ie && i <= i1;
+      ro.innerHTML = `<b>${esc(fmtDate(D[T.idx[i]], { weekday: "short", day: "numeric", month: "short", year: "numeric" }))}</b>  close <b>${labPct(pc(T.c[i]))}</b>  high ${labPct(pc(T.h[i]))}  low ${labPct(pc(T.l[i]))}${inT ? `  trade <b class="${r >= 0 ? "up" : "down"}">${labPct(i === i1 ? t.ret * 100 : r)}</b>` : i === ie ? "  entry" : ""}`;
+    };
+    const mv = ev => { const r = el.getBoundingClientRect(), px = (ev.clientX - r.left) * (W / r.width); const i = Math.max(a, Math.min(b, a + Math.round((px - P.l) / (W - P.l - P.r) * (n - 1)))); xh.setAttribute("x1", x(i)); xh.setAttribute("x2", x(i)); xh.setAttribute("visibility", "visible"); show(i); };
+    el.addEventListener("pointermove", mv); el.addEventListener("pointerdown", mv);
+    el.addEventListener("pointerleave", () => { xh.setAttribute("visibility", "hidden"); ro.innerHTML = head; });
+  }
   // pick an indicator: keep the exits and extras, except to or from one with its own default exit (Buy the dip)
   function labPickInd(st, ind) {
     const M = LAB.mod, o = M.clean(st.cfg), own = k => M.INDICATORS[k]?.buysOnly, keep = { tp: o.tp, sl: o.sl, trail: o.trail, fMa: o.fMa, fMkt: o.fMkt, fInd: o.fInd, maxPos: o.maxPos, cost: o.cost };
@@ -3395,13 +3504,19 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
       setTimeout(() => { const st = labState(); st.open = [...document.querySelectorAll(".lsec[open]")].map(d => d.dataset.labsec); saveLab(st); }, 0);
       return false;
     }
-    const t = e.target.closest("[data-labind], [data-labexit], [data-labside], [data-labreset], [data-labtab], [data-labmkt], [data-labtax], [data-labmode], [data-labunpick], [data-labshare], [data-labcsv], [data-labrunopt], [data-labapply], [data-laboptview], [data-labcmp], [data-labdel], [data-labload], [data-labcalrisk], [data-labcaltax], [data-labcalm], [data-labcalday]");
+    const t = e.target.closest("[data-labind], [data-labexit], [data-labside], [data-labreset], [data-labtab], [data-labmkt], [data-labtax], [data-labmode], [data-labunpick], [data-labshare], [data-labcsv], [data-labrunopt], [data-labapply], [data-laboptview], [data-labcmp], [data-labdel], [data-labload], [data-labcalrisk], [data-labcaltax], [data-labcalm], [data-labcalday], [data-labcaltrade]");
     if (!t) return false;
     const st = labState(), d = t.dataset;
     if (d.labind) st.cfg = labPickInd(st, d.labind);
     else if (d.labcalrisk != null || d.labcaltax != null) {
       st.cal = { ...st.cal, ...(d.labcalrisk != null ? { risk: d.labcalrisk === "1" } : { tax: d.labcaltax === "1" }) };
       saveLab(st); runLab(); return true;
+    }
+    else if (d.labcaltrade) {   // a trade row on the calendar day: show it on the chart
+      if (e.target.closest("a")) return false;
+      LAB.calPick = d.labcaltrade; labCalRefresh();
+      document.getElementById("lcaltc")?.scrollIntoView({ block: "nearest", behavior: "smooth" });
+      return true;
     }
     else if (d.labcalm || d.labcalday) {   // another month or day: only the calendar below the switches changes
       st.cal = d.labcalm ? { ...st.cal, ym: d.labcalm, day: null } : { ...st.cal, ym: d.labcalday.slice(0, 7), day: d.labcalday };
