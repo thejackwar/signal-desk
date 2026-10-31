@@ -1,0 +1,29 @@
+name: BTC dip study - fetch data
+
+on:
+  push:
+    branches: [btc-dip-research]
+    paths: [research/btc-dip/fetch_data.py, .github/workflows/btc-dip-data.yml]
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install pandas numpy
+      - run: python research/btc-dip/fetch_data.py
+      - name: Commit data
+        run: |
+          git config user.name "signal-desk-bot"
+          git config user.email "signal-desk-bot@users.noreply.github.com"
+          gzip -kf research/btc-dip/data/btc_1h.csv
+          git add research/btc-dip/data/btc_1h.csv.gz research/btc-dip/data/funding.csv
+          git commit -m "BTC dip study: hourly data $(date -u +%F)" || true
+          git push
