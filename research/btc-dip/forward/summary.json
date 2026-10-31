@@ -1,0 +1,130 @@
+{
+  "start": "2026-10-31T10:00:00+00:00",
+  "updated": "2026-10-31T10:00:00+00:00",
+  "last_candle": "2026-10-31T09:00:00+00:00",
+  "source": "Binance BTCUSDT",
+  "btc_price": 77473.28,
+  "btc_since_start": 0.0,
+  "variants": [
+    {
+      "dip": 0.05,
+      "hold": 4,
+      "trades": 0,
+      "open": null,
+      "closed": 0,
+      "total": 0.0,
+      "win": null,
+      "avg": null
+    },
+    {
+      "dip": 0.05,
+      "hold": 12,
+      "trades": 0,
+      "open": null,
+      "closed": 0,
+      "total": 0.0,
+      "win": null,
+      "avg": null
+    },
+    {
+      "dip": 0.05,
+      "hold": 24,
+      "trades": 0,
+      "open": null,
+      "closed": 0,
+      "total": 0.0,
+      "win": null,
+      "avg": null
+    },
+    {
+      "dip": 0.05,
+      "hold": 36,
+      "trades": 0,
+      "open": null,
+      "closed": 0,
+      "total": 0.0,
+      "win": null,
+      "avg": null
+    },
+    {
+      "dip": 0.05,
+      "hold": 48,
+      "trades": 0,
+      "open": null,
+      "closed": 0,
+      "total": 0.0,
+      "win": null,
+      "avg": null
+    },
+    {
+      "dip": 0.05,
+      "hold": 72,
+      "trades": 0,
+      "open": null,
+      "closed": 0,
+      "total": 0.0,
+      "win": null,
+      "avg": null
+    },
+    {
+      "dip": 0.07,
+      "hold": 4,
+      "trades": 0,
+      "open": null,
+      "closed": 0,
+      "total": 0.0,
+      "win": null,
+      "avg": null
+    },
+    {
+      "dip": 0.07,
+      "hold": 12,
+      "trades": 0,
+      "open": null,
+      "closed": 0,
+      "total": 0.0,
+      "win": null,
+      "avg": null
+    },
+    {
+      "dip": 0.07,
+      "hold": 24,
+      "trades": 0,
+      "open": null,
+      "closed": 0,
+      "total": 0.0,
+      "win": null,
+      "avg": null
+    },
+    {
+      "dip": 0.07,
+      "hold": 36,
+      "trades": 0,
+      "open": null,
+      "closed": 0,
+      "total": 0.0,
+      "win": null,
+      "avg": null
+    },
+    {
+      "dip": 0.07,
+      "hold": 48,
+      "trades": 0,
+      "open": null,
+      "closed": 0,
+      "total": 0.0,
+      "win": null,
+      "avg": null
+    },
+    {
+      "dip": 0.07,
+      "hold": 72,
+      "trades": 0,
+      "open": null,
+      "closed": 0,
+      "total": 0.0,
+      "win": null,
+      "avg": null
+    }
+  ]
+}
