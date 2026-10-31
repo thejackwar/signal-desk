@@ -184,7 +184,8 @@ def model(df: pd.DataFrame, minutes: int, shown_n: int, step: int, bins: int, pa
         new = (df["volume"] * .05).values
         closed_share = np.full(len(df), DECAY_PER_HOUR * minutes / 60)
 
-    longs, shorts = np.zeros(bins), np.zeros(bins)
+    levs = list(LEVERAGE)
+    longs, shorts = np.zeros((len(levs), bins)), np.zeros((len(levs), bins))   # open positions per leverage
     H, L, C = df["high"].values, df["low"].values, df["close"].values
     typ = (df["high"] + df["low"] + df["close"]).values / 3
     start = len(df) - len(shown)
@@ -193,18 +194,18 @@ def model(df: pd.DataFrame, minutes: int, shown_n: int, step: int, bins: int, pa
     for t in range(len(df)):
         if t > 0:                                        # price sweeps through levels: liquidated
             hl, hs = mids >= L[t], mids <= H[t]
-            rl.append(longs[hl].sum()); rs.append(shorts[hs].sum())
-            longs[hl] = 0; shorts[hs] = 0
+            rl.append(longs[:, hl].sum()); rs.append(shorts[:, hs].sum())
+            longs[:, hl] = 0; shorts[:, hs] = 0
         keep = 1 - closed_share[t]                       # positions closed on their own
         longs *= keep; shorts *= keep
-        for lev, w in LEVERAGE.items():                  # new positions, half long, half short
+        for j, (lev, w) in enumerate(LEVERAGE.items()):  # new positions, half long, half short
             amt = new[t] * w / 2
             for p, arr in ((typ[t] * (1 - 1 / lev + MM), longs), (typ[t] * (1 + 1 / lev - MM), shorts)):
                 i = int(np.searchsorted(edges, p)) - 1
                 if 0 <= i < bins:
-                    arr[i] += amt
+                    arr[j, i] += amt
         if t >= start and (t - start) % step == step - 1:
-            cols.append(longs + shorts)
+            cols.append(longs.sum(0) + shorts.sum(0))
             times.append(df.index[t])
 
     M = np.array(cols).T
@@ -212,6 +213,8 @@ def model(df: pd.DataFrame, minutes: int, shown_n: int, step: int, bins: int, pa
     q = np.clip(np.sqrt(np.clip(M / scale, 0, 1)) * 255, 0, 255).round().astype(int)
 
     price = float(C[-1])
+    lev_longs, lev_shorts = longs, shorts
+    longs, shorts = longs.sum(0), shorts.sum(0)
 
     def clusters(side_vals, above, k=3):
         items = sorted(((mids[i], side_vals[i]) for i in range(bins) if (mids[i] > price) == above), key=lambda x: -x[1])
@@ -234,6 +237,10 @@ def model(df: pd.DataFrame, minutes: int, shown_n: int, step: int, bins: int, pa
         "matrix": q.tolist(),
         "ohlc": {k: [round(float(x), 2) for x in v.values[:len(times)]] for k, v in ohlc.items()},
         "now": {"longs": [round(float(x)) for x in longs], "shorts": [round(float(x)) for x in shorts]},
+        # liquidation map: positions still open, by leverage (same order as "leverage" at the top of the file)
+        "now_lev": {"lev": levs,
+                    "longs": [[round(float(x)) for x in r] for r in lev_longs],
+                    "shorts": [[round(float(x)) for x in r] for r in lev_shorts]},
         "short_clusters": clusters(shorts, True),
         "long_clusters": clusters(longs, False),
         "wiped_24h": {"longs": round(float(sum(rl[-per_day * step:]))), "shorts": round(float(sum(rs[-per_day * step:])))},
