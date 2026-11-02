@@ -26,7 +26,8 @@ ROOT = Path(__file__).resolve().parents[2]
 OUT = Path(__file__).resolve().parent / "results"
 
 DEFAULT = dict(min_gap_atr=0.25, b_range_mult=1.5, close_pos=0.30, trend=True, volume=True,
-               entry="mid", stop_at="gap", expiry=20, stop_buf_atr=0.1, target_r=2.0, max_hold=None)
+               entry="mid", stop_at="gap", expiry=20, stop_buf_atr=0.1, target_r=2.0, max_hold=None,
+               trail_atr=None, rs=False)
 COST = {"stocks": 0.001, "btc": 0.001}   # paid on each buy and each sell (commission + spread)
 
 
@@ -69,7 +70,8 @@ def spy_close() -> pd.Series:
 
 
 # ---------- strategy ----------
-def find_trades(df: pd.DataFrame, p: dict, use_volume: bool) -> list[dict]:
+def find_trades(df: pd.DataFrame, p: dict, use_volume: bool, rs_ok: np.ndarray | None = None) -> list[dict]:
+    """rs_ok: optional bool per bar, True when the symbol is beating its benchmark (rs filter)."""
     o, h, l, c = (df[k].to_numpy(float) for k in ("open", "high", "low", "close"))
     v = df["volume"].to_numpy(float)
     n = len(c)
@@ -105,6 +107,9 @@ def find_trades(df: pd.DataFrame, p: dict, use_volume: bool) -> list[dict]:
             if exit_px is not None:
                 trades.append({**pos, "i_out": i, "t_out": df.index[i], "exit": exit_px, "why": why})
                 pos = None
+            elif p["trail_atr"]:                        # trail from this bar's high, used from the next bar
+                pos["hh"] = max(pos.get("hh", h[i]), h[i])
+                pos["stop"] = max(pos["stop"], pos["hh"] - p["trail_atr"] * atr[i])
             continue_after = pos is not None
         else:
             continue_after = False
@@ -133,7 +138,7 @@ def find_trades(df: pd.DataFrame, p: dict, use_volume: bool) -> list[dict]:
                 g, px = filled
                 risk = px - g["stop"]
                 pos = {"i_in": i, "t_in": df.index[i], "entry": px, "stop": g["stop"],
-                       "target": px + p["target_r"] * risk, "risk": risk, "t_gap": g["t_gap"],
+                       "target": px + p["target_r"] * risk if p["target_r"] else np.inf, "risk": risk, "t_gap": g["t_gap"],
                        "gap_atr": g["gap_atr"]}
                 pending = []
                 # same bar: stop first if touched after fill (conservative), target needs a later bar
@@ -156,6 +161,8 @@ def find_trades(df: pd.DataFrame, p: dict, use_volume: bool) -> list[dict]:
         if rng[b] <= 0 or (c[b] - l[b]) / rng[b] < 1 - p["close_pos"]:
             continue
         if p["trend"] and c[i] <= ema[i]:
+            continue
+        if p["rs"] and rs_ok is not None and not rs_ok[i]:
             continue
         if use_volume and p["volume"] and not (v[b] > avg_v[b]):
             continue
