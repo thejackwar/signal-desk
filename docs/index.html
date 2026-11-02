@@ -245,6 +245,8 @@ a { color: var(--blue); }
 .bt.ucits td:first-child a { color: var(--fg); }
 .bt.ucits td:last-child, .bt.ucits th:last-child { text-align: right; font: 500 13.5px var(--font-mono); white-space: nowrap; }
 .bt.ucits .mono { display: inline; font: 600 12px var(--font-mono); color: var(--muted); }
+.pill.live { background: color-mix(in srgb, var(--blue) 20%, transparent); color: var(--blue); margin-left: 6px; }
+.livenote { margin: -4px 0 10px; font-size: 13px; color: var(--muted); line-height: 1.45; }
 .pill.earn { background: color-mix(in srgb, var(--amber) 18%, transparent); color: var(--amber); margin-left: 6px; }
 .earnwarn { display: flex; gap: 12px; align-items: flex-start; color: var(--fg); text-decoration: none; border: 1px solid color-mix(in srgb, var(--amber) 40%, transparent); }
 .earnwarn .ico { flex: none; width: 24px; height: 24px; border-radius: 50%; background: var(--amber); color: var(--on-accent); font: 700 15px/24px var(--font-display); text-align: center; }
@@ -1420,6 +1422,7 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
   function dayLabel(d) {
     const asOf = S.feed?.as_of;
     if (d === asOf) return "Latest session";
+    if (asOf && d > asOf) return "Today so far · live";
     const diff = Math.round((parse(asOf) - parse(d)) / DAY);
     if (diff < 7) return fmtDate(d, { weekday: "long" });
     return fmtDate(d, { day: "numeric", month: "long" });
@@ -1430,11 +1433,11 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
   const disp = t => isComm() && S.stockBy?.[t] ? S.stockBy[t].name.replace(/ \(.*\)$/, "") : sym(t);
   const MK = {
     stocks: { noun: "stocks", one: "stock", Tab: "Stocks", index: "S&amp;P 100", base: "data/", search: "Search ticker or company", topic: "",
-              scan: "The scan runs once a day after the US market closes (around 23:15 Milan time)." },
+              scan: "Live (provisional) signals every 30 minutes while the US market is open. The final scan runs after the close (around 23:15 Milan time)." },
     crypto: { noun: "coins", one: "coin", Tab: "Coins", index: "top crypto", base: "data/crypto/", search: "Search coin", topic: "crypto-",
-              scan: "The crypto scan runs every day shortly after the daily candle closes (around 01:20 Milan time), weekends included." },
+              scan: "Live (provisional) signals every 4 hours. The final scan runs every day shortly after the daily candle closes (around 01:20 Milan time), weekends included." },
     commodities: { noun: "commodities", one: "commodity", Tab: "Futures", Title: "Commodities", index: "commodity", base: "data/commodities/", search: "Search gold, oil, wheat…", topic: "commodities-",
-              scan: "The commodities scan runs Monday to Friday after the futures settle (around midnight Milan time)." },
+              scan: "Live (provisional) signals every hour on weekdays. The final scan runs Monday to Friday after the futures settle (around midnight Milan time)." },
   };
   const L = () => MK[S.market] || MK.stocks;
   const isCrypto = () => S.market === "crypto";
@@ -1644,6 +1647,8 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
   function buildFeed(c) {
     if (!c.feed) return c.feed;
     const td = S.market !== "commodities" ? (c.td?.alerts || []).filter(a => tdTfs().includes(a.tf)) : [];
+    // live (provisional) signals on today's open candle, until the after-close scan replaces them
+    if (c.live && !c.live.demo === !c.feed.demo && c.live.session > c.feed.as_of) td.push(...(c.live.alerts || []));
     if (!td.length) return c.feed;
     const key = a => (a.date || "") + (a.found_at || "");
     return { ...c.feed, alerts: [...td, ...c.feed.alerts].sort((a, b) => key(a) < key(b) ? 1 : key(a) > key(b) ? -1 : 0) };
@@ -1656,7 +1661,9 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
     const iso = a.found_at || S.feed?.generated_at;
     if (!iso) return "";
     const d = new Date(iso.replace(/\+00:00$/, "Z"));
-    return isNaN(d) ? "" : " " + d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+    if (isNaN(d)) return "";
+    const t = d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+    return " " + (d.toDateString() === new Date().toDateString() ? t : d.toLocaleDateString("en-GB", { weekday: "short" }) + " " + t);
   }
 
   // The trading-bot strategies send sell alerts (and cover alerts for the long + short one): they close a trade
@@ -1664,12 +1671,13 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
   const sideLbl = a => a.exit ? (a.side === "bearish" ? "sell" : "cover") : (S.byId[a.strategy]?.long_only ? "buy" : a.side);
   function alertRow(a, opts = {}) {
     const idx = S.feed.alerts.indexOf(a);
-    const sinceTxt = a.since_days > 0 ? `${chg(a.since)} <span style="color:var(--faint)">${a.since_days}d</span>` : `<span style="color:var(--faint)">today${foundTime(a)}</span>`;
+    const sinceTxt = a.live ? `<span style="color:var(--faint)">since${foundTime(a)}</span>`
+      : a.since_days > 0 ? `${chg(a.since)} <span style="color:var(--faint)">${a.since_days}d</span>` : `<span style="color:var(--faint)">found${foundTime(a)}</span>`;
     return `<a class="row alert ${a.side}${hasIcon() && !opts.showDate ? " withcoin" : ""}" href="#alert-${idx}">
       <span class="stripe"></span>${!opts.showDate ? icon(a.ticker, 32) : ""}
       <span class="main"><span class="tk">${esc(opts.showDate ? fmtDate(a.date, { day: "numeric", month: "short" }) : disp(a.ticker))}</span><span class="strat">${esc(stratName(a.strategy))}${a.tf ? ` · ${esc(a.tf)}` : ""}</span>
         <div class="note">${esc(a.note)}</div>
-        <div class="info">${meter(a.strength)}<span class="pill">${sideLbl(a)}</span>${S.market === "stocks" && earnSoon(a.ticker) ? `<span class="pill earn" title="Earnings ${inDays(earnSoon(a.ticker).days)}">earnings ${earnSoon(a.ticker).days === 0 ? "today" : earnSoon(a.ticker).days + "d"}</span>` : ""}${a.stop_hit ? `<span class="pill lvhit" title="Closed beyond its “wrong if” level on ${esc(fmtDate(a.stop_hit, { day: "numeric", month: "short" }))}">level hit</span>` : ""}</div></span>
+        <div class="info">${meter(a.strength)}<span class="pill">${sideLbl(a)}</span>${a.live ? `<span class="pill live" title="Not final: fires only if the price holds until the close">live</span>` : ""}${S.market === "stocks" && earnSoon(a.ticker) ? `<span class="pill earn" title="Earnings ${inDays(earnSoon(a.ticker).days)}">earnings ${earnSoon(a.ticker).days === 0 ? "today" : earnSoon(a.ticker).days + "d"}</span>` : ""}${a.stop_hit ? `<span class="pill lvhit" title="Closed beyond its “wrong if” level on ${esc(fmtDate(a.stop_hit, { day: "numeric", month: "short" }))}">level hit</span>` : ""}</div></span>
       <span class="px">${money(a.price)}<span class="since">${sinceTxt}</span></span></a>`;
   }
 
@@ -1713,6 +1721,7 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
         day = a.date;
         const cnt = list.filter(z => z.date === day).length;
         h += `<div class="day"><span>${esc(dayLabel(day))}</span><span>${cnt} alert${cnt > 1 ? "s" : ""}</span></div>`;
+        if (list.some(z => z.date === day && z.live)) h += `<p class="livenote">Today's candle isn't finished. Live signals (updated ${esc(ago(CACHE[S.market]?.live?.generated_at))}) only count if the price holds until the close. The after-close scan confirms or drops them.</p>`;
       }
       h += alertRow(a);
     }
@@ -1930,7 +1939,8 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
     const isTd = a.strategy === "topdown";
     h += `<p class="sub">${stock ? `<a href="#stock-${esc(a.ticker)}">${esc(stock.name)}</a> · ` : ""}${esc(s?.name)} · ${isTd
       ? `${esc(TD_LABEL[a.tf] || a.tf)} chart · ${esc(fmtDate(a.date, { weekday: "short", day: "numeric", month: "long" }))}${foundTime(a)}`
-      : `close of ${esc(fmtDate(a.date, { weekday: "short", day: "numeric", month: "long" }))}`}</p>`;
+      : a.live ? `live · first seen${foundTime(a)}` : `close of ${esc(fmtDate(a.date, { weekday: "short", day: "numeric", month: "long" }))}`}</p>`;
+    if (a.live) h += `<div class="card"><h3>Not final yet</h3><p>Today's candle is still open, so this uses the latest price instead of the close. If the price moves back before the close, the signal disappears; if it holds, the after-close scan turns it into a normal alert and adds it to the track record.</p></div>`;
     if (isTd) h += `<div class="card tdline"><div><span>Timeframe</span><b>${esc(a.tf)}</b></div><div><span>${a.side === "bullish" ? "Falling line" : "Rising line"}</span><b class="${a.side === "bullish" ? "down" : "up"}">${money(a.level)}</b></div><div><span>Price at alert</span><b>${money(a.price)}</b></div></div>
       <p style="margin:10px 0 0"><a class="btn ghost" href="trendlines.html#${encodeURIComponent(a.ticker)}">See ${esc(disp(a.ticker))}'s lines on every timeframe ›</a></p>`;
     else h += `<div class="chartbox" id="achart"><p class="loading">Loading chart…</p></div>`;
@@ -5588,8 +5598,8 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
   async function loadMarket(m) {
     if (!CACHE[m]) {
       const b = MK[m].base;
-      const [feed, bt, stocks, liq, news, mentions, td, sent] = await Promise.all([opt(b + "alerts.json"), opt(b + "backtest.json"), opt(b + "stocks.json"), m === "crypto" ? opt(b + "liquidations.json") : null, opt(b + "news.json"), opt(b + "mentions.json"), m === "stocks" ? opt("data/topdown/alerts.json") : m === "crypto" ? opt(b + "topdown.json") : null, m === "stocks" ? opt("data/sentiment.json") : null]);
-      CACHE[m] = { feed, bt, stocks, liq, news, mentions, td, sent, stockData: {} };
+      const [feed, bt, stocks, liq, news, mentions, td, sent, live] = await Promise.all([opt(b + "alerts.json"), opt(b + "backtest.json"), opt(b + "stocks.json"), m === "crypto" ? opt(b + "liquidations.json") : null, opt(b + "news.json"), opt(b + "mentions.json"), m === "stocks" ? opt("data/topdown/alerts.json") : m === "crypto" ? opt(b + "topdown.json") : null, m === "stocks" ? opt("data/sentiment.json") : null, opt(b + "live.json")]);
+      CACHE[m] = { feed, bt, stocks, liq, news, mentions, td, sent, live, stockData: {} };
     }
     const c = CACHE[m];
     S.market = m; S.liq = c.liq; S.news = c.news; S.mentions = c.mentions; S.sent = c.sent; S.newsSrc = "all"; S.newsSec = "all"; S.nq = ""; S.feed = buildFeed(c); S.bt = c.bt; S.stocks = c.stocks; S.stockData = c.stockData;

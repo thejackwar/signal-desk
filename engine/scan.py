@@ -13,12 +13,14 @@ ntfy iPhone app to just the strategies you follow.
 from __future__ import annotations
 
 import argparse
+import datetime as dt
 import json
 import os
 import sys
 import urllib.request
 from datetime import datetime, timezone
 from pathlib import Path
+from zoneinfo import ZoneInfo
 
 import numpy as np
 import pandas as pd
@@ -73,7 +75,7 @@ def load_tickers() -> list[str]:
     return [x.strip() for x in lines if x.strip() and not x.startswith("#")]
 
 
-def fetch_real(tickers: list[str], period: str = "2y") -> dict[str, pd.DataFrame]:
+def fetch_real(tickers: list[str], period: str = "2y", keep_open_candle: bool = False) -> dict[str, pd.DataFrame]:
     import yfinance as yf
     raw = yf.download(tickers, period=period, interval="1d", group_by="ticker",
                       auto_adjust=True, progress=False, threads=True)
@@ -83,7 +85,7 @@ def fetch_real(tickers: list[str], period: str = "2y") -> dict[str, pd.DataFrame
             df = raw[t].rename(columns=str.lower)[["open", "high", "low", "close", "volume"]].dropna()
         except KeyError:
             continue
-        if MARKET == "crypto":
+        if MARKET == "crypto" and not keep_open_candle:
             # crypto trades around the clock: drop today's unfinished daily candle
             today = pd.Timestamp.now(tz="UTC").normalize().tz_localize(None)
             df = df[df.index.tz_localize(None) < today] if df.index.tz is not None else df[df.index < today]
@@ -396,12 +398,85 @@ def notify(new_alerts: list[dict], prefix: str, names: dict):
             print(f"  ! notification failed: {e}")
 
 
+ET = ZoneInfo("America/New_York")
+
+
+def live_session(now: datetime) -> str | None:
+    """The trading day whose candle is still open right now, or None when nothing is open.
+    Stocks: 9:30-16:00 New York, Monday to Friday. Commodities: futures trade nearly around the
+    clock on weekdays; the day's candle is open until the evening settlement scan. Crypto: the
+    UTC day's candle."""
+    if MARKET == "crypto":
+        return now.strftime("%Y-%m-%d")
+    et = now.astimezone(ET)
+    if et.weekday() >= 5:
+        return None
+    if MARKET == "stocks" and not (dt.time(9, 30) <= et.time() < dt.time(16, 0)):
+        return None
+    return et.strftime("%Y-%m-%d")
+
+
+def live_main(args):
+    """Live (provisional) scan: the same strategies on today's unfinished candle.
+    A signal here means "if the price holds until the close, this strategy fires". It is
+    written to live.json only; the alert feed, track record and notifications are untouched
+    until the after-close scan confirms it."""
+    live_out, live_charts = DATA / "live.json", CHART_DIR / "live"
+    now_dt = datetime.now(timezone.utc)
+    session = "demo" if args.demo else live_session(now_dt)
+    if session is None:
+        print("Market closed: no open candle to scan, live.json left as it is.")
+        return
+    tickers = load_tickers()
+    data = fetch_demo() if args.demo else fetch_real(tickers, keep_open_candle=True)
+    if args.demo:
+        session = f"{max(df.index[-1] for df in data.values()):%Y-%m-%d}"
+    # only series whose last candle is today's: a holiday or a missing quote must not
+    # turn yesterday's close into a "live" signal
+    today = {t: df for t, df in data.items() if f"{df.index[-1]:%Y-%m-%d}" == session}
+    print(f"Loaded {len(data)} tickers, {len(today)} with a {session} candle")
+    if not today:
+        print("No open candle yet (holiday or data not in), live.json left as it is.")
+        return
+    use_benchmark(data, args.demo)
+
+    found = scan(today, 1, load_edge())
+    now = now_dt.isoformat(timespec="minutes")
+    prev = json.loads(live_out.read_text()) if live_out.exists() else {}
+    seen = {a["id"]: a.get("found_at") for a in prev.get("alerts", [])} if prev.get("session") == session else {}
+    live_charts.mkdir(parents=True, exist_ok=True)
+    keep = set()
+    for a in found:
+        a["live"] = True
+        a["found_at"] = seen.get(a["id"]) or now
+        a["file"] = "live/" + a["id"].replace(":", "_") + ".json"
+        keep.add(a["file"].split("/", 1)[1])
+        (live_charts / a["file"].split("/", 1)[1]).write_text(
+            json.dumps(a.pop("chart"), separators=(",", ":")))
+    for f in live_charts.glob("*.json"):
+        if f.name not in keep:
+            f.unlink()
+    found.sort(key=lambda a: (a["found_at"], a["ticker"]), reverse=True)
+    live_out.write_text(json.dumps({
+        "generated_at": now,
+        "session": session,
+        "market": MARKET,
+        "demo": args.demo,
+        "tickers": len(today),
+        "alerts": found,
+    }, separators=(",", ":")))
+    print(f"{len(found)} live signals ({sum(a['id'] not in seen for a in found)} new) -> {live_out.relative_to(ROOT)}")
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--demo", action="store_true", help="use synthetic prices")
     ap.add_argument("--market", choices=list(MARKETS), default="stocks")
+    ap.add_argument("--live", action="store_true", help="provisional scan of today's unfinished candle")
     args = ap.parse_args()
     configure(args.market)
+    if args.live:
+        return live_main(args)
 
     previous = json.loads(OUT.read_text()) if OUT.exists() else None
     if previous and previous.get("demo") != args.demo:

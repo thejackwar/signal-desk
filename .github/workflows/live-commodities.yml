@@ -1,0 +1,40 @@
+name: Live scan (commodities, provisional)
+
+# Runs the same strategies on today's unfinished candle. Results go to live.json only:
+# provisional signals ("fires if it holds until the close"), never added to the alert feed,
+# the track record or the notifications. The after-close scan confirms or drops them.
+on:
+  schedule:
+    # every hour, Monday to Friday, 07:50-21:50 UTC: the futures day before the evening settlement scan
+    - cron: "50 7-21 * * 1-5"
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+concurrency:
+  group: live-commodities
+  cancel-in-progress: false
+
+jobs:
+  live:
+    if: github.event_name != 'schedule' || vars.EXTERNAL_SCHEDULER != 'on'   # the scheduler Worker starts it on time instead (worker/README.md)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: pip install -r requirements.txt
+      - name: Scan today's open candle
+        run: python engine/scan.py --market commodities --live
+      - name: Publish
+        run: |
+          git config user.name "signal-desk-bot"
+          git config user.email "signal-desk-bot@users.noreply.github.com"
+          git add -A docs/data/commodities/live.json docs/data/commodities/charts/live 2>/dev/null || true
+          git diff --cached --quiet || git commit -m "Live commodities $(date -u +%FT%H:%M)"
+          git pull --rebase
+          git push

@@ -12,6 +12,9 @@
 
 const SCHEDULE = [
   ["topdown.yml",      "2,32 13-21 * * 1-5", "Top-Down alerts: every 30 min while the US market is open"],
+  ["live-stocks.yml",  "5,35 13-20 * * 1-5", "Live stock scan (provisional): every 30 min while the US market is open"],
+  ["live-commodities.yml", "50 7-21 * * 1-5", "Live commodities scan (provisional): every hour on weekdays"],
+  ["live-crypto.yml",  "25 3-23/4 * * *",    "Live crypto scan (provisional): every 4 hours"],
   ["scan.yml",         "15 22 * * 1-5",      "Daily scan (S&P 100)"],
   ["commodities.yml",  "40 22 * * 1-5",      "Daily commodities scan"],
   ["crypto.yml",       "20 0 * * *",         "Daily crypto scan"],
