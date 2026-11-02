@@ -19,6 +19,7 @@ docs/                    the website (served by GitHub Pages)
   data/stocks.json       stock list + market health       (written by engine/scan.py)
   data/stocks/           one-year chart per stock
   lab.js                 Strategy Lab (indicator settings, exit rule, take profit / stop loss); tests: tests/lab/test_parity.py, tests/lab/test_stops.mjs
+                         Robustness tab: vs holding the same stocks, walk-forward, settings plateau, bootstrap luck test (tests/lab/test_robust.mjs)
   rating.js              technical rating (Strong sell … Strong buy) on each stock page; test: tests/rating/test_rating.py
   trendlines.html/.js    automatic trendlines + support/resistance, stocks and crypto (data from worker/)
   data/sentiment.json    News mood: per-stock headline tone from Google News, established outlets (engine/sentiment.py, FinBERT, hourly news job)

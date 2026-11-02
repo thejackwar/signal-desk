@@ -553,6 +553,17 @@ table.lstocks td small { max-width: 160px; overflow: hidden; text-overflow: elli
 .lopt { margin-bottom: 12px; }
 .lopt .lrow > span:first-child { min-width: 70px; color: var(--muted); }
 .lpickcard p { font-size: 14.5px; line-height: 1.5; }
+.lrobhead { display: flex; align-items: center; gap: 14px; }
+.lrobhead .sc { font: 700 30px var(--font-mono); letter-spacing: -.02em; }
+.lrobhead span b { display: block; font-size: 17px; }
+.lrobhead small { color: var(--faint); font-size: 12.5px; }
+.lchecks { list-style: none; margin: 12px 0 0; padding: 0; }
+.lchecks li { display: flex; gap: 11px; padding: 10px 0 2px; border-top: 1px solid var(--line); font-size: 14px; line-height: 1.45; }
+.lchecks li b { display: block; margin-bottom: 1px; }
+.lchecks i { flex: 0 0 22px; height: 22px; border-radius: 50%; display: grid; place-items: center; font: 700 12px var(--font-body); font-style: normal; background: var(--surface-2); color: var(--muted); }
+.lchecks i.up { background: var(--bull-bg); color: var(--bull); }
+.lchecks i.down { background: var(--bear-bg); color: var(--bear); }
+h3.lsub { font-size: 16px; margin: 22px 2px 8px; }
 table.lheat th, table.lheat td { text-align: center; padding: 4px 3px; white-space: nowrap; }
 table.lheat thead th { font: 500 11px var(--font-mono); color: var(--faint); }
 table.lheat tbody th { font: 600 12px var(--font-mono); color: var(--muted); text-align: left; padding-left: 10px; }
@@ -2801,7 +2812,7 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
   // Build and backtest an indicator strategy your way, in the browser (docs/lab.js): settings, exits
   // and stops, filters, which stocks, the account, costs, taxes and the period. Results, every trade,
   // a per-stock view, an optimizer with an out-of-sample check, and saved setups to compare.
-  const LAB = { mod: null, data: {}, sub: {}, timer: 0, opt: null, optRun: 0 };
+  const LAB = { mod: null, data: {}, sub: {}, timer: 0, opt: null, optRun: 0, rob: null, robRun: 0 };
   const LAB_IND = { ma200: "ma", golden_cross: "cross", bollinger: "bollinger", rsi: "rsi", macd: "macd", donchian: "donchian", supertrend: "supertrend", buy_the_dip: "dip" };
   // every other strategy has the same id in the Lab (docs/lab.js)
   ["volume_breakout", "relative_strength", "double_top_bottom", "head_shoulders", "triangle", "deck_live", "deck_v6", "deck_ma50", "deck_v8",
@@ -2809,7 +2820,7 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
    "btc_trend_50_200", "btc50_both", "avg_down"].forEach(k => LAB_IND[k] = k);
   const LAB_FLASK = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3h6"/><path d="M10 3v6.2L4.6 18.8A1.6 1.6 0 0 0 6 21h12a1.6 1.6 0 0 0 1.4-2.2L14 9.2V3"/><path d="M7.2 15h9.6"/></svg>`;
   const LAB_CAPS = [1000, 5000, 10000, 25000, 50000, 100000, 250000, 1000000];
-  const LAB_TABS = [["overview", "Results"], ["trades", "Trades"], ["calendar", "Calendar"], ["stocks", "By " + "stock"], ["optimize", "Optimize"], ["compare", "Compare"]];
+  const LAB_TABS = [["overview", "Results"], ["trades", "Trades"], ["calendar", "Calendar"], ["stocks", "By " + "stock"], ["optimize", "Optimize"], ["robust", "Robustness"], ["compare", "Compare"]];
   const labMk = () => S.market || "stocks";
   function labState() {
     const st = pref("lab", null) || {};
@@ -2818,7 +2829,7 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
       cfg: st.cfg || { ind: "ma" }, side: st.trades === "all" ? "all" : "long", from: st.from || null, to: st.to || null,
       uni: st.uni?.[labMk()] || { mode: "all" }, cap: LAB_CAPS.includes(st.cap) ? st.cap : 100000, tax: !!st.tax,
       tab: LAB_TABS.some(t => t[0] === st.tab) ? st.tab : "overview", open: Array.isArray(st.open) ? st.open : ["signal"],
-      opt: st.opt || {}, cal: st.cal || {}, _uni: st.uni || {},
+      opt: st.opt || {}, rob: st.rob || {}, cal: st.cal || {}, _uni: st.uni || {},
     };
   }
   const saveLab = st => { const { side, uni, _uni, ...rest } = st; setPref("lab", { ...rest, trades: side, uni: { ..._uni, [labMk()]: uni } }); };
@@ -3037,7 +3048,7 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
   function runLab() {
     const out = document.getElementById("labout"); if (!out || !LAB.mod) return;
     const st = labState();
-    try { out.innerHTML = ({ overview: labOverview, trades: labTrades, calendar: labCalendar, stocks: labStocks, optimize: labOptimizeView, compare: labCompare }[st.tab] || labOverview)(st, out); }
+    try { out.innerHTML = ({ overview: labOverview, trades: labTrades, calendar: labCalendar, stocks: labStocks, optimize: labOptimizeView, robust: labRobustView, compare: labCompare }[st.tab] || labOverview)(st, out); }
     catch (err) { console.error(err); out.innerHTML = `<div class="card"><p style="margin:0">Something went wrong running these settings. Try Reset.</p></div>`; }
     LAB.after?.(); LAB.after = null;
   }
@@ -3441,7 +3452,7 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
     return out;
   }
   const labSet = (cfg, key, v) => { const c = JSON.parse(JSON.stringify(cfg)); if (key.startsWith("p.")) c.p[key.slice(2)] = v; else c[key] = v; return c; };
-  function labOptCtx(st) { const { opt, tab, open, ...rest } = st; return JSON.stringify({ ...rest, cfg: LAB.mod.clean(st.cfg), m: labMk() }); }
+  function labOptCtx(st) { const { opt, rob, tab, open, ...rest } = st; return JSON.stringify({ ...rest, cfg: LAB.mod.clean(st.cfg), m: labMk() }); }
   function labOptimizeView(st) {
     const M = LAB.mod, cfg = M.clean(st.cfg), keys = labOptKeys(cfg), [first, last] = labYears();
     const o = st.opt, a = keys.some(k => k[0] === o.a) ? o.a : keys[0][0], b = o.b === "" || keys.some(k => k[0] === o.b && k[0] !== a) ? (o.b ?? (keys[1]?.[0] !== a ? keys[1]?.[0] : "")) : "";
@@ -3517,6 +3528,115 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
     }
     h += `<p class="hint">Tap a result to use those settings. The outlined one is the best in the training years. Cells with fewer than 5 trades aren't picked.</p>`;
     el.innerHTML = h;
+  }
+
+  // ----------------------------------------------------------- robustness
+  // Is the result an edge or luck? Four checks (docs/lab.js: holdCurve, walkForward, bootstrap):
+  //   1) beats simply holding the same stocks (same survivorship bias, same equal weights)
+  //   2) walk-forward: settings re-picked every year from past years only, then used on the next one
+  //   3) stable settings: most settings around it also beat holding the same stocks
+  //   4) not luck: still ahead in most of 1,000 reshuffled histories (block bootstrap)
+  const labRobCtx = st => JSON.stringify({ cfg: LAB.mod.clean(st.cfg), side: st.side, from: st.from, to: st.to, uni: st.uni, m: labMk(), r: labRobOpts(st) });
+  const labRobOpts = st => ({ train: [3, 5, 0].includes(st.rob?.train) ? st.rob.train : 5, by: st.rob?.by === "cagr" ? "cagr" : "sharpe" });
+  // the settings tried: the strategy's first setting × its second (or the stop loss when it has none)
+  function labRobAxes(cfg) {
+    const P = LAB.mod.INDICATORS[cfg.ind].params;
+    return P.length ? [["p." + P[0].k, labOptVals(cfg, "p." + P[0].k, 7)], ...(P[1] ? [["p." + P[1].k, labOptVals(cfg, "p." + P[1].k, 5)]] : [])]
+      : [["sl", labOptVals(cfg, "sl", 7)]];
+  }
+  function labRobustView(st) {
+    const M = LAB.mod, cfg = M.clean(st.cfg), o = labRobOpts(st), ax = labRobAxes(cfg), runs = ax.reduce((n, a) => n * a[1].length, 1);
+    const sel = (attr, cur, opts, lbl) => `<span class="yrpick"><select data-labrob="${attr}" aria-label="${lbl}">${opts.map(([v, t]) => `<option value="${v}"${String(v) === String(cur) ? " selected" : ""}>${esc(t)}</option>`).join("")}</select></span>`;
+    let h = `<p class="hint" style="margin:0 2px 12px">A great backtest can still be luck, or come from the ${L().noun} chosen rather than the rules. These four checks test the current settings against simply holding the same ${L().noun}, then retest the strategy as if you'd picked its settings without knowing the future.</p>
+      <div class="labbox lopt">
+        <label class="lrow"><span>Pick with</span>${sel("train", o.train, [[3, "the last 3 years"], [5, "the last 5 years"], [0, "every year before"]], "Training years")}</label>
+        <label class="lrow"><span>Best by</span>${sel("by", o.by, [["sharpe", "Sharpe ratio"], ["cagr", "Return per year"]], "Score")}</label>
+        <div class="lrow"><button class="btn sm" data-labrunrob>Run the checks (${runs} backtests)</button><span class="hint" id="labrobprog" style="margin:0"></span></div>
+      </div><div id="labrob"></div>`;
+    if (LAB.rob && LAB.rob.ctx === labRobCtx(st)) LAB.after = () => labRobDraw();
+    else if (LAB.rob) LAB.after = () => { const el = document.getElementById("labrob"); if (el) el.innerHTML = `<p class="hint">Settings changed since the last check: run it again.</p>`; };
+    return h;
+  }
+  async function labRobust() {
+    const M = LAB.mod, st = labState(), cfg = M.clean(st.cfg), o = labRobOpts(st), ax = labRobAxes(cfg);
+    const token = ++LAB.robRun, prog = () => document.getElementById("labrobprog"), btn = document.querySelector("[data-labrunrob]");
+    if (btn) btn.disabled = true;
+    const data = labData(st), D = data.dates, fi = labFi(D, st.from), side = M.INDICATORS[cfg.ind].buysOnly ? "long" : st.side;
+    const [A, B] = [ax[0][1], ax[1]?.[1] || [null]], cells = [];
+    for (let i = 0; i < A.length; i++) for (let j = 0; j < B.length; j++) {
+      if (token !== LAB.robRun) return;
+      let c = labSet(cfg, ax[0][0], A[i]); if (ax[1]) c = labSet(c, ax[1][0], B[j]);
+      const cc = M.clean(c), r = M.run(data, cc, fi)[side];
+      cells.push({ i, j, cfg: cc, eq: r.eq, n: r.trades.n, s: M.summary(r.eq, D, fi) });
+      if (prog()) prog().textContent = `${cells.length} of ${A.length * B.length}…`;
+      await new Promise(ok => setTimeout(ok, 0));
+    }
+    const mine = M.run(data, cfg, fi)[side].eq, hold = M.holdCurve(data, fi), spy = M.spyCurve(data, fi);
+    const wf = M.walkForward(cells.map(c => c.eq), D, fi, o);
+    const R = { ctx: labRobCtx(st), o, ax, A, B, cells, D, fi, mine, hold, spy, wf, n: data.tickers.length,
+      sMine: M.summary(mine, D, fi), sHold: M.summary(hold, D, fi), sSpy: spy ? M.summary(spy, D, fi) : null };
+    if (wf.from >= 0) {
+      const w = (eq, a = wf.from) => M.summary(eq, D, a);
+      Object.assign(R, { wWf: w(wf.eq), wHold: w(hold), wMine: w(mine), wSpy: spy ? w(spy) : null,
+        wBest: cells.map(c => w(c.eq)).reduce((m, s) => (s.cagr ?? -1e9) > (m.cagr ?? -1e9) ? s : m) });
+      wf.years.forEach(y => y.hold = (hold[y.to] / hold[y.from] - 1) * 100);
+    }
+    if (prog()) prog().textContent = "Reshuffling history…";
+    await new Promise(ok => setTimeout(ok, 0));
+    R.bs = M.bootstrap(mine, hold, fi);
+    if (token !== LAB.robRun) return;
+    LAB.rob = R;
+    if (prog()) prog().textContent = "";
+    if (btn) btn.disabled = false;
+    labRobDraw();
+  }
+  function labRobDraw() {
+    const el = document.getElementById("labrob"), R = LAB.rob; if (!el || !R) return;
+    const M = LAB.mod, bn = benchOf().name, held = `holding all ${R.n} ${R.n > 1 ? L().noun : L().one}`, Held = held[0].toUpperCase() + held.slice(1);
+    const pp = v => labPct(v) + " a year", gap = (a, b) => (a ?? 0) - (b ?? 0);
+    const stab = R.cells.filter(c => (c.s.cagr ?? -1e9) > R.sHold.cagr).length, stabPct = stab / R.cells.length * 100;
+    const checks = [
+      { ok: gap(R.sMine.cagr, R.sHold.cagr) > 0, t: `Beats ${held}`,
+        d: `${pp(R.sMine.cagr)} against ${pp(R.sHold.cagr)} (${labPct(gap(R.sMine.cagr, R.sHold.cagr))})${R.sSpy ? `. ${bn}: ${pp(R.sSpy.cagr)}` : ""}. The fair comparison: same ${L().noun}, so any edge left comes from the rules.` },
+      R.wf.from < 0 ? { ok: null, t: "Settings picked without hindsight", d: `Needs more years than the ${R.o.train || 3} used to pick the settings: choose earlier years or a shorter window.` }
+        : { ok: gap(R.wWf.cagr, R.wHold.cagr) > 0, t: "Settings picked without hindsight",
+          d: `Re-picking the best settings each year from past years only earned ${pp(R.wWf.cagr)} in ${R.wf.years[0].year}–${R.wf.years.at(-1).year}, against ${pp(R.wHold.cagr)} for ${held}. With hindsight the best setting made ${pp(R.wBest.cagr)}: the gap is what perfect knowledge of the future was worth.` },
+      { ok: stabPct >= 50, t: "Works across settings", d: `${stab} of ${R.cells.length} settings tried beat ${held}. ${stabPct >= 50 ? "A broad plateau, not a lucky spike." : "Most don't: the result depends on finding the exact numbers, which rarely lasts."}` },
+      R.bs ? { ok: R.bs.p >= 90, t: "Not just luck", d: `Ahead in ${Math.round(R.bs.p)}% of 1,000 reshuffled histories; extra return ${labPct(R.bs.lo)} to ${labPct(R.bs.hi)} a year (90% range). In the unlucky 5%, the worst drop reached ${labPct(R.bs.dd, 0)}.` }
+        : { ok: null, t: "Not just luck", d: "Needs at least a year of results." },
+    ];
+    const score = checks.filter(c => c.ok).length, of = checks.filter(c => c.ok != null).length;
+    const [word, cls] = score === of && of >= 3 ? ["Looks robust", "up"] : score >= of - 1 && score >= 2 ? ["Promising, not proven", ""] : score >= 2 ? ["Mixed", ""] : ["Fragile", "down"];
+    let h = `<div class="card lrobcard"><div class="lrobhead"><b class="sc ${cls}">${score}/${of}</b><span><b class="${cls}">${word}</b><small>checks passed, before tax${R.cells[0].cfg.cost ? "" : ", no costs"}</small></span></div>
+      <ul class="lchecks">${checks.map(c => `<li><i class="${c.ok == null ? "" : c.ok ? "up" : "down"}" aria-label="${c.ok == null ? "Not run" : c.ok ? "Passed" : "Failed"}">${c.ok == null ? "–" : c.ok ? "✓" : "✕"}</i><span><b>${c.t}</b>${c.d}</span></li>`).join("")}</ul></div>`;
+    if (R.wf.from >= 0) {
+      const names = R.ax.map(a => Object.fromEntries(labOptKeys(R.cells[0].cfg))[a[0]] || a[0]);
+      const pick = c => R.ax.map(a => esc(labTxt(c.cfg, a[0]))).join(" · ");
+      h += `<h3 class="lsub">Picked without hindsight</h3><div class="chartbox" id="labrobchart"></div>
+        <div class="tablewrap"><table class="bt"><thead><tr><th>Year</th><th>${esc(names.join(" · "))}</th><th style="text-align:right">Return</th><th style="text-align:right">Held</th></tr></thead><tbody>${R.wf.years.map(y =>
+          `<tr><td>${y.year}</td><td><small style="color:var(--muted)">${pick(R.cells[y.pick])}</small></td><td style="text-align:right" class="${y.ret >= y.hold ? "up" : "down"}">${labPct(y.ret)}</td><td style="text-align:right">${labPct(y.hold)}</td></tr>`).join("")}</tbody></table></div>
+        <p class="hint">Each year uses only the settings that scored best (${R.o.by === "cagr" ? "return per year" : "Sharpe ratio"}) in ${R.o.train ? `the ${R.o.train} years` : "all the years"} before it. Green: beat ${held} that year.</p>`;
+    }
+    const lbl = k => esc(Object.fromEntries(labOptKeys(R.cells[0].cfg))[k] || k), ex = c => (c.s.cagr ?? 0) - R.sHold.cagr;
+    const vals = R.cells.map(ex), lim = Math.max(1, ...vals.map(Math.abs));
+    const tint = v => `background:color-mix(in srgb, ${v >= 0 ? "var(--bull)" : "var(--bear)"} ${Math.round(Math.min(1, Math.abs(v) / lim) * 38)}%, transparent)`;
+    const cell = c => `<td><button class="lcell" style="${tint(ex(c))}" data-labrobapply="${R.cells.indexOf(c)}" title="Use these settings">${labPct(ex(c))}${c.n < 5 ? "<small>few trades</small>" : ""}</button></td>`;
+    h += `<h3 class="lsub">Across settings</h3><p class="hint" style="margin:0 2px 8px">Return per year above (green) or below (red) ${held}, ${R.D[R.fi].slice(0, 4)}–now. Tap one to use it.</p><div class="tablewrap"><table class="bt lheat">`;
+    h += R.ax[1] ? `<thead><tr><th>${lbl(R.ax[0][0])} ↓ · ${lbl(R.ax[1][0])} →</th>${R.B.map(v => `<th>${esc(labTxt(labSet(R.cells[0].cfg, R.ax[1][0], v), R.ax[1][0]))}</th>`).join("")}</tr></thead><tbody>` +
+        R.A.map((v, i) => `<tr><th>${esc(labTxt(labSet(R.cells[0].cfg, R.ax[0][0], v), R.ax[0][0]))}</th>${R.B.map((_, j) => cell(R.cells.find(c => c.i === i && c.j === j))).join("")}</tr>`).join("") + `</tbody>`
+      : `<thead><tr><th>${lbl(R.ax[0][0])}</th><th>vs holding</th></tr></thead><tbody>` + R.cells.map(c => `<tr><th>${esc(labTxt(c.cfg, R.ax[0][0]))}</th>${cell(c)}</tr>`).join("") + `</tbody>`;
+    h += `</table></div>`;
+    h += `<p class="hint" style="margin-top:14px">Still to keep in mind: the ${L().noun} are ${S.market === "stocks" || !S.market ? "today's S&amp;P 100, tested on the past, so the companies that later fell out of the index are missing. That's why holding them all beat " + bn + ", and why it's the bar to clear" : "today's list, tested on the past, so ones that failed or were dropped are missing. That's why holding them all is the bar to clear"}. Past results don't promise future ones.</p>`;
+    el.innerHTML = h;
+    if (R.wf.from >= 0) {
+      const f = R.wf.from, re = eq => eq.map(v => v / eq[f] * 100000);
+      drawLabChart(document.getElementById("labrobchart"), R.D, f, [
+        ...(R.spy ? [{ name: bn.replace("&amp;", "&"), vals: re(R.spy), color: C.muted, w: 1.2, dash: "3 3" }] : []),
+        { name: Held, vals: re(R.hold), color: C.muted, w: 1.5 },
+        { name: "Your settings", vals: re(R.mine), color: "#ff9500", w: 1.5 },
+        { name: "Picked without hindsight", vals: R.wf.eq, color: C.accent, w: 2.2 },
+      ]);
+    }
   }
 
   // -------------------------------------------------------------- compare
@@ -3610,7 +3730,7 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
   }
   function labChange(e) {
     const M = LAB.mod; if (!M) return false;
-    const t = e.target.closest("[data-labfrom], [data-labto], [data-labcap], [data-labsector], [data-labfind], [data-labadd], [data-labopt], [data-labcalyr], [data-labcalind]"); if (!t) return false;
+    const t = e.target.closest("[data-labfrom], [data-labto], [data-labcap], [data-labsector], [data-labfind], [data-labadd], [data-labopt], [data-labrob], [data-labcalyr], [data-labcalind]"); if (!t) return false;
     const st = labState(), [first, last] = labYears();
     if (t.matches("[data-labfrom]")) { st.from = +t.value === first ? null : +t.value; if (st.to && st.to < st.from) st.to = null; }
     else if (t.matches("[data-labto]")) st.to = +t.value === last ? null : +t.value;
@@ -3622,6 +3742,7 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
       const m = (labCal(st).ym || LAB.calc?.last || "").slice(5, 7) || "12";
       st.cal = { ...st.cal, ym: t.value + "-" + m, day: null }; saveLab(st); labCalRefresh(); return true;
     }
+    else if (t.matches("[data-labrob]")) { st.rob = { ...st.rob, [t.dataset.labrob]: t.dataset.labrob === "train" ? +t.value : t.value }; saveLab(st); runLab(); return true; }
     else if (t.matches("[data-labopt]")) { st.opt = { ...st.opt, [t.dataset.labopt]: t.dataset.labopt === "b" ? t.value : t.dataset.labopt === "split" ? +t.value : t.value }; saveLab(st); runLab(); return true; }
     else {   // add a stock to the picks: matches the ticker as shown, or the start of a name
       const q = t.value.trim().toUpperCase(); if (!q) return true;
@@ -3639,7 +3760,7 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
       setTimeout(() => { const st = labState(); st.open = [...document.querySelectorAll(".lsec[open]")].map(d => d.dataset.labsec); saveLab(st); }, 0);
       return false;
     }
-    const t = e.target.closest("[data-labind], [data-labexit], [data-labside], [data-labreset], [data-labtab], [data-labmkt], [data-labtax], [data-labmode], [data-labunpick], [data-labshare], [data-labcsv], [data-labrunopt], [data-labapply], [data-laboptview], [data-labcmp], [data-labdel], [data-labload], [data-labcalrisk], [data-labcaltax], [data-labcalm], [data-labcalday], [data-labcaltrade]");
+    const t = e.target.closest("[data-labind], [data-labexit], [data-labside], [data-labreset], [data-labtab], [data-labmkt], [data-labtax], [data-labmode], [data-labunpick], [data-labshare], [data-labcsv], [data-labrunopt], [data-labrunrob], [data-labrobapply], [data-labapply], [data-laboptview], [data-labcmp], [data-labdel], [data-labload], [data-labcalrisk], [data-labcaltax], [data-labcalm], [data-labcalday], [data-labcaltrade]");
     if (!t) return false;
     const st = labState(), d = t.dataset;
     if (d.labind) st.cfg = labPickInd(st, d.labind);
@@ -3679,6 +3800,13 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
     }
     else if (d.labcsv != null) { labCsv(); return true; }
     else if (d.labrunopt != null) { labOptimize(); return true; }
+    else if (d.labrunrob != null) { labRobust(); return true; }
+    else if (d.labrobapply != null) {
+      const c = LAB.rob?.cells[+d.labrobapply]; if (!c) return true;
+      st.cfg = c.cfg; st.tab = "overview"; LAB.rob = null; saveLab(st); renderLab();
+      document.getElementById("lab")?.scrollIntoView({ behavior: "smooth", block: "start" });
+      return true;
+    }
     else if (d.laboptview) { if (LAB.opt) { LAB.opt.view = d.laboptview; labOptDraw(); } return true; }
     else if (d.labapply != null) {
       const c = LAB.opt?.cells[+d.labapply]; if (!c) return true;

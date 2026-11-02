@@ -789,3 +789,72 @@ export function byYear(eq, dates, fromIdx) {
   out.push({ year: +y, ret: (eq[eq.length - 1] / start - 1) * 100 });
   return out;
 }
+
+// ------------------------------------------------------------- robustness
+// Checks whether a backtest result is an edge or luck (the Lab's Robustness tab).
+
+// Buying and holding every one of the chosen stocks in equal parts (rebalanced daily), from fromIdx.
+// The fair benchmark: it has the same stocks as the strategy, so the same survivorship bias (today's
+// index members, tested on the past) and the same equal weighting. A strategy has to beat this one,
+// not just SPY, to show its rules add something.
+export function holdCurve(data, fromIdx = 0) {
+  const D = data.dates.length, s = new Float64Array(D), k = new Int32Array(D);
+  for (const T of data.tickers)
+    for (let i = 1; i < T.c.length; i++) if (T.idx[i] === T.idx[i - 1] + 1) { s[T.idx[i]] += T.c[i] / T.c[i - 1] - 1; k[T.idx[i]]++; }
+  const eq = new Float64Array(D); let v = ACCOUNT;
+  for (let g = 0; g < D; g++) { if (g > fromIdx && k[g]) v *= 1 + s[g] / k[g]; eq[g] = g < fromIdx ? NaN : v; }
+  return eq;
+}
+
+// Walk-forward test. `curves` are the account curves of a grid of settings (all from fromIdx).
+// Every calendar year, it picks the settings with the best score over the `train` years before it
+// (0 = every year before it, at least `min`), and uses them for that year only. Chained together, the
+// test years show what choosing settings with past data only would have earned.
+export function walkForward(curves, dates, fromIdx, { train = 5, by = "sharpe", min = 3 } = {}) {
+  const D = dates.length, yr = g => +dates[g].slice(0, 4), starts = [];
+  for (let g = fromIdx; g < D; g++) if (g === fromIdx || yr(g) !== yr(g - 1)) starts.push(g);
+  const score = (eq, a, b) => { const s = summary(eq, dates, a, b); return (by === "cagr" ? s.cagr : s.sharpe) ?? -1e9; };
+  const eq = new Float64Array(D).fill(NaN), years = [];
+  let v = ACCOUNT, from = -1;
+  for (let k = 1; k < starts.length; k++) {
+    const a = starts[train ? Math.max(0, k - train) : 0], need = train || min;
+    if (k - (train ? Math.max(0, k - train) : 0) < need || starts[k] - 1 - a < 120) continue;
+    const t0 = starts[k] - 1, t1 = k + 1 < starts.length ? starts[k + 1] - 1 : D - 1;
+    let best = 0, bs = -Infinity;
+    curves.forEach((c, i) => { const s = score(c, a, t0); if (s > bs) { bs = s; best = i; } });
+    if (from < 0) { from = t0; eq[t0] = v; }
+    const c = curves[best];
+    for (let g = t0 + 1; g <= t1; g++) { v *= c[g] / c[g - 1]; eq[g] = v; }
+    years.push({ year: yr(starts[k]), pick: best, train: bs, ret: (c[t1] / c[t0] - 1) * 100, from: t0, to: t1 });
+  }
+  return { eq, from, years };
+}
+
+// Luck test: a stationary block bootstrap of the daily returns of curve `a` against curve `b`, taken on
+// the same days (so market crashes hit both). Each of `sims` made-up histories reshuffles blocks of
+// about `block` days. Returns how often `a` still beat `b`, the range of its extra return per year,
+// and how deep its worst drop got in the unlucky histories.
+export function bootstrap(a, b, fromIdx, { sims = 1000, block = 20, seed = 7 } = {}) {
+  const ra = [], rb = [];
+  for (let g = fromIdx + 1; g < a.length; g++)
+    if (a[g - 1] > 0 && b[g - 1] > 0 && Number.isFinite(a[g]) && Number.isFinite(b[g])) { ra.push(Math.log(a[g] / a[g - 1])); rb.push(Math.log(b[g] / b[g - 1])); }
+  const N = ra.length; if (N < 250) return null;
+  let s = seed >>> 0;
+  const rnd = () => { s = (s + 0x6d2b79f5) >>> 0; let t = s; t = Math.imul(t ^ (t >>> 15), t | 1); t ^= t + Math.imul(t ^ (t >>> 7), t | 61); return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
+  const ex = new Float64Array(sims), dds = new Float64Array(sims), p = 1 / block;
+  let wins = 0;
+  for (let k = 0; k < sims; k++) {
+    let i = Math.floor(rnd() * N), la = 0, lb = 0, peak = 0, dd = 0;
+    for (let n = 0; n < N; n++) {
+      if (n && rnd() < p) i = Math.floor(rnd() * N); else if (n) i = (i + 1) % N;
+      la += ra[i]; lb += rb[i];
+      if (la > peak) peak = la; else if (la - peak < dd) dd = la - peak;
+    }
+    ex[k] = (Math.exp(la * 252 / N) - Math.exp(lb * 252 / N)) * 100;
+    dds[k] = (Math.exp(dd) - 1) * 100;
+    if (ex[k] > 0) wins++;
+  }
+  ex.sort(); dds.sort();
+  const q = (x, f) => x[Math.min(x.length - 1, Math.max(0, Math.round(f * (x.length - 1))))];
+  return { p: wins / sims * 100, lo: q(ex, 0.05), mid: q(ex, 0.5), hi: q(ex, 0.95), dd: q(dds, 0.05), ddMid: q(dds, 0.5), days: N };
+}
