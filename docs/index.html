@@ -2806,7 +2806,7 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
   // every other strategy has the same id in the Lab (docs/lab.js)
   ["volume_breakout", "relative_strength", "double_top_bottom", "head_shoulders", "triangle", "deck_live", "deck_v6", "deck_ma50", "deck_v8",
    "pattern_trader", "breakout_bot", "btc50_f1", "btc50_touch_f1", "btc50_touch_f2", "btc50_touch", "btc50_ma", "btc50_maonly", "btc50_lhonly",
-   "btc_trend_50_200", "btc50_both"].forEach(k => LAB_IND[k] = k);
+   "btc_trend_50_200", "btc50_both", "avg_down"].forEach(k => LAB_IND[k] = k);
   const LAB_FLASK = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3h6"/><path d="M10 3v6.2L4.6 18.8A1.6 1.6 0 0 0 6 21h12a1.6 1.6 0 0 0 1.4-2.2L14 9.2V3"/><path d="M7.2 15h9.6"/></svg>`;
   const LAB_CAPS = [1000, 5000, 10000, 25000, 50000, 100000, 250000, 1000000];
   const LAB_TABS = [["overview", "Results"], ["trades", "Trades"], ["calendar", "Calendar"], ["stocks", "By " + "stock"], ["optimize", "Optimize"], ["compare", "Compare"]];
@@ -2971,9 +2971,9 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
     h += sec("exits", "Exits &amp; risk", I.own ? ["Own exit", cfg.tp ? "TP " + labRiskTxt(cfg.tp) : "", cfg.sl ? "SL " + labRiskTxt(cfg.sl) : "", cfg.trail ? "Trail " + labRiskTxt(cfg.trail) : ""].filter(Boolean).join(" · ") : exitSum,
       `${I.own ? `<p class="hint" style="margin:0"><b>Its own exit:</b> ${esc(I.rule)} You can add a take profit or stops on top.</p>` : `<div class="lrow"><span>Close a trade</span>${labSeg("labexit", cfg.exit, [["opposite", esc(I.exitLabels?.opposite || "On the opposite alert")], ["hold", esc(I.exitLabels?.hold || "After a time limit")]], "Exit")}</div>
       ${cfg.exit === "hold" ? labSlider(cfg, "hold", "Time limit", I.buysOnly ? "or earlier at the take profit" : "or earlier on an opposite alert", 2, 120, 1) : ""}`}
-      ${labSlider(cfg, "tp", "Take profit", esc(R.tp.about), R.tp.min, R.tp.max, R.tp.step)}
-      ${labSlider(cfg, "sl", "Stop loss", esc(R.sl.about), R.sl.min, R.sl.max, R.sl.step)}
-      ${labSlider(cfg, "trail", "Trailing stop", esc(R.trail.about), R.trail.min, R.trail.max, R.trail.step)}
+      ${labSlider(cfg, "tp", "Take profit", esc(I.avg ? "above your average cost" : R.tp.about), R.tp.min, R.tp.max, R.tp.step)}
+      ${labSlider(cfg, "sl", "Stop loss", esc(I.avg ? "below your average cost" : R.sl.about), R.sl.min, R.sl.max, R.sl.step)}
+      ${labSlider(cfg, "trail", "Trailing stop", esc(I.avg ? "follows the best price since the last buy" : R.trail.about), R.trail.min, R.trail.max, R.trail.step)}
       <p class="hint" style="margin:0">Whichever comes first closes the trade. Stops are checked on each day's high and low.</p>`);
     // 3) filters
     const nF = [cfg.fMa, cfg.fMkt, cfg.fInd].filter(Boolean).length, bm = benchOf().name;
@@ -3002,7 +3002,7 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
     const from = Math.min(last, Math.max(first, st.from || first)), to = Math.max(from, Math.min(last, st.to || last));
     h += sec("acct", "Account &amp; costs", [kEur(st.cap), cfg.maxPos ? `max ${cfg.maxPos} positions` : "", cfg.cost ? `${labTxt(cfg, "cost")} costs` : "", st.tax ? "after tax" : "", `${from}–${to === last ? "now" : to}`].filter(Boolean).join(" · "),
       `<label class="lrow"><span>Start with</span><span class="yrpick"><select data-labcap aria-label="Starting money">${LAB_CAPS.map(v => `<option value="${v}"${v === st.cap ? " selected" : ""}>${eurS(v)}</option>`).join("")}</select></span></label>
-      ${labSlider(cfg, "maxPos", "Positions", cfg.maxPos ? `each gets 1/${cfg.maxPos} of the account` : "the money is split across every open one", 0, 50, 1)}
+      ${I.avg ? labSlider(cfg, "maxPos", "Positions", `each gets 1/${cfg.maxPos} of the account when it opens, split into ${cfg.p.buys} buys`, 1, 50, 1) : labSlider(cfg, "maxPos", "Positions", cfg.maxPos ? `each gets 1/${cfg.maxPos} of the account` : "the money is split across every open one", 0, 50, 1)}
       ${labSlider(cfg, "cost", "Costs per buy and per sell", "commission + spread", 0, 1, 0.05)}
       <div class="lrow"><span>Taxes</span>${labSeg("labtax", st.tax ? 1 : 0, [[0, "Before tax"], [1, `After Italian tax (${Math.round(labTaxRate() * 100)}%)`]], "Taxes")}</div>
       <div class="lrow"><span>Years</span>${yrs(from, "labfrom", "Starting year", first, last)}<span style="color:var(--faint)">to</span>${yrs(to, "labto", "Last year", from, last)}</div>`);
@@ -3092,9 +3092,10 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
   }
   function labNotes(st, cfg, I) {
     const parts = [];
-    parts.push(cfg.maxPos ? `The account has ${cfg.maxPos} slot${cfg.maxPos > 1 ? "s" : ""} of 1/${cfg.maxPos} each: an alert that comes while every slot is full is skipped (same-day alerts in a fixed random order), and empty slots wait in cash.`
+    if (I.avg) parts.push(`The account has ${cfg.maxPos} slots: each new position gets 1/${cfg.maxPos} of the account's value when it opens, split into ${cfg.p.buys} equal buys; money not yet spent waits in cash at 0%, and a position is never topped up or trimmed. A dip that comes while every slot is full is skipped.`);
+    else parts.push(cfg.maxPos ? `The account has ${cfg.maxPos} slot${cfg.maxPos > 1 ? "s" : ""} of 1/${cfg.maxPos} each: an alert that comes while every slot is full is skipped (same-day alerts in a fixed random order), and empty slots wait in cash.`
       : `The account splits its money equally across every open position and rebalances daily; with nothing open the money waits in cash.`);
-    parts.push(I.own ? `${I.rule} Its trades come from the app's weekly backtest; the trading bot's own money rules aren't used.` : I.buysOnly ? "It buys on each alert." : st.side === "all" ? "It buys on bullish alerts and sells short on bearish ones." : "It buys on bullish alerts and sells on bearish ones.");
+    parts.push(I.own ? `${I.rule} Its trades come from the app's weekly backtest; the trading bot's own money rules aren't used.` : I.avg ? `It buys a first slice ${cfg.p.drop}% below the ${cfg.p.n}-day high, then another every further ${cfg.p.step}% fall, up to ${cfg.p.buys} slices.` : I.buysOnly ? "It buys on each alert." : st.side === "all" ? "It buys on bullish alerts and sells short on bearish ones." : "It buys on bullish alerts and sells on bearish ones.");
     if (cfg.tp || cfg.sl || cfg.trail) parts.push("A level touched during the day fills at the level, a price that opens past it fills at the middle of that day's range, and a day that touches a stop and the take profit counts as the stop.");
     parts.push(cfg.cost ? `Each buy and each sell costs ${labTxt(cfg, "cost")}.` : "No trading costs.");
     parts.push(st.tax ? `After tax: ${Math.round(labTaxRate() * 100)}% on each year's net gain (losses carried forward 4 years) and 0.2% a year stamp duty; ${benchOf().name} pays its tax when sold at the end. Simplified.` : "No taxes or borrow fees.");
@@ -3152,6 +3153,7 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
     const euros = t => {
       const T = byT.get(t.t), eq = mine.eq, n = g => cfg.maxPos || mine.held[g] || 1;
       let got = claim.get(t.t); if (!got) claim.set(t.t, got = new Set());
+      if (t.P) return (t.P.eur || 0) * f;   // Average down: the position's own euros (money fixed when it opened)
       let i = T.idx.indexOf(t.g0), sum = 0;
       const i0 = i, p0 = t.p0 ?? T.c[i0], px = t.p1 ?? T.c[i0] * (1 + t.side * (t.ret + 2 * fee));   // buy and sell prices
       for (i++; i < T.idx.length && T.idx[i] <= t.g1; i++) {
@@ -3167,7 +3169,7 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
     mine.list.slice().sort((a, b) => a.g0 - b.g0).forEach(t => eur.set(t, euros(t)));
     // in the order they closed, so a loss can lower the tax on later gains (carried 4 years)
     const trades = mine.list.map(t => {
-      const size = mine.eq[t.g0] * f / (cfg.maxPos || mine.held[t.g0 + 1] || 1), gross = eur.get(t);
+      const size = t.P?.size != null ? t.P.size * f : mine.eq[t.g0] * f / (cfg.maxPos || mine.held[t.g0 + 1] || 1), gross = eur.get(t);
       let net = gross, tax = 0, stamp = 0;
       if (c.tax) {
         stamp = size * 0.002 * t.days / 252; net -= stamp;
@@ -3205,8 +3207,8 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
         `<option value="${k}"${k === base.ind ? " selected" : ""}${ok ? "" : " disabled"}>${esc(J.name)}${ok ? "" : " (soon)"}</option>`).join("")}</optgroup>`).join("")}</select></span></label>
       ${I.buysOnly ? "" : `<div class="lrow"><span>Trades</span>${labSeg("labside", st.side, [["long", "Long only"], ["all", "Long + short"]], "Trades")}</div>`}
       <div class="lrow"><span>Take profit / stop loss</span>${labSeg("labcalrisk", c.risk ? 1 : 0, [[0, "Off"], [1, "On"]], "Take profit and stop loss")}</div>
-      ${c.risk ? `${labSlider(base, "tp", "Take profit", esc(R.tp.about), R.tp.min, R.tp.max, R.tp.step)}
-        ${labSlider(base, "sl", "Stop loss", esc(R.sl.about), R.sl.min, R.sl.max, R.sl.step)}
+      ${c.risk ? `${labSlider(base, "tp", "Take profit", esc(I.avg ? "above your average cost" : R.tp.about), R.tp.min, R.tp.max, R.tp.step)}
+        ${labSlider(base, "sl", "Stop loss", esc(I.avg ? "below your average cost" : R.sl.about), R.sl.min, R.sl.max, R.sl.step)}
         ${!base.tp && !base.sl && !base.trail ? `<p class="hint" style="margin:0">Both are off: move a slider to set a level.</p>` : ""}
         ${base.trail ? `<p class="hint" style="margin:0">Your ${labRiskTxt(base.trail)} trailing stop from Exits &amp; risk is on too.</p>` : ""}` : ""}
       <div class="lrow"><span>Italian tax &amp; fees</span>${labSeg("labcaltax", c.tax ? 1 : 0, [[0, "Before"], [1, `After (${Math.round(labTaxRate() * 100)}% tax)`]], "Italian tax and fees")}</div>

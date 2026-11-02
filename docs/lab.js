@@ -58,6 +58,15 @@ export const INDICATORS = {
     params: [{ k: "drop", label: "Buy after a drop of", min: 1, max: 30, step: 0.5, def: 5, unit: "%" },
              { k: "n", label: "From the highest close of the last", min: 5, max: 120, step: 1, def: 20, unit: "days" }],
   },
+  avg_down: {
+    name: "Average down", base: "avg_down", exit: "opposite", hold: 60, tp: 10, buysOnly: true, avg: true,
+    about: "Buys a first slice when a stock closes a set % below its highest close of the last N days, buys another equal slice every time it falls a further step below the last buy (up to a maximum number of buys), and sells everything at the take profit above the average cost. Each position gets the same money, split into equal slices. It never sells on a loss by itself, so losing positions wait until they recover: add a stop loss or a time limit to free that money.",
+    exitLabels: { opposite: "No time limit", hold: "After a time limit" },
+    params: [{ k: "drop", label: "First buy after a drop of", min: 1, max: 40, step: 0.5, def: 10, unit: "%" },
+             { k: "n", label: "From the highest close of the last", min: 5, max: 120, step: 1, def: 20, unit: "days" },
+             { k: "step", label: "Buy again every further fall of", min: 1, max: 40, step: 0.5, def: 10, unit: "%" },
+             { k: "buys", label: "Buys at most", min: 1, max: 10, step: 1, def: 3, unit: "slices" }],
+  },
 };
 // Strategies the Lab can't recompute itself: their alerts (pre) or whole trades (own) come from the
 // weekly backtest (lab.json "pre", written by engine/backtest.py). They have no settings of their
@@ -165,6 +174,7 @@ export function clean(cfg) {
   for (const k of ["tp", "sl", "trail"]) out[k] = snap(RISK[k], out[k]);
   for (const k of ["fMa", "maxPos"]) out[k] = snap(EXTRA[k], out[k]);
   if (out.fMa && out.fMa < 20) out.fMa = 20;
+  if (INDICATORS[I].avg && !out.maxPos) out.maxPos = 10;   // Average down always runs with fixed slots
   out.cost = +snap(EXTRA.cost, out.cost).toFixed(2);
   out.fMkt = out.fMkt ? 1 : 0;
   out.fInd = Object.hasOwn(FILTER_IND, out.fInd) ? out.fInd : "";
@@ -422,6 +432,7 @@ export function riskHit(side, entry, h, l, cfg, peak = entry) {
 export function run(data, cfg, fromIdx = 0) {
   cfg = clean(cfg);
   if (INDICATORS[cfg.ind].own) return runOwn(data, cfg, fromIdx);
+  if (INDICATORS[cfg.ind].avg) return runAvg(data, cfg, fromIdx);
   const D = data.dates.length, trend = cfg.exit === "opposite", H = cfg.hold, risk = cfg.tp > 0 || cfg.sl > 0 || cfg.trail > 0;
   // buy-only strategies (Buy the dip) ignore alerts while a position is open, so the time limit counts
   // from the buy (own_exit_positions in engine/backtest.py)
@@ -565,6 +576,67 @@ function runOwn(data, cfg, fromIdx) {
   return finish(data, cfg, fromIdx, sum, cnt, book, trades, openL);
 }
 
+// Average down: each position is a slot of money split into `buys` equal slices. The first slice is
+// bought at the close that is drop% below the n-day high close (filters checked there), another at
+// each close a further step% below the last buy. Take profit / stop loss count from the average cost
+// (fees included), the trailing stop from the best price since the last buy, the time limit from the
+// first buy. Unbought slices wait in cash at 0%. Each day's return is the whole slot's (cash + shares).
+// A trade's return is on the money it actually put in. The account (fillAvg in finish) gives each
+// position 1/maxPos of the account's value when it opens and never tops it up or trims it, so a
+// losing position keeps only what it has left (the usual daily rebalance would quietly keep buying it).
+// Each accepted position gets its euros (eur, per ACCOUNT) for the calendar.
+function runAvg(data, cfg, fromIdx) {
+  const D = data.dates.length, p = cfg.p, fee = cfg.cost / 100, slots = cfg.maxPos;
+  const slice = 1 / p.buys, drop = p.drop / 100, step = p.step / 100, timed = cfg.exit === "hold", H = cfg.hold, eps = 1e-12;
+  const sum = { ls: new Float64Array(D), long: new Float64Array(D) }, cnt = { ls: new Int32Array(D), long: new Int32Array(D) };
+  const trades = [], openL = [], book = { ls: [], long: [] };
+  for (const T of data.tickers) {
+    const gate = gates(T, cfg, data), { c, h, l, idx } = T, n = c.length, P = [];
+    const top = new Float64Array(n).fill(NaN);
+    for (let i = p.n - 1; i < n; i++) { let mx = -Infinity; for (let j = i - p.n + 1; j <= i; j++) if (c[j] > mx) mx = c[j]; top[i] = mx; }
+    let pos = null;
+    const buy = i => {
+      pos.cash -= slice; pos.units += slice * (1 - fee) / c[i]; pos.cost += slice; pos.buys++;
+      pos.last = c[i]; pos.avg = pos.cost / pos.units; pos.pk = c[i];
+    };
+    const mark = (i, val) => { pos.rs.g.push(idx[i]); pos.rs.r.push(val / pos.v - 1); pos.v = val; };
+    for (let i = 0; i < n; i++) {
+      if (pos) {
+        // 1) exits inside this bar (from the average cost), or the time limit at this close
+        let hit = riskHit(1, pos.avg, h[i], l[i], cfg, pos.pk), px = null, why = null;
+        if (hit) { px = hit.px; why = hit.why; } else if (timed && i - pos.i0 >= H) { px = c[i]; why = "rule"; }
+        if (why) {
+          const proceeds = pos.units * px * (1 - fee);
+          mark(i, pos.cash + proceeds);
+          pos.P.gE = idx[i];
+          if (idx[pos.i0] >= fromIdx)
+            trades.push({ t: T.t, side: 1, g0: idx[pos.i0], g1: idx[i], ret: proceeds / pos.cost - 1, days: i - pos.i0, why,
+              p0: pos.avg, p1: px, buys: pos.buys, rs: pos.rs, P: pos.P });
+          pos = null;
+          continue;   // a new position can start from the next close
+        }
+        pos.pk = Math.max(pos.pk, h[i]);
+        // 2) another slice after a further fall
+        if (pos.buys < p.buys && c[i] <= pos.last * (1 - step) + eps) buy(i);
+        mark(i, pos.cash + pos.units * c[i]);
+      } else if (c[i] / top[i] - 1 <= -drop + eps && (!gate || gate.buy[i])) {
+        // 3) a new position: first slice at this close
+        pos = { i0: i, cash: 1, units: 0, cost: 0, buys: 0, last: 0, avg: 0, pk: 0, v: 1, rs: { g: [], r: [] } };
+        pos.P = { t: T.t, g0: idx[i], gE: Infinity, g: pos.rs.g, r: pos.rs.r };
+        P.push(pos.P);
+        buy(i);
+        mark(i, pos.cash + pos.units * c[i]);
+      }
+    }
+    if (pos && idx[n - 1] === D - 1) openL.push({ t: T.t, since: data.dates[idx[pos.i0]], ret: (c[n - 1] / pos.avg - 1) * 100, buys: pos.buys, g0: idx[pos.i0] });
+    for (const x of P) for (const key of ["ls", "long"]) {
+      if (slots) book[key].push(x);
+      else for (let m = 0; m < x.g.length; m++) { sum[key][x.g[m]] += x.r[m]; cnt[key][x.g[m]]++; }
+    }
+  }
+  return finish(data, cfg, fromIdx, sum, cnt, book, trades, openL);
+}
+
 // the account, trade lists and statistics from each day's position returns
 function finish(data, cfg, fromIdx, sum, cnt, book, trades, openL) {
   const D = data.dates.length, slots = cfg.maxPos;
@@ -582,8 +654,33 @@ function finish(data, cfg, fromIdx, sum, cnt, book, trades, openL) {
     }
     return { s, k, acc };
   };
-  const books = slots ? { ls: fill("ls"), long: fill("long") } : null;
+  // Average down: fixed money per position from the day it opens (see runAvg)
+  const fillAvg = key => {
+    const P = book[key].filter(p => p.g0 >= fromIdx).map(p => ({ p, k: mix(p.t + p.g0) })).sort((a, b) => a.p.g0 - b.p.g0 || a.k - b.k).map(x => x.p);
+    const eq = new Float64Array(D).fill(NaN), k = new Int32Array(D), acc = new Set(), starts = new Map();
+    for (const p of P) { if (!starts.has(p.g0)) starts.set(p.g0, []); starts.get(p.g0).push(p); }
+    let cash = ACCOUNT, act = [], prev = ACCOUNT;
+    for (let g = fromIdx; g < D; g++) {
+      for (const p of starts.get(g) || []) {
+        const size = Math.min(prev / slots, cash);   // never more than the cash there is
+        if (act.length >= slots || size <= 0) continue;
+        cash -= size; acc.add(p.t + "|" + p.g0);
+        act.push({ p, size, m: 0, v: 1 });
+      }
+      act = act.filter(a => {
+        if (a.p.g[a.m] === g) { a.v *= 1 + a.p.r[a.m]; a.m++; }
+        a.p.eur = a.size * (a.v - 1); a.p.size = a.size;
+        if (a.p.gE === g) { cash += a.size * a.v; return false; }
+        return true;
+      });
+      k[g] = act.length; eq[g] = prev = cash + act.reduce((s, a) => s + a.size * a.v, 0);
+    }
+    return { eq, k, acc };
+  };
+  const avg = !!INDICATORS[cfg.ind].avg;
+  const books = slots ? (avg ? { ls: fillAvg("ls"), long: fillAvg("long") } : { ls: fill("ls"), long: fill("long") }) : null;
   const curve = key => {
+    if (avg && books) return books[key].eq;
     const eq = new Float64Array(D); let v = ACCOUNT;
     const S = books ? books[key].s : sum[key], K = books ? books[key].k : cnt[key];
     for (let g = 0; g < D; g++) {
@@ -609,7 +706,7 @@ function finish(data, cfg, fromIdx, sum, cnt, book, trades, openL) {
     cfg,
     all: { eq: curve("ls"), inv: invested("ls"), trades: stat(L.ls), list: L.ls, held: held("ls") },
     long: { eq: curve("long"), inv: invested("long"), trades: stat(L.long), list: L.long, held: held("long") },
-    open: openL.sort((a, b) => a.ret - b.ret),   // long positions still held on the last day, worst first
+    open: (avg && books ? openL.filter(o => books.long.acc.has(o.t + "|" + o.g0)) : openL).sort((a, b) => a.ret - b.ret),   // long positions still held on the last day, worst first
   };
 }
 
