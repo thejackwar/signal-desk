@@ -1,7 +1,11 @@
 # Investment Center Signals
 
-A phone-friendly web app that explains twelve trading strategies and shows
-their alerts on the S&P 100. You pick the strategies you want to follow;
+A phone-friendly web app that explains about thirty trading strategies, backtests
+them in the Strategy Lab and shows their alerts on the S&P 100, crypto and commodities.
+Strategies are split into **core** (best results in the backtest and the live track
+record) and **experimental** (the rest, folded away but still alertable and testable).
+The split lives in `CORE` in `docs/index.html`; the numbers behind it are in
+`research/core-strategies.md`. You pick the strategies you want to follow;
 each one has a plain-English explanation, its exact rules, and worked chart
 examples. **Information only: it doesn't trade and it isn't investment advice.**
 
@@ -74,7 +78,7 @@ Alerts always show in the app. To also get a push notification:
 
 ## Crypto
 
-The app has a Stocks / Crypto switch. Crypto uses the same twelve strategies on the coins
+The app has a Stocks / Crypto switch. Crypto uses the same strategies (plus its own 50-day rule variants) on the coins
 in `engine/crypto.txt` (names in `engine/crypto_names.json`) and writes everything to
 `docs/data/crypto/`. The *Daily crypto scan* workflow runs every day at 00:20 UTC, just
 after the daily candle closes, weekends included. The weekly backtest covers both markets.
@@ -82,7 +86,7 @@ Phone notification channels for crypto are `<NTFY_PREFIX>-crypto-<strategy>`.
 
 ## Commodities
 
-The third switch, *Commodities*, runs the same twelve strategies on 19 front-month futures in
+The third switch, *Commodities*, runs the same indicator and pattern strategies on 19 front-month futures in
 `engine/commodities.txt` (gold, silver, platinum, palladium, copper, WTI and Brent crude, natural gas,
 gasoline, heating oil, corn, wheat, soybeans, coffee, cocoa, sugar, cotton, live cattle, lean hogs).
 `engine/commodities_names.json` holds each one's name, sector, contract unit, exchange and a line on

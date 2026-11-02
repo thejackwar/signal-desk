@@ -1336,11 +1336,55 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
 .rtab > div > span:nth-child(2) { color: var(--muted); text-align: right; }
 .rtab > div > span:last-child { text-align: right; font-weight: 600; }
 .rating .hint:last-child { margin-top: 12px; }
+
+/* experimental strategies, folded away under the core ones */
+.badge.xp { background: color-mix(in srgb, var(--fg) 8%, transparent); color: var(--muted); }
+.xpbox { margin-top: 22px; }
+.xpbox > summary { list-style: none; cursor: pointer; display: flex; align-items: center; gap: 12px; padding: 14px 18px; background: var(--surface); border-radius: 14px; margin-bottom: 10px; }
+.xpbox > summary::-webkit-details-marker { display: none; }
+.xpbox > summary > span { display: grid; gap: 2px; flex: 1; }
+.xpbox > summary b { font: 600 16px var(--font-display); }
+.xpbox > summary small { font-size: 12.5px; color: var(--muted); }
+.xpbox > summary::after { content: ""; width: 7px; height: 7px; border: solid var(--muted); border-width: 0 1.8px 1.8px 0; transform: translateY(-2px) rotate(45deg); transition: transform .15s; }
+.xpbox[open] > summary::after { transform: translateY(1px) rotate(-135deg); }
+.xpbox .srow { opacity: .92; }
+
+/* home: first screen for new visitors */
+.side a.brand { color: inherit; text-decoration: none; }
+.home { max-width: 720px; margin: 0 auto; padding-top: 8px; }
+.hbrand { display: flex; align-items: center; gap: 10px; font: 700 15px var(--font-display); }
+.hbrand img { width: 34px; height: 34px; border-radius: 8px; }
+.hbrand em { font-style: normal; color: var(--amber); }
+@media (min-width: 1000px) { .hbrand { display: none; } }
+#app .home h1 { font: 700 34px/1.08 var(--font-display); letter-spacing: -.03em; margin: 18px 0 10px; text-wrap: balance; }
+@media (min-width: 700px) { #app .home h1 { font-size: 46px; } }
+.hlead { font-size: 16px; line-height: 1.5; color: var(--muted); margin: 0 0 18px; text-wrap: pretty; }
+.hbtns { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 18px; }
+.hbtns .btn { padding: 13px 20px; font-size: 15.5px; border-radius: 12px; flex: 1 1 160px; }
+.home a.card { display: block; color: inherit; text-decoration: none; padding: 18px; border-radius: 18px; }
+.home a.card:hover { box-shadow: 0 0 0 1px var(--line); }
+.hk { font: 600 11px/1 var(--font-mono); text-transform: uppercase; letter-spacing: .08em; color: var(--faint); }
+.hbig { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 12px 0 8px; }
+.hbig b { display: block; font: 700 36px/1 var(--font-display); letter-spacing: -.03em; }
+.hbig small { color: var(--muted); font-size: 13px; }
+.home .card p { font-size: 14px; line-height: 1.45; margin: 6px 0 0; }
+.home .card p.hall { color: var(--muted); font-size: 12.5px; }
+.home .card .go { display: inline-block; margin-top: 10px; color: var(--blue); font-weight: 600; font-size: 14px; }
+.hbt h3 { font: 700 20px var(--font-display); margin: 8px 0 6px; }
+.hrow { display: flex; align-items: baseline; gap: 10px; font-size: 15px; color: var(--muted); }
+.hrow b { font: 700 28px var(--font-display); letter-spacing: -.02em; }
+.hgrid { display: grid; grid-template-columns: 1fr; gap: 8px; margin-top: 18px; }
+@media (min-width: 600px) { .hgrid { grid-template-columns: 1fr 1fr; } }
+.hgrid a { display: grid; grid-template-columns: 1fr auto; gap: 2px 12px; align-items: center; padding: 14px 16px; background: var(--surface); border-radius: 14px; color: inherit; text-decoration: none; }
+.hgrid b { font: 700 15.5px var(--font-display); }
+.hgrid small { grid-column: 1; color: var(--muted); font-size: 13px; line-height: 1.4; }
+.hgrid span { grid-row: 1 / 3; grid-column: 2; color: var(--muted); font-size: 22px; }
+.hdisc { margin: 18px 2px 8px; line-height: 1.45; }
 </style>
 </head>
 <body>
 <aside class="side" aria-label="Sections">
-  <div class="brand"><img src="logo.svg?v=2" alt=""><span>Investment Center<br><em>Signals</em></span></div>
+  <a class="brand" href="#home" data-tab="home" aria-label="Home"><img src="logo.svg?v=2" alt=""><span>Investment Center<br><em>Signals</em></span></a>
   <div class="mswitch side-sw" role="group" aria-label="Market"></div>
   <a class="nav" href="#alerts" data-tab="alerts"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9a6 6 0 1 1 12 0c0 6 2.5 7.5 2.5 7.5h-17S6 15 6 9Z"/><path d="M10 20a2 2 0 0 0 4 0"/></svg>Alerts<span class="count" hidden></span></a>
   <a class="nav" href="#stocks" data-tab="stocks"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="m7 15 4-4 3 3 6-7"/></svg><span data-l="tab">Stocks</span></a>
@@ -1348,7 +1392,7 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
   <a class="nav" href="#news" data-tab="news"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h13a1 1 0 0 1 1 1v12a2 2 0 0 0 2 2H6a2 2 0 0 1-2-2Z"/><path d="M18 9h2a1 1 0 0 1 1 1v8a2 2 0 0 1-2 2"/><path d="M8 9h6"/><path d="M8 13h6"/><path d="M8 17h4"/></svg>News</a>
   <a class="nav" href="#calendar" data-tab="calendar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5" width="17" height="15.5" rx="2"/><path d="M3.5 10h17"/><path d="M8 3v4"/><path d="M16 3v4"/><path d="M7.5 14h2"/><path d="M11 14h2"/><path d="M14.5 14h2"/><path d="M7.5 17h2"/></svg>Calendar</a>
   <a class="nav" href="#strategies" data-tab="strategies"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 20h18"/><path d="M6 16V9"/><path d="M4.5 9h3"/><path d="M12 16V5"/><path d="M10.5 5h3"/><path d="M18 16v-5"/><path d="M16.5 11h3"/></svg>Strategies</a>
-  <a class="nav" href="#strategylab" data-tab="lab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3h6"/><path d="M10 3v6.2L4.6 18.8A1.6 1.6 0 0 0 6 21h12a1.6 1.6 0 0 0 1.4-2.2L14 9.2V3"/><path d="M7.2 15h9.6"/></svg>Strategy Lab<span class="new">New</span></a>
+  <a class="nav" href="#strategylab" data-tab="lab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3h6"/><path d="M10 3v6.2L4.6 18.8A1.6 1.6 0 0 0 6 21h12a1.6 1.6 0 0 0 1.4-2.2L14 9.2V3"/><path d="M7.2 15h9.6"/></svg>Strategy Lab</a>
   <a class="nav crypto-only" href="#crypto" data-tab="cryptohub"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><path d="M9.5 8h4a2 2 0 0 1 0 4h-4m0 0h4.5a2 2 0 0 1 0 4H9.5m0-8v8m1.5-9.5V8m0 8v1.5m2-11V8m0 8v1.5"/></svg>Crypto dashboard</a>
   <a class="nav" href="#winners" data-tab="winners"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 4h8v5a4 4 0 0 1-8 0Z"/><path d="M8 6H5a3 3 0 0 0 3 4"/><path d="M16 6h3a3 3 0 0 1-3 4"/><path d="M12 13v4"/><path d="M8.5 20.5h7"/><path d="M10 17h4"/></svg>Best trades</a>
   <a class="nav" href="#record" data-tab="record"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3.5" width="16" height="17" rx="2"/><path d="m8 9 1.5 1.5L12 8"/><path d="M14 9.5h3"/><path d="m8 15 1.5 1.5L12 14"/><path d="M14 15.5h3"/></svg>Track record</a>
@@ -1379,6 +1423,7 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
   <div class="panel" role="dialog" aria-modal="true" aria-label="Menu">
     <div class="grab" aria-hidden="true"></div>
     <nav class="mgrid" aria-label="All sections">
+      <a href="#home" data-tab="home"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 10.5 12 4l8.5 6.5"/><path d="M5.5 9v10.5h13V9"/><path d="M10 19.5v-5h4v5"/></svg><span>Home</span></a>
       <a href="#alerts" data-tab="alerts"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9a6 6 0 1 1 12 0c0 6 2.5 7.5 2.5 7.5h-17S6 15 6 9Z"/><path d="M10 20a2 2 0 0 0 4 0"/></svg><span>Alerts</span></a>
       <a href="#stocks" data-tab="stocks"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="m7 15 4-4 3 3 6-7"/></svg><span data-l="tab">Stocks</span></a>
       <a href="trendlines.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M6 8l13 5"/><path d="M6 18l13-9"/></svg><span>Trendlines</span></a>
@@ -1400,8 +1445,17 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
 
 <script>
 (() => {
-  const DEFAULT_FOLLOW = ["ma200", "bollinger", "donchian"];
-  const STORE = "signaldesk.follow", SEEN = "signaldesk.seen", PREFS = "signaldesk.prefs";
+  const DEFAULT_FOLLOW = ["buy_the_dip", "bollinger", "macd", "rsi"];
+  // Core strategies per market: the ones with the best results in the 15-year backtest and the live
+  // track record (picked 2 Nov 2026, numbers in research/core-strategies.md). The rest are shown under
+  // "Experimental": still alertable and fully testable in the Strategy Lab, just not recommended.
+  const CORE = {
+    stocks: ["buy_the_dip", "bollinger", "pattern_trader", "macd", "rsi", "deck_v6", "head_shoulders", "topdown"],
+    crypto: ["macd", "volume_breakout", "supertrend", "donchian", "btc_trend_50_200", "topdown"],
+    commodities: ["rsi", "bollinger", "buy_the_dip"],
+  };
+  const isCore = id => (CORE[S.market] || CORE.stocks).includes(id);
+  const STORE = "signaldesk.follow", SEEN = "signaldesk.seen", PREFS = "signaldesk.prefs", VISITED = "signaldesk.visited";
   const S = { strategies: [], byId: {}, feed: null, bt: null, stocks: null, stockBy: {}, follow: new Set(), filter: "all",
               exSide: {}, btSide: {}, trSide: {}, prefs: {}, firstSel: null, navs: 0, lastTab: null, lastSel: null, stockData: {} };
   const app = document.getElementById("app");
@@ -1695,7 +1749,7 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
       return header("Alerts") + `<div class="empty"><strong>Pick your strategies</strong>Follow at least one strategy and its alerts show up here.<br><br><a class="btn" href="#strategies">Browse strategies</a></div>`;
     }
     if (S.filter !== "all" && !followed.includes(S.filter)) S.filter = "all";
-    const minS = pref("minStr", 0), sort = pref("sort", "new");
+    const minS = pref("minStr", 2), sort = pref("sort", "new");
     let list = followedAlerts().filter(a => (S.filter === "all" || a.strategy === S.filter) && (a.strength?.score ?? 0) >= minS);
     if (sort === "str") list = list.slice().sort((a, b) => (b.strength?.score ?? 0) - (a.strength?.score ?? 0) || (a.date < b.date ? 1 : -1));
     const stamp = S.feed ? `<div class="stamp">${esc(S.feed.universe)}<br>close ${fmtDate(S.feed.as_of, { day: "numeric", month: "short" })}</div>` : "";
@@ -1881,9 +1935,69 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
   // Every alert the scanner has sent (data/…/history.json), graded 5, 20 and 60 sessions later.
   async function loadHistory() {
     const c = CACHE[S.market];
-    if (c && c.history === undefined) { c.history = null; c.history = await opt(L().base + "history.json") || false; if (location.hash === "#record") rerender(); }
+    if (c && c.history === undefined) { c.history = null; c.history = await opt(L().base + "history.json") || false; if (location.hash === "#record" || location.hash === "#home") rerender(); }
     return c?.history;
   }
+  // ------------------------------------------------------------------ home
+  // First screen for new visitors: what the app is, the live record (honest numbers, losers
+  // included) and the way into the Strategy Lab.
+  function viewHome() {
+    S.firstSel = null;
+    const H = CACHE[S.market]?.history;
+    if (H === undefined) loadHistory();
+    const nStrat = S.strategies.filter(forMarket).length;
+    const pc = v => v == null ? "–" : Math.round(v) + "%";
+    const sg = v => v == null ? "–" : (v >= 0 ? "+" : "−") + Math.abs(v).toFixed(2) + "%";
+    const eur = v => "€" + (v >= 1e6 ? (v / 1e6).toFixed(2).replace(/\.?0+$/, "") + "M" : Math.round(v / 1000) + "k");
+    let h = `<section class="home">
+      <div class="hbrand"><img src="logo.svg?v=2" alt=""><span>Investment Center <em>Signals</em></span></div>
+      <h1>Test trading strategies before you trust them.</h1>
+      <p class="hlead">Backtest ${nStrat} strategies on up to 15 years of prices, learn how each one works, and get an alert when one fires on the ${L().index} ${L().noun}. Free, and information only: nothing here is investment advice.</p>
+      <div class="hbtns"><a class="btn" href="#strategylab">Test a strategy</a><a class="btn ghost" href="#alerts">See today's alerts</a></div>`;
+
+    // live track record
+    if (H && H.rows?.length && !H.demo) {
+      const sid = i => H.strategies[i];
+      const rows = H.rows.filter(r => forMarket(S.byId[sid(r[2])]) && r[7] != null);
+      const stat = xs => xs.length ? { n: xs.length, hit: xs.filter(r => r[3] * r[7] > 0).length / xs.length * 100, avg: xs.reduce((t, r) => t + r[3] * r[7], 0) / xs.length } : null;
+      const core = stat(rows.filter(r => isCore(sid(r[2])) && r[3] > 0)), all = stat(rows);
+      const base = S.bt?.strategies ? Object.values(S.bt.strategies)[0]?.bullish?.["20"]?.base_hit : null;
+      if (core && all) h += `<a class="card hrec" href="#record">
+        <div class="hk">Live track record · since ${esc(fmtDate(H.since, { day: "numeric", month: "short", year: "numeric" }))}</div>
+        <div class="hbig"><div><b class="${core.hit >= 50 ? "up" : "down"}">${pc(core.hit)}</b><small>went the right way</small></div><div><b class="${core.avg >= 0 ? "up" : "down"}">${sg(core.avg)}</b><small>average move</small></div></div>
+        <p>Buy alerts from the core strategies, checked 20 sessions later (${core.n.toLocaleString("en-US")} alerts).${base != null ? ` A random day was right ${pc(base)} of the time over 15 years.` : ""}</p>
+        <p class="hall">Every alert, all strategies and both sides: ${pc(all.hit)} right way, ${sg(all.avg)} on average. Losers stay in the record.</p>
+        <span class="go">See every alert ›</span></a>`;
+    } else if (H === undefined || H === null) h += `<div class="card hrec"><p class="loading" style="margin:0">Loading the track record…</p></div>`;
+
+    // best core strategy in the backtest, against buying and holding the index
+    const acc = S.bt?.strategies, dates = S.bt?.account?.dates, spy = S.bt?.spy?.account;
+    if (acc && dates?.length) {
+      const best = Object.entries(acc).filter(([id, v]) => isCore(id) && forMarket(S.byId[id]) && v.account?.long?.length)
+        .map(([id, v]) => ({ id, end: v.account.long.at(-1) })).sort((a, b) => b.end - a.end)[0];
+      if (best) {
+        const start = S.bt.account.size || 1e5, yr = dates[0].slice(0, 4), bench = spy?.at(-1);
+        h += `<a class="card hbt" href="#strategy-${slug(best.id)}">
+          <div class="hk">In the backtest · best core strategy</div>
+          <h3>${esc(stratName(best.id))}</h3>
+          <div class="hrow"><span>${eur(start)} in ${yr}</span><span aria-hidden="true">→</span><b class="up">${eur(best.end)}</b></div>
+          ${bench ? `<p>Buying and holding ${esc(S.bt.spy.ticker || "the index")} instead: ${eur(bench)}. Long trades only.</p>` : ""}
+          <p class="hall">Tested on today's ${L().index} list, so ${L().noun} that later dropped out aren't in it and the results look better than they would have in real time. Past results don't predict future ones.</p></a>`;
+      }
+    }
+
+    const tiles = [
+      ["#strategylab", "Strategy Lab", `Change any setting, add stops and costs, pick the ${L().noun} and years, and see what €100k would have become.`],
+      ["#alerts", "Alerts", "Signals from the strategies you follow, with a strength rating and a “wrong if” level on each."],
+      ["#learn", "Learn", "How every strategy works, with chart examples, plus the basics of risk and backtesting."],
+      ["#brokers", "Made for Italy", "Results after Italian tax, EU-buyable versions of US ETFs, and brokers that serve Italy."],
+    ];
+    h += `<div class="hgrid">${tiles.map(([href, t, d]) => `<a href="${href}"><b>${t}</b><small>${d}</small><span aria-hidden="true">›</span></a>`).join("")}</div>
+      <p class="hint hdisc">Investment Center Signals describes price patterns and how they behaved in the past. It doesn't know your situation and doesn't tell you what to buy or sell. <a href="#brokers-about">Affiliate disclosure</a></p>
+    </section>`;
+    return h;
+  }
+
   function viewRecord() {
     S.firstSel = null;
     const H = CACHE[S.market]?.history;
@@ -2158,15 +2272,23 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
     S.firstSel = "strategy-" + slug(S.strategies[0].id);
     h += labHero() + marketFitCard() + compareCard();
     h += `<a class="labcta" href="#learn"><span><b>Learn</b><small>How every strategy works, plus the basics: charts, risk and backtests</small></span><span aria-hidden="true">›</span></a>`;
-    for (const c of cats) {
-      h += `<div class="cat">${esc(c)}</div>`;
-      for (const s of list.filter(s => s.category === c)) {
-        const on = S.follow.has(s.id), hit = S.bt?.strategies?.[s.id]?.bullish?.["20"]?.hit;
-        h += `<div class="srow"><a class="open" href="#strategy-${slug(s.id)}">
+    const row = s => {
+      const on = S.follow.has(s.id), hit = S.bt?.strategies?.[s.id]?.bullish?.["20"]?.hit;
+      return `<div class="srow"><a class="open" href="#strategy-${slug(s.id)}">
           <h3>${esc(s.name)}</h3><p>${esc(s.tagline)}</p>
           <div class="meta"><span>${esc(s.level)}</span><span>·</span><span><b>${counts[s.id] || 0}</b> recent alerts</span>${hit != null ? `<span>·</span><span><b>${Math.round(hit)}%</b> right after 20d</span>` : ""}</div></a>
           <button class="toggle" role="switch" aria-checked="${on}" aria-label="Follow ${esc(s.name)}" data-follow="${s.id}"></button></div>`;
-      }
+    };
+    for (const c of cats) {
+      const core = list.filter(s => s.category === c && isCore(s.id));
+      if (core.length) h += `<div class="cat">${esc(c)}</div>` + core.map(row).join("");
+    }
+    const exp = list.filter(s => !isCore(s.id));
+    if (exp.length) {
+      const openX = exp.some(s => S.follow.has(s.id));
+      h += `<details class="xpbox"${openX ? " open" : ""}><summary><span><b>Experimental</b><small>${exp.length} strategies with weaker results so far</small></span></summary>
+        <p class="hint" style="margin:2px 2px 10px">These did worse in the 15-year backtest or in the live track record. They still send alerts if you follow them, and you can test all of them in the Strategy Lab.</p>
+        ${exp.map(row).join("")}</details>`;
     }
     if (!isComm()) h += `<a class="labcta" href="#brokers-${isCrypto() ? "crypto" : "stocks"}" style="margin-top:22px"><span><b>Brokers</b><small>${isCrypto() ? "Where to buy crypto from Italy" : "Where to buy stocks and ETFs from Italy"}</small></span><span aria-hidden="true">›</span></a>`;
     return h;
@@ -2183,8 +2305,9 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
     let h = header("", "#strategies");
     h += `<h1 style="font:700 30px/1.1 var(--font-display);margin:4px 0 6px;text-wrap:balance">${esc(s.name)}</h1>`;
     h += `<p class="tag">${esc(s.tagline)}</p>`;
-    h += `<div class="lede"><span class="badge">${esc(s.category)}</span><span class="badge">${esc(s.level)}</span><span class="badge">Daily chart</span>
+    h += `<div class="lede"><span class="badge">${esc(s.category)}</span><span class="badge">${esc(s.level)}</span><span class="badge">Daily chart</span>${isCore(id) ? "" : `<span class="badge xp">Experimental</span>`}
       <span style="flex:1"></span><button class="btn ${on ? "on" : ""}" data-follow="${id}">${on ? "✓ Following" : "Follow"}</button></div>`;
+    if (!isCore(id)) h += `<p class="hint" style="margin:10px 2px 0">Experimental: weaker results than the core strategies in the backtest or the live track record so far. Test it in the <a href="#strategylab">Strategy Lab</a> before relying on it.</p>`;
     h += `<div class="prose">${s.how.map(p => `<p>${esc(p)}</p>`).join("")}</div>`;
     h += `<h2>When it alerts</h2><div class="rules">
       <div class="rule bullish"><span class="pill bullish">${s.buys_only || s.long_only ? "buy" : "bullish"}</span><p>${esc(s.bullish)}</p></div>
@@ -5176,14 +5299,15 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
   const norm = x => typeof x === "string" ? { html: x } : x;
 
   function route() {
-    const r = (location.hash || "#alerts").slice(1);
-    const tab = r === "news" || r === "buzz" || r === "mood" || r === "earnings" || r.startsWith("earnings-") ? "news" : r.startsWith("calendar") ? "calendar" : r === "crypto" || r.startsWith("crypto-") ? "cryptohub" : r.startsWith("strategylab") ? "lab" : r.startsWith("strateg") ? "strategies" : r.startsWith("stock") || r === "heatmap" ? "stocks" : r === "notify" ? "notify" : r.startsWith("brokers") ? "brokers" : r.startsWith("learn") ? "learn" : r === "practice" ? "practice" : "alerts";
+    const r = (location.hash || (S.visited ? "#alerts" : "#home")).slice(1);
+    if (!S.visited) { S.visited = true; save(VISITED, true); if (!location.hash) history.replaceState(null, "", "#home"); }
+    const tab = r === "news" || r === "buzz" || r === "mood" || r === "earnings" || r.startsWith("earnings-") ? "news" : r.startsWith("calendar") ? "calendar" : r === "crypto" || r.startsWith("crypto-") ? "cryptohub" : r.startsWith("strategylab") ? "lab" : r.startsWith("strateg") ? "strategies" : r.startsWith("stock") || r === "heatmap" ? "stocks" : r === "notify" ? "notify" : r.startsWith("brokers") ? "brokers" : r.startsWith("learn") ? "learn" : r === "practice" ? "practice" : r === "home" ? "home" : "alerts";
     if (r === "winners" || r === "record") S.alView = r; else if (tab === "alerts" && !r.startsWith("alert-")) S.alView = "alerts";
-    const list = { alerts: S.alView === "winners" ? viewWinners : S.alView === "record" ? viewRecord : viewAlerts, stocks: viewStocks, strategies: viewStrategies, notify: viewNotify, brokers: viewBrokers, learn: viewLearn, practice: viewPractice, lab: () => viewLab(r.slice(11)), cryptohub: () => viewCrypto(r), news: r === "buzz" ? viewBuzz : r === "mood" ? viewMood : r === "earnings" || r.startsWith("earnings-") ? () => viewEarnings(r.slice(9)) : viewNews, calendar: () => viewCalendar(r.slice(9)) }[tab];
+    const list = { alerts: S.alView === "winners" ? viewWinners : S.alView === "record" ? viewRecord : viewAlerts, stocks: viewStocks, home: viewHome, strategies: viewStrategies, notify: viewNotify, brokers: viewBrokers, learn: viewLearn, practice: viewPractice, lab: () => viewLab(r.slice(11)), cryptohub: () => viewCrypto(r), news: r === "buzz" ? viewBuzz : r === "mood" ? viewMood : r === "earnings" || r.startsWith("earnings-") ? () => viewEarnings(r.slice(9)) : viewNews, calendar: () => viewCalendar(r.slice(9)) }[tab];
     let detail = detailFor(r), sel = detail ? r : null;
     charts.length = 0;
 
-    if (WIDE.matches && tab !== "notify" && tab !== "brokers" && tab !== "learn" && tab !== "news" && tab !== "calendar" && tab !== "practice" && tab !== "lab" && tab !== "cryptohub" && r !== "record") {
+    if (WIDE.matches && tab !== "home" && tab !== "notify" && tab !== "brokers" && tab !== "learn" && tab !== "news" && tab !== "calendar" && tab !== "practice" && tab !== "lab" && tab !== "cryptohub" && r !== "record") {
       const lp = app.querySelector(".pane.list"), dp = app.querySelector(".pane.detail");
       const listTop = lp?.scrollTop || 0, detTop = dp?.scrollTop || 0;
       const L = norm(list());
@@ -5209,7 +5333,7 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
     if (nsearch) { nsearch.addEventListener("input", () => { S.nq = nsearch.value; filterNews(); }); filterNews(); }
     // the phone tab bar has no Calendar button: it lives under News there
     // phone bar: pages without their own button light up Menu
-    const inBar = { calendar: "menu", brokers: "menu", notify: "menu", learn: "menu", practice: "menu", cryptohub: "menu" }[tab] || tab;
+    const inBar = { home: "menu", calendar: "menu", brokers: "menu", notify: "menu", learn: "menu", practice: "menu", cryptohub: "menu" }[tab] || tab;
     const navTab = tab === "alerts" && (S.alView === "winners" || S.alView === "record") ? S.alView : tab;
     document.querySelectorAll("[data-tab]").forEach(a => a.setAttribute("aria-current", (a.closest(".tabs") ? a.dataset.tab === inBar : a.dataset.tab === navTab) ? "page" : "false"));
     S.routed = true;
@@ -5634,6 +5758,7 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
   async function boot() {
     S.follow = new Set(load(STORE, DEFAULT_FOLLOW));
     S.prefs = load(PREFS, {}) || {};
+    S.visited = !!load(VISITED, false) || load(STORE, null) != null;
     try {
       opt("data/brokers.json").then(b => { S.brokers = b; if (S.routed && location.hash.startsWith("#brokers")) rerender(); });
       opt("data/ucits.json").then(u => { S.ucits = u; if (u && S.routed && /^#(brokers|stock-|strateg)/.test(location.hash)) rerender(); });
