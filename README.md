@@ -30,6 +30,10 @@ docs/                    the website (served by GitHub Pages)
   data/ucits.json        EU-buyable versions of SPY/QQQ and an ETC per commodity (edit by hand)
   data/history.json      every alert ever sent, graded 5/20/60 sessions later (written by engine/scan.py;
                          the Track record page). Crypto and commodities keep their own in their folders.
+  data/live_trades.json  Live trades page: every Strategy Lab strategy paper-trading with default settings
+                         since 2 Nov 2026, €1,000 a trade (engine/live_trades.py + live_trades.mjs, which run
+                         docs/lab.js on fresh prices after each daily scan). Closed trades are never changed
+                         or removed. Crypto and commodities keep their own in their folders.
 worker/                  Cloudflare Workers: trendlines data, counted broker links (see worker/README.md)
 engine/
   strategies.py          the strategy detectors (shared by scanner and examples)
@@ -46,6 +50,7 @@ engine/
   names.json             company names and sectors
 .github/workflows/scan.yml      runs the scan every weekday after the US close
 .github/workflows/backtest.yml  reruns the backtest every Saturday
+.github/workflows/live-trades.yml  updates the live trades after each daily scan (stocks, crypto, commodities)
 ```
 
 ## Put it online (about 10 minutes, free)

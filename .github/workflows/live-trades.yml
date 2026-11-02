@@ -1,0 +1,65 @@
+name: Live trades (paper)
+
+# Every Strategy Lab strategy paper-trades from 2 Nov 2026 on (engine/live_trades.py): after each
+# market's daily scan, its trades are added to docs/data/.../live_trades.json (the Live trades page).
+# Started by the daily scans finishing, so it needs no schedule of its own (and works the same
+# whether GitHub or the scheduler Worker starts the scans).
+on:
+  workflow_run:
+    workflows: ["Daily scan", "Daily crypto scan", "Daily commodities scan"]
+    types: [completed]
+  workflow_dispatch:
+    inputs:
+      market:
+        description: "Market"
+        type: choice
+        options: [stocks, crypto, commodities]
+        default: stocks
+
+permissions:
+  contents: write
+
+concurrency:
+  group: live-trades-${{ github.event.workflow_run.name || inputs.market }}   # one per market, so none waits behind another
+  cancel-in-progress: false
+
+jobs:
+  trades:
+    if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - run: pip install -r requirements.txt
+      - name: Pick the market
+        id: m
+        env:
+          SCAN: ${{ github.event.workflow_run.name }}
+          INPUT: ${{ inputs.market }}
+        run: |
+          case "$SCAN" in
+            "Daily crypto scan") M=crypto ;;
+            "Daily commodities scan") M=commodities ;;
+            "Daily scan") M=stocks ;;
+            *) M="${INPUT:-stocks}" ;;
+          esac
+          echo "market=$M" >> "$GITHUB_OUTPUT"
+      - name: Update the live trades
+        run: python engine/live_trades.py --market ${{ steps.m.outputs.market }}
+      - name: Publish
+        run: |
+          git config user.name "signal-desk-bot"
+          git config user.email "signal-desk-bot@users.noreply.github.com"
+          for f in docs/data/live_trades.json docs/data/crypto/live_trades.json docs/data/commodities/live_trades.json; do
+            [ -f "$f" ] && git add "$f"
+          done
+          git diff --cached --quiet || git commit -m "Live trades ${{ steps.m.outputs.market }} $(date -u +%F)"
+          git pull --rebase
+          git push
