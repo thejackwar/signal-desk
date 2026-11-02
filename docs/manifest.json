@@ -2,7 +2,7 @@
   "name": "Investment Center Signals",
   "short_name": "IC Signals",
   "description": "Pick a trading strategy, learn how it works, and see its alerts on the S&P 100. Information only.",
-  "start_url": "./#alerts",
+  "start_url": "./#home",
   "scope": "./",
   "display": "standalone",
   "background_color": "#08090b",

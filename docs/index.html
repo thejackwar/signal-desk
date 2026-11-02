@@ -1455,7 +1455,7 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
     commodities: ["rsi", "bollinger", "buy_the_dip"],
   };
   const isCore = id => (CORE[S.market] || CORE.stocks).includes(id);
-  const STORE = "signaldesk.follow", SEEN = "signaldesk.seen", PREFS = "signaldesk.prefs", VISITED = "signaldesk.visited";
+  const STORE = "signaldesk.follow", SEEN = "signaldesk.seen", PREFS = "signaldesk.prefs";
   const S = { strategies: [], byId: {}, feed: null, bt: null, stocks: null, stockBy: {}, follow: new Set(), filter: "all",
               exSide: {}, btSide: {}, trSide: {}, prefs: {}, firstSel: null, navs: 0, lastTab: null, lastSel: null, stockData: {} };
   const app = document.getElementById("app");
@@ -1939,7 +1939,7 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
     return c?.history;
   }
   // ------------------------------------------------------------------ home
-  // First screen for new visitors: what the app is, the live record (honest numbers, losers
+  // Start page for everyone: what the app is, the live record (honest numbers, losers
   // included) and the way into the Strategy Lab.
   function viewHome() {
     S.firstSel = null;
@@ -5299,8 +5299,8 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
   const norm = x => typeof x === "string" ? { html: x } : x;
 
   function route() {
-    const r = (location.hash || (S.visited ? "#alerts" : "#home")).slice(1);
-    if (!S.visited) { S.visited = true; save(VISITED, true); if (!location.hash) history.replaceState(null, "", "#home"); }
+    if (!location.hash) history.replaceState(null, "", "#home");
+    const r = (location.hash || "#home").slice(1);
     const tab = r === "news" || r === "buzz" || r === "mood" || r === "earnings" || r.startsWith("earnings-") ? "news" : r.startsWith("calendar") ? "calendar" : r === "crypto" || r.startsWith("crypto-") ? "cryptohub" : r.startsWith("strategylab") ? "lab" : r.startsWith("strateg") ? "strategies" : r.startsWith("stock") || r === "heatmap" ? "stocks" : r === "notify" ? "notify" : r.startsWith("brokers") ? "brokers" : r.startsWith("learn") ? "learn" : r === "practice" ? "practice" : r === "home" ? "home" : "alerts";
     if (r === "winners" || r === "record") S.alView = r; else if (tab === "alerts" && !r.startsWith("alert-")) S.alView = "alerts";
     const list = { alerts: S.alView === "winners" ? viewWinners : S.alView === "record" ? viewRecord : viewAlerts, stocks: viewStocks, home: viewHome, strategies: viewStrategies, notify: viewNotify, brokers: viewBrokers, learn: viewLearn, practice: viewPractice, lab: () => viewLab(r.slice(11)), cryptohub: () => viewCrypto(r), news: r === "buzz" ? viewBuzz : r === "mood" ? viewMood : r === "earnings" || r.startsWith("earnings-") ? () => viewEarnings(r.slice(9)) : viewNews, calendar: () => viewCalendar(r.slice(9)) }[tab];
@@ -5758,7 +5758,6 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
   async function boot() {
     S.follow = new Set(load(STORE, DEFAULT_FOLLOW));
     S.prefs = load(PREFS, {}) || {};
-    S.visited = !!load(VISITED, false) || load(STORE, null) != null;
     try {
       opt("data/brokers.json").then(b => { S.brokers = b; if (S.routed && location.hash.startsWith("#brokers")) rerender(); });
       opt("data/ucits.json").then(u => { S.ucits = u; if (u && S.routed && /^#(brokers|stock-|strateg)/.test(location.hash)) rerender(); });
