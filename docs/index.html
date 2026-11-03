@@ -1478,6 +1478,118 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
 .hgroup:nth-of-type(4) .hic { background: color-mix(in srgb, #ff9f0a 16%, transparent); color: #ff9f0a; }
 .hgroup:nth-of-type(5) .hic { background: color-mix(in srgb, #bf5af2 15%, transparent); color: #bf5af2; }
 
+/* home, dark: the four main features with live numbers (always dark, in light and dark mode) */
+#app.single.homex { max-width: 1180px; padding: 20px 32px 56px; }
+.home.hx { --hx-bg: #0b0f14; --hx-s: #121820; --hx-s2: #0e141b; --hx-l: #1f2833; --hx-l2: #2b3644; --hx-t: #e6edf3; --hx-t2: #c3ccd5; --hx-m: #8b98a5; --hx-g: #22c55e; --hx-up: #4ade80; --hx-dn: #f87171; --hx-gold: #fcd34d;
+  --surface: var(--hx-s); --muted: var(--hx-m); --faint: var(--hx-m); --line: var(--hx-l); --shadow: none;
+  position: relative; overflow: hidden; max-width: none; margin: 0 -6px; padding: 28px 22px 26px; border-radius: 24px; background: var(--hx-bg); color: var(--hx-t); color-scheme: dark; }
+@media (min-width: 700px) { .home.hx { margin: 0; padding: 44px 44px 32px; } }
+.hx a, .hx button.hxm { color: inherit; text-decoration: none; }
+.hx .up { color: var(--hx-up); } .hx .down { color: var(--hx-dn); }
+.hx .loading { color: var(--hx-m); }
+.hxbg { position: absolute; top: 40px; left: 0; width: 100%; height: 420px; opacity: .16; pointer-events: none; }
+.hxbg polyline { fill: none; stroke-width: 2; vector-effect: non-scaling-stroke; } .hxbg .g { stroke: var(--hx-g); } .hxbg .d { stroke: #3b82f6; stroke-dasharray: 6 6; stroke-width: 1.5; }
+.hx > :not(.hxbg) { position: relative; }
+.hx .hbrand { color: var(--hx-t); } .hx .hbrand em { color: var(--hx-g); }
+.hx .hxeye { margin: 0 0 12px; font: 500 12px/1.3 var(--font-mono); letter-spacing: .06em; text-transform: uppercase; color: var(--hx-g); }
+.hxhero { text-align: left; padding: 8px 0 26px; }
+.hx .hxhero .hxeye { margin-top: 22px; }
+@media (min-width: 700px) { .hxhero { text-align: center; padding: 20px 0 34px; } .hxhero .hbrand { justify-content: center; } .hxlead { margin-inline: auto; } .hxbtns { justify-content: center; } }
+#app .hx h1 { font: 700 36px/1.05 var(--font-display); letter-spacing: -.03em; margin: 0; text-wrap: balance; color: var(--hx-t); }
+#app .hx h1 span { color: var(--hx-m); }
+@media (min-width: 700px) { #app .hx h1 { font-size: 58px; max-width: 880px; margin-inline: auto; } }
+.hxlead { max-width: 620px; font-size: 16.5px; line-height: 1.55; color: var(--hx-t2); margin: 18px 0 0; text-wrap: pretty; }
+.hxbtns, .hxrow { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 24px; }
+.hxb { display: inline-flex; align-items: center; justify-content: center; min-height: 46px; padding: 0 20px; border-radius: 12px; background: var(--hx-g); color: #04130a !important; font-weight: 600; font-size: 15px; }
+.hxb.ghost { background: transparent; border: 1px solid var(--hx-l2); color: var(--hx-t) !important; }
+.hxb.gold { background: transparent; border: 1px solid #5b4a16; color: var(--hx-gold) !important; }
+@media (hover: hover) { .hxb:hover { filter: brightness(1.08); } .hxb.ghost:hover { border-color: var(--hx-m); } }
+.hxbtns .hxb { flex: 1 1 180px; } @media (min-width: 700px) { .hxbtns .hxb { flex: 0 0 auto; } }
+.hxfine { margin: 12px 0 0; font-size: 13px; color: var(--hx-m); }
+.hxsteps { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px; }
+@media (min-width: 860px) { .hxsteps { grid-template-columns: repeat(4, 1fr); gap: 12px; } }
+.hxsteps a { display: grid; gap: 4px; align-content: start; padding: 14px 16px; background: var(--hx-s); border: 1px solid var(--hx-l); border-radius: 14px; }
+.hxsteps .i { font: 500 12px var(--font-mono); color: var(--hx-g); }
+.hxsteps b { font: 600 16px var(--font-display); }
+.hxsteps small { font-size: 13px; line-height: 1.45; color: var(--hx-m); }
+@media (max-width: 599px) { .hxsteps small { display: none; } }
+@media (hover: hover) { .hxsteps a:hover, .hxpanel:hover, .hxal:hover, .hxrec:hover, .hxm:hover, .hxdir a:hover { border-color: var(--hx-l2); } }
+.hxfeat { display: grid; gap: 22px; align-items: center; padding: 40px 0 8px; border-top: 1px solid var(--hx-l); margin-top: 30px; }
+@media (min-width: 900px) { .hxfeat { grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr); gap: 44px; padding-top: 56px; margin-top: 44px; }
+  .hxfeat.rev > .hxtxt { order: 2; } }
+.hx h2 { font: 700 27px/1.12 var(--font-display); letter-spacing: -.02em; margin: 0; color: var(--hx-t); text-wrap: balance; }
+@media (min-width: 700px) { .hx h2 { font-size: 36px; } }
+.hxtxt p { margin: 14px 0 0; font-size: 15.5px; line-height: 1.6; color: var(--hx-t2); }
+.hxtxt ul { list-style: none; margin: 16px 0 0; padding: 0; display: grid; gap: 10px; font-size: 15px; line-height: 1.45; color: var(--hx-t2); }
+.hxtxt li { padding-left: 24px; position: relative; }
+.hxtxt li::before { content: "✓"; position: absolute; left: 0; color: var(--hx-g); font-weight: 700; }
+.hxtxt > .hxb { margin-top: 22px; }
+.hxpro { display: inline-block; vertical-align: 1px; margin-left: 4px; font: 600 10.5px/1 var(--font-body, inherit); letter-spacing: .04em; text-transform: uppercase; color: var(--hx-gold); border: 1px solid #5b4a16; border-radius: 999px; padding: 4px 8px; white-space: nowrap; }
+.hxpro.solid { background: var(--hx-gold); color: #0b0f14; border-color: var(--hx-gold); }
+.hxpanel { display: block; min-width: 0; background: var(--hx-s); border: 1px solid var(--hx-l); border-radius: 18px; padding: 18px; }
+@media (min-width: 700px) { .hxpanel { padding: 22px; } }
+.hxph { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 6px; font-size: 12.5px; color: var(--hx-m); }
+.hxgrade { font: 500 12px var(--font-mono); color: var(--hx-t); border: 1px solid var(--hx-l2); border-radius: 6px; padding: 3px 8px; }
+.hxpanel h3 { font: 700 20px var(--font-display); margin: 10px 0 0; }
+.hxchart { display: block; width: 100%; height: 150px; margin-top: 12px; }
+@media (min-width: 700px) { .hxchart { height: 180px; } }
+.hxchart polyline { fill: none; vector-effect: non-scaling-stroke; } .hxchart .a { stroke: var(--hx-g); stroke-width: 2.5; } .hxchart .b { stroke: #5b6775; stroke-width: 2; }
+.hxleg { display: flex; flex-wrap: wrap; gap: 4px 16px; margin-top: 6px; font-size: 12px; color: var(--hx-m); }
+.hxleg .a { color: var(--hx-up); } .hxleg .a::before, .hxleg .b::before { content: "━ "; } .hxleg .yr { margin-left: auto; }
+.hxkpi { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 14px; }
+.hxkpi > div { background: var(--hx-bg); border-radius: 10px; padding: 10px 12px; }
+.hxkpi small { display: block; font-size: 11.5px; color: var(--hx-m); }
+.hxkpi b { font: 500 16px var(--font-mono); }
+.hxnote { margin: 12px 0 0; font-size: 12.5px; line-height: 1.5; color: var(--hx-m); }
+.hxals-list { display: grid; gap: 10px; min-width: 0; }
+.hxal { display: grid; gap: 4px; background: var(--hx-s2); border: 1px solid var(--hx-l); border-radius: 16px; padding: 14px 18px; }
+.hxal.big { background: var(--hx-s); padding: 18px 20px; }
+.hxalh { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+.hxalh b { font: 500 17px var(--font-mono); }
+.hxside { font-size: 12px; font-weight: 600; padding: 4px 10px; border-radius: 999px; background: rgba(74,222,128,.12); }
+.hxside.down { background: rgba(248,113,113,.12); }
+.hxals { font-size: 14px; color: var(--hx-t2); }
+.hxalk { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 10px; }
+.hxalk small { display: block; font-size: 11.5px; color: var(--hx-m); }
+.hxalk b { font: 500 14px var(--font-mono); color: var(--hx-t); } .hxalk b.down { color: var(--hx-dn); }
+.hxstack { display: grid; gap: 12px; min-width: 0; }
+.hxrec { display: block; background: var(--hx-s); border: 1px solid var(--hx-l); border-radius: 18px; padding: 18px 20px; }
+.hxrec .hk { color: var(--hx-m); line-height: 1.4; }
+.hxbig { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
+.hxbig b { display: block; font: 700 34px/1 var(--font-display); letter-spacing: -.03em; }
+.hxbig small { font-size: 13px; color: var(--hx-m); }
+.hxtab { background: var(--hx-s); border: 1px solid var(--hx-l); border-radius: 18px; overflow: hidden; }
+.hxtr { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1.2fr) auto; gap: 10px; align-items: center; padding: 12px 18px; border-top: 1px solid var(--hx-l); font-size: 14px; }
+.hxtr.hd { border-top: 0; font-size: 12px; color: var(--hx-m); }
+.hxtr > span:first-child { font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.hxtr > span:nth-child(2) { color: var(--hx-m); font-size: 13px; } .hxtr > span:last-child { text-align: right; font-family: var(--font-mono); }
+.hxg { display: inline-block; min-width: 22px; text-align: center; font: 500 12px/20px var(--font-mono); color: var(--hx-t); border: 1px solid var(--hx-l2); border-radius: 6px; margin-right: 4px; }
+.hxmk-wrap, .hxall, .hxplans { padding-top: 40px; margin-top: 30px; border-top: 1px solid var(--hx-l); }
+@media (min-width: 900px) { .hxmk-wrap, .hxall, .hxplans { padding-top: 56px; margin-top: 44px; } }
+.hxmk { display: grid; gap: 10px; margin-top: 20px; }
+@media (min-width: 600px) { .hxmk { grid-template-columns: 1fr 1fr; } } @media (min-width: 1000px) { .hxmk { grid-template-columns: repeat(4, 1fr); } }
+.hxm { display: grid; gap: 6px; align-content: start; text-align: left; font: inherit; cursor: pointer; background: var(--hx-s); border: 1px solid var(--hx-l); border-top: 3px solid var(--hx-g); border-radius: 16px; padding: 18px 20px; }
+.hxm.m-crypto { border-top-color: #c77dff; } .hxm.m-commodities { border-top-color: #40c8c8; } .hxm.m-options { border-top-color: #3b82f6; }
+.hxm b { font: 600 19px var(--font-display); } .hxm small { font-size: 13.5px; line-height: 1.5; color: var(--hx-m); } .hxm > span { margin-top: 6px; font-size: 14px; color: var(--hx-t); }
+.hxall h3 { margin: 26px 2px 10px; font: 600 13px var(--font-mono); letter-spacing: .06em; text-transform: uppercase; color: var(--hx-m); }
+.hxdir { display: grid; gap: 0; background: var(--hx-s2); border: 1px solid var(--hx-l); border-radius: 16px; overflow: hidden; }
+@media (min-width: 760px) { .hxdir { grid-template-columns: 1fr 1fr; } }
+.hxdir a { display: flex; align-items: center; gap: 14px; padding: 14px 16px; background: var(--hx-s2); border: 0; box-shadow: inset 0 -1px var(--hx-l), inset -1px 0 var(--hx-l); }
+.hxdir .hic { width: 22px; height: 22px; color: var(--hx-g); flex: none; } .hxdir .hic svg { width: 22px; height: 22px; }
+.hxdir .htx { display: grid; gap: 2px; flex: 1; min-width: 0; } .hxdir b { font: 600 15px var(--font-display); } .hxdir small { font-size: 13px; line-height: 1.4; color: var(--hx-m); }
+.hxdir .hgo { color: var(--hx-m); font-size: 20px; }
+.hxplans > p { margin: 12px 0 0; max-width: 620px; font-size: 15.5px; line-height: 1.55; color: var(--hx-t2); }
+.hxpl { display: grid; gap: 12px; margin-top: 22px; } @media (min-width: 760px) { .hxpl { grid-template-columns: 1fr 1fr; } }
+.hxplan { display: flex; flex-direction: column; background: var(--hx-s); border: 1px solid var(--hx-l); border-radius: 18px; padding: 22px; }
+.hxplan.pro { border-color: #5b4a16; }
+.hxplan h3 { display: flex; justify-content: space-between; align-items: center; margin: 0; font: 700 21px var(--font-display); }
+.hxplan ul { flex: 1; list-style: none; margin: 16px 0 20px; padding: 0; display: grid; gap: 9px; font-size: 14.5px; color: var(--hx-t2); }
+.hxplan li::before { content: "✓ "; color: var(--hx-g); font-weight: 700; }
+.hxend { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 18px; margin-top: 44px; padding: 26px 24px; background: var(--hx-s); border: 1px solid var(--hx-l); border-radius: 20px; }
+.hxend h2 { font-size: 24px !important; } .hxend p { margin: 6px 0 0; color: var(--hx-t2); font-size: 15px; }
+.hxdisc { margin: 26px 2px 0; font-size: 12.5px; line-height: 1.5; color: var(--hx-m); }
+.hxdisc a { color: var(--hx-t2) !important; text-decoration: underline !important; }
+.hx :focus-visible { outline: 2px solid var(--hx-g); outline-offset: 2px; }
 /* about us */
 .about { max-width: 760px; }
 .about .ahero { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr); gap: 28px; align-items: center; margin: 8px 0 26px; }
@@ -2150,8 +2262,28 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
     return c?.history;
   }
   // ------------------------------------------------------------------ home
-  // Start page for everyone: what the app is, the live record (honest numbers, losers
-  // included) and the way into the Strategy Lab.
+  // Start page for everyone, dark: the four main features (Strategy Lab, alerts, live track
+  // record, markets) with live numbers, then every part of the site.
+  // Launch switches: sign-up and Pro stay off until accounts and paid plans are ready.
+  // signup: shows "Create a free account" buttons and the Free/Pro plans section.
+  // pro: shows the "Pro · free in beta" tags on the features that will be paid later.
+  const LAUNCH = { signup: false, pro: false };
+
+  // backtest equity curve of one strategy against holding the index, log scale
+  function hxCurve(id) {
+    const a = S.bt?.strategies?.[id]?.account?.long, b = S.bt?.spy?.account;
+    if (!a?.length || a.length < 2) return "";
+    const step = Math.max(1, Math.floor(a.length / 140));
+    const pick = xs => xs.filter((_, i) => i % step === 0 || i === xs.length - 1).map(v => Math.log(Math.max(+v || 0, 1)));
+    const A = pick(a), B = b?.length === a.length ? pick(b) : null;
+    const all = B ? A.concat(B) : A, lo = Math.min(...all), hi = Math.max(...all), span = hi - lo || 1;
+    const pts = xs => xs.map((v, i) => `${(i / (xs.length - 1) * 600).toFixed(1)},${(172 - (v - lo) / span * 164).toFixed(1)}`).join(" ");
+    const bench = esc(S.bt.spy?.ticker || "the index"), yr0 = S.bt.account?.dates?.[0]?.slice(0, 4);
+    return `<svg class="hxchart" viewBox="0 0 600 180" preserveAspectRatio="none" role="img" aria-label="Backtest of ${esc(stratName(id))} against holding ${bench}">
+        ${B ? `<polyline class="b" points="${pts(B)}"/>` : ""}<polyline class="a" points="${pts(A)}"/></svg>
+      <div class="hxleg"><span class="a">${esc(stratName(id))}</span>${B ? `<span class="b">Holding ${bench}</span>` : ""}${yr0 ? `<span class="yr">Backtest since ${esc(yr0)}, long trades</span>` : ""}</div>`;
+  }
+
   function viewHome() {
     S.firstSel = null;
     const H = CACHE[S.market]?.history;
@@ -2159,108 +2291,155 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
     const nStrat = S.strategies.filter(s => forMarket(s) && isCore(s.id)).length;
     const pc = v => v == null ? "–" : Math.round(v) + "%";
     const sg = v => v == null ? "–" : (v >= 0 ? "+" : "−") + Math.abs(v).toFixed(2) + "%";
-    const eur = v => "€" + (v >= 1e6 ? (v / 1e6).toFixed(2).replace(/\.?0+$/, "") + "M" : Math.round(v / 1000) + "k");
-    let h = `<section class="home">
-      <div class="hbrand"><img src="logo.svg?v=2" alt=""><span>Investment Center <em>Signals</em></span></div>
-      <h1>Test trading strategies before you trust them.</h1>
-      <p class="hlead">Backtest ${nStrat} strategies on up to 15 years of prices, learn how each one works, and get an alert when one fires on the ${L().index} ${L().noun}. Free, and information only: nothing here is investment advice.</p>
-      <div class="hbtns"><a class="btn" href="#strategylab">Test a strategy</a><a class="btn ghost" href="#alerts">See today's alerts</a></div>`;
+    const yr = v => v == null ? "–" : (v >= 0 ? "+" : "−") + Math.abs(v * 100).toFixed(1) + "%";
+    const num = v => v == null ? "–" : (+v).toLocaleString("en-US", { maximumFractionDigits: Math.abs(v) < 10 ? 4 : 2 });
+    const cap = s => s ? s[0].toUpperCase() + s.slice(1) : "";
+    const pro = LAUNCH.pro ? ` <span class="hxpro">Pro · free in beta</span>` : "";
+    const MK_NAME = { stocks: "Stocks", crypto: "Crypto", commodities: "Commodities" };
+    const eye = n => `<p class="hxeye">${n}</p>`;
 
-    h += `<div class="hstats">`;
-    // live track record
+    let h = `<section class="home hx">
+      <svg class="hxbg" aria-hidden="true" viewBox="0 0 1200 420" preserveAspectRatio="none"><polyline class="g" points="0,340 80,322 140,330 210,290 280,305 350,265 410,277 490,232 560,248 630,200 700,216 770,176 840,192 910,144 980,160 1050,120 1130,132 1200,96"/><polyline class="d" points="0,356 170,330 340,298 520,266 700,232 870,200 1040,160 1200,128"/></svg>
+      <div class="hxhero">
+        <div class="hbrand"><img src="logo.svg?v=2" alt=""><span>Investment Center <em>Signals</em></span></div>
+        ${eye("Stocks · Crypto · Commodities · Options")}
+        <h1>Build a strategy. Backtest it. <span>Get the alert when it fires.</span></h1>
+        <p class="hxlead">${nStrat} strategies, each tested on up to 15 years of prices, sending alerts and trading live on paper, so you can see what really works. Information only, nothing here is investment advice.</p>
+        <div class="hxbtns">${LAUNCH.signup
+          ? `<a class="hxb" href="#signup">Create a free account</a><a class="hxb ghost" href="#hx-lab">See what's inside</a>`
+          : `<a class="hxb" href="#strategylab">Open Strategy Lab</a><a class="hxb ghost" href="#alerts">See today's alerts</a>`}</div>
+        ${LAUNCH.signup ? `<p class="hxfine">Everything is free during the beta · no card needed</p>` : ""}
+      </div>
+      <nav class="hxsteps" aria-label="How it works">${[
+        ["#strategylab", "01", "Build", "Pick indicators, volume, patterns and exits"],
+        ["#strategylab", "02", "Backtest", "After costs and Italian tax, against buy &amp; hold"],
+        ["#alerts", "03", "Get alerts", "When a strategy fires, with the level that proves it wrong"],
+        ["#trades", "04", "Track live", "Every strategy paper-trades on live prices"],
+      ].map(([href, i, t, d]) => `<a href="${href}"><span class="i">${i}</span><b>${t}</b><small>${d}</small></a>`).join("")}</nav>`;
+
+    // 01 · Strategy Lab, with the strongest strategy in the tests
+    const EV = S.lineup?.evidence?.[S.market] || null;
+    const core = EV ? Object.entries(EV.strategies).filter(([id]) => isCore(id)) : [];   // already sorted, best evidence first
+    let panel;
+    if (core.length) {
+      const [id, e] = core[0];
+      panel = `<a class="hxpanel" href="#strategy-${slug(id)}">
+        <div class="hxph"><span>Strongest evidence · ${esc(MK_NAME[S.market] || "")}</span><span class="hxgrade">Grade ${esc(e.grade)} · ${esc(e.label)}</span></div>
+        <h3>${esc(stratName(id))}</h3>
+        ${hxCurve(id)}
+        <div class="hxkpi"><div><small>A year, after costs</small><b class="${(e.cagr ?? 0) >= 0 ? "up" : "down"}">${yr(e.cagr)}</b></div><div><small>Holding instead</small><b>${yr(EV.hold?.cagr)}</b></div><div><small>Worst fall</small><b class="down">${yr(e.maxdd)}</b></div></div>
+        <p class="hxnote">Beat ${esc(EV.vs || "holding")} in ${Math.round(e.beats_hold * 100)}% of test periods. ${S.market === "crypto" ? "Tested on bitcoin and ether from 2021 on." : "Tested on the stocks that were among the 100 biggest at the time, with 2021 onwards kept aside."} Past results don't predict future ones.</p></a>`;
+    } else panel = `<div class="hxpanel"><p class="loading" style="margin:0">Loading the test results…</p></div>`;
+    h += `<section class="hxfeat" id="hx-lab"><div class="hxtxt">${eye("01 · Strategy Lab")}
+        <h2>Test anything a trader would want to test.</h2>
+        <ul><li>${nStrat} ready-made strategies, each explained with a real chart</li>
+          <li>Your own rules: indicators, volume and chart patterns${pro}</li>
+          <li>Many take profit and stop loss options</li>
+          <li>€100k against buy &amp; hold, after costs and Italian tax${pro}</li></ul>
+        <a class="hxb" href="#strategylab">Build a strategy</a></div>${panel}</section>`;
+
+    // 02 · Alerts, the strongest ones from the last scan
+    const today = S.feed ? (S.feed.alerts || []).filter(a => a.date === S.feed.as_of && a.strategy !== "topdown") : [];
+    const seen = new Set(), picks = today.filter(a => !a.exit).sort((x, y) => (y.strength?.score ?? 0) - (x.strength?.score ?? 0))
+      .filter(a => !seen.has(a.strategy) && seen.add(a.strategy)).slice(0, 3);   // one per strategy, strongest first
+    const alCard = (a, big) => {
+      const idx = S.feed.alerts.indexOf(a), up = a.side === "bullish";
+      return `<a class="hxal${big ? " big" : ""}" href="#alert-${idx}">
+        <span class="hxalh"><b>${esc(disp(a.ticker))}</b><span class="hxside ${up ? "up" : "down"}">${up ? "▲" : "▼"} ${esc(cap(sideLbl(a)))}</span></span>
+        <span class="hxals">${esc(stratName(a.strategy))}${a.tf ? ` · ${esc(a.tf)}` : ""}${a.strength?.label ? ` · ${esc(a.strength.label)}` : ""}</span>
+        ${big ? `<span class="hxalk"><span><small>Price</small><b>${num(a.price)}</b></span><span><small>Wrong if ${up ? "below" : "above"}</small><b class="down">${num(a.stop)}</b></span><span><small>Found</small><b>${esc(foundTime(a).trim() || fmtDate(a.date, { day: "numeric", month: "short" }))}</b></span></span>` : ""}
+      </a>`;
+    };
+    const alerts = !S.feed ? `<p class="loading" style="margin:0">Loading today's alerts…</p>`
+      : picks.length ? picks.map((a, i) => alCard(a, i === 0)).join("")
+      : `<div class="hxal big"><span class="hxals">No new alerts on the last close. The next scan will add them here.</span></div>`;
+    const bu = today.filter(a => a.side === "bullish").length;
+    h += `<section class="hxfeat rev"><div class="hxtxt">${eye("02 · Alerts")}
+        <h2>Know when a strategy fires, and when it's wrong.</h2>
+        <ul><li>${S.feed ? `${today.length} alert${today.length === 1 ? "" : "s"} on the last close${today.length ? `: ${bu} buy, ${today.length - bu} sell` : ""}` : "Today's alerts from every strategy"}</li>
+          <li>A “wrong if” level and a strength rating on every alert</li>
+          <li>Scans through the trading day, crypto around the clock${pro}</li>
+          <li>iPhone notifications for the strategies you follow${pro}</li></ul>
+        <a class="hxb ghost" href="#notify">Set up my alerts</a></div><div class="hxals-list">${alerts}</div></section>`;
+
+    // 03 · Live track record: honest numbers, losers included, plus the graded line-up
+    let rec = "";
     if (H && H.rows?.length && !H.demo) {
       const sid = i => H.strategies[i];
       const rows = H.rows.filter(r => forMarket(S.byId[sid(r[2])]) && r[7] != null);
       const stat = xs => xs.length ? { n: xs.length, hit: xs.filter(r => r[3] * r[7] > 0).length / xs.length * 100, avg: xs.reduce((t, r) => t + r[3] * r[7], 0) / xs.length } : null;
-      const core = stat(rows.filter(r => isCore(sid(r[2])) && r[3] > 0)), all = stat(rows);
-      const base = S.bt?.strategies ? Object.values(S.bt.strategies)[0]?.bullish?.["20"]?.base_hit : null;
-      if (core && all) h += `<a class="card hrec" href="#record">
-        <div class="hk">Live track record · since ${esc(fmtDate(H.since, { day: "numeric", month: "short", year: "numeric" }))}</div>
-        <div class="hbig"><div><b class="${core.hit >= 50 ? "up" : "down"}">${pc(core.hit)}</b><small>went the right way</small></div><div><b class="${core.avg >= 0 ? "up" : "down"}">${sg(core.avg)}</b><small>average move</small></div></div>
-        <p>Buy alerts from the strategies on the site, checked 20 sessions later (${core.n.toLocaleString("en-US")} alerts).${base != null ? ` A random day was right ${pc(base)} of the time over 15 years.` : ""}</p>
-        <p class="hall">Every alert, all strategies and both sides: ${pc(all.hit)} right way, ${sg(all.avg)} on average. Losers stay in the record.</p>
-        <span class="go">See every alert ›</span></a>`;
-    } else if (H === undefined || H === null) h += `<div class="card hrec"><p class="loading" style="margin:0">Loading the track record…</p></div>`;
+      const c = stat(rows.filter(r => isCore(sid(r[2])) && r[3] > 0));
+      if (c) rec = `<a class="hxrec" href="#record"><span class="hk">Every buy alert since ${esc(fmtDate(H.since, { day: "numeric", month: "short", year: "numeric" }))}, checked 20 sessions later</span>
+        <span class="hxbig"><span><b class="${c.hit >= 50 ? "up" : "down"}">${pc(c.hit)}</b><small>went the right way</small></span><span><b class="${c.avg >= 0 ? "up" : "down"}">${sg(c.avg)}</b><small>average move · ${c.n.toLocaleString("en-US")} alerts</small></span></span></a>`;
+    } else if (H === undefined || H === null) rec = `<div class="hxrec"><p class="loading" style="margin:0">Loading the track record…</p></div>`;
+    const table = core.length ? `<div class="hxtab"><div class="hxtr hd"><span>Strategy</span><span>Grade</span><span>Beat holding</span></div>${core.slice(0, 5).map(([id, e]) =>
+      `<a class="hxtr" href="#strategy-${slug(id)}"><span>${esc(stratName(id))}</span><span><span class="hxg">${esc(e.grade)}</span> ${esc(e.label)}</span><span class="${e.beats_hold >= 0.5 ? "up" : "down"}">${Math.round(e.beats_hold * 100)}%</span></a>`).join("")}</div>` : "";
+    h += `<section class="hxfeat"><div class="hxtxt">${eye("03 · Live track record")}
+        <h2>No hiding the losers.</h2>
+        <p>Every strategy trades live on paper, so every alert gets a result, and nothing is removed afterwards. Strategies are graded on tests they never saw while being built.</p>
+        <div class="hxrow"><a class="hxb ghost" href="#trades">Live trades</a><a class="hxb ghost" href="#winners">Best trades</a></div></div>
+        <div class="hxstack">${rec}${table}</div></section>`;
 
-    // best core strategy in the backtest, against buying and holding the index
-    const acc = S.bt?.strategies, dates = S.bt?.account?.dates, spy = S.bt?.spy?.account;
-    const EV = S.lineup?.evidence?.[S.market] || null;
-    const top = EV ? Object.entries(EV.strategies).filter(([id]) => isCore(id))[0] : null;   // already sorted, best evidence first
-    if (top) {
-      const [id, e] = top, yr = v => v == null ? "–" : (v * 100).toFixed(1) + "%";
-      h += `<a class="card hbt" href="#strategy-${slug(id)}">
-        <div class="hk">In our tests · strongest evidence</div>
-        <h3>${esc(stratName(id))}</h3>
-        <div class="hrow"><span>Beat ${esc(EV.vs || "holding")} in</span><b class="${e.beats_hold >= 0.5 ? "up" : "down"}">${Math.round(e.beats_hold * 100)}%</b></div>
-        <p>${yr(e.cagr)} a year after costs, vs ${yr(EV.hold?.cagr)} for ${esc(EV.vs || "holding")}. Grade: ${esc(e.label)}.</p>
-        <p class="hall">${S.market === "crypto" ? "Tested on bitcoin and ether from 2021 on, not today's top coins" : "Tested on the stocks that were among the 100 biggest at the time, not today's list, with 2021 onwards kept aside"}. ${Object.values(EV.strategies).some(x => x.grade === "A") ? "" : "No strategy has proven it beats simply holding. "}Past results don't predict future ones.</p></a>`;
-    } else if (acc && dates?.length) {
-      const best = Object.entries(acc).filter(([id, v]) => isCore(id) && forMarket(S.byId[id]) && v.account?.long?.length)
-        .map(([id, v]) => ({ id, end: v.account.long.at(-1) })).sort((a, b) => b.end - a.end)[0];
-      if (best) {
-        const start = S.bt.account.size || 1e5, yr = dates[0].slice(0, 4), bench = spy?.at(-1);
-        h += `<a class="card hbt" href="#strategy-${slug(best.id)}">
-          <div class="hk">In the backtest · best strategy</div>
-          <h3>${esc(stratName(best.id))}</h3>
-          <div class="hrow"><span>${eur(start)} in ${yr}</span><span aria-hidden="true">→</span><b class="up">${eur(best.end)}</b></div>
-          ${bench ? `<p>Buying and holding ${esc(S.bt.spy.ticker || "the index")} instead: ${eur(bench)}. Long trades only.</p>` : ""}
-          <p class="hall">Tested on today's ${L().index} list, so ${L().noun} that later dropped out aren't in it and the results look better than they would have in real time. Past results don't predict future ones.</p></a>`;
-      }
-    }
-
-    h += `</div>`;   // closes .hstats
-
-    // today, at a glance
-    const today = S.feed ? (S.feed.alerts || []).filter(a => a.date === S.feed.as_of && a.strategy !== "topdown") : [];
-    const bu = today.filter(a => a.side === "bullish").length, br = S.stocks?.breadth200;
-    h += `<h2 class="hsec">Today</h2><div class="hpulse">
-      <a href="#alerts"><b>${S.feed ? today.length : "–"}</b><small>alerts on the last close${today.length ? ` · ${bu} buy, ${today.length - bu} sell` : ""}</small></a>
-      <a href="${isCrypto() ? "#crypto" : "#stocks"}"><b>${br != null ? Math.round(br) + "%" : "–"}</b><small>of ${L().noun} above their 200-day average</small></a>
-      <a href="#strategies"><b>${nStrat}</b><small>strategies on the site · <span class="lnk">the Vault</span> holds the rest</small></a>
-    </div>`;
+    // 04 · Markets: the three markets switch the whole site; options has its own page
+    const here = { stocks: "#stocks", crypto: "#crypto", commodities: "#stocks" };
+    const mk = [["stocks", "Stocks", `${S.market === "stocks" ? L().index : "S&P 100"} scanner, technical ratings, earnings and IPO calendar`],
+      ["crypto", "Crypto", "Fear &amp; greed, strength vs Bitcoin, DCA and Italian tax helpers"],
+      ["commodities", "Commodities", "Gold, oil and silver, with ETCs you can buy in the EU"]];
+    h += `<section class="hxmk-wrap">${eye("04 · Markets")}<h2>One method, four markets.</h2><div class="hxmk">${mk.map(([m, t, d]) => S.market === m
+        ? `<a class="hxm m-${m}" href="${here[m]}"><b>${t}</b><small>${d}</small><span>You're here · open ›</span></a>`
+        : `<button class="hxm m-${m}" data-market="${m}"><b>${t}</b><small>${d}</small><span>Switch to ${t.toLowerCase()} ›</span></button>`).join("")}
+      <a class="hxm m-options" href="options.html"><b>Options</b><small>How option strategies pay off, a live chain builder and paper trading${pro}</small><span>Open ›</span></a></div></section>`;
 
     // every part of the site, grouped
     const ic = (href, alt) => document.querySelector(`#menusheet a[href="${href}"] svg`)?.outerHTML || document.querySelector(`#menusheet a[href="${alt}"] svg`)?.outerHTML || "";
     const GROUPS = [
-      ["Test & learn", "Find out what has worked before you use it", [
+      ["Test & learn", [
         ["#strategylab", "Strategy Lab", `Tune any strategy, add stops, costs and Italian tax, and see what €100k would have become`],
         ["#strategies", "Strategies", `${nStrat} strategies, each explained with a real chart and graded on how well it really did`],
         ["#strategies-vault", "Vault", "Strategies taken off the site, with the numbers that put them there", "#strategies"],
-        ["#crashes", "Smaller Crashes", "Hold the S&P 500 in uptrends, T-bills in downtrends: the big falls were about a third smaller"],
+        ["#crashes", "Smaller Crashes", "Hold the S&P 500 in uptrends, T-bills in downtrends"],
         ["#learn", "Learn", "Charts, indicators, risk and how to read a backtest, from zero"],
       ]],
-      ["Signals", "What the strategies are saying, and how they did", [
+      ["Signals", [
         ["#alerts", "Alerts", "Today's signals from the strategies you follow, with a strength rating"],
         ["#winners", "Best trades", "The alerts that have worked best, today, this week or this month"],
         ["#record", "Track record", "Every alert ever sent, checked 5, 20 and 60 sessions later"],
         ["#trades", "Live trades", "Every strategy paper-trading on live prices, profit and loss included"],
         ["#notify", "Phone alerts", "Get a notification on your iPhone when a strategy you follow fires"],
       ]],
-      ["Markets & charts", "Prices, trends and tools for each market", [
+      ["Markets & charts", [
         ["#stocks", L().Title || L().Tab, `Every ${L().one} with its chart, technical rating and latest alerts`],
         ["#heatmap", "Heatmap", "The whole market on one screen, coloured by today's move", "#stocks"],
         ["trendlines.html", "Trendlines", "Automatic trendlines and support/resistance on seven timeframes"],
         ["options.html", "Options", "How option strategies pay off, a live option chain builder and backtests"],
-        ["pairs.html", "Pairs trading", "Two stocks that move together, traded when their gap stretches: today's pairs and a fair backtest"],
+        ["pairs.html", "Pairs trading", "Two stocks that move together, traded when their gap stretches"],
         ["#crypto", "Crypto dashboard", "Fear & greed, strength vs Bitcoin, cycles, DCA and tax helpers"],
       ]],
-      ["News & events", "What could move prices next", [
+      ["News & events", [
         ["#news", "News", "Headlines from trusted outlets, by stock and sector"],
         ["#mood", "News mood", "Is the latest news on a stock bullish or bearish? Scored by AI", "#news"],
         ["#buzz", "Most mentioned", "The names the news is talking about most right now", "#news"],
         ["#calendar", "Calendar", "Upcoming earnings, IPOs and economic releases"],
         ["#earnings", "After earnings", "How a stock moves after it beats or misses estimates", "#calendar"],
       ]],
-      ["Your money", "Practise first, then invest from Italy", [
+      ["Your money", [
         ["#practice", "Practice portfolio", "Paper money to try the alerts without risking anything"],
         ["#brokers", "Brokers", "Where to buy stocks, ETFs and crypto from Italy"],
         ["#brokers-ucits", "EU-buyable ETFs", "The UCITS versions of popular US ETFs you can actually buy here", "#brokers"],
         ["#crypto-tax", "Italian crypto tax", "What you owe on crypto gains, worked out step by step", "#crypto"],
       ]],
     ];
-    h += GROUPS.map(([g, sub, items]) => `<section class="hgroup"><h2 class="hsec">${g}</h2><p class="hsub">${sub}</p><div class="hdir">${items.map(([href, t, d, alt]) =>
-      `<a href="${href}"><span class="hic" aria-hidden="true">${ic(href, alt)}</span><span class="htx"><b>${t}</b><small>${d}</small></span><span class="hgo" aria-hidden="true">›</span></a>`).join("")}</div></section>`).join("");
-    h += `<p class="hint hdisc">Investment Center Signals describes price patterns and how they behaved in the past. It doesn't know your situation and doesn't tell you what to buy or sell. <a href="#brokers-about">Affiliate disclosure</a> · <a href="#about">Made by Giacomo &amp; Andrea</a></p>
+    h += `<section class="hxall"><h2>Everything on the site</h2>${GROUPS.map(([g, items]) => `<h3>${g}</h3><div class="hxdir">${items.map(([href, t, d, alt]) =>
+      `<a href="${href}"><span class="hic" aria-hidden="true">${ic(href, alt)}</span><span class="htx"><b>${t}</b><small>${d}</small></span><span class="hgo" aria-hidden="true">›</span></a>`).join("")}</div>`).join("")}</section>`;
+
+    // Free / Pro, only once sign-up is open
+    if (LAUNCH.signup) h += `<section class="hxplans">${eye("Plans")}<h2>Free now. Pro is free during the beta.</h2>
+        <p>Sign up and use every feature while we're in beta. Pro features will be paid later: join the waitlist to hear first.</p>
+        <div class="hxpl"><div class="hxplan"><h3>Free</h3><ul>${["Full track record and strategy grades", "Ready-made strategies in the Strategy Lab", "Daily alert digest", "Best trades and calendar", "Learn pages and market dashboards", "Practice portfolio"].map(x => `<li>${x}</li>`).join("")}</ul><a class="hxb" href="#signup">Create a free account</a></div>
+        <div class="hxplan pro"><h3>Pro <span class="hxpro solid">Free during beta</span></h3><ul>${["Real-time alerts, crypto around the clock", "Build your own strategies", "Unlimited backtests from any year", "Results after Italian tax and fees", "Top-Down Analysis and intraday ratings", "Options chain, gamma levels, news mood"].map(x => `<li>${x}</li>`).join("")}</ul><a class="hxb gold" href="#waitlist">Join the Pro waitlist</a></div></div></section>`;
+
+    h += `<section class="hxend"><div><h2>Start with one strategy.</h2><p>Test it, follow it, see how it does live.</p></div><a class="hxb" href="${LAUNCH.signup ? "#signup" : "#strategylab"}">${LAUNCH.signup ? "Sign up free" : "Open Strategy Lab"}</a></section>
+      <p class="hxdisc">Investment Center Signals describes price patterns and how they behaved in the past. It doesn't know your situation and doesn't tell you what to buy or sell. <a href="#brokers-about">Affiliate disclosure</a> · <a href="#about">Made by Giacomo &amp; Andrea</a></p>
     </section>`;
     return h;
   }
@@ -6469,7 +6648,7 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
       L.after?.(); D.after?.();
       if (sel) app.querySelectorAll(`.pane.list a[href="#${CSS.escape(sel)}"]`).forEach(a => (a.closest(".srow") || a).classList.add("sel"));
     } else {
-      app.className = WIDE.matches ? "single" : "";
+      app.className = (WIDE.matches ? "single" : "") + (tab === "home" ? " homex" : "");
       const V = norm(detail ? detail() : list());
       app.innerHTML = (detail || WIDE.matches ? "" : `<div class="mswitch inline" role="group" aria-label="Market">${switchHtml()}</div>`) + V.html;
       V.after?.();
