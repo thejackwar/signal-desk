@@ -182,6 +182,28 @@ details.settings summary:hover .cz { text-decoration: underline; }
 .dot.dash { height: 0; border-top: 3px dashed; border-radius: 0; margin-top: 2px; }
 @media (max-width: 760px) { .feat { grid-template-columns: 1fr; gap: 14px; } .feat > div { padding: 22px; } }
 
+/* gamma levels (SPY) */
+.gex { padding: 22px 24px 20px; margin-bottom: 56px; }
+.gex header { padding: 0; display: flex; justify-content: space-between; align-items: baseline; flex-wrap: wrap; gap: 4px 16px; margin-bottom: 14px; }
+.gex h3 { margin: 0; font-size: 21px; font-weight: 700; letter-spacing: -.022em; }
+.gex header small { color: var(--muted); font-size: 13px; }
+.gex .lv { margin-bottom: 14px; }
+.gex .lv .f { color: var(--accent); }
+.gex .bars { width: 100%; height: auto; display: block; }
+.gex .lv .n { color: var(--fg); }
+.gex .bars text { font: 10px var(--font); fill: var(--muted); }
+.gex .tbl { overflow-x: auto; margin: 10px 0 12px; }
+.gex table { border-collapse: collapse; width: 100%; font-size: 14px; }
+.gex th, .gex td { padding: 8px 10px; text-align: right; white-space: nowrap; border-top: 1px solid var(--hair-2); }
+.gex th { color: var(--muted); font-size: 12px; font-weight: 500; border-top: 0; }
+.gex th:first-child, .gex td:first-child { text-align: left; font-weight: 600; }
+.reg { display: inline-block; border-radius: 980px; padding: 2px 10px; font-size: 12px; font-weight: 600; }
+.reg.positive { background: var(--pill-up); color: var(--up-line); }
+.reg.negative { background: var(--pill-down); color: var(--down-line); }
+.gex details { font-size: 14px; color: var(--muted); line-height: 1.5; }
+.gex details summary { cursor: pointer; color: var(--link); }
+@media (max-width: 560px) { .gex { padding: 18px; } }
+
 .fine { color: var(--faint); font-size: 12px; line-height: 1.5; letter-spacing: -.005em; margin: 0; }
 footer.foot { border-top: 1px solid var(--hair); margin-top: 56px; padding-top: 18px; display: grid; gap: 10px; }
 
@@ -262,7 +284,7 @@ let C = {};
 function readColors() {
   const v = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
   C = { bg: v("--c-bg"), grid: v("--c-grid"), txt: v("--c-txt"), candleUp: v("--c-cup"), candleDn: v("--c-cdn"),
-        up: v("--up-line"), dn: v("--down-line"), sup: v("--sup"), res: v("--res"), font: v("--font") };
+        up: v("--up-line"), dn: v("--down-line"), sup: v("--sup"), res: v("--res"), font: v("--font"), accent: v("--accent") || "#0071e3" };
 }
 readColors();
 const darkMq = matchMedia("(prefers-color-scheme: dark)");
@@ -285,6 +307,7 @@ let charts = [];
 let loadSeq = 0;
 let names = { SPY: "S&P 500 ETF" };
 let mk = "stocks";
+let GEX = null;              // data/gex/latest.json: daily gamma levels (engine/gex.py), shown for SPY
 
 // ------------------------------------------------------------------ stocks / crypto
 function setMarket(m) {
@@ -447,7 +470,9 @@ function render() {
     const tf = P.tfs.includes(t) ? `<a href="#${esc(symbol)}" data-jump="${t}">${TFS[t].label}</a>` : TFS[t].label;
     h += `<tr><td class="tf">${tf}</td>${cell(r.up, "up")}${cell(r.down, "down")}<td><span class="bias ${r.bias === "-" ? "none" : r.bias}">${r.bias === "-" ? "–" : r.bias}</span></td>${P.sr ? srCells(r.sr) : ""}</tr>`;
   }
-  h += `</tbody></table></div><div class="charts">`;
+  h += `</tbody></table></div>`;
+  if (symbol === "SPY" && GEX?.underlyings?.SPY) h += gexPanel();
+  h += `<div class="charts">`;
   for (const t of P.tfs) {
     const r = results[t];
     const it = (dt, val, cls) => `<div><dt>${dt}</dt><dd class="${cls}">${val}</dd></div>`;
@@ -462,6 +487,47 @@ function render() {
     else $(`chart-${t}`).innerHTML = `<p class="msg small">No ${TFS[t].label.toLowerCase()} candles for ${esc(symbol)}.</p>`;
   }
 }
+// ------------------------------------------------------------------ gamma levels
+const money = v => { const a = Math.abs(v); return (v < 0 ? "−" : "+") + "$" + (a >= 1e9 ? (a / 1e9).toFixed(2) + "bn" : (a / 1e6).toFixed(0) + "m"); };
+const pfx = v => v == null ? "–" : fmtPrice(v);
+function gexPanel() {
+  const G = GEX.underlyings.SPY;
+  const lowTf = ORDER[ORDER.length - 1], fr = state.frames[lowTf];
+  const last = fr?.length ? fr[fr.length - 1].close : G.spot;
+  const regime = G.flip == null ? null : last >= G.flip ? "positive" : "negative";
+  const it = (dt, val, cls = "") => `<div><dt>${dt}</dt><dd class="${cls}">${val}</dd></div>`;
+  const upd = new Date(GEX.updated).toLocaleString("en-US", { timeZone: "America/New_York", weekday: "short", day: "numeric", month: "short", hour: "2-digit", minute: "2-digit", hour12: false });
+  let h = `<section class="card gex"><header><h3>Gamma levels</h3><small>SPY options · open interest from ${esc(GEX.oi_date || "the last session")} · computed ${upd} New York</small></header>
+    <dl class="lv">${it("Regime now", regime ? `<span class="reg ${regime}">${regime === "positive" ? "Positive gamma" : "Negative gamma"}</span>` : "–")}
+    ${it("Gamma flip", pfx(G.flip), "f")}${it("Call wall", pfx(G.call_wall), "u")}${it("Put wall", pfx(G.put_wall), "d")}
+    ${it("Total GEX per 1%", money(G.total_gex), "n")}${it("Put/call open interest", G.put_call_oi ?? "–", "n")}</dl>`;
+  h += gexBars(G, last);
+  h += `<div class="tbl"><table><thead><tr><th></th><th>Price at calc.</th><th>Flip</th><th>Regime</th><th>Call wall</th><th>Put wall</th><th>Magnets</th><th>Put/call prem. (last session)</th></tr></thead><tbody>`;
+  for (const [s, L] of Object.entries(GEX.underlyings)) {
+    const pc = L.call_premium ? (L.put_premium / L.call_premium).toFixed(2) : "–";
+    h += `<tr><td>${esc(s)}</td><td>${pfx(L.spot)}</td><td>${pfx(L.flip)}</td><td>${L.regime ? `<span class="reg ${L.regime}">${L.regime}</span>` : "–"}</td>
+      <td>${pfx(L.call_wall)}</td><td>${pfx(L.put_wall)}</td><td>${L.magnets.map(m => m.strike).join(" · ")}</td><td>${pc}</td></tr>`;
+  }
+  h += `</tbody></table></div>
+    <details><summary>What these levels mean</summary>
+    <p>Options dealers hedge what they've sold. Using the usual assumption (dealers long calls, short puts), <b>GEX</b> estimates how many dollars of stock they must trade for each 1% move. <b>Above the gamma flip</b> they buy dips and sell rallies, so moves tend to be damped and prices pinned near big strikes. <b>Below it</b> they sell into drops and buy into rallies, so moves tend to be larger. The <b>call wall</b> often acts as a ceiling and the <b>put wall</b> as a floor; <b>magnets</b> are the strikes with the most gamma near the price. The bars show net GEX per strike (green calls, red puts) within 5% of the price.</p>
+    <p>Computed once a day before the open from Alpaca's free option data. It's an estimate: dealers' real positions aren't public, and the put/call premium has no buyer/seller side. We save every day's snapshot so the levels can be backtested once enough history has built up. For information only. Not investment advice.</p></details></section>`;
+  return h;
+}
+function gexBars(G, last) {
+  const st = G.strikes || []; if (!st.length) return "";
+  const W = 600, H = 150, pad = 18, mid = H / 2;
+  const lo = st[0][0], hi = st[st.length - 1][0], x = k => pad + (k - lo) / (hi - lo || 1) * (W - 2 * pad);
+  const mx = Math.max(...st.map(r => Math.abs(r[1] + r[2])), 1), bw = Math.max(1.5, (W - 2 * pad) / st.length * 0.7);
+  let g = st.map(([k, c, p]) => { const n = c + p, hgt = Math.abs(n) / mx * (mid - 16);
+    return `<rect x="${(x(k) - bw / 2).toFixed(1)}" y="${(n >= 0 ? mid - hgt : mid).toFixed(1)}" width="${bw.toFixed(1)}" height="${Math.max(.5, hgt).toFixed(1)}" fill="${n >= 0 ? C.up : C.dn}" opacity=".85"><title>${k}: ${money(n)} per 1%</title></rect>`; }).join("");
+  g += `<line x1="${pad}" x2="${W - pad}" y1="${mid}" y2="${mid}" stroke="${C.grid}"/>`;
+  const vline = (v, col, lab, dash) => v != null && (v = Math.min(hi, Math.max(lo, v)), true) ? `<line x1="${x(v)}" x2="${x(v)}" y1="8" y2="${H - 14}" stroke="${col}" stroke-dasharray="${dash}"/><text x="${x(v)}" y="${H - 2}" text-anchor="${x(v) > W - 70 ? "end" : x(v) < 70 ? "start" : "middle"}">${lab}</text>` : "";
+  g += vline(last, C.txt, `price ${fmtPrice(last)}`, "") + vline(G.flip, C.accent, "flip", "3 3");
+  g += `<text x="${pad}" y="10">${fmtPrice(lo)}</text><text x="${W - pad}" y="10" text-anchor="end">${fmtPrice(hi)}</text>`;
+  return `<svg class="bars" viewBox="0 0 ${W} ${H}" role="img" aria-label="Net gamma exposure by strike">${g}</svg>`;
+}
+
 // nearest support and resistance, with how many swings touched them
 function srCells(sr) {
   const c = (l, cls) => l ? `<td class="${cls}" title="${l.touches} swings touched ${fmtPrice(l.lo)}–${fmtPrice(l.hi)}">${fmtPrice(l.price)} <span class="tc">${l.touches}×</span></td>` : `<td class="dim">–</td>`;
@@ -508,6 +574,15 @@ function drawChart(el, tf, candles, res) {
       price: l.price, color: col, lineWidth: l.touches >= 4 ? 2 : 1, lineStyle: LightweightCharts.LineStyle.Dashed,
       axisLabelVisible: true, title: `${tag}${k + 1} · ${l.touches}×`,
     }));
+  }
+
+  // SPY: today's gamma levels from the options market (not on the weekly chart: too far apart to matter)
+  const G = state.symbol === "SPY" && tf !== "W" && GEX?.underlyings?.SPY;
+  if (G) {
+    for (const [price, col, title, style] of [[G.flip, C.accent, "γ flip", LightweightCharts.LineStyle.Dotted],
+      [G.call_wall, C.up, "Call wall", LightweightCharts.LineStyle.SparseDotted], [G.put_wall, C.dn, "Put wall", LightweightCharts.LineStyle.SparseDotted]]) {
+      if (price) cs.createPriceLine({ price, color: col, lineWidth: 2, lineStyle: style, axisLabelVisible: true, title });
+    }
   }
 
   const marks = [];                                          // ✕ and timeframe labels, drawn on top
@@ -568,6 +643,9 @@ setMarket(isCrypto(current()) ? "crypto" : "stocks");
 fetch("data/stocks.json").then(r => r.json()).then(d => {
   for (const s of d.stocks || []) names[s.ticker] = s.name;
   if (mk === "stocks") setMarket("stocks");
+}).catch(() => {});
+fetch("data/gex/latest.json", { cache: "no-store" }).then(r => r.ok ? r.json() : null).then(d => {
+  GEX = d; if (GEX && state?.symbol === "SPY") render();
 }).catch(() => {});
 renderSettings();
 if (typeof LightweightCharts === "undefined") setStatus("The chart library didn't load. Check your connection and reload.", true);
