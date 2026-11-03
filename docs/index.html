@@ -534,6 +534,52 @@ table.cxmon tr.cxavg th, table.cxmon tr.cxavg td { font-weight: 700; border-top:
 .lsbody .seg.sm { background: var(--bg); margin: 0; flex-wrap: wrap; }
 .lsbody .seg.sm button { padding: 5px 10px; font-size: 12.5px; }
 .lfoot { display: flex; gap: 8px; flex-wrap: wrap; margin: 12px 2px 0; }
+/* Strategy Lab, your own rules: groups of conditions, one opens into its editor */
+.rgroup { display: grid; gap: 6px; }
+.rghd { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; font-size: 13.5px; }
+.rghd .seg.sm { background: var(--bg); margin: 0; }
+.rcond { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 0 4px; background: var(--bg); border-radius: 12px; padding: 2px 4px 2px 0; }
+.rcond.on { outline: 1.5px solid var(--amber); }
+.rtxt { text-align: left; padding: 9px 12px; font: 500 13.5px/1.35 var(--font-body); color: var(--fg); min-width: 0; overflow-wrap: anywhere; }
+.rtxt i { font-style: normal; font: 600 10.5px var(--font-mono); text-transform: uppercase; letter-spacing: .06em; color: var(--amber); margin-right: 6px; }
+.rcond .prdel { align-self: center; }
+.redit { grid-column: 1 / -1; display: grid; gap: 10px; padding: 4px 12px 12px; }
+.rspec, .rop { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 8px; }
+.rspec .yrpick select, .rop .yrpick select, .redit > .yrpick select { max-width: 100%; padding-top: 5px; padding-bottom: 5px; }
+.rspec .yrpick, .redit > .yrpick { flex: 1 1 100%; max-width: 100%; min-width: 0; }
+.rspec .yrpick select, .redit > .yrpick select { width: 100%; text-overflow: ellipsis; }
+.rnum { display: grid; gap: 2px; font-size: 12px; color: var(--muted); }
+.rop .rnum { grid-auto-flow: column; align-items: center; gap: 6px; }
+.rnum input { width: 76px; font: 500 14px var(--font-mono); color: var(--fg); background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 5px 7px; }
+.rnum small { font-size: 11.5px; color: var(--faint); }
+.redit .seg.sm { background: var(--surface-2); margin: 0; width: fit-content; }
+.radd { display: flex; gap: 6px; flex-wrap: wrap; }
+.linkbtn { color: var(--amber); font-weight: 600; }
+/* Strategy Lab, patterns */
+.lpatg h4 { margin: 0 0 6px; font: 600 12px var(--font-body); color: var(--muted); text-transform: uppercase; letter-spacing: .06em; }
+.lpatg .labinds button { font-size: 12.5px; padding: 6px 10px; }
+table.lpatt td { vertical-align: middle; }
+table.lpatt td .pill { margin-left: 4px; }
+tr.lprow { cursor: pointer; }
+tr.lprow.on td { background: var(--surface-2); }
+tr.lpdet td { background: var(--surface-2); }
+tr.lpbase td { color: var(--muted); font-style: italic; }
+.lpyears { display: flex; flex-wrap: wrap; gap: 4px; margin: 4px 0 10px; }
+.lpyears span { display: grid; text-align: center; background: var(--surface); border-radius: 8px; padding: 4px 6px; min-width: 50px; }
+.lpyears b { font: 600 12px var(--font-mono); }
+.lpyears small, .lpcap { color: var(--faint); font-size: 11px; }
+.lpcap { display: block; }
+.lpexs { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
+.lpex { display: inline-flex; align-items: baseline; gap: 6px; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 5px 9px; text-decoration: none; color: var(--fg); font-size: 12.5px; }
+.lpex small { color: var(--faint); }
+.lpex em { font: 600 12px var(--font-mono); font-style: normal; }
+table.lmonths th, table.lmonths td { text-align: right; font: 500 11.5px var(--font-mono); padding: 6px 5px; white-space: nowrap; }
+table.lmonths th:first-child, table.lmonths td:first-child { text-align: left; }
+.lfol { margin-top: 12px; }
+.lfolhd { display: flex; align-items: flex-start; gap: 8px; flex-wrap: wrap; }
+.lfolhd > span { flex: 1; min-width: 180px; display: grid; gap: 2px; }
+.lfolhd small { color: var(--muted); font-size: 12.5px; }
+.lsrow .btn.on { color: var(--amber); }
 .ltabs { display: flex; width: 100%; overflow-x: auto; scrollbar-width: none; margin-bottom: 14px; }
 .ltabs::-webkit-scrollbar { display: none; }
 .ltabs button { flex: 1 0 auto; white-space: nowrap; }
@@ -1831,7 +1877,7 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
     let list = followedAlerts().filter(a => (S.filter === "all" || a.strategy === S.filter) && (a.strength?.score ?? 0) >= minS);
     if (sort === "str") list = list.slice().sort((a, b) => (b.strength?.score ?? 0) - (a.strength?.score ?? 0) || (a.date < b.date ? 1 : -1));
     const stamp = S.feed ? `<div class="stamp">${esc(S.feed.universe)}<br>close ${fmtDate(S.feed.as_of, { day: "numeric", month: "short" })}</div>` : "";
-    let h = header("Alerts", null, stamp) + alertsSwitch("alerts") + demoNote() + marketStrip();
+    let h = header("Alerts", null, stamp) + alertsSwitch("alerts") + demoNote() + marketStrip() + labFollowCard();
     const arrow = d => `<button class="chiparrow ${d < 0 ? "left" : "right"}" data-chipscroll="${d}" aria-label="Scroll ${d < 0 ? "left" : "right"}" hidden>
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="${d < 0 ? "m15 18-6-6 6-6" : "m9 18 6-6-6-6"}"/></svg></button>`;
     h += `<div class="chipbar">${arrow(-1)}<div class="chips" role="group" aria-label="Filter by strategy">` +
@@ -3032,7 +3078,7 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
    "btc_trend_50_200", "btc50_both", "avg_down"].forEach(k => LAB_IND[k] = k);
   const LAB_FLASK = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3h6"/><path d="M10 3v6.2L4.6 18.8A1.6 1.6 0 0 0 6 21h12a1.6 1.6 0 0 0 1.4-2.2L14 9.2V3"/><path d="M7.2 15h9.6"/></svg>`;
   const LAB_CAPS = [1000, 5000, 10000, 25000, 50000, 100000, 250000, 1000000];
-  const LAB_TABS = [["overview", "Results"], ["trades", "Trades"], ["calendar", "Calendar"], ["stocks", "By " + "stock"], ["optimize", "Optimize"], ["robust", "Robustness"], ["compare", "Compare"]];
+  const LAB_TABS = [["overview", "Results"], ["trades", "Trades"], ["calendar", "Calendar"], ["stocks", "By " + "stock"], ["patterns", "Patterns"], ["optimize", "Optimize"], ["robust", "Robustness"], ["compare", "Compare"], ["follow", "Follow"]];
   const labMk = () => S.market || "stocks";
   function labState() {
     const st = pref("lab", null) || {};
@@ -3041,7 +3087,7 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
       cfg: st.cfg || { ind: "ma" }, side: st.trades === "all" ? "all" : "long", from: st.from || null, to: st.to || null,
       uni: st.uni?.[labMk()] || { mode: "all" }, cap: LAB_CAPS.includes(st.cap) ? st.cap : 100000, tax: !!st.tax,
       tab: LAB_TABS.some(t => t[0] === st.tab) ? st.tab : "overview", open: Array.isArray(st.open) ? st.open : ["signal"],
-      opt: st.opt || {}, rob: st.rob || {}, cal: st.cal || {}, _uni: st.uni || {},
+      opt: st.opt || {}, rob: st.rob || {}, cal: st.cal || {}, _uni: st.uni || {}, pat: st.pat || {}, lastRules: st.lastRules || null,
     };
   }
   const saveLab = st => { const { side, uni, _uni, ...rest } = st; setPref("lab", { ...rest, trades: side, uni: { ..._uni, [labMk()]: uni } }); };
@@ -3053,6 +3099,7 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
       const raw = await fetch(`${L().base}lab.json`, { cache: "no-cache" }).then(r => { if (!r.ok) throw new Error(r.status); return r.json(); });
       LAB.data[mk] = LAB.mod.decode(raw);
     }
+    LAB.data[mk].sectors = LAB.data[mk].sectors && Object.keys(LAB.data[mk].sectors).length ? LAB.data[mk].sectors : labSectors();   // the sector limit
     return LAB.data[mk];
   }
   function labHero() {
@@ -3071,6 +3118,7 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
       else {
         const q = new URLSearchParams(arg);
         if (q.get("s")) { st.uni = { mode: "pick", picks: [q.get("s").toUpperCase()] }; st.tab = "overview"; st.open = [...new Set([...st.open, "uni"])]; }
+        if (q.get("tab") && LAB_TABS.some(t => t[0] === q.get("tab"))) st.tab = q.get("tab");
         if (q.get("c")) try {
           const o = labUnpack(q.get("c"));
           if (o.m && o.m !== labMk() && ["stocks", "crypto", "commodities"].includes(o.m)) {   // switch market first, then come back here
@@ -3145,10 +3193,12 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
   // ------------------------------------------------------------ settings
   const labNum = (x, v) => (x.step < 1 ? (+v).toFixed(2).replace(/\.?0+$/, "") : v) + (x.unit ? " " + x.unit : "");
   const labRiskTxt = v => v > 0 ? (+v).toFixed(1).replace(/\.0$/, "") + "%" : "Off";
-  const labVal = (cfg, k) => k.startsWith("p.") ? cfg.p[k.slice(2)] : cfg[k];
+  const labVal = (cfg, k) => k.startsWith("p.") ? cfg.p[k.slice(2)] : k.startsWith("r.") ? (v => v && typeof v === "object" ? NaN : v)(rulePath(cfg.rules, k.slice(2))) ?? (k.endsWith(".mul") ? 1 : k.endsWith(".n") ? 1 : 0) : cfg[k];
   function labTxt(cfg, k) {
     const M = LAB.mod, I = M.INDICATORS[cfg.ind], v = labVal(cfg, k);
     if (k.startsWith("p.")) return labNum(I.params.find(x => x.k === k.slice(2)), v);
+    if (k.startsWith("r.")) return String(+(+v).toFixed(4));
+    const pro = labTxtPro(cfg, k); if (pro != null) return pro;
     if (k === "hold") return v + " days";
     if (k === "tp" || k === "sl" || k === "trail") return labRiskTxt(v);
     if (k === "fMa") return v ? v + "-day" : "Off";
@@ -3184,20 +3234,27 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
     const sec = (id, title, sum, body) => `<details class="lsec" data-labsec="${id}"${st.open.includes(id) ? " open" : ""}><summary><span>${title}</span><em>${sum}</em></summary><div class="lsbody">${body}</div></details>`;
     const R = M.RISK;
     // 1) the signal
-    let h = labPicker(cfg.ind) + `<p class="hint" style="margin:8px 2px 12px">${esc(I.about)}</p><div class="lsecs">`;
-    h += I.params.length ? sec("signal", "Entry signal", I.params.map(x => labNum(x, cfg.p[x.k]).replace(/ (days|std devs|ATRs|× average)$/, "")).join(" · "),
-      I.params.map(x => labSlider(cfg, "p." + x.k, esc(x.label), "", x.min, x.max, x.step)).join(""))
-      : sec("signal", "Entry signal", "Fixed rules", `<p class="hint" style="margin:0">${I.own ? esc(I.rule) : `Its alerts come from the app's weekly backtest, so the pattern rules can't be changed here. ${I.exit === "hold" ? "Choose how trades close under Exits &amp; risk." : ""}`}</p>`);
+    const pro = !I.own && !I.avg;
+    let h = labPicker(cfg.ind) + `<p class="hint" style="margin:8px 2px 12px">${esc(I.about)}${I.custom ? "" : ` <button class="linkbtn" data-labind="custom">Or build your own rules ›</button>`}</p><div class="lsecs">`;
+    const entryRow = pro ? `<div class="lrow"><span>Buy at</span>${labSeg("labentry", cfg.entry, [["close", "The signal's close"], ["open", "The next day's open"]], "Entry price")}</div>` : "";
+    if (I.custom) {
+      const r = labRules(cfg), n = r.long.list.length + (st.side === "all" ? r.short.list.length : 0);
+      h += sec("signal", "Entry rules", n ? `${n} condition${n > 1 ? "s" : ""}${cfg.entry === "open" ? " · next open" : ""}` : "None yet", labRuleBuilder(st, cfg, data) + entryRow);
+    } else h += I.params.length ? sec("signal", "Entry signal", I.params.map(x => labNum(x, cfg.p[x.k]).replace(/ (days|std devs|ATRs|× average)$/, "")).join(" · "),
+      I.params.map(x => labSlider(cfg, "p." + x.k, esc(x.label), "", x.min, x.max, x.step)).join("") + entryRow)
+      : sec("signal", "Entry signal", "Fixed rules", `<p class="hint" style="margin:0">${I.own ? esc(I.rule) : `Its alerts come from the app's weekly backtest, so the pattern rules can't be changed here. ${I.exit === "hold" ? "Choose how trades close under Exits &amp; risk." : ""}`}</p>${entryRow}`);
     // 2) exits and risk
-    const exitSum = [cfg.exit === "hold" ? `${cfg.hold}-day limit` : (I.buysOnly ? "No time limit" : "Opposite alert"),
-      cfg.tp ? "TP " + labRiskTxt(cfg.tp) : "", cfg.sl ? "SL " + labRiskTxt(cfg.sl) : "", cfg.trail ? "Trail " + labRiskTxt(cfg.trail) : ""].filter(Boolean).join(" · ");
-    h += sec("exits", "Exits &amp; risk", I.own ? ["Own exit", cfg.tp ? "TP " + labRiskTxt(cfg.tp) : "", cfg.sl ? "SL " + labRiskTxt(cfg.sl) : "", cfg.trail ? "Trail " + labRiskTxt(cfg.trail) : ""].filter(Boolean).join(" · ") : exitSum,
-      `${I.own ? `<p class="hint" style="margin:0"><b>Its own exit:</b> ${esc(I.rule)} You can add a take profit or stops on top.</p>` : `<div class="lrow"><span>Close a trade</span>${labSeg("labexit", cfg.exit, [["opposite", esc(I.exitLabels?.opposite || "On the opposite alert")], ["hold", esc(I.exitLabels?.hold || "After a time limit")]], "Exit")}</div>
-      ${cfg.exit === "hold" ? labSlider(cfg, "hold", "Time limit", I.buysOnly ? "or earlier at the take profit" : "or earlier on an opposite alert", 2, 120, 1) : ""}`}
-      ${labSlider(cfg, "tp", "Take profit", esc(I.avg ? "above your average cost" : R.tp.about), R.tp.min, R.tp.max, R.tp.step)}
+    const exitSum = [cfg.exit === "hold" ? `${cfg.hold}-day limit` : I.custom ? "Your exit rules" : (I.buysOnly ? "No time limit" : "Opposite alert"),
+      labTpTxt(cfg), labStopTxt(cfg), labTrailTxt(cfg), cfg.be ? "BE " + labTxtPro(cfg, "be") : "", cfg.part ? `${cfg.part}% at ${labTxtPro(cfg, "p1")}` : "", cfg.tLose ? `losers out after ${cfg.tLose}d` : ""].filter(Boolean).join(" · ");
+    const r0 = I.custom ? labRules(cfg) : null;
+    h += sec("exits", I.custom ? "Exits, stops &amp; targets" : "Exits &amp; risk", I.own ? ["Own exit", cfg.tp ? "TP " + labRiskTxt(cfg.tp) : "", cfg.sl ? "SL " + labRiskTxt(cfg.sl) : "", cfg.trail ? "Trail " + labRiskTxt(cfg.trail) : ""].filter(Boolean).join(" · ") : exitSum,
+      `${I.custom ? labRuleGroup("xl", r0, data) + (st.side === "all" ? labRuleGroup("xs", r0, data) : "") : ""}
+      ${I.own ? `<p class="hint" style="margin:0"><b>Its own exit:</b> ${esc(I.rule)} You can add a take profit or stops on top.</p>` : `<div class="lrow"><span>${I.custom ? "Time limit" : "Close a trade"}</span>${labSeg("labexit", cfg.exit, [["opposite", esc(I.custom ? "None" : I.exitLabels?.opposite || "On the opposite alert")], ["hold", esc(I.custom ? "Close after N days" : I.exitLabels?.hold || "After a time limit")]], "Exit")}</div>
+      ${cfg.exit === "hold" ? labSlider(cfg, "hold", "Time limit", I.buysOnly ? "or earlier at the take profit" : "or earlier on an exit signal", 2, 120, 1) : ""}`}
+      ${pro ? labExitsPro(cfg, I) : `${labSlider(cfg, "tp", "Take profit", esc(I.avg ? "above your average cost" : R.tp.about), R.tp.min, R.tp.max, R.tp.step)}
       ${labSlider(cfg, "sl", "Stop loss", esc(I.avg ? "below your average cost" : R.sl.about), R.sl.min, R.sl.max, R.sl.step)}
-      ${labSlider(cfg, "trail", "Trailing stop", esc(I.avg ? "follows the best price since the last buy" : R.trail.about), R.trail.min, R.trail.max, R.trail.step)}
-      <p class="hint" style="margin:0">Whichever comes first closes the trade. Stops are checked on each day's high and low.</p>`);
+      ${labSlider(cfg, "trail", "Trailing stop", esc(I.avg ? "follows the best price since the last buy" : R.trail.about), R.trail.min, R.trail.max, R.trail.step)}`}
+      <p class="hint" style="margin:0">Whichever comes first closes the trade. Stops and targets are checked on each day's high and low${pro ? "; ATRs are measured on the signal day" : ""}.</p>`);
     // 3) filters
     const nF = [cfg.fMa, cfg.fMkt, cfg.fInd].filter(Boolean).length, bm = benchOf().name;
     h += sec("filters", "Filters", nF ? `${nF} on` : "Off",
@@ -3223,9 +3280,17 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
     const yrs = (cur, attr, lbl, lo, hi) => `<span class="yrpick"><select data-${attr} aria-label="${lbl}">${Array.from({ length: hi - lo + 1 }, (_, i) => lo + i).map(y =>
       `<option value="${y}"${y === cur ? " selected" : ""}>${y}</option>`).join("")}</select></span>`;
     const from = Math.min(last, Math.max(first, st.from || first)), to = Math.max(from, Math.min(last, st.to || last));
-    h += sec("acct", "Account &amp; costs", [kEur(st.cap), cfg.maxPos ? `max ${cfg.maxPos} positions` : "", cfg.cost ? `${labTxt(cfg, "cost")} costs` : "", st.tax ? "after tax" : "", `${from}–${to === last ? "now" : to}`].filter(Boolean).join(" · "),
+    const P = M.PRO, secs = [...new Set(Object.values(all.sectors || {}))].length > 1 && sectors.length > 1;
+    const money = pro ? `<div class="lrow"><span>Position size</span>${labSeg("labsize", cfg.size, [["equal", "Equal shares"], ["risk", "Risk a % per trade"]], "Position size")}</div>
+      ${cfg.size === "risk" ? labSlider(cfg, "risk", "Risk per trade", "lost if the stop is hit; size = risk ÷ stop distance", P.risk.min, P.risk.max, P.risk.step)
+        + (labStopTxt(cfg) ? "" : `<p class="hint" style="margin:0"><b>Needs a stop loss</b> (Exits &amp; risk): without one no trade can be sized, so none is taken.</p>`) : ""}
+      ${labSlider(cfg, "pyr", `Positions in the same ${L().one}`, "a new signal adds another while one is open", P.pyr.min, P.pyr.max, P.pyr.step)}
+      ${secs ? labSlider(cfg, "secMax", "Most positions in one sector", "", P.secMax.min, P.secMax.max, P.secMax.step) : ""}
+      ${labSlider(cfg, "cool", `After a loss, wait before trading that ${L().one} again`, "sessions", P.cool.min, P.cool.max, P.cool.step)}` : "";
+    h += sec("acct", "Account, sizing &amp; costs", [kEur(st.cap), cfg.maxPos ? `max ${cfg.maxPos} positions` : "", cfg.size === "risk" ? `risk ${(+cfg.risk).toFixed(2).replace(/\.?0+$/, "")}%` : "", cfg.secMax ? `${cfg.secMax}/sector` : "", cfg.pyr > 1 ? `${cfg.pyr} per ${L().one}` : "", cfg.cool ? `${cfg.cool}d pause after a loss` : "", cfg.cost ? `${labTxt(cfg, "cost")} costs` : "", st.tax ? "after tax" : "", `${from}–${to === last ? "now" : to}`].filter(Boolean).join(" · "),
       `<label class="lrow"><span>Start with</span><span class="yrpick"><select data-labcap aria-label="Starting money">${LAB_CAPS.map(v => `<option value="${v}"${v === st.cap ? " selected" : ""}>${eurS(v)}</option>`).join("")}</select></span></label>
       ${I.avg ? labSlider(cfg, "maxPos", "Positions", `each gets 1/${cfg.maxPos} of the account when it opens, split into ${cfg.p.buys} buys`, 1, 50, 1) : labSlider(cfg, "maxPos", "Positions", cfg.maxPos ? `each gets 1/${cfg.maxPos} of the account` : "the money is split across every open one", 0, 50, 1)}
+      ${money}
       ${labSlider(cfg, "cost", "Costs per buy and per sell", "commission + spread", 0, 1, 0.05)}
       <div class="lrow"><span>Taxes</span>${labSeg("labtax", st.tax ? 1 : 0, [[0, "Before tax"], [1, `After Italian tax (${Math.round(labTaxRate() * 100)}%)`]], "Taxes")}</div>
       <div class="lrow"><span>Years</span>${yrs(from, "labfrom", "Starting year", first, last)}<span style="color:var(--faint)">to</span>${yrs(to, "labto", "Last year", from, last)}</div>`);
@@ -3260,7 +3325,7 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
   function runLab() {
     const out = document.getElementById("labout"); if (!out || !LAB.mod) return;
     const st = labState();
-    try { out.innerHTML = ({ overview: labOverview, trades: labTrades, calendar: labCalendar, stocks: labStocks, optimize: labOptimizeView, robust: labRobustView, compare: labCompare }[st.tab] || labOverview)(st, out); }
+    try { out.innerHTML = ({ overview: labOverview, trades: labTrades, calendar: labCalendar, stocks: labStocks, patterns: labPatternsView, optimize: labOptimizeView, robust: labRobustView, compare: labCompare, follow: labFollowView }[st.tab] || labOverview)(st, out); }
     catch (err) { console.error(err); out.innerHTML = `<div class="card"><p style="margin:0">Something went wrong running these settings. Try Reset.</p></div>`; }
     LAB.after?.(); LAB.after = null;
   }
@@ -3282,15 +3347,23 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
       <div><span>Profit factor</span><b class="${T.pf == null ? "" : T.pf >= 1 ? "up" : "down"}">${labRatio(T.pf)}</b><small>won ÷ lost, on every trade</small></div>
       <div><span>Sharpe</span><b class="${better(sm.sharpe, ss?.sharpe)}">${labRatio(sm.sharpe)}</b><small>${ss ? `${bn} ${labRatio(ss.sharpe)}` : "return per unit of risk"}</small></div>
       <div><span>Longest under water</span><b>${sm.under >= 252 ? (sm.under / 252).toFixed(1) + " yrs" : Math.round(sm.under / 21) + " mo"}</b><small>${ss ? `${bn} ${ss.under >= 252 ? (ss.under / 252).toFixed(1) + " yrs" : Math.round(ss.under / 21) + " mo"}` : "below a previous high"}</small></div>
+      <div><span>Average trade</span><b class="${(T.avg ?? 0) >= 0 ? "up" : "down"}">${labPct(T.avg, 2)}</b><small>${T.n ? `held ${Math.round(T.days)} days on average` : ""}</small></div>
+      <div><span>${T.nR ? "Average R" : "Sortino"}</span><b class="${T.nR ? ((T.avgR ?? 0) >= 0 ? "up" : "down") : better(sm.sortino, ss?.sortino)}">${T.nR ? (T.avgR >= 0 ? "+" : "−") + Math.abs(T.avgR).toFixed(2) + "R" : labRatio(sm.sortino)}</b><small>${T.nR ? "result ÷ the risk to the stop" : ss ? `${bn} ${labRatio(ss.sortino)}` : "return per unit of downside"}</small></div>
     </div>`;
-    if (cfg.tp || cfg.sl || cfg.trail) h += `<p class="hint" style="margin:8px 2px 0">${[
-      cfg.tp ? `<b>${Math.round(T.tp / Math.max(1, T.n) * 100)}%</b> of trades reached the ${labRiskTxt(cfg.tp)} take profit` : "",
-      cfg.sl ? `<b>${Math.round(T.sl / Math.max(1, T.n) * 100)}%</b> hit the ${labRiskTxt(cfg.sl)} stop loss` : "",
-      cfg.trail ? `<b>${Math.round(T.trail / Math.max(1, T.n) * 100)}%</b> hit the ${labRiskTxt(cfg.trail)} trailing stop` : ""].filter(Boolean).join(", ")}${T.n ? `; the rest closed on the exit rule. Worst single trade ${labPct(T.worst)}.` : "."}</p>`;
+    const pc = k => Math.round((T[k] || 0) / Math.max(1, T.n) * 100);
+    if (labHasExits(cfg)) h += `<p class="hint" style="margin:8px 2px 0">${[
+      labTpTxt(cfg) ? `<b>${pc("tp")}%</b> of trades reached the take profit (${labTpTxt(cfg).slice(3)})` : "",
+      labStopTxt(cfg) ? `<b>${pc("sl")}%</b> hit the stop loss (${labStopTxt(cfg).slice(3)})` : "",
+      labTrailTxt(cfg) ? `<b>${pc("trail")}%</b> hit the trailing stop` : "",
+      cfg.be ? `<b>${pc("be")}%</b> were stopped at break-even` : "",
+      cfg.part ? `<b>${pc("part")}%</b> sold ${cfg.part}% at the first target` : "",
+      cfg.tLose ? `<b>${pc("time")}%</b> were closed for still losing after ${cfg.tLose} days` : ""].filter(Boolean).join(", ")}${T.n ? `; the rest closed on the exit rule. Worst single trade ${labPct(T.worst)}.` : "."}</p>`;
+    if (M.isPro(cfg) && !I.custom && (I.exit === "hold" || !["ma", "cross", "macd", "supertrend"].includes(cfg.ind))) h += `<p class="hint" style="margin:8px 2px 0">With these exits each alert opens one position per ${L().one} (repeat alerts while it's open don't add a trade unless you allow more positions per ${L().one}), so the trade count can differ from the plain backtest.</p>`;
     if (I.buysOnly && !I.own && cfg.exit === "opposite" && !cfg.tp && !cfg.sl && !cfg.trail) h += `<p class="hint" style="margin:8px 2px 0"><b>With no time limit, take profit or stop nothing is ever sold</b>: every position is held to the end.</p>`;
     h += `<h3 class="h3">Growth over time</h3><div class="chartbox" id="labchart"></div>`;
     if (!X.isDef) h += `<p class="hint">Default ${esc(I.name)} settings: ${kEur(sb.end)} (${labPct(sb.cagr)} a year, worst drop ${labPct(sb.dd)}).</p>`;
     const ym = M.byYear(eq, D, fi), ys = spyEq ? M.byYear(spyEq, D, fi) : null, live = !(st.to && st.to < labYears()[1]);
+    h += `<h3 class="h3">Month by month <small style="font-weight:400;color:var(--faint)">% each month</small></h3>${labMonthly(eq, D, fi)}`;
     h += `<h3 class="h3">Year by year</h3><div class="tablewrap"><table class="bt labyears"><thead><tr><th>Year</th><th style="text-align:right">Your settings</th>${ys ? `<th style="text-align:right">${bn}</th><th style="text-align:right">Difference</th>` : ""}</tr></thead><tbody>` +
       ym.slice().reverse().map((y, k) => {
         const sp = ys?.[ym.length - 1 - k], d = sp ? y.ret - sp.ret : null;
@@ -3319,7 +3392,9 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
     else parts.push(cfg.maxPos ? `The account has ${cfg.maxPos} slot${cfg.maxPos > 1 ? "s" : ""} of 1/${cfg.maxPos} each: an alert that comes while every slot is full is skipped (same-day alerts in a fixed random order), and empty slots wait in cash.`
       : `The account splits its money equally across every open position and rebalances daily; with nothing open the money waits in cash.`);
     parts.push(I.own ? `${I.rule} Its trades come from the app's weekly backtest; the trading bot's own money rules aren't used.` : I.avg ? `It buys a first slice ${cfg.p.drop}% below the ${cfg.p.n}-day high, then another every further ${cfg.p.step}% fall, up to ${cfg.p.buys} slices.` : I.buysOnly ? "It buys on each alert." : st.side === "all" ? "It buys on bullish alerts and sells short on bearish ones." : "It buys on bullish alerts and sells on bearish ones.");
-    if (cfg.tp || cfg.sl || cfg.trail) parts.push("A level touched during the day fills at the level, a price that opens past it fills at the middle of that day's range, and a day that touches a stop and the take profit counts as the stop.");
+    if (I.custom) parts.push(`It ${labRules(cfg).edge ? "enters when your rules first turn true" : "enters on any day your rules are true"}${st.side === "all" ? " (buys on the buy rules, shorts on the short rules)" : ""}, and closes on your exit rules, an opposite signal, or the stops and targets. Weekly values only change when a week closes.`);
+    if (LAB.mod.isPro(cfg)) parts.push(`${cfg.entry === "open" ? "Trades are entered at the next day's open." : "Trades are entered at the signal's close."} A level touched during the day fills at the level; a day that opens past it fills at the open${LAB.mod.Rules.hasOpens(labData(st)) ? "" : " (the middle of the day's range until opening prices arrive)"}; a day that reaches a stop and a target counts as the stop.${cfg.size === "risk" ? ` Each position is sized to lose ${cfg.risk}% of the account at its stop (never more than ${cfg.maxPos ? `1/${cfg.maxPos}` : "all"} of the account in one, never more than 100% invested).` : ""}${cfg.secMax ? ` At most ${cfg.secMax} open in one sector.` : ""}${cfg.cool ? ` After a losing trade it waits ${cfg.cool} sessions before trading that ${L().one} again.` : ""}`);
+    else if (cfg.tp || cfg.sl || cfg.trail) parts.push("A level touched during the day fills at the level, a price that opens past it fills at the middle of that day's range, and a day that touches a stop and the take profit counts as the stop.");
     parts.push(cfg.cost ? `Each buy and each sell costs ${labTxt(cfg, "cost")}.` : "No trading costs.");
     parts.push(st.tax ? `After tax: ${Math.round(labTaxRate() * 100)}% on each year's net gain (losses carried forward 4 years) and 0.2% a year stamp duty; ${benchOf().name} pays its tax when sold at the end. Simplified.` : "No taxes or borrow fees.");
     if (S.market !== "commodities") parts.push(`The list is today's ${L().index}, which flatters buying.`);
@@ -3342,13 +3417,23 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
       <div><span>Profit factor</span><b>${labRatio(T.pf)}</b></div>
       <div><span>Losers in a row</span><b>${T.streak}</b></div>
     </div>
-    <p class="hint">Closed by the exit rule ${pc("n") - pc("tp") - pc("sl") - pc("trail")}%${T.tp ? `, take profit ${pc("tp")}%` : ""}${T.sl ? `, stop loss ${pc("sl")}%` : ""}${T.trail ? `, trailing stop ${pc("trail")}%` : ""}. Trade returns are per trade, after the costs you set, before tax; "days" are trading sessions.</p>`;
+    <p class="hint">Closed by the exit rule ${pc("n") - pc("tp") - pc("sl") - pc("trail") - pc("be") - pc("time")}%${T.tp ? `, take profit ${pc("tp")}%` : ""}${T.sl ? `, stop loss ${pc("sl")}%` : ""}${T.trail ? `, trailing stop ${pc("trail")}%` : ""}${T.be ? `, break-even stop ${pc("be")}%` : ""}${T.time ? `, still losing ${pc("time")}%` : ""}${T.part ? `; ${pc("part")}% sold part at the first target` : ""}. Trade returns are per trade, after the costs you set, before tax; "days" are trading sessions.</p>`;
+    const withR = list.filter(t => t.rm != null), ex = list.filter(t => t.mfe != null);
+    if (withR.length || ex.length) {
+      const avg = (l, f) => l.reduce((s, t) => s + f(t), 0) / l.length;
+      h += `<div class="kv lkv">${withR.length ? `<div><span>Average R</span><b class="${avg(withR, t => t.rm) >= 0 ? "up" : "down"}">${avg(withR, t => t.rm).toFixed(2)}R</b></div>
+        <div><span>Trades ≥ 2R</span><b>${Math.round(withR.filter(t => t.rm >= 2).length / withR.length * 100)}%</b></div>` : ""}
+        ${ex.length ? `<div><span>Best price reached</span><b class="up">${labPct(avg(ex, t => t.mfe) * 100)}</b><small>average, before the exit</small></div>
+        <div><span>Worst price reached</span><b class="down">${labPct(avg(ex, t => t.mae) * 100)}</b><small>average, before the exit</small></div>` : ""}</div>
+        <p class="hint">${withR.length ? "R = a trade's result ÷ the distance to its starting stop (−1R is a full stop-out). " : ""}${ex.length ? "The best and worst prices reached while open show how much the exits leave on the table, or how much room the stop needs." : ""}</p>`;
+    }
+    h += labHist(list);
     h += `<div class="hd" style="display:flex;align-items:center;justify-content:space-between;margin:20px 0 8px"><h3 class="h3" style="margin:0">Latest trades</h3><button class="btn ghost sm" data-labcsv>Download all ${list.length.toLocaleString("en-US")} (CSV)</button></div>`;
-    const why = { rule: "rule", tp: "take profit", sl: "stop", trail: "trailing" };
+    const why = { rule: "rule", tp: "take profit", sl: "stop", trail: "trailing", be: "break-even", time: "still losing" };
     h += `<div class="tablewrap"><table class="bt ltrades"><thead><tr><th>${esc(L().one[0].toUpperCase() + L().one.slice(1))}</th><th>In → out</th><th style="text-align:right">Return</th><th style="text-align:right">Exit</th></tr></thead><tbody>` +
       list.slice(-25).reverse().map(t => `<tr><td><a href="#stock-${esc(t.t)}" class="tk">${esc(disp(t.t))}</a> <span class="pill ${t.side > 0 ? "bullish" : "bearish"}">${t.side > 0 ? "long" : "short"}</span></td>
         <td style="white-space:nowrap">${esc(fmtDate(D[t.g0], { day: "numeric", month: "short", year: "2-digit" }))}<small>→ ${esc(fmtDate(D[t.g1], { day: "numeric", month: "short", year: "2-digit" }))} · ${t.days}d</small></td>
-        <td style="text-align:right" class="${t.ret >= 0 ? "up" : "down"}">${labPct(t.ret * 100)}</td><td style="text-align:right"><small style="margin:0">${why[t.why]}</small></td></tr>`).join("") + `</tbody></table></div>`;
+        <td style="text-align:right" class="${t.ret >= 0 ? "up" : "down"}">${labPct(t.ret * 100)}${t.rm != null ? `<small>${t.rm >= 0 ? "+" : "−"}${Math.abs(t.rm).toFixed(1)}R</small>` : ""}</td><td style="text-align:right"><small style="margin:0">${why[t.why] || t.why}${t.part ? " · part" : ""}</small></td></tr>`).join("") + `</tbody></table></div>`;
     return h;
   }
   // ------------------------------------------------------------ calendar
@@ -3361,7 +3446,7 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
   const labCal = st => ({ risk: st.cal?.risk !== false, tax: st.cal?.tax ?? !!st.tax, ym: st.cal?.ym || null, day: st.cal?.day || null });
   function labCalCfg(st) {
     const M = LAB.mod, base = M.clean(st.cfg), c = labCal(st);
-    return M.clean({ ...base, ...(c.risk ? {} : { tp: 0, sl: 0, trail: 0 }), cost: c.tax ? (base.cost || LAB_FEE) : 0 });
+    return M.clean({ ...base, ...(c.risk ? {} : { tp: 0, sl: 0, trail: 0, slMode: "pct", tpMode: "pct", trailMode: "pct", be: 0, part: 0, tLose: 0 }), cost: c.tax ? (base.cost || LAB_FEE) : 0 });
   }
   function labCalCompute(st) {
     const M = LAB.mod, data = labData(st), D = data.dates, cfg = labCalCfg(st), c = labCal(st), fi = labFi(D, st.from);
@@ -3377,6 +3462,11 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
       const T = byT.get(t.t), eq = mine.eq, n = g => cfg.maxPos || mine.held[g] || 1;
       let got = claim.get(t.t); if (!got) claim.set(t.t, got = new Set());
       if (t.P) return (t.P.eur || 0) * f;   // Average down: the position's own euros (money fixed when it opened)
+      if (t.pos) {   // runPro: the position's own daily returns (partial exits included), at its share of the account
+        let sum = 0; const P = t.pos;
+        for (let m = 0; m < P.g.length; m++) { const g = P.g[m]; sum += eq[g - 1] * P.r[m] * (cfg.size === "risk" ? P.w : 1 / n(g)); }
+        return sum * f;
+      }
       let i = T.idx.indexOf(t.g0), sum = 0;
       const i0 = i, p0 = t.p0 ?? T.c[i0], px = t.p1 ?? T.c[i0] * (1 + t.side * (t.ret + 2 * fee));   // buy and sell prices
       for (i++; i < T.idx.length && T.idx[i] <= t.g1; i++) {
@@ -3392,7 +3482,7 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
     mine.list.slice().sort((a, b) => a.g0 - b.g0).forEach(t => eur.set(t, euros(t)));
     // in the order they closed, so a loss can lower the tax on later gains (carried 4 years)
     const trades = mine.list.map(t => {
-      const size = t.P?.size != null ? t.P.size * f : mine.eq[t.g0] * f / (cfg.maxPos || mine.held[t.g0 + 1] || 1), gross = eur.get(t);
+      const size = t.P?.size != null ? t.P.size * f : cfg.size === "risk" && t.pos ? mine.eq[t.g0] * f * t.pos.w : mine.eq[t.g0] * f / (cfg.maxPos || mine.held[t.g0 + 1] || 1), gross = eur.get(t);
       let net = gross, tax = 0, stamp = 0;
       if (c.tax) {
         stamp = size * 0.002 * t.days / 252; net -= stamp;
@@ -3619,13 +3709,19 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
   // pick an indicator: keep the exits and extras, except to or from one with its own default exit (Buy the dip)
   function labPickInd(st, ind) {
     const M = LAB.mod, o = M.clean(st.cfg), own = k => M.INDICATORS[k]?.buysOnly, keep = { tp: o.tp, sl: o.sl, trail: o.trail, fMa: o.fMa, fMkt: o.fMkt, fInd: o.fInd, maxPos: o.maxPos, cost: o.cost };
-    return own(o.ind) || own(ind) ? { ind, sl: o.sl, trail: o.trail, fMa: o.fMa, fMkt: o.fMkt, fInd: o.fInd, maxPos: o.maxPos, cost: o.cost } : { ind, ...keep };
+    const proOk = k => !M.INDICATORS[k]?.own && !M.INDICATORS[k]?.avg;
+    const pro = proOk(o.ind) && proOk(ind) ? Object.fromEntries(["entry", "slMode", "slAtr", "swing", "tpMode", "tpAtr", "rr", "trailMode", "trailAtr", "atrN", "be", "part", "p1", "p1Be", "tLose", "size", "risk", "secMax", "cool", "pyr"].map(k => [k, o[k]])) : {};
+    if (M.INDICATORS[o.ind]?.custom) st.lastRules = o.rules;   // your rules come back when you return to them
+    const rules = M.INDICATORS[ind]?.custom ? { rules: st.lastRules || M.START_RULES } : {};
+    LAB.edit = null;
+    return own(o.ind) || own(ind) ? { ind, sl: o.sl, trail: o.trail, fMa: o.fMa, fMkt: o.fMkt, fInd: o.fInd, maxPos: o.maxPos, cost: o.cost, ...pro, ...rules } : { ind, ...keep, ...pro, ...rules };
   }
 
   function labCsv() {
     const st = labState(), X = labCompute(st), D = X.D;
-    const rows = [["ticker", "side", "entry_date", "exit_date", "sessions", "return_pct", "exit"]].concat(
-      X.mine.list.map(t => [t.t, t.side > 0 ? "long" : "short", D[t.g0], D[t.g1], t.days, (t.ret * 100).toFixed(3), t.why]));
+    const rows = [["ticker", "side", "entry_date", "exit_date", "sessions", "return_pct", "exit", "entry_price", "exit_price", "r_multiple", "best_pct", "worst_pct", "partial"]].concat(
+      X.mine.list.map(t => [t.t, t.side > 0 ? "long" : "short", D[t.g0], D[t.g1], t.days, (t.ret * 100).toFixed(3), t.why, t.p0 != null ? (+t.p0).toPrecision(6) : "", t.p1 != null ? (+t.p1).toPrecision(6) : "",
+        t.rm != null ? t.rm.toFixed(3) : "", t.mfe != null ? (t.mfe * 100).toFixed(2) : "", t.mae != null ? (t.mae * 100).toFixed(2) : "", t.part ? 1 : ""]));
     const blob = new Blob([rows.map(r => r.join(",")).join("\n")], { type: "text/csv" });
     const a = document.createElement("a"); a.href = URL.createObjectURL(blob);
     a.download = `strategy-lab-${X.cfg.ind}-${labMk()}.csv`; document.body.appendChild(a); a.click(); a.remove();
@@ -3650,20 +3746,53 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
   // Tries a grid of values for one or two settings. It picks the best in the earlier years
   // ("training") and shows how that pick did in the later years it never saw ("check").
   function labOptKeys(cfg) {
-    const M = LAB.mod, I = M.INDICATORS[cfg.ind];
+    const M = LAB.mod, I = M.INDICATORS[cfg.ind], X = M.Rules;
     const k = I.params.map(x => ["p." + x.k, x.label]);
+    // your own rules: every number in them (a level, an indicator's length, a bar count)
+    if (I.custom) for (const g of ["long", "short", "xl", "xs"]) (labRules(cfg)[g]?.list || []).forEach((q, j) => {
+      if (q.pat) return;
+      const tag = `${{ long: "Buy", short: "Short", xl: "Exit", xs: "Short exit" }[g]} ${j + 1}`, path = `r.${g}.list.${j}`;
+      for (const x of X.IND[q.a.id]?.params || []) k.push([`${path}.a.p.${x.k}`, `${tag}: ${X.IND[q.a.id].short || X.IND[q.a.id].name} ${x.label.toLowerCase()}`]);
+      if (X.unary(q.op)) k.push([`${path}.n`, `${tag}: bars`]);
+      else if (typeof q.b === "object") { for (const x of X.IND[q.b.id]?.params || []) k.push([`${path}.b.p.${x.k}`, `${tag}: ${X.IND[q.b.id].short || X.IND[q.b.id].name} ${x.label.toLowerCase()}`]); }
+      else k.push([`${path}.b`, `${tag}: ${X.IND[q.a.id]?.short || ""} level`]);
+    });
     if (cfg.exit === "hold") k.push(["hold", "Time limit"]);
-    k.push(["tp", "Take profit"], ["sl", "Stop loss"], ["trail", "Trailing stop"], ["fMa", "Trend filter average"], ["maxPos", "Max positions"]);
+    const pro = !I.own && !I.avg;
+    k.push(pro && cfg.tpMode === "atr" ? ["tpAtr", "Take profit (ATRs)"] : pro && cfg.tpMode === "rr" ? ["rr", "Risk : reward"] : ["tp", "Take profit"]);
+    k.push(pro && cfg.slMode === "atr" ? ["slAtr", "Stop loss (ATRs)"] : pro && cfg.slMode === "swing" ? ["swing", "Swing stop (bars)"] : ["sl", "Stop loss"]);
+    k.push(pro && cfg.trailMode === "atr" ? ["trailAtr", "Trailing stop (ATRs)"] : ["trail", "Trailing stop"]);
+    if (pro) k.push(["be", "Break-even at"], ["tLose", "Close losers after"]);
+    k.push(["fMa", "Trend filter average"], ["maxPos", "Max positions"]);
+    if (pro && cfg.size === "risk") k.push(["risk", "Risk per trade"]);
     return k;
   }
   function labOptVals(cfg, key, n) {
-    const fixed = { tp: [0, 3, 5, 8, 12, 20, 30], sl: [0, 2, 3, 5, 8, 12, 20], trail: [0, 3, 5, 8, 12, 20, 30], hold: [5, 10, 20, 40, 60, 90, 120], fMa: [0, 20, 50, 100, 150, 200, 300], maxPos: [1, 3, 5, 10, 20, 30, 0] }[key];
+    const fixed = { tp: [0, 3, 5, 8, 12, 20, 30], sl: [0, 2, 3, 5, 8, 12, 20], trail: [0, 3, 5, 8, 12, 20, 30], hold: [5, 10, 20, 40, 60, 90, 120], fMa: [0, 20, 50, 100, 150, 200, 300], maxPos: [1, 3, 5, 10, 20, 30, 0],
+      slAtr: [0, 1, 1.5, 2, 3, 4, 5], tpAtr: [0, 2, 3, 4, 6, 8, 12], rr: [1, 1.5, 2, 2.5, 3, 4, 5], trailAtr: [0, 1.5, 2, 2.5, 3, 4, 5], swing: [0, 3, 5, 10, 15, 20, 40], be: [0, 2, 3, 5, 8, 10, 15],
+      tLose: [0, 3, 5, 10, 15, 20, 40], risk: [0.25, 0.5, 0.75, 1, 1.5, 2, 3] }[key];
     if (fixed) return fixed.slice(0, n);
+    if (key.startsWith("r.")) {   // around the current value, inside the indicator's range
+      const X = LAB.mod.Rules, path = key.slice(2), v = +labVal(cfg, key) || 0, parts = path.split(".");
+      const pk = parts.indexOf("p"), spec = pk > 0 ? rulePath(labRules(cfg), parts.slice(0, pk).join(".")) : null;
+      const par = spec ? X.IND[spec.id]?.params.find(x => x.k === parts[pk + 1]) : null;
+      let lo, hi, step;
+      if (par) { lo = Math.max(par.min, v / 2); hi = Math.min(par.max, v * 2); step = par.step; }
+      else if (parts[parts.length - 1] === "n") { lo = 1; hi = Math.max(5, v * 3); step = 1; }
+      else {
+        const q = rulePath(labRules(cfg), parts.slice(0, 3).join(".")), sc = X.IND[q?.a?.id]?.scale;
+        if (sc === "osc") { lo = Math.max(0, v - 20); hi = Math.min(100, v + 20); step = 1; }
+        else if (v === 0) { lo = -2; hi = 2; step = 0.1; }
+        else { lo = Math.min(v * 0.5, v * 1.5); hi = Math.max(v * 0.5, v * 1.5); step = Math.abs(v) >= 10 ? 1 : 0.05; }
+      }
+      const out = []; for (let i = 0; i < n; i++) { const x = +(Math.round((lo + (hi - lo) * i / (n - 1)) / step) * step).toFixed(4); if (!out.includes(x)) out.push(x); }
+      return out;
+    }
     const x = LAB.mod.INDICATORS[cfg.ind].params.find(q => q.k === key.slice(2));
     const out = []; for (let i = 0; i < n; i++) { const v = Math.round((x.min + (x.max - x.min) * i / (n - 1)) / x.step) * x.step; if (!out.includes(v)) out.push(+v.toFixed(4)); }
     return out;
   }
-  const labSet = (cfg, key, v) => { const c = JSON.parse(JSON.stringify(cfg)); if (key.startsWith("p.")) c.p[key.slice(2)] = v; else c[key] = v; return c; };
+  const labSet = (cfg, key, v) => { const c = JSON.parse(JSON.stringify(cfg)); if (key.startsWith("p.")) c.p[key.slice(2)] = v; else if (key.startsWith("r.")) ruleSetPath(c.rules, key.slice(2), v); else c[key] = v; return c; };
   function labOptCtx(st) { const { opt, rob, tab, open, ...rest } = st; return JSON.stringify({ ...rest, cfg: LAB.mod.clean(st.cfg), m: labMk() }); }
   function labOptimizeView(st) {
     const M = LAB.mod, cfg = M.clean(st.cfg), keys = labOptKeys(cfg), [first, last] = labYears();
@@ -3753,6 +3882,10 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
   // the settings tried: the strategy's first setting × its second (or the stop loss when it has none)
   function labRobAxes(cfg) {
     const P = LAB.mod.INDICATORS[cfg.ind].params;
+    if (LAB.mod.INDICATORS[cfg.ind].custom) {   // your rules: their first two numbers
+      const R = labOptKeys(cfg).filter(k => k[0].startsWith("r.")).map(k => k[0]);
+      if (R.length) return [[R[0], labOptVals(cfg, R[0], 7)], ...(R[1] ? [[R[1], labOptVals(cfg, R[1], 5)]] : [])];
+    }
     return P.length ? [["p." + P[0].k, labOptVals(cfg, "p." + P[0].k, 7)], ...(P[1] ? [["p." + P[1].k, labOptVals(cfg, "p." + P[1].k, 5)]] : [])]
       : [["sl", labOptVals(cfg, "sl", 7)]];
   }
@@ -3860,7 +3993,7 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
     const on = saved.filter(x => x.on !== false);
     h += `<div class="lsaved">${saved.map(x => `<div class="lsrow"><button class="toggle" role="switch" aria-checked="${x.on !== false}" aria-label="Compare ${esc(x.name)}" data-labcmp="${esc(x.id)}"></button>
       <span><b>${esc(x.name)}</b><small>${esc(M.INDICATORS[M.clean(x.st.cfg).ind]?.name || "")}${M.extrasOn(M.clean(x.st.cfg)) ? ` · ${M.extrasOn(M.clean(x.st.cfg))} extra rule${M.extrasOn(M.clean(x.st.cfg)) > 1 ? "s" : ""}` : ""}</small></span>
-      <button class="btn ghost sm" data-labload="${esc(x.id)}">Load</button><button class="prdel" data-labdel="${esc(x.id)}" aria-label="Delete ${esc(x.name)}">×</button></div>`).join("")}</div>`;
+      <button class="btn ghost sm" data-labload="${esc(x.id)}">Load</button><button class="btn ghost sm${x.follow ? " on" : ""}" ${x.follow ? `data-labunfollow="${esc(x.id)}"` : `data-labfollow="${esc(x.id)}"`}>${x.follow ? "Following" : "Follow"}</button><button class="prdel" data-labdel="${esc(x.id)}" aria-label="Delete ${esc(x.name)}">×</button></div>`).join("")}</div>`;
     // everything over the current years and account size, each with its own stocks and rules
     const runs = [{ name: "Current settings", st }, ...on.map(x => ({ name: x.name, st: { ...st, ...x.st, from: st.from, to: st.to, cap: st.cap, tax: st.tax } }))];
     const X = runs.map(r => ({ ...r, X: labCompute(r.st, { full: r === runs[0] }) }));
@@ -3920,6 +4053,393 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
     el.addEventListener("pointerleave", () => { xh.setAttribute("visibility", "hidden"); show(n - 1); });
   }
 
+  // ----------------------------------------------------- build your own
+  // The rule builder (Your own rules), the advanced exits and money rules, the pattern tester and
+  // the followed strategies. The maths is in docs/lab-rules.js and runPro() in docs/lab.js.
+  const RG_NAME = { long: "Buy when", short: "Sell short when", xl: "Also close a buy when", xs: "Also close a short when" };
+  const RG_EMPTY = { long: "Add at least one condition: with none, it never buys.", short: "No short rules: it never sells short.", xl: "None: buys close on the stops, targets, time limit or an opposite signal.", xs: "None: shorts close on the stops, targets, time limit or an opposite signal." };
+  // ready-made starting points: rules plus the exits that suit them
+  const LAB_TPL = [
+    ["dip", "Dip in an uptrend", "RSI turns up from oversold while the stock is above its 200-day average; out when RSI is overbought.", { long: [{ a: { id: "rsi", p: { n: 14 } }, op: "xa", b: 30 }, { a: { id: "close" }, op: "gt", b: { id: "sma", p: { n: 200 } } }], xl: [{ a: { id: "rsi", p: { n: 14 } }, op: "xa", b: 70 }] }, {}],
+    ["golden", "Golden cross with volume", "The 50-day average crosses above the 200-day on above-average volume; out on the opposite cross.", { long: [{ a: { id: "sma", p: { n: 50 } }, op: "xa", b: { id: "sma", p: { n: 200 } } }, { a: { id: "rvol", p: { n: 20 } }, op: "gt", b: 1.2, w: 5 }], xl: [{ a: { id: "sma", p: { n: 50 } }, op: "xb", b: { id: "sma", p: { n: 200 } } }] }, {}],
+    ["breakout", "Breakout on heavy volume", "A close above the 20-day high on twice the usual volume, with an ATR stop and a 1:3 target.", { long: [{ a: { id: "close" }, op: "xa", b: { id: "dc_up", p: { n: 20 } } }, { a: { id: "rvol", p: { n: 20 } }, op: "gt", b: 2 }], xl: [{ a: { id: "close" }, op: "xb", b: { id: "ema", p: { n: 20 } } }] }, { slMode: "atr", slAtr: 2, tpMode: "rr", rr: 3 }],
+    ["squeeze", "Bollinger squeeze breakout", "The bands at their tightest in 6 months, then a close above the upper band; out below the middle band.", { long: [{ a: { id: "bb_width", p: { n: 20, k: 2 } }, op: "lo", n: 120, w: 10 }, { a: { id: "close" }, op: "xa", b: { id: "bb_up", p: { n: 20, k: 2 } } }], xl: [{ a: { id: "close" }, op: "xb", b: { id: "bb_mid", p: { n: 20 } } }] }, {}],
+    ["weekly", "Weekly trend, daily pullback", "Above the 10-week average on the weekly chart and a 2-day RSI under 10 on the daily; out when RSI(2) gets back above 70.", { long: [{ a: { id: "close" }, op: "gt", b: { id: "ema", p: { n: 10 }, tf: "W" } }, { a: { id: "rsi", p: { n: 2 } }, op: "lt", b: 10 }], xl: [{ a: { id: "rsi", p: { n: 2 } }, op: "xa", b: 70 }] }, { exit: "hold", hold: 10 }],
+    ["macdadx", "MACD cross in a strong trend", "MACD crosses its signal line while ADX shows a strong trend and +DI leads; out on the opposite MACD cross.", { long: [{ a: { id: "macd", p: { fast: 12, slow: 26 } }, op: "xa", b: { id: "macd_sig", p: { fast: 12, slow: 26, sig: 9 } } }, { a: { id: "adx", p: { n: 14 } }, op: "gt", b: 25 }, { a: { id: "pdi", p: { n: 14 } }, op: "gt", b: { id: "mdi", p: { n: 14 } } }], xl: [{ a: { id: "macd", p: { fast: 12, slow: 26 } }, op: "xb", b: { id: "macd_sig", p: { fast: 12, slow: 26, sig: 9 } } }] }, {}],
+    ["engulf", "Bullish engulfing at a pullback", "A bullish engulfing candle above the 200-day average after RSI dipped under 40; held 10 days with a swing-low stop.", { long: [{ pat: "engulf_bull" }, { a: { id: "close" }, op: "gt", b: { id: "sma", p: { n: 200 } } }, { a: { id: "rsi", p: { n: 14 } }, op: "lt", b: 40, w: 5 }] }, { exit: "hold", hold: 10, slMode: "swing", swing: 5 }],
+    ["leader", "Market leader", "Beating the market by 10%+ over 3 months, above its 50-day average, with the market itself above its 200-day; out below the 50-day.", { long: [{ a: { id: "rs_chg", p: { n: 63 } }, op: "gt", b: 10 }, { a: { id: "close" }, op: "xa", b: { id: "sma", p: { n: 50 } } }, { a: { id: "mkt" }, op: "gt", b: { id: "mkt_ma", p: { n: 200 } } }], xl: [{ a: { id: "close" }, op: "xb", b: { id: "sma", p: { n: 50 } } }] }, {}],
+    ["supertrend", "Supertrend with a trailing ATR stop", "Price crosses above the Supertrend line; a 3-ATR trailing stop and half sold at 2 ATRs.", { long: [{ a: { id: "close" }, op: "xa", b: { id: "supertrend", p: { n: 10, mult: 3 } } }], xl: [{ a: { id: "close" }, op: "xb", b: { id: "supertrend", p: { n: 10, mult: 3 } } }] }, { trailMode: "atr", trailAtr: 3, tpMode: "atr", tpAtr: 0, part: 50, p1: 2 }],
+  ];
+  const labRules = cfg => cfg.rules || LAB.mod.START_RULES;
+  const rulePath = (obj, path) => path.split(".").reduce((o, k) => o?.[k], obj);
+  function ruleSetPath(obj, path, v) {
+    const ks = path.split("."); let o = obj;
+    for (let j = 0; j < ks.length - 1; j++) { if (o[ks[j]] == null) o[ks[j]] = /^\d+$/.test(ks[j + 1]) ? [] : {}; o = o[ks[j]]; }
+    if (v === undefined) delete o[ks[ks.length - 1]]; else o[ks[ks.length - 1]] = v;
+  }
+  // one condition from an indicator's usual use: "RSI(14) crosses above 30"; a price level (an
+  // average, a band) becomes "Close is above <it>"
+  function labNewCond(id) {
+    const X = LAB.mod.Rules, I = X.IND[id], h = I.hint || { op: "gt", b: 0 };
+    if (h.rev) return { a: { id: "close" }, op: h.op === "lt" ? "gt" : h.op, b: { id } };
+    const q = { a: { id }, op: h.op };
+    if (X.unary(h.op)) q.n = h.n || 3;
+    else if (typeof h.b === "object") { q.b = { id: h.b.id, p: X.specP({ id: h.b.id, p: X.specP({ id }) }) }; if (h.mul) q.mul = h.mul; }
+    else q.b = h.b ?? 0;
+    return q;
+  }
+  function labIndSelect(attr, cur, data) {
+    const X = LAB.mod.Rules, hasO = X.hasOpens(data);
+    return `<span class="yrpick"><select ${attr} aria-label="Indicator">${X.IND_GROUPS.map(g => `<optgroup label="${esc(g)}">${Object.values(X.IND).filter(I => I.group === g).map(I => {
+      const off = (I.needs === "v" && !data.tickers.some(T => T.v)) || (I.needs === "bench" && !data.bench);
+      return `<option value="${I.id}"${I.id === cur ? " selected" : ""}${off ? " disabled" : ""}>${esc(I.name)}${I.open && !hasO ? " *" : ""}</option>`; }).join("")}</optgroup>`).join("")}</select></span>`;
+  }
+  function labSpecEd(path, s, data, side = "a") {
+    const X = LAB.mod.Rules, I = X.IND[s.id] || X.IND.close, p = X.specP(s);
+    let h = `<div class="rspec">${labIndSelect(`data-rce="${path}.id"`, I.id, data)}`;
+    h += I.params.map(x => `<label class="rnum"><small>${esc(x.label)}</small><input type="number" inputmode="decimal" data-rce="${path}.p.${x.k}" value="${p[x.k]}" min="${x.min}" max="${x.max}" step="${x.step}"></label>`).join("");
+    h += `<div class="seg sm rtf" role="group" aria-label="Timeframe"><button data-rcset="${path}.tf" data-v="D" aria-pressed="${s.tf !== "W"}">Daily</button><button data-rcset="${path}.tf" data-v="W" aria-pressed="${s.tf === "W"}">Weekly</button></div>`;
+    h += `<label class="rnum"><small>${side === "a" ? "Bars ago" : "Bars ago"}</small><input type="number" inputmode="numeric" data-rce="${path}.ago" value="${s.ago || 0}" min="0" max="250" step="1"></label></div>`;
+    return h;
+  }
+  function labCondEd(path, q, data) {
+    const X = LAB.mod.Rules;
+    let h = `<div class="redit"><div class="seg sm" role="group" aria-label="Condition type"><button data-rctype="${path}" data-v="ind" aria-pressed="${!q.pat}">Indicator</button><button data-rctype="${path}" data-v="pat" aria-pressed="${!!q.pat}">Pattern</button></div>`;
+    if (q.pat) {
+      h += `<span class="yrpick"><select data-rce="${path}.pat" aria-label="Pattern">${X.PAT_GROUPS.map(g => `<optgroup label="${esc(g)}">${Object.values(X.PATTERNS).filter(P => P.group === g && X.patternOk(data, P.id)).map(P =>
+        `<option value="${P.id}"${P.id === q.pat ? " selected" : ""}>${esc(P.name)}${P.side > 0 ? " (bullish)" : P.side < 0 ? " (bearish)" : ""}</option>`).join("")}</optgroup>`).join("")}</select></span>
+        <p class="hint" style="margin:0">${esc(X.PATTERNS[q.pat]?.about || "")}</p>`;
+    } else {
+      h += labSpecEd(path + ".a", q.a, data);
+      h += `<div class="rop"><span class="yrpick"><select data-rce="${path}.op" aria-label="Comparison">${Object.entries(X.OPS).map(([k, o]) => `<option value="${k}"${k === q.op ? " selected" : ""}>${esc(o.name)}</option>`).join("")}</select></span>`;
+      if (X.unary(q.op)) h += `<label class="rnum"><input type="number" inputmode="numeric" data-rce="${path}.n" value="${q.n || 1}" min="1" max="400" step="1"><small>bars</small></label></div>`;
+      else {
+        const isInd = typeof q.b === "object";
+        h += `<div class="seg sm" role="group" aria-label="Compare with"><button data-rcb="${path}" data-v="num" aria-pressed="${!isInd}">A number</button><button data-rcb="${path}" data-v="ind" aria-pressed="${isInd}">An indicator</button></div></div>`;
+        h += isInd ? `<label class="rnum rmul"><small>Times</small><input type="number" inputmode="decimal" data-rce="${path}.mul" value="${q.mul || 1}" min="0.01" max="100" step="0.05"></label>` + labSpecEd(path + ".b", q.b, data, "b")
+          : `<label class="rnum"><small>Value</small><input type="number" inputmode="decimal" data-rce="${path}.b" value="${+q.b || 0}" step="any"></label>`;
+      }
+    }
+    h += `<div class="rop"><label class="rnum"><small>True in the last</small><input type="number" inputmode="numeric" data-rce="${path}.w" value="${q.w || 1}" min="1" max="60" step="1"><small>bar(s)</small></label>
+      <button class="btn sm" data-rcdone>Done</button></div></div>`;
+    return h;
+  }
+  function labRuleGroup(g, rules, data) {
+    const X = LAB.mod.Rules, G = rules[g] || { mode: "all", list: [] }, edit = LAB.edit;
+    let h = `<div class="rgroup"><div class="rghd"><b>${RG_NAME[g]}</b>${G.list.length > 1 ? `<div class="seg sm" role="group" aria-label="Match"><button data-rcmode="${g}" data-v="all" aria-pressed="${G.mode !== "any"}">all of these</button><button data-rcmode="${g}" data-v="any" aria-pressed="${G.mode === "any"}">any of these</button></div>` : ""}</div>`;
+    if (!G.list.length) h += `<p class="hint" style="margin:0">${RG_EMPTY[g]}</p>`;
+    h += G.list.map((q, k) => {
+      const path = `${g}.list.${k}`, on = edit === path;
+      return `<div class="rcond${on ? " on" : ""}"><button class="rtxt" data-rcedit="${path}" aria-expanded="${on}">${k ? `<i>${G.mode === "any" ? "or" : "and"}</i>` : ""}${esc(X.condTxt(q))}</button><button class="prdel" data-rcdel="${path}" aria-label="Remove this condition">×</button>${on ? labCondEd(path, q, data) : ""}</div>`;
+    }).join("");
+    if (G.list.length < 8) h += `<div class="radd"><button class="btn ghost sm" data-rcadd="${g}">+ Condition</button><button class="btn ghost sm" data-rcadd="${g}" data-pat="1">+ Pattern</button></div>`;
+    return h + `</div>`;
+  }
+  // the entry section of Your own rules
+  function labRuleBuilder(st, cfg, data) {
+    const M = LAB.mod, X = M.Rules, r = labRules(cfg), miss = M.missing(data, r);
+    let h = `<label class="lrow"><span>Start from</span><span class="yrpick"><select data-rctpl aria-label="Start from an example"><option value="">An example…</option>${LAB_TPL.map(([k, n]) => `<option value="${k}">${esc(n)}</option>`).join("")}</select></span></label>`;
+    h += labRuleGroup("long", r, data);
+    if (st.side === "all") h += labRuleGroup("short", r, data);
+    else h += `<p class="hint" style="margin:0">To sell short too, switch <b>What to trade</b> to Long + short.</p>`;
+    h += `<div class="lrow"><span>Enter</span>${labSeg("labedge", r.edge, [[1, "When the rules first turn true"], [0, "Any day they're true"]], "When to enter")}</div>`;
+    if (miss.includes("o")) h += `<p class="hint" style="margin:0">* Candle patterns, gaps and opens need each day's opening price, which arrives with the next weekly data update. Until then yesterday's close stands in for the open, so candle patterns are only approximate.</p>`;
+    if (miss.some(k => k.startsWith("pre:"))) h += `<p class="hint" style="margin:0">A chart pattern you picked has no alerts in this market's data yet.</p>`;
+    return h;
+  }
+  // a template, with the exits that suit it, on top of the current money rules
+  function labApplyTpl(st, key) {
+    const t = LAB_TPL.find(x => x[0] === key); if (!t) return;
+    const M = LAB.mod, base = M.clean(st.cfg), g = l => ({ mode: "all", list: l || [] }), x = l => ({ mode: "any", list: l || [] });
+    const off = { exit: "opposite", hold: 20, tp: 0, sl: 0, trail: 0, slMode: "pct", tpMode: "pct", trailMode: "pct", be: 0, part: 0, p1: 0, p1Be: 0, tLose: 0 };
+    st.cfg = M.clean({ ...base, ...off, ...t[4], ind: "custom", rules: { long: g(t[3].long), short: g(t[3].short), xl: x(t[3].xl), xs: x(t[3].xs), edge: 1 } });
+    st.lastRules = st.cfg.rules; LAB.edit = null;
+  }
+
+  // the exits (Exits & risk) for every strategy that makes its own alerts
+  function labExitsPro(cfg, I) {
+    const M = LAB.mod, P = M.PRO, R = M.RISK, sl = cfg.slMode, tpm = cfg.tpMode, trm = cfg.trailMode;
+    const anyAtr = sl === "atr" || tpm === "atr" || trm === "atr" || (cfg.part && tpm === "atr");
+    let h = `<div class="lrow"><span>Stop loss</span>${labSeg("labslm", sl, [["pct", "%"], ["atr", "ATR"], ["swing", "Swing low"]], "Stop loss type")}</div>`;
+    h += sl === "atr" ? labSlider(cfg, "slAtr", "Stop", "ATRs from the entry", P.slAtr.min, P.slAtr.max, P.slAtr.step)
+      : sl === "swing" ? labSlider(cfg, "swing", "Stop under the lowest low of the last", "bars (highest high for a short)", P.swing.min, P.swing.max, P.swing.step)
+      : labSlider(cfg, "sl", "Stop", esc(R.sl.about), R.sl.min, R.sl.max, R.sl.step);
+    h += `<div class="lrow"><span>Take profit</span>${labSeg("labtpm", tpm, [["pct", "%"], ["atr", "ATR"], ["rr", "Risk : reward"]], "Take profit type")}</div>`;
+    h += tpm === "atr" ? labSlider(cfg, "tpAtr", "Target", "ATRs from the entry", P.tpAtr.min, P.tpAtr.max, P.tpAtr.step)
+      : tpm === "rr" ? labSlider(cfg, "rr", "Target", "times the stop's distance (needs a stop)", P.rr.min, P.rr.max, P.rr.step)
+      : labSlider(cfg, "tp", "Target", esc(R.tp.about), R.tp.min, R.tp.max, R.tp.step);
+    h += `<div class="lrow"><span>Trailing stop</span>${labSeg("labtrm", trm, [["pct", "%"], ["atr", "ATR"]], "Trailing stop type")}</div>`;
+    h += trm === "atr" ? labSlider(cfg, "trailAtr", "Trail", "ATRs below the best price since the entry", P.trailAtr.min, P.trailAtr.max, P.trailAtr.step)
+      : labSlider(cfg, "trail", "Trail", esc(R.trail.about), R.trail.min, R.trail.max, R.trail.step);
+    h += labSlider(cfg, "be", "Stop to break-even", "once the trade is this much in profit", P.be.min, P.be.max, P.be.step);
+    h += labSlider(cfg, "part", "Sell part at a first target", "the rest runs to the other exits", P.part.min, P.part.max, P.part.step);
+    if (cfg.part) h += labSlider(cfg, "p1", "First target", tpm === "atr" ? "ATRs from the entry" : tpm === "rr" ? "times the stop's distance" : "from the entry", P.p1.min, P.p1.max, P.p1.step)
+      + `<div class="lrow"><span>Then</span>${labSeg("labp1be", cfg.p1Be, [[0, "Keep the stop"], [1, "Move the stop to break-even"]], "After the first target")}</div>`;
+    h += labSlider(cfg, "tLose", "Close losers after", "sessions, if still losing", P.tLose.min, P.tLose.max, P.tLose.step);
+    if (anyAtr) h += labSlider(cfg, "atrN", "ATR length", "", P.atrN.min, P.atrN.max, P.atrN.step);
+    return h;
+  }
+  // the extra text for the new settings (labTxt calls it)
+  function labTxtPro(cfg, k) {
+    const v = cfg[k], n = x => (+x).toFixed(2).replace(/\.?0+$/, "");
+    if (k === "slAtr" || k === "tpAtr" || k === "trailAtr") return v ? n(v) + " ATR" : "Off";
+    if (k === "swing") return v ? v + " bars" : "Off";
+    if (k === "rr") return v ? "1 : " + n(v) : "Off";
+    if (k === "be") return v ? "+" + n(v) + "%" : "Off";
+    if (k === "part") return v ? v + "%" : "Off";
+    if (k === "p1") return cfg.tpMode === "atr" ? n(v) + " ATR" : cfg.tpMode === "rr" ? n(v) + " R" : "+" + n(v) + "%";
+    if (k === "tLose") return v ? v + " days" : "Off";
+    if (k === "atrN") return v + " days";
+    if (k === "risk") return n(v) + "% of the account";
+    if (k === "secMax") return v ? v + " per sector" : "No limit";
+    if (k === "cool") return v ? v + " days" : "Off";
+    if (k === "pyr") return v > 1 ? v + " at once" : "1";
+    return null;
+  }
+  const labStopTxt = cfg => cfg.slMode === "atr" ? "SL " + labTxtPro(cfg, "slAtr") : cfg.slMode === "swing" ? "SL swing " + cfg.swing : cfg.sl ? "SL " + labRiskTxt(cfg.sl) : "";
+  const labTpTxt = cfg => cfg.tpMode === "atr" ? "TP " + labTxtPro(cfg, "tpAtr") : cfg.tpMode === "rr" ? "TP " + labTxtPro(cfg, "rr") : cfg.tp ? "TP " + labRiskTxt(cfg.tp) : "";
+  const labTrailTxt = cfg => cfg.trailMode === "atr" ? "Trail " + labTxtPro(cfg, "trailAtr") : cfg.trail ? "Trail " + labRiskTxt(cfg.trail) : "";
+  const labHasExits = cfg => !!(labStopTxt(cfg) || labTpTxt(cfg) || labTrailTxt(cfg) || cfg.be || cfg.part || cfg.tLose);
+
+  // rule edits
+  function labRulesEdit(fn) {
+    const M = LAB.mod, st = labState(), cfg = M.clean(st.cfg), r = JSON.parse(JSON.stringify(labRules(cfg)));
+    fn(r);
+    st.cfg = M.clean({ ...cfg, rules: r }); st.lastRules = st.cfg.rules;
+    saveLab(st); renderLab();
+  }
+  function labRuleChange(t) {
+    const path = t.dataset.rce, X = LAB.mod.Rules;
+    labRulesEdit(r => {
+      const end = path.split(".").pop(), cond = path.split(".").slice(0, 3).join(".");
+      if (end === "id" && path.endsWith(".a.id")) {   // a new indicator on the left: its usual condition
+        const q = labNewCond(t.value), old = rulePath(r, cond);
+        if (old?.w) q.w = old.w;
+        ruleSetPath(r, cond, q); LAB.edit = cond;
+        return;
+      }
+      if (end === "id") { ruleSetPath(r, path.replace(/\.id$/, ""), { id: t.value }); return; }
+      if (end === "op") {
+        const q = rulePath(r, cond), was = X.unary(q.op);
+        q.op = t.value;
+        if (X.unary(q.op) && !was) { q.n = q.op === "hi" || q.op === "lo" ? 20 : 3; delete q.b; delete q.mul; }
+        if (!X.unary(q.op) && was) { const d = labNewCond(q.a.id); q.b = d.b ?? 0; delete q.n; }
+        return;
+      }
+      if (end === "pat") { ruleSetPath(r, path, t.value); return; }
+      const v = +t.value; if (!Number.isFinite(v)) return;
+      ruleSetPath(r, path, v);
+    });
+  }
+  function labRuleClick(t, d) {
+    const X = LAB.mod.Rules;
+    if (d.rcedit) { LAB.edit = LAB.edit === d.rcedit ? null : d.rcedit; renderLab(); return true; }
+    if (d.rcdone != null) { LAB.edit = null; renderLab(); return true; }
+    if (d.rcdel) { const [g, , k] = d.rcdel.split("."); LAB.edit = null; labRulesEdit(r => r[g].list.splice(+k, 1)); return true; }
+    if (d.rcadd) {
+      const g = d.rcadd;
+      labRulesEdit(r => {
+        const G = r[g] || (r[g] = { mode: g.startsWith("x") ? "any" : "all", list: [] });
+        G.list.push(d.pat ? { pat: g === "short" || g === "xl" ? "engulf_bear" : "engulf_bull" } : labNewCond(g === "xl" || g === "xs" ? "rsi" : "rsi"));
+        if (!d.pat && g === "xl") Object.assign(G.list[G.list.length - 1], { op: "xa", b: 70 });
+        if (!d.pat && g === "short") Object.assign(G.list[G.list.length - 1], { op: "xb", b: 70 });
+        if (!d.pat && g === "xs") Object.assign(G.list[G.list.length - 1], { op: "xb", b: 30 });
+        LAB.edit = `${g}.list.${G.list.length - 1}`;
+      });
+      return true;
+    }
+    if (d.rcmode) { labRulesEdit(r => { r[d.rcmode].mode = d.v; }); return true; }
+    if (d.rctype) { labRulesEdit(r => { const q = rulePath(r, d.rctype); const n = d.v === "pat" ? { pat: "engulf_bull" } : labNewCond("rsi"); if (q.w) n.w = q.w; ruleSetPath(r, d.rctype, n); }); return true; }
+    if (d.rcb) { labRulesEdit(r => { const q = rulePath(r, d.rcb); if (d.v === "num") { q.b = 0; delete q.mul; } else { const I = X.IND[q.a.id]; q.b = { id: I.scale === "price" ? "sma" : I.scale === "vol" ? "vol_ma" : I.scale === "mkt" ? "mkt_ma" : I.id === "rs" ? "rs" : q.a.id, ...(I.id === "rs" ? { ago: 20 } : {}) }; } }); return true; }
+    if (d.rcset) { labRulesEdit(r => ruleSetPath(r, d.rcset, d.v === "D" ? undefined : d.v)); return true; }
+    return false;
+  }
+
+  // ------------------------------------------------------- pattern tester
+  // Each pattern on its own: how often it showed up and how the price moved 1, 5, 10 and 20 sessions
+  // later, in the pattern's direction, against any day (the drift a buy gets for free). Uses the
+  // Lab's stocks and years, plus filters of its own.
+  const PAT_HZ = [1, 5, 10, 20];
+  const labPat = st => ({ ids: ["engulf_bull", "hammer", "morning_star", "engulf_bear", "shooting_star", "inside_up", "brk20"], hz: 5, trend: "", vol: 0, mkt: 0, ...(st.pat || {}) });
+  function labPatGate(P, data) {
+    const q = [];
+    if (P.trend === "a200") q.push({ a: { id: "close" }, op: "gt", b: { id: "sma", p: { n: 200 } } });
+    if (P.trend === "b200") q.push({ a: { id: "close" }, op: "lt", b: { id: "sma", p: { n: 200 } } });
+    if (P.trend === "a50") q.push({ a: { id: "close" }, op: "gt", b: { id: "sma", p: { n: 50 } } });
+    if (P.vol && data.tickers.some(T => T.v)) q.push({ a: { id: "rvol", p: { n: 20 } }, op: "gt", b: 1.5 });
+    if (P.mkt && data.bench) q.push({ a: { id: "mkt" }, op: "gt", b: { id: "mkt_ma", p: { n: 200 } } });
+    return q;
+  }
+  function labPatCompute(st) {
+    const M = LAB.mod, X = M.Rules, P = labPat(st), data = labData(st), D = data.dates, fi = labFi(D, st.from);
+    const ids = P.ids.filter(id => X.PATTERNS[id] && X.patternOk(data, id)), conds = labPatGate(P, data);
+    const key = JSON.stringify([labMk(), ids, conds, st.uni, st.from, st.to]);
+    if (LAB.pat?.key === key) return LAB.pat;
+    const res = X.patternStats(data, ids, { fromIdx: fi, hz: PAT_HZ, gate: conds.length ? T => X.group(T, data, { mode: "all", list: conds }) : null });
+    return LAB.pat = { key, res, data, D, conds };
+  }
+  function labPatternsView(st) {
+    const M = LAB.mod, X = M.Rules, P = labPat(st), data = labData(st), hasO = X.hasOpens(data);
+    let h = `<p class="hint" style="margin:0 2px 10px">Pick patterns to test each one on its own: how often it appeared on the ${L().noun} and years you chose, and how the price moved afterwards in the pattern's direction (a bearish pattern is right when the price falls). <b>Edge</b> is the move minus what any day did, so a buy pattern has to beat the market's normal rise.</p>`;
+    if (!hasO) h += `<p class="hint" style="margin:0 2px 10px"><b>Candle patterns are approximate for now:</b> they need each day's opening price, which arrives with the next weekly data update. Until then yesterday's close stands in for the open. Price-action and chart patterns don't need it.</p>`;
+    h += `<div class="lsbody lpat" style="padding:0">`;
+    for (const g of X.PAT_GROUPS) {
+      const list = Object.values(X.PATTERNS).filter(p => p.group === g && X.patternOk(data, p.id)); if (!list.length) continue;
+      h += `<div class="lpatg"><h4>${esc(g)}${g === "Candles" && !hasO ? " *" : ""}</h4><div class="labinds">${list.map(p =>
+        `<button data-patpick="${p.id}" aria-pressed="${P.ids.includes(p.id)}">${esc(p.name)}</button>`).join("")}</div></div>`;
+    }
+    h += `<div class="lrow">${labSeg("patall", "", [["bull", "All bullish"], ["bear", "All bearish"], ["all", "Every pattern"], ["none", "Clear"]], "Quick pick")}</div>`;
+    h += `<div class="lrow"><span>Only when</span>${labSeg("pattrend", P.trend, [["", "Any trend"], ["a200", "Above 200-day"], ["a50", "Above 50-day"], ["b200", "Below 200-day"]], "Trend filter")}</div>`;
+    h += `<div class="lrow"><span></span>${data.tickers.some(T => T.v) ? labSeg("patvol", P.vol, [[0, "Any volume"], [1, "Volume 1.5× average"]], "Volume filter") : ""}${data.bench ? labSeg("patmkt", P.mkt, [[0, "Any market"], [1, `${benchOf().name} above its 200-day`]], "Market filter") : ""}</div>`;
+    h += `<div class="lrow"><span>Show after</span>${labSeg("pathz", P.hz, PAT_HZ.map(x => [x, x === 1 ? "1 day" : x + " days"]), "Days after")}</div></div>`;
+    if (!P.ids.length) return h + `<div class="empty"><strong>No pattern picked</strong>Tap the patterns above to test them.</div>`;
+    const R = labPatCompute(st), k = PAT_HZ.indexOf(P.hz), base = R.res.base[k];
+    const rows = R.res.list.slice().sort((a, b) => (b.at[k].edge ?? -1e9) - (a.at[k].edge ?? -1e9));
+    const cls = v => v == null ? "" : v >= 0 ? "up" : "down";
+    h += `<div class="tablewrap" style="margin-top:14px"><table class="bt lpatt"><thead><tr><th>Pattern</th><th style="text-align:right">Seen</th><th style="text-align:right">Right</th><th style="text-align:right">Avg move</th><th style="text-align:right">Edge</th><th></th></tr></thead><tbody>` +
+      rows.map(r => { const a = r.at[k], X0 = X.PATTERNS[r.id], open = LAB.patOpen === r.id;
+        return `<tr class="lprow${open ? " on" : ""}" data-patrow="${r.id}"><td><b>${esc(X0.name)}</b> <span class="pill ${r.side > 0 ? "bullish" : "bearish"}">${X0.side > 0 ? "bull" : X0.side < 0 ? "bear" : "buy"}</span></td><td style="text-align:right">${r.n.toLocaleString("en-US")}</td>
+          <td style="text-align:right">${a.win == null ? "–" : Math.round(a.win) + "%"}</td><td style="text-align:right" class="${cls(a.avg)}">${labPct(a.avg, 2)}</td><td style="text-align:right"><b class="${cls(a.edge)}">${labPct(a.edge, 2)}</b></td>
+          <td style="text-align:right"><button class="btn ghost sm" data-pattest="${r.id}">Backtest</button></td></tr>${open ? `<tr class="lpdet"><td colspan="6">${labPatDetail(r, R)}</td></tr>` : ""}`; }).join("") +
+      `<tr class="lpbase"><td>Any day <small>the baseline</small></td><td style="text-align:right">${base.k.toLocaleString("en-US")}</td><td style="text-align:right">${base.win == null ? "–" : Math.round(base.win) + "%"}</td><td style="text-align:right" class="${cls(base.avg)}">${labPct(base.avg, 2)}</td><td></td><td></td></tr></tbody></table></div>`;
+    h += `<p class="hint">"Right" is how often the price moved the pattern's way ${P.hz === 1 ? "the next day" : `${P.hz} sessions later`}, from the close of the day it appeared, before costs. Tap a row for the year-by-year results and the latest examples; Backtest turns it into a full strategy under Your own rules.${R.conds.length ? " Filters on: only days that pass them count, for the baseline too." : ""} Few sightings mean luck plays a big part.</p>`;
+    return h;
+  }
+  function labPatDetail(r, R) {
+    const X = LAB.mod.Rules, D = R.D, k = PAT_HZ.indexOf(5);
+    const yrs = r.years.length ? `<div class="lpyears">${r.years.map(y => `<span title="${y.k} times"><b class="${y.avg >= 0 ? "up" : "down"}">${labPct(y.avg, 1)}</b><small>${y.year}</small></span>`).join("")}</div>` : "";
+    const ex = r.last.slice(0, 8).map(e => `<a href="#stock-${esc(e.t)}" class="lpex"><b>${esc(disp(e.t))}</b><small>${esc(fmtDate(D[e.g], { day: "numeric", month: "short", year: "2-digit" }))}</small>${e.r == null ? `<em>–</em>` : `<em class="${e.r >= 0 ? "up" : "down"}">${labPct(e.r * 100, 1)}</em>`}</a>`).join("");
+    return `<p class="hint" style="margin:0 0 6px">${esc(X.PATTERNS[r.id].about)} Median move after 5 days ${labPct(r.at[k]?.med, 2)}.</p>
+      <small class="lpcap">Average 5-day move by year</small>${yrs}<small class="lpcap">Latest (5-day result)</small><div class="lpexs">${ex || "–"}</div>`;
+  }
+  // a pattern as a strategy: enter on it (with the tester's filters), out after the days shown
+  function labPatToRules(st, id) {
+    const M = LAB.mod, X = M.Rules, P = labPat(st), side = X.PATTERNS[id].side || 1, data = labData(st);
+    const list = [{ pat: id }, ...labPatGate(P, data)];
+    const g = l => ({ mode: "all", list: l });
+    st.cfg = M.clean({ ...M.clean(st.cfg), ind: "custom", exit: "hold", hold: Math.max(2, P.hz), rules: { long: g(side > 0 ? list : []), short: g(side < 0 ? list : []), xl: { mode: "any", list: [] }, xs: { mode: "any", list: [] }, edge: 1 } });
+    if (side < 0) st.side = "all";
+    st.lastRules = st.cfg.rules; st.tab = "overview"; st.open = [...new Set([...st.open, "signal"])];
+  }
+  function labPatClick(t, d, st) {
+    const M = LAB.mod, X = M.Rules, P = labPat(st), data = labData(st);
+    if (d.patpick) { P.ids = P.ids.includes(d.patpick) ? P.ids.filter(x => x !== d.patpick) : [...P.ids, d.patpick]; }
+    else if (d.patall) { const all = Object.values(X.PATTERNS).filter(p => X.patternOk(data, p.id)); P.ids = d.patall === "none" ? [] : all.filter(p => d.patall === "all" || (d.patall === "bull" ? p.side > 0 : p.side < 0)).map(p => p.id); }
+    else if (d.pattrend != null) P.trend = d.pattrend;
+    else if (d.patvol != null) P.vol = +d.patvol;
+    else if (d.patmkt != null) P.mkt = +d.patmkt;
+    else if (d.pathz) P.hz = +d.pathz;
+    else if (d.pattest) { labPatToRules(st, d.pattest); LAB.edit = null; saveLab(st); renderLab(); document.getElementById("lab")?.scrollIntoView({ behavior: "smooth", block: "start" }); return true; }
+    else if (d.patrow) { if (t.closest("button, a")) return false; LAB.patOpen = LAB.patOpen === d.patrow ? null : d.patrow; runLab(); return true; }
+    else return false;
+    st.pat = P; saveLab(st);
+    const out = document.getElementById("labout"); out?.classList.add("busy");
+    setTimeout(() => { runLab(); out?.classList.remove("busy"); }, 30);
+    return true;
+  }
+
+  // ------------------------------------------------------ results extras
+  // monthly returns of the account (a heat table) and the spread of trade results
+  function labMonthly(eq, D, fi) {
+    const by = {}; let start = eq[fi], ym = D[fi].slice(0, 7);
+    for (let g = fi + 1; g < D.length; g++) {
+      const m = D[g].slice(0, 7);
+      if (m !== ym) { by[ym] = (eq[g - 1] / start - 1) * 100; start = eq[g - 1]; ym = m; }
+    }
+    by[ym] = (eq[D.length - 1] / start - 1) * 100;
+    const years = [...new Set(Object.keys(by).map(k => k.slice(0, 4)))].reverse();
+    const tint = v => { const a = Math.min(1, Math.abs(v) / 8); return `background:color-mix(in srgb, var(${v >= 0 ? "--bull" : "--bear"}) ${Math.round(a * 38)}%, transparent)`; };
+    return `<div class="tablewrap"><table class="bt lmonths"><thead><tr><th>Year</th>${LAB_MON.map(m => `<th>${m}</th>`).join("")}</tr></thead><tbody>` +
+      years.map(y => `<tr><td>${y}</td>${LAB_MON.map((_, i) => { const v = by[`${y}-${String(i + 1).padStart(2, "0")}`]; return v == null ? `<td></td>` : `<td style="${tint(v)}">${v >= 0 ? "" : "−"}${Math.abs(v).toFixed(1)}</td>`; }).join("")}</tr>`).join("") +
+      `</tbody></table></div>`;
+  }
+  function labHist(list) {
+    if (list.length < 5) return "";
+    const W = 340, H = 120, P = { l: 6, r: 6, t: 8, b: 18 }, rs = list.map(t => t.ret * 100).sort((a, b) => a - b);
+    const lo = Math.max(rs[0], rs[Math.floor(rs.length * 0.01)]), hi = Math.min(rs[rs.length - 1], rs[Math.floor(rs.length * 0.99)]);
+    const span = Math.max(1, hi - lo), nb = 24, w = span / nb, bins = new Array(nb).fill(0);
+    for (const r of rs) bins[Math.min(nb - 1, Math.max(0, Math.floor((r - lo) / w)))]++;
+    const mx = Math.max(...bins), bw = (W - P.l - P.r) / nb;
+    let svg = `<svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="How trade returns were spread">`;
+    bins.forEach((b, i) => { const x0 = lo + i * w, bh = b / mx * (H - P.t - P.b); svg += `<rect x="${(P.l + i * bw + 1).toFixed(1)}" y="${(H - P.b - bh).toFixed(1)}" width="${(bw - 2).toFixed(1)}" height="${bh.toFixed(1)}" rx="2" fill="${x0 + w / 2 >= 0 ? C.up : C.down}" opacity=".8"/>`; });
+    const zx = P.l + (0 - lo) / span * (W - P.l - P.r);
+    if (zx > P.l && zx < W - P.r) svg += `<line x1="${zx.toFixed(1)}" x2="${zx.toFixed(1)}" y1="${P.t}" y2="${H - P.b}" stroke="${C.muted}" stroke-dasharray="3 3"/>`;
+    svg += `<text x="${P.l}" y="${H - 4}" fill="${C.muted}" font-size="10">${labPct(lo, 0)}</text><text x="${W - P.r}" y="${H - 4}" fill="${C.muted}" font-size="10" text-anchor="end">${labPct(hi, 0)}</text></svg>`;
+    return `<h3 class="h3">How trade results were spread</h3><div class="chartbox">${svg}</div>`;
+  }
+
+  // ------------------------------------------------------------- follow
+  // A saved setup you follow is run on the freshest daily prices (lab_recent.json, updated after each
+  // daily scan) every time you open it: its signals on the last close, and paper trades from the day
+  // you followed it. All on this device; nothing is sent anywhere.
+  async function labRecent() {
+    const mk = labMk(); LAB.recent = LAB.recent || {};
+    if (!(mk in LAB.recent)) {
+      LAB.mod = LAB.mod || await import("./lab.js");
+      const raw = await opt(`${L().base}lab_recent.json`);
+      LAB.recent[mk] = raw ? LAB.mod.decode(raw) : null;
+    }
+    if (LAB.recent[mk]) { LAB.recent[mk].sectors = LAB.recent[mk].sectors || labSectors(); return LAB.recent[mk]; }
+    return labEnsure();   // before the first daily update: the weekly prices
+  }
+  const labSectors = () => Object.fromEntries(Object.entries(S.stockBy || {}).filter(([, x]) => x?.sector).map(([t, x]) => [t, x.sector]));
+  const labFollowed = () => labSaved().filter(x => x.follow);
+  function labFollowRun(x, data) {
+    const M = LAB.mod, cfg = M.clean(x.st.cfg), I = M.INDICATORS[cfg.ind], side = I.buysOnly ? "long" : x.st.side || "long";
+    const set = labTickers(x.st.uni || { mode: "all" }, data), sub = set ? M.subset(data, { tickers: set }) : data, D = sub.dates;
+    let fi = D.findIndex(d => d > x.follow); if (fi < 0) fi = D.length;
+    const R = fi < D.length ? M.run(sub, cfg, Math.max(0, fi - 1)) : null;
+    const closed = R ? R[side].list.filter(t => t.g0 >= fi - 1 && D[t.g0] >= x.follow) : [];
+    const open = R ? R.openTrades.filter(o => (side === "all" || o.side > 0) && D[o.g0] >= x.follow) : [];
+    const today = M.todaySignals(sub, cfg).filter(s => side === "all" || s.side > 0);
+    return { cfg, I, side, D, closed, open, today, asOf: D[D.length - 1] };
+  }
+  async function labFollowCardFill() {
+    const el = document.getElementById("labfollowcta"); if (!el) return;
+    try {
+      const data = await labRecent(), F = labFollowed(); let n = 0, o = 0;
+      for (const x of F) { const r = labFollowRun(x, data); n += r.today.length; o += r.open.length; }
+      const sm = document.querySelector("#labfollowcta small");
+      if (sm) sm.textContent = `${F.length} followed · ${n} signal${n === 1 ? "" : "s"} on the last close · ${o} paper position${o === 1 ? "" : "s"} open`;
+    } catch (err) { console.error(err); }
+  }
+  function labFollowCard() {
+    if (!labFollowed().length) return "";
+    setTimeout(labFollowCardFill, 0);
+    return `<a class="labcta" id="labfollowcta" href="#strategylab?tab=follow"><span><b>Your Lab strategies</b><small>Checking the last close…</small></span><span aria-hidden="true">›</span></a>`;
+  }
+  function labFollowView(st) {
+    const M = LAB.mod, saved = labSaved(), F = saved.filter(x => x.follow);
+    let h = `<p class="hint" style="margin:0 2px 10px">Follow a saved setup and it's checked on the latest daily prices each time you open the app: its signals on the last close, and paper trades from the day you followed it, at €1,000 a trade. All on this device: no orders and no notifications.</p>`;
+    h += `<form class="lsave" data-labsaveform data-labfollowform="1"><input class="search" name="n" maxlength="40" placeholder="Name the current settings to follow them" aria-label="Name for these settings" autocomplete="off"><button class="btn sm">Save &amp; follow</button></form>`;
+    const rest = saved.filter(x => !x.follow);
+    if (rest.length) h += `<div class="lsaved">${rest.map(x => `<div class="lsrow"><span><b>${esc(x.name)}</b><small>${esc(M.INDICATORS[M.clean(x.st.cfg).ind]?.name || "")}</small></span><button class="btn ghost sm" data-labfollow="${esc(x.id)}">Follow</button></div>`).join("")}</div>`;
+    if (!F.length) return h + `<div class="empty"><strong>Nothing followed yet</strong>Save the current settings above, or follow one of your saved setups.</div>`;
+    const loaded = LAB.recent && labMk() in LAB.recent, data = loaded ? LAB.recent[labMk()] || LAB.data[labMk()] : null;
+    if (data && !data.sectors) data.sectors = labSectors();
+    if (!data) {
+      LAB.after = async () => { await labRecent(); if (labState().tab === "follow") runLab(); };
+      return h + `<p class="loading">Loading the latest prices…</p>`;
+    }
+    const day = d => esc(fmtDate(d, { day: "numeric", month: "short", year: "numeric" })), size = 1000;
+    for (const x of F) {
+      const r = labFollowRun(x, data), pl = r.closed.reduce((s, t) => s + t.ret * size, 0), op = r.open.reduce((s, t) => s + t.ret * size, 0);
+      const won = r.closed.filter(t => t.ret > 0).length;
+      h += `<div class="card lfol"><div class="lfolhd"><span><b>${esc(x.name)}</b><small>${esc(r.I.name)} · following since ${day(x.follow)} · prices to ${day(r.asOf)}</small></span>
+        <button class="btn ghost sm" data-labload="${esc(x.id)}">Open</button><button class="btn ghost sm" data-labunfollow="${esc(x.id)}">Unfollow</button></div>`;
+      h += `<div class="kv lkv"><div><span>Signals last close</span><b>${r.today.length}</b></div><div><span>Closed trades</span><b>${r.closed.length}</b><small>${r.closed.length ? `${won} won` : ""}</small></div>
+        <div><span>Closed P/L</span><b class="${pl >= 0 ? "up" : "down"}">${eurSigned(pl)}</b></div><div><span>Open P/L</span><b class="${op >= 0 ? "up" : "down"}">${eurSigned(op)}</b><small>${r.open.length} open</small></div></div>`;
+      if (r.today.length) h += `<p style="margin:12px 0 6px;font-weight:600">On the last close</p><div class="lpexs">${r.today.map(s => `<a class="lpex" href="#stock-${esc(s.t)}"><b>${esc(disp(s.t))}</b><span class="pill ${s.side > 0 ? "bullish" : "bearish"}">${s.side > 0 ? (r.cfg.entry === "open" ? "buy at open" : "buy") : "short"}</span></a>`).join("")}</div>`;
+      if (r.open.length) h += `<div class="tablewrap" style="margin-top:10px"><table class="bt"><thead><tr><th>Open</th><th>Since</th><th style="text-align:right">Return</th></tr></thead><tbody>${r.open.slice(0, 12).map(o =>
+        `<tr><td><a href="#stock-${esc(o.t)}" class="tk">${esc(disp(o.t))}</a> <span class="pill ${o.side > 0 ? "bullish" : "bearish"}">${o.side > 0 ? "long" : "short"}</span></td><td>${day(r.D[o.g0])}</td><td style="text-align:right" class="${o.ret >= 0 ? "up" : "down"}">${labPct(o.ret * 100)}</td></tr>`).join("")}</tbody></table></div>`;
+      if (r.closed.length) h += `<div class="tablewrap" style="margin-top:10px"><table class="bt"><thead><tr><th>Closed</th><th>In → out</th><th style="text-align:right">Return</th></tr></thead><tbody>${r.closed.slice(-12).reverse().map(t =>
+        `<tr><td><a href="#stock-${esc(t.t)}" class="tk">${esc(disp(t.t))}</a></td><td>${day(r.D[t.g0])}<small>→ ${day(r.D[t.g1])}</small></td><td style="text-align:right" class="${t.ret >= 0 ? "up" : "down"}">${labPct(t.ret * 100)}</td></tr>`).join("")}</tbody></table></div>`;
+      if (!r.today.length && !r.open.length && !r.closed.length) h += `<p class="hint">No signals since you followed it. Slow strategies can stay quiet for weeks.</p>`;
+      h += `</div>`;
+    }
+    return h;
+  }
+
   // --------------------------------------------------------------- events
   function labRerun() {
     clearTimeout(LAB.timer); document.getElementById("labout")?.classList.add("busy");
@@ -3929,7 +4449,9 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
     const M = LAB.mod; if (!M) return false;
     const pi = e.target.closest("[data-lab]"); if (!pi) return false;
     const st = labState(), k = pi.dataset.lab; let cfg = M.clean(st.cfg);
-    cfg = M.clean(labSet(cfg, k, +pi.value)); st.cfg = cfg; saveLab(st);
+    let next = labSet(cfg, k, +pi.value);
+    if (k === "part" && +pi.value && !cfg.part) next.p1 = next.tpMode === "atr" ? 2 : next.tpMode === "rr" ? 1 : 5;   // a first target to start from
+    cfg = M.clean(next); st.cfg = cfg; saveLab(st);
     // a linked setting may have moved (fast < slow): update every label and slider
     document.querySelectorAll("[data-lpv]").forEach(b => { b.textContent = labTxt(cfg, b.dataset.lpv); });
     document.querySelectorAll("[data-lab]").forEach(inp => { if (inp !== pi && +inp.value !== labVal(cfg, inp.dataset.lab)) inp.value = labVal(cfg, inp.dataset.lab); });
@@ -3942,6 +4464,13 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
   }
   function labChange(e) {
     const M = LAB.mod; if (!M) return false;
+    // a slider whose new value changes what else is shown (a first target, a stop type turned off): redraw on release
+    const sl = e.target.closest('[data-lab="part"], [data-lab="slAtr"], [data-lab="tpAtr"], [data-lab="trailAtr"], [data-lab="swing"], [data-lab="rr"], [data-lab="sl"]');
+    if (sl) { renderLab(); return true; }
+    const rc = e.target.closest("[data-rce]");
+    if (rc) { labRuleChange(rc); return true; }
+    const tp = e.target.closest("[data-rctpl]");
+    if (tp) { if (tp.value) { const st = labState(); labApplyTpl(st, tp.value); saveLab(st); renderLab(); } return true; }
     const t = e.target.closest("[data-labfrom], [data-labto], [data-labcap], [data-labsector], [data-labfind], [data-labadd], [data-labopt], [data-labrob], [data-labcalyr], [data-labcalind]"); if (!t) return false;
     const st = labState(), [first, last] = labYears();
     if (t.matches("[data-labfrom]")) { st.from = +t.value === first ? null : +t.value; if (st.to && st.to < st.from) st.to = null; }
@@ -3971,6 +4500,27 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
     if (sm) {   // remember which sections are open
       setTimeout(() => { const st = labState(); st.open = [...document.querySelectorAll(".lsec[open]")].map(d => d.dataset.labsec); saveLab(st); }, 0);
       return false;
+    }
+    const nt = e.target.closest("[data-rcedit], [data-rcdone], [data-rcdel], [data-rcadd], [data-rcmode], [data-rctype], [data-rcb], [data-rcset], [data-patpick], [data-patall], [data-pattrend], [data-patvol], [data-patmkt], [data-pathz], [data-pattest], [data-patrow], [data-labslm], [data-labtpm], [data-labtrm], [data-labp1be], [data-labentry], [data-labsize], [data-labedge], [data-labfollow], [data-labunfollow]");
+    if (nt) {
+      const d = nt.dataset, st = labState();
+      if (labRuleClick(nt, d)) return true;
+      if (d.labedge != null) { labRulesEdit(r => { r.edge = +d.labedge; }); return true; }
+      if (Object.keys(d).some(k => k.startsWith("pat"))) return labPatClick(nt, d, st);
+      if (d.labfollow || d.labunfollow) {
+        const id = d.labfollow || d.labunfollow, all = pref("labSaved", []) || [];
+        const day = new Date(Date.now() - new Date().getTimezoneOffset() * 6e4).toISOString().slice(0, 10);
+        setPref("labSaved", all.map(x => x.id === id ? { ...x, follow: d.labfollow ? day : null } : x));
+        runLab(); return true;
+      }
+      const c = M.clean(st.cfg), P = M.PRO;
+      if (d.labslm) { c.slMode = d.labslm; if (d.labslm === "atr" && !c.slAtr) c.slAtr = P.slAtr.def; if (d.labslm === "swing" && !c.swing) c.swing = P.swing.def; if (d.labslm === "pct" && !c.sl) c.sl = 5; }
+      else if (d.labtpm) { c.tpMode = d.labtpm; if (d.labtpm === "atr" && !c.tpAtr) c.tpAtr = P.tpAtr.def; if (d.labtpm === "rr") { c.rr = c.rr || P.rr.def; if (!labStopTxt(c)) { c.slMode = "atr"; c.slAtr = P.slAtr.def; } } if (d.labtpm === "pct" && !c.tp) c.tp = 10; }
+      else if (d.labtrm) { c.trailMode = d.labtrm; if (d.labtrm === "atr" && !c.trailAtr) c.trailAtr = P.trailAtr.def; if (d.labtrm === "pct" && !c.trail) c.trail = 8; }
+      else if (d.labp1be != null) c.p1Be = +d.labp1be;
+      else if (d.labentry) c.entry = d.labentry;
+      else if (d.labsize) { c.size = d.labsize; if (d.labsize === "risk" && !labStopTxt(c)) { c.slMode = "atr"; c.slAtr = P.slAtr.def; } if (d.labsize === "risk" && !c.maxPos) c.maxPos = 10; }
+      st.cfg = M.clean(c); saveLab(st); renderLab(); return true;
     }
     const t = e.target.closest("[data-labind], [data-labexit], [data-labside], [data-labreset], [data-labtab], [data-labmkt], [data-labtax], [data-labmode], [data-labunpick], [data-labshare], [data-labcsv], [data-labrunopt], [data-labrunrob], [data-labrobapply], [data-labapply], [data-laboptview], [data-labcmp], [data-labdel], [data-labload], [data-labcalrisk], [data-labcaltax], [data-labcalm], [data-labcalday], [data-labcaltrade]");
     if (!t) return false;
@@ -4030,7 +4580,7 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
       const all = pref("labSaved", []) || [], id = d.labcmp || d.labdel || d.labload;
       if (d.labcmp) setPref("labSaved", all.map(x => x.id === id ? { ...x, on: x.on === false } : x));
       else if (d.labdel) setPref("labSaved", all.filter(x => x.id !== id));
-      else { const x = all.find(q => q.id === id); if (x) { Object.assign(st, { cfg: x.st.cfg, side: x.st.side || "long", uni: x.st.uni || { mode: "all" }, tab: "overview" }); saveLab(st); renderLab(); } return true; }
+      else { const x = all.find(q => q.id === id); if (x) { Object.assign(st, { cfg: x.st.cfg, side: x.st.side || "long", uni: x.st.uni || { mode: "all" }, tab: "overview" }); if (x.st.cfg?.rules) st.lastRules = x.st.cfg.rules; LAB.edit = null; saveLab(st); renderLab(); } return true; }
       runLab(); return true;
     }
     else { st.cfg = M.defaults(M.clean(st.cfg).ind); st.side = "long"; st.uni = { mode: "all" }; st.cap = 100000; st.tax = false; st.from = null; st.to = null; LAB.opt = null; }
@@ -4038,7 +4588,13 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
   }
   function labSubmit(e) {
     const f = e.target.closest("[data-labsaveform]"); if (!f) return false;
-    e.preventDefault(); labSave(f.n.value); runLab(); return true;
+    e.preventDefault(); labSave(f.n.value);
+    if (f.dataset.labfollowform) {   // follow what was just saved
+      const all = pref("labSaved", []) || [], last = all[all.length - 1];
+      const day = new Date(Date.now() - new Date().getTimezoneOffset() * 6e4).toISOString().slice(0, 10);
+      if (last) setPref("labSaved", all.map(x => x === last ? { ...x, follow: day } : x));
+    }
+    runLab(); return true;
   }
 
 

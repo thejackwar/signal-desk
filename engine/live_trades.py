@@ -90,6 +90,11 @@ def main():
         out.parent.mkdir(parents=True, exist_ok=True)
         subprocess.run(["node", str(ENGINE / "live_trades.mjs"), str(lab_file), args.market, str(out), args.start,
                         "demo" if args.demo else "real"], check=True)
+    # The same fresh prices for the Strategy Lab's followed strategies (your own setups, checked on
+    # your device each time you open the app): lab.json itself only updates once a week.
+    recent = out.parent / "lab_recent.json"
+    recent.write_text(json.dumps(lab, separators=(",", ":")))
+    print(f"-> {recent} ({recent.stat().st_size // 1024} KB)")
 
 
 if __name__ == "__main__":

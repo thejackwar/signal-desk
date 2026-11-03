@@ -20,6 +20,13 @@ docs/                    the website (served by GitHub Pages)
   data/stocks/           one-year chart per stock
   lab.js                 Strategy Lab (indicator settings, exit rule, take profit / stop loss); tests: tests/lab/test_parity.py, tests/lab/test_stops.mjs
                          Robustness tab: vs holding the same stocks, walk-forward, settings plateau, bootstrap luck test (tests/lab/test_robust.mjs)
+  lab-rules.js           Strategy Lab "Your own rules": 71 indicators (daily or weekly), conditions, 47 candle /
+                         price-action / chart patterns and the pattern tester's statistics. runPro() in lab.js is the
+                         trade-by-trade engine for them and for the advanced exits (ATR / swing / risk:reward stops and
+                         targets, break-even, partial exits, losers' time stop, next-open entries) and money rules (risk %
+                         sizing, sector limit, pause after a loss, positions per stock); tests: tests/lab/test_pro.mjs
+  data/lab_recent.json   two years of fresh daily prices (written by engine/live_trades.py after each daily scan),
+                         for the Lab's followed setups (Follow tab, and the card on Alerts)
   rating.js              technical rating (Strong sell … Strong buy) on each stock page; test: tests/rating/test_rating.py
   trendlines.html/.js    automatic trendlines + support/resistance, stocks and crypto (data from worker/)
   options.html/.js       Options page: Learn (payoff charts of 11 strategies), Builder (a strategy on a live option
