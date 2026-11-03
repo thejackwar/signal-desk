@@ -50,3 +50,16 @@ Rank correlation of Sharpe, dev years vs test years: **0.11** (1 = the best on 2
 
 Walk-forward (each January keep the top 5 of the previous 5 years): CAGR 9.9%, Sharpe 0.66 vs holding the stocks 16.0%, Sharpe 0.87; beats hold in 2% of bootstraps.
 
+## Phase 3: trend-filter portfolios
+
+Weekly rebalance, 10 bp on every change, idle money in 3-month T-bills. Compared with holding every stock equally under the same rules.
+
+| Portfolio | CAGR | Sharpe | Worst drop | Covid fall | 2022 | Invested | Dev | Test | Beats hold (full / test) | Deflated |
+|---|---|---|---|---|---|---|---|---|---|---|
+| hold_all | 14.7% | 0.83 | -35% | -35% | -14% | 100% | 0.81 | 0.88 | – / – | – |
+| market_trend | 9.5% | 0.77 | -24% | -13% | -10% | 85% | 0.67 | 0.94 | 32% / 60% | 0.00 |
+| market_cross | 9.1% | 0.63 | -35% | -35% | -3% | 84% | 0.49 | 0.92 | 7% / 59% | 0.00 |
+| stock_trend_ivol | 11.2% | 0.78 | -29% | -29% | -13% | 99% | 0.75 | 0.85 | 24% / 39% | 0.00 |
+| vol_target | 11.3% | 0.82 | -23% | -23% | -11% | 89% | 0.79 | 0.88 | 38% / 54% | 0.00 |
+| trend_vol_target | 10.3% | 0.80 | -22% | -20% | -12% | 94% | 0.79 | 0.83 | 33% / 34% | 0.00 |
+
