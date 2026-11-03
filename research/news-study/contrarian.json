@@ -1,0 +1,53 @@
+{
+ "trades": 73,
+ "all": {
+  "strategy": {
+   "cagr": 11.19,
+   "sharpe": 0.8,
+   "maxdd": -32.0
+  },
+  "hold": {
+   "cagr": 16.25,
+   "sharpe": 0.9,
+   "maxdd": -32.0
+  },
+  "invested_pct": 44.7,
+  "avg_day_in_pct": 0.109,
+  "avg_day_all_pct": 0.067
+ },
+ "2019-23": {
+  "strategy": {
+   "cagr": 8.3,
+   "sharpe": 0.59,
+   "maxdd": -32.0
+  },
+  "hold": {
+   "cagr": 14.42,
+   "sharpe": 0.77,
+   "maxdd": -32.0
+  },
+  "invested_pct": 42.3,
+  "avg_day_in_pct": 0.092,
+  "avg_day_all_pct": 0.062
+ },
+ "2024-now": {
+  "strategy": {
+   "cagr": 16.03,
+   "sharpe": 1.22,
+   "maxdd": -19.1
+  },
+  "hold": {
+   "cagr": 19.27,
+   "sharpe": 1.2,
+   "maxdd": -19.8
+  },
+  "invested_pct": 48.7,
+  "avg_day_in_pct": 0.133,
+  "avg_day_all_pct": 0.075
+ },
+ "random_days": {
+  "share_as_good": 0.102,
+  "real_avg_day_pct": 0.109,
+  "random_median_pct": 0.067
+ }
+}
