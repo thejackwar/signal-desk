@@ -185,14 +185,14 @@ footer.foot { border-top: 1px solid var(--hair); margin-top: 56px; padding-top: 
 
 /* a little more colour, as in the app */
 :root { --accent2: #32ade6; --title-grad: linear-gradient(95deg, #0071e3 0%, #32ade6 55%, #34c759 100%); }
-@media all { :root { --accent2: #2dd4bf; --title-grad: linear-gradient(95deg, #e6edf3 0%, #e6edf3 45%, #7dd3fc 75%, #6ee7b7 100%); } }
+@media all { :root { --accent2: #4ade80; --title-grad: linear-gradient(95deg, #e6edf3 0%, #e6edf3 40%, #7dd3fc 65%, #86efac 100%); } }
 body { background: radial-gradient(1100px 560px at 85% -10%, color-mix(in srgb, var(--accent) 16%, transparent), transparent 65%),
   radial-gradient(900px 480px at -5% 105%, color-mix(in srgb, var(--accent2) 11%, transparent), transparent 62%), var(--bg); background-attachment: fixed; }
 .hero h1, .sec { background: var(--title-grad); -webkit-background-clip: text; background-clip: text; color: transparent; }
 .sec small { -webkit-text-fill-color: var(--muted); }
-.seg button[aria-pressed="true"] { background: var(--accent); color: var(--on-accent); box-shadow: 0 1px 6px color-mix(in srgb, var(--accent) 35%, transparent); }
-@media all { .seg button[aria-pressed="true"] { background: var(--accent); } }
-.btn { background: linear-gradient(95deg, #38bdf8 0%, #34d399 100%); color: var(--on-accent); }
+.seg button[aria-pressed="true"] { background: linear-gradient(95deg, #38bdf8 0%, #34d399 60%, #4ade80 100%); color: var(--on-accent); box-shadow: 0 1px 6px color-mix(in srgb, var(--accent) 35%, transparent); }
+@media all { .seg button[aria-pressed="true"] { background: linear-gradient(95deg, #38bdf8 0%, #34d399 60%, #4ade80 100%); } }
+.btn { background: linear-gradient(95deg, #38bdf8 0%, #34d399 60%, #4ade80 100%); color: var(--on-accent); }
 .feat > div, .card, .summary, .set { background: linear-gradient(150deg, color-mix(in srgb, var(--accent) 7%, var(--card)) 0%, var(--card) 55%); }
 
 /* ---------------------------------------------------------------- Options page */
