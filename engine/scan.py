@@ -200,7 +200,7 @@ def load_edge() -> dict | None:
 
 def lineup() -> set[str] | None:
     """Strategies still on the site for this market (docs/data/lineup.json). The rest are in the
-    Vault: still scanned and graded in history.json, but kept out of the feed and notifications.
+    Vault: off the main pages, their alerts only reach people who follow them (on_site below).
     None when the file is missing, which keeps every strategy."""
     if MARKET not in _LINEUP:
         f = ROOT / "docs" / "data" / "lineup.json"
@@ -213,8 +213,15 @@ _LINEUP: dict = {}
 
 
 def on_site(alerts: list[dict]) -> list[dict]:
+    """Vaulted strategies stay in the feed, tagged "vault": the app hides them except from people who
+    follow that strategy, and their phone channel only reaches those who subscribed to it."""
     keep = lineup()
-    return alerts if keep is None else [a for a in alerts if a["strategy"] in keep]
+    for a in alerts:
+        if keep is not None and a["strategy"] not in keep:
+            a["vault"] = True
+        else:
+            a.pop("vault", None)
+    return alerts
 
 
 def stop_hit(df, i: int, side: int, stop) -> int | None:
@@ -517,7 +524,7 @@ def main():
     history["demo"] = args.demo
     HISTORY.write_text(json.dumps(history, separators=(",", ":")))
     print(f"history: {len(history['rows'])} alerts since {history['since']}")
-    found = on_site(found)   # vaulted strategies: graded in the history above, but no feed or notifications
+    found = on_site(found)   # vaulted strategies: tagged, shown only to people who follow them
     old = {a["id"] for a in (previous or {}).get("alerts", [])}
     new = [a for a in found if a["id"] not in old]
     merged = {a["id"]: a for a in found}

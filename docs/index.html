@@ -1746,7 +1746,7 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
   // the daily feed plus the Top-Down alerts for the picked timeframes, newest first
   function buildFeed(c) {
     if (!c.feed) return c.feed;
-    const onSite = a => !S.byId[a.strategy] || isCore(a.strategy);   // vaulted strategies send nothing
+    const onSite = a => !S.byId[a.strategy] || isCore(a.strategy) || S.follow.has(a.strategy);   // vaulted: only for their followers
     const td = S.market !== "commodities" ? (c.td?.alerts || []).filter(a => tdTfs().includes(a.tf)) : [];
     // live (provisional) signals on today's open candle, until the after-close scan replaces them
     if (c.live && !c.live.demo === !c.feed.demo && c.live.session > c.feed.as_of) td.push(...(c.live.alerts || []));
@@ -1791,7 +1791,7 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
   }
 
   function viewAlerts() {
-    const followed = [...S.follow].filter(id => forMarket(S.byId[id]) && isCore(id));
+    const followed = [...S.follow].filter(id => forMarket(S.byId[id]));
     S.firstSel = null;
     if (!followed.length) {
       return header("Alerts") + `<div class="empty"><strong>Pick your strategies</strong>Follow at least one strategy and its alerts show up here.<br><br><a class="btn" href="#strategies">Browse strategies</a></div>`;
@@ -2447,7 +2447,7 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
       if (core.length) h += `<div class="cat">${esc(c)}</div>` + core.map(row).join("");
     }
     const nv = list.filter(s => !isCore(s.id)).length;
-    if (nv) h += `<a class="labcta vaultcta" href="#strategies-vault" style="margin-top:22px"><span><b>Vault</b><small>${nv} strategies with weaker returns or no real edge. No alerts, still in the Strategy Lab.</small></span><span aria-hidden="true">›</span></a>`;
+    if (nv) h += `<a class="labcta vaultcta" href="#strategies-vault" style="margin-top:22px"><span><b>Vault</b><small>${nv} strategies with weaker returns or no real edge. Off the main pages, but you can still follow them, get their alerts and test them.</small></span><span aria-hidden="true">›</span></a>`;
     if (!isComm()) h += `<a class="labcta" href="#brokers-${isCrypto() ? "crypto" : "stocks"}" style="margin-top:22px"><span><b>Brokers</b><small>${isCrypto() ? "Where to buy crypto from Italy" : "Where to buy stocks and ETFs from Italy"}</small></span><span aria-hidden="true">›</span></a>`;
     return h;
   }
@@ -2465,7 +2465,7 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
     if (H && H.rows?.length && !H.demo) H.rows.forEach(r => { if (r[3] > 0 && r[7] != null) (live[H.strategies[r[2]]] ||= []).push(r[7]); });
     const pct = v => v == null ? "–" : (v >= 0 ? "+" : "−") + Math.abs(v).toFixed(1) + "%";
     let h = header("Vault", "#strategies");
-    h += `<p class="tag" style="margin-top:2px;font-size:14.5px">${list.length} strategies taken off the ${L().noun} side of the app${S.lineup?.updated ? ` on ${esc(fmtDate(S.lineup.updated, { day: "numeric", month: "short", year: "numeric" }))}` : ""}. They send no alerts or notifications. Their trades are still graded in the <a href="#record">record</a> and paper-traded, so one can come back if it starts to earn its place.</p>`;
+    h += `<p class="tag" style="margin-top:2px;font-size:14.5px">${list.length} strategies taken off the ${L().noun} side of the app${S.lineup?.updated ? ` on ${esc(fmtDate(S.lineup.updated, { day: "numeric", month: "short", year: "numeric" }))}` : ""}. They're off the main pages, but you can still pick any of them: follow one and its alerts and phone notifications reach you like any other. Their trades are still graded in the <a href="#record">record</a> and paper-traded, so one can come back if it starts to earn its place.</p>`;
     h += `<div class="card" style="margin-top:14px"><h3>How the cut was made</h3><p>A strategy stays when its long-only account beat ${BM.name} buy &amp; hold in the backtest${bench != null ? ` (${pct(bench)} a year)` : ""} and its buy alerts beat a random day 20 sessions later, without a losing live record.${S.market === "commodities" ? " Nothing beat holding the S&amp;P 500 on commodities, so the three that made money with an edge stayed." : ""}</p></div>`;
     if (!list.length) return h + `<div class="empty"><strong>Nothing in the Vault</strong>Every strategy for ${L().noun} is still on the site.</div>`;
     const rows = list.map(s => {
@@ -2479,9 +2479,10 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
       if (!why.length) why.push(s.kind === "lines" ? "kept for the stock side only" : "beaten by a similar strategy on the site");
       return { s, c, edge, n: lv.length, la, why };
     }).sort((a, b) => (b.c ?? -1e9) - (a.c ?? -1e9));
-    h += rows.map(x => `<a class="srow vrow" href="#strategy-${slug(x.s.id)}"><span class="open" style="display:block">
+    h += rows.map(x => `<div class="srow vrow"><a class="open" href="#strategy-${slug(x.s.id)}">
         <h3>${esc(x.s.name)}</h3><p>${esc(x.why.join(" · ").replace(/^./, m => m.toUpperCase()))}</p>
-        <div class="meta"><span>Backtest <b class="${x.c != null && bench != null && x.c > bench ? "up" : "down"}">${pct(x.c)}</b>/yr</span><span>·</span><span>Alert edge <b class="${(x.edge ?? 0) > 0 ? "up" : "down"}">${x.edge == null ? "–" : (x.edge >= 0 ? "+" : "−") + Math.abs(x.edge).toFixed(2) + "%"}</b></span>${x.n ? `<span>·</span><span>Live <b class="${x.la >= 0 ? "up" : "down"}">${pct(x.la)}</b> (${x.n})</span>` : ""}</div></span></a>`).join("");
+        <div class="meta"><span>Backtest <b class="${x.c != null && bench != null && x.c > bench ? "up" : "down"}">${pct(x.c)}</b>/yr</span><span>·</span><span>Alert edge <b class="${(x.edge ?? 0) > 0 ? "up" : "down"}">${x.edge == null ? "–" : (x.edge >= 0 ? "+" : "−") + Math.abs(x.edge).toFixed(2) + "%"}</b></span>${x.n ? `<span>·</span><span>Live <b class="${x.la >= 0 ? "up" : "down"}">${pct(x.la)}</b> (${x.n})</span>` : ""}</div></a>
+        <button class="toggle" role="switch" aria-checked="${S.follow.has(x.s.id)}" aria-label="Follow ${esc(x.s.name)}" data-follow="${x.s.id}"></button></div>`).join("");
     h += `<p class="hint" style="margin:12px 2px 0">Backtest: yearly growth of the long-only account since ${D ? esc(D[0].slice(0, 4)) : "the start"}, before costs. Alert edge: how much better its buy alerts did than a random day after 20 sessions. Live: buy alerts since ${H?.since ? esc(fmtDate(H.since, { day: "numeric", month: "short" })) : "the record started"}, checked 20 sessions later. Past results don't predict future ones.</p>`;
     h += `<a class="labcta" href="#strategylab" style="margin-top:18px"><span><b>Test them yourself</b><small>Every vaulted strategy is still in the Strategy Lab</small></span><span aria-hidden="true">›</span></a>`;
     return h;
@@ -2499,8 +2500,8 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
     h += `<h1 style="font:700 30px/1.1 var(--font-display);margin:4px 0 6px;text-wrap:balance">${esc(s.name)}</h1>`;
     h += `<p class="tag">${esc(s.tagline)}</p>`;
     h += `<div class="lede"><span class="badge">${esc(s.category)}</span><span class="badge">${esc(s.level)}</span><span class="badge">Daily chart</span>${isCore(id) ? "" : `<span class="badge xp">In the Vault</span>`}
-      <span style="flex:1"></span>${isCore(id) ? `<button class="btn ${on ? "on" : ""}" data-follow="${id}">${on ? "✓ Following" : "Follow"}</button>` : ""}</div>`;
-    if (!isCore(id)) h += `<p class="hint" style="margin:10px 2px 0">In the <a href="#strategies-vault">Vault</a>: it didn't earn its place among the most profitable strategies, so it sends no alerts. You can still test it in the <a href="#strategylab">Strategy Lab</a>.</p>`;
+      <span style="flex:1"></span><button class="btn ${on ? "on" : ""}" data-follow="${id}">${on ? "✓ Following" : "Follow"}</button></div>`;
+    if (!isCore(id)) h += `<p class="hint" style="margin:10px 2px 0">In the <a href="#strategies-vault">Vault</a>: it didn't earn its place among the most profitable strategies, so it's off the main pages. Follow it to get its alerts anyway, or test it in the <a href="#strategylab">Strategy Lab</a>.</p>`;
     h += `<div class="prose">${s.how.map(p => `<p>${esc(p)}</p>`).join("")}</div>`;
     h += `<h2>When it alerts</h2><div class="rules">
       <div class="rule bullish"><span class="pill bullish">${s.buys_only || s.long_only ? "buy" : "bullish"}</span><p>${esc(s.bullish)}</p></div>
@@ -2863,7 +2864,8 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
     const hasTurn = Object.values(B.strategies).some(r => r.turnover);
     const net = hasTurn && pref("cmpNet", "gross") === "net";
     let i0 = D.findIndex(d => +d.slice(0, 4) >= from); if (i0 < 0) i0 = 0;
-    const rows = S.strategies.filter(s => isCore(s.id)).map(s => { const r0 = B.strategies[s.id], v = r0?.account?.[side]; const r = v && acctRun(v, i0, size, lev, net ? { dates: D, turn: r0.turnover?.[side] } : null); return r && { s, ...r }; })
+    const withVault = pref("cmpVault", "off") === "on";
+    const rows = S.strategies.filter(s => isCore(s.id) || (withVault && vaulted(s))).map(s => { const r0 = B.strategies[s.id], v = r0?.account?.[side]; const r = v && acctRun(v, i0, size, lev, net ? { dates: D, turn: r0.turnover?.[side] } : null); return r && { s, ...r }; })
       .filter(Boolean).sort((a, b) => b.end - a.end);
     const spy = B.spy?.account ? acctRun(B.spy.account, i0, size, lev, net ? { dates: D, bench: true } : null) : null;
     if (!rows.length) return "";
@@ -2881,6 +2883,7 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
     let h = `<div class="compare"><div class="hd"><h3>${kEur(size)} account since <span class="yrpick"><select data-cmpfrom aria-label="Starting year">${years.map(y => `<option value="${y}"${y === from ? " selected" : ""}>${y}</option>`).join("")}</select></span></h3></div>
       <div class="seg sm" role="group" aria-label="Trades">${[["long", "Long only"], ["all", "Long + short"]].map(([k, l]) => `<button data-cmpside="${k}" aria-pressed="${k === side}">${l}</button>`).join("")}</div>
       <div class="seg sm" role="group" aria-label="Leverage">${[1, 2, 3, 4, 5].map(k => `<button data-cmplev="${k}" aria-pressed="${k === lev}">${k}x</button>`).join("")}</div>
+      <div class="seg sm" role="group" aria-label="Vault strategies">${[["off", "Site strategies"], ["on", "+ Vault"]].map(([k, l]) => `<button data-cmpvault="${k}" aria-pressed="${k === (withVault ? "on" : "off")}">${l}</button>`).join("")}</div>
       ${hasTurn ? `<div class="seg sm" role="group" aria-label="Costs">${[["gross", "Before costs"], ["net", "After Italian taxes & fees"]].map(([k, l]) => `<button data-cmpnet="${k}" aria-pressed="${k === (net ? "net" : "gross")}">${l}</button>`).join("")}</div>` : ""}
       ${B.demo ? `<p class="hint" style="margin:0 0 6px">Demo backtest on simulated prices.</p>` : ""}`;
     const BM = benchOf();
@@ -2888,7 +2891,7 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
       <span class="val">${eurBig(spy.end)}<small class="${spy.ret >= 0 ? "up" : "down"}">${spy.ret >= 0 ? "+" : "−"}${Math.abs(Math.round(spy.ret)).toLocaleString("en-US")}%</small></span></div>`;
     h += rows.map(r => {
       const diff = spy ? r.end - spy.end : null;
-      return `<a class="cmp" href="#strategy-${slug(r.s.id)}"><span class="nm">${esc(r.s.name)}<em>${r.bust ? "wiped out" : net ? `tax ${kEur(r.tax)} · fees ${kEur(r.fees)}` : `worst drop −${Math.abs(Math.round(r.dd))}%`}</em></span>${track(r, r.profit >= 0 ? "pos" : "neg")}
+      return `<a class="cmp" href="#strategy-${slug(r.s.id)}"><span class="nm">${esc(r.s.name)}<em>${r.bust ? "wiped out" : net ? `tax ${kEur(r.tax)} · fees ${kEur(r.fees)}` : `worst drop −${Math.abs(Math.round(r.dd))}%`}${isCore(r.s.id) ? "" : " · Vault"}</em></span>${track(r, r.profit >= 0 ? "pos" : "neg")}
         <span class="val">${eurBig(r.end)}<small class="${(diff ?? r.profit) >= 0 ? "up" : "down"}">${diff != null ? `${diff >= 0 ? "+" : ""}${kEur(diff)} vs ${BM.short}` : `${r.ret >= 0 ? "+" : "−"}${Math.abs(Math.round(r.ret))}%`}</small></span></a>`;
     }).join("");
     h += `<p class="hint" style="margin:8px 0 0">Each strategy runs its own ${eurS(size)}, split equally across every open position: it buys on bullish alerts${side === "all" ? " and sells short on bearish ones" : ""}, and with nothing open the money waits in cash.${spy ? ` The ${BM.name} line puts the same ${eurS(size)} into ${BM.short} in the week of ${esc(when)} and holds it${BM.note}; the thin mark on each bar is where it ended.${BM.short === "SPY" ? ` (SPY itself isn't sold to EU investors: <a href="#brokers-ucits">here are the EU versions</a>.)` : ""}` : ""}${lev > 1 ? ` At ${lev}x every account, ${BM.short} included, borrows to hold ${lev} times its money, so each week's gain or loss is multiplied by ${lev} (rebalanced weekly, borrowing free); a week that loses ${Math.round(100 / lev)}% or more wipes it out.` : ""} Worst drop is the biggest fall from a high along the way. ${net
@@ -5209,7 +5212,7 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
 
   function viewNotify() {
     const pre = S.feed?.ntfy_prefix;
-    const followed = [...S.follow].filter(id => forMarket(S.byId[id]) && isCore(id));
+    const followed = [...S.follow].filter(id => forMarket(S.byId[id]));
     let h = header("Phone alerts");
     h += `<div class="prose"><p>Alerts always appear in this app. To also get a notification on your iPhone the moment the daily scan finds one, use the free <strong>ntfy</strong> app. Each strategy has its own channel, so you only get pinged for the ones you follow.</p></div>`;
     h += `<h2>Set it up</h2><ol class="steps">
@@ -5705,7 +5708,8 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
       const id = f.dataset.follow;
       S.follow.has(id) ? S.follow.delete(id) : S.follow.add(id);
       save(STORE, [...S.follow]);
-      rerender(); return;
+      if (CACHE[S.market]) S.feed = buildFeed(CACHE[S.market]);   // a vaulted strategy's alerts show only while followed
+      rerender(); updateBadge(); return;
     }
     const cs = e.target.closest("[data-chipscroll]");
     if (cs) { const row = cs.parentElement.querySelector(".chips"); row.scrollBy({ left: +cs.dataset.chipscroll * row.clientWidth * 0.7, behavior: "smooth" }); return; }
@@ -5799,6 +5803,8 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
     if (hd) { S.hmPeriod = hd.dataset.hmperiod; rerender(); return; }
     const cs2 = e.target.closest("[data-cmpside]");
     if (cs2) { setPref("cmpSide", cs2.dataset.cmpside); rerender(); return; }
+    const cv = e.target.closest("[data-cmpvault]");
+    if (cv) { setPref("cmpVault", cv.dataset.cmpvault); rerender(); return; }
     const cn = e.target.closest("[data-cmpnet]");
     if (cn) { setPref("cmpNet", cn.dataset.cmpnet); rerender(); return; }
     const cl = e.target.closest("[data-cmplev]");
