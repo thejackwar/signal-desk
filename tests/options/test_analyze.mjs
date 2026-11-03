@@ -11,7 +11,7 @@ for (const id of L.ORDER) {
     "BE", a.breakevens.map(x => x.toFixed(2)).join(","), "POP", (a.pop * 100).toFixed(0) + "%");
   if (id === "iron_condor") {
     ok(near(a.maxGain, prem), "condor max gain = premium");
-    ok(near(-a.maxLoss, Math.min(k[1] - k[0], k[3] - k[2]) * 100 - prem), "condor max loss = wing - premium");
+    ok(near(-a.maxLoss, Math.max(k[1] - k[0], k[3] - k[2]) * 100 - prem), "condor max loss = wider wing - premium");
     ok(a.breakevens.length === 2, "condor two breakevens");
   }
   if (id === "long_straddle") { ok(a.maxGain === null, "straddle unlimited gain"); ok(near(a.maxLoss, prem), "straddle max loss = premium"); }

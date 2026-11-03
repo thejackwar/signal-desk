@@ -6,7 +6,8 @@
 export const R = 0.04;
 export const COMMISSION = 0.65;
 export const SPREAD_PCT = 0.025, SPREAD_MIN = 0.01, SPREAD_MAX = 0.15;
-export const SKEW_INDEX = 0.10, SKEW_STOCK = 0.05, SKEW_UP = 0.3;
+// calibrated on SPY's real option chain (2 Nov 2026), as in engine/options_model.py
+export const ATM_VIX = 0.82, SKEW_INDEX = 0.30, SKEW_STOCK = 0.15, CALL_LIN = 0.46, CALL_QUAD = 0.21;
 export const MIN_DAYS = 21;
 
 // legs: t C/P, s +1 buy / -1 sell, d target |delta| or "atm", exp "far" = the month after
@@ -168,8 +169,8 @@ export function skewIv(atm, S, K, T, slope) {
   T = Math.max(T, 1 / 365);
   let x = -Math.log(K / S) / (atm * Math.sqrt(T));
   x = Math.max(-2.5, Math.min(2.5, x));
-  const k = x > 0 ? slope : slope * SKEW_UP;
-  return Math.max(0.05, atm * (1 + k * x));
+  const k = x > 0 ? 1 + slope * x : Math.max(0.6, 1 + slope / SKEW_INDEX * (CALL_LIN * x + CALL_QUAD * x * x));
+  return Math.max(0.05, atm * k);
 }
 
 export const halfSpread = p => Math.min(SPREAD_MAX, Math.max(SPREAD_MIN, SPREAD_PCT * p));

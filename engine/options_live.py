@@ -100,7 +100,7 @@ def parse_occ(occ: str):
 class Pricer:
     """Bid/ask/mid for a leg: the real quote when there is a usable one, else the model."""
     def __init__(self, today: date, S: float, vix: float, chain: dict | None):
-        self.today, self.S, self.atm, self.chain = today, S, vix / 100, chain
+        self.today, self.S, self.atm, self.chain = today, S, M.ATM_VIX * vix / 100, chain
 
     def model_mid(self, t, K, exp: date):
         T = max((exp - self.today).days, 0) / 365

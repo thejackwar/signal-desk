@@ -21,8 +21,10 @@ R = 0.04                  # risk-free rate used everywhere (a year)
 COMMISSION = 0.65         # $ per contract per leg, each time a contract is opened or closed early
 SPREAD_PCT = 0.025        # half the bid/ask spread as a share of the option price ...
 SPREAD_MIN, SPREAD_MAX = 0.01, 0.15   # ... but at least 1 cent and at most 15 cents a share
-SKEW_INDEX, SKEW_STOCK = 0.10, 0.05   # how much volatility rises per standard deviation below the price
-SKEW_UP = 0.3             # above the price the slope is this fraction of the downside slope
+# Calibrated on SPY's real option chain (Alpaca quotes, 2 Nov 2026, 46 days out):
+ATM_VIX = 0.82            # at-the-money volatility is about 82% of VIX (VIX also prices the skew)
+SKEW_INDEX, SKEW_STOCK = 0.30, 0.15   # below the price: volatility rises this share per standard deviation
+CALL_LIN, CALL_QUAD = 0.46, 0.21      # above the price (index): it falls fast, then flattens (a "smirk")
 MIN_DAYS = 21             # the next monthly expiry must be at least this many days away
 
 # ------------------------------------------------------------------ strategies
@@ -91,12 +93,17 @@ def greeks(S: float, K: float, T: float, iv: float, t: str, r: float = R) -> dic
 
 
 def skew_iv(atm: float, S: float, K: float, T: float, slope: float) -> float:
-    """Volatility for strike K: higher below the price (put skew), slightly lower above it."""
+    """Volatility for strike K: higher below the price (puts cost more), lower above it.
+    x = how many standard deviations K is below the price. Stocks (slope SKEW_STOCK) get a flatter
+    version of the index's shape on both sides."""
     T = max(T, 1 / 365)
     x = -math.log(K / S) / (atm * math.sqrt(T))          # + below the price, - above
     x = max(-2.5, min(2.5, x))
-    k = slope if x > 0 else slope * SKEW_UP
-    return max(0.05, atm * (1 + k * x))
+    if x > 0:
+        k = 1 + slope * x
+    else:
+        k = max(0.6, 1 + slope / SKEW_INDEX * (CALL_LIN * x + CALL_QUAD * x * x))
+    return max(0.05, atm * k)
 
 
 def half_spread(price: float) -> float:

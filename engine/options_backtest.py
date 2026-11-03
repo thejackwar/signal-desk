@@ -82,7 +82,7 @@ def load_demo(n: int = 12, seed: int = 3):
 
 def atm_vol(close: pd.Series, vix: pd.Series, spy: pd.Series, is_index: bool) -> pd.Series:
     """At-the-money implied volatility used for each day (see options_model.py)."""
-    v = (vix / 100).reindex(close.index).ffill()
+    v = (M.ATM_VIX * vix / 100).reindex(close.index).ffill()   # at-the-money vol implied by VIX
     if is_index:
         return v
     def rv(s, n):
@@ -310,7 +310,7 @@ def main(demo: bool = False, out: Path = OUT) -> None:
     start = pd.Timestamp(START)
     result = {"as_of": max(s.index[-1] for s in closes.values()).date().isoformat(), "demo": demo,
               "start": START, "account": ACCOUNT, "risk": RISK,
-              "model": {"rate": M.R, "commission": M.COMMISSION, "spread_pct": M.SPREAD_PCT,
+              "model": {"rate": M.R, "atm_vix": M.ATM_VIX, "commission": M.COMMISSION, "spread_pct": M.SPREAD_PCT,
                         "spread_min": M.SPREAD_MIN, "spread_max": M.SPREAD_MAX, "skew_index": M.SKEW_INDEX,
                         "skew_stock": M.SKEW_STOCK, "tax": TAX, "stamp": STAMP},
               "strategies": {sid: {"kind": st["kind"], "manageable": sid in M.MANAGEABLE} for sid, st in M.STRATEGIES.items()}}

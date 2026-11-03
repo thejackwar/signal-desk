@@ -1,6 +1,6 @@
 // The Options page: Learn (payoff of each strategy), Builder (a strategy on a real option chain),
 // Backtest (modeled, engine/options_backtest.py) and Live (paper trades, engine/options_live.py).
-import * as L from "./options-lib.js?v=1";
+import * as L from "./options-lib.js?v=2";
 
 // Address of the Cloudflare Worker (worker/trendlines-worker.js, which also serves option chains).
 // The Trendlines page's "Data server" setting, if set on this device, is used instead.
@@ -243,7 +243,7 @@ async function modeledChain(sym) {
   if (sym === "SPY") {
     const lv = await fetchJson("data/options/live.json", 15000).catch(() => ({}));
     if (!lv.spot) throw new Error("live quotes and SPY's last close are both unavailable right now");
-    S = lv.spot.S; atm = lv.spot.vix / 100;
+    S = lv.spot.S; atm = L.ATM_VIX * lv.spot.vix / 100;
   } else {
     const js = await fetchJson(`data/stocks/${encodeURIComponent(sym)}.json`, 15000);
     const c = js.c, r = c.slice(1).map((v, i) => Math.log(v / c[i]));
@@ -488,8 +488,8 @@ function renderBacktest() {
   </div>
   <details class="ass"><summary>How the prices are modeled</summary><ul>
     <li>Real historical option quotes cost a lot, so prices come from Black-Scholes (rate ${(mdl.rate * 100).toFixed(0)}%, no dividends, European exercise).</li>
-    <li>Volatility at the money: VIX for SPY. For a stock: its own recent volatility (20 and 60 days) times how far VIX was above SPY's recent volatility that day.</li>
-    <li>Skew: strikes below the price get a higher volatility (${mdl.skew_index * 100}% per standard deviation for SPY, ${mdl.skew_stock * 100}% for stocks), as puts cost more in real markets.</li>
+    <li>Volatility at the money: ${mdl.atm_vix ? Math.round(mdl.atm_vix * 100) + '% of ' : ''}VIX for SPY. For a stock: its own recent volatility (20 and 60 days) times how far that was above SPY's recent volatility that day.</li>
+    <li>Skew: strikes below the price get a higher volatility and strikes above it a lower one, fitted to SPY's real option chain (stocks get a flatter version). Puts cost more than calls, as in real markets.</li>
     <li>Costs: half a bid/ask spread on every option bought or sold (${mdl.spread_pct * 100}% of its price, between $${mdl.spread_min} and $${mdl.spread_max} a share) and $${mdl.commission} a contract.</li>
     <li>Not modeled: earnings jumps in volatility, early assignment, dividends on the option side, currency (results are in % terms).</li>
     <li>Data up to ${shortDate(d.as_of)}. Rerun every Saturday.</li></ul></details>`;
