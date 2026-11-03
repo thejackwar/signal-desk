@@ -30,6 +30,16 @@ jobs:
         continue-on-error: true   # a bad download here must not hold back the stock and crypto results
         run: python engine/backtest.py --market commodities
 
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Candle pattern study for the Learn page
+        continue-on-error: true
+        run: |
+          node engine/candle_study.mjs docs/data/lab.json docs/data/candles.json stocks
+          node engine/candle_study.mjs docs/data/crypto/lab.json docs/data/crypto/candles.json crypto
+          node engine/candle_study.mjs docs/data/commodities/lab.json docs/data/commodities/candles.json commodities
+
       - name: Publish results
         run: |
           git config user.name "signal-desk-bot"
