@@ -3,8 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#f5f5f7" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#0b0f14">
 <title>Options</title>
 <meta name="description" content="Options strategies explained with payoff charts, priced on live option chains for S&amp;P 100 stocks and SPY, backtested since 2010 and paper-traded every month. Free, information only.">
 <!-- Link previews (WhatsApp, LinkedIn, Reddit, X…). Absolute addresses: update SITE if the site moves to its own domain. -->
@@ -49,13 +48,13 @@
   --font: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", Inter, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   color-scheme: light;
 }
-@media (prefers-color-scheme: dark) {
+@media all {
   :root {
-    --bg: #000000; --card: #1c1c1e; --fill: #2c2c2e; --fill-2: #1c1c1e; --hair: #38383a; --hair-2: #2c2c2e;
-    --fg: #f5f5f7; --muted: #a1a1a6; --faint: #6e6e73; --accent: #0a84ff; --accent-hover: #409cff; --link: #2997ff;
-    --shadow: none; --bar: rgba(22,22,23,.8);
-    --c-bg: #1c1c1e; --c-grid: #262628; --c-txt: #8e8e93; --c-cup: #30d158; --c-cdn: #ff453a;
-    --up-line: #32d74b; --down-line: #ff6961; --sup: #0a84ff; --res: #ff9f0a;
+    --bg: #0b0f14; --card: #121820; --fill: #1a222c; --fill-2: #121820; --hair: #2b3644; --hair-2: #1f2833;
+    --fg: #e6edf3; --muted: #a5b1bd; --faint: #7d8a97; --accent: #22c55e; --accent-hover: #4ade80; --link: #4ade80; --on-accent: #04130a;
+    --shadow: none; --bar: rgba(11,15,20,.86);
+    --c-bg: #121820; --c-grid: #1f2833; --c-txt: #8b98a5; --c-cup: #4ade80; --c-cdn: #f87171;
+    --up-line: #4ade80; --down-line: #f87171; --sup: #60a5fa; --res: #f59e0b;
     --pill-up: rgba(48,209,88,.18); --pill-down: rgba(255,69,58,.18); --pill-sq: rgba(255,159,10,.18); --pill-sq-fg: #ff9f0a;
     color-scheme: dark;
   }
@@ -87,7 +86,7 @@ a:hover { text-decoration: underline; }
 .seg button { appearance: none; border: 0; background: none; color: var(--fg); font: 500 13px/1 var(--font); letter-spacing: -.01em;
   padding: 8px 14px; border-radius: 8px; cursor: pointer; transition: background .2s, box-shadow .2s; }
 .seg button[aria-pressed="true"] { background: var(--card); font-weight: 600; box-shadow: 0 1px 3px rgba(0,0,0,.12), 0 0 0 .5px rgba(0,0,0,.04); }
-@media (prefers-color-scheme: dark) { .seg button[aria-pressed="true"] { background: #636366; box-shadow: none; } }
+@media all { .seg button[aria-pressed="true"] { background: #636366; box-shadow: none; } }
 .mk { margin: 32px 0 16px; }
 .mk button { padding: 9px 22px; font-size: 14px; }
 
@@ -99,7 +98,7 @@ form.pick input { width: 100%; height: 52px; background: var(--card); border: 1p
   color: var(--fg); font: 500 17px var(--font); letter-spacing: -.01em; text-transform: uppercase; box-shadow: var(--shadow); transition: border-color .2s, box-shadow .2s; }
 form.pick input::placeholder { text-transform: none; color: var(--faint); font-weight: 400; }
 form.pick input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent) 22%, transparent); }
-.btn { appearance: none; border: 0; background: var(--accent); color: #fff; border-radius: 980px; padding: 0 26px; height: 52px;
+.btn { appearance: none; border: 0; background: var(--accent); color: var(--on-accent); border-radius: 980px; padding: 0 26px; height: 52px;
   font: 500 17px var(--font); letter-spacing: -.01em; cursor: pointer; transition: background .2s; }
 .btn:hover { background: var(--accent-hover); }
 .btn:disabled { opacity: .45; cursor: default; }
@@ -186,14 +185,14 @@ footer.foot { border-top: 1px solid var(--hair); margin-top: 56px; padding-top: 
 
 /* a little more colour, as in the app */
 :root { --accent2: #32ade6; --title-grad: linear-gradient(95deg, #0071e3 0%, #32ade6 55%, #34c759 100%); }
-@media (prefers-color-scheme: dark) { :root { --accent2: #64d2ff; --title-grad: linear-gradient(95deg, #2997ff 0%, #64d2ff 55%, #30d158 100%); } }
+@media all { :root { --accent2: #3b82f6; --title-grad: linear-gradient(95deg, #e6edf3 0%, #e6edf3 55%, #86efac 100%); } }
 body { background: radial-gradient(1100px 560px at 85% -10%, color-mix(in srgb, var(--accent) 16%, transparent), transparent 65%),
   radial-gradient(900px 480px at -5% 105%, color-mix(in srgb, var(--accent2) 11%, transparent), transparent 62%), var(--bg); background-attachment: fixed; }
 .hero h1, .sec { background: var(--title-grad); -webkit-background-clip: text; background-clip: text; color: transparent; }
 .sec small { -webkit-text-fill-color: var(--muted); }
-.seg button[aria-pressed="true"] { background: var(--accent); color: #fff; box-shadow: 0 1px 6px color-mix(in srgb, var(--accent) 35%, transparent); }
-@media (prefers-color-scheme: dark) { .seg button[aria-pressed="true"] { background: var(--accent); } }
-.btn { background: var(--title-grad); background-size: 140% 100%; }
+.seg button[aria-pressed="true"] { background: var(--accent); color: var(--on-accent); box-shadow: 0 1px 6px color-mix(in srgb, var(--accent) 35%, transparent); }
+@media all { .seg button[aria-pressed="true"] { background: var(--accent); } }
+.btn { background: var(--accent); color: var(--on-accent); }
 .feat > div, .card, .summary, .set { background: linear-gradient(150deg, color-mix(in srgb, var(--accent) 7%, var(--card)) 0%, var(--card) 55%); }
 
 /* ---------------------------------------------------------------- Options page */
