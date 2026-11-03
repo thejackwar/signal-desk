@@ -44,16 +44,18 @@ def get(query: str, mode: str, start: date, end: date) -> dict[str, float]:
     p = {"query": query, "mode": mode, "format": "json", "TIMELINESMOOTH": 0,
          "startdatetime": start.strftime("%Y%m%d000000"), "enddatetime": end.strftime("%Y%m%d235959")}
     req = urllib.request.Request(URL + "?" + urllib.parse.urlencode(p), headers={"User-Agent": "Mozilla/5.0"})
-    for attempt in range(6):
-        time.sleep(PAUSE)
+    wait = PAUSE
+    for attempt in range(10):
+        time.sleep(wait)
         try:
-            with urllib.request.urlopen(req, timeout=120) as r:
+            with urllib.request.urlopen(req, timeout=180) as r:
                 raw = r.read().decode("utf-8", "replace")
             data = json.loads(raw)
             break
         except (urllib.error.URLError, TimeoutError, json.JSONDecodeError) as e:
-            print(f"  retry {mode} {start}: {str(e)[:80]}", flush=True)
-            time.sleep(PAUSE * (attempt + 2))
+            # GDELT throttles shared cloud addresses hard: back off for longer each time
+            wait = min(300, 30 * 2 ** attempt)
+            print(f"  retry {mode} {start}: {str(e)[:60]} (waiting {wait}s)", flush=True)
     else:
         return {}
     vals: dict[str, list[float]] = {}
@@ -63,6 +65,22 @@ def get(query: str, mode: str, start: date, end: date) -> dict[str, float]:
             vals.setdefault(d, []).append(float(pt["value"]))
     # if GDELT answers in finer steps than a day: counts add up, tone averages
     return {d: (sum(v) if mode == "timelinevolraw" else sum(v) / len(v)) for d, v in vals.items()}
+
+
+def daily(query: str, mode: str, start: date, end: date) -> dict[str, float]:
+    """The whole span in one request (few requests = less throttling). If GDELT answers in coarser
+    steps than a day for a span that long, ask again half a year at a time."""
+    out = get(query, mode, start, end)
+    if len(out) >= 0.9 * ((end - start).days + 1):
+        return out
+    print(f"  {mode}: {len(out)} points for {(end - start).days + 1} days, asking half-years", flush=True)
+    out = {}
+    for y in range(start.year, end.year + 1):
+        for a, b in ((date(y, 1, 1), date(y, 6, 30)), (date(y, 7, 1), date(y, 12, 31))):
+            a, b = max(a, start), min(b, end)
+            if a <= b:
+                out.update(get(query, mode, a, b))
+    return out
 
 
 def demo(theme: str, start: date, end: date):
@@ -87,16 +105,11 @@ def main():
         if args.demo:
             rows += demo(theme, date(args.start, 1, 1), today)
             continue
-        for y in range(args.start, today.year + 1):
-            # half-years keep each answer at one point per day
-            for a, b in ((date(y, 1, 1), date(y, 6, 30)), (date(y, 7, 1), date(y, 12, 31))):
-                if a > today:
-                    continue
-                b = min(b, today)
-                tone = get(q, "timelinetone", a, b)
-                vol = get(q, "timelinevolraw", a, b)
-                rows += [(theme, d, int(vol.get(d, 0)), round(t, 4)) for d, t in sorted(tone.items())]
-                print(f"{theme} {a}..{b}: {len(tone)} days of tone, {len(vol)} of counts", flush=True)
+        a, b = date(args.start, 1, 1), today
+        tone = daily(q, "timelinetone", a, b)
+        vol = daily(q, "timelinevolraw", a, b)
+        rows += [(theme, d, int(vol.get(d, 0)), round(t, 4)) for d, t in sorted(tone.items()) if d in vol]
+        print(f"{theme}: {len(tone)} days of tone, {len(vol)} of counts", flush=True)
     with open(args.out / "gdelt.csv", "w", newline="") as f:
         w = csv.writer(f)
         w.writerow(["theme", "day", "n", "tone"])

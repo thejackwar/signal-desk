@@ -198,7 +198,9 @@ def stock_strategies(panel: dict[str, pd.DataFrame], bench_ew: pd.Series, cost: 
         for h in HORIZONS:
             lo, expo = tranche_returns(top, rets, h, cost)
             ls, _ = tranche_returns(top, rets, h, cost, short=bot)
+            worst, _ = tranche_returns(bot, rets, h, cost)   # same rules on the worst news: the fair comparison
             out[s][h] = {"long": periods(lo, bench_ew, 252, {"exposure_pct": round(100 * expo.mean(), 1)}),
+                         "worst_news_long": {k: v["strategy"] for k, v in periods(worst, bench_ew, 252).items()},
                          "long_short": {k: v["strategy"] for k, v in periods(ls, bench_ew, 252).items()}}
     return out
 
@@ -252,7 +254,8 @@ def report(res: dict) -> str:
         L.append("")
         if block.get("strategies"):
             L += ["Strategy (long only) vs buy & hold, yearly growth after costs:", "",
-                  "| Signal | Hold | All years | 2019-23 | 2024-now | Sharpe (vs B&H) | Time invested |", "|---|---|---|---|---|---|---|"]
+                  "| Signal | Hold | All years | 2019-23 | 2024-now | Sharpe (vs B&H) | Time invested | Same rules on the worst news |",
+                  "|---|---|---|---|---|---|---|---|"]
             for s, byh in block["strategies"].items():
                 for h, r in byh.items():
                     lo = r["long"]
@@ -261,7 +264,8 @@ def report(res: dict) -> str:
                     cell = lambda k: (f"{lo[k]['strategy']['cagr']:+.1f}% vs {lo[k]['buy_hold']['cagr']:+.1f}%"
                                       + (" ✓" if lo[k]["beats"] else "")) if k in lo else "–"
                     L.append(f"| {SIG_NAME[s]} | {h}d | {cell('all')} | {cell('2019-2023')} | {cell('2024-now')} | "
-                             f"{lo['all']['strategy']['sharpe']:.2f} vs {lo['all']['buy_hold']['sharpe']:.2f} | {lo.get('exposure_pct', 0):.0f}% |")
+                             f"{lo['all']['strategy']['sharpe']:.2f} vs {lo['all']['buy_hold']['sharpe']:.2f} | {lo.get('exposure_pct', 0):.0f}% | "
+                             + (f"{r['worst_news_long']['all']['cagr']:+.1f}%" if r.get("worst_news_long", {}).get("all") else "–") + " |")
             L.append("")
     L += ["## Verdict", ""] + [f"- {v}" for v in res["verdict"]] + [""]
     return "\n".join(L)
@@ -278,7 +282,9 @@ def verdict(res: dict) -> list[str]:
         for s, byh in (b.get("strategies") or {}).items():
             for h, r in byh.items():
                 lo = r["long"]
-                if all(lo.get(k, {}).get("beats") for k in ("all", "2019-2023", "2024-now")):
+                worst = r.get("worst_news_long", {})
+                fair = all(lo[k]["strategy"]["cagr"] > worst[k]["cagr"] for k in worst if k in lo)   # good news beats bad news too
+                if fair and all(lo.get(k, {}).get("beats") for k in ("all", "2019-2023", "2024-now")):
                     winners.append(f"{SIG_NAME[s]} {h}d ({lo['all']['strategy']['cagr']:+.1f}% vs {lo['all']['buy_hold']['cagr']:+.1f}%)")
         line = f"**{b['title']}**: same-day reaction up to {react:+.3f}; "
         line += ("predictive (|t| ≥ 2, same sign before and after 2024): " + ", ".join(f"{SIG_NAME.get(s, 'volume')} {h}d (IC {f['ic']:+.3f})" for s, h, f in strong)
