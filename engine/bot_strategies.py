@@ -567,15 +567,59 @@ def btc_news_step_aside(df: pd.DataFrame) -> StrategyResult:
     return _result(df, trades, notes, stops)
 
 
+_MKT = {}
+
+
+def _market_days() -> dict:
+    """Daily stock-market news tone from GDELT (engine/news_market.py), read once per run."""
+    if "days" not in _MKT:
+        import json
+        from pathlib import Path
+        f = Path(__file__).resolve().parent.parent / "docs" / "data" / "news_market.json"
+        try:
+            _MKT["days"] = json.loads(f.read_text()).get("days", {})
+        except Exception:
+            _MKT["days"] = {}
+    return _MKT["days"]
+
+
+def demo_market_news(df: pd.DataFrame, rng) -> None:
+    """Made-up market news for the example charts: ordinary days, then one very gloomy one."""
+    days, spike = {}, int(rng.integers(130, len(df) - 30))
+    for i, d in enumerate(df.index):
+        days[f"{d:%Y-%m-%d}"] = [int(rng.integers(800, 1200)), -1.0]   # an even tone, so only the spike is gloomy
+        if i == spike - 1:
+            days[f"{d:%Y-%m-%d}"] = [int(rng.integers(1500, 2500)), round(float(rng.uniform(-3.5, -2.5)), 4)]
+    _MKT["days"] = days
+
+
+def news_contrarian(df: pd.DataFrame) -> StrategyResult:
+    """Buy after a gloomy day of stock-market news (the lowest fifth of the past year), hold 5 sessions."""
+    import news_market as nm
+    g = nm.sessions(df.index, _market_days())["gloomy"].values
+    recent = pd.Series(g).rolling(nm.HOLD, min_periods=1).max().astype(bool).values
+    trades = _flag_trades(df, g, ~recent)
+    notes, stops = {}, {}
+    for t in trades:
+        i = t["sig"]
+        notes[i] = ("Gloomy stock-market news: the world's news on the market was among the gloomiest fifth of "
+                    "the past year. Buy at the next open")
+        stops[i] = (None, f"no stop: it sells {nm.HOLD} sessions after the last gloomy day")
+        if t.get("exit_sig") is not None:
+            notes[t["exit_sig"]] = f"{nm.HOLD} sessions without gloomy market news. Sell at the next open"
+            stops[t["exit_sig"]] = (None, "a sell alert closes the trade; it doesn't open a short")
+    return _result(df, trades, notes, stops)
+
+
 BOT_REGISTRY = {
     "deck_live": deck_live, "deck_v6": deck_v6, "deck_ma50": deck_ma50, "deck_v8": deck_v8,
     "pattern_trader": pattern_trader, "breakout_bot": breakout_bot,
     "btc50_f1": btc50_f1, "btc50_touch_f1": btc50_touch_f1, "btc50_touch_f2": btc50_touch_f2,
     "btc50_touch": btc50_touch, "btc50_ma": btc50_ma, "btc_trend_50_200": btc_trend_50_200,
     "btc50_both": btc50_both, "btc50_maonly": btc50_maonly, "btc50_lhonly": btc50_lhonly,
-    "btc_news_step_aside": btc_news_step_aside,
+    "btc_news_step_aside": btc_news_step_aside, "news_contrarian": news_contrarian,
 }
-STOCK_ONLY = {"deck_live", "deck_v6", "deck_ma50", "deck_v8", "pattern_trader", "breakout_bot"}
+STOCK_ONLY = {"deck_live", "deck_v6", "deck_ma50", "deck_v8", "pattern_trader", "breakout_bot", "news_contrarian"}
 BOT_MARKETS = {sid: ("stocks",) if sid in STOCK_ONLY else ("crypto",) for sid in BOT_REGISTRY}
 # the exit each strategy's backtest uses, shown on its strategy page
 BOT_RULES = {
@@ -587,6 +631,7 @@ BOT_RULES = {
     "breakout_bot": "Buy at the next open, sell at a stop 2 ATR below or on a close below the 20-day low",
     "btc_trend_50_200": "Buy at the next open after a close above both averages, sell at the next open after a close below either",
     "btc50_both": "Long or short at the next open after the signal, out at the next open after the rule's exit",
+    "news_contrarian": "Buy at the next open after a gloomy day of stock-market news, sell at the next open 5 sessions after the last one",
     "btc_news_step_aside": "Hold Bitcoin; sell at the next open after a loud bad-news day, buy back at the next open after 5 days without one",
 }
 for _sid in BOT_REGISTRY:

@@ -427,6 +427,34 @@
       "source": "From the trading bot project. Its own test, S&P 100 2018-2026 with the 15-minute signals: +17.7% a year, worst drop −27.7%. This page runs it on this site's own backtest (money split equally across open trades, no costs), so its numbers differ from the bot's."
     },
     {
+      "id": "news_contrarian",
+      "name": "News Contrarian (S&P 500)",
+      "category": "News",
+      "level": "Intermediate",
+      "tagline": "Buy the market after the gloomiest days of stock-market news.",
+      "how": [
+        "Every day the app reads GDELT, a free database that scores the tone of the world's online news, for articles about the stock market or Wall Street, and averages their tone.",
+        "A gloomy day is one whose tone is in the lowest fifth of the past year. The news day ends after the US close, so it waits for the next session's close, then buys every stock in the list at the next open and holds until 5 sessions have passed without another gloomy day. The rest of the time it's in cash."
+      ],
+      "bullish": "The world's market news was among the gloomiest fifth of the past year: buy at the next open.",
+      "bearish": "Five sessions without gloomy market news: sell at the next open.",
+      "why": "Fear in the headlines often comes after prices have already dropped, and the market tends to bounce. In the news study (2019–2026), the S&P 500 rose +0.72% on average in the 5 days after the gloomiest days, against +0.32% for any 5 days, and the link held in both 2019–23 and 2024–26.",
+      "watch_out": [
+        "It's in cash a large part of the time, so in a strong bull market it usually ends up behind simply holding, even when its days in the market are better than average.",
+        "It buys every stock in the list at once: it's a bet on the whole market, not on picking stocks.",
+        "Found in a study that tested many news rules; the evidence grade on this page shows how it stands up on its own.",
+        "If GDELT's data is late, no new gloomy days are seen and it simply waits in cash."
+      ],
+      "settings": "Fixed: lowest fifth of the past year's tone, hold 5 sessions after the last gloomy day.",
+      "markets": [
+        "stocks"
+      ],
+      "own_trades": true,
+      "long_only": true,
+      "exit_text": "It buys at the next open after a gloomy news day (counted from the next session's close) and sells at the next open once 5 sessions have passed without another one.",
+      "source": "From this site's news study (research/news-study on GitHub): GDELT world news tone 2019–2026, signals used only from the close after the news."
+    },
+    {
       "id": "btc50_f1",
       "name": "50-Day Rule (Live)",
       "category": "Trading bot",

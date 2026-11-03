@@ -113,6 +113,8 @@ Object.assign(INDICATORS, {
   btc50_maonly: BOT("50-Day cross, average exit", "Only the 50-day average: no lower-high exit.", R50 + " Sells at the next open after a close below the 50-day.", ["crypto"]),
   btc50_lhonly: BOT("50-Day Rule, lower-high exit", "Sells only on a lower high (1-day confirmation) or the starting stop.", R50 + " Sells after a lower high or a close below the starting stop.", ["crypto"]),
   btc_trend_50_200: BOT("Above the 50 & 200-day", "Holds while the close is above both the 50- and the 200-day average, else cash.", "Buys at the next open after a close above both averages, sells at the next open after a close below either.", ["crypto"]),
+  news_contrarian: BOT("News contrarian (S&P 500)", "Buys the whole list after a gloomy day of stock-market news: the world's news on the stock market (GDELT) in the gloomiest fifth of the past year. In cash the rest of the time.",
+    "Buys at the next open after the session that follows a gloomy news day, sells at the next open 5 sessions after the last one.", ["stocks"], { group: "News" }),
   btc_news_step_aside: BOT("News step-aside (Bitcoin)", "Holds Bitcoin, but steps aside for 5 days after a loud bad-news day: about twice the usual Bitcoin headlines (Benzinga, scored by FinBERT) with a gloomier tone than usual. Bitcoin only; before 2021 there's no news, so it just holds.",
     "Sells at the next open after a loud bad-news day, buys back at the next open after 5 days without one.", ["crypto"], { group: "News" }),
   btc50_both: BOT("50-Day Rule, long + short", "The live rule both ways: long above a rising 50-day, short below a falling one.", "Long or short at the next open after the signal, out at the next open after the rule's exit.", ["crypto"], { buysOnly: false }),

@@ -1,0 +1,26 @@
+name: News study - contrarian SPY test
+
+on:
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r requirements.txt
+      - run: python research/news-study/contrarian.py
+      - name: Commit
+        run: |
+          git config user.name "signal-desk-bot"
+          git config user.email "signal-desk-bot@users.noreply.github.com"
+          git add research/news-study/contrarian.md research/news-study/contrarian.json
+          git commit -m "News study: contrarian SPY test [skip ci]" || true
+          git pull --rebase
+          git push

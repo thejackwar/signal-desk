@@ -412,18 +412,27 @@ def stock_files(data: dict[str, pd.DataFrame], alerts: list[dict], names: dict) 
 
 
 def notify(new_alerts: list[dict], prefix: str, names: dict):
+    """One push per alert; a strategy firing on many stocks at once (News Contrarian buys the whole
+    list) sends one summary per side instead of a flood."""
+    groups: dict = {}
     for a in new_alerts:
-        arrow = "▲" if a["side"] == "bullish" else "▼"
-        msg = f"{arrow} {a['ticker']} {a['price']}: {a['note']}".encode()
-        req = urllib.request.Request(f"https://ntfy.sh/{prefix}-{a['strategy']}", data=msg, method="POST",
-                                     headers={"Title": f"{names.get(a['strategy'], a['strategy'])}: {a['ticker']}",
-                                              "Tags": "chart_with_upwards_trend" if a["side"] == "bullish"
+        groups.setdefault((a["strategy"], a["side"], a["date"]), []).append(a)
+    for (sid, side, _), al in groups.items():
+        arrow = "▲" if side == "bullish" else "▼"
+        if len(al) > 3:
+            tks = ", ".join(a["ticker"] for a in al[:8]) + (f" and {len(al) - 8} more" if len(al) > 8 else "")
+            msg, title = f"{arrow} {len(al)} stocks: {tks}. {al[0]['note']}", f"{names.get(sid, sid)}: {len(al)} alerts"
+        else:
+            msg = "\n".join(f"{arrow} {a['ticker']} {a['price']}: {a['note']}" for a in al)
+            title = f"{names.get(sid, sid)}: {', '.join(a['ticker'] for a in al)}"
+        req = urllib.request.Request(f"https://ntfy.sh/{prefix}-{sid}", data=msg.encode(), method="POST",
+                                     headers={"Title": title,
+                                              "Tags": "chart_with_upwards_trend" if side == "bullish"
                                               else "chart_with_downwards_trend"})
         try:
             urllib.request.urlopen(req, timeout=10)
         except Exception as e:
             print(f"  ! notification failed: {e}")
-
 
 ET = ZoneInfo("America/New_York")
 

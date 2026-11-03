@@ -18,7 +18,7 @@ import pandas as pd
 sys.path.insert(0, str(Path(__file__).parent))
 from chart import payload  # noqa: E402
 from strategies import REGISTRY, set_benchmark  # noqa: E402
-from bot_strategies import demo_news  # noqa: E402
+from bot_strategies import demo_market_news, demo_news  # noqa: E402
 
 ROOT = Path(__file__).resolve().parent.parent
 AFTER = 20  # sessions shown after the signal, to see what happened next
@@ -96,6 +96,8 @@ def find_example(sid, side, max_tries=4000, entries_only=False):
             set_benchmark(simulated_market(df, seed), "SPY")
         if sid == "btc_news_step_aside":
             demo_news(df, rng)
+        if sid == "news_contrarian":
+            demo_market_news(df, rng)
         res = fn(df)
         sig = res.signals.values
         hits = [i for i in np.flatnonzero(sig == side) if i + AFTER < len(df) and i >= 60
