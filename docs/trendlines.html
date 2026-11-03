@@ -307,7 +307,8 @@ let charts = [];
 let loadSeq = 0;
 let names = { SPY: "S&P 500 ETF" };
 let mk = "stocks";
-let GEX = null;              // data/gex/latest.json: daily gamma levels (engine/gex.py), shown for SPY
+let GEX = null;
+let GSET = { live: null, bt: null };   // data/gamma: the rejection setup's paper trades and backtest (engine/gamma_setup.py)              // data/gex/latest.json: daily gamma levels (engine/gex.py), shown for SPY
 
 // ------------------------------------------------------------------ stocks / crypto
 function setMarket(m) {
@@ -508,10 +509,49 @@ function gexPanel() {
     h += `<tr><td>${esc(s)}</td><td>${pfx(L.spot)}</td><td>${pfx(L.flip)}</td><td>${L.regime ? `<span class="reg ${L.regime}">${L.regime}</span>` : "–"}</td>
       <td>${pfx(L.call_wall)}</td><td>${pfx(L.put_wall)}</td><td>${L.magnets.map(m => m.strike).join(" · ")}</td><td>${pc}</td></tr>`;
   }
-  h += `</tbody></table></div>
+  h += `</tbody></table></div>` + setupBlock() + `
     <details><summary>What these levels mean</summary>
     <p>Options dealers hedge what they've sold. Using the usual assumption (dealers long calls, short puts), <b>GEX</b> estimates how many dollars of stock they must trade for each 1% move. <b>Above the gamma flip</b> they buy dips and sell rallies, so moves tend to be damped and prices pinned near big strikes. <b>Below it</b> they sell into drops and buy into rallies, so moves tend to be larger. The <b>call wall</b> often acts as a ceiling and the <b>put wall</b> as a floor; <b>magnets</b> are the strikes with the most gamma near the price. The bars show net GEX per strike (green calls, red puts) within 5% of the price.</p>
     <p>Computed once a day before the open from Alpaca's free option data. It's an estimate: dealers' real positions aren't public, and the put/call premium has no buyer/seller side. We save every day's snapshot so the levels can be backtested once enough history has built up. For information only. Not investment advice.</p></details></section>`;
+  return h;
+}
+// the "trapped buyers" rejection setup: forward test (paper) and backtest
+function statRow(name, ts) {
+  const n = ts.length, rs = ts.map(t => t.r), w = rs.filter(r => r > 0).length, tot = rs.reduce((a, b) => a + b, 0);
+  const col = v => v > 0 ? "var(--up-line)" : v < 0 ? "var(--down-line)" : "inherit";
+  return `<tr><td>${name}</td><td>${n}</td><td>${n ? Math.round(100 * w / n) + "%" : "–"}</td><td style="color:${col(tot)}">${n ? (tot / n >= 0 ? "+" : "") + (tot / n).toFixed(2) + "R" : "–"}</td><td style="color:${col(tot)}">${n ? (tot >= 0 ? "+" : "") + tot.toFixed(1) + "R" : "–"}</td></tr>`;
+}
+function setupBlock() {
+  const L = GSET.live, B = GSET.bt;
+  let h = `<h3 style="margin:26px 0 4px">Rejection setup</h3>
+    <p class="fine" style="font-size:14px;color:var(--muted);margin-bottom:10px">A 5-minute bar tests one of these levels (or yesterday's high, low or close), gets rejected and closes back on its side on at least 1.5× normal volume: the traders who bought or sold the test are trapped. Stop just past the bar, target the next level paying at least 2× the risk, out by 15:55 New York. Checked every 5 minutes on SPY, QQQ and IWM, paper trades only.</p>`;
+  const closed = (L?.trades || []).filter(t => t.exit);
+  const open = (L?.trades || []).filter(t => !t.exit);
+  const head = `<thead><tr><th></th><th>Trades</th><th>Win rate</th><th>Avg</th><th>Total</th></tr></thead>`;
+  h += `<div class="tbl"><table>${head}<tbody>`;
+  if (!L) h += `<tr><td colspan="5" style="font-weight:400;color:var(--muted)">Forward test starts ${esc("4 Nov 2026")}: the first trades appear here.</td></tr>`;
+  else {
+    const f = (k, v) => closed.filter(t => t.filters?.[k] === v);
+    h += statRow("Forward test: all", closed) + statRow("· gamma agrees", f("gamma", true)) + statRow("· gamma disagrees", f("gamma", false))
+      + statRow("· gamma + put/call agree", closed.filter(t => t.filters?.gamma && t.filters?.premium));
+  }
+  h += `</tbody></table></div>`;
+  const recent = [...open, ...closed.slice(-8).reverse()];
+  if (recent.length) {
+    h += `<div class="tbl"><table><thead><tr><th>Trade</th><th>Level</th><th>Entry</th><th>Stop</th><th>Target</th><th>Options agree</th><th>Result</th></tr></thead><tbody>`;
+    for (const t of recent) {
+      const ag = ["gamma", "premium"].filter(k => t.filters?.[k]).join(" + ") || "no";
+      const res = t.exit ? `<span style="color:${t.r > 0 ? "var(--up-line)" : "var(--down-line)"}">${t.r > 0 ? "+" : ""}${t.r}R · ${t.exit.reason}</span>` : "open";
+      h += `<tr><td>${esc(t.date.slice(5))} ${esc(t.bar)} ${esc(t.symbol)} <span class="reg ${t.side === "short" ? "negative" : "positive"}">${t.side}</span></td><td>${esc(t.level_name)} ${fmtPrice(t.level)}</td><td>${fmtPrice(t.entry)}</td><td>${fmtPrice(t.stop)}</td><td>${fmtPrice(t.target)}</td><td>${esc(ag)}</td><td>${res}</td></tr>`;
+    }
+    h += `</tbody></table></div>`;
+  }
+  if (B?.groups?.All?.trades) {
+    const g = B.groups, row = (n, k) => g[k]?.trades ? `<tr><td>${n}</td><td>${g[k].trades}</td><td>${Math.round(100 * g[k].win_rate)}%</td><td>${g[k].avg_r >= 0 ? "+" : ""}${g[k].avg_r.toFixed(2)}R</td><td>${g[k].total_r >= 0 ? "+" : ""}${g[k].total_r}R</td></tr>` : "";
+    h += `<p class="fine" style="margin-top:14px">Backtest ${esc(B.from)} to ${esc(B.to)}, yesterday's high/low/close only (old gamma levels aren't available), no costs:</p>
+      <div class="tbl"><table>${head}<tbody>${row("All", "All")}${row("Shorts", "Short only")}${row("Longs", "Long only")}${row("At prior high", "At prior high")}${row("At prior low", "At prior low")}${row("At prior close", "At prior close")}</tbody></table></div>`;
+  }
+  h += `<p class="fine">Phone alerts: subscribe to the ntfy channel ending in <b>-gamma</b> (same prefix as the other alert channels). Entries use IEX real-time prices; a rejection found late is logged as missed, not traded.</p>`;
   return h;
 }
 function gexBars(G, last) {
@@ -644,6 +684,8 @@ fetch("data/stocks.json").then(r => r.json()).then(d => {
   for (const s of d.stocks || []) names[s.ticker] = s.name;
   if (mk === "stocks") setMarket("stocks");
 }).catch(() => {});
+for (const [k, f] of [["live", "data/gamma/live.json"], ["bt", "data/gamma/backtest.json"]])
+  fetch(f, { cache: "no-store" }).then(r => r.ok ? r.json() : null).then(d => { GSET[k] = d; if (d && GEX && state?.symbol === "SPY") render(); }).catch(() => {});
 fetch("data/gex/latest.json", { cache: "no-store" }).then(r => r.ok ? r.json() : null).then(d => {
   GEX = d; if (GEX && state?.symbol === "SPY") render();
 }).catch(() => {});

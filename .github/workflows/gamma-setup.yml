@@ -1,0 +1,63 @@
+name: Gamma rejection setup
+
+# engine/gamma_setup.py
+#  - live: every 5 minutes while the US market is open, looks for a rejection at today's gamma levels and
+#    yesterday's high/low/close, opens and closes paper trades (docs/data/gamma/live.json) and sends
+#    phone alerts on the ntfy topic <NTFY_PREFIX>-gamma. The script exits straight away when the market
+#    is closed, so the wide hours below cover summer and winter time.
+#    Runs on GitHub's timer AND (once the Worker is pasted again) the scheduler Worker: a second run of the
+#    same 5 minutes finds nothing new, so the two never double a trade.
+#  - backtest: the same rules on two years of 5-minute bars, every Saturday and when the engine changes.
+on:
+  schedule:
+    - cron: "1-59/5 13-21 * * 1-5"   # live
+    - cron: "15 7 * * 6"             # backtest, Saturday 07:15 UTC
+  push:
+    branches: [main]
+    paths: ["engine/gamma_setup.py"]
+  workflow_dispatch:
+    inputs:
+      job:
+        description: "What to run"
+        type: choice
+        options: [live, backtest]
+        default: live
+
+permissions:
+  contents: write
+
+concurrency:
+  group: gamma-setup
+  cancel-in-progress: false
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Live
+        if: (github.event_name == 'schedule' && github.event.schedule != '15 7 * * 6') || (github.event_name == 'workflow_dispatch' && inputs.job == 'live')
+        env:
+          ALPACA_KEY_ID: ${{ secrets.ALPACA_KEY_ID }}
+          ALPACA_SECRET_KEY: ${{ secrets.ALPACA_SECRET_KEY }}
+          NTFY_PREFIX: ${{ vars.NTFY_PREFIX }}
+        run: python engine/gamma_setup.py
+      - name: Backtest
+        if: github.event.schedule == '15 7 * * 6' || github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.job == 'backtest')
+        env:
+          ALPACA_KEY_ID: ${{ secrets.ALPACA_KEY_ID }}
+          ALPACA_SECRET_KEY: ${{ secrets.ALPACA_SECRET_KEY }}
+        run: python engine/gamma_setup.py --backtest
+      - name: Publish
+        run: |
+          git config user.name "signal-desk-bot"
+          git config user.email "signal-desk-bot@users.noreply.github.com"
+          mkdir -p docs/data/gamma
+          git add docs/data/gamma
+          git diff --cached --quiet && exit 0
+          git commit -m "Gamma setup $(date -u +%F\ %H:%M)"
+          for i in 1 2 3; do git pull --rebase && git push && break; sleep 5; done
