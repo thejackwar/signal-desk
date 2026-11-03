@@ -674,6 +674,35 @@
       "source": "From the trading bot project. Its own test, BTC only, 2021-2026: +18.9% a year, worst drop −35.3%, beat BTC in 10 of 10 start dates. This page runs it on this site's own backtest (money split equally across open trades, no costs), so its numbers differ from the bot's."
     },
     {
+      "id": "btc_news_step_aside",
+      "name": "News Step-Aside (Bitcoin)",
+      "category": "News",
+      "level": "Intermediate",
+      "tagline": "Hold Bitcoin, but step aside for 5 days after a loud day of bad news.",
+      "how": [
+        "Every day the app counts Bitcoin's headlines in Alpaca's news feed (Benzinga) and scores each one with FinBERT, a free language model trained on financial news, from −1 (gloomy) to +1 (upbeat).",
+        "A loud bad-news day has at least twice the usual number of headlines (the average of the 60 days before) and a tone below Bitcoin's usual tone (the 120 days before). After one, it sells at the next open (00:00 UTC) and buys back at the next open after 5 days without another one. The rest of the time it simply holds Bitcoin."
+      ],
+      "bullish": "Five days have passed without a loud bad-news day: buy Bitcoin back at the next open.",
+      "bearish": "A loud bad-news day (about twice the usual headlines, gloomier than usual): sell at the next open and stay out 5 days.",
+      "why": "In the news study (2019–2026), the 5 days after a loud bad-news day averaged −1.35% on Bitcoin against +0.67% for any 5 days, and holding but stepping aside beat holding Bitcoin in both 2019–23 and 2024–26. It is the only news rule out of dozens tested that did.",
+      "watch_out": [
+        "It rests on about 35 bad-news days in 7 years, and it was the best of many news rules tested, so part of its edge may be luck. Random sets of the same number of days out did as well about 3% of the time.",
+        "The same rule didn't work on Ethereum from 2024, and nothing in the news study predicted stocks, gold, silver or oil.",
+        "Bitcoin news in the feed starts in 2021: before that there are no news days, so in the backtest it just holds Bitcoin, the same as buy & hold.",
+        "The edge is small (about 1–3 points a year) and costs eat part of it."
+      ],
+      "settings": "Fixed: twice the usual headlines, tone below the usual, 5 days out.",
+      "markets": [
+        "crypto"
+      ],
+      "own_trades": true,
+      "long_only": true,
+      "buys_only": false,
+      "exit_text": "It holds Bitcoin and sells at the next open after a loud bad-news day, then buys back at the next open after 5 days without another one.",
+      "source": "From this site's news study (research/news-study on GitHub): Benzinga headlines scored by FinBERT, 2019–2026, signals only used from the close after the news, costs included."
+    },
+    {
       "id": "topdown",
       "name": "Top-Down Analysis",
       "kind": "lines",

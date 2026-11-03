@@ -110,10 +110,12 @@ Object.assign(INDICATORS, {
   btc50_maonly: BOT("50-Day cross, average exit", "Only the 50-day average: no lower-high exit.", R50 + " Sells at the next open after a close below the 50-day.", ["crypto"]),
   btc50_lhonly: BOT("50-Day Rule, lower-high exit", "Sells only on a lower high (1-day confirmation) or the starting stop.", R50 + " Sells after a lower high or a close below the starting stop.", ["crypto"]),
   btc_trend_50_200: BOT("Above the 50 & 200-day", "Holds while the close is above both the 50- and the 200-day average, else cash.", "Buys at the next open after a close above both averages, sells at the next open after a close below either.", ["crypto"]),
+  btc_news_step_aside: BOT("News step-aside (Bitcoin)", "Holds Bitcoin, but steps aside for 5 days after a loud bad-news day: about twice the usual Bitcoin headlines (Benzinga, scored by FinBERT) with a gloomier tone than usual. Bitcoin only; before 2021 there's no news, so it just holds.",
+    "Sells at the next open after a loud bad-news day, buys back at the next open after 5 days without one.", ["crypto"], { group: "News" }),
   btc50_both: BOT("50-Day Rule, long + short", "The live rule both ways: long above a rising 50-day, short below a falling one.", "Long or short at the next open after the signal, out at the next open after the rule's exit.", ["crypto"], { buysOnly: false }),
 });
 for (const [k, I] of Object.entries(INDICATORS)) { if (!I.base) I.base = k; I.group = I.group || "Indicators"; }
-export const GROUPS = ["Indicators", "Breakouts & strength", "Chart patterns", "Trading-bot strategies", "50-day rule (crypto)"];
+export const GROUPS = ["Indicators", "Breakouts & strength", "Chart patterns", "Trading-bot strategies", "50-day rule (crypto)", "News"];
 // can this strategy run on this market's data? (some need the weekly backtest's extra data)
 export function available(data, ind, market) {
   const I = INDICATORS[ind];

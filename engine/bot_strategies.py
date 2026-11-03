@@ -501,12 +501,79 @@ def btc_trend_50_200(df: pd.DataFrame) -> StrategyResult:
                                               {"name": "SMA 200", "values": _vals(m200), "style": "accent"}])
 
 
+# ------------------------------------------------- news step-aside (research/news-study)
+_NEWS = {}
+
+
+def _news_days() -> dict:
+    """Bitcoin's daily headline counts and tone (engine/news_signal.py), read once per run."""
+    if "days" not in _NEWS:
+        import json
+        from pathlib import Path
+        f = Path(__file__).resolve().parent.parent / "docs" / "data" / "crypto" / "news_signal.json"
+        try:
+            _NEWS["days"] = json.loads(f.read_text()).get("days", {})
+        except Exception:
+            _NEWS["days"] = {}
+    return _NEWS["days"]
+
+
+def demo_news(df: pd.DataFrame, rng) -> None:
+    """Made-up news days for the example charts: ordinary days, then one loud gloomy day."""
+    days, spike = {}, int(rng.integers(130, len(df) - 30))
+    for i, d in enumerate(df.index):
+        n = int(rng.integers(4, 12))
+        days[f"{d:%Y-%m-%d}"] = [n, round(float(rng.normal(0.05, 0.15)), 4)]
+        if i == spike:
+            days[f"{d:%Y-%m-%d}"] = [int(rng.integers(30, 45)), round(float(rng.uniform(-0.6, -0.3)), 4)]
+    _NEWS.update(days=days, force=True)
+
+
+def _is_bitcoin(df: pd.DataFrame) -> bool:
+    """The strategy is Bitcoin's alone (the news study found nothing for other coins). Strategies only
+    see prices, so Bitcoin is recognised as the series that matches the crypto benchmark (Bitcoin)."""
+    from strategies import BENCHMARK
+    b = BENCHMARK.get("close")
+    if _NEWS.get("force"):            # build_examples.py: example charts on made-up prices and news
+        return True
+    if b is None or BENCHMARK.get("name") not in ("Bitcoin", "BTC", "BTC-USD"):
+        return False
+    common = df.index.intersection(b.index)
+    if len(common) < 20:
+        return False
+    r = (df["close"].reindex(common) / b.reindex(common)).dropna()
+    return bool(len(r) and (r - 1).abs().max() < 0.002)
+
+
+def btc_news_step_aside(df: pd.DataFrame) -> StrategyResult:
+    """Hold Bitcoin, but sell after a loud bad-news day and stay out for 5 days (news_signal.py)."""
+    import news_signal as ns
+    if not _is_bitcoin(df):
+        return _result(df, [], {}, {})
+    bad = ns.bad_days(df.index, _news_days())   # before the news file starts there are no bad days: it just holds
+    recent_bad = pd.Series(bad).rolling(ns.STEP_ASIDE, min_periods=1).max().astype(bool).values
+    trades = _flag_trades(df, ~recent_bad, bad)
+    notes, stops = {}, {}
+    for t in trades:
+        i = t["sig"]
+        notes[i] = (f"No loud bad-news day for {ns.STEP_ASIDE} days. Buy back at the next open"
+                    if i >= ns.STEP_ASIDE and bad[i - ns.STEP_ASIDE] else "Holding Bitcoin. Buy at the next open")
+        stops[i] = (None, "no stop: it only sells after a loud bad-news day")
+        if t.get("exit_sig") is not None:
+            j = t["exit_sig"]
+            notes[j] = (f"Loud bad-news day: about twice the usual Bitcoin headlines and a gloomier tone than usual. "
+                        f"Sell at the next open and stay out {ns.STEP_ASIDE} days")
+            stops[j] = (None, "a sell alert closes the trade; it doesn't open a short")
+    return _result(df, trades, notes, stops)
+
+
 BOT_REGISTRY = {
     "deck_live": deck_live, "deck_v6": deck_v6, "deck_ma50": deck_ma50, "deck_v8": deck_v8,
     "pattern_trader": pattern_trader, "breakout_bot": breakout_bot,
     "btc50_f1": btc50_f1, "btc50_touch_f1": btc50_touch_f1, "btc50_touch_f2": btc50_touch_f2,
     "btc50_touch": btc50_touch, "btc50_ma": btc50_ma, "btc_trend_50_200": btc_trend_50_200,
     "btc50_both": btc50_both, "btc50_maonly": btc50_maonly, "btc50_lhonly": btc50_lhonly,
+    "btc_news_step_aside": btc_news_step_aside,
 }
 STOCK_ONLY = {"deck_live", "deck_v6", "deck_ma50", "deck_v8", "pattern_trader", "breakout_bot"}
 BOT_MARKETS = {sid: ("stocks",) if sid in STOCK_ONLY else ("crypto",) for sid in BOT_REGISTRY}
@@ -520,6 +587,7 @@ BOT_RULES = {
     "breakout_bot": "Buy at the next open, sell at a stop 2 ATR below or on a close below the 20-day low",
     "btc_trend_50_200": "Buy at the next open after a close above both averages, sell at the next open after a close below either",
     "btc50_both": "Long or short at the next open after the signal, out at the next open after the rule's exit",
+    "btc_news_step_aside": "Hold Bitcoin; sell at the next open after a loud bad-news day, buy back at the next open after 5 days without one",
 }
 for _sid in BOT_REGISTRY:
     BOT_RULES.setdefault(_sid, "Buy at the next open after the signal, sell at the next open after the rule's exit")

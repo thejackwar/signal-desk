@@ -38,6 +38,15 @@ jobs:
         if: steps.finbert.outcome == 'success'
         continue-on-error: true
         run: python engine/sentiment.py
+      # Bitcoin news days for the News Step-Aside strategy (engine/news_signal.py): only each day's
+      # headline count and average tone are kept, read by the crypto scan at 00:20 UTC.
+      - name: Bitcoin news days (News Step-Aside strategy)
+        if: steps.finbert.outcome == 'success'
+        continue-on-error: true
+        env:
+          ALPACA_KEY_ID: ${{ secrets.ALPACA_KEY_ID }}
+          ALPACA_SECRET_KEY: ${{ secrets.ALPACA_SECRET_KEY }}
+        run: python engine/news_signal.py
       # Source test until 3 Nov 2026: the same scoring on Alpaca/Benzinga headlines, kept in the
       # Actions cache (private), never published. Only each stock's mood is saved, in research/.
       - name: "Source test: restore Alpaca state"
