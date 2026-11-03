@@ -1,7 +1,7 @@
 name: Research engine
 
 # The honest backtest (research/quant/): point-in-time universe, costs, out-of-sample and luck
-# tests. Writes research/quant/results/ only; the website isn't touched.
+# tests. Writes research/quant/results/, and the stock line-up + evidence grades in docs/data/lineup.json.
 on:
   workflow_dispatch: {}
   push:
@@ -41,11 +41,14 @@ jobs:
       - name: Run every stock strategy
         run: python -u research/quant/run.py
 
+      - name: Update the site's stock line-up and evidence grades
+        run: python research/quant/grades.py
+
       - name: Publish results
         run: |
           git config user.name "signal-desk-bot"
           git config user.email "signal-desk-bot@users.noreply.github.com"
-          git add research/quant/results
+          git add research/quant/results docs/data/lineup.json
           git diff --cached --quiet || git commit -m "Research report $(date -u +%F)"
           git pull --rebase
           git push

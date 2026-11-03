@@ -1338,6 +1338,11 @@ body { background:
   .seg button[aria-pressed="true"], .nsw a[aria-pressed="true"], .mswitch button[aria-pressed="true"] { background: var(--amber); }
 }
 .badge { background: var(--amber-bg); color: var(--amber); }
+.grade { display: inline-block; font: 600 11px/1 var(--font-body); padding: 4px 8px; border-radius: 999px; background: var(--surface-2); color: var(--muted); }
+.grade.gA, .grade.gB { color: var(--bull); background: var(--bull-bg); }
+.grade.gD { color: var(--bear); background: var(--bear-bg); }
+.evcard .evnum { display: flex; gap: 18px; flex-wrap: wrap; margin-top: 8px; font-size: 13.5px; color: var(--muted); }
+.evcard .evnum b { color: var(--text, inherit); }
 .tabs a[aria-current="page"] svg, .mgrid svg { filter: drop-shadow(0 2px 6px color-mix(in srgb, var(--amber) 40%, transparent)); }
 .side a.nav[aria-current="page"] { background: var(--amber-bg); color: var(--amber); }
 .day, .cat { color: var(--amber); }
@@ -1565,18 +1570,23 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
 
 <script>
 (() => {
-  const DEFAULT_FOLLOW = ["buy_the_dip", "bollinger", "macd", "rsi", "volume_breakout", "donchian"];
-  // The strategies on the site per market: the most profitable ones in the backtest and the live
-  // record (data/lineup.json, the scanner reads the same file; notes in research/core-strategies.md).
+  const DEFAULT_FOLLOW = ["golden_cross", "ma200", "pattern_trader", "relative_strength", "macd", "volume_breakout", "donchian", "supertrend"];
+  // The strategies on the site per market (data/lineup.json, the scanner reads the same file).
+  // Stocks: set each month by the research engine's evidence grades (research/quant/grades.py):
+  // everything except "Trails holding". Crypto and commodities: the older backtest picks.
   // The rest are in the Vault: no alerts or notifications, still graded in the record, still in the
   // Strategy Lab. The list below is only a fallback for when lineup.json can't load.
   let KEEP = {
-    stocks: ["pattern_trader", "buy_the_dip", "bollinger", "head_shoulders", "macd", "rsi", "deck_v6", "topdown"],
+    stocks: ["golden_cross", "ma200", "relative_strength", "deck_live", "pattern_trader", "deck_ma50", "topdown"],
     crypto: ["macd", "volume_breakout", "supertrend", "donchian", "golden_cross", "topdown"],
     commodities: ["rsi", "bollinger", "buy_the_dip"],
   };
   const isCore = id => (KEEP[S.market] || KEEP.stocks).includes(id);
   const vaulted = s => s && forMarket(s) && !isCore(s.id);
+  // Evidence grade from the research engine (stocks only for now): A Proven edge ... D Trails holding.
+  const evOf = id => S.market === "stocks" ? S.lineup?.evidence?.stocks?.strategies?.[id] || null : null;
+  const gradeChip = id => { const e = evOf(id); return e ? `<span class="grade g${e.grade}" title="Evidence vs holding the same stocks">${esc(e.label)}</span>` : ""; };
+  const GORDER = { A: 0, B: 1, C: 2, D: 3 };
   const STORE = "signaldesk.follow", SEEN = "signaldesk.seen", PREFS = "signaldesk.prefs";
   const S = { strategies: [], byId: {}, feed: null, bt: null, stocks: null, stockBy: {}, follow: new Set(), filter: "all",
               exSide: {}, btSide: {}, trSide: {}, prefs: {}, firstSel: null, navs: 0, lastTab: null, lastSel: null, stockData: {} };
@@ -2097,7 +2107,17 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
 
     // best core strategy in the backtest, against buying and holding the index
     const acc = S.bt?.strategies, dates = S.bt?.account?.dates, spy = S.bt?.spy?.account;
-    if (acc && dates?.length) {
+    const EV = S.market === "stocks" ? S.lineup?.evidence?.stocks : null;
+    const top = EV ? Object.entries(EV.strategies).filter(([id]) => isCore(id))[0] : null;   // already sorted, best evidence first
+    if (top) {
+      const [id, e] = top, yr = v => v == null ? "–" : (v * 100).toFixed(1) + "%";
+      h += `<a class="card hbt" href="#strategy-${slug(id)}">
+        <div class="hk">In our tests · strongest evidence</div>
+        <h3>${esc(stratName(id))}</h3>
+        <div class="hrow"><span>Beat holding the same stocks in</span><b class="${e.beats_hold >= 0.5 ? "up" : "down"}">${Math.round(e.beats_hold * 100)}%</b></div>
+        <p>${yr(e.cagr)} a year after costs, vs ${yr(EV.hold?.cagr)} for holding the same stocks. Grade: ${esc(e.label)}.</p>
+        <p class="hall">Tested on the stocks that were among the 100 biggest at the time, not today's list, with 2021 onwards kept aside. No strategy has proven it beats simply holding. Past results don't predict future ones.</p></a>`;
+    } else if (acc && dates?.length) {
       const best = Object.entries(acc).filter(([id, v]) => isCore(id) && forMarket(S.byId[id]) && v.account?.long?.length)
         .map(([id, v]) => ({ id, end: v.account.long.at(-1) })).sort((a, b) => b.end - a.end)[0];
       if (best) {
@@ -2127,7 +2147,7 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
     const GROUPS = [
       ["Test & learn", "Find out what has worked before you use it", [
         ["#strategylab", "Strategy Lab", `Tune any strategy, add stops, costs and Italian tax, and see what €100k would have become`],
-        ["#strategies", "Strategies", `The ${nStrat} most profitable strategies, each explained with a real chart`],
+        ["#strategies", "Strategies", `${nStrat} strategies, each explained with a real chart and graded on how well it really did`],
         ["#strategies-vault", "Vault", "Strategies taken off the site, with the numbers that put them there", "#strategies"],
         ["#learn", "Learn", "Charts, indicators, risk and how to read a backtest, from zero"],
       ]],
@@ -2515,15 +2535,16 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
       const on = S.follow.has(s.id), hit = S.bt?.strategies?.[s.id]?.bullish?.["20"]?.hit;
       return `<div class="srow"><a class="open" href="#strategy-${slug(s.id)}">
           <h3>${esc(s.name)}</h3><p>${esc(s.tagline)}</p>
-          <div class="meta"><span>${esc(s.level)}</span><span>·</span><span><b>${counts[s.id] || 0}</b> recent alerts</span>${hit != null ? `<span>·</span><span><b>${Math.round(hit)}%</b> right after 20d</span>` : ""}</div></a>
+          <div class="meta">${evOf(s.id) ? `${gradeChip(s.id)}<span>·</span>` : ""}<span>${esc(s.level)}</span><span>·</span><span><b>${counts[s.id] || 0}</b> recent alerts</span>${hit != null ? `<span>·</span><span><b>${Math.round(hit)}%</b> right after 20d</span>` : ""}</div></a>
           <button class="toggle" role="switch" aria-checked="${on}" aria-label="Follow ${esc(s.name)}" data-follow="${s.id}"></button></div>`;
     };
     for (const c of cats) {
-      const core = list.filter(s => s.category === c && isCore(s.id));
+      const core = list.filter(s => s.category === c && isCore(s.id))
+        .sort((a, b) => (GORDER[evOf(a.id)?.grade] ?? 9) - (GORDER[evOf(b.id)?.grade] ?? 9));
       if (core.length) h += `<div class="cat">${esc(c)}</div>` + core.map(row).join("");
     }
     const nv = list.filter(s => !isCore(s.id)).length;
-    if (nv) h += `<a class="labcta vaultcta" href="#strategies-vault" style="margin-top:22px"><span><b>Vault</b><small>${nv} strategies with weaker returns or no real edge. No alerts, still in the Strategy Lab.</small></span><span aria-hidden="true">›</span></a>`;
+    if (nv) h += `<a class="labcta vaultcta" href="#strategies-vault" style="margin-top:22px"><span><b>Vault</b><small>${nv} strategies that did worse than simply holding, or had no real edge. No alerts, still in the Strategy Lab.</small></span><span aria-hidden="true">›</span></a>`;
     if (!isComm()) h += `<a class="labcta" href="#brokers-${isCrypto() ? "crypto" : "stocks"}" style="margin-top:22px"><span><b>Brokers</b><small>${isCrypto() ? "Where to buy crypto from Italy" : "Where to buy stocks and ETFs from Italy"}</small></span><span aria-hidden="true">›</span></a>`;
     return h;
   }
@@ -2542,13 +2563,15 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
     const pct = v => v == null ? "–" : (v >= 0 ? "+" : "−") + Math.abs(v).toFixed(1) + "%";
     let h = header("Vault", "#strategies");
     h += `<p class="tag" style="margin-top:2px;font-size:14.5px">${list.length} strategies taken off the ${L().noun} side of the app${S.lineup?.updated ? ` on ${esc(fmtDate(S.lineup.updated, { day: "numeric", month: "short", year: "numeric" }))}` : ""}. They send no alerts or notifications. Their trades are still graded in the <a href="#record">record</a> and paper-traded, so one can come back if it starts to earn its place.</p>`;
-    h += `<div class="card" style="margin-top:14px"><h3>How the cut was made</h3><p>A strategy stays when its long-only account beat ${BM.name} buy &amp; hold in the backtest${bench != null ? ` (${pct(bench)} a year)` : ""} and its buy alerts beat a random day 20 sessions later, without a losing live record.${S.market === "commodities" ? " Nothing beat holding the S&amp;P 500 on commodities, so the three that made money with an edge stayed." : ""}</p></div>`;
+    if (S.market === "stocks" && S.lineup?.evidence) h += `<div class="card" style="margin-top:14px"><h3>How the cut was made</h3><p>${esc(S.lineup.rule)}</p></div>`;
+    else h += `<div class="card" style="margin-top:14px"><h3>How the cut was made</h3><p>A strategy stays when its long-only account beat ${BM.name} buy &amp; hold in the backtest${bench != null ? ` (${pct(bench)} a year)` : ""} and its buy alerts beat a random day 20 sessions later, without a losing live record.${S.market === "commodities" ? " Nothing beat holding the S&amp;P 500 on commodities, so the three that made money with an edge stayed." : ""}</p></div>`;
     if (!list.length) return h + `<div class="empty"><strong>Nothing in the Vault</strong>Every strategy for ${L().noun} is still on the site.</div>`;
     const rows = list.map(s => {
-      const r = B?.strategies?.[s.id], c = cagr(r?.account?.long), b20 = r?.bullish?.["20"];
+      const r = B?.strategies?.[s.id], e0 = evOf(s.id), c = e0 ? e0.cagr * 100 : cagr(r?.account?.long), b20 = r?.bullish?.["20"];
       const edge = b20 && b20.avg != null && b20.base_avg != null ? b20.avg - b20.base_avg : null, lv = live[s.id] || [];
-      const why = [];
-      if (c != null && bench != null && c <= bench) why.push(c < 0 ? "lost money in the backtest" : `trailed ${BM.short} by ${Math.abs(c - bench).toFixed(1)} pts a year`);
+      const why = [], ev = evOf(s.id);
+      if (ev?.grade === "D") why.push(`holding the same stocks did better in ${Math.round((1 - ev.beats_hold) * 100)}% of tests`);
+      else if (c != null && bench != null && c <= bench) why.push(c < 0 ? "lost money in the backtest" : `trailed ${BM.short} by ${Math.abs(c - bench).toFixed(1)} pts a year`);
       if (edge != null && edge < 0.05) why.push(edge > 0 ? "buy alerts barely better than a random day" : "buy alerts no better than a random day");
       const la = lv.length ? lv.reduce((a, x) => a + x, 0) / lv.length : null;
       if (la != null && la < 0 && lv.length >= 3) why.push(`live buy alerts ${pct(la)} on average`);
@@ -2557,10 +2580,28 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
     }).sort((a, b) => (b.c ?? -1e9) - (a.c ?? -1e9));
     h += rows.map(x => `<a class="srow vrow" href="#strategy-${slug(x.s.id)}"><span class="open" style="display:block">
         <h3>${esc(x.s.name)}</h3><p>${esc(x.why.join(" · ").replace(/^./, m => m.toUpperCase()))}</p>
-        <div class="meta"><span>Backtest <b class="${x.c != null && bench != null && x.c > bench ? "up" : "down"}">${pct(x.c)}</b>/yr</span><span>·</span><span>Alert edge <b class="${(x.edge ?? 0) > 0 ? "up" : "down"}">${x.edge == null ? "–" : (x.edge >= 0 ? "+" : "−") + Math.abs(x.edge).toFixed(2) + "%"}</b></span>${x.n ? `<span>·</span><span>Live <b class="${x.la >= 0 ? "up" : "down"}">${pct(x.la)}</b> (${x.n})</span>` : ""}</div></span></a>`).join("");
+        <div class="meta"><span>${evOf(x.s.id) ? "Tested" : "Backtest"} <b class="${x.c != null && (evOf(x.s.id) ? S.lineup.evidence.stocks.hold.cagr * 100 : bench) != null && x.c > (evOf(x.s.id) ? S.lineup.evidence.stocks.hold.cagr * 100 : bench) ? "up" : "down"}">${pct(x.c)}</b>/yr</span><span>·</span><span>Alert edge <b class="${(x.edge ?? 0) > 0 ? "up" : "down"}">${x.edge == null ? "–" : (x.edge >= 0 ? "+" : "−") + Math.abs(x.edge).toFixed(2) + "%"}</b></span>${x.n ? `<span>·</span><span>Live <b class="${x.la >= 0 ? "up" : "down"}">${pct(x.la)}</b> (${x.n})</span>` : ""}</div></span></a>`).join("");
     h += `<p class="hint" style="margin:12px 2px 0">Backtest: yearly growth of the long-only account since ${D ? esc(D[0].slice(0, 4)) : "the start"}, before costs. Alert edge: how much better its buy alerts did than a random day after 20 sessions. Live: buy alerts since ${H?.since ? esc(fmtDate(H.since, { day: "numeric", month: "short" })) : "the record started"}, checked 20 sessions later. Past results don't predict future ones.</p>`;
     h += `<a class="labcta" href="#strategylab" style="margin-top:18px"><span><b>Test them yourself</b><small>Every vaulted strategy is still in the Strategy Lab</small></span><span aria-hidden="true">›</span></a>`;
     return h;
+  }
+
+  // How strong the evidence is that following this strategy beats just holding the same stocks.
+  function evidenceCard(id) {
+    const e = evOf(id), E = S.lineup?.evidence?.stocks;
+    if (!e) return "";
+    const p = v => v == null ? "–" : Math.round(v * 100) + "%";
+    const yr = v => v == null ? "–" : (v * 100).toFixed(1) + "%";
+    const say = {
+      A: "Strong evidence of a real edge over holding the same stocks, even allowing for luck.",
+      B: "Did better than holding the same stocks in most tests, including the years it was never picked on. Not proven: it could still be luck.",
+      C: "No clear edge: it did neither clearly better nor clearly worse than holding the same stocks.",
+      D: "Holding the same stocks did better in almost every test.",
+    }[e.grade];
+    return `<div class="card evcard" style="margin-top:14px"><h3>Evidence: ${esc(e.label)}</h3><p>${say}</p>
+      <div class="evnum"><span>Beat holding in <b>${p(e.beats_hold)}</b> of tests</span><span>2021 on: <b>${p(e.beats_hold_test)}</b></span>
+      <span>Yearly growth <b>${yr(e.cagr)}</b> vs holding <b>${yr(E.hold?.cagr)}</b></span></div>
+      <p class="hint" style="margin:8px 0 0">Tested ${E.updated ? `on ${esc(fmtDate(E.updated, { day: "numeric", month: "short", year: "numeric" }))} ` : ""}on the stocks that were among the 100 biggest at each point since 2011 (not today's list, which only shows the winners), after trading costs, with 2021 onwards kept aside as a test it was never picked on. Past results don't predict future ones.</p></div>`;
   }
 
   function viewStrategy(id) {
@@ -2574,9 +2615,10 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
     let h = header("", "#strategies");
     h += `<h1 style="font:700 30px/1.1 var(--font-display);margin:4px 0 6px;text-wrap:balance">${esc(s.name)}</h1>`;
     h += `<p class="tag">${esc(s.tagline)}</p>`;
-    h += `<div class="lede"><span class="badge">${esc(s.category)}</span><span class="badge">${esc(s.level)}</span><span class="badge">Daily chart</span>${isCore(id) ? "" : `<span class="badge xp">In the Vault</span>`}
+    h += `<div class="lede"><span class="badge">${esc(s.category)}</span><span class="badge">${esc(s.level)}</span><span class="badge">Daily chart</span>${gradeChip(id)}${isCore(id) ? "" : `<span class="badge xp">In the Vault</span>`}
       <span style="flex:1"></span>${isCore(id) ? `<button class="btn ${on ? "on" : ""}" data-follow="${id}">${on ? "✓ Following" : "Follow"}</button>` : ""}</div>`;
-    if (!isCore(id)) h += `<p class="hint" style="margin:10px 2px 0">In the <a href="#strategies-vault">Vault</a>: it didn't earn its place among the most profitable strategies, so it sends no alerts. You can still test it in the <a href="#strategylab">Strategy Lab</a>.</p>`;
+    if (!isCore(id)) h += `<p class="hint" style="margin:10px 2px 0">In the <a href="#strategies-vault">Vault</a>: ${evOf(id) ? "in our tests, simply holding the same stocks did better" : "it didn't earn its place among the most profitable strategies"}, so it sends no alerts. You can still test it in the <a href="#strategylab">Strategy Lab</a>.</p>`;
+    h += evidenceCard(id);
     h += `<div class="prose">${s.how.map(p => `<p>${esc(p)}</p>`).join("")}</div>`;
     h += `<h2>When it alerts</h2><div class="rules">
       <div class="rule bullish"><span class="pill bullish">${s.buys_only || s.long_only ? "buy" : "bullish"}</span><p>${esc(s.bullish)}</p></div>

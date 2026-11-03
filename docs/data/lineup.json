@@ -1,9 +1,216 @@
 {
   "updated": "2026-11-03",
-  "rule": "A strategy stays on the site when, in the backtest, its long-only account beat buying and holding the market and its buy alerts beat a random day after 20 sessions, without a losing live record. Commodities: nothing beat holding the S&P 500, so the three that made money with an edge stay. Top-Down Analysis stays as its own kind of tool. Everything else is in the Vault: no alerts or notifications, still tracked in the record and paper trades, still testable in the Strategy Lab. Notes: research/core-strategies.md.",
+  "rule": "Stocks: every strategy is retested each month against simply holding the same stocks, on the stocks that were actually among the 100 biggest at the time (not today's list), after trading costs, with 2021 onwards kept aside as a test the strategies were never picked on. Each gets an evidence grade: Proven edge, Promising, Unproven or Trails holding. Strategies that trail holding go to the Vault. Crypto and commodities: picked on the older backtest until the new tests cover them.",
   "keep": {
-    "stocks": ["pattern_trader", "buy_the_dip", "bollinger", "head_shoulders", "macd", "rsi", "deck_v6", "topdown"],
-    "crypto": ["macd", "volume_breakout", "supertrend", "donchian", "golden_cross", "topdown"],
-    "commodities": ["rsi", "bollinger", "buy_the_dip"]
+    "stocks": [
+      "golden_cross",
+      "ma200",
+      "relative_strength",
+      "deck_live",
+      "pattern_trader",
+      "deck_ma50",
+      "topdown"
+    ],
+    "crypto": [
+      "macd",
+      "volume_breakout",
+      "supertrend",
+      "donchian",
+      "golden_cross",
+      "topdown"
+    ],
+    "commodities": [
+      "rsi",
+      "bollinger",
+      "buy_the_dip"
+    ]
+  },
+  "evidence": {
+    "stocks": {
+      "updated": "2026-11-03",
+      "labels": {
+        "A": "Proven edge",
+        "B": "Promising",
+        "C": "Unproven",
+        "D": "Trails holding"
+      },
+      "hold": {
+        "cagr": 0.1466,
+        "sharpe": 0.8325
+      },
+      "strategies": {
+        "golden_cross": {
+          "grade": "B",
+          "label": "Promising",
+          "beats_hold": 0.755,
+          "beats_hold_test": 0.733,
+          "deflated": 0.0655,
+          "cagr": 0.144,
+          "sharpe": 0.8823
+        },
+        "ma200": {
+          "grade": "C",
+          "label": "Unproven",
+          "beats_hold": 0.6975,
+          "beats_hold_test": 0.6805,
+          "deflated": 0.0449,
+          "cagr": 0.1402,
+          "sharpe": 0.8718
+        },
+        "relative_strength": {
+          "grade": "C",
+          "label": "Unproven",
+          "beats_hold": 0.4865,
+          "beats_hold_test": 0.4075,
+          "deflated": 0.0723,
+          "cagr": 0.1423,
+          "sharpe": 0.8344
+        },
+        "deck_live": {
+          "grade": "C",
+          "label": "Unproven",
+          "beats_hold": 0.2155,
+          "beats_hold_test": 0.4345,
+          "deflated": 0.0137,
+          "cagr": 0.1189,
+          "sharpe": 0.7641
+        },
+        "pattern_trader": {
+          "grade": "C",
+          "label": "Unproven",
+          "beats_hold": 0.144,
+          "beats_hold_test": 0.558,
+          "deflated": 0.0638,
+          "cagr": 0.1261,
+          "sharpe": 0.6742
+        },
+        "deck_ma50": {
+          "grade": "C",
+          "label": "Unproven",
+          "beats_hold": 0.035,
+          "beats_hold_test": 0.4455,
+          "deflated": 0.0013,
+          "cagr": 0.0972,
+          "sharpe": 0.6532
+        },
+        "volume_breakout": {
+          "grade": "D",
+          "label": "Trails holding",
+          "beats_hold": 0.084,
+          "beats_hold_test": 0.113,
+          "deflated": 0.0091,
+          "cagr": 0.1105,
+          "sharpe": 0.6577
+        },
+        "donchian": {
+          "grade": "D",
+          "label": "Trails holding",
+          "beats_hold": 0.079,
+          "beats_hold_test": 0.024,
+          "deflated": 0.0045,
+          "cagr": 0.1149,
+          "sharpe": 0.7366
+        },
+        "double_top_bottom": {
+          "grade": "D",
+          "label": "Trails holding",
+          "beats_hold": 0.069,
+          "beats_hold_test": 0.031,
+          "deflated": 0.018,
+          "cagr": 0.1121,
+          "sharpe": 0.634
+        },
+        "head_shoulders": {
+          "grade": "D",
+          "label": "Trails holding",
+          "beats_hold": 0.05,
+          "beats_hold_test": 0.085,
+          "deflated": 0.0209,
+          "cagr": 0.0845,
+          "sharpe": 0.4705
+        },
+        "breakout_bot": {
+          "grade": "D",
+          "label": "Trails holding",
+          "beats_hold": 0.042,
+          "beats_hold_test": 0.1295,
+          "deflated": 0.0012,
+          "cagr": 0.0909,
+          "sharpe": 0.6243
+        },
+        "triangle": {
+          "grade": "D",
+          "label": "Trails holding",
+          "beats_hold": 0.032,
+          "beats_hold_test": 0.0005,
+          "deflated": 0.0031,
+          "cagr": 0.0797,
+          "sharpe": 0.5034
+        },
+        "bollinger": {
+          "grade": "D",
+          "label": "Trails holding",
+          "beats_hold": 0.029,
+          "beats_hold_test": 0.078,
+          "deflated": 0.0109,
+          "cagr": 0.1189,
+          "sharpe": 0.6586
+        },
+        "buy_the_dip": {
+          "grade": "D",
+          "label": "Trails holding",
+          "beats_hold": 0.0175,
+          "beats_hold_test": 0.108,
+          "deflated": 0.0115,
+          "cagr": 0.1336,
+          "sharpe": 0.7449
+        },
+        "deck_v6": {
+          "grade": "D",
+          "label": "Trails holding",
+          "beats_hold": 0.0125,
+          "beats_hold_test": 0.015,
+          "deflated": 0.0004,
+          "cagr": 0.0999,
+          "sharpe": 0.6556
+        },
+        "deck_v8": {
+          "grade": "D",
+          "label": "Trails holding",
+          "beats_hold": 0.003,
+          "beats_hold_test": 0.001,
+          "deflated": 0.0001,
+          "cagr": 0.0849,
+          "sharpe": 0.5706
+        },
+        "supertrend": {
+          "grade": "D",
+          "label": "Trails holding",
+          "beats_hold": 0.002,
+          "beats_hold_test": 0.0535,
+          "deflated": 0.0002,
+          "cagr": 0.0931,
+          "sharpe": 0.6004
+        },
+        "rsi": {
+          "grade": "D",
+          "label": "Trails holding",
+          "beats_hold": 0.0,
+          "beats_hold_test": 0.0945,
+          "deflated": 0.0005,
+          "cagr": 0.0562,
+          "sharpe": 0.3548
+        },
+        "macd": {
+          "grade": "D",
+          "label": "Trails holding",
+          "beats_hold": 0.0,
+          "beats_hold_test": 0.0135,
+          "deflated": 0.0,
+          "cagr": 0.0399,
+          "sharpe": 0.3041
+        }
+      }
+    }
   }
 }
