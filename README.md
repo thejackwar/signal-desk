@@ -2,10 +2,9 @@
 
 A phone-friendly web app that explains about thirty trading strategies, backtests
 them in the Strategy Lab and shows their alerts on the S&P 100, crypto and commodities.
-Strategies are split into **core** (best results in the backtest and the live track
-record) and **experimental** (the rest, folded away but still alertable and testable).
-The split lives in `CORE` in `docs/index.html`; the numbers behind it are in
-`research/core-strategies.md`. You pick the strategies you want to follow;
+Stock strategies carry an **evidence grade** from the research engine (`research/quant/`):
+how well each did against simply holding the same stocks, on a point-in-time universe, after
+costs, out of sample. The line-up is `docs/data/lineup.json`; notes in `research/core-strategies.md`. You pick the strategies you want to follow;
 each one has a plain-English explanation, its exact rules, and worked chart
 examples. **Information only: it doesn't trade and it isn't investment advice.**
 

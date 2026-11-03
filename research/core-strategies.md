@@ -1,3 +1,21 @@
+# Update 3 Nov 2026 (evening): stock line-up now set by the research engine
+
+The research engine (`research/quant/`, report in `research/quant/results/REPORT.md`) retested every
+stock strategy on a point-in-time universe (the top 100 S&P 500 members by trading value each
+quarter, not today's S&P 100), after 10 bp per trade, against holding the same stocks, with
+2011–2020 for development and 2021 onwards as an untouched test.
+
+Findings: today's list flattered every strategy by 2–8 points a year; no strategy passes the
+deflated Sharpe luck test; the "most profitable" picks below were mostly noise (a 2011–2020 ranking
+barely predicts 2021–2026, rank correlation 0.11).
+
+New rule (stocks): each strategy gets an evidence grade (`research/quant/grades.py`, rerun monthly):
+Proven edge / Promising / Unproven / Trails holding. Everything except "Trails holding" stays on the
+site; Top-Down stays as a tool. On 3 Nov 2026: Promising: Golden / Death Cross. Unproven: 200-Day
+Trend, Relative Strength, Deck (Live Rules), Pattern Trader, Deck (+50-Day). Vault: the other 13,
+including Buy the Dip, Bollinger, RSI, MACD and Head & Shoulders. Crypto and commodities unchanged
+until the engine covers them.
+
 # Update 3 Nov 2026: experimental strategies moved to the Vault
 
 The "Experimental" fold-out is gone. Strategies that aren't among the most profitable are now in
