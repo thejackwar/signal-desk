@@ -10,6 +10,11 @@
 // comes straight from the exchange and t is plain UTC (seconds); daily candles start at 00:00 UTC.
 // Source: Binance's public market data (<COIN>/USDT, no keys needed); if Binance doesn't list the coin
 // or can't be reached, Kraken (<COIN>/USD, last 720 candles per timeframe).
+//
+// Options (for docs/options.html): GET /?options=AAPL  ->  { symbol, spot, end, expirations: [...],
+// chain: [[expiry, "C"|"P", strike, bid, ask, iv, delta, gamma, theta, vega], ...] }
+// The next four monthly expiries (third Fridays), strikes within 35% of the price, from Alpaca's
+// option snapshots (feed=indicative, the free one). Cached for a minute.
 
 const ALPACA = "https://data.alpaca.markets/v2/stocks/bars";
 const DAY = 86400e3;
@@ -223,6 +228,7 @@ export default {
   async fetch(request, env, ctx) {
     if (request.method === "OPTIONS") return new Response(null, { headers: cors });
     const url = new URL(request.url);
+    if (url.searchParams.has("options")) return options(url.searchParams.get("options"), env, ctx);
     let sym = (url.searchParams.get("symbol") || "").trim().toUpperCase().replace(/\./g, "-");
     if (["SPX", "^SPX", "^GSPC"].includes(sym)) sym = "SPY";       // index: no Alpaca data
     const coin = TICKERS.has(sym) ? null : coinOf(sym);
@@ -268,5 +274,71 @@ async function crypto(coin, ctx) {
     return res;
   } catch (e) {
     return json({ error: `No data for ${sym}. ${e.message || e}` }, 502);
+  }
+}
+
+// ------------------------------------------------------------------ option chains
+const OPT_SNAP = "https://data.alpaca.markets/v1beta1/options/snapshots/";
+const thirdFriday = (y, m) => { const d = new Date(Date.UTC(y, m, 15)); d.setUTCDate(15 + ((5 - d.getUTCDay() + 7) % 7)); return d; };
+function monthlyExpiries(n) {
+  const today = new Date(); today.setUTCHours(0, 0, 0, 0);
+  const out = [];
+  for (let y = today.getUTCFullYear(), m = today.getUTCMonth(); out.length < n; m++) {
+    if (m === 12) { m = 0; y++; }
+    const f = thirdFriday(y, m);
+    if (f >= today) out.push(f);
+  }
+  return out;
+}
+const iso = d => d.toISOString().slice(0, 10);
+
+async function options(raw, env, ctx) {
+  let sym = (raw || "").trim().toUpperCase().replace(/\./g, "-");
+  if (["SPX", "^SPX", "^GSPC"].includes(sym)) sym = "SPY";
+  if (!TICKERS.has(sym)) return json({ error: `${sym || "No ticker"}: options are available for S&P 100 stocks and SPY.` }, 400);
+  if (!env.ALPACA_KEY_ID || !env.ALPACA_SECRET_KEY) return json({ error: "The Alpaca keys are not set on the Worker." }, 500);
+  const cache = typeof caches !== "undefined" ? caches.default : null;
+  const key = new Request(`https://trendlines.cache/options/${sym}`);
+  if (cache) { const hit = await cache.match(key); if (hit) return hit; }
+  const headers = { "APCA-API-KEY-ID": env.ALPACA_KEY_ID, "APCA-API-SECRET-KEY": env.ALPACA_SECRET_KEY };
+  const aSym = sym.replace(/-/g, ".");
+  try {
+    // price: the latest trade on IEX (free), or the last daily close
+    const sr = await fetch(`https://data.alpaca.markets/v2/stocks/${encodeURIComponent(aSym)}/snapshot?feed=iex`, { headers });
+    if (!sr.ok) throw new Error(`Alpaca price: HTTP ${sr.status}`);
+    const sj = await sr.json();
+    const spot = sj.latestTrade?.p || sj.dailyBar?.c || sj.prevDailyBar?.c;
+    if (!spot) throw new Error("no price");
+    const exps = monthlyExpiries(4);
+    const rows = [];
+    await Promise.all(exps.map(async f => {
+      // a holiday Friday (Good Friday) moves the expiry to Thursday: look at both days
+      const params = new URLSearchParams({ feed: "indicative", limit: "1000",
+        expiration_date_gte: iso(new Date(f.getTime() - DAY)), expiration_date_lte: iso(f),
+        strike_price_gte: (spot * 0.65).toFixed(2), strike_price_lte: (spot * 1.35).toFixed(2) });
+      for (let page = 0; page < 6; page++) {
+        const r = await fetch(`${OPT_SNAP}${encodeURIComponent(aSym)}?${params}`, { headers });
+        if (!r.ok) throw new Error(`Alpaca options: HTTP ${r.status} ${(await r.text()).slice(0, 160)}`);
+        const js = await r.json();
+        for (const [occ, s] of Object.entries(js.snapshots || {})) {
+          const t = occ.slice(-15);
+          const exp = `20${t.slice(0, 2)}-${t.slice(2, 4)}-${t.slice(4, 6)}`;
+          const q = s.latestQuote || {}, g = s.greeks || {};
+          const num = v => (v == null || !isFinite(v)) ? null : +(+v).toFixed(5);
+          rows.push([exp, t[6], +t.slice(7) / 1000, num(q.bp), num(q.ap), num(s.impliedVolatility),
+            num(g.delta), num(g.gamma), num(g.theta), num(g.vega)]);
+        }
+        if (!js.next_page_token) break;
+        params.set("page_token", js.next_page_token);
+      }
+    }));
+    if (!rows.length) return json({ error: `No option quotes for ${sym} right now.` }, 404);
+    rows.sort((a, b) => a[0].localeCompare(b[0]) || a[1].localeCompare(b[1]) || a[2] - b[2]);
+    const expirations = [...new Set(rows.map(r => r[0]))];
+    const res = json({ symbol: sym, spot, end: new Date().toISOString(), expirations, chain: rows }, 200, { "Cache-Control": "max-age=60" });
+    if (cache) ctx?.waitUntil?.(cache.put(key, res.clone()));
+    return res;
+  } catch (e) {
+    return json({ error: String(e.message || e) }, 502);
   }
 }

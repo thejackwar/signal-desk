@@ -1,0 +1,60 @@
+name: Options
+
+# Options page (docs/options.html):
+#  - backtest: engine/options_backtest.py, modeled prices since 2010 on SPY and the S&P 100.
+#    Every Saturday, and whenever the options engine changes.
+#  - paper trades: engine/options_live.py, one SPY contract per strategy on real Alpaca option quotes.
+#    After each daily (stocks) scan, like the other live trades.
+on:
+  schedule:
+    - cron: "30 6 * * 6"     # Saturday 06:30 UTC, after the weekly backtest
+  push:
+    branches: [main]
+    paths: ["engine/options_*.py"]
+  workflow_run:
+    workflows: ["Daily scan"]
+    types: [completed]
+  workflow_dispatch:
+    inputs:
+      job:
+        description: "What to run"
+        type: choice
+        options: [both, backtest, live]
+        default: both
+
+permissions:
+  contents: write
+
+concurrency:
+  group: options
+  cancel-in-progress: false
+
+jobs:
+  options:
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: pip install -r requirements.txt
+      - name: Backtest
+        if: github.event_name == 'schedule' || github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.job != 'live')
+        run: python engine/options_backtest.py
+      - name: Paper trades
+        if: github.event_name == 'workflow_run' || github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.job != 'backtest')
+        env:
+          ALPACA_KEY_ID: ${{ secrets.ALPACA_KEY_ID }}
+          ALPACA_SECRET_KEY: ${{ secrets.ALPACA_SECRET_KEY }}
+        run: python engine/options_live.py
+      - name: Publish
+        run: |
+          git config user.name "signal-desk-bot"
+          git config user.email "signal-desk-bot@users.noreply.github.com"
+          git add docs/data/options
+          git diff --cached --quiet || git commit -m "Options $(date -u +%F)"
+          git pull --rebase
+          git push

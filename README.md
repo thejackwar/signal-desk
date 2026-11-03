@@ -22,6 +22,12 @@ docs/                    the website (served by GitHub Pages)
                          Robustness tab: vs holding the same stocks, walk-forward, settings plateau, bootstrap luck test (tests/lab/test_robust.mjs)
   rating.js              technical rating (Strong sell … Strong buy) on each stock page; test: tests/rating/test_rating.py
   trendlines.html/.js    automatic trendlines + support/resistance, stocks and crypto (data from worker/)
+  options.html/.js       Options page: Learn (payoff charts of 11 strategies), Builder (a strategy on a live option
+                         chain from the trendlines Worker's ?options= route, or modeled prices), Backtest, Live
+  options-lib.js         the options model (Black-Scholes, skew, strike picking, payoff analysis);
+                         mirrors engine/options_model.py, tests: tests/options/test_parity.py, tests/options/test_analyze.mjs
+  data/options/backtest.json  modeled options backtest since 2010, SPY + S&P 100 (engine/options_backtest.py)
+  data/options/live.json      options paper trades on SPY from the go-live day, real Alpaca quotes (engine/options_live.py)
   data/sentiment.json    News mood: per-stock headline tone from Google News, established outlets (engine/sentiment.py, FinBERT, hourly news job)
   research/mood-compare/ News mood source test, Google vs Alpaca, moods only (engine/mood_compare.py; until 3 Nov 2026)
   data/calendar.json     upcoming earnings, IPOs, economy (written by engine/events.py)
@@ -50,6 +56,7 @@ engine/
   names.json             company names and sectors
 .github/workflows/scan.yml      runs the scan every weekday after the US close
 .github/workflows/backtest.yml  reruns the backtest every Saturday
+.github/workflows/options.yml   options backtest (Saturdays) and options paper trades (after each daily scan)
 .github/workflows/live-trades.yml  updates the live trades after each daily scan (stocks, crypto, commodities)
 ```
 

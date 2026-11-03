@@ -38,6 +38,10 @@ directly (weekly to 5-minute, times in UTC) from Binance's public market data (c
 If Binance doesn't list a coin (Monero) or can't be reached, it uses Kraken (coin/USD, last 720
 candles per timeframe). No extra secrets are needed.
 
+**Options:** `GET /?options=AAPL` returns the next four monthly option chains (strikes within 35% of
+the price) from Alpaca's free option snapshots, for `docs/options.html`. Same keys, nothing to add:
+just paste the updated code (step 3) once.
+
 If you change the code, paste it again in step 3. Tests: `python tests/trendlines/test_parity.py`,
 `node tests/trendlines/test_crypto.mjs`, `node tests/trendlines/test_sr.mjs`.
 
