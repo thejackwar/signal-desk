@@ -24,20 +24,29 @@ ROOT = Path(__file__).resolve().parents[2]
 REPORTS = {"stocks": ROOT / "research" / "quant" / "results" / "report.json",
            "crypto": ROOT / "research" / "quant" / "results" / "crypto" / "report.json"}
 VS = {"stocks": "holding the same stocks", "crypto": "holding bitcoin"}
+# which years the grade is judged on: stocks on all of them (2011 on, with 2021 on as a check);
+# crypto on 2021 on only, because earlier crypto prices were tiny and illiquid and the market was
+# a different thing (the earlier years are still in the research report)
+JUDGE = {"stocks": "full", "crypto": "test"}
+PERIOD = {"stocks": "2011–now", "crypto": "2021–now"}
 LINEUP = ROOT / "docs" / "data" / "lineup.json"
 ALWAYS = ["topdown"]
 LABELS = {"A": "Proven edge", "B": "Promising", "C": "Unproven", "D": "Trails holding"}
 RULE = ("Every strategy is retested each month against simply holding: for stocks, holding the same stocks, "
         "using the ones that were actually among the 100 biggest at the time (not today's list); for crypto, "
-        "holding bitcoin, tested on bitcoin and ether. After trading costs, with 2021 onwards kept aside as a "
-        "test the strategies were never picked on. Each gets an evidence grade: Proven edge, Promising, "
+        "holding bitcoin, tested on bitcoin and ether and judged on 2021 onwards only. After trading costs, "
+        "with 2021 onwards also the stock test the strategies were never picked on. Each gets an evidence grade: Proven edge, Promising, "
         "Unproven or Trails holding. Strategies that trail holding go to the Vault. Commodities: picked on "
         "the older backtest until the new tests cover them.")
 
 
-def grade(s: dict) -> str:
+def grade(s: dict, judge: str = "full") -> str:
     full = (s["full"].get("vs_hold") or {}).get("p_better") or 0
     test = (s["test"].get("vs_hold") or {}).get("p_better") or 0
+    if judge == "test":   # 2021 on only
+        if (s.get("dsr_test", s.get("dsr")) or 0) >= 0.95 and test >= 0.95:
+            return "A"
+        return "B" if test >= 0.70 else "D" if test < 0.20 else "C"
     if (s.get("dsr") or 0) >= 0.95 and full >= 0.95:
         return "A"
     if full >= 0.70 and test >= 0.60:
@@ -57,20 +66,24 @@ def update(market: str, rep: dict):
     if rep.get("demo"):
         print(f"{market}: demo report, line-up left alone")
         return
-    hold = rep.get("hold") or rep["benchmarks"]["ew_pit"]["full"]
+    j = JUDGE[market]
+    hk = "btc" if market == "crypto" else "ew_pit"
+    hold = rep["benchmarks"][hk][j]
     ev = {}
     for sid, s in rep["strategies"].items():
-        g = grade(s)
+        g = grade(s, j)
         ev[sid] = {"grade": g, "label": LABELS[g],
-                   "beats_hold": s["full"]["vs_hold"]["p_better"], "beats_hold_test": s["test"]["vs_hold"]["p_better"],
-                   "deflated": s.get("dsr"), "cagr": s["full"].get("cagr"), "sharpe": s["full"].get("sharpe")}
+                   "beats_hold": s[j]["vs_hold"]["p_better"], "beats_hold_test": s["test"]["vs_hold"]["p_better"],
+                   "deflated": s.get("dsr_test", s.get("dsr")) if j == "test" else s.get("dsr"),
+                   "cagr": s[j].get("cagr"), "sharpe": s[j].get("sharpe"), "maxdd": s[j].get("maxdd")}
     order = sorted(ev, key=lambda k: (ev[k]["grade"], -(ev[k]["beats_hold"] or 0)))
     lu = json.loads(LINEUP.read_text())
     lu["updated"] = rep["generated_at"][:10]
     lu["rule"] = RULE
     lu["keep"][market] = [k for k in order if ev[k]["grade"] != "D"] + ALWAYS
     lu.setdefault("evidence", {})[market] = {"updated": rep["generated_at"][:10], "labels": LABELS, "vs": VS[market],
-                                             "hold": {"cagr": hold.get("cagr"), "sharpe": hold.get("sharpe")},
+                                             "period": PERIOD[market], "judged_on": j,
+                                             "hold": {"cagr": hold.get("cagr"), "sharpe": hold.get("sharpe"), "maxdd": hold.get("maxdd")},
                                              "strategies": {k: ev[k] for k in order}}
     LINEUP.write_text(json.dumps(lu, indent=2) + "\n")
     for k in order:

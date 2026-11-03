@@ -2183,7 +2183,7 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
         <h3>${esc(stratName(id))}</h3>
         <div class="hrow"><span>Beat ${esc(EV.vs || "holding")} in</span><b class="${e.beats_hold >= 0.5 ? "up" : "down"}">${Math.round(e.beats_hold * 100)}%</b></div>
         <p>${yr(e.cagr)} a year after costs, vs ${yr(EV.hold?.cagr)} for ${esc(EV.vs || "holding")}. Grade: ${esc(e.label)}.</p>
-        <p class="hall">${S.market === "crypto" ? "Tested on bitcoin and ether since 2015, not today's top coins" : "Tested on the stocks that were among the 100 biggest at the time, not today's list"}, with 2021 onwards kept aside. ${Object.values(EV.strategies).some(x => x.grade === "A") ? "" : "No strategy has proven it beats simply holding. "}Past results don't predict future ones.</p></a>`;
+        <p class="hall">${S.market === "crypto" ? "Tested on bitcoin and ether from 2021 on, not today's top coins" : "Tested on the stocks that were among the 100 biggest at the time, not today's list, with 2021 onwards kept aside"}. ${Object.values(EV.strategies).some(x => x.grade === "A") ? "" : "No strategy has proven it beats simply holding. "}Past results don't predict future ones.</p></a>`;
     } else if (acc && dates?.length) {
       const best = Object.entries(acc).filter(([id, v]) => isCore(id) && forMarket(S.byId[id]) && v.account?.long?.length)
         .map(([id, v]) => ({ id, end: v.account.long.at(-1) })).sort((a, b) => b.end - a.end)[0];
@@ -2667,9 +2667,9 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
       D: `${vs[0].toUpperCase() + vs.slice(1)} did better in almost every test.`,
     }[e.grade];
     return `<div class="card evcard" style="margin-top:14px"><h3>Evidence: ${esc(e.label)}</h3><p>${say}</p>
-      <div class="evnum"><span>Beat holding in <b>${p(e.beats_hold)}</b> of tests</span><span>2021 on: <b>${p(e.beats_hold_test)}</b></span>
+      <div class="evnum"><span>Beat holding in <b>${p(e.beats_hold)}</b> of tests${crypto ? " (2021 on)" : ""}</span>${crypto ? "" : `<span>2021 on: <b>${p(e.beats_hold_test)}</b></span>`}
       <span>Yearly growth <b>${yr(e.cagr)}</b> vs ${crypto ? "bitcoin" : "holding"} <b>${yr(E.hold?.cagr)}</b></span></div>
-      <p class="hint" style="margin:8px 0 0">Tested ${E.updated ? `on ${esc(fmtDate(E.updated, { day: "numeric", month: "short", year: "numeric" }))} ` : ""}${crypto ? "on bitcoin and ether since 2015 (today's top coins would only show the survivors), after 0.2% trading costs per buy and per sell," : "on the stocks that were among the 100 biggest at each point since 2011 (not today's list, which only shows the winners), after trading costs,"} with 2021 onwards kept aside as a test it was never picked on. Past results don't predict future ones.</p></div>`;
+      <p class="hint" style="margin:8px 0 0">Tested ${E.updated ? `on ${esc(fmtDate(E.updated, { day: "numeric", month: "short", year: "numeric" }))} ` : ""}${crypto ? "on bitcoin and ether from 2021 on (earlier crypto prices were tiny and today's top coins would only show the survivors), after 0.2% trading costs per buy and per sell," : "on the stocks that were among the 100 biggest at each point since 2011 (not today's list, which only shows the winners), after trading costs,"} ${crypto ? "" : "with 2021 onwards kept aside as a test it was never picked on. "}Past results don't predict future ones.</p></div>`;
   }
 
   function viewStrategy(id) {
@@ -3039,7 +3039,28 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
     return h;
   }
 
+  // Markets the research engine covers: how each strategy on the site did against simply holding,
+  // instead of the old account race (today's list, no costs). Commodities keep compareCard below.
+  function evidenceListCard() {
+    const E = S.lineup?.evidence?.[S.market];
+    const rows = Object.entries(E.strategies).filter(([id]) => isCore(id) && S.byId[id]);
+    const nv = Object.keys(E.strategies).filter(id => !isCore(id)).length;
+    const yr = v => v == null ? "–" : (v * 100).toFixed(1) + "%";
+    const hold = E.hold?.cagr;
+    let h = `<div class="card"><h3>How they did vs ${esc(E.vs.replace(/^holding /, "holding "))}</h3>
+      <p>${esc(E.period)}, after trading costs, ${S.market === "crypto" ? "on bitcoin and ether" : "on the stocks that were among the 100 biggest at the time"}. Holding: <b>${yr(hold)}</b> a year${E.hold?.maxdd != null ? `, worst fall ${yr(E.hold.maxdd)}` : ""}.</p>`;
+    h += rows.map(([id, e]) => { const w = Math.round((e.beats_hold ?? 0) * 100);
+      return `<a href="#strategy-${slug(id)}" style="display:block;color:inherit;text-decoration:none;padding:9px 0;border-top:1px solid var(--line)">
+        <div style="display:flex;justify-content:space-between;gap:8px;align-items:center"><b style="font-size:14.5px;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(stratName(id))}</b>${gradeChip(id)}</div>
+        <div style="display:flex;align-items:center;gap:8px;margin-top:6px;font-size:12.5px;color:var(--muted)">
+          <span style="flex:1;height:6px;border-radius:3px;background:var(--surface-2);overflow:hidden"><span style="display:block;height:100%;width:${w}%;background:${w >= 50 ? "var(--bull)" : "var(--muted)"}"></span></span>
+          <span style="white-space:nowrap">beat holding in <b>${w}%</b> of tests · ${yr(e.cagr)}/yr${e.maxdd != null ? ` · worst ${yr(e.maxdd)}` : ""}</span></div></a>`; }).join("");
+    if (nv) h += `<p class="hint" style="margin:8px 0 0">${nv} more in the <a href="#strategies-vault">Vault</a>: holding did better. Want to try your own settings and years? Use the <a href="#strategylab">Strategy Lab</a>.</p>`;
+    return h + `</div>`;
+  }
+
   function compareCard() {
+    if (S.lineup?.evidence?.[S.market]) return evidenceListCard();
     const B = S.bt, A = B?.account; if (!A?.dates?.length) return "";
     const D = A.dates, size = A.size || 100000, mk = S.market || "stocks";
     const first = +D[0].slice(0, 4), last = +D[D.length - 1].slice(0, 4);

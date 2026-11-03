@@ -75,6 +75,7 @@ def main():
     nets = {s: acc[s][key]["net"] for s in sids}
     P = R.period
     trial = [float(P(n, "full").mean() / P(n, "full").std()) for n in nets.values() if P(n, "full").std() > 0]
+    trial_test = [float(P(n, "test").mean() / P(n, "test").std()) for n in nets.values() if P(n, "test").std() > 0]
 
     report = {}
     for s in sids:
@@ -89,6 +90,7 @@ def main():
         cu = a[("current", 0, "split")]
         row["current_list"] = M.stats(P(cu["net"], "full"), cu["k"])
         row["dsr"] = M.deflated_sharpe(P(m["net"] - hold, "full"), trial)
+        row["dsr_test"] = M.deflated_sharpe(P(m["net"] - hold, "test"), trial_test)
         report[s] = row
 
     bench = {n: {p: M.stats(P(r, p)) for p in ("full", "dev", "test")}

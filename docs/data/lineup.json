@@ -1,6 +1,6 @@
 {
   "updated": "2026-11-03",
-  "rule": "Every strategy is retested each month against simply holding: for stocks, holding the same stocks, using the ones that were actually among the 100 biggest at the time (not today's list); for crypto, holding bitcoin, tested on bitcoin and ether. After trading costs, with 2021 onwards kept aside as a test the strategies were never picked on. Each gets an evidence grade: Proven edge, Promising, Unproven or Trails holding. Strategies that trail holding go to the Vault. Commodities: picked on the older backtest until the new tests cover them.",
+  "rule": "Every strategy is retested each month against simply holding: for stocks, holding the same stocks, using the ones that were actually among the 100 biggest at the time (not today's list); for crypto, holding bitcoin, tested on bitcoin and ether and judged on 2021 onwards only. After trading costs, with 2021 onwards also the stock test the strategies were never picked on. Each gets an evidence grade: Proven edge, Promising, Unproven or Trails holding. Strategies that trail holding go to the Vault. Commodities: picked on the older backtest until the new tests cover them.",
   "keep": {
     "stocks": [
       "golden_cross",
@@ -13,23 +13,22 @@
     ],
     "crypto": [
       "btc_trend_50_200",
-      "supertrend",
-      "donchian",
       "ma200",
-      "btc50_ma",
-      "golden_cross",
-      "macd",
+      "double_top_bottom",
+      "donchian",
+      "supertrend",
+      "volume_breakout",
+      "btc50_touch",
+      "btc50_touch_f1",
       "btc50_f1",
       "btc50_both",
       "btc50_maonly",
-      "double_top_bottom",
-      "volume_breakout",
-      "triangle",
-      "btc50_touch",
-      "btc50_lhonly",
-      "btc50_touch_f1",
+      "btc50_ma",
+      "golden_cross",
       "btc50_touch_f2",
+      "btc50_lhonly",
       "relative_strength",
+      "triangle",
       "topdown"
     ],
     "commodities": [
@@ -48,9 +47,12 @@
         "D": "Trails holding"
       },
       "vs": "holding the same stocks",
+      "period": "2011\u2013now",
+      "judged_on": "full",
       "hold": {
         "cagr": 0.1466,
-        "sharpe": 0.8325
+        "sharpe": 0.8325,
+        "maxdd": -0.3469
       },
       "strategies": {
         "golden_cross": {
@@ -60,7 +62,8 @@
           "beats_hold_test": 0.733,
           "deflated": 0.0655,
           "cagr": 0.144,
-          "sharpe": 0.8823
+          "sharpe": 0.8823,
+          "maxdd": -0.3289
         },
         "ma200": {
           "grade": "C",
@@ -69,7 +72,8 @@
           "beats_hold_test": 0.6805,
           "deflated": 0.0449,
           "cagr": 0.1402,
-          "sharpe": 0.8718
+          "sharpe": 0.8718,
+          "maxdd": -0.2806
         },
         "relative_strength": {
           "grade": "C",
@@ -78,7 +82,8 @@
           "beats_hold_test": 0.4075,
           "deflated": 0.0723,
           "cagr": 0.1423,
-          "sharpe": 0.8344
+          "sharpe": 0.8344,
+          "maxdd": -0.3224
         },
         "deck_live": {
           "grade": "C",
@@ -87,7 +92,8 @@
           "beats_hold_test": 0.4345,
           "deflated": 0.0137,
           "cagr": 0.1189,
-          "sharpe": 0.7641
+          "sharpe": 0.7641,
+          "maxdd": -0.2893
         },
         "pattern_trader": {
           "grade": "C",
@@ -96,7 +102,8 @@
           "beats_hold_test": 0.558,
           "deflated": 0.0638,
           "cagr": 0.1261,
-          "sharpe": 0.6742
+          "sharpe": 0.6742,
+          "maxdd": -0.3535
         },
         "deck_ma50": {
           "grade": "C",
@@ -105,7 +112,8 @@
           "beats_hold_test": 0.4455,
           "deflated": 0.0013,
           "cagr": 0.0972,
-          "sharpe": 0.6532
+          "sharpe": 0.6532,
+          "maxdd": -0.3647
         },
         "volume_breakout": {
           "grade": "D",
@@ -114,7 +122,8 @@
           "beats_hold_test": 0.113,
           "deflated": 0.0091,
           "cagr": 0.1105,
-          "sharpe": 0.6577
+          "sharpe": 0.6577,
+          "maxdd": -0.2836
         },
         "donchian": {
           "grade": "D",
@@ -123,7 +132,8 @@
           "beats_hold_test": 0.024,
           "deflated": 0.0045,
           "cagr": 0.1149,
-          "sharpe": 0.7366
+          "sharpe": 0.7366,
+          "maxdd": -0.3117
         },
         "double_top_bottom": {
           "grade": "D",
@@ -132,7 +142,8 @@
           "beats_hold_test": 0.031,
           "deflated": 0.018,
           "cagr": 0.1121,
-          "sharpe": 0.634
+          "sharpe": 0.634,
+          "maxdd": -0.2911
         },
         "head_shoulders": {
           "grade": "D",
@@ -141,7 +152,8 @@
           "beats_hold_test": 0.085,
           "deflated": 0.0209,
           "cagr": 0.0845,
-          "sharpe": 0.4705
+          "sharpe": 0.4705,
+          "maxdd": -0.4533
         },
         "breakout_bot": {
           "grade": "D",
@@ -150,7 +162,8 @@
           "beats_hold_test": 0.1295,
           "deflated": 0.0012,
           "cagr": 0.0909,
-          "sharpe": 0.6243
+          "sharpe": 0.6243,
+          "maxdd": -0.352
         },
         "triangle": {
           "grade": "D",
@@ -159,7 +172,8 @@
           "beats_hold_test": 0.0005,
           "deflated": 0.0031,
           "cagr": 0.0797,
-          "sharpe": 0.5034
+          "sharpe": 0.5034,
+          "maxdd": -0.4471
         },
         "bollinger": {
           "grade": "D",
@@ -168,7 +182,8 @@
           "beats_hold_test": 0.078,
           "deflated": 0.0109,
           "cagr": 0.1189,
-          "sharpe": 0.6586
+          "sharpe": 0.6586,
+          "maxdd": -0.3565
         },
         "buy_the_dip": {
           "grade": "D",
@@ -177,7 +192,8 @@
           "beats_hold_test": 0.108,
           "deflated": 0.0115,
           "cagr": 0.1336,
-          "sharpe": 0.7449
+          "sharpe": 0.7449,
+          "maxdd": -0.3536
         },
         "deck_v6": {
           "grade": "D",
@@ -186,7 +202,8 @@
           "beats_hold_test": 0.015,
           "deflated": 0.0004,
           "cagr": 0.0999,
-          "sharpe": 0.6556
+          "sharpe": 0.6556,
+          "maxdd": -0.2924
         },
         "deck_v8": {
           "grade": "D",
@@ -195,7 +212,8 @@
           "beats_hold_test": 0.001,
           "deflated": 0.0001,
           "cagr": 0.0849,
-          "sharpe": 0.5706
+          "sharpe": 0.5706,
+          "maxdd": -0.2896
         },
         "supertrend": {
           "grade": "D",
@@ -204,7 +222,8 @@
           "beats_hold_test": 0.0535,
           "deflated": 0.0002,
           "cagr": 0.0931,
-          "sharpe": 0.6004
+          "sharpe": 0.6004,
+          "maxdd": -0.301
         },
         "rsi": {
           "grade": "D",
@@ -213,7 +232,8 @@
           "beats_hold_test": 0.0945,
           "deflated": 0.0005,
           "cagr": 0.0562,
-          "sharpe": 0.3548
+          "sharpe": 0.3548,
+          "maxdd": -0.3922
         },
         "macd": {
           "grade": "D",
@@ -222,7 +242,8 @@
           "beats_hold_test": 0.0135,
           "deflated": 0.0,
           "cagr": 0.0399,
-          "sharpe": 0.3041
+          "sharpe": 0.3041,
+          "maxdd": -0.4244
         }
       }
     },
@@ -235,208 +256,233 @@
         "D": "Trails holding"
       },
       "vs": "holding bitcoin",
+      "period": "2021\u2013now",
+      "judged_on": "test",
       "hold": {
-        "cagr": 0.5897,
-        "sharpe": 1.0356
+        "cagr": 0.1838,
+        "sharpe": 0.5808,
+        "maxdd": -0.7663
       },
       "strategies": {
         "btc_trend_50_200": {
           "grade": "B",
           "label": "Promising",
-          "beats_hold": 0.8305,
+          "beats_hold": 0.8395,
           "beats_hold_test": 0.8395,
           "deflated": 0.0012,
-          "cagr": 0.6686,
-          "sharpe": 1.3141
+          "cagr": 0.3891,
+          "sharpe": 0.994,
+          "maxdd": -0.5154
+        },
+        "ma200": {
+          "grade": "B",
+          "label": "Promising",
+          "beats_hold": 0.7485,
+          "beats_hold_test": 0.7485,
+          "deflated": 0.001,
+          "cagr": 0.3297,
+          "sharpe": 0.8158,
+          "maxdd": -0.5706
+        },
+        "double_top_bottom": {
+          "grade": "B",
+          "label": "Promising",
+          "beats_hold": 0.731,
+          "beats_hold_test": 0.731,
+          "deflated": 0.0,
+          "cagr": 0.1474,
+          "sharpe": 0.7997,
+          "maxdd": -0.1921
+        },
+        "donchian": {
+          "grade": "B",
+          "label": "Promising",
+          "beats_hold": 0.71,
+          "beats_hold_test": 0.71,
+          "deflated": 0.0009,
+          "cagr": 0.3227,
+          "sharpe": 0.8066,
+          "maxdd": -0.5675
         },
         "supertrend": {
           "grade": "C",
           "label": "Unproven",
-          "beats_hold": 0.687,
+          "beats_hold": 0.648,
           "beats_hold_test": 0.648,
           "deflated": 0.0007,
-          "cagr": 0.61,
-          "sharpe": 1.1933
-        },
-        "donchian": {
-          "grade": "C",
-          "label": "Unproven",
-          "beats_hold": 0.562,
-          "beats_hold_test": 0.71,
-          "deflated": 0.0009,
-          "cagr": 0.589,
-          "sharpe": 1.1095
-        },
-        "ma200": {
-          "grade": "C",
-          "label": "Unproven",
-          "beats_hold": 0.5525,
-          "beats_hold_test": 0.7485,
-          "deflated": 0.001,
-          "cagr": 0.5919,
-          "sharpe": 1.1036
-        },
-        "btc50_ma": {
-          "grade": "C",
-          "label": "Unproven",
-          "beats_hold": 0.399,
-          "beats_hold_test": 0.511,
-          "deflated": 0.0,
-          "cagr": 0.3183,
-          "sharpe": 1.006
-        },
-        "golden_cross": {
-          "grade": "C",
-          "label": "Unproven",
-          "beats_hold": 0.3835,
-          "beats_hold_test": 0.489,
-          "deflated": 0.0003,
-          "cagr": 0.5276,
-          "sharpe": 1.0212
-        },
-        "macd": {
-          "grade": "C",
-          "label": "Unproven",
-          "beats_hold": 0.3805,
-          "beats_hold_test": 0.165,
-          "deflated": 0.0,
-          "cagr": 0.4178,
-          "sharpe": 0.9867
-        },
-        "btc50_f1": {
-          "grade": "C",
-          "label": "Unproven",
-          "beats_hold": 0.2935,
-          "beats_hold_test": 0.5375,
-          "deflated": 0.0,
-          "cagr": 0.2192,
-          "sharpe": 0.8945
-        },
-        "btc50_both": {
-          "grade": "C",
-          "label": "Unproven",
-          "beats_hold": 0.2935,
-          "beats_hold_test": 0.5375,
-          "deflated": 0.0,
-          "cagr": 0.2192,
-          "sharpe": 0.8945
-        },
-        "btc50_maonly": {
-          "grade": "C",
-          "label": "Unproven",
-          "beats_hold": 0.2555,
-          "beats_hold_test": 0.5265,
-          "deflated": 0.0,
-          "cagr": 0.2895,
-          "sharpe": 0.8721
-        },
-        "double_top_bottom": {
-          "grade": "C",
-          "label": "Unproven",
-          "beats_hold": 0.222,
-          "beats_hold_test": 0.731,
-          "deflated": 0.0,
-          "cagr": 0.1578,
-          "sharpe": 0.8138
+          "cagr": 0.2804,
+          "sharpe": 0.7601,
+          "maxdd": -0.5004
         },
         "volume_breakout": {
           "grade": "C",
           "label": "Unproven",
-          "beats_hold": 0.1,
+          "beats_hold": 0.6185,
           "beats_hold_test": 0.6185,
           "deflated": 0.0,
-          "cagr": 0.2097,
-          "sharpe": 0.6698
-        },
-        "triangle": {
-          "grade": "C",
-          "label": "Unproven",
-          "beats_hold": 0.0955,
-          "beats_hold_test": 0.2485,
-          "deflated": 0.0,
-          "cagr": 0.066,
-          "sharpe": 0.5501
+          "cagr": 0.2708,
+          "sharpe": 0.8384,
+          "maxdd": -0.4377
         },
         "btc50_touch": {
           "grade": "C",
           "label": "Unproven",
-          "beats_hold": 0.078,
+          "beats_hold": 0.5655,
           "beats_hold_test": 0.5655,
           "deflated": 0.0,
-          "cagr": 0.1297,
-          "sharpe": 0.5635
-        },
-        "btc50_lhonly": {
-          "grade": "C",
-          "label": "Unproven",
-          "beats_hold": 0.066,
-          "beats_hold_test": 0.3445,
-          "deflated": 0.0,
-          "cagr": 0.141,
-          "sharpe": 0.5813
+          "cagr": 0.1507,
+          "sharpe": 0.6052,
+          "maxdd": -0.3568
         },
         "btc50_touch_f1": {
           "grade": "C",
           "label": "Unproven",
-          "beats_hold": 0.059,
+          "beats_hold": 0.545,
           "beats_hold_test": 0.545,
           "deflated": 0.0,
-          "cagr": 0.1058,
-          "sharpe": 0.5098
+          "cagr": 0.1287,
+          "sharpe": 0.5748,
+          "maxdd": -0.3486
+        },
+        "btc50_f1": {
+          "grade": "C",
+          "label": "Unproven",
+          "beats_hold": 0.5375,
+          "beats_hold_test": 0.5375,
+          "deflated": 0.0,
+          "cagr": 0.1165,
+          "sharpe": 0.5789,
+          "maxdd": -0.3845
+        },
+        "btc50_both": {
+          "grade": "C",
+          "label": "Unproven",
+          "beats_hold": 0.5375,
+          "beats_hold_test": 0.5375,
+          "deflated": 0.0,
+          "cagr": 0.1165,
+          "sharpe": 0.5789,
+          "maxdd": -0.3845
+        },
+        "btc50_maonly": {
+          "grade": "C",
+          "label": "Unproven",
+          "beats_hold": 0.5265,
+          "beats_hold_test": 0.5265,
+          "deflated": 0.0,
+          "cagr": 0.1284,
+          "sharpe": 0.5313,
+          "maxdd": -0.6368
+        },
+        "btc50_ma": {
+          "grade": "C",
+          "label": "Unproven",
+          "beats_hold": 0.511,
+          "beats_hold_test": 0.511,
+          "deflated": 0.0,
+          "cagr": 0.1237,
+          "sharpe": 0.5554,
+          "maxdd": -0.4273
+        },
+        "golden_cross": {
+          "grade": "C",
+          "label": "Unproven",
+          "beats_hold": 0.489,
+          "beats_hold_test": 0.489,
+          "deflated": 0.0003,
+          "cagr": 0.1974,
+          "sharpe": 0.6092,
+          "maxdd": -0.559
         },
         "btc50_touch_f2": {
           "grade": "C",
           "label": "Unproven",
-          "beats_hold": 0.046,
+          "beats_hold": 0.458,
           "beats_hold_test": 0.458,
           "deflated": 0.0,
-          "cagr": 0.0949,
-          "sharpe": 0.4696
+          "cagr": 0.1002,
+          "sharpe": 0.477,
+          "maxdd": -0.3785
+        },
+        "btc50_lhonly": {
+          "grade": "C",
+          "label": "Unproven",
+          "beats_hold": 0.3445,
+          "beats_hold_test": 0.3445,
+          "deflated": 0.0,
+          "cagr": 0.0602,
+          "sharpe": 0.3429,
+          "maxdd": -0.4388
         },
         "relative_strength": {
           "grade": "C",
           "label": "Unproven",
-          "beats_hold": 0.004,
+          "beats_hold": 0.3325,
           "beats_hold_test": 0.3325,
           "deflated": 0.0,
-          "cagr": -0.0489,
-          "sharpe": 0.1591
+          "cagr": 0.0416,
+          "sharpe": 0.3397,
+          "maxdd": -0.7774
+        },
+        "triangle": {
+          "grade": "C",
+          "label": "Unproven",
+          "beats_hold": 0.2485,
+          "beats_hold_test": 0.2485,
+          "deflated": 0.0,
+          "cagr": 0.013,
+          "sharpe": 0.1616,
+          "maxdd": -0.2538
+        },
+        "macd": {
+          "grade": "D",
+          "label": "Trails holding",
+          "beats_hold": 0.165,
+          "beats_hold_test": 0.165,
+          "deflated": 0.0,
+          "cagr": 0.0492,
+          "sharpe": 0.3277,
+          "maxdd": -0.588
         },
         "head_shoulders": {
           "grade": "D",
           "label": "Trails holding",
-          "beats_hold": 0.005,
+          "beats_hold": 0.131,
           "beats_hold_test": 0.131,
           "deflated": 0.0,
-          "cagr": 0.0068,
-          "sharpe": 0.1203
-        },
-        "rsi": {
-          "grade": "D",
-          "label": "Trails holding",
-          "beats_hold": 0.0025,
-          "beats_hold_test": 0.017,
-          "deflated": 0.0,
-          "cagr": -0.0148,
-          "sharpe": 0.1383
+          "cagr": -0.0053,
+          "sharpe": -0.0166,
+          "maxdd": -0.1488
         },
         "bollinger": {
           "grade": "D",
           "label": "Trails holding",
-          "beats_hold": 0.0,
+          "beats_hold": 0.0435,
           "beats_hold_test": 0.0435,
           "deflated": 0.0,
-          "cagr": -0.1315,
-          "sharpe": -0.0504
+          "cagr": -0.1301,
+          "sharpe": -0.0904,
+          "maxdd": -0.7525
+        },
+        "rsi": {
+          "grade": "D",
+          "label": "Trails holding",
+          "beats_hold": 0.017,
+          "beats_hold_test": 0.017,
+          "deflated": 0.0,
+          "cagr": -0.127,
+          "sharpe": -0.2537,
+          "maxdd": -0.709
         },
         "buy_the_dip": {
           "grade": "D",
           "label": "Trails holding",
-          "beats_hold": 0.0,
+          "beats_hold": 0.0095,
           "beats_hold_test": 0.0095,
           "deflated": 0.0,
-          "cagr": -0.1132,
-          "sharpe": 0.115
+          "cagr": -0.1535,
+          "sharpe": -0.0054,
+          "maxdd": -0.806
         }
       }
     }
