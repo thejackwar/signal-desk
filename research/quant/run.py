@@ -34,6 +34,7 @@ sys.path.insert(0, str(HERE))
 import data as D  # noqa: E402
 import engine as E  # noqa: E402
 import metrics as M  # noqa: E402
+import portfolio as PF  # noqa: E402
 import universe as U  # noqa: E402
 from strategies import REGISTRY, for_market, set_benchmark  # noqa: E402  (engine/ is on the path via engine.py)
 
@@ -165,8 +166,9 @@ def main():
     else:
         names = sorted(set(U.all_tickers()) | set(today))
         print(f"Loading {len(names) + 1} tickers", flush=True)
-        data = D.load(names + ["SPY"])
+        data = D.load(names + ["SPY", "^IRX"])
     spy = data.pop("SPY")
+    irx = data.pop("^IRX")["close"] if "^IRX" in data else None
     cal = spy.index[spy.index >= "2009-01-01"]
     closes, vols = matrices(data, cal)
     rets = closes.pct_change(fill_method=None)
@@ -242,6 +244,22 @@ def main():
 
     corr = pd.DataFrame({s: period(nets[s], "full") for s in sids}).corr().round(2)
 
+    # Phase 3: trend-filter portfolios with risk-based sizing
+    print("  portfolios", flush=True)
+    pf = PF.build(closes, rets, universes["pit"], spy["close"].reindex(cal), irx)
+    hold = pf["hold_all"]["net"]
+    act = {k: period(v["net"] - hold, "full") for k, v in pf.items() if k != "hold_all"}
+    ptrial = trial + [float(a.mean() / a.std()) for a in act.values() if a.std() > 0]
+    ports = {}
+    for k, v in pf.items():
+        row = {p: M.stats(period(v["net"], p), traded=v["traded"]) for p in ("full", "dev", "test")}
+        row["invested"] = float(period(v["invested"], "full").mean())
+        row["crash"] = PF.crash_stats(v["net"])
+        if k != "hold_all":
+            row["vs_hold"] = {p: M.boot_vs(period(v["net"], p), period(hold, p)) for p in ("full", "test")}
+            row["dsr"] = M.deflated_sharpe(act[k], ptrial)
+        ports[k] = row
+
     OUT.mkdir(exist_ok=True)
     doc = {
         "generated_at": datetime.now(timezone.utc).isoformat(timespec="minutes"),
@@ -257,6 +275,7 @@ def main():
         "combos": combo,
         "walk_forward": walk,
         "correlation": corr.to_dict(),
+        "portfolios": ports,
     }
     (OUT / "report.json").write_text(json.dumps(r4(doc), indent=1, default=float))
     (OUT / "REPORT.md").write_text(markdown(doc, sids))
@@ -316,6 +335,20 @@ def markdown(doc, sids) -> str:
     L += ["", f"Walk-forward (each January keep the top 5 of the previous 5 years): CAGR {P(w['stats'].get('cagr'))}, "
           f"Sharpe {F(w['stats'].get('sharpe'))} vs holding the stocks {P(w['hold_same_years'].get('cagr'))}, "
           f"Sharpe {F(w['hold_same_years'].get('sharpe'))}; beats hold in {P((w['vs_hold'] or {}).get('p_better'), 0)} of bootstraps.", ""]
+    pp = doc.get("portfolios") or {}
+    if pp:
+        L += ["## Phase 3: trend-filter portfolios", "",
+              "Weekly rebalance, 10 bp on every change, idle money in 3-month T-bills. "
+              "Compared with holding every stock equally under the same rules.", "",
+              "| Portfolio | CAGR | Sharpe | Worst drop | Covid fall | 2022 | Invested | Dev | Test | Beats hold (full / test) | Deflated |",
+              "|---|---|---|---|---|---|---|---|---|---|---|"]
+        for k, x in pp.items():
+            vh = x.get("vs_hold") or {}
+            L.append(f"| {k} | {P(x['full'].get('cagr'))} | {F(x['full'].get('sharpe'))} | {P(x['full'].get('maxdd'), 0)} "
+                     f"| {P(x['crash']['covid_2020'], 0)} | {P(x['crash']['year_2022'], 0)} | {P(x['invested'], 0)} "
+                     f"| {F(x['dev'].get('sharpe'))} | {F(x['test'].get('sharpe'))} "
+                     f"| {P((vh.get('full') or {}).get('p_better'), 0)} / {P((vh.get('test') or {}).get('p_better'), 0)} | {F(x.get('dsr'))} |")
+        L.append("")
     return "\n".join(L) + "\n"
 
 
