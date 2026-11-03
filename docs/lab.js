@@ -5,6 +5,9 @@
 // engine/backtest.py, so default settings reproduce the app's own backtest
 // (tests/lab/test_parity.py checks this). Informational only.
 
+import * as Rules from "./lab-rules.js";
+export { Rules };
+
 export const ACCOUNT = 100_000;
 
 // ---------------------------------------------------------------- settings
@@ -114,8 +117,30 @@ Object.assign(INDICATORS, {
     "Sells at the next open after a loud bad-news day, buys back at the next open after 5 days without one.", ["crypto"], { group: "News" }),
   btc50_both: BOT("50-Day Rule, long + short", "The live rule both ways: long above a rising 50-day, short below a falling one.", "Long or short at the next open after the signal, out at the next open after the rule's exit.", ["crypto"], { buysOnly: false }),
 });
-for (const [k, I] of Object.entries(INDICATORS)) { if (!I.base) I.base = k; I.group = I.group || "Indicators"; }
-export const GROUPS = ["Indicators", "Breakouts & strength", "Chart patterns", "Trading-bot strategies", "50-day rule (crypto)", "News"];
+// Your own rules: entries, exits and filters built from the indicator library and the patterns in
+// docs/lab-rules.js. Starts as a dip-in-an-uptrend example the user changes.
+INDICATORS.custom = {
+  name: "Your own rules", base: "custom", exit: "opposite", group: "Build your own", custom: true, params: [],
+  about: "Build a strategy from scratch: buy (and short) when your conditions are true, using any indicator on the daily or weekly chart, volume, the market, the calendar or a candle pattern, and close on your own exit conditions, stops and targets.",
+};
+export const START_RULES = {
+  long: { mode: "all", list: [{ a: { id: "rsi", p: { n: 14 } }, op: "xa", b: 30 }, { a: { id: "close" }, op: "gt", b: { id: "sma", p: { n: 200 } } }] },
+  short: { mode: "all", list: [] },
+  xl: { mode: "any", list: [{ a: { id: "rsi", p: { n: 14 } }, op: "xa", b: 70 }] },
+  xs: { mode: "any", list: [] },
+  edge: 1,
+};
+// Indicator strategies sit in the category of the indicator they're built on
+const IND_CAT = {
+  ma: "Trend", cross: "Trend", supertrend: "Trend",
+  rsi: "Momentum", macd: "Momentum", relative_strength: "Momentum",
+  volume_breakout: "Volume",
+  bollinger: "Volatility",
+  donchian: "Support & resistance",
+  dip: "Dip buying", avg_down: "Dip buying",
+};
+for (const [k, I] of Object.entries(INDICATORS)) { if (!I.base) I.base = k; I.group = IND_CAT[k] || I.group || "Trend"; }
+export const GROUPS = ["Build your own", "Trend", "Momentum", "Volume", "Volatility", "Support & resistance", "Dip buying", "Chart patterns", "Trading-bot strategies", "50-day rule (crypto)", "News"];
 // can this strategy run on this market's data? (some need the weekly backtest's extra data)
 export function available(data, ind, market) {
   const I = INDICATORS[ind];
@@ -124,6 +149,17 @@ export function available(data, ind, market) {
   if (I.needs === "v") return data.tickers.some(T => T.v);
   if (I.needs === "bench") return !!data.bench;
   return true;
+}
+// what a custom rule set can't use on this data (opens, volume, a benchmark, a chart pattern's alerts)
+export function missing(data, rules) {
+  const out = [];
+  for (const k of Rules.needs(rules)) {
+    if (k === "o" && !Rules.hasOpens(data)) out.push("o");
+    else if (k === "v" && !data.tickers.some(T => T.v)) out.push("v");
+    else if (k === "bench" && !data.bench) out.push("bench");
+    else if (k.startsWith("pre:") && !data.tickers.some(T => T.pre?.[k.slice(4)])) out.push(k);
+  }
+  return out;
 }
 export const HOLD_DEFAULT = 20;
 // Take profit / stop loss, in % from the entry price. 0 = off (the default, so the app's own
@@ -155,11 +191,61 @@ export const EXTRA = {
   maxPos: { min: 0, max: 50, step: 1 },
   cost: { min: 0, max: 1, step: 0.05 },
 };
+// The advanced exits and money rules (all off by default; any of them on runs runPro below).
+//   entry    "close": in at the alert's close (as the app's backtest), "open": at the next day's open
+//   slMode   stop loss in % ("pct", uses sl), in ATRs below the entry ("atr", slAtr) or under the
+//            lowest low of the last N bars ("swing", swing); tpMode the same for the take profit
+//            ("pct" tp, "atr" tpAtr, "rr" a multiple of the stop's distance); trailMode "pct" / "atr"
+//   atrN     ATR length for the ATR levels
+//   be       move the stop to the entry once the price is this % in profit
+//   part/p1  sell part % of the position at a first target p1 (in the take profit's unit); p1Be: then
+//            move the stop to the entry
+//   tLose    close a trade still losing after this many sessions
+//   size     "equal" (the usual), or "risk": each trade risks `risk`% of the account at its stop
+//   secMax   at most this many positions in one sector; cool: sessions to wait after a loss on a
+//            stock before buying it again; pyr: positions in the same stock at once
+export const PRO = {
+  slAtr: { min: 0, max: 10, step: 0.25, def: 2 }, swing: { min: 0, max: 60, step: 1, def: 10 },
+  tpAtr: { min: 0, max: 20, step: 0.25, def: 4 }, rr: { min: 0, max: 10, step: 0.25, def: 2 },
+  trailAtr: { min: 0, max: 10, step: 0.25, def: 3 }, atrN: { min: 2, max: 50, step: 1, def: 14 },
+  be: { min: 0, max: 30, step: 0.5, def: 0 }, part: { min: 0, max: 90, step: 5, def: 0 },
+  p1: { min: 0, max: 50, step: 0.25, def: 0 }, tLose: { min: 0, max: 120, step: 1, def: 0 },
+  risk: { min: 0.25, max: 5, step: 0.25, def: 1 }, secMax: { min: 0, max: 20, step: 1, def: 0 },
+  cool: { min: 0, max: 120, step: 1, def: 0 }, pyr: { min: 1, max: 5, step: 1, def: 1 },
+};
 
 export function defaults(ind) {
   const I = INDICATORS[ind], p = {};
   I.params.forEach(x => p[x.k] = x.def);
-  return { ind, p, exit: I.exit, hold: I.hold ?? HOLD_DEFAULT, tp: I.tp ?? 0, sl: 0, trail: 0, fMa: 0, fMkt: 0, fInd: "", maxPos: 0, cost: 0 };
+  return { ind, p, exit: I.exit, hold: I.hold ?? HOLD_DEFAULT, tp: I.tp ?? 0, sl: 0, trail: 0, fMa: 0, fMkt: 0, fInd: "", maxPos: 0, cost: 0,
+    ...(I.custom ? { rules: JSON.parse(JSON.stringify(START_RULES)) } : {}), ...PRO_OFF };
+}
+const PRO_OFF = { entry: "close", slMode: "pct", slAtr: 0, swing: 0, tpMode: "pct", tpAtr: 0, rr: 0, trailMode: "pct", trailAtr: 0, atrN: 14,
+  be: 0, part: 0, p1: 0, p1Be: 0, tLose: 0, size: "equal", risk: 1, secMax: 0, cool: 0, pyr: 1 };
+// a rule set kept valid: known indicators, operators and patterns, at most 8 conditions a group
+function cleanSpec(s) {
+  if (!s || !Rules.IND[s.id]) return { id: "close" };
+  const out = { id: s.id }, p = Rules.specP(s);
+  if (Object.keys(p).length) out.p = p;
+  if (s.tf === "W") out.tf = "W";
+  const ago = Math.round(+s.ago || 0); if (ago > 0) out.ago = Math.min(250, ago);
+  return out;
+}
+function cleanCond(q) {
+  if (!q || typeof q !== "object") return null;
+  const w = Math.max(1, Math.min(60, Math.round(+q.w || 1)));
+  if (q.pat) return Rules.PATTERNS[q.pat] ? { pat: q.pat, ...(w > 1 ? { w } : {}) } : null;
+  const op = Rules.OPS[q.op] ? q.op : "gt", out = { a: cleanSpec(q.a), op };
+  if (Rules.unary(op)) out.n = Math.max(1, Math.min(400, Math.round(+q.n || 1)));
+  else if (q.b && typeof q.b === "object") { out.b = cleanSpec(q.b); const m = +q.mul; if (Number.isFinite(m) && m > 0 && m !== 1) out.mul = Math.min(100, m); }
+  else out.b = Number.isFinite(+q.b) ? +q.b : 0;
+  if (w > 1) out.w = w;
+  return out;
+}
+export function cleanRules(r) {
+  r = r && typeof r === "object" ? r : START_RULES;
+  const g = (x, mode) => ({ mode: x?.mode === "any" ? "any" : x?.mode === "all" ? "all" : mode, list: (Array.isArray(x?.list) ? x.list : []).map(cleanCond).filter(Boolean).slice(0, 8) });
+  return { long: g(r.long, "all"), short: g(r.short, "all"), xl: g(r.xl, "any"), xs: g(r.xs, "any"), edge: r.edge === 0 ? 0 : 1 };
 }
 // keep a setting set valid (fast < slow, oversold < overbought, numbers in range)
 export function clean(cfg) {
@@ -180,12 +266,49 @@ export function clean(cfg) {
   out.cost = +snap(EXTRA.cost, out.cost).toFixed(2);
   out.fMkt = out.fMkt ? 1 : 0;
   out.fInd = Object.hasOwn(FILTER_IND, out.fInd) ? out.fInd : "";
+  // the advanced exits and money rules: only for strategies that make their own alerts (not the
+  // trading-bot ones, which come with their own trades, or Average down, which has its own buys)
+  const pro = { ...PRO_OFF };
+  if (!INDICATORS[I].own && !INDICATORS[I].avg) {
+    const num = (k, v) => { const R = PRO[k]; return Number.isFinite(+v) ? Math.min(R.max, Math.max(R.min, Math.round(+v / R.step) * R.step)) : PRO_OFF[k]; };
+    pro.entry = out.entry === "open" ? "open" : "close";
+    pro.slMode = ["atr", "swing"].includes(out.slMode) ? out.slMode : "pct";
+    pro.tpMode = ["atr", "rr"].includes(out.tpMode) ? out.tpMode : "pct";
+    pro.trailMode = out.trailMode === "atr" ? "atr" : "pct";
+    if (pro.slMode === "atr") pro.slAtr = num("slAtr", out.slAtr);
+    if (pro.slMode === "swing") pro.swing = num("swing", out.swing);
+    if (pro.tpMode === "atr") pro.tpAtr = num("tpAtr", out.tpAtr);
+    if (pro.tpMode === "rr") pro.rr = num("rr", out.rr);
+    if (pro.trailMode === "atr") pro.trailAtr = num("trailAtr", out.trailAtr);
+    if (pro.slMode !== "pct") out.sl = 0;
+    if (pro.tpMode !== "pct") out.tp = 0;
+    if (pro.trailMode !== "pct") out.trail = 0;
+    pro.atrN = num("atrN", out.atrN);
+    for (const k of ["be", "part", "tLose", "secMax", "cool", "pyr"]) pro[k] = num(k, out[k]);
+    if (pro.part) { pro.p1 = num("p1", out.p1); pro.p1Be = out.p1Be ? 1 : 0; if (!pro.p1) pro.part = 0; }
+    if (out.size === "risk") { pro.size = "risk"; pro.risk = num("risk", out.risk); }
+    if (pro.tpMode === "rr" && !(pro.slMode !== "pct" ? pro.slAtr || pro.swing : out.sl)) pro.rr = 0;   // R needs a stop
+    if (pro.tpMode === "rr" && !pro.rr) pro.tpMode = "pct";
+    if (!pro.slAtr && pro.slMode === "atr") pro.slMode = "pct";
+    if (!pro.swing && pro.slMode === "swing") pro.slMode = "pct";
+    if (!pro.tpAtr && pro.tpMode === "atr") pro.tpMode = "pct";
+    if (!pro.trailAtr && pro.trailMode === "atr") pro.trailMode = "pct";
+    if (pro.slMode === "pct" && pro.tpMode === "pct" && pro.trailMode === "pct" && !pro.be && !pro.part && !pro.tLose) pro.atrN = 14;
+  }
+  const rules = INDICATORS[I].custom ? cleanRules(cfg.rules) : undefined;
   // fixed key order, so sameCfg can compare JSON
   const { ind, p, exit, hold, tp, sl, trail, fMa, fMkt, fInd, maxPos, cost } = out;
-  return { ind, p, exit, hold, tp, sl, trail, fMa, fMkt, fInd, maxPos, cost };
+  const P = pro;
+  return { ind, p, exit, hold, tp, sl, trail, fMa, fMkt, fInd, maxPos, cost, ...(rules ? { rules } : {}),
+    entry: P.entry, slMode: P.slMode, slAtr: P.slAtr, swing: P.swing, tpMode: P.tpMode, tpAtr: P.tpAtr, rr: P.rr, trailMode: P.trailMode, trailAtr: P.trailAtr,
+    atrN: P.atrN, be: P.be, part: P.part, p1: P.p1, p1Be: P.p1Be, tLose: P.tLose, size: P.size, risk: P.risk, secMax: P.secMax, cool: P.cool, pyr: P.pyr };
 }
+// does this setting need the trade-by-trade engine (runPro)?
+export const isPro = cfg => !!INDICATORS[cfg.ind]?.custom || cfg.entry === "open" || cfg.slMode !== "pct" || cfg.tpMode !== "pct" || cfg.trailMode !== "pct"
+  || cfg.be > 0 || cfg.part > 0 || cfg.tLose > 0 || cfg.size === "risk" || cfg.secMax > 0 || cfg.cool > 0 || cfg.pyr > 1;
 // how many of the extra rules are on (for the UI)
-export const extrasOn = cfg => ["trail", "fMa", "fMkt", "fInd", "maxPos", "cost"].filter(k => cfg[k]).length;
+export const extrasOn = cfg => ["trail", "fMa", "fMkt", "fInd", "maxPos", "cost", "be", "part", "tLose", "secMax", "cool"].filter(k => cfg[k]).length
+  + (cfg.size === "risk") + (cfg.pyr > 1) + (cfg.entry === "open");
 export const sameCfg = (a, b) => JSON.stringify(clean(a)) === JSON.stringify(clean(b));
 
 // ------------------------------------------------------------------- data
@@ -201,11 +324,13 @@ export function decode(raw) {
       L += T.c[i];
       c[i] = Math.exp(L / 1e4); h[i] = Math.exp((L + T.h[i]) / 1e4); l[i] = Math.exp((L + T.l[i]) / 1e4);
     }
+    let o = null;   // opens (newer files only): candle patterns and next-open entries
+    if (T.o?.length === n) { o = new Float64Array(n); let L2 = 0; for (let i = 0; i < n; i++) { L2 += T.c[i]; o[i] = Math.exp((L2 + T.o[i]) / 1e4); } }
     let v = null;
     if (T.v?.length === n) { v = new Float64Array(n); for (let i = 0; i < n; i++) v[i] = T.v[i] > 0 ? Math.exp(T.v[i] / (raw.v_scale || 100)) : NaN; }
     let pre = null;
     for (const [sid, by] of Object.entries(raw.pre || {})) if (by[T.t]) (pre = pre || {})[sid] = Int32Array.from(by[T.t]);
-    return { t: T.t, idx, c, h, l, v, pre };
+    return { t: T.t, idx, c, h, l, o, v, pre };
   });
   let spy = null;
   if (raw.spy?.length === D) {
@@ -390,18 +515,40 @@ function gates(T, cfg, data) {
 export function subset(data, { tickers = null, to = null } = {}) {
   const end = to == null ? data.dates.length - 1 : Math.min(to, data.dates.length - 1);
   const out = { dates: data.dates.slice(0, end + 1), spy: data.spy ? data.spy.subarray(0, end + 1) : null,
-    bench: data.bench ? data.bench.subarray(0, end + 1) : null, benchName: data.benchName, tickers: [] };
+    bench: data.bench ? data.bench.subarray(0, end + 1) : null, benchName: data.benchName, sectors: data.sectors, tickers: [] };
   for (const T of data.tickers) {
     if (tickers && !tickers.has(T.t)) continue;
     let k = T.idx.length; while (k > 0 && T.idx[k - 1] > end) k--;
     if (k < 2) continue;
     out.tickers.push(k === T.idx.length ? T : { t: T.t, idx: T.idx.subarray(0, k), c: T.c.subarray(0, k), h: T.h.subarray(0, k), l: T.l.subarray(0, k),
-      v: T.v ? T.v.subarray(0, k) : null, pre: T.pre });
+      o: T.o ? T.o.subarray(0, k) : null, v: T.v ? T.v.subarray(0, k) : null, pre: T.pre });
   }
   return out;
 }
 
 // ------------------------------------------------------------------ run it
+// The alerts on the last day of the data that would open a position (filters applied): what a
+// followed setup shows as "signals on the last close". [{ t, side }]
+export function todaySignals(data, cfg) {
+  cfg = clean(cfg);
+  const I = INDICATORS[cfg.ind], D = data.dates.length, out = [];
+  if (I.own || I.avg) {   // their own entries: the trades that start on the last day
+    const R = run(data, cfg, D - 1);
+    for (const o of R.openTrades) if (o.g0 === D - 1) out.push({ t: o.t, side: o.side });
+    return out;
+  }
+  for (const T of data.tickers) {
+    const n = T.c.length; if (!n || T.idx[n - 1] !== D - 1) continue;
+    T._bench = data.bench;
+    const s = I.custom ? Rules.customSignals(T, data, cfg.rules).sig[n - 1] : signals(T, cfg)[n - 1];
+    if (!s || (s < 0 && I.buysOnly)) continue;
+    const g = gates(T, cfg, data);
+    if (g && !(s > 0 ? g.buy[n - 1] : g.short[n - 1])) continue;
+    out.push({ t: T.t, side: s });
+  }
+  return out;
+}
+
 // Take profit / stop loss check on one daily bar for a position of `side` (+1 buy, -1 short)
 // entered at `entry`. Returns { px, why } when the bar reaches a level, else null.
 // Daily bars have no open: a level touched inside the bar fills at the level; a bar that
@@ -435,6 +582,7 @@ export function run(data, cfg, fromIdx = 0) {
   cfg = clean(cfg);
   if (INDICATORS[cfg.ind].own) return runOwn(data, cfg, fromIdx);
   if (INDICATORS[cfg.ind].avg) return runAvg(data, cfg, fromIdx);
+  if (isPro(cfg)) return runPro(data, cfg, fromIdx);
   const D = data.dates.length, trend = cfg.exit === "opposite", H = cfg.hold, risk = cfg.tp > 0 || cfg.sl > 0 || cfg.trail > 0;
   // buy-only strategies (Buy the dip) ignore alerts while a position is open, so the time limit counts
   // from the buy (own_exit_positions in engine/backtest.py)
@@ -646,20 +794,173 @@ function runAvg(data, cfg, fromIdx) {
   return finish(data, cfg, fromIdx, sum, cnt, book, trades, openL, openT);
 }
 
+// The trade-by-trade engine, for your own rules and the advanced exits and money rules (isPro).
+// Each alert that passes the filters opens a position (at that close, or the next day's open), which
+// lives until its first exit: the stop (fixed, ATR or swing; moved to the entry by the break-even
+// rule; or the trailing stop when that's closer), the take profit (fixed, ATR or a multiple of the
+// stop's distance), the first target (sells part), the time limit, the "still losing after N days"
+// rule, your exit conditions, or an opposite alert. Levels are checked on each day's high and low:
+// touched inside the day fills at the level; a day that opened past it fills at the open (or, with no
+// opening price in the data, at the middle of the day's range); a day that reaches the stop and a
+// target counts as the stop. Each position earns its own daily returns, like runOwn above, and the
+// account (finish) adds them up with the position limit, sector limit and position sizing.
+function runPro(data, cfg, fromIdx) {
+  const D = data.dates.length, I = INDICATORS[cfg.ind], fee = cfg.cost / 100, H = cfg.hold, timed = cfg.exit === "hold";
+  const sum = { ls: new Float64Array(D), long: new Float64Array(D) }, cnt = { ls: new Int32Array(D), long: new Int32Array(D) };
+  const trades = [], openL = [], book = { ls: [], long: [] }, openT = [];
+  const useBook = cfg.maxPos > 0 || cfg.secMax > 0 || cfg.size === "risk";
+  const needAtr = cfg.slMode === "atr" || cfg.tpMode === "atr" || cfg.trailMode === "atr";
+  const cap = cfg.maxPos ? 1 / cfg.maxPos : 1;
+  for (const T of data.tickers) {
+    T._bench = data.bench;
+    const { c, h, l, idx } = T, n = c.length, realOpen = !!T.o, o = T.o || Float64Array.from(c, (v, i) => i ? c[i - 1] : v);
+    let sig, xl = null, xs = null;
+    if (I.custom) ({ sig, xl, xs } = Rules.customSignals(T, data, cfg.rules)); else sig = signals(T, cfg);
+    const gate = gates(T, cfg, data), A = needAtr ? Rules.atr(T, cfg.atrN) : null;
+    const swLo = cfg.slMode === "swing" ? Rules.series(T, data, { id: "low" }) : null;
+    const sec = data.sectors?.[T.t] || "";
+    const open = [], lastLoss = { 1: -1e9, "-1": -1e9 }, Ps = [];
+    let pending = [];   // next-open entries
+    // a stop / target level crossed on bar i, for side `sd`: the fill price, or null
+    const fill = (sd, lv, i, stop) => {
+      const beyond = stop ? (sd > 0 ? l[i] <= lv : h[i] >= lv) : (sd > 0 ? h[i] >= lv : l[i] <= lv);
+      if (!beyond) return null;
+      const gapped = stop ? (sd > 0 ? o[i] <= lv : o[i] >= lv) : (sd > 0 ? o[i] >= lv : o[i] <= lv);
+      if (realOpen && gapped) return o[i];
+      const whole = stop ? (sd > 0 ? h[i] < lv : l[i] > lv) : (sd > 0 ? l[i] > lv : h[i] < lv);
+      return whole ? (h[i] + l[i]) / 2 : lv;
+    };
+    const start = (sd, i0, ia, pin) => {
+      const a = A ? A[i0] : NaN;
+      let stop = null;
+      if (cfg.slMode === "pct" && cfg.sl) stop = pin * (1 - sd * cfg.sl / 100);
+      else if (cfg.slMode === "atr" && cfg.slAtr && a === a) stop = pin - sd * cfg.slAtr * a;
+      else if (cfg.slMode === "swing" && cfg.swing) {
+        let x = sd > 0 ? Infinity : -Infinity;
+        for (let j = Math.max(0, i0 - cfg.swing + 1); j <= i0; j++) x = sd > 0 ? Math.min(x, l[j]) : Math.max(x, h[j]);
+        stop = sd > 0 ? (x < pin ? x : null) : (x > pin ? x : null);
+      }
+      const R = stop != null ? Math.abs(pin - stop) / pin : null;
+      let tp = null;
+      if (cfg.tpMode === "pct" && cfg.tp) tp = pin * (1 + sd * cfg.tp / 100);
+      else if (cfg.tpMode === "atr" && cfg.tpAtr && a === a) tp = pin + sd * cfg.tpAtr * a;
+      else if (cfg.tpMode === "rr" && cfg.rr && R) tp = pin * (1 + sd * cfg.rr * R);
+      let p1 = null;
+      if (cfg.part && cfg.p1) {
+        const d = cfg.tpMode === "atr" ? (a === a ? cfg.p1 * a / pin : null) : cfg.tpMode === "rr" ? (R ? cfg.p1 * R : null) : cfg.p1 / 100;
+        if (d) p1 = pin * (1 + sd * d);
+      }
+      const w = cfg.size === "risk" ? (R ? Math.min(cap, cfg.risk / 100 / R) : 0) : 1;   // risk sizing with no stop: not taken
+      const P = { t: T.t, side: sd, g0: idx[i0], gE: Infinity, g: [], r: [], w, sec };
+      Ps.push(P);
+      return { sd, i0, t0: i0, ia, pin, stop, stop0: stop, R, tp, p1, left: 1, got: 0, pk: pin, worst: pin, be: false, P, prev: pin, fresh: true };
+    };
+    const close = (q, i, px, why) => {
+      const done = q.left;
+      q.got += done * (q.sd * (px / q.pin - 1) - fee);
+      q.left = 0;
+      q.P.gE = idx[i];
+      const ret = q.got - fee;
+      if (ret < 0) lastLoss[q.sd] = i;
+      if (idx[q.i0] >= fromIdx)
+        trades.push({ t: T.t, side: q.sd, g0: idx[q.i0], g1: idx[i], ret, days: i - q.i0, why, p0: q.pin, p1: px,
+          ...(q.R ? { rm: ret / q.R } : {}), mfe: q.sd * (q.pk / q.pin - 1), mae: q.sd * (q.worst / q.pin - 1), ...(q.part ? { part: 1 } : {}), pos: q.P });
+    };
+    for (let i = 0; i < n; i++) {
+      // 1) entries at today's open
+      for (const e of pending) open.push(start(e.sd, e.i0, i, o[i]));
+      pending = [];
+      // 2) every open position through today's bar
+      for (let k = open.length - 1; k >= 0; k--) {
+        const q = open[k], sd = q.sd, base = i === q.ia ? q.pin : c[i - 1];
+        let exitPx = null, why = null, dayR = 0;
+        if (i > q.ia || (i === q.ia && cfg.entry === "open")) {
+          // stops: the fixed (or break-even) stop, or the trailing stop when it's closer
+          let lv = q.stop, w0 = q.be ? "be" : "sl";
+          const tr = cfg.trailMode === "pct" && cfg.trail ? q.pk * (1 - sd * cfg.trail / 100)
+            : cfg.trailMode === "atr" && cfg.trailAtr && A && A[i - 1] === A[i - 1] && i > 0 ? q.pk - sd * cfg.trailAtr * A[i - 1] : null;
+          if (tr != null && (lv == null || (sd > 0 ? tr > lv : tr < lv))) { lv = tr; w0 = "trail"; }
+          const px = lv != null ? fill(sd, lv, i, true) : null;
+          if (px != null) { exitPx = px; why = w0; }
+          else {
+            if (q.p1 != null && q.left === 1) {
+              const f1 = fill(sd, q.p1, i, false);
+              if (f1 != null) {
+                const f = cfg.part / 100;
+                dayR += f * sd * (f1 / base - 1) - f * fee;
+                q.got += f * (sd * (f1 / q.pin - 1) - fee); q.left = 1 - f; q.part = true;
+                if (cfg.p1Be) { q.stop = q.stop == null ? q.pin : sd > 0 ? Math.max(q.stop, q.pin) : Math.min(q.stop, q.pin); q.be = true; }
+              }
+            }
+            if (q.tp != null) { const f2 = fill(sd, q.tp, i, false); if (f2 != null) { exitPx = f2; why = "tp"; } }
+          }
+        }
+        // at the close: time limit, still losing, your exit rule, an opposite alert
+        if (exitPx == null && i > q.i0) {
+          if (timed && i - q.t0 >= H) { exitPx = c[i]; why = "rule"; }
+          else if (cfg.tLose && i - q.ia >= cfg.tLose && sd * (c[i] / q.pin - 1) < 0) { exitPx = c[i]; why = "time"; }
+          else if ((sd > 0 ? xl?.[i] : xs?.[i]) || sig[i] === -sd) { exitPx = c[i]; why = "rule"; }
+        }
+        const mark = exitPx ?? c[i];
+        if (i > q.ia || (i === q.ia && cfg.entry === "open")) {
+          dayR += q.left * sd * (mark / base - 1);
+          if (q.fresh) { dayR -= fee; q.fresh = false; }
+          if (exitPx != null) dayR -= q.left * fee;
+          q.P.g.push(idx[i]); q.P.r.push(dayR);
+          q.pk = sd > 0 ? Math.max(q.pk, h[i]) : Math.min(q.pk, l[i]);
+          q.worst = sd > 0 ? Math.min(q.worst, l[i]) : Math.max(q.worst, h[i]);
+          if (cfg.be && !q.be && sd * (q.pk / q.pin - 1) * 100 >= cfg.be) { q.stop = q.stop == null ? q.pin : sd > 0 ? Math.max(q.stop, q.pin) : Math.min(q.stop, q.pin); q.be = true; }
+        }
+        if (exitPx != null) { close(q, i, exitPx, why); open.splice(k, 1); }
+      }
+      // 3) new positions from this close's alert
+      const s = sig[i];
+      if (s && (!gate || (s > 0 ? gate.buy[i] : gate.short[i])) && i - lastLoss[s] > cfg.cool) {
+        const same = open.filter(q => q.sd === s).length + pending.filter(e => e.sd === s).length;
+        if (same < cfg.pyr && (s > 0 || !I.buysOnly)) {
+          if (cfg.entry === "open") { if (i + 1 < n) pending.push({ sd: s, i0: i }); }
+          else open.push(start(s, i, i, c[i]));
+        } else if (!I.buysOnly) {
+          // already holding: a new alert the same way restarts the time limit (as the app's backtest)
+          for (const q of open) if (q.sd === s) q.t0 = i;
+        }
+      }
+    }
+    // still open on the last day
+    for (const q of open) {
+      if (q.sd > 0 && idx[n - 1] === D - 1) openL.push({ t: T.t, since: data.dates[idx[q.ia]], ret: (c[n - 1] / q.pin - 1) * 100 });
+      if (idx[q.i0] >= fromIdx && idx[n - 1] === D - 1)
+        openT.push({ t: T.t, side: q.sd, g0: idx[q.i0], days: n - 1 - q.i0, p0: q.pin, px: c[n - 1], ret: q.got + q.left * q.sd * (c[n - 1] / q.pin - 1) - fee });
+    }
+    // every position of this ticker, closed or open, into the account
+    for (const P of Ps) for (const key of P.side > 0 ? ["ls", "long"] : ["ls"]) {
+      if (useBook) book[key].push(P);
+      else for (let m = 0; m < P.g.length; m++) { sum[key][P.g[m]] += P.r[m]; cnt[key][P.g[m]]++; }
+    }
+  }
+  return finish(data, cfg, fromIdx, sum, cnt, book, trades, openL, openT);
+}
+
 // the account, trade lists and statistics from each day's position returns
 function finish(data, cfg, fromIdx, sum, cnt, book, trades, openL, openT = []) {
   const D = data.dates.length, slots = cfg.maxPos;
   // with a position limit: fill the slots in date order (same-day alerts in a fixed shuffled order)
   const mix = s => { let x = 2166136261; for (let k = 0; k < s.length; k++) x = Math.imul(x ^ s.charCodeAt(k), 16777619); return x >>> 0; };
+  // (runPro also: at most secMax positions per sector, and with risk sizing each position's weight w,
+  // never more than the whole account invested at once)
+  const risk = cfg.size === "risk", secMax = cfg.secMax || 0;
   const fill = key => {
     const P = book[key].map(p => ({ p, k: mix(p.t + p.g0) })).sort((a, b) => a.p.g0 - b.p.g0 || a.k - b.k).map(x => x.p);
     const s = new Float64Array(D), k = new Int32Array(D), acc = new Set();
     let open = [];
     for (const p of P) {
       open = open.filter(q => q.gE > p.g0);
-      if (open.length >= slots) continue;
+      if (slots && open.length >= slots) continue;
+      if (secMax && p.sec && open.filter(q => q.sec === p.sec).length >= secMax) continue;
+      if (risk && (!(p.w > 0) || open.reduce((a, q) => a + q.w, 0) + p.w > 1 + 1e-9)) continue;
       open.push(p); acc.add(p.t + "|" + p.g0);
-      for (let m = 0; m < p.g.length; m++) { s[p.g[m]] += p.r[m]; k[p.g[m]]++; }
+      const w = risk ? p.w : 1;
+      for (let m = 0; m < p.g.length; m++) { s[p.g[m]] += w * p.r[m]; k[p.g[m]]++; }
     }
     return { s, k, acc };
   };
@@ -687,13 +988,14 @@ function finish(data, cfg, fromIdx, sum, cnt, book, trades, openL, openT = []) {
     return { eq, k, acc };
   };
   const avg = !!INDICATORS[cfg.ind].avg;
-  const books = slots ? (avg ? { ls: fillAvg("ls"), long: fillAvg("long") } : { ls: fill("ls"), long: fill("long") }) : null;
+  const useBook = slots || secMax || risk;
+  const books = useBook ? (avg ? { ls: fillAvg("ls"), long: fillAvg("long") } : { ls: fill("ls"), long: fill("long") }) : null;
   const curve = key => {
     if (avg && books) return books[key].eq;
     const eq = new Float64Array(D); let v = ACCOUNT;
     const S = books ? books[key].s : sum[key], K = books ? books[key].k : cnt[key];
     for (let g = 0; g < D; g++) {
-      if (g > fromIdx && K[g]) v *= 1 + S[g] / (books ? slots : K[g]);
+      if (g > fromIdx && K[g]) v *= 1 + S[g] / (risk ? 1 : slots ? slots : K[g]);
       eq[g] = g < fromIdx ? NaN : v;
     }
     return eq;
@@ -725,9 +1027,12 @@ function finish(data, cfg, fromIdx, sum, cnt, book, trades, openL, openT = []) {
 export function stat(list) {
   const n = list.length;
   let w = 0, sw = 0, sl = 0, nl = 0, tot = 0, best = -Infinity, worst = Infinity, days = 0, streak = 0, run = 0;
-  const why = { rule: 0, tp: 0, sl: 0, trail: 0 };
+  const why = { rule: 0, tp: 0, sl: 0, trail: 0, be: 0, time: 0 };
+  let rk = 0, rs = 0, part = 0;   // R multiples (trades with a stop) and partial exits (runPro)
   for (const t of list) {
-    tot += t.ret; days += t.days; why[t.why]++;
+    tot += t.ret; days += t.days; why[t.why] = (why[t.why] || 0) + 1;
+    if (t.rm != null) { rk++; rs += t.rm; }
+    if (t.part) part++;
     if (t.ret > 0) { w++; sw += t.ret; run = 0; } else { nl++; sl += t.ret; run++; if (run > streak) streak = run; }
     if (t.ret > best) best = t.ret; if (t.ret < worst) worst = t.ret;
   }
@@ -737,6 +1042,7 @@ export function stat(list) {
     worst: n ? worst * 100 : null, best: n ? best * 100 : null,
     avgWin: w ? sw / w * 100 : null, avgLoss: nl ? sl / nl * 100 : null,
     pf: sl < 0 ? sw / -sl : w ? Infinity : null, days: n ? days / n : null, streak,
+    be: why.be, time: why.time, part, avgR: rk ? rs / rk : null, nR: rk,
   };
 }
 

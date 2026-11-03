@@ -57,7 +57,7 @@ jobs:
         run: |
           git config user.name "signal-desk-bot"
           git config user.email "signal-desk-bot@users.noreply.github.com"
-          for f in docs/data/live_trades.json docs/data/crypto/live_trades.json docs/data/commodities/live_trades.json; do
+          for f in docs/data/live_trades.json docs/data/crypto/live_trades.json docs/data/commodities/live_trades.json docs/data/lab_recent.json docs/data/crypto/lab_recent.json docs/data/commodities/lab_recent.json; do
             [ -f "$f" ] && git add "$f"
           done
           git diff --cached --quiet || git commit -m "Live trades ${{ steps.m.outputs.market }} $(date -u +%F)"

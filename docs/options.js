@@ -1,6 +1,6 @@
 // The Options page: Learn (payoff of each strategy), Builder (a strategy on a real option chain),
 // Backtest (modeled, engine/options_backtest.py) and Live (paper trades, engine/options_live.py).
-import * as L from "./options-lib.js?v=2";
+import * as L from "./options-lib.js?v=3";
 
 // Address of the Cloudflare Worker (worker/trendlines-worker.js, which also serves option chains).
 // The Trendlines page's "Data server" setting, if set on this device, is used instead.
@@ -467,6 +467,7 @@ function renderBacktest() {
   }
   const mdl = d.model;
   v.innerHTML = `${d.demo ? `<p class="note err">These are simulated test numbers, not real results.</p>` : ""}
+  ${findings(d)}
   <div class="panel">
     <div class="subrow"><div class="seg" id="tuni"><button type="button" data-v="spy" aria-pressed="${T_.uni === "spy"}">SPY</button><button type="button" data-v="sp100" aria-pressed="${T_.uni === "sp100"}">S&amp;P 100 stocks</button></div>
       <div class="seg" id="tvar"><button type="button" data-v="hold" aria-pressed="${T_.variant === "hold"}">Hold to expiry</button><button type="button" data-v="managed" aria-pressed="${T_.variant === "managed"}">Take profit / stop</button></div></div>
@@ -496,6 +497,43 @@ function renderBacktest() {
   v.querySelectorAll("tr[data-s]").forEach(r => r.addEventListener("click", () => { location.hash = `backtest/${r.dataset.s}`; }));
   $("tuni").addEventListener("click", e => { const b = e.target.closest("button"); if (!b) return; T_.uni = b.dataset.v; renderBacktest(); });
   $("tvar").addEventListener("click", e => { const b = e.target.closest("button"); if (!b) return; T_.variant = b.dataset.v; renderBacktest(); });
+}
+
+// What the backtest says, in a few lines. Written from the numbers each time, so it stays true
+// after every weekly rerun (a sentence whose condition no longer holds is simply left out).
+function findings(d) {
+  const S = d.spy, P = d.sp100, b = S.bench_stats, yr = d.spy.dates[0].slice(0, 4);
+  const h = sid => S.strat[sid]?.hold?.stats, mg = sid => S.strat[sid]?.managed?.stats;
+  const name = sid => L.META[sid].name.toLowerCase();
+  const out = [];
+  const beat = L.ORDER.filter(sid => h(sid) && h(sid).cagr > b.cagr);
+  out.push(beat.length
+    ? `On SPY since ${yr}, ${beat.length === 1 ? "one strategy" : beat.length + " strategies"} beat simply holding it (${pct(b.cagr)} a year): ${beat.map(name).join(", ")}.`
+    : `<b>No options strategy beat simply holding SPY since ${yr}</b> (${pct(b.cagr)} a year, ${pct(b.cagr_tax)} after tax).`);
+  const cc = h("covered_call");
+  if (cc && cc.cagr < b.cagr)
+    out.push(`<b>Covered calls</b> won ${cc.win.toFixed(0)}% of months but returned ${pct(cc.cagr)} a year, ${(b.cagr - cc.cagr).toFixed(1)} points less, with a drop almost as deep (${pct(cc.maxdd, 0)} vs ${pct(b.maxdd, 0)}): the premium doesn't cover the big falls and the call caps the rallies.`);
+  const col = h("collar"), pp = h("protective_put");
+  const safer = [["collar", col], ["protective_put", pp]].filter(([, s]) => s && s.maxdd > b.maxdd * 0.8).sort((a, c) => c[1].maxdd - a[1].maxdd);
+  if (safer.length) {
+    const [sid, s] = safer[0];
+    out.push(`For <b>smaller drops</b>, the ${name(sid)} worked best: its worst fall was ${pct(s.maxdd, 0)} against ${pct(b.maxdd, 0)} for SPY, for ${(b.cagr - s.cagr).toFixed(1)} points a year less return.`);
+  }
+  const csp = mg("cash_secured_put");
+  if (csp && csp.maxdd > -10) out.push(`<b>Cash-secured puts with take profit / stop</b> kept the worst drop to ${pct(csp.maxdd, 0)}, but made only ${pct(csp.cagr)} a year.`);
+  const longVol = ["bull_call_spread", "bear_put_spread", "long_straddle", "long_strangle", "calendar", "iron_condor"].filter(sid => h(sid) && h(sid).cagr < 0);
+  if (longVol.length >= 3) {
+    const worst = longVol.reduce((a, c) => h(c).cagr < h(a).cagr ? c : a);
+    out.push(`${longVol.length} of the spread, condor, straddle, strangle and calendar strategies <b>lost money</b> traded every month (worst: the ${name(worst)}, ${pct(h(worst).cagr)} a year). Paying for options month after month costs more than it brings in, on average.`);
+  }
+  const t = sid => (P.strat?.[sid]?.tickers || []).filter(r => r[1] != null && r[4] != null);
+  const ccT = t("covered_call"), colT = t("collar");
+  if (ccT.length) out.push(`On the S&amp;P 100 stocks the pattern is the same: covered calls beat holding the stock on ${ccT.filter(r => r[1] > r[4]).length} of ${ccT.length}${colT.length ? `, collars on ${colT.filter(r => r[1] > r[4]).length}` : ""}.`);
+  const takeaway = !beat.length
+    ? `So options here are most useful <b>to understand and to hedge</b> (paying a little to limit a fall), not as an extra income on top of the market.`
+    : "";
+  return `<div class="panel"><h2>What the backtest says</h2><ul class="find">${out.map(x => `<li>${x}</li>`).join("")}</ul>${takeaway ? `<p class="lead" style="margin:12px 0 0">${takeaway}</p>` : ""}
+    <p class="note">Modeled prices, a new position every month, held to expiry unless noted. Details and every strategy below.</p></div>`;
 }
 
 // ------------------------------------------------------------------ Live (paper)

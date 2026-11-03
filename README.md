@@ -2,10 +2,9 @@
 
 A phone-friendly web app that explains about thirty trading strategies, backtests
 them in the Strategy Lab and shows their alerts on the S&P 100, crypto and commodities.
-Strategies are split into **core** (best results in the backtest and the live track
-record) and **experimental** (the rest, folded away but still alertable and testable).
-The split lives in `CORE` in `docs/index.html`; the numbers behind it are in
-`research/core-strategies.md`. You pick the strategies you want to follow;
+Stock strategies carry an **evidence grade** from the research engine (`research/quant/`):
+how well each did against simply holding the same stocks, on a point-in-time universe, after
+costs, out of sample. The line-up is `docs/data/lineup.json`; notes in `research/core-strategies.md`. You pick the strategies you want to follow;
 each one has a plain-English explanation, its exact rules, and worked chart
 examples. **Information only: it doesn't trade and it isn't investment advice.**
 
@@ -20,6 +19,13 @@ docs/                    the website (served by GitHub Pages)
   data/stocks/           one-year chart per stock
   lab.js                 Strategy Lab (indicator settings, exit rule, take profit / stop loss); tests: tests/lab/test_parity.py, tests/lab/test_stops.mjs
                          Robustness tab: vs holding the same stocks, walk-forward, settings plateau, bootstrap luck test (tests/lab/test_robust.mjs)
+  lab-rules.js           Strategy Lab "Your own rules": 71 indicators (daily or weekly), conditions, 47 candle /
+                         price-action / chart patterns and the pattern tester's statistics. runPro() in lab.js is the
+                         trade-by-trade engine for them and for the advanced exits (ATR / swing / risk:reward stops and
+                         targets, break-even, partial exits, losers' time stop, next-open entries) and money rules (risk %
+                         sizing, sector limit, pause after a loss, positions per stock); tests: tests/lab/test_pro.mjs
+  data/lab_recent.json   two years of fresh daily prices (written by engine/live_trades.py after each daily scan),
+                         for the Lab's followed setups (Follow tab, and the card on Alerts)
   rating.js              technical rating (Strong sell … Strong buy) on each stock page; test: tests/rating/test_rating.py
   trendlines.html/.js    automatic trendlines + support/resistance, stocks and crypto (data from worker/)
   options.html/.js       Options page: Learn (payoff charts of 11 strategies), Builder (a strategy on a live option
@@ -28,6 +34,11 @@ docs/                    the website (served by GitHub Pages)
                          mirrors engine/options_model.py, tests: tests/options/test_parity.py, tests/options/test_analyze.mjs
   data/options/backtest.json  modeled options backtest since 2010, SPY + S&P 100 (engine/options_backtest.py)
   data/options/live.json      options paper trades on SPY from the go-live day, real Alpaca quotes (engine/options_live.py)
+  pairs.html/.js         Pairs trading (statistical arbitrage): today's same-sector S&P 100 pairs with their gap
+                         (z-score) and what-if settings, an out-of-sample walk-forward backtest vs SPY, a settings grid
+                         and paper trades. pairs.js mirrors engine/pairs.py, test: tests/pairs/test_parity.py
+  data/pairs/            pairs.json, grid.json (weekly), live.json (paper trades, closed ones never changed),
+                         written by engine/pairs.py from the Strategy Lab's price files (.github/workflows/pairs.yml)
   data/sentiment.json    News mood: per-stock headline tone from Google News, established outlets (engine/sentiment.py, FinBERT, hourly news job)
   research/mood-compare/ News mood source test, Google vs Alpaca, moods only (engine/mood_compare.py; until 3 Nov 2026)
   data/calendar.json     upcoming earnings, IPOs, economy (written by engine/events.py)

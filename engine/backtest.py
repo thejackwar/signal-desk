@@ -513,7 +513,8 @@ def lab_prices(data: dict[str, pd.DataFrame], spy_c: pd.Series | None) -> dict:
     browser with your own settings. Prices are stored as log-price steps in basis points
     (0.01%), so 15 years of the whole list stays small:
       close  -> first value round(ln(close) * 1e4), then the change from the day before
-      high/low -> round((ln(high or low) - ln(close)) * 1e4) for the same day
+      high/low/open -> round((ln(high, low or open) - ln(close)) * 1e4) for the same day ("o": the
+               Lab's candle patterns and next-open entries; older files have no "o")
     Each ticker runs on its own trading days; "s" is its first day in the shared calendar
     and "miss" lists shared-calendar days it has no price for (holidays, halts).
     Also: "v" volume per day as round(ln(volume) * v_scale), 0 = none (Volume breakout); "bench" and
@@ -533,6 +534,7 @@ def lab_prices(data: dict[str, pd.DataFrame], spy_c: pd.Series | None) -> dict:
             "c": [int(L[0])] + np.diff(L).tolist(),
             "h": (enc(df["high"].values) - L).tolist(),
             "l": (enc(df["low"].values) - L).tolist(),
+            "o": (enc(df["open"].values) - L).tolist(),
             "v": [int(round(np.log(x) * 1000)) if x > 0 else 0 for x in df["volume"].fillna(0).astype(float).values]})
     if spy_c is not None:
         c = spy_c.copy()
