@@ -6,7 +6,7 @@ on:
   workflow_dispatch: {}
   push:
     branches: [research-engine]
-    paths: ["research/quant/**.py", ".github/workflows/research.yml"]
+    paths: ["research/quant/**.py", "engine/crash_filter.py", ".github/workflows/research.yml"]
   schedule:
     - cron: "30 7 1 * *"     # first day of each month
 
@@ -41,14 +41,21 @@ jobs:
       - name: Run every stock strategy
         run: python -u research/quant/run.py
 
-      - name: Update the site's stock line-up and evidence grades
+      - name: Run every crypto strategy (vs holding bitcoin)
+        continue-on-error: true   # a bad crypto download must not hold back the stock results
+        run: python -u research/quant/run_crypto.py
+
+      - name: Smaller Crashes data (also refreshed by the daily scan)
+        run: python engine/crash_filter.py
+
+      - name: Update the site's line-ups and evidence grades (stocks, crypto)
         run: python research/quant/grades.py
 
       - name: Publish results
         run: |
           git config user.name "signal-desk-bot"
           git config user.email "signal-desk-bot@users.noreply.github.com"
-          git add research/quant/results docs/data/lineup.json
+          git add research/quant/results docs/data/lineup.json docs/data/crashfilter.json
           git diff --cached --quiet || git commit -m "Research report $(date -u +%F)"
           git pull --rebase
           git push

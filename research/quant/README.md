@@ -10,7 +10,10 @@ research/quant/
   data.py       daily prices from Yahoo Finance, cached (cache/ is not committed)
   engine.py     alerts -> daily positions -> account, with the universe check and trading costs
   metrics.py    CAGR, Sharpe, Sortino, worst drop, turnover; bootstrap and deflated Sharpe
-  run.py        runs it all, writes results/report.json and results/REPORT.md
+  run.py        stocks: runs it all, writes results/report.json and results/REPORT.md
+  run_crypto.py crypto: same tests vs holding bitcoin, on bitcoin + ether, writes results/crypto/
+  portfolio.py  phase 3: trend-filter portfolios with volatility sizing and T-bill cash
+  grades.py     evidence grades -> the site's stock and crypto line-ups (docs/data/lineup.json)
   data/sp500_membership.csv   S&P 500 membership history (github.com/fja05680/sp500, MIT)
 ```
 
@@ -37,3 +40,7 @@ position is 100% of it); "capped" holds at most 5% per stock and keeps the rest 
 - Yahoo has no prices for most delisted stocks (mostly takeovers). The report shows the coverage.
 - Trading value stands in for market cap when ranking the top 100.
 - No Italian tax yet (the Strategy Lab has it); costs only.
+- Crypto: no free point-in-time list of the biggest coins, so the honest test is bitcoin + ether only.
+
+The one practical result so far, the S&P 500 200-day filter, runs daily as `engine/crash_filter.py`
+(the site's Smaller Crashes page).

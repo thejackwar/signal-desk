@@ -1,6 +1,6 @@
 {
   "updated": "2026-11-03",
-  "rule": "Stocks: every strategy is retested each month against simply holding the same stocks, on the stocks that were actually among the 100 biggest at the time (not today's list), after trading costs, with 2021 onwards kept aside as a test the strategies were never picked on. Each gets an evidence grade: Proven edge, Promising, Unproven or Trails holding. Strategies that trail holding go to the Vault. Crypto and commodities: picked on the older backtest until the new tests cover them.",
+  "rule": "Every strategy is retested each month against simply holding: for stocks, holding the same stocks, using the ones that were actually among the 100 biggest at the time (not today's list); for crypto, holding bitcoin, tested on bitcoin and ether. After trading costs, with 2021 onwards kept aside as a test the strategies were never picked on. Each gets an evidence grade: Proven edge, Promising, Unproven or Trails holding. Strategies that trail holding go to the Vault. Commodities: picked on the older backtest until the new tests cover them.",
   "keep": {
     "stocks": [
       "golden_cross",
@@ -34,6 +34,7 @@
         "C": "Unproven",
         "D": "Trails holding"
       },
+      "vs": "holding the same stocks",
       "hold": {
         "cagr": 0.1466,
         "sharpe": 0.8325
