@@ -35,6 +35,11 @@ docs/                    the website (served by GitHub Pages)
                          mirrors engine/options_model.py, tests: tests/options/test_parity.py, tests/options/test_analyze.mjs
   data/options/backtest.json  modeled options backtest since 2010, SPY + S&P 100 (engine/options_backtest.py)
   data/options/live.json      options paper trades on SPY from the go-live day, real Alpaca quotes (engine/options_live.py)
+  pairs.html/.js         Pairs trading (statistical arbitrage): today's same-sector S&P 100 pairs with their gap
+                         (z-score) and what-if settings, an out-of-sample walk-forward backtest vs SPY, a settings grid
+                         and paper trades. pairs.js mirrors engine/pairs.py, test: tests/pairs/test_parity.py
+  data/pairs/            pairs.json, grid.json (weekly), live.json (paper trades, closed ones never changed),
+                         written by engine/pairs.py from the Strategy Lab's price files (.github/workflows/pairs.yml)
   data/sentiment.json    News mood: per-stock headline tone from Google News, established outlets (engine/sentiment.py, FinBERT, hourly news job)
   research/mood-compare/ News mood source test, Google vs Alpaca, moods only (engine/mood_compare.py; until 3 Nov 2026)
   data/calendar.json     upcoming earnings, IPOs, economy (written by engine/events.py)

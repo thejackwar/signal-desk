@@ -1,0 +1,14 @@
+{
+ "since": "2026-11-03",
+ "trade_eur": 1000,
+ "open": [],
+ "closed": [],
+ "last_day": "2026-11-03",
+ "summary": {
+  "closed": 0,
+  "open": 0,
+  "pnl_closed": 0,
+  "pnl_open": 0,
+  "win_rate": null
+ }
+}

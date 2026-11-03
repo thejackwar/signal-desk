@@ -1,0 +1,57 @@
+name: Pairs
+
+# Pairs trading page (docs/pairs.html), engine/pairs.py:
+#  - after the paper-trades job (which follows each daily scan and rewrites lab_recent.json, the fresh
+#    prices this reads): today's pairs, the walk-forward backtest and the paper trades. That job also
+#    runs after the crypto and commodities scans; a rerun on the same prices changes nothing.
+#  - Saturdays (after the weekly backtest rewrites lab.json): the same plus the settings grid.
+on:
+  workflow_run:
+    workflows: ["Live trades (paper)"]
+    types: [completed]
+  schedule:
+    - cron: "45 6 * * 6"     # Saturday 06:45 UTC
+  push:
+    branches: [main]
+    paths: ["engine/pairs.py"]
+  workflow_dispatch:
+    inputs:
+      grid:
+        description: "Also run the settings grid (slow)"
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+concurrency:
+  group: pairs
+  cancel-in-progress: false
+
+jobs:
+  pairs:
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: pip install -r requirements.txt statsmodels
+      - name: Pairs
+        run: |
+          if [ "${{ github.event_name }}" = "schedule" ] || [ "${{ github.event_name }}" = "push" ] || [ "${{ inputs.grid }}" = "true" ]; then
+            python engine/pairs.py --grid
+          else
+            python engine/pairs.py
+          fi
+      - name: Publish
+        run: |
+          git config user.name "signal-desk-bot"
+          git config user.email "signal-desk-bot@users.noreply.github.com"
+          git add docs/data/pairs
+          git diff --cached --quiet || git commit -m "Pairs $(date -u +%F)"
+          git pull --rebase
+          git push
