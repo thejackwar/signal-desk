@@ -2669,6 +2669,7 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
     return `<div class="card evcard" style="margin-top:14px"><h3>Evidence: ${esc(e.label)}</h3><p>${say}</p>
       <div class="evnum"><span>Beat holding in <b>${p(e.beats_hold)}</b> of tests${crypto ? " (2021 on)" : ""}</span>${crypto ? "" : `<span>2021 on: <b>${p(e.beats_hold_test)}</b></span>`}
       <span>Yearly growth <b>${yr(e.cagr)}</b> vs ${crypto ? "bitcoin" : "holding"} <b>${yr(E.hold?.cagr)}</b></span></div>
+      ${(E.periods || []).slice(1).map(P => { const o = e.by?.[P.key], ho = E.hold_by?.[P.key]; return o ? `<p class="hint" style="margin:8px 0 0">${esc(P.label)}: ${esc(o.label)}, beat holding in ${p(o.beats_hold)} of tests, ${yr(o.cagr)} a year vs ${yr(ho?.cagr)}.</p>` : ""; }).join("")}
       <p class="hint" style="margin:8px 0 0">Tested ${E.updated ? `on ${esc(fmtDate(E.updated, { day: "numeric", month: "short", year: "numeric" }))} ` : ""}${crypto ? "on bitcoin and ether from 2021 on (earlier crypto prices were tiny and today's top coins would only show the survivors), after 0.2% trading costs per buy and per sell," : "on the stocks that were among the 100 biggest at each point since 2011 (not today's list, which only shows the winners), after trading costs,"} ${crypto ? "" : "with 2021 onwards kept aside as a test it was never picked on. "}Past results don't predict future ones.</p></div>`;
   }
 
@@ -3042,16 +3043,21 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
   // Markets the research engine covers: how each strategy on the site did against simply holding,
   // instead of the old account race (today's list, no costs). Commodities keep compareCard below.
   function evidenceListCard() {
-    const E = S.lineup?.evidence?.[S.market];
-    const rows = Object.entries(E.strategies).filter(([id]) => isCore(id) && S.byId[id]);
+    const E = S.lineup?.evidence?.[S.market], PS = E.periods || [{ key: E.judged_on || "full", label: E.period }];
+    const pk = PS.some(p => p.key === pref("evPeriod." + S.market)) ? pref("evPeriod." + S.market) : PS[0].key;
+    const pl = PS.find(p => p.key === pk).label;
+    const at = e => ({ ...e, ...(e.by?.[pk] || {}) });
+    const rows = Object.entries(E.strategies).filter(([id]) => isCore(id) && S.byId[id]).map(([id, e]) => [id, at(e)])
+      .sort((a, b) => (GORDER[a[1].grade] - GORDER[b[1].grade]) || ((b[1].beats_hold ?? 0) - (a[1].beats_hold ?? 0)));
     const nv = Object.keys(E.strategies).filter(id => !isCore(id)).length;
     const yr = v => v == null ? "–" : (v * 100).toFixed(1) + "%";
-    const hold = E.hold?.cagr;
-    let h = `<div class="card"><h3>How they did vs ${esc(E.vs.replace(/^holding /, "holding "))}</h3>
-      <p>${esc(E.period)}, after trading costs, ${S.market === "crypto" ? "on bitcoin and ether" : "on the stocks that were among the 100 biggest at the time"}. Holding: <b>${yr(hold)}</b> a year${E.hold?.maxdd != null ? `, worst fall ${yr(E.hold.maxdd)}` : ""}.</p>`;
+    const H = E.hold_by?.[pk] || E.hold;
+    let h = `<div class="card"><div style="display:flex;justify-content:space-between;align-items:center;gap:8px"><h3 style="margin:0">How they did vs ${esc(E.vs)}</h3>
+      ${PS.length > 1 ? `<span class="yrpick"><select data-evperiod aria-label="Years">${PS.map(p => `<option value="${p.key}"${p.key === pk ? " selected" : ""}>${esc(p.label)}</option>`).join("")}</select></span>` : ""}</div>
+      <p style="margin-top:6px">${esc(pl)}, after trading costs, ${S.market === "crypto" ? "on bitcoin and ether" : "on the stocks that were among the 100 biggest at the time"}. Holding: <b>${yr(H?.cagr)}</b> a year${H?.maxdd != null ? `, worst fall ${yr(H.maxdd)}` : ""}.${pk !== PS[0].key ? ` Grades here are for these years; the line-up and alerts follow ${esc(PS[0].label)}.` : ""}</p>`;
     h += rows.map(([id, e]) => { const w = Math.round((e.beats_hold ?? 0) * 100);
       return `<a href="#strategy-${slug(id)}" style="display:block;color:inherit;text-decoration:none;padding:9px 0;border-top:1px solid var(--line)">
-        <div style="display:flex;justify-content:space-between;gap:8px;align-items:center"><b style="font-size:14.5px;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(stratName(id))}</b>${gradeChip(id)}</div>
+        <div style="display:flex;justify-content:space-between;gap:8px;align-items:center"><b style="font-size:14.5px;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(stratName(id))}</b><span class="grade g${e.grade}">${esc(e.label)}</span></div>
         <div style="display:flex;align-items:center;gap:8px;margin-top:6px;font-size:12.5px;color:var(--muted)">
           <span style="flex:1;height:6px;border-radius:3px;background:var(--surface-2);overflow:hidden"><span style="display:block;height:100%;width:${w}%;background:${w >= 50 ? "var(--bull)" : "var(--muted)"}"></span></span>
           <span style="white-space:nowrap">beat holding in <b>${w}%</b> of tests · ${yr(e.cagr)}/yr${e.maxdd != null ? ` · worst ${yr(e.maxdd)}` : ""}</span></div></a>`; }).join("");
@@ -6581,6 +6587,8 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
     if (lsel) { setPref("ltStrat", lsel.value); S.ltLim = 0; S.ltOpenLim = 0; rerender(); return; }
     const ey = e.target.closest("[data-ernfrom], [data-ernto]");
     if (ey) { setPref(ey.matches("[data-ernfrom]") ? "ernFrom" : "ernTo", +ey.value); rerender(); return; }
+    const ep = e.target.closest("[data-evperiod]");
+    if (ep) { setPref("evPeriod." + (S.market || "stocks"), ep.value); rerender(); return; }
     const cf = e.target.closest("[data-cmpfrom]");
     if (cf) { setPref("cmpFrom." + (S.market || "stocks"), +cf.value); rerender(); }
   });

@@ -24,11 +24,12 @@ ROOT = Path(__file__).resolve().parents[2]
 REPORTS = {"stocks": ROOT / "research" / "quant" / "results" / "report.json",
            "crypto": ROOT / "research" / "quant" / "results" / "crypto" / "report.json"}
 VS = {"stocks": "holding the same stocks", "crypto": "holding bitcoin"}
-# which years the grade is judged on: stocks on all of them (2011 on, with 2021 on as a check);
-# crypto on 2021 on only, because earlier crypto prices were tiny and illiquid and the market was
-# a different thing (the earlier years are still in the research report)
+# which years decide the grade and the line-up (the site's default view): stocks all of them
+# (2011 on, with 2021 on as a check); crypto 2021 on, because earlier crypto prices were tiny and
+# illiquid. The other period is stored too and can be picked on the site.
 JUDGE = {"stocks": "full", "crypto": "test"}
-PERIOD = {"stocks": "2011–now", "crypto": "2021–now"}
+PERIODS = {"stocks": [("full", "2011–now"), ("test", "2021–now")],
+           "crypto": [("test", "2021–now"), ("full", "2015–now")]}   # first = the default
 LINEUP = ROOT / "docs" / "data" / "lineup.json"
 ALWAYS = ["topdown"]
 LABELS = {"A": "Proven edge", "B": "Promising", "C": "Unproven", "D": "Trails holding"}
@@ -72,18 +73,26 @@ def update(market: str, rep: dict):
     ev = {}
     for sid, s in rep["strategies"].items():
         g = grade(s, j)
+        by = {}
+        for k, _ in PERIODS[market]:
+            gk = grade(s, k)   # "full" uses the stock rule (all years + the 2021-on check), "test" 2021 on only
+            by[k] = {"grade": gk, "label": LABELS[gk], "beats_hold": s[k]["vs_hold"]["p_better"],
+                     "cagr": s[k].get("cagr"), "maxdd": s[k].get("maxdd")}
         ev[sid] = {"grade": g, "label": LABELS[g],
                    "beats_hold": s[j]["vs_hold"]["p_better"], "beats_hold_test": s["test"]["vs_hold"]["p_better"],
                    "deflated": s.get("dsr_test", s.get("dsr")) if j == "test" else s.get("dsr"),
-                   "cagr": s[j].get("cagr"), "sharpe": s[j].get("sharpe"), "maxdd": s[j].get("maxdd")}
+                   "cagr": s[j].get("cagr"), "sharpe": s[j].get("sharpe"), "maxdd": s[j].get("maxdd"), "by": by}
     order = sorted(ev, key=lambda k: (ev[k]["grade"], -(ev[k]["beats_hold"] or 0)))
     lu = json.loads(LINEUP.read_text())
     lu["updated"] = rep["generated_at"][:10]
     lu["rule"] = RULE
     lu["keep"][market] = [k for k in order if ev[k]["grade"] != "D"] + ALWAYS
     lu.setdefault("evidence", {})[market] = {"updated": rep["generated_at"][:10], "labels": LABELS, "vs": VS[market],
-                                             "period": PERIOD[market], "judged_on": j,
+                                             "period": PERIODS[market][0][1], "judged_on": j,
+                                             "periods": [{"key": k, "label": lab} for k, lab in PERIODS[market]],
                                              "hold": {"cagr": hold.get("cagr"), "sharpe": hold.get("sharpe"), "maxdd": hold.get("maxdd")},
+                                             "hold_by": {k: {"cagr": rep["benchmarks"][hk][k].get("cagr"), "maxdd": rep["benchmarks"][hk][k].get("maxdd")}
+                                                         for k, _ in PERIODS[market]},
                                              "strategies": {k: ev[k] for k in order}}
     LINEUP.write_text(json.dumps(lu, indent=2) + "\n")
     for k in order:

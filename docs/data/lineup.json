@@ -49,10 +49,30 @@
       "vs": "holding the same stocks",
       "period": "2011\u2013now",
       "judged_on": "full",
+      "periods": [
+        {
+          "key": "full",
+          "label": "2011\u2013now"
+        },
+        {
+          "key": "test",
+          "label": "2021\u2013now"
+        }
+      ],
       "hold": {
         "cagr": 0.1466,
         "sharpe": 0.8325,
         "maxdd": -0.3469
+      },
+      "hold_by": {
+        "full": {
+          "cagr": 0.1466,
+          "maxdd": -0.3469
+        },
+        "test": {
+          "cagr": 0.151,
+          "maxdd": -0.2527
+        }
       },
       "strategies": {
         "golden_cross": {
@@ -63,7 +83,23 @@
           "deflated": 0.0655,
           "cagr": 0.144,
           "sharpe": 0.8823,
-          "maxdd": -0.3289
+          "maxdd": -0.3289,
+          "by": {
+            "full": {
+              "grade": "B",
+              "label": "Promising",
+              "beats_hold": 0.755,
+              "cagr": 0.144,
+              "maxdd": -0.3289
+            },
+            "test": {
+              "grade": "B",
+              "label": "Promising",
+              "beats_hold": 0.733,
+              "cagr": 0.1498,
+              "maxdd": -0.2129
+            }
+          }
         },
         "ma200": {
           "grade": "C",
@@ -73,7 +109,23 @@
           "deflated": 0.0449,
           "cagr": 0.1402,
           "sharpe": 0.8718,
-          "maxdd": -0.2806
+          "maxdd": -0.2806,
+          "by": {
+            "full": {
+              "grade": "C",
+              "label": "Unproven",
+              "beats_hold": 0.6975,
+              "cagr": 0.1402,
+              "maxdd": -0.2806
+            },
+            "test": {
+              "grade": "C",
+              "label": "Unproven",
+              "beats_hold": 0.6805,
+              "cagr": 0.1454,
+              "maxdd": -0.236
+            }
+          }
         },
         "relative_strength": {
           "grade": "C",
@@ -83,7 +135,23 @@
           "deflated": 0.0723,
           "cagr": 0.1423,
           "sharpe": 0.8344,
-          "maxdd": -0.3224
+          "maxdd": -0.3224,
+          "by": {
+            "full": {
+              "grade": "C",
+              "label": "Unproven",
+              "beats_hold": 0.4865,
+              "cagr": 0.1423,
+              "maxdd": -0.3224
+            },
+            "test": {
+              "grade": "C",
+              "label": "Unproven",
+              "beats_hold": 0.4075,
+              "cagr": 0.1463,
+              "maxdd": -0.2865
+            }
+          }
         },
         "deck_live": {
           "grade": "C",
@@ -93,7 +161,23 @@
           "deflated": 0.0137,
           "cagr": 0.1189,
           "sharpe": 0.7641,
-          "maxdd": -0.2893
+          "maxdd": -0.2893,
+          "by": {
+            "full": {
+              "grade": "C",
+              "label": "Unproven",
+              "beats_hold": 0.2155,
+              "cagr": 0.1189,
+              "maxdd": -0.2893
+            },
+            "test": {
+              "grade": "C",
+              "label": "Unproven",
+              "beats_hold": 0.4345,
+              "cagr": 0.1435,
+              "maxdd": -0.2893
+            }
+          }
         },
         "pattern_trader": {
           "grade": "C",
@@ -103,7 +187,23 @@
           "deflated": 0.0638,
           "cagr": 0.1261,
           "sharpe": 0.6742,
-          "maxdd": -0.3535
+          "maxdd": -0.3535,
+          "by": {
+            "full": {
+              "grade": "C",
+              "label": "Unproven",
+              "beats_hold": 0.144,
+              "cagr": 0.1261,
+              "maxdd": -0.3535
+            },
+            "test": {
+              "grade": "C",
+              "label": "Unproven",
+              "beats_hold": 0.558,
+              "cagr": 0.2014,
+              "maxdd": -0.3522
+            }
+          }
         },
         "deck_ma50": {
           "grade": "C",
@@ -113,7 +213,23 @@
           "deflated": 0.0013,
           "cagr": 0.0972,
           "sharpe": 0.6532,
-          "maxdd": -0.3647
+          "maxdd": -0.3647,
+          "by": {
+            "full": {
+              "grade": "C",
+              "label": "Unproven",
+              "beats_hold": 0.035,
+              "cagr": 0.0972,
+              "maxdd": -0.3647
+            },
+            "test": {
+              "grade": "C",
+              "label": "Unproven",
+              "beats_hold": 0.4455,
+              "cagr": 0.1436,
+              "maxdd": -0.2399
+            }
+          }
         },
         "volume_breakout": {
           "grade": "D",
@@ -123,7 +239,23 @@
           "deflated": 0.0091,
           "cagr": 0.1105,
           "sharpe": 0.6577,
-          "maxdd": -0.2836
+          "maxdd": -0.2836,
+          "by": {
+            "full": {
+              "grade": "D",
+              "label": "Trails holding",
+              "beats_hold": 0.084,
+              "cagr": 0.1105,
+              "maxdd": -0.2836
+            },
+            "test": {
+              "grade": "D",
+              "label": "Trails holding",
+              "beats_hold": 0.113,
+              "cagr": 0.0926,
+              "maxdd": -0.2836
+            }
+          }
         },
         "donchian": {
           "grade": "D",
@@ -133,7 +265,23 @@
           "deflated": 0.0045,
           "cagr": 0.1149,
           "sharpe": 0.7366,
-          "maxdd": -0.3117
+          "maxdd": -0.3117,
+          "by": {
+            "full": {
+              "grade": "D",
+              "label": "Trails holding",
+              "beats_hold": 0.079,
+              "cagr": 0.1149,
+              "maxdd": -0.3117
+            },
+            "test": {
+              "grade": "D",
+              "label": "Trails holding",
+              "beats_hold": 0.024,
+              "cagr": 0.0959,
+              "maxdd": -0.3117
+            }
+          }
         },
         "double_top_bottom": {
           "grade": "D",
@@ -143,7 +291,23 @@
           "deflated": 0.018,
           "cagr": 0.1121,
           "sharpe": 0.634,
-          "maxdd": -0.2911
+          "maxdd": -0.2911,
+          "by": {
+            "full": {
+              "grade": "D",
+              "label": "Trails holding",
+              "beats_hold": 0.069,
+              "cagr": 0.1121,
+              "maxdd": -0.2911
+            },
+            "test": {
+              "grade": "D",
+              "label": "Trails holding",
+              "beats_hold": 0.031,
+              "cagr": 0.0523,
+              "maxdd": -0.2593
+            }
+          }
         },
         "head_shoulders": {
           "grade": "D",
@@ -153,7 +317,23 @@
           "deflated": 0.0209,
           "cagr": 0.0845,
           "sharpe": 0.4705,
-          "maxdd": -0.4533
+          "maxdd": -0.4533,
+          "by": {
+            "full": {
+              "grade": "D",
+              "label": "Trails holding",
+              "beats_hold": 0.05,
+              "cagr": 0.0845,
+              "maxdd": -0.4533
+            },
+            "test": {
+              "grade": "D",
+              "label": "Trails holding",
+              "beats_hold": 0.085,
+              "cagr": 0.0744,
+              "maxdd": -0.4533
+            }
+          }
         },
         "breakout_bot": {
           "grade": "D",
@@ -163,7 +343,23 @@
           "deflated": 0.0012,
           "cagr": 0.0909,
           "sharpe": 0.6243,
-          "maxdd": -0.352
+          "maxdd": -0.352,
+          "by": {
+            "full": {
+              "grade": "D",
+              "label": "Trails holding",
+              "beats_hold": 0.042,
+              "cagr": 0.0909,
+              "maxdd": -0.352
+            },
+            "test": {
+              "grade": "D",
+              "label": "Trails holding",
+              "beats_hold": 0.1295,
+              "cagr": 0.0945,
+              "maxdd": -0.3037
+            }
+          }
         },
         "triangle": {
           "grade": "D",
@@ -173,7 +369,23 @@
           "deflated": 0.0031,
           "cagr": 0.0797,
           "sharpe": 0.5034,
-          "maxdd": -0.4471
+          "maxdd": -0.4471,
+          "by": {
+            "full": {
+              "grade": "D",
+              "label": "Trails holding",
+              "beats_hold": 0.032,
+              "cagr": 0.0797,
+              "maxdd": -0.4471
+            },
+            "test": {
+              "grade": "D",
+              "label": "Trails holding",
+              "beats_hold": 0.0005,
+              "cagr": -0.04,
+              "maxdd": -0.4471
+            }
+          }
         },
         "bollinger": {
           "grade": "D",
@@ -183,7 +395,23 @@
           "deflated": 0.0109,
           "cagr": 0.1189,
           "sharpe": 0.6586,
-          "maxdd": -0.3565
+          "maxdd": -0.3565,
+          "by": {
+            "full": {
+              "grade": "D",
+              "label": "Trails holding",
+              "beats_hold": 0.029,
+              "cagr": 0.1189,
+              "maxdd": -0.3565
+            },
+            "test": {
+              "grade": "D",
+              "label": "Trails holding",
+              "beats_hold": 0.078,
+              "cagr": 0.118,
+              "maxdd": -0.3016
+            }
+          }
         },
         "buy_the_dip": {
           "grade": "D",
@@ -193,7 +421,23 @@
           "deflated": 0.0115,
           "cagr": 0.1336,
           "sharpe": 0.7449,
-          "maxdd": -0.3536
+          "maxdd": -0.3536,
+          "by": {
+            "full": {
+              "grade": "D",
+              "label": "Trails holding",
+              "beats_hold": 0.0175,
+              "cagr": 0.1336,
+              "maxdd": -0.3536
+            },
+            "test": {
+              "grade": "D",
+              "label": "Trails holding",
+              "beats_hold": 0.108,
+              "cagr": 0.139,
+              "maxdd": -0.2822
+            }
+          }
         },
         "deck_v6": {
           "grade": "D",
@@ -203,7 +447,23 @@
           "deflated": 0.0004,
           "cagr": 0.0999,
           "sharpe": 0.6556,
-          "maxdd": -0.2924
+          "maxdd": -0.2924,
+          "by": {
+            "full": {
+              "grade": "D",
+              "label": "Trails holding",
+              "beats_hold": 0.0125,
+              "cagr": 0.0999,
+              "maxdd": -0.2924
+            },
+            "test": {
+              "grade": "D",
+              "label": "Trails holding",
+              "beats_hold": 0.015,
+              "cagr": 0.0925,
+              "maxdd": -0.2924
+            }
+          }
         },
         "deck_v8": {
           "grade": "D",
@@ -213,7 +473,23 @@
           "deflated": 0.0001,
           "cagr": 0.0849,
           "sharpe": 0.5706,
-          "maxdd": -0.2896
+          "maxdd": -0.2896,
+          "by": {
+            "full": {
+              "grade": "D",
+              "label": "Trails holding",
+              "beats_hold": 0.003,
+              "cagr": 0.0849,
+              "maxdd": -0.2896
+            },
+            "test": {
+              "grade": "D",
+              "label": "Trails holding",
+              "beats_hold": 0.001,
+              "cagr": 0.0688,
+              "maxdd": -0.2896
+            }
+          }
         },
         "supertrend": {
           "grade": "D",
@@ -223,7 +499,23 @@
           "deflated": 0.0002,
           "cagr": 0.0931,
           "sharpe": 0.6004,
-          "maxdd": -0.301
+          "maxdd": -0.301,
+          "by": {
+            "full": {
+              "grade": "D",
+              "label": "Trails holding",
+              "beats_hold": 0.002,
+              "cagr": 0.0931,
+              "maxdd": -0.301
+            },
+            "test": {
+              "grade": "D",
+              "label": "Trails holding",
+              "beats_hold": 0.0535,
+              "cagr": 0.104,
+              "maxdd": -0.301
+            }
+          }
         },
         "rsi": {
           "grade": "D",
@@ -233,7 +525,23 @@
           "deflated": 0.0005,
           "cagr": 0.0562,
           "sharpe": 0.3548,
-          "maxdd": -0.3922
+          "maxdd": -0.3922,
+          "by": {
+            "full": {
+              "grade": "D",
+              "label": "Trails holding",
+              "beats_hold": 0.0,
+              "cagr": 0.0562,
+              "maxdd": -0.3922
+            },
+            "test": {
+              "grade": "D",
+              "label": "Trails holding",
+              "beats_hold": 0.0945,
+              "cagr": 0.1223,
+              "maxdd": -0.2264
+            }
+          }
         },
         "macd": {
           "grade": "D",
@@ -243,7 +551,23 @@
           "deflated": 0.0,
           "cagr": 0.0399,
           "sharpe": 0.3041,
-          "maxdd": -0.4244
+          "maxdd": -0.4244,
+          "by": {
+            "full": {
+              "grade": "D",
+              "label": "Trails holding",
+              "beats_hold": 0.0,
+              "cagr": 0.0399,
+              "maxdd": -0.4244
+            },
+            "test": {
+              "grade": "D",
+              "label": "Trails holding",
+              "beats_hold": 0.0135,
+              "cagr": 0.0788,
+              "maxdd": -0.2994
+            }
+          }
         }
       }
     },
@@ -258,10 +582,30 @@
       "vs": "holding bitcoin",
       "period": "2021\u2013now",
       "judged_on": "test",
+      "periods": [
+        {
+          "key": "test",
+          "label": "2021\u2013now"
+        },
+        {
+          "key": "full",
+          "label": "2015\u2013now"
+        }
+      ],
       "hold": {
         "cagr": 0.1838,
         "sharpe": 0.5808,
         "maxdd": -0.7663
+      },
+      "hold_by": {
+        "test": {
+          "cagr": 0.1838,
+          "maxdd": -0.7663
+        },
+        "full": {
+          "cagr": 0.5897,
+          "maxdd": -0.834
+        }
       },
       "strategies": {
         "btc_trend_50_200": {
@@ -272,7 +616,23 @@
           "deflated": 0.0012,
           "cagr": 0.3891,
           "sharpe": 0.994,
-          "maxdd": -0.5154
+          "maxdd": -0.5154,
+          "by": {
+            "test": {
+              "grade": "B",
+              "label": "Promising",
+              "beats_hold": 0.8395,
+              "cagr": 0.3891,
+              "maxdd": -0.5154
+            },
+            "full": {
+              "grade": "B",
+              "label": "Promising",
+              "beats_hold": 0.8305,
+              "cagr": 0.6686,
+              "maxdd": -0.5207
+            }
+          }
         },
         "ma200": {
           "grade": "B",
@@ -282,7 +642,23 @@
           "deflated": 0.001,
           "cagr": 0.3297,
           "sharpe": 0.8158,
-          "maxdd": -0.5706
+          "maxdd": -0.5706,
+          "by": {
+            "test": {
+              "grade": "B",
+              "label": "Promising",
+              "beats_hold": 0.7485,
+              "cagr": 0.3297,
+              "maxdd": -0.5706
+            },
+            "full": {
+              "grade": "C",
+              "label": "Unproven",
+              "beats_hold": 0.5525,
+              "cagr": 0.5919,
+              "maxdd": -0.8243
+            }
+          }
         },
         "double_top_bottom": {
           "grade": "B",
@@ -292,7 +668,23 @@
           "deflated": 0.0,
           "cagr": 0.1474,
           "sharpe": 0.7997,
-          "maxdd": -0.1921
+          "maxdd": -0.1921,
+          "by": {
+            "test": {
+              "grade": "B",
+              "label": "Promising",
+              "beats_hold": 0.731,
+              "cagr": 0.1474,
+              "maxdd": -0.1921
+            },
+            "full": {
+              "grade": "C",
+              "label": "Unproven",
+              "beats_hold": 0.222,
+              "cagr": 0.1578,
+              "maxdd": -0.3397
+            }
+          }
         },
         "donchian": {
           "grade": "B",
@@ -302,7 +694,23 @@
           "deflated": 0.0009,
           "cagr": 0.3227,
           "sharpe": 0.8066,
-          "maxdd": -0.5675
+          "maxdd": -0.5675,
+          "by": {
+            "test": {
+              "grade": "B",
+              "label": "Promising",
+              "beats_hold": 0.71,
+              "cagr": 0.3227,
+              "maxdd": -0.5675
+            },
+            "full": {
+              "grade": "C",
+              "label": "Unproven",
+              "beats_hold": 0.562,
+              "cagr": 0.589,
+              "maxdd": -0.7458
+            }
+          }
         },
         "supertrend": {
           "grade": "C",
@@ -312,7 +720,23 @@
           "deflated": 0.0007,
           "cagr": 0.2804,
           "sharpe": 0.7601,
-          "maxdd": -0.5004
+          "maxdd": -0.5004,
+          "by": {
+            "test": {
+              "grade": "C",
+              "label": "Unproven",
+              "beats_hold": 0.648,
+              "cagr": 0.2804,
+              "maxdd": -0.5004
+            },
+            "full": {
+              "grade": "C",
+              "label": "Unproven",
+              "beats_hold": 0.687,
+              "cagr": 0.61,
+              "maxdd": -0.6219
+            }
+          }
         },
         "volume_breakout": {
           "grade": "C",
@@ -322,7 +746,23 @@
           "deflated": 0.0,
           "cagr": 0.2708,
           "sharpe": 0.8384,
-          "maxdd": -0.4377
+          "maxdd": -0.4377,
+          "by": {
+            "test": {
+              "grade": "C",
+              "label": "Unproven",
+              "beats_hold": 0.6185,
+              "cagr": 0.2708,
+              "maxdd": -0.4377
+            },
+            "full": {
+              "grade": "C",
+              "label": "Unproven",
+              "beats_hold": 0.1,
+              "cagr": 0.2097,
+              "maxdd": -0.7651
+            }
+          }
         },
         "btc50_touch": {
           "grade": "C",
@@ -332,7 +772,23 @@
           "deflated": 0.0,
           "cagr": 0.1507,
           "sharpe": 0.6052,
-          "maxdd": -0.3568
+          "maxdd": -0.3568,
+          "by": {
+            "test": {
+              "grade": "C",
+              "label": "Unproven",
+              "beats_hold": 0.5655,
+              "cagr": 0.1507,
+              "maxdd": -0.3568
+            },
+            "full": {
+              "grade": "C",
+              "label": "Unproven",
+              "beats_hold": 0.078,
+              "cagr": 0.1297,
+              "maxdd": -0.4782
+            }
+          }
         },
         "btc50_touch_f1": {
           "grade": "C",
@@ -342,7 +798,23 @@
           "deflated": 0.0,
           "cagr": 0.1287,
           "sharpe": 0.5748,
-          "maxdd": -0.3486
+          "maxdd": -0.3486,
+          "by": {
+            "test": {
+              "grade": "C",
+              "label": "Unproven",
+              "beats_hold": 0.545,
+              "cagr": 0.1287,
+              "maxdd": -0.3486
+            },
+            "full": {
+              "grade": "C",
+              "label": "Unproven",
+              "beats_hold": 0.059,
+              "cagr": 0.1058,
+              "maxdd": -0.4275
+            }
+          }
         },
         "btc50_f1": {
           "grade": "C",
@@ -352,7 +824,23 @@
           "deflated": 0.0,
           "cagr": 0.1165,
           "sharpe": 0.5789,
-          "maxdd": -0.3845
+          "maxdd": -0.3845,
+          "by": {
+            "test": {
+              "grade": "C",
+              "label": "Unproven",
+              "beats_hold": 0.5375,
+              "cagr": 0.1165,
+              "maxdd": -0.3845
+            },
+            "full": {
+              "grade": "C",
+              "label": "Unproven",
+              "beats_hold": 0.2935,
+              "cagr": 0.2192,
+              "maxdd": -0.5237
+            }
+          }
         },
         "btc50_both": {
           "grade": "C",
@@ -362,7 +850,23 @@
           "deflated": 0.0,
           "cagr": 0.1165,
           "sharpe": 0.5789,
-          "maxdd": -0.3845
+          "maxdd": -0.3845,
+          "by": {
+            "test": {
+              "grade": "C",
+              "label": "Unproven",
+              "beats_hold": 0.5375,
+              "cagr": 0.1165,
+              "maxdd": -0.3845
+            },
+            "full": {
+              "grade": "C",
+              "label": "Unproven",
+              "beats_hold": 0.2935,
+              "cagr": 0.2192,
+              "maxdd": -0.5237
+            }
+          }
         },
         "btc50_maonly": {
           "grade": "C",
@@ -372,7 +876,23 @@
           "deflated": 0.0,
           "cagr": 0.1284,
           "sharpe": 0.5313,
-          "maxdd": -0.6368
+          "maxdd": -0.6368,
+          "by": {
+            "test": {
+              "grade": "C",
+              "label": "Unproven",
+              "beats_hold": 0.5265,
+              "cagr": 0.1284,
+              "maxdd": -0.6368
+            },
+            "full": {
+              "grade": "C",
+              "label": "Unproven",
+              "beats_hold": 0.2555,
+              "cagr": 0.2895,
+              "maxdd": -0.6368
+            }
+          }
         },
         "btc50_ma": {
           "grade": "C",
@@ -382,7 +902,23 @@
           "deflated": 0.0,
           "cagr": 0.1237,
           "sharpe": 0.5554,
-          "maxdd": -0.4273
+          "maxdd": -0.4273,
+          "by": {
+            "test": {
+              "grade": "C",
+              "label": "Unproven",
+              "beats_hold": 0.511,
+              "cagr": 0.1237,
+              "maxdd": -0.4273
+            },
+            "full": {
+              "grade": "C",
+              "label": "Unproven",
+              "beats_hold": 0.399,
+              "cagr": 0.3183,
+              "maxdd": -0.6303
+            }
+          }
         },
         "golden_cross": {
           "grade": "C",
@@ -392,7 +928,23 @@
           "deflated": 0.0003,
           "cagr": 0.1974,
           "sharpe": 0.6092,
-          "maxdd": -0.559
+          "maxdd": -0.559,
+          "by": {
+            "test": {
+              "grade": "C",
+              "label": "Unproven",
+              "beats_hold": 0.489,
+              "cagr": 0.1974,
+              "maxdd": -0.559
+            },
+            "full": {
+              "grade": "C",
+              "label": "Unproven",
+              "beats_hold": 0.3835,
+              "cagr": 0.5276,
+              "maxdd": -0.801
+            }
+          }
         },
         "btc50_touch_f2": {
           "grade": "C",
@@ -402,7 +954,23 @@
           "deflated": 0.0,
           "cagr": 0.1002,
           "sharpe": 0.477,
-          "maxdd": -0.3785
+          "maxdd": -0.3785,
+          "by": {
+            "test": {
+              "grade": "C",
+              "label": "Unproven",
+              "beats_hold": 0.458,
+              "cagr": 0.1002,
+              "maxdd": -0.3785
+            },
+            "full": {
+              "grade": "C",
+              "label": "Unproven",
+              "beats_hold": 0.046,
+              "cagr": 0.0949,
+              "maxdd": -0.4513
+            }
+          }
         },
         "btc50_lhonly": {
           "grade": "C",
@@ -412,7 +980,23 @@
           "deflated": 0.0,
           "cagr": 0.0602,
           "sharpe": 0.3429,
-          "maxdd": -0.4388
+          "maxdd": -0.4388,
+          "by": {
+            "test": {
+              "grade": "C",
+              "label": "Unproven",
+              "beats_hold": 0.3445,
+              "cagr": 0.0602,
+              "maxdd": -0.4388
+            },
+            "full": {
+              "grade": "C",
+              "label": "Unproven",
+              "beats_hold": 0.066,
+              "cagr": 0.141,
+              "maxdd": -0.6199
+            }
+          }
         },
         "relative_strength": {
           "grade": "C",
@@ -422,7 +1006,23 @@
           "deflated": 0.0,
           "cagr": 0.0416,
           "sharpe": 0.3397,
-          "maxdd": -0.7774
+          "maxdd": -0.7774,
+          "by": {
+            "test": {
+              "grade": "C",
+              "label": "Unproven",
+              "beats_hold": 0.3325,
+              "cagr": 0.0416,
+              "maxdd": -0.7774
+            },
+            "full": {
+              "grade": "C",
+              "label": "Unproven",
+              "beats_hold": 0.004,
+              "cagr": -0.0489,
+              "maxdd": -0.8808
+            }
+          }
         },
         "triangle": {
           "grade": "C",
@@ -432,7 +1032,23 @@
           "deflated": 0.0,
           "cagr": 0.013,
           "sharpe": 0.1616,
-          "maxdd": -0.2538
+          "maxdd": -0.2538,
+          "by": {
+            "test": {
+              "grade": "C",
+              "label": "Unproven",
+              "beats_hold": 0.2485,
+              "cagr": 0.013,
+              "maxdd": -0.2538
+            },
+            "full": {
+              "grade": "C",
+              "label": "Unproven",
+              "beats_hold": 0.0955,
+              "cagr": 0.066,
+              "maxdd": -0.2538
+            }
+          }
         },
         "macd": {
           "grade": "D",
@@ -442,7 +1058,23 @@
           "deflated": 0.0,
           "cagr": 0.0492,
           "sharpe": 0.3277,
-          "maxdd": -0.588
+          "maxdd": -0.588,
+          "by": {
+            "test": {
+              "grade": "D",
+              "label": "Trails holding",
+              "beats_hold": 0.165,
+              "cagr": 0.0492,
+              "maxdd": -0.588
+            },
+            "full": {
+              "grade": "C",
+              "label": "Unproven",
+              "beats_hold": 0.3805,
+              "cagr": 0.4178,
+              "maxdd": -0.588
+            }
+          }
         },
         "head_shoulders": {
           "grade": "D",
@@ -452,7 +1084,23 @@
           "deflated": 0.0,
           "cagr": -0.0053,
           "sharpe": -0.0166,
-          "maxdd": -0.1488
+          "maxdd": -0.1488,
+          "by": {
+            "test": {
+              "grade": "D",
+              "label": "Trails holding",
+              "beats_hold": 0.131,
+              "cagr": -0.0053,
+              "maxdd": -0.1488
+            },
+            "full": {
+              "grade": "D",
+              "label": "Trails holding",
+              "beats_hold": 0.005,
+              "cagr": 0.0068,
+              "maxdd": -0.2167
+            }
+          }
         },
         "bollinger": {
           "grade": "D",
@@ -462,7 +1110,23 @@
           "deflated": 0.0,
           "cagr": -0.1301,
           "sharpe": -0.0904,
-          "maxdd": -0.7525
+          "maxdd": -0.7525,
+          "by": {
+            "test": {
+              "grade": "D",
+              "label": "Trails holding",
+              "beats_hold": 0.0435,
+              "cagr": -0.1301,
+              "maxdd": -0.7525
+            },
+            "full": {
+              "grade": "D",
+              "label": "Trails holding",
+              "beats_hold": 0.0,
+              "cagr": -0.1315,
+              "maxdd": -0.8982
+            }
+          }
         },
         "rsi": {
           "grade": "D",
@@ -472,7 +1136,23 @@
           "deflated": 0.0,
           "cagr": -0.127,
           "sharpe": -0.2537,
-          "maxdd": -0.709
+          "maxdd": -0.709,
+          "by": {
+            "test": {
+              "grade": "D",
+              "label": "Trails holding",
+              "beats_hold": 0.017,
+              "cagr": -0.127,
+              "maxdd": -0.709
+            },
+            "full": {
+              "grade": "D",
+              "label": "Trails holding",
+              "beats_hold": 0.0025,
+              "cagr": -0.0148,
+              "maxdd": -0.7897
+            }
+          }
         },
         "buy_the_dip": {
           "grade": "D",
@@ -482,7 +1162,23 @@
           "deflated": 0.0,
           "cagr": -0.1535,
           "sharpe": -0.0054,
-          "maxdd": -0.806
+          "maxdd": -0.806,
+          "by": {
+            "test": {
+              "grade": "D",
+              "label": "Trails holding",
+              "beats_hold": 0.0095,
+              "cagr": -0.1535,
+              "maxdd": -0.806
+            },
+            "full": {
+              "grade": "D",
+              "label": "Trails holding",
+              "beats_hold": 0.0,
+              "cagr": -0.1132,
+              "maxdd": -0.9374
+            }
+          }
         }
       }
     }
