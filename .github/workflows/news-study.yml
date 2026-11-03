@@ -1,0 +1,105 @@
+name: News study (research)
+
+# News-only strategy research (research/news-study). Runs on pushes to the news-study branch or by hand.
+# 1) one job per year: Alpaca/Benzinga headlines -> FinBERT -> daily counts and tone per asset
+# 2) GDELT tone and article counts for oil, gold, silver, bitcoin and the stock market
+# 3) the study itself; results are committed to research/news-study on the same branch.
+# A re-run reuses every year already done (Actions cache), so a failed year can simply be re-run.
+
+on:
+  push:
+    branches: [news-study]
+    paths: [research/news-study/*.py, .github/workflows/news-study.yml]
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+jobs:
+  alpaca:
+    runs-on: ubuntu-latest
+    timeout-minutes: 340
+    strategy:
+      fail-fast: false
+      max-parallel: 3          # Alpaca's free plan allows 200 requests a minute in total
+      matrix:
+        year: [2019, 2020, 2021, 2022, 2023, 2024, 2025, 2026]
+    steps:
+      - uses: actions/checkout@v4
+      - id: done
+        uses: actions/cache/restore@v4
+        with:
+          path: news-out
+          key: news-study-alpaca-v1-${{ matrix.year }}-${{ matrix.year == 2026 && github.run_id || 'final' }}
+      - uses: actions/setup-python@v5
+        if: steps.done.outputs.cache-hit != 'true'
+        with:
+          python-version: "3.12"
+      - uses: actions/cache@v4
+        if: steps.done.outputs.cache-hit != 'true'
+        with:
+          path: ~/.cache/huggingface
+          key: finbert-v1
+      - name: Install FinBERT (CPU only)
+        if: steps.done.outputs.cache-hit != 'true'
+        run: |
+          pip install torch --index-url https://download.pytorch.org/whl/cpu
+          pip install "transformers>=4.40"
+      - name: Headlines for ${{ matrix.year }}
+        if: steps.done.outputs.cache-hit != 'true'
+        env:
+          ALPACA_KEY_ID: ${{ secrets.ALPACA_KEY_ID }}
+          ALPACA_SECRET_KEY: ${{ secrets.ALPACA_SECRET_KEY }}
+        run: python research/news-study/fetch_alpaca.py --year ${{ matrix.year }} --out news-out
+      - uses: actions/cache/save@v4
+        if: steps.done.outputs.cache-hit != 'true'
+        with:
+          path: news-out
+          key: news-study-alpaca-v1-${{ matrix.year }}-${{ matrix.year == 2026 && github.run_id || 'final' }}
+      - uses: actions/upload-artifact@v4
+        with:
+          name: alpaca-${{ matrix.year }}
+          path: news-out
+
+  gdelt:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: python research/news-study/fetch_gdelt.py --out news-out
+      - uses: actions/upload-artifact@v4
+        with:
+          name: gdelt
+          path: news-out
+
+  study:
+    needs: [alpaca, gdelt]
+    if: ${{ !cancelled() }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r requirements.txt
+      - uses: actions/download-artifact@v4
+        with:
+          path: news-out
+          merge-multiple: true
+      - name: Keep the daily counts (no headline text) and run the study
+        run: |
+          mkdir -p research/news-study/data
+          for f in news-out/*.csv; do gzip -c "$f" > "research/news-study/data/$(basename "$f").gz"; done
+          ls -la research/news-study/data
+          python research/news-study/study.py --news research/news-study/data
+      - name: Commit results
+        run: |
+          git config user.name "signal-desk-bot"
+          git config user.email "signal-desk-bot@users.noreply.github.com"
+          git add research/news-study
+          git commit -m "News study results $(date -u +%F)" || true
+          git pull --rebase
+          git push
