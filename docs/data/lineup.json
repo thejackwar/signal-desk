@@ -12,11 +12,24 @@
       "topdown"
     ],
     "crypto": [
-      "macd",
-      "volume_breakout",
+      "btc_trend_50_200",
       "supertrend",
       "donchian",
+      "ma200",
+      "btc50_ma",
       "golden_cross",
+      "macd",
+      "btc50_f1",
+      "btc50_both",
+      "btc50_maonly",
+      "double_top_bottom",
+      "volume_breakout",
+      "triangle",
+      "btc50_touch",
+      "btc50_lhonly",
+      "btc50_touch_f1",
+      "btc50_touch_f2",
+      "relative_strength",
       "topdown"
     ],
     "commodities": [
@@ -210,6 +223,220 @@
           "deflated": 0.0,
           "cagr": 0.0399,
           "sharpe": 0.3041
+        }
+      }
+    },
+    "crypto": {
+      "updated": "2026-11-03",
+      "labels": {
+        "A": "Proven edge",
+        "B": "Promising",
+        "C": "Unproven",
+        "D": "Trails holding"
+      },
+      "vs": "holding bitcoin",
+      "hold": {
+        "cagr": 0.5897,
+        "sharpe": 1.0356
+      },
+      "strategies": {
+        "btc_trend_50_200": {
+          "grade": "B",
+          "label": "Promising",
+          "beats_hold": 0.8305,
+          "beats_hold_test": 0.8395,
+          "deflated": 0.0012,
+          "cagr": 0.6686,
+          "sharpe": 1.3141
+        },
+        "supertrend": {
+          "grade": "C",
+          "label": "Unproven",
+          "beats_hold": 0.687,
+          "beats_hold_test": 0.648,
+          "deflated": 0.0007,
+          "cagr": 0.61,
+          "sharpe": 1.1933
+        },
+        "donchian": {
+          "grade": "C",
+          "label": "Unproven",
+          "beats_hold": 0.562,
+          "beats_hold_test": 0.71,
+          "deflated": 0.0009,
+          "cagr": 0.589,
+          "sharpe": 1.1095
+        },
+        "ma200": {
+          "grade": "C",
+          "label": "Unproven",
+          "beats_hold": 0.5525,
+          "beats_hold_test": 0.7485,
+          "deflated": 0.001,
+          "cagr": 0.5919,
+          "sharpe": 1.1036
+        },
+        "btc50_ma": {
+          "grade": "C",
+          "label": "Unproven",
+          "beats_hold": 0.399,
+          "beats_hold_test": 0.511,
+          "deflated": 0.0,
+          "cagr": 0.3183,
+          "sharpe": 1.006
+        },
+        "golden_cross": {
+          "grade": "C",
+          "label": "Unproven",
+          "beats_hold": 0.3835,
+          "beats_hold_test": 0.489,
+          "deflated": 0.0003,
+          "cagr": 0.5276,
+          "sharpe": 1.0212
+        },
+        "macd": {
+          "grade": "C",
+          "label": "Unproven",
+          "beats_hold": 0.3805,
+          "beats_hold_test": 0.165,
+          "deflated": 0.0,
+          "cagr": 0.4178,
+          "sharpe": 0.9867
+        },
+        "btc50_f1": {
+          "grade": "C",
+          "label": "Unproven",
+          "beats_hold": 0.2935,
+          "beats_hold_test": 0.5375,
+          "deflated": 0.0,
+          "cagr": 0.2192,
+          "sharpe": 0.8945
+        },
+        "btc50_both": {
+          "grade": "C",
+          "label": "Unproven",
+          "beats_hold": 0.2935,
+          "beats_hold_test": 0.5375,
+          "deflated": 0.0,
+          "cagr": 0.2192,
+          "sharpe": 0.8945
+        },
+        "btc50_maonly": {
+          "grade": "C",
+          "label": "Unproven",
+          "beats_hold": 0.2555,
+          "beats_hold_test": 0.5265,
+          "deflated": 0.0,
+          "cagr": 0.2895,
+          "sharpe": 0.8721
+        },
+        "double_top_bottom": {
+          "grade": "C",
+          "label": "Unproven",
+          "beats_hold": 0.222,
+          "beats_hold_test": 0.731,
+          "deflated": 0.0,
+          "cagr": 0.1578,
+          "sharpe": 0.8138
+        },
+        "volume_breakout": {
+          "grade": "C",
+          "label": "Unproven",
+          "beats_hold": 0.1,
+          "beats_hold_test": 0.6185,
+          "deflated": 0.0,
+          "cagr": 0.2097,
+          "sharpe": 0.6698
+        },
+        "triangle": {
+          "grade": "C",
+          "label": "Unproven",
+          "beats_hold": 0.0955,
+          "beats_hold_test": 0.2485,
+          "deflated": 0.0,
+          "cagr": 0.066,
+          "sharpe": 0.5501
+        },
+        "btc50_touch": {
+          "grade": "C",
+          "label": "Unproven",
+          "beats_hold": 0.078,
+          "beats_hold_test": 0.5655,
+          "deflated": 0.0,
+          "cagr": 0.1297,
+          "sharpe": 0.5635
+        },
+        "btc50_lhonly": {
+          "grade": "C",
+          "label": "Unproven",
+          "beats_hold": 0.066,
+          "beats_hold_test": 0.3445,
+          "deflated": 0.0,
+          "cagr": 0.141,
+          "sharpe": 0.5813
+        },
+        "btc50_touch_f1": {
+          "grade": "C",
+          "label": "Unproven",
+          "beats_hold": 0.059,
+          "beats_hold_test": 0.545,
+          "deflated": 0.0,
+          "cagr": 0.1058,
+          "sharpe": 0.5098
+        },
+        "btc50_touch_f2": {
+          "grade": "C",
+          "label": "Unproven",
+          "beats_hold": 0.046,
+          "beats_hold_test": 0.458,
+          "deflated": 0.0,
+          "cagr": 0.0949,
+          "sharpe": 0.4696
+        },
+        "relative_strength": {
+          "grade": "C",
+          "label": "Unproven",
+          "beats_hold": 0.004,
+          "beats_hold_test": 0.3325,
+          "deflated": 0.0,
+          "cagr": -0.0489,
+          "sharpe": 0.1591
+        },
+        "head_shoulders": {
+          "grade": "D",
+          "label": "Trails holding",
+          "beats_hold": 0.005,
+          "beats_hold_test": 0.131,
+          "deflated": 0.0,
+          "cagr": 0.0068,
+          "sharpe": 0.1203
+        },
+        "rsi": {
+          "grade": "D",
+          "label": "Trails holding",
+          "beats_hold": 0.0025,
+          "beats_hold_test": 0.017,
+          "deflated": 0.0,
+          "cagr": -0.0148,
+          "sharpe": 0.1383
+        },
+        "bollinger": {
+          "grade": "D",
+          "label": "Trails holding",
+          "beats_hold": 0.0,
+          "beats_hold_test": 0.0435,
+          "deflated": 0.0,
+          "cagr": -0.1315,
+          "sharpe": -0.0504
+        },
+        "buy_the_dip": {
+          "grade": "D",
+          "label": "Trails holding",
+          "beats_hold": 0.0,
+          "beats_hold_test": 0.0095,
+          "deflated": 0.0,
+          "cagr": -0.1132,
+          "sharpe": 0.115
         }
       }
     }

@@ -1,5 +1,5 @@
 {
- "generated_at": "2026-11-03T19:43+00:00",
+ "generated_at": "2026-11-03T20:48+00:00",
  "demo": false,
  "settings": {
   "start": "2011-01-01",
@@ -86,7 +86,7 @@
  },
  "strategies": {
   "ma200": {
-   "on_site": false,
+   "on_site": true,
    "full": {
     "cagr": 0.1402,
     "vol": 0.1665,
@@ -163,7 +163,7 @@
    "dsr": 0.0449
   },
   "bollinger": {
-   "on_site": true,
+   "on_site": false,
    "full": {
     "cagr": 0.1189,
     "vol": 0.2015,
@@ -317,7 +317,7 @@
    "dsr": 0.0045
   },
   "rsi": {
-   "on_site": true,
+   "on_site": false,
    "full": {
     "cagr": 0.0562,
     "vol": 0.2264,
@@ -394,7 +394,7 @@
    "dsr": 0.0005
   },
   "macd": {
-   "on_site": true,
+   "on_site": false,
    "full": {
     "cagr": 0.0399,
     "vol": 0.1847,
@@ -471,7 +471,7 @@
    "dsr": 0.0
   },
   "golden_cross": {
-   "on_site": false,
+   "on_site": true,
    "full": {
     "cagr": 0.144,
     "vol": 0.1687,
@@ -702,7 +702,7 @@
    "dsr": 0.0091
   },
   "relative_strength": {
-   "on_site": false,
+   "on_site": true,
    "full": {
     "cagr": 0.1423,
     "vol": 0.1787,
@@ -779,7 +779,7 @@
    "dsr": 0.0723
   },
   "buy_the_dip": {
-   "on_site": true,
+   "on_site": false,
    "full": {
     "cagr": 0.1336,
     "vol": 0.1936,
@@ -933,7 +933,7 @@
    "dsr": 0.018
   },
   "head_shoulders": {
-   "on_site": true,
+   "on_site": false,
    "full": {
     "cagr": 0.0845,
     "vol": 0.2279,
@@ -1087,7 +1087,7 @@
    "dsr": 0.0031
   },
   "deck_live": {
-   "on_site": false,
+   "on_site": true,
    "full": {
     "cagr": 0.1189,
     "vol": 0.1649,
@@ -1164,7 +1164,7 @@
    "dsr": 0.0137
   },
   "deck_v6": {
-   "on_site": true,
+   "on_site": false,
    "full": {
     "cagr": 0.0999,
     "vol": 0.1664,
@@ -1241,7 +1241,7 @@
    "dsr": 0.0004
   },
   "deck_ma50": {
-   "on_site": false,
+   "on_site": true,
    "full": {
     "cagr": 0.0972,
     "vol": 0.1624,
@@ -1574,26 +1574,25 @@
   },
   "on_site_now": {
    "members": [
-    "bollinger",
-    "rsi",
-    "macd",
-    "buy_the_dip",
-    "head_shoulders",
-    "deck_v6",
+    "ma200",
+    "golden_cross",
+    "relative_strength",
+    "deck_live",
+    "deck_ma50",
     "pattern_trader"
    ],
    "test": {
-    "cagr": 0.1252,
-    "vol": 0.1704,
-    "sharpe": 0.7777,
-    "sortino": 1.1164,
-    "maxdd": -0.2739
+    "cagr": 0.1576,
+    "vol": 0.1621,
+    "sharpe": 0.984,
+    "sortino": 1.4111,
+    "maxdd": -0.2491
    },
    "test_vs_hold": {
-    "diff": -0.107,
-    "lo": -0.3145,
-    "hi": 0.0603,
-    "p_better": 0.1195
+    "diff": 0.0993,
+    "lo": -0.159,
+    "hi": 0.3245,
+    "p_better": 0.723
    }
   },
   "all": {
