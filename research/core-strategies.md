@@ -1,3 +1,24 @@
+# Update 3 Nov 2026: experimental strategies moved to the Vault
+
+The "Experimental" fold-out is gone. Strategies that aren't among the most profitable are now in
+the **Vault** (`#strategies-vault`): they send no alerts or phone notifications and don't show on
+the Strategies list, Learn page, alerts or the account comparison. They're still scanned and graded
+in `history.json`, still paper-traded, and still in the Strategy Lab, so one can come back later.
+
+The list now lives in `docs/data/lineup.json`, read by both the site and `engine/scan.py`
+(feed, notifications and the "other strategies agree" part of signal strength only count
+strategies on the site). The Vault page shows each vaulted strategy's numbers and why it's there.
+
+Rule: long-only backtest account beats buy & hold of the market, buy alerts beat a random day
+after 20 sessions, and no losing live record. Rechecked on data to 2 Nov 2026:
+
+- Stocks keep: Pattern Trader, Buy the Dip, Bollinger, Head & Shoulders, MACD, RSI,
+  Deck Patterns (v6), Top-Down. Vault: 12 (Supertrend's edge is +0.01%, effectively none).
+- Crypto keep: MACD, Volume Breakout, Supertrend, Donchian, Golden / Death Cross (+6.6 pts/yr
+  over BTC, profit factor 8.5), Top-Down. **Above the 50 & 200-Day moved to the Vault**: it trails
+  BTC by 0.8 pts a year, its buy alerts lose to a random day, and live it's 1 right of 7.
+- Commodities keep: RSI, Bollinger, Buy the Dip (nothing beats holding the S&P 500 here).
+
 # Core vs experimental strategies (2 Nov 2026)
 
 The app now shows a short list of **core** strategies per market and folds the rest away

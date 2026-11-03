@@ -154,8 +154,9 @@ def strength(df, sigs: dict, sid: str, i: int, side: int, edge: dict | None) -> 
         checks.append({"ok": bool(ok), "text": f"Price is {where} its 200-day average"
                        + (" (with the long-term trend)" if ok else " (against the long-term trend)")})
     same, opposite = [], []
+    keep = lineup()
     for other, s in sigs.items():
-        if other == sid or other in SAME_RULE.get(sid, ()):
+        if other == sid or other in SAME_RULE.get(sid, ()) or (keep is not None and other not in keep):
             continue
         w = s[max(0, i - CONFLUENCE_BARS):i + 1]
         if (w == side).any():
@@ -195,6 +196,25 @@ def load_edge() -> dict | None:
             out[sid][side] = (x["avg"] is not None and x["hit"] is not None and
                               x["avg"] > x["base_avg"] and x["hit"] > x["base_hit"])
     return out
+
+
+def lineup() -> set[str] | None:
+    """Strategies still on the site for this market (docs/data/lineup.json). The rest are in the
+    Vault: still scanned and graded in history.json, but kept out of the feed and notifications.
+    None when the file is missing, which keeps every strategy."""
+    if MARKET not in _LINEUP:
+        f = ROOT / "docs" / "data" / "lineup.json"
+        keep = json.loads(f.read_text()).get("keep", {}).get(MARKET) if f.exists() else None
+        _LINEUP[MARKET] = set(keep) if keep is not None else None
+    return _LINEUP[MARKET]
+
+
+_LINEUP: dict = {}
+
+
+def on_site(alerts: list[dict]) -> list[dict]:
+    keep = lineup()
+    return alerts if keep is None else [a for a in alerts if a["strategy"] in keep]
 
 
 def stop_hit(df, i: int, side: int, stop) -> int | None:
@@ -440,7 +460,7 @@ def live_main(args):
         return
     use_benchmark(data, args.demo)
 
-    found = scan(today, 1, load_edge())
+    found = on_site(scan(today, 1, load_edge()))
     now = now_dt.isoformat(timespec="minutes")
     prev = json.loads(live_out.read_text()) if live_out.exists() else {}
     seen = {a["id"]: a.get("found_at") for a in prev.get("alerts", [])} if prev.get("session") == session else {}
@@ -497,6 +517,7 @@ def main():
     history["demo"] = args.demo
     HISTORY.write_text(json.dumps(history, separators=(",", ":")))
     print(f"history: {len(history['rows'])} alerts since {history['since']}")
+    found = on_site(found)   # vaulted strategies: graded in the history above, but no feed or notifications
     old = {a["id"] for a in (previous or {}).get("alerts", [])}
     new = [a for a in found if a["id"] not in old]
     merged = {a["id"]: a for a in found}

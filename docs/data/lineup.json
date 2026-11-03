@@ -1,0 +1,9 @@
+{
+  "updated": "2026-11-03",
+  "rule": "A strategy stays on the site when, in the backtest, its long-only account beat buying and holding the market and its buy alerts beat a random day after 20 sessions, without a losing live record. Commodities: nothing beat holding the S&P 500, so the three that made money with an edge stay. Top-Down Analysis stays as its own kind of tool. Everything else is in the Vault: no alerts or notifications, still tracked in the record and paper trades, still testable in the Strategy Lab. Notes: research/core-strategies.md.",
+  "keep": {
+    "stocks": ["pattern_trader", "buy_the_dip", "bollinger", "head_shoulders", "macd", "rsi", "deck_v6", "topdown"],
+    "crypto": ["macd", "volume_breakout", "supertrend", "donchian", "golden_cross", "topdown"],
+    "commodities": ["rsi", "bollinger", "buy_the_dip"]
+  }
+}

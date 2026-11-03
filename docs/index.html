@@ -1354,6 +1354,8 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
 /* experimental strategies, folded away under the core ones */
 .badge.xp { background: color-mix(in srgb, var(--fg) 8%, transparent); color: var(--muted); }
 .xpbox { margin-top: 22px; }
+.vrow { grid-template-columns: 1fr; color: inherit; text-decoration: none; }
+.vrow .meta b.up { color: var(--bull); } .vrow .meta b.down { color: var(--bear); }
 .xpbox > summary { list-style: none; cursor: pointer; display: flex; align-items: center; gap: 12px; padding: 14px 18px; background: var(--surface); border-radius: 14px; margin-bottom: 10px; }
 .xpbox > summary::-webkit-details-marker { display: none; }
 .xpbox > summary > span { display: grid; gap: 2px; flex: 1; }
@@ -1463,16 +1465,18 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
 
 <script>
 (() => {
-  const DEFAULT_FOLLOW = ["buy_the_dip", "bollinger", "macd", "rsi"];
-  // Core strategies per market: the ones with the best results in the 15-year backtest and the live
-  // track record (picked 2 Nov 2026, numbers in research/core-strategies.md). The rest are shown under
-  // "Experimental": still alertable and fully testable in the Strategy Lab, just not recommended.
-  const CORE = {
-    stocks: ["buy_the_dip", "bollinger", "pattern_trader", "macd", "rsi", "deck_v6", "head_shoulders", "topdown"],
-    crypto: ["macd", "volume_breakout", "supertrend", "donchian", "btc_trend_50_200", "topdown"],
+  const DEFAULT_FOLLOW = ["buy_the_dip", "bollinger", "macd", "rsi", "volume_breakout", "donchian"];
+  // The strategies on the site per market: the most profitable ones in the backtest and the live
+  // record (data/lineup.json, the scanner reads the same file; notes in research/core-strategies.md).
+  // The rest are in the Vault: no alerts or notifications, still graded in the record, still in the
+  // Strategy Lab. The list below is only a fallback for when lineup.json can't load.
+  let KEEP = {
+    stocks: ["pattern_trader", "buy_the_dip", "bollinger", "head_shoulders", "macd", "rsi", "deck_v6", "topdown"],
+    crypto: ["macd", "volume_breakout", "supertrend", "donchian", "golden_cross", "topdown"],
     commodities: ["rsi", "bollinger", "buy_the_dip"],
   };
-  const isCore = id => (CORE[S.market] || CORE.stocks).includes(id);
+  const isCore = id => (KEEP[S.market] || KEEP.stocks).includes(id);
+  const vaulted = s => s && forMarket(s) && !isCore(s.id);
   const STORE = "signaldesk.follow", SEEN = "signaldesk.seen", PREFS = "signaldesk.prefs";
   const S = { strategies: [], byId: {}, feed: null, bt: null, stocks: null, stockBy: {}, follow: new Set(), filter: "all",
               exSide: {}, btSide: {}, trSide: {}, prefs: {}, firstSel: null, navs: 0, lastTab: null, lastSel: null, stockData: {} };
@@ -1718,12 +1722,14 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
   // the daily feed plus the Top-Down alerts for the picked timeframes, newest first
   function buildFeed(c) {
     if (!c.feed) return c.feed;
+    const onSite = a => !S.byId[a.strategy] || isCore(a.strategy);   // vaulted strategies send nothing
     const td = S.market !== "commodities" ? (c.td?.alerts || []).filter(a => tdTfs().includes(a.tf)) : [];
     // live (provisional) signals on today's open candle, until the after-close scan replaces them
     if (c.live && !c.live.demo === !c.feed.demo && c.live.session > c.feed.as_of) td.push(...(c.live.alerts || []));
-    if (!td.length) return c.feed;
+    const base = c.feed.alerts.filter(onSite);
+    if (!td.length) return base.length === c.feed.alerts.length ? c.feed : { ...c.feed, alerts: base };
     const key = a => (a.date || "") + (a.found_at || "");
-    return { ...c.feed, alerts: [...td, ...c.feed.alerts].sort((a, b) => key(a) < key(b) ? 1 : key(a) > key(b) ? -1 : 0) };
+    return { ...c.feed, alerts: [...td.filter(onSite), ...base].sort((a, b) => key(a) < key(b) ? 1 : key(a) > key(b) ? -1 : 0) };
   }
 
   function followedAlerts() { return (S.feed?.alerts || []).filter(a => S.follow.has(a.strategy)); }
@@ -1761,7 +1767,7 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
   }
 
   function viewAlerts() {
-    const followed = [...S.follow].filter(id => forMarket(S.byId[id]));
+    const followed = [...S.follow].filter(id => forMarket(S.byId[id]) && isCore(id));
     S.firstSel = null;
     if (!followed.length) {
       return header("Alerts") + `<div class="empty"><strong>Pick your strategies</strong>Follow at least one strategy and its alerts show up here.<br><br><a class="btn" href="#strategies">Browse strategies</a></div>`;
@@ -1953,7 +1959,7 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
   // Every alert the scanner has sent (data/…/history.json), graded 5, 20 and 60 sessions later.
   async function loadHistory() {
     const c = CACHE[S.market];
-    if (c && c.history === undefined) { c.history = null; c.history = await opt(L().base + "history.json") || false; if (location.hash === "#record" || location.hash === "#home") rerender(); }
+    if (c && c.history === undefined) { c.history = null; c.history = await opt(L().base + "history.json") || false; if (location.hash === "#record" || location.hash === "#home" || location.hash === "#strategies-vault") rerender(); }
     return c?.history;
   }
   // ------------------------------------------------------------------ home
@@ -1963,7 +1969,7 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
     S.firstSel = null;
     const H = CACHE[S.market]?.history;
     if (H === undefined) loadHistory();
-    const nStrat = S.strategies.filter(forMarket).length;
+    const nStrat = S.strategies.filter(s => forMarket(s) && isCore(s.id)).length;
     const pc = v => v == null ? "–" : Math.round(v) + "%";
     const sg = v => v == null ? "–" : (v >= 0 ? "+" : "−") + Math.abs(v).toFixed(2) + "%";
     const eur = v => "€" + (v >= 1e6 ? (v / 1e6).toFixed(2).replace(/\.?0+$/, "") + "M" : Math.round(v / 1000) + "k");
@@ -2372,14 +2378,44 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
       const core = list.filter(s => s.category === c && isCore(s.id));
       if (core.length) h += `<div class="cat">${esc(c)}</div>` + core.map(row).join("");
     }
-    const exp = list.filter(s => !isCore(s.id));
-    if (exp.length) {
-      const openX = exp.some(s => S.follow.has(s.id));
-      h += `<details class="xpbox"${openX ? " open" : ""}><summary><span><b>Experimental</b><small>${exp.length} strategies with weaker results so far</small></span></summary>
-        <p class="hint" style="margin:2px 2px 10px">These did worse in the 15-year backtest or in the live track record. They still send alerts if you follow them, and you can test all of them in the Strategy Lab.</p>
-        ${exp.map(row).join("")}</details>`;
-    }
+    const nv = list.filter(s => !isCore(s.id)).length;
+    if (nv) h += `<a class="labcta vaultcta" href="#strategies-vault" style="margin-top:22px"><span><b>Vault</b><small>${nv} strategies with weaker returns or no real edge. No alerts, still in the Strategy Lab.</small></span><span aria-hidden="true">›</span></a>`;
     if (!isComm()) h += `<a class="labcta" href="#brokers-${isCrypto() ? "crypto" : "stocks"}" style="margin-top:22px"><span><b>Brokers</b><small>${isCrypto() ? "Where to buy crypto from Italy" : "Where to buy stocks and ETFs from Italy"}</small></span><span aria-hidden="true">›</span></a>`;
+    return h;
+  }
+
+  // Strategies taken off the site for this market, with the numbers that put them there.
+  function viewVault() {
+    S.firstSel = null;
+    const list = S.strategies.filter(vaulted), B = S.bt, BM = benchOf();
+    const H = CACHE[S.market]?.history;
+    if (H === undefined) loadHistory();
+    const D = B?.account?.dates, yrs = D?.length > 1 ? (parse(D.at(-1)) - parse(D[0])) / 3.15576e10 : null;
+    const cagr = v => v?.length > 1 && yrs && v[0] > 0 && v.at(-1) > 0 ? ((v.at(-1) / v[0]) ** (1 / yrs) - 1) * 100 : null;
+    const bench = cagr(B?.spy?.account);
+    const live = {};
+    if (H && H.rows?.length && !H.demo) H.rows.forEach(r => { if (r[3] > 0 && r[7] != null) (live[H.strategies[r[2]]] ||= []).push(r[7]); });
+    const pct = v => v == null ? "–" : (v >= 0 ? "+" : "−") + Math.abs(v).toFixed(1) + "%";
+    let h = header("Vault", "#strategies");
+    h += `<p class="tag" style="margin-top:2px;font-size:14.5px">${list.length} strategies taken off the ${L().noun} side of the app${S.lineup?.updated ? ` on ${esc(fmtDate(S.lineup.updated, { day: "numeric", month: "short", year: "numeric" }))}` : ""}. They send no alerts or notifications. Their trades are still graded in the <a href="#record">record</a> and paper-traded, so one can come back if it starts to earn its place.</p>`;
+    h += `<div class="card" style="margin-top:14px"><h3>How the cut was made</h3><p>A strategy stays when its long-only account beat ${BM.name} buy &amp; hold in the backtest${bench != null ? ` (${pct(bench)} a year)` : ""} and its buy alerts beat a random day 20 sessions later, without a losing live record.${S.market === "commodities" ? " Nothing beat holding the S&amp;P 500 on commodities, so the three that made money with an edge stayed." : ""}</p></div>`;
+    if (!list.length) return h + `<div class="empty"><strong>Nothing in the Vault</strong>Every strategy for ${L().noun} is still on the site.</div>`;
+    const rows = list.map(s => {
+      const r = B?.strategies?.[s.id], c = cagr(r?.account?.long), b20 = r?.bullish?.["20"];
+      const edge = b20 && b20.avg != null && b20.base_avg != null ? b20.avg - b20.base_avg : null, lv = live[s.id] || [];
+      const why = [];
+      if (c != null && bench != null && c <= bench) why.push(c < 0 ? "lost money in the backtest" : `trailed ${BM.short} by ${Math.abs(c - bench).toFixed(1)} pts a year`);
+      if (edge != null && edge < 0.05) why.push(edge > 0 ? "buy alerts barely better than a random day" : "buy alerts no better than a random day");
+      const la = lv.length ? lv.reduce((a, x) => a + x, 0) / lv.length : null;
+      if (la != null && la < 0 && lv.length >= 3) why.push(`live buy alerts ${pct(la)} on average`);
+      if (!why.length) why.push(s.kind === "lines" ? "kept for the stock side only" : "beaten by a similar strategy on the site");
+      return { s, c, edge, n: lv.length, la, why };
+    }).sort((a, b) => (b.c ?? -1e9) - (a.c ?? -1e9));
+    h += rows.map(x => `<a class="srow vrow" href="#strategy-${slug(x.s.id)}"><span class="open" style="display:block">
+        <h3>${esc(x.s.name)}</h3><p>${esc(x.why.join(" · ").replace(/^./, m => m.toUpperCase()))}</p>
+        <div class="meta"><span>Backtest <b class="${x.c != null && bench != null && x.c > bench ? "up" : "down"}">${pct(x.c)}</b>/yr</span><span>·</span><span>Alert edge <b class="${(x.edge ?? 0) > 0 ? "up" : "down"}">${x.edge == null ? "–" : (x.edge >= 0 ? "+" : "−") + Math.abs(x.edge).toFixed(2) + "%"}</b></span>${x.n ? `<span>·</span><span>Live <b class="${x.la >= 0 ? "up" : "down"}">${pct(x.la)}</b> (${x.n})</span>` : ""}</div></span></a>`).join("");
+    h += `<p class="hint" style="margin:12px 2px 0">Backtest: yearly growth of the long-only account since ${D ? esc(D[0].slice(0, 4)) : "the start"}, before costs. Alert edge: how much better its buy alerts did than a random day after 20 sessions. Live: buy alerts since ${H?.since ? esc(fmtDate(H.since, { day: "numeric", month: "short" })) : "the record started"}, checked 20 sessions later. Past results don't predict future ones.</p>`;
+    h += `<a class="labcta" href="#strategylab" style="margin-top:18px"><span><b>Test them yourself</b><small>Every vaulted strategy is still in the Strategy Lab</small></span><span aria-hidden="true">›</span></a>`;
     return h;
   }
 
@@ -2394,9 +2430,9 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
     let h = header("", "#strategies");
     h += `<h1 style="font:700 30px/1.1 var(--font-display);margin:4px 0 6px;text-wrap:balance">${esc(s.name)}</h1>`;
     h += `<p class="tag">${esc(s.tagline)}</p>`;
-    h += `<div class="lede"><span class="badge">${esc(s.category)}</span><span class="badge">${esc(s.level)}</span><span class="badge">Daily chart</span>${isCore(id) ? "" : `<span class="badge xp">Experimental</span>`}
-      <span style="flex:1"></span><button class="btn ${on ? "on" : ""}" data-follow="${id}">${on ? "✓ Following" : "Follow"}</button></div>`;
-    if (!isCore(id)) h += `<p class="hint" style="margin:10px 2px 0">Experimental: weaker results than the core strategies in the backtest or the live track record so far. Test it in the <a href="#strategylab">Strategy Lab</a> before relying on it.</p>`;
+    h += `<div class="lede"><span class="badge">${esc(s.category)}</span><span class="badge">${esc(s.level)}</span><span class="badge">Daily chart</span>${isCore(id) ? "" : `<span class="badge xp">In the Vault</span>`}
+      <span style="flex:1"></span>${isCore(id) ? `<button class="btn ${on ? "on" : ""}" data-follow="${id}">${on ? "✓ Following" : "Follow"}</button>` : ""}</div>`;
+    if (!isCore(id)) h += `<p class="hint" style="margin:10px 2px 0">In the <a href="#strategies-vault">Vault</a>: it didn't earn its place among the most profitable strategies, so it sends no alerts. You can still test it in the <a href="#strategylab">Strategy Lab</a>.</p>`;
     h += `<div class="prose">${s.how.map(p => `<p>${esc(p)}</p>`).join("")}</div>`;
     h += `<h2>When it alerts</h2><div class="rules">
       <div class="rule bullish"><span class="pill bullish">${s.buys_only || s.long_only ? "buy" : "bullish"}</span><p>${esc(s.bullish)}</p></div>
@@ -2759,7 +2795,7 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
     const hasTurn = Object.values(B.strategies).some(r => r.turnover);
     const net = hasTurn && pref("cmpNet", "gross") === "net";
     let i0 = D.findIndex(d => +d.slice(0, 4) >= from); if (i0 < 0) i0 = 0;
-    const rows = S.strategies.map(s => { const r0 = B.strategies[s.id], v = r0?.account?.[side]; const r = v && acctRun(v, i0, size, lev, net ? { dates: D, turn: r0.turnover?.[side] } : null); return r && { s, ...r }; })
+    const rows = S.strategies.filter(s => isCore(s.id)).map(s => { const r0 = B.strategies[s.id], v = r0?.account?.[side]; const r = v && acctRun(v, i0, size, lev, net ? { dates: D, turn: r0.turnover?.[side] } : null); return r && { s, ...r }; })
       .filter(Boolean).sort((a, b) => b.end - a.end);
     const spy = B.spy?.account ? acctRun(B.spy.account, i0, size, lev, net ? { dates: D, bench: true } : null) : null;
     if (!rows.length) return "";
@@ -5105,7 +5141,7 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
 
   function viewNotify() {
     const pre = S.feed?.ntfy_prefix;
-    const followed = [...S.follow].filter(id => forMarket(S.byId[id]));
+    const followed = [...S.follow].filter(id => forMarket(S.byId[id]) && isCore(id));
     let h = header("Phone alerts");
     h += `<div class="prose"><p>Alerts always appear in this app. To also get a notification on your iPhone the moment the daily scan finds one, use the free <strong>ntfy</strong> app. Each strategy has its own channel, so you only get pinged for the ones you follow.</p></div>`;
     h += `<h2>Set it up</h2><ol class="steps">
@@ -5364,7 +5400,7 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
   }
 
   function viewLearn() {
-    const strats = S.strategies.filter(forMarket);
+    const strats = S.strategies.filter(s => forMarket(s) && isCore(s.id));
     const daily = strats.filter(s => s.kind !== "lines").length, numW = n => ["zero","one","two","three","four","five","six","seven","eight","nine","ten","eleven","twelve","thirteen","fourteen","fifteen"][n] || n;
     let h = header("Learn");
     h += `<p class="tag" style="margin-top:2px;font-size:15px">How every strategy in the app works, and the basics behind them: charts, indicators, risk and how to read a backtest.</p>`;
@@ -5502,6 +5538,7 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
     if (r.startsWith("stock-")) return () => viewStock(r.slice(6));
     if (r === "heatmap") return () => viewHeatmap();
     if (r.startsWith("strategy-")) return () => viewStrategy(unslug(r.slice(9)));
+    if (r === "strategies-vault") return () => viewVault();
     return null;
   }
   const norm = x => typeof x === "string" ? { html: x } : x;
@@ -5967,7 +6004,7 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
     await loadMarket(m);
     S.lastSel = null; S.lastTab = null;
     const tab = (location.hash || "#alerts").slice(1);
-    const base = tab.startsWith("strategylab") || tab === "crypto" || tab.startsWith("crypto-") ? tab : tab.startsWith("strateg") ? (tab.startsWith("strategy-") ? tab : "strategies") : tab.startsWith("stock") || tab === "heatmap" ? "stocks" : tab === "news" || tab === "buzz" || tab === "mood" ? tab : tab.startsWith("calendar") ? tab : tab === "notify" ? "notify" : tab.startsWith("brokers") ? "brokers" : tab.startsWith("learn") ? tab : tab === "winners" || tab === "record" || tab === "trades" || tab === "practice" ? tab : "alerts";
+    const base = tab.startsWith("strategylab") || tab === "crypto" || tab.startsWith("crypto-") ? tab : tab.startsWith("strateg") ? (tab.startsWith("strategy-") || tab === "strategies-vault" ? tab : "strategies") : tab.startsWith("stock") || tab === "heatmap" ? "stocks" : tab === "news" || tab === "buzz" || tab === "mood" ? tab : tab.startsWith("calendar") ? tab : tab === "notify" ? "notify" : tab.startsWith("brokers") ? "brokers" : tab.startsWith("learn") ? tab : tab === "winners" || tab === "record" || tab === "trades" || tab === "practice" ? tab : "alerts";
     if ("#" + base !== location.hash) location.hash = base; else route();
     scrollTo(0, 0);
   }
@@ -5984,7 +6021,8 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
       opt("data/brokers.json").then(b => { S.brokers = b; if (S.routed && location.hash.startsWith("#brokers")) rerender(); });
       opt("data/ucits.json").then(u => { S.ucits = u; if (u && S.routed && /^#(brokers|stock-|strateg)/.test(location.hash)) rerender(); });
       opt("data/calendar.json").then(c => { S.cal = c; if (c && S.routed && (/^#(calendar|stock-|alert)/.test(location.hash) || !location.hash)) rerender(); });
-      const st = await fetch("data/strategies.json", { cache: "no-cache" }).then(r => r.json());
+      const [st, lu] = await Promise.all([fetch("data/strategies.json", { cache: "no-cache" }).then(r => r.json()), opt("data/lineup.json")]);
+      if (lu?.keep) { KEEP = { ...KEEP, ...lu.keep }; S.lineup = lu; }
       S.strategies = st.strategies;
       S.strategies.forEach(s => S.byId[s.id] = s);
       await loadMarket(MK[pref("market", "stocks")] ? pref("market", "stocks") : "stocks");
