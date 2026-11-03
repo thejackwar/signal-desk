@@ -131,7 +131,7 @@ def main():
     back_soon = sum(1 for a, b in zip(sw, sw[1:]) if a["to"] == "bills" and
                     (pd.Timestamp(b["date"]) - pd.Timestamp(a["date"])).days <= 35)
     eq_rule, eq_hold = START * (1 + rule).cumprod(), START * (1 + r).cumprod()
-    wk = eq_rule.resample("W-FRI").last().dropna().index
+    wk = eq_rule.groupby(eq_rule.index.to_period("W-FRI")).tail(1).index   # last real session of each week
     yrs = len(c) / 252
 
     # next session's position: decided at this week's last close; mid-week it can't change yet
