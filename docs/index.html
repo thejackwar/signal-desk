@@ -1478,10 +1478,10 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
 .hgroup:nth-of-type(5) .hic { background: color-mix(in srgb, #bf5af2 15%, transparent); color: #bf5af2; }
 
 /* home, dark: the four main features with live numbers (always dark, in light and dark mode) */
-#app.single.homex { max-width: 1180px; padding: 20px 32px 56px; }
+#app.single.homex { max-width: none; padding: 20px 40px 56px; }
 .home.hx { --hx-bg: #0b0f14; --hx-s: #121820; --hx-s2: #0e141b; --hx-l: #1f2833; --hx-l2: #2b3644; --hx-t: #e6edf3; --hx-t2: #c3ccd5; --hx-m: #8b98a5; --hx-g: #22c55e; --hx-a: #38bdf8; --hx-a2: #5eead4; --hx-grad: var(--btn-grad, linear-gradient(95deg, #38bdf8 0%, #34d399 100%)); --hx-up: #4ade80; --hx-dn: #f87171; --hx-gold: #fcd34d;
   --surface: var(--hx-s); --muted: var(--hx-m); --faint: var(--hx-m); --line: var(--hx-l); --shadow: none;
-  position: relative; overflow: hidden; max-width: none; margin: 0; padding: 20px 0 26px; background: transparent; color: var(--hx-t); color-scheme: dark; }
+  position: relative; overflow: hidden; max-width: 1180px; margin: 0 auto; padding: 20px 0 26px; background: transparent; color: var(--hx-t); color-scheme: dark; }
 @media (min-width: 700px) { .home.hx { padding: 32px 0 32px; } }
 .hx a, .hx button.hxm { color: inherit; text-decoration: none; }
 .hx .up { color: var(--hx-up); } .hx .down { color: var(--hx-dn); }
@@ -1498,6 +1498,7 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
 #app .hx h1 span { color: var(--hx-m); }
 @media (min-width: 700px) { #app .hx h1 { font-size: 58px; max-width: 880px; margin-inline: auto; } }
 .hxlead { max-width: 620px; font-size: 16.5px; line-height: 1.55; color: var(--hx-t2); margin: 18px 0 0; text-wrap: pretty; }
+@media (min-width: 700px) { .hx .hxlead { margin: 18px auto 0; } }
 .hxbtns, .hxrow { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 24px; }
 .hxb { display: inline-flex; align-items: center; justify-content: center; min-height: 46px; padding: 0 20px; border-radius: 12px; background: var(--hx-grad); color: #04121a !important; font-weight: 600; font-size: 15px; }
 .hxb.ghost { background: transparent; border: 1px solid var(--hx-l2); color: var(--hx-t) !important; }
