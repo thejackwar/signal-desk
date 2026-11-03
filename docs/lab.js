@@ -128,8 +128,17 @@ export const START_RULES = {
   xs: { mode: "any", list: [] },
   edge: 1,
 };
-for (const [k, I] of Object.entries(INDICATORS)) { if (!I.base) I.base = k; I.group = I.group || "Indicators"; }
-export const GROUPS = ["Build your own", "Indicators", "Breakouts & strength", "Chart patterns", "Trading-bot strategies", "50-day rule (crypto)"];
+// Indicator strategies sit in the category of the indicator they're built on
+const IND_CAT = {
+  ma: "Trend", cross: "Trend", supertrend: "Trend",
+  rsi: "Momentum", macd: "Momentum", relative_strength: "Momentum",
+  volume_breakout: "Volume",
+  bollinger: "Volatility",
+  donchian: "Support & resistance",
+  dip: "Dip buying", avg_down: "Dip buying",
+};
+for (const [k, I] of Object.entries(INDICATORS)) { if (!I.base) I.base = k; I.group = IND_CAT[k] || I.group || "Trend"; }
+export const GROUPS = ["Build your own", "Trend", "Momentum", "Volume", "Volatility", "Support & resistance", "Dip buying", "Chart patterns", "Trading-bot strategies", "50-day rule (crypto)"];
 // can this strategy run on this market's data? (some need the weekly backtest's extra data)
 export function available(data, ind, market) {
   const I = INDICATORS[ind];
