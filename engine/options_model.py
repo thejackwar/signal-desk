@@ -112,6 +112,11 @@ def half_spread(price: float) -> float:
 
 # ------------------------------------------------------------------ strikes and expiries
 def strike_step(S: float) -> float:
+    # split-adjusted history can put a stock at a few dollars (NVDA was under $1 in 2010 adjusted),
+    # where real strikes were set on the unadjusted price: keep the grid at roughly 1-2% steps
+    if S < 2: return 0.025
+    if S < 5: return 0.05
+    if S < 10: return 0.1
     if S < 25: return 0.5
     if S < 100: return 1.0
     if S < 250: return 2.5

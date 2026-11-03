@@ -1,6 +1,6 @@
 // The Options page: Learn (payoff of each strategy), Builder (a strategy on a real option chain),
 // Backtest (modeled, engine/options_backtest.py) and Live (paper trades, engine/options_live.py).
-import * as L from "./options-lib.js?v=2";
+import * as L from "./options-lib.js?v=3";
 
 // Address of the Cloudflare Worker (worker/trendlines-worker.js, which also serves option chains).
 // The Trendlines page's "Data server" setting, if set on this device, is used instead.

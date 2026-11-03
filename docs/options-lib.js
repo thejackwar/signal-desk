@@ -176,7 +176,7 @@ export function skewIv(atm, S, K, T, slope) {
 export const halfSpread = p => Math.min(SPREAD_MAX, Math.max(SPREAD_MIN, SPREAD_PCT * p));
 
 // ------------------------------------------------------------------ strikes and expiries
-export function strikeStep(S) { return S < 25 ? 0.5 : S < 100 ? 1 : S < 250 ? 2.5 : S < 500 ? 5 : 10; }
+export function strikeStep(S) { return S < 2 ? 0.025 : S < 5 ? 0.05 : S < 10 ? 0.1 : S < 25 ? 0.5 : S < 100 ? 1 : S < 250 ? 2.5 : S < 500 ? 5 : 10; }
 const r4 = x => Math.round(x * 1e4) / 1e4;
 export function strikeGrid(S, step = strikeStep(S)) {
   const lo = Math.floor(S * 0.5 / step), hi = Math.ceil(S * 1.5 / step), out = [];
