@@ -1419,6 +1419,34 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
 .hgroup:nth-of-type(4) .hic { background: color-mix(in srgb, #ff9f0a 16%, transparent); color: #ff9f0a; }
 .hgroup:nth-of-type(5) .hic { background: color-mix(in srgb, #bf5af2 15%, transparent); color: #bf5af2; }
 
+/* about us */
+.about { max-width: 760px; }
+.about .ahero { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr); gap: 28px; align-items: center; margin: 8px 0 26px; }
+.about .kick { font-size: 13px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); margin: 0 0 8px; }
+.about .ahero h2 { font-size: clamp(30px, 6vw, 44px); line-height: 1.05; letter-spacing: -.02em; margin: 0 0 14px; background: var(--title-grad); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.about .ahero p { margin: 0 0 10px; font-size: 16px; line-height: 1.55; }
+.about figure { margin: 0; position: relative; }
+.about figure img { display: block; width: 100%; height: auto; border-radius: 22px; box-shadow: 0 18px 50px rgba(0,0,0,.28); transform: rotate(1.6deg); transition: transform .35s ease; }
+.about figure:hover img { transform: rotate(0deg) scale(1.015); }
+.about figcaption { position: absolute; left: -10px; bottom: 18px; background: var(--surface); color: inherit; font-size: 13px; font-weight: 600; padding: 8px 12px; border-radius: 12px; box-shadow: 0 6px 20px rgba(0,0,0,.18); transform: rotate(-3deg); max-width: 80%; }
+.about .afacts { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin: 6px 0 22px; }
+.about .afacts div { background: var(--surface); border-radius: 14px; padding: 14px; }
+.about .afacts b { display: block; font-size: 24px; letter-spacing: -.01em; }
+.about .afacts small { color: var(--muted); font-size: 13px; }
+.about .aduo { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 22px; }
+.about .aduo .card { margin: 0; }
+.about .aduo h3 { margin: 0 0 6px; font-size: 18px; }
+.about .aduo p { margin: 0; color: var(--muted); font-size: 14px; line-height: 1.5; }
+.about .arules { margin: 0 0 22px; padding-left: 20px; line-height: 1.6; }
+.about .arules li { margin-bottom: 6px; }
+@media (max-width: 640px) {
+  .about .ahero { grid-template-columns: 1fr; gap: 20px; }
+  .about figure { order: -1; }
+  .about figcaption { left: 10px; }
+  .about .aduo { grid-template-columns: 1fr; }
+}
+@media (prefers-reduced-motion: reduce) { .about figure img { transform: none; transition: none; } }
+
 </style>
 </head>
 <body>
@@ -1442,6 +1470,7 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
   <a class="nav" href="#learn" data-tab="learn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 6.5C10 5 7 4.5 3.5 5v13.5c3.5-.5 6.5 0 8.5 1.5 2-1.5 5-2 8.5-1.5V5C17 4.5 14 5 12 6.5Z"/><path d="M12 6.5V20"/></svg>Learn</a>
   <a class="nav" href="#notify" data-tab="notify"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="2.5" width="12" height="19" rx="2.5"/><path d="M11 18.5h2"/></svg>Phone alerts</a>
   <a class="nav" href="#brokers" data-tab="brokers"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9.5 12 4l9 5.5"/><path d="M4.5 10v8"/><path d="M9.5 10v8"/><path d="M14.5 10v8"/><path d="M19.5 10v8"/><path d="M3 20.5h18"/></svg>Brokers</a>
+  <a class="nav" href="#about" data-tab="about"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.2"/><path d="M3 19.5c0-3.3 2.7-5.5 6-5.5s6 2.2 6 5.5"/><circle cx="17" cy="9" r="2.6"/><path d="M16 14.2c2.9-.3 5 1.6 5 4.8"/></svg>About us</a>
   <div class="foot" id="sidefoot"></div>
   <div class="disc"><a href="#brokers-about">Affiliate disclosure</a></div>
 </aside>
@@ -1482,6 +1511,7 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
       <a href="#learn" data-tab="learn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 6.5C10 5 7 4.5 3.5 5v13.5c3.5-.5 6.5 0 8.5 1.5 2-1.5 5-2 8.5-1.5V5C17 4.5 14 5 12 6.5Z"/><path d="M12 6.5V20"/></svg><span>Learn</span></a>
       <a href="#notify" data-tab="notify"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="2.5" width="12" height="19" rx="2.5"/><path d="M11 18.5h2"/></svg><span>Phone alerts</span></a>
       <a href="#brokers" data-tab="brokers"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9.5 12 4l9 5.5"/><path d="M4.5 10v8"/><path d="M9.5 10v8"/><path d="M14.5 10v8"/><path d="M19.5 10v8"/><path d="M3 20.5h18"/></svg><span>Brokers</span></a>
+      <a href="#about" data-tab="about"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.2"/><path d="M3 19.5c0-3.3 2.7-5.5 6-5.5s6 2.2 6 5.5"/><circle cx="17" cy="9" r="2.6"/><path d="M16 14.2c2.9-.3 5 1.6 5 4.8"/></svg><span>About us</span></a>
     </nav>
     <div class="mfoot"><a href="#brokers-about">Affiliate disclosure</a><button type="button" data-close>Close</button></div>
   </div>
@@ -2085,7 +2115,7 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
     ];
     h += GROUPS.map(([g, sub, items]) => `<section class="hgroup"><h2 class="hsec">${g}</h2><p class="hsub">${sub}</p><div class="hdir">${items.map(([href, t, d, alt]) =>
       `<a href="${href}"><span class="hic" aria-hidden="true">${ic(href, alt)}</span><span class="htx"><b>${t}</b><small>${d}</small></span><span class="hgo" aria-hidden="true">›</span></a>`).join("")}</div></section>`).join("");
-    h += `<p class="hint hdisc">Investment Center Signals describes price patterns and how they behaved in the past. It doesn't know your situation and doesn't tell you what to buy or sell. <a href="#brokers-about">Affiliate disclosure</a></p>
+    h += `<p class="hint hdisc">Investment Center Signals describes price patterns and how they behaved in the past. It doesn't know your situation and doesn't tell you what to buy or sell. <a href="#brokers-about">Affiliate disclosure</a> · <a href="#about">Made by Giacomo &amp; Andrea</a></p>
     </section>`;
     return h;
   }
@@ -5600,6 +5630,51 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
     } };
   }
 
+  // ---------------------------------------------------------------- about
+  function viewAbout() {
+    S.firstSel = null;
+    const nStrat = S.strategies.length;
+    let h = header("About us");
+    h += `<section class="about">
+      <div class="ahero">
+        <div>
+          <p class="kick">Made in Milan</p>
+          <h2>Two friends, one suit each, too many charts.</h2>
+          <p>Investment Center Signals is built by <strong>Giacomo</strong> and <strong>Andrea</strong>. It started as a simple question over a drink: <em>do these trading strategies everyone talks about actually work?</em></p>
+          <p>Instead of arguing about it, we built a machine to find out. A few thousand lines of code later, here we are.</p>
+        </div>
+        <figure>
+          <img src="team.jpg" width="900" height="1200" alt="Giacomo and Andrea in dark suits and sunglasses on a Milan street at night" loading="lazy">
+          <figcaption>Dress code for every backtest.</figcaption>
+        </figure>
+      </div>
+
+      <div class="afacts">
+        <div><b>${nStrat}</b><small>strategies built and tested</small></div>
+        <div><b>15 yrs</b><small>of prices in the backtests</small></div>
+        <div><b>2</b><small>founders</small></div>
+        <div><b>∞</b><small>espressos</small></div>
+      </div>
+
+      <div class="aduo">
+        <div class="card"><h3>Giacomo</h3><p>Writes the strategies, breaks them, fixes them, then asks “but what if we add one more indicator?”</p></div>
+        <div class="card"><h3>Andrea</h3><p>The other half of the team. Keeps the ideas honest and makes sure the charts don't get too excited.</p></div>
+      </div>
+
+      <h2>What we believe</h2>
+      <ol class="arules">
+        <li><strong>Test before you trust.</strong> Every strategy here shows its backtest, its live record and its losing trades too.</li>
+        <li><strong>No black boxes.</strong> Each signal comes with an explanation and a “wrong if” level.</li>
+        <li><strong>Free to use.</strong> Some broker links pay us a small fee, and we say so on the <a href="#brokers-about">disclosure</a>.</li>
+        <li><strong>We're not financial advisors.</strong> We do own suits, though.</li>
+      </ol>
+
+      <div class="hbtns"><a class="btn" href="#strategylab">Try the Strategy Lab</a><a class="btn ghost" href="#home">Back to home</a></div>
+      <p class="fine">Investment Center Signals shows information about price patterns. It doesn't trade and isn't investment advice.</p>
+    </section>`;
+    return h;
+  }
+
   // --------------------------------------------------------------- router
   function detailFor(r) {
     if (r.startsWith("alert-")) return () => viewAlert(+r.slice(6));
@@ -5614,13 +5689,13 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
   function route() {
     if (!location.hash) history.replaceState(null, "", "#home");
     const r = (location.hash || "#home").slice(1);
-    const tab = r === "news" || r === "buzz" || r === "mood" || r === "earnings" || r.startsWith("earnings-") ? "news" : r.startsWith("calendar") ? "calendar" : r === "crypto" || r.startsWith("crypto-") ? "cryptohub" : r.startsWith("strategylab") ? "lab" : r.startsWith("strateg") ? "strategies" : r.startsWith("stock") || r === "heatmap" ? "stocks" : r === "notify" ? "notify" : r.startsWith("brokers") ? "brokers" : r.startsWith("learn") ? "learn" : r === "practice" ? "practice" : r === "home" ? "home" : "alerts";
+    const tab = r === "news" || r === "buzz" || r === "mood" || r === "earnings" || r.startsWith("earnings-") ? "news" : r.startsWith("calendar") ? "calendar" : r === "crypto" || r.startsWith("crypto-") ? "cryptohub" : r.startsWith("strategylab") ? "lab" : r.startsWith("strateg") ? "strategies" : r.startsWith("stock") || r === "heatmap" ? "stocks" : r === "notify" ? "notify" : r.startsWith("brokers") ? "brokers" : r.startsWith("learn") ? "learn" : r === "practice" ? "practice" : r === "home" ? "home" : r === "about" ? "about" : "alerts";
     if (r === "winners" || r === "record" || r === "trades") S.alView = r; else if (tab === "alerts" && !r.startsWith("alert-")) S.alView = "alerts";
-    const list = { alerts: S.alView === "winners" ? viewWinners : S.alView === "record" ? viewRecord : S.alView === "trades" ? viewTrades : viewAlerts, stocks: viewStocks, home: viewHome, strategies: viewStrategies, notify: viewNotify, brokers: viewBrokers, learn: viewLearn, practice: viewPractice, lab: () => viewLab(r.slice(11)), cryptohub: () => viewCrypto(r), news: r === "buzz" ? viewBuzz : r === "mood" ? viewMood : r === "earnings" || r.startsWith("earnings-") ? () => viewEarnings(r.slice(9)) : viewNews, calendar: () => viewCalendar(r.slice(9)) }[tab];
+    const list = { alerts: S.alView === "winners" ? viewWinners : S.alView === "record" ? viewRecord : S.alView === "trades" ? viewTrades : viewAlerts, stocks: viewStocks, home: viewHome, strategies: viewStrategies, notify: viewNotify, brokers: viewBrokers, learn: viewLearn, practice: viewPractice, about: viewAbout, lab: () => viewLab(r.slice(11)), cryptohub: () => viewCrypto(r), news: r === "buzz" ? viewBuzz : r === "mood" ? viewMood : r === "earnings" || r.startsWith("earnings-") ? () => viewEarnings(r.slice(9)) : viewNews, calendar: () => viewCalendar(r.slice(9)) }[tab];
     let detail = detailFor(r), sel = detail ? r : null;
     charts.length = 0;
 
-    if (WIDE.matches && tab !== "home" && tab !== "notify" && tab !== "brokers" && tab !== "learn" && tab !== "news" && tab !== "calendar" && tab !== "practice" && tab !== "lab" && tab !== "cryptohub" && r !== "record" && r !== "trades") {
+    if (WIDE.matches && tab !== "home" && tab !== "about" && tab !== "notify" && tab !== "brokers" && tab !== "learn" && tab !== "news" && tab !== "calendar" && tab !== "practice" && tab !== "lab" && tab !== "cryptohub" && r !== "record" && r !== "trades") {
       const lp = app.querySelector(".pane.list"), dp = app.querySelector(".pane.detail");
       const listTop = lp?.scrollTop || 0, detTop = dp?.scrollTop || 0;
       const L = norm(list());
@@ -5646,7 +5721,7 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
     if (nsearch) { nsearch.addEventListener("input", () => { S.nq = nsearch.value; filterNews(); }); filterNews(); }
     // the phone tab bar has no Calendar button: it lives under News there
     // phone bar: pages without their own button light up Menu
-    const inBar = { news: "menu", calendar: "menu", brokers: "menu", notify: "menu", learn: "menu", practice: "menu", cryptohub: "menu" }[tab] || tab;
+    const inBar = { news: "menu", calendar: "menu", brokers: "menu", notify: "menu", learn: "menu", practice: "menu", cryptohub: "menu", about: "menu" }[tab] || tab;
     const navTab = tab === "alerts" && (S.alView === "winners" || S.alView === "record" || S.alView === "trades") ? S.alView : tab;
     document.querySelectorAll("[data-tab]").forEach(a => a.setAttribute("aria-current", (a.closest(".tabs") ? a.dataset.tab === inBar : a.dataset.tab === navTab) ? "page" : "false"));
     S.routed = true;
@@ -6086,7 +6161,7 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
     try {
       if (!sessionStorage.getItem("ics.visit")) {
         sessionStorage.setItem("ics.visit", "1");
-        if (!/^#(stock-|alert-|strategy-|earnings-.|calendar-.|learn-|strategylab[-?])/.test(location.hash)) history.replaceState(null, "", "#home");
+        if (!/^#(stock-|alert-|strategy-|earnings-.|calendar-.|learn-|strategylab[-?]|about$)/.test(location.hash)) history.replaceState(null, "", "#home");
       }
     } catch (e) {}
     S.follow = new Set(load(STORE, DEFAULT_FOLLOW));
