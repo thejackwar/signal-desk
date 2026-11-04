@@ -1000,7 +1000,8 @@ def mom_breadth_filter(x):
 def factor_rotation_mom(x):
     subs = {k: REG[k][1](x) for k in ("mom_12_1", "lowvol_252", "mom_52wk_high")}
     perf = pd.DataFrame({k: (1 + _own(x, w)).rolling(126).apply(np.prod, raw=True) for k, w in subs.items()})
-    best = perf.idxmax(axis=1).where(_row_mask(x, x.me)).ffill()
+    has = perf.notna().any(axis=1)
+    best = perf.fillna(-np.inf).idxmax(axis=1).where(has & _row_mask(x, x.me)).ffill()
     out = sum(subs[k].mul((best == k).astype(float), axis=0) for k in subs)
     return out
 
