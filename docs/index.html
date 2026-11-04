@@ -478,6 +478,8 @@ table.cxder td img, table.cxrs td img, table.cxder td .coin, table.cxrs td .coin
 .cxbars i::after { content: ""; position: absolute; left: 0; right: 0; border-radius: 2px; height: calc(var(--h) / 2); }
 .cxbars i.pos::after { bottom: 50%; background: var(--bull); }
 .cxbars i.neg::after { top: 50%; background: var(--bear); }
+.cxbars i.vup::after { bottom: 50%; background: var(--bear); }
+.cxbars i.vdn::after { top: 50%; background: var(--bull); }
 .cxbarsx { display: flex; justify-content: space-between; font: 500 11px var(--font-mono); color: var(--faint); margin-top: 4px; }
 .cxprog { height: 8px; border-radius: 4px; background: var(--surface-2); overflow: hidden; margin-top: 12px; }
 .cxprog i { display: block; height: 100%; background: var(--amber); }
@@ -2255,12 +2257,12 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
     const M = X.months, mx = Math.max(...M.map(m => Math.abs(m.rel - 1)));
     const cur = MN.indexOf(N.month);
     h += cxCard("Month by month", "VIX vs past-year average",
-      `<div class="cxbars">${M.map(m => `<i class="${m.rel >= 1 ? "neg" : "pos"}" style="--h:${Math.abs(m.rel - 1) / mx * 100}%" title="${m.m} ${rp(m.rel)}"></i>`).join("")}</div>
+      `<div class="cxbars">${M.map(m => `<i class="${m.rel >= 1 ? "vup" : "vdn"}" style="--h:${Math.abs(m.rel - 1) / mx * 100}%" title="${m.m} ${rp(m.rel)}"></i>`).join("")}</div>
       <div class="cxbarsx">${M.map(m => `<span>${m.m[0]}</span>`).join("")}</div>
       <div class="tablewrap" style="margin-top:10px"><table class="bt"><thead><tr><th>Month</th><th>VIX vs avg</th><th>VIX rose</th><th>S&amp;P 500</th></tr></thead><tbody>` +
       M.map((m, i) => `<tr${i === cur ? ` style="background:color-mix(in srgb, var(--accent, ${C.accent}) 12%, transparent)"` : ""}><td>${m.m}${i === cur ? " ·&nbsp;now" : ""}</td><td><b class="${m.rel > 1 ? "down" : "up"}">${rp(m.rel)}</b></td><td>${m.vix_up}%</td><td><b class="${m.spy >= 0 ? "up" : "down"}">${pc(m.spy, 1)}</b> <small style="color:var(--muted)">up ${m.spy_up}%</small></td></tr>`).join("") +
       `</tbody></table></div>`
-      + cxWhy(`Red bars: months when the VIX is usually above its own past-year average (more fear); green: below. “VIX rose” is how often the VIX ended the month higher than it started. The S&amp;P 500 column is its average monthly return and how often it rose, since ${esc(X.start.slice(0, 4))}. Around ${M[0].n} years per month, so a single 2008 or 2020 still moves the averages.`));
+      + cxWhy(`Red bars, up: months when the VIX is usually above its own past-year average (more fear); green bars, down: below it. “VIX rose” is how often the VIX ended the month higher than it started. The S&amp;P 500 column is its average monthly return and how often it rose, since ${esc(X.start.slice(0, 4))}. Around ${M[0].n} years per month, so a single 2008 or 2020 still moves the averages.`));
 
     // ---- holidays and weekdays
     const HO = X.holidays;
