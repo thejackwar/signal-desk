@@ -90,7 +90,7 @@ def find_example(sid, side, max_tries=4000, entries_only=False):
         rng = np.random.default_rng(seed * 31 + (7 if side > 0 else 3))
         shaped = (sid, side) in SHAPES
         df = from_waypoints(SHAPES[(sid, side)], rng) if shaped else random_walk(rng)
-        if sid == "volume_breakout":
+        if sid in ("volume_breakout", "back_to_value", "value_breakout"):
             df = with_volume(df, seed)
         if sid == "relative_strength":
             set_benchmark(simulated_market(df, seed), "SPY")

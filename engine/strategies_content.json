@@ -161,6 +161,46 @@
       "settings": "20-day channel of highs and lows, volume at least 1.5× its 20-day average, signal on the daily close."
     },
     {
+      "id": "back_to_value",
+      "name": "Back to Value",
+      "category": "Volume profile",
+      "level": "Intermediate",
+      "tagline": "Price slips out of the busiest price zone, then closes back inside it.",
+      "how": [
+        "Every day, the app builds a volume profile of the last 20 trading days: how much traded at each price, spreading each day's volume evenly over its high–low range. The busiest price is the point of control (POC), and the zone around it holding 70% of the volume is the value area.",
+        "When a stock closes below the value area and the very next day closes back inside it, the move down was rejected: sellers couldn't find buyers lower. Traders then expect a drift back toward the POC, the price the market agreed on most."
+      ],
+      "bullish": "Yesterday closed below the 20-day value area low; today closes back inside the value area, still below the point of control.",
+      "bearish": "Yesterday closed above the 20-day value area high; today closes back inside the value area, still above the point of control.",
+      "why": "Prices spend most of their time where most of the trading happens. A break out of that zone that fails straight away often means the move had no real buyers or sellers behind it, so price tends to rotate back to the middle of the range.",
+      "watch_out": [
+        "In a strong trend the value area keeps moving, and the 'failed' break is often just a pause before the trend carries on.",
+        "Built from daily bars, so the profile is an estimate of where the volume traded. The Volume Profile page shows the exact intraday version.",
+        "Earnings and news days can move price far outside value for good reasons."
+      ],
+      "settings": "Volume profile of the last 20 sessions on 50 price rows, 70% value area, signal on the daily close. The trade is closed after 20 sessions or on an opposite alert."
+    },
+    {
+      "id": "value_breakout",
+      "name": "Value Area Breakout",
+      "category": "Volume profile",
+      "level": "Intermediate",
+      "tagline": "Two closes in a row outside the busiest price zone: the market accepts a new price.",
+      "how": [
+        "The app builds a volume profile of the 20 trading days before the move: the point of control (busiest price) and the value area around it holding 70% of the volume.",
+        "One close outside the value area can be a fake-out. Two closes in a row beyond the value area high (or low) mean the market is accepting the new prices, which often starts a move to a new range."
+      ],
+      "bullish": "Two closes in a row above the 20-day value area high, after a close inside (or below) it.",
+      "bearish": "Two closes in a row below the 20-day value area low, after a close inside (or above) it.",
+      "why": "When price leaves the zone where most trading happened and stays out, the old 'fair price' is no longer fair: buyers (or sellers) have taken control and the market goes looking for a new balance. The old value area edge then often turns into support (or resistance).",
+      "watch_out": [
+        "Waiting for the second close means you often buy a little higher than the breakout.",
+        "In sideways markets breakouts fail often, and price falls back into value.",
+        "Built from daily bars, so the profile is an estimate of where the volume traded."
+      ],
+      "settings": "Volume profile of the 20 sessions before the move on 50 price rows, 70% value area, 2 closes in a row outside it. The trade is closed after 20 sessions or on an opposite alert."
+    },
+    {
       "id": "relative_strength",
       "name": "Relative Strength",
       "category": "Momentum",

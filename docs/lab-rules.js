@@ -143,6 +143,45 @@ function sinceExtreme(x, n, max) {   // bars since the highest (or lowest) of th
   }
   return out;
 }
+// Rolling volume profile from daily bars (same loops as value_area() in engine/strategies.py): each
+// day's volume spread evenly over its high-low range, on `rows` equal price rows between the window's
+// lowest low and highest high. poc / vah / val on day e describe the n bars ending at e (e included).
+export function valueArea(T, n, va = 0.7, rows = 50) {
+  return memo(T, `#VA|${n}|${va}|${rows}`, () => {
+    const { h, l, c } = T, v = vol(T), N = c.length;
+    const poc = nan(N), vah = nan(N), val = nan(N), acc = new Float64Array(rows);
+    for (let e = n - 1; e < N; e++) {
+      let lo = Infinity, hi = -Infinity;
+      for (let j = e - n + 1; j <= e; j++) { if (l[j] < lo) lo = l[j]; if (h[j] > hi) hi = h[j]; }
+      if (!(hi > lo)) continue;
+      const step = (hi - lo) / rows;
+      acc.fill(0);
+      let total = 0;
+      for (let j = e - n + 1; j <= e; j++) {
+        const vj = v[j];
+        if (!(vj > 0)) continue;
+        total += vj;
+        if (!(h[j] > l[j])) { acc[Math.min(rows - 1, Math.max(0, Math.floor((c[j] - lo) / step)))] += vj; continue; }
+        const per = vj / (h[j] - l[j]);
+        const k0 = Math.max(0, Math.floor((l[j] - lo) / step) - 1), k1 = Math.min(rows - 1, Math.floor((h[j] - lo) / step) + 1);
+        for (let k = k0; k <= k1; k++) {
+          const top = Math.min(h[j], lo + (k + 1) * step), bot = Math.max(l[j], lo + k * step);
+          if (top > bot) acc[k] += (top - bot) * per;
+        }
+      }
+      if (!(total > 0)) continue;
+      let p = 0;
+      for (let k = 1; k < rows; k++) if (acc[k] > acc[p]) p = k;
+      let a = p, b = p, inside = acc[p];
+      while (inside < va * total && (a > 0 || b < rows - 1)) {
+        const up = b < rows - 1 ? acc[b + 1] : -1, dn = a > 0 ? acc[a - 1] : -1;
+        if (up >= dn) inside += acc[++b]; else inside += acc[--a];
+      }
+      poc[e] = lo + (p + 0.5) * step; vah[e] = lo + (b + 1) * step; val[e] = lo + a * step;
+    }
+    return { poc, vah, val };
+  });
+}
 const benchOn = (T, data) => { const b = data?.bench; return b ? map(T.c.length, i => b[T.idx[i]]) : nan(T.c.length); };
 const dateOf = (T, data, i) => data.dates[T.idx[i]];
 
@@ -221,6 +260,9 @@ export const IND = {
   ad: { name: "Accumulation / distribution", short: "A/D", group: "Volume", scale: "num", params: [], needs: "v", f: T => { const v = vol(T); let s = 0; return map(T.c.length, i => { const r = T.h[i] - T.l[i]; if (r > 0 && ok(v[i])) s += ((T.c[i] - T.l[i]) - (T.h[i] - T.c[i])) / r * v[i]; return s; }); }, hint: { op: "rise", n: 5 } },
   cmf: { name: "Chaikin money flow", short: "CMF", group: "Volume", scale: "num", params: [N(20, 3, 100)], needs: "v", f: (T, p) => { const v = vol(T), n = T.c.length, mf = new Float64Array(n), vv = new Float64Array(n); for (let i = 0; i < n; i++) { const r = T.h[i] - T.l[i]; if (ok(v[i])) { vv[i] = v[i]; if (r > 0) mf[i] = ((T.c[i] - T.l[i]) - (T.h[i] - T.c[i])) / r * v[i]; } } const a = sma(mf, p.n), b = sma(vv, p.n); return map(n, i => b[i] > 0 ? a[i] / b[i] : NaN); }, hint: { op: "gt", b: 0.1 } },
   mfi: { name: "Money flow index", short: "MFI", group: "Volume", scale: "osc", params: [N(14, 3, 50)], needs: "v", f: (T, p) => { const v = vol(T), n = T.c.length, tp = map(n, i => (T.h[i] + T.l[i] + T.c[i]) / 3), pos = new Float64Array(n), neg = new Float64Array(n); for (let i = 1; i < n; i++) { const f = ok(v[i]) ? tp[i] * v[i] : 0; if (tp[i] > tp[i - 1]) pos[i] = f; else if (tp[i] < tp[i - 1]) neg[i] = f; } const a = sma(pos, p.n), b = sma(neg, p.n); return map(n, i => i < p.n ? NaN : b[i] === 0 ? 100 : 100 - 100 / (1 + a[i] / b[i])); }, hint: { op: "xa", b: 20 } },
+  vp_poc: { name: "Point of control (volume profile, last N bars)", short: "POC", group: "Volume", scale: "price", params: [N(20, 5, 252), P("va", "Value area", 70, 50, 90, 5, "%")], needs: "v", f: (T, p) => valueArea(T, p.n, p.va / 100).poc, hint: { op: "lt", rev: true } },
+  vp_vah: { name: "Value area high (volume profile, last N bars)", short: "VAH", group: "Volume", scale: "price", params: [N(20, 5, 252), P("va", "Value area", 70, 50, 90, 5, "%")], needs: "v", f: (T, p) => valueArea(T, p.n, p.va / 100).vah, hint: { op: "lt", rev: true } },
+  vp_val: { name: "Value area low (volume profile, last N bars)", short: "VAL", group: "Volume", scale: "price", params: [N(20, 5, 252), P("va", "Value area", 70, 50, 90, 5, "%")], needs: "v", f: (T, p) => valueArea(T, p.n, p.va / 100).val, hint: { op: "lt", rev: true } },
   vwap: { name: "Rolling VWAP", short: "VWAP", group: "Volume", scale: "price", params: [N(20, 2, 252)], needs: "v", f: (T, p) => { const v = vol(T), tp = map(T.c.length, i => (T.h[i] + T.l[i] + T.c[i]) / 3 * v[i]); const a = sma(tp, p.n), b = sma(v, p.n); return map(T.c.length, i => a[i] / b[i]); }, hint: { op: "lt", rev: true } },
   // market & relative
   mkt: { name: "Market (benchmark price)", short: "Market", group: "Market & relative", scale: "mkt", params: [], needs: "bench", f: (T, p, data) => benchOn(T, data), hint: { op: "gt", b: { id: "mkt_ma" } } },

@@ -371,6 +371,139 @@ def buy_the_dip(df: pd.DataFrame, drop: float = 0.05, n: int = 20) -> StrategyRe
     ])
 
 
+# ----------------------------------------------------------- volume profile
+# A rolling volume profile from daily bars: each day's volume is spread evenly over its high-low range,
+# on `rows` equal price rows between the window's lowest low and highest high. Same loops as
+# valueArea() in docs/lab-rules.js (the Strategy Lab), so both give the same levels.
+VP_ROWS = 50
+_VA_CACHE: dict = {}
+
+
+def value_area(df: pd.DataFrame, n: int = 20, va: float = 0.7, rows: int = VP_ROWS):
+    """Point of control, value area high and low of the n sessions ending at each bar (that bar
+    included), as numpy arrays (NaN until n sessions, or with no volume). The value area starts at
+    the busiest row and adds the busier neighbouring row until `va` of the volume is inside."""
+    key = (id(df), len(df), n, va, rows)
+    if key in _VA_CACHE:
+        return _VA_CACHE[key]
+    h = df["high"].to_numpy(float)
+    l = df["low"].to_numpy(float)
+    c = df["close"].to_numpy(float)
+    v = df["volume"].to_numpy(float) if "volume" in df else np.zeros(len(df))
+    N = len(c)
+    poc, vah, val = (np.full(N, np.nan) for _ in range(3))
+    if N >= n:
+        W = N - n + 1
+        win = np.arange(W)[:, None] + np.arange(n)[None, :]          # (window, day)
+        H, L, C, V = h[win], l[win], c[win], v[win]
+        lo, hi = L.min(axis=1), H.max(axis=1)
+        good = hi > lo
+        step = np.where(good, (hi - lo) / rows, 1.0)
+        k = np.arange(rows, dtype=float)
+        tops = lo[:, None] + (k + 1)[None, :] * step[:, None]         # (window, row)
+        bots = lo[:, None] + k[None, :] * step[:, None]
+        vpos = np.where(V > 0, V, 0.0)
+        flat = ~(H > L)
+        per = np.where((V > 0) & ~flat, V / np.where(flat, 1.0, H - L), 0.0)
+        frow = np.clip(np.floor((C - lo[:, None]) / step[:, None]), 0, rows - 1).astype(int)
+        acc = np.zeros((W, rows))
+        total = np.zeros(W)
+        for j in range(n):                                            # day by day, like the Lab's loop
+            top = np.minimum(H[:, j][:, None], tops)
+            bot = np.maximum(L[:, j][:, None], bots)
+            add = np.where(top > bot, (top - bot) * per[:, j][:, None], 0.0)
+            fl = flat[:, j] & (V[:, j] > 0)
+            if fl.any():
+                add[fl, frow[fl, j]] = V[fl, j]
+            acc = acc + add
+            total = total + vpos[:, j]
+        for w in np.flatnonzero(good & (total > 0)):
+            a_ = acc[w]
+            p = int(np.argmax(a_))
+            a = b = p
+            inside = a_[p]
+            while inside < va * total[w] and (a > 0 or b < rows - 1):
+                up = a_[b + 1] if b < rows - 1 else -1.0
+                dn = a_[a - 1] if a > 0 else -1.0
+                if up >= dn:
+                    b += 1
+                    inside += a_[b]
+                else:
+                    a -= 1
+                    inside += a_[a]
+            e = w + n - 1
+            poc[e] = lo[w] + (p + 0.5) * step[w]
+            vah[e] = lo[w] + (b + 1) * step[w]
+            val[e] = lo[w] + a * step[w]
+    if len(_VA_CACHE) > 64:
+        _VA_CACHE.clear()
+    _VA_CACHE[key] = (poc, vah, val)
+    return poc, vah, val
+
+
+def _vp_lines(df, poc, vah, val, lag: int, n: int) -> list:
+    sh = lambda x: _vals(pd.Series(x, index=df.index).shift(lag))
+    return [{"name": f"{n}-day value area high", "values": sh(vah), "style": "band"},
+            {"name": f"{n}-day point of control", "values": sh(poc), "style": "accent"},
+            {"name": f"{n}-day value area low", "values": sh(val), "style": "band"}]
+
+
+def back_to_value(df: pd.DataFrame, n: int = 20, va: float = 0.7) -> StrategyResult:
+    """The value area of the previous n sessions (yesterday included). Bullish when yesterday closed
+    below the value area low and today closes back inside it, still below the point of control (the
+    usual target). Bearish: yesterday above the value area high, today back inside, above the POC."""
+    poc, vah, val = value_area(df, n, va)
+    c = df["close"].to_numpy(float)
+    N = len(c)
+    buy, sell = np.zeros(N, bool), np.zeros(N, bool)
+    for i in range(1, N):
+        e = i - 1
+        if not val[e] == val[e]:
+            continue
+        buy[i] = c[i - 1] < val[e] and c[i] >= val[e] and c[i] < poc[e]
+        sell[i] = c[i - 1] > vah[e] and c[i] <= vah[e] and c[i] > poc[e]
+    sig = _signals(df, pd.Series(buy, index=df.index), pd.Series(sell, index=df.index))
+    notes = {}
+    for i in np.flatnonzero(sig.values):
+        e = i - 1
+        notes[int(i)] = (f"Closed back inside the {n}-day value area ({P(val[e])}–{P(vah[e])}) after a close below it; "
+                         f"the point of control ({P(poc[e])}) is the usual target" if sig.iloc[i] > 0 else
+                         f"Closed back inside the {n}-day value area ({P(val[e])}–{P(vah[e])}) after a close above it; "
+                         f"the point of control ({P(poc[e])}) is the usual target")
+    stops = _swing_stops(df, sig, 5, "below the low it came back from (last 5 sessions)",
+                         "above the high it came back from (last 5 sessions)")
+    return StrategyResult(sig, notes, _vp_lines(df, poc, vah, val, 1, n), stops=stops)
+
+
+def value_breakout(df: pd.DataFrame, n: int = 20, va: float = 0.7, k: int = 2) -> StrategyResult:
+    """The value area of the n sessions up to the day before the move. Bullish when the price closes
+    above its value area high k sessions in a row (the market accepts higher prices), having closed
+    inside or below it the day before; bearish below the value area low."""
+    poc, vah, val = value_area(df, n, va)
+    c = df["close"].to_numpy(float)
+    N = len(c)
+    buy, sell = np.zeros(N, bool), np.zeros(N, bool)
+    for i in range(k, N):
+        e = i - k
+        if not val[e] == val[e]:
+            continue
+        run = c[e + 1:i + 1]
+        buy[i] = c[e] <= vah[e] and bool((run > vah[e]).all())
+        sell[i] = c[e] >= val[e] and bool((run < val[e]).all())
+    sig = _signals(df, pd.Series(buy, index=df.index), pd.Series(sell, index=df.index))
+    notes, stops = {}, {}
+    days = "close" if k == 1 else f"{k} closes in a row"
+    for i in np.flatnonzero(sig.values):
+        e = i - k
+        if sig.iloc[i] > 0:
+            notes[int(i)] = f"{days[0].upper() + days[1:]} above the {n}-day value area high ({P(vah[e])}): the market is accepting higher prices"
+            stops[int(i)] = (float(vah[e]), "back inside the value area (a close below its high)")
+        else:
+            notes[int(i)] = f"{days[0].upper() + days[1:]} below the {n}-day value area low ({P(val[e])}): the market is accepting lower prices"
+            stops[int(i)] = (float(val[e]), "back inside the value area (a close above its low)")
+    return StrategyResult(sig, notes, _vp_lines(df, poc, vah, val, k, n), stops=stops)
+
+
 # ----------------------------------------------------------- chart patterns
 
 def pivots(df: pd.DataFrame, k: int = 5):
@@ -537,6 +670,8 @@ REGISTRY = {
     "volume_breakout": volume_breakout,
     "relative_strength": relative_strength,
     "buy_the_dip": buy_the_dip,
+    "back_to_value": back_to_value,
+    "value_breakout": value_breakout,
     "double_top_bottom": double_top_bottom,
     "head_shoulders": head_shoulders,
     "triangle": triangle,

@@ -82,6 +82,19 @@ Object.assign(INDICATORS, {
     params: [{ k: "n", label: "Channel and volume length", min: 5, max: 100, step: 1, def: 20, unit: "days" },
              { k: "mult", label: "Volume at least", min: 1, max: 4, step: 0.1, def: 1.5, unit: "× average" }],
   },
+  back_to_value: {
+    name: "Back to value", base: "back_to_value", exit: "hold", needs: "v",
+    about: "A volume profile of the last N days (each day's volume spread over its high–low range). Bullish when the price closes back inside the value area after closing below it the day before, still under the point of control (the usual target); bearish when it closes back inside from above.",
+    params: [{ k: "n", label: "Volume profile of the last", min: 5, max: 120, step: 1, def: 20, unit: "days" },
+             { k: "va", label: "Value area", min: 50, max: 90, step: 5, def: 70, unit: "% of volume" }],
+  },
+  value_breakout: {
+    name: "Value area breakout", base: "value_breakout", exit: "hold", needs: "v",
+    about: "A volume profile of the last N days. Bullish when the price closes above the value area high for a set number of days in a row (the market accepts higher prices), bearish below the value area low.",
+    params: [{ k: "n", label: "Volume profile of the last", min: 5, max: 120, step: 1, def: 20, unit: "days" },
+             { k: "va", label: "Value area", min: 50, max: 90, step: 5, def: 70, unit: "% of volume" },
+             { k: "k", label: "Closes outside value in a row", min: 1, max: 5, step: 1, def: 2, unit: "days" }],
+  },
   relative_strength: {
     name: "Relative strength", base: "relative_strength", exit: "opposite", group: "Breakouts & strength", needs: "bench",
     about: "Price ÷ the market (SPY, Bitcoin or the commodity average). Bullish when that line makes a new N-day high (it starts leading), bearish at a new N-day low; it only alerts when it switches.",
@@ -136,7 +149,7 @@ export const START_RULES = {
 const IND_CAT = {
   ma: "Trend", cross: "Trend", supertrend: "Trend",
   rsi: "Momentum", macd: "Momentum", relative_strength: "Momentum",
-  volume_breakout: "Volume",
+  volume_breakout: "Volume", back_to_value: "Volume", value_breakout: "Volume",
   bollinger: "Volatility",
   donchian: "Support & resistance",
   dip: "Dip buying", avg_down: "Dip buying",
@@ -454,6 +467,23 @@ export function signals(T, cfg) {
       hi[i] = mx; lo[i] = mn; if (k === p.n) avg[i] = s / k;
     }
     for (let i = 1; i < n; i++) { const heavy = v[i] >= p.mult * avg[i]; put(i, heavy && above(c, hi, i), heavy && below(c, lo, i)); }
+  } else if (cfg.ind === "back_to_value" || cfg.ind === "value_breakout") {
+    // back_to_value() / value_breakout() in engine/strategies.py, on Rules.valueArea (the same profile)
+    if (!T.v) return sig;
+    const { poc, vah, val } = Rules.valueArea(T, p.n, p.va / 100);
+    if (cfg.ind === "back_to_value") {
+      for (let i = 1; i < n; i++) {
+        const e = i - 1; if (!(val[e] === val[e])) continue;
+        put(i, c[i - 1] < val[e] && c[i] >= val[e] && c[i] < poc[e], c[i - 1] > vah[e] && c[i] <= vah[e] && c[i] > poc[e]);
+      }
+    } else {
+      for (let i = p.k; i < n; i++) {
+        const e = i - p.k; if (!(val[e] === val[e])) continue;
+        let up = c[e] <= vah[e], dn = c[e] >= val[e];
+        for (let j = e + 1; j <= i; j++) { up = up && c[j] > vah[e]; dn = dn && c[j] < val[e]; }
+        put(i, up, dn);
+      }
+    }
   } else if (cfg.ind === "relative_strength") {
     // relative_strength() in engine/strategies.py: price / benchmark at a new n-day high or low, switches only
     const b = T._bench; if (!b) return sig;
