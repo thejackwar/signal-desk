@@ -177,7 +177,7 @@ function renderBacktest() {
       <p class="lead">${esc(T.verdict)} Settings fixed in advance (±${T.z_hot}σ vs the last ${T.z_win} days), so the later period is a fair out-of-sample test.</p>
       <div class="seg" id="btsel">${[["out", "Out of sample"], ["in", "In sample"], ["all", "All years"]].map(([k, l]) => `<button type="button" data-k="${k}" aria-pressed="${st.bt === k}">${l}</button>`).join("")}</div>
       <p class="note">${per}</p>
-      <h4>After a signal: buy the next open, sell the close days later</h4>
+      <h4>After a signal: buy at the next open, sell at the close a few days later</h4>
       <div class="tbl"><table><thead><tr><th>Signal</th><th>Hold</th><th>Times</th><th>Average</th><th class="hm">Won</th><th>Any day</th><th>Edge</th></tr></thead><tbody>
       ${ev.map(e => `<tr><td><span class="sig ${e.sig}">${e.sig === "buying" ? "Dark buying" : "Dark selling"}</span></td><td>${e.h} days</td><td>${e.n.toLocaleString("en-GB")}</td><td class="${cls(e.avg)}">${sgn(e.avg)}%</td><td class="hm">${pct(e.win, 0)}</td><td class="dim">${sgn(e.base)}%</td><td class="${cls(e.edge)}"><b>${sgn(e.edge)}%</b></td></tr>`).join("")}
       </tbody></table></div>

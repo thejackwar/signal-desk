@@ -299,6 +299,15 @@ def build_daily(sv, tv, close, vol) -> None:
 _token = None
 
 
+def venue_name(mpid: str, name: str) -> str:
+    """FINRA prefixes names with the MPID: "UBSA UBS ATS" -> "UBS ATS", "BIDS BIDS ATS" -> "BIDS ATS"."""
+    name = (name or mpid).strip()
+    if name.upper().startswith(mpid.upper() + " "):
+        rest = name[len(mpid) + 1:].strip()
+        return rest if rest.upper() != "ATS" else f"{mpid} ATS"
+    return name
+
+
 def finra_post(body: dict) -> list:
     global _token
     hdr = {"Accept": "application/json", "Content-Type": "application/json"}
@@ -363,7 +372,7 @@ def cmd_weekly(args) -> None:
                 continue
             m = x.get("MPID") or "?"
             nm_ = (x.get("marketParticipantName") or m).strip()
-            venues[m] = nm_[len(m) + 1:].strip() if nm_.upper().startswith(m.upper() + " ") else nm_   # "UBSA UBS ATS" -> "UBS ATS"
+            venues[m] = venue_name(m, nm_)
             a = per.setdefault(t, {})
             a[m] = a.get(m, 0) + int(x.get("totalWeeklyShareQuantity") or 0)
         write_json(adir / f"{wk}.json", {"week": wk, "venues": venues, "shares": per})
@@ -382,7 +391,7 @@ def build_weekly(err: str | None = None) -> None:
     weeks = [w["week"] for w in wkd]
     vn: dict = {}
     for w in wkd:
-        vn.update({m: n[len(m) + 1:].strip() if n.upper().startswith(m.upper() + " ") else n for m, n in w["venues"].items()})
+        vn.update({m: venue_name(m, n) for m, n in w["venues"].items()})
     # consolidated weekly volume from Yahoo, to turn shares into "% of all trading"
     cons = {}
     try:
