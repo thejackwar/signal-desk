@@ -42,6 +42,12 @@ candles per timeframe). No extra secrets are needed.
 the price) from Alpaca's free option snapshots, for `docs/options.html`. Same keys, nothing to add:
 just paste the updated code (step 3) once.
 
+**Volume profile:** `GET /?vp=AAPL&range=5&hours=rth` returns intraday bars *with volume* for
+`docs/volumeprofile.html`: the last 1, 5, 20, 60 or 250 sessions (1-, 1-, 5-, 15- and 30-minute bars), from Alpaca's
+full-market SIP feed (`feed=sip`, end = now − 16 min, so the free plan works), regular hours (`hours=rth`) or 4:00–20:00
+(`hours=all`). Coins come from Binance with their dollar (USDT) volume, Kraken as a fallback. Same keys, nothing to add:
+just paste the updated code (step 3) once. Test: `node tests/volumeprofile/test_vp.mjs`.
+
 If you change the code, paste it again in step 3. Tests: `python tests/trendlines/test_parity.py`,
 `node tests/trendlines/test_crypto.mjs`, `node tests/trendlines/test_sr.mjs`.
 

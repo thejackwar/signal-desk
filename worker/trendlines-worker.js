@@ -15,6 +15,9 @@
 // chain: [[expiry, "C"|"P", strike, bid, ask, iv, delta, gamma, theta, vega], ...] }
 // The next four monthly expiries (third Fridays), strikes within 35% of the price, from Alpaca's
 // option snapshots (feed=indicative, the free one). Cached for a minute.
+//
+// Volume profile (for docs/volumeprofile.html): GET /?vp=AAPL&range=1|5|20|60|250&hours=rth|all -> intraday bars
+// with volume for the last `range` sessions (see volumeBars below).
 
 const ALPACA = "https://data.alpaca.markets/v2/stocks/bars";
 const DAY = 86400e3;
@@ -229,6 +232,7 @@ export default {
     if (request.method === "OPTIONS") return new Response(null, { headers: cors });
     const url = new URL(request.url);
     if (url.searchParams.has("options")) return options(url.searchParams.get("options"), env, ctx);
+    if (url.searchParams.has("vp")) return volumeBars(url.searchParams, env, ctx);
     let sym = (url.searchParams.get("symbol") || "").trim().toUpperCase().replace(/\./g, "-");
     if (["SPX", "^SPX", "^GSPC"].includes(sym)) sym = "SPY";       // index: no Alpaca data
     const coin = TICKERS.has(sym) ? null : coinOf(sym);
@@ -341,4 +345,113 @@ async function options(raw, env, ctx) {
   } catch (e) {
     return json({ error: String(e.message || e) }, 502);
   }
+}
+
+// ------------------------------------------------------------------ volume profile (docs/volumeprofile.html)
+// GET /?vp=AAPL&range=5&hours=rth  ->  { symbol, market, range, tf, hours, unit, end, sessions, bars }
+// bars: [t, open, high, low, close, volume]. Stocks: full-market (SIP) bars, 15+ minutes old (free plan),
+// t = New York wall-clock as if UTC; hours=rth keeps 9:30-16:00, hours=all keeps 4:00-20:00. The last `range`
+// trading sessions. Crypto: Binance coin/USDT bars with their USDT volume (Kraken coin/USD as a fallback,
+// volume in coins), t = UTC, the last `range` days. sessions = the dates covered (New York / UTC).
+// range -> [Alpaca timeframe, minutes, Binance interval, minutes, Kraken minutes]
+const VP_RANGES = {
+  1:   ["1Min", 1, "1m", 1, 1],
+  5:   ["1Min", 1, "5m", 5, 5],
+  20:  ["5Min", 5, "15m", 15, 15],
+  60:  ["15Min", 15, "1h", 60, 60],
+  250: ["30Min", 30, "4h", 240, 240],
+};
+const short = x => +(+x).toPrecision(7);
+
+async function volumeBars(q, env, ctx) {
+  let sym = (q.get("vp") || "").trim().toUpperCase().replace(/\./g, "-");
+  if (["SPX", "^SPX", "^GSPC"].includes(sym)) sym = "SPY";
+  const range = VP_RANGES[q.get("range")] ? +q.get("range") : 5;
+  const hours = q.get("hours") === "all" ? "all" : "rth";
+  const coin = TICKERS.has(sym) ? null : coinOf(sym);
+  if (!coin && !TICKERS.has(sym)) return json({ error: `${sym || "No ticker"}: only S&P 100 stocks, SPY and the app's 19 coins are available.` }, 400);
+  if (!coin && (!env.ALPACA_KEY_ID || !env.ALPACA_SECRET_KEY)) return json({ error: "The Alpaca keys are not set on the Worker." }, 500);
+
+  const name = coin ? `${coin}-USD` : sym;
+  const cache = typeof caches !== "undefined" ? caches.default : null;
+  const key = new Request(`https://trendlines.cache/vp/${name}/${range}/${coin ? "24h" : hours}`);
+  if (cache) { const hit = await cache.match(key).catch(() => null); if (hit) return hit; }
+  const [atf, amin, binterval, bmin, kmin] = VP_RANGES[range];
+  try {
+    let out;
+    if (coin) {
+      const want = Math.ceil(range * 1440 / bmin);
+      let bars, source, unit = "USD";
+      try {
+        bars = await binanceVolume(coin, binterval, want);
+        source = `Binance ${coin}/USDT`;
+      } catch (e) {
+        bars = await krakenVolume(coin, kmin);
+        source = `Kraken ${coin}/USD`; unit = coin;
+      }
+      const from = Date.now() / 1000 - range * 86400;
+      bars = clean(bars).filter(b => b[0] >= from - bmin * 60);
+      if (!bars.length) return json({ error: `No data for ${name}.` }, 404);
+      const sessions = [...new Set(bars.map(b => new Date(b[0] * 1000).toISOString().slice(0, 10)))];
+      out = { symbol: name, market: "crypto", source, range, tf: bmin, hours: "24h", unit,
+        end: new Date((bars[bars.length - 1][0] + bmin * 60) * 1000).toISOString(), sessions, bars };
+    } else {
+      const end = Date.now() - 16 * 60e3;                      // free plan: SIP data 15+ minutes old
+      const days = Math.ceil(range * 7 / 5) + 6;               // calendar days that hold `range` sessions
+      const raw = await fetchSeries(sym.replace(/-/g, "."), atf, end - days * DAY, end, env);
+      const lo = hours === "rth" ? 570 : 240, hi = hours === "rth" ? 960 : 1200;
+      let bars = [], prev = null;
+      for (const b of raw) {
+        const t = nyWall(b.t);
+        if (t === prev) continue;
+        prev = t;
+        const m = Math.floor((t % 86400) / 60);
+        if (m >= lo && m < hi) bars.push([t, short(b.o), short(b.h), short(b.l), short(b.c), b.v]);
+      }
+      bars.sort((a, b) => a[0] - b[0]);
+      const dateOf = t => new Date(t * 1000).toISOString().slice(0, 10);
+      const sessions = [...new Set(bars.map(b => dateOf(b[0])))].slice(-range);
+      bars = bars.filter(b => dateOf(b[0]) >= sessions[0]);
+      if (!bars.length) return json({ error: `No data for ${sym}.` }, 404);
+      out = { symbol: sym, market: "stock", source: "Alpaca (all US exchanges, SIP)", range, tf: amin, hours, unit: "shares",
+        end: new Date(end).toISOString(), sessions, bars };
+    }
+    const res = json(out, 200, { "Cache-Control": `max-age=${range >= 60 ? 300 : 60}` });
+    if (cache) ctx?.waitUntil?.(cache.put(key, res.clone()));
+    return res;
+  } catch (e) {
+    return json({ error: String(e.message || e) }, 502);
+  }
+}
+
+// newest `want` candles with their USDT (quote) volume
+async function binanceVolume(coin, interval, want) {
+  const rows = [];
+  let endTime = null;
+  while (rows.length < want) {
+    const q = new URLSearchParams({ symbol: `${coin}USDT`, interval, limit: String(Math.min(1000, want - rows.length)) });
+    if (endTime !== null) q.set("endTime", String(endTime));
+    const js = await getJson(`${BINANCE}?${q}`, `Binance ${interval}`);
+    if (!Array.isArray(js) || !js.length) break;
+    rows.unshift(...js);
+    if (js.length < +q.get("limit")) break;
+    endTime = js[0][0] - 1;
+  }
+  if (!rows.length) throw new Error("no candles");
+  return rows.map(k => [Math.floor(k[0] / 1000), +k[1], +k[2], +k[3], +k[4], Math.round(+k[7])]);
+}
+
+// Kraken: last 720 candles, volume in coins
+async function krakenVolume(coin, minutes) {
+  let js;
+  for (let tries = 0; ; tries++) {
+    js = await getJson(`${KRAKEN}?pair=${KRAKEN_NAME[coin] || coin}USD&interval=${minutes}`, `Kraken ${minutes}m`);
+    const busy = (js.error || []).some(e => /too many requests|rate limit/i.test(e));
+    if (!busy || tries >= 4) break;
+    await new Promise(ok => setTimeout(ok, 2500 * (tries + 1)));
+  }
+  if (js.error && js.error.length) throw new Error(`Kraken: ${js.error.join(", ")}`);
+  const k = Object.keys(js.result || {}).find(x => x !== "last");
+  if (!k) throw new Error(`Kraken: no ${coin}/USD data`);
+  return js.result[k].map(r => [+r[0], +r[1], +r[2], +r[3], +r[4], +r[6]]);
 }
