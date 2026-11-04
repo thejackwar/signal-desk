@@ -1,190 +1,190 @@
 {
- "through": "2026-11-03",
+ "through": "2026-11-04",
  "blocks": [
   {
    "title": "Stocks (S&P 100, Benzinga headlines)",
    "key": "stocks",
    "stats": {
     "mood": {
-     "obs": 93971,
+     "obs": 94392,
      "reaction": 0.077,
      "fwd": {
       "1": {
-       "ic": 0.0018,
-       "t": 0.45,
-       "ic_2019_23": 0.0036,
-       "ic_2024_now": -0.0093,
-       "top_pct": 0.079,
-       "bottom_pct": 0.082,
-       "all_pct": 0.085,
+       "ic": 0.002,
+       "t": 0.51,
+       "ic_2019_23": 0.0035,
+       "ic_2024_now": -0.0096,
+       "top_pct": 0.076,
+       "bottom_pct": 0.081,
+       "all_pct": 0.086,
        "top_hit": 52.2
       },
       "3": {
-       "ic": -0.004,
-       "t": -0.59,
-       "ic_2019_23": -0.0042,
-       "ic_2024_now": -0.0095,
-       "top_pct": 0.226,
-       "bottom_pct": 0.259,
-       "all_pct": 0.252,
+       "ic": -0.0042,
+       "t": -0.63,
+       "ic_2019_23": -0.0045,
+       "ic_2024_now": -0.0096,
+       "top_pct": 0.222,
+       "bottom_pct": 0.263,
+       "all_pct": 0.251,
        "top_hit": 53.3
       },
       "5": {
-       "ic": -0.0038,
-       "t": -0.43,
+       "ic": -0.0041,
+       "t": -0.46,
        "ic_2019_23": -0.0055,
-       "ic_2024_now": -0.0125,
-       "top_pct": 0.38,
-       "bottom_pct": 0.425,
-       "all_pct": 0.412,
-       "top_hit": 54.0
+       "ic_2024_now": -0.0127,
+       "top_pct": 0.375,
+       "bottom_pct": 0.429,
+       "all_pct": 0.41,
+       "top_hit": 53.9
       },
       "10": {
        "ic": -0.0038,
        "t": -0.31,
        "ic_2019_23": -0.0121,
-       "ic_2024_now": -0.0144,
-       "top_pct": 0.721,
-       "bottom_pct": 0.82,
-       "all_pct": 0.8,
-       "top_hit": 55.0
+       "ic_2024_now": -0.0146,
+       "top_pct": 0.717,
+       "bottom_pct": 0.825,
+       "all_pct": 0.799,
+       "top_hit": 54.9
       }
      }
     },
     "vs_usual": {
-     "obs": 91899,
+     "obs": 92244,
      "reaction": 0.077,
      "fwd": {
       "1": {
-       "ic": 0.0019,
-       "t": 0.5,
-       "ic_2019_23": 0.0058,
-       "ic_2024_now": -0.0066,
+       "ic": 0.0017,
+       "t": 0.45,
+       "ic_2019_23": 0.0056,
+       "ic_2024_now": -0.007,
        "top_pct": 0.077,
-       "bottom_pct": 0.093,
+       "bottom_pct": 0.096,
        "all_pct": 0.083,
        "top_hit": 52.1
       },
       "3": {
-       "ic": -0.0026,
-       "t": -0.39,
-       "ic_2019_23": -0.0014,
-       "ic_2024_now": -0.0057,
+       "ic": -0.0028,
+       "t": -0.42,
+       "ic_2019_23": -0.0017,
+       "ic_2024_now": -0.0059,
        "top_pct": 0.223,
-       "bottom_pct": 0.251,
+       "bottom_pct": 0.256,
        "all_pct": 0.247,
        "top_hit": 53.3
       },
       "5": {
-       "ic": -0.0016,
-       "t": -0.18,
-       "ic_2019_23": 0.0009,
-       "ic_2024_now": -0.0085,
+       "ic": -0.0017,
+       "t": -0.2,
+       "ic_2019_23": 0.001,
+       "ic_2024_now": -0.0087,
        "top_pct": 0.381,
-       "bottom_pct": 0.425,
-       "all_pct": 0.406,
+       "bottom_pct": 0.427,
+       "all_pct": 0.405,
        "top_hit": 54.0
       },
       "10": {
        "ic": 0.0007,
        "t": 0.06,
-       "ic_2019_23": -0.0023,
-       "ic_2024_now": -0.0074,
-       "top_pct": 0.772,
-       "bottom_pct": 0.844,
-       "all_pct": 0.793,
+       "ic_2019_23": -0.0024,
+       "ic_2024_now": -0.0076,
+       "top_pct": 0.766,
+       "bottom_pct": 0.841,
+       "all_pct": 0.791,
        "top_hit": 55.3
       }
      }
     },
     "burst": {
-     "obs": 91886,
+     "obs": 92231,
      "reaction": 0.076,
      "fwd": {
       "1": {
-       "ic": 0.0014,
-       "t": 0.38,
-       "ic_2019_23": 0.002,
-       "ic_2024_now": -0.0067,
-       "top_pct": 0.075,
-       "bottom_pct": 0.089,
+       "ic": 0.0016,
+       "t": 0.43,
+       "ic_2019_23": 0.0019,
+       "ic_2024_now": -0.0066,
+       "top_pct": 0.077,
+       "bottom_pct": 0.088,
        "all_pct": 0.083,
        "top_hit": 51.8
       },
       "3": {
-       "ic": -0.0023,
-       "t": -0.37,
-       "ic_2019_23": -0.0028,
-       "ic_2024_now": -0.0018,
-       "top_pct": 0.224,
-       "bottom_pct": 0.251,
+       "ic": -0.0026,
+       "t": -0.42,
+       "ic_2019_23": -0.0031,
+       "ic_2024_now": -0.0019,
+       "top_pct": 0.226,
+       "bottom_pct": 0.253,
        "all_pct": 0.247,
-       "top_hit": 53.3
+       "top_hit": 53.4
       },
       "5": {
-       "ic": -0.0014,
-       "t": -0.18,
-       "ic_2019_23": -0.0007,
-       "ic_2024_now": -0.0046,
-       "top_pct": 0.404,
-       "bottom_pct": 0.391,
-       "all_pct": 0.406,
-       "top_hit": 54.0
+       "ic": -0.0016,
+       "t": -0.19,
+       "ic_2019_23": -0.0009,
+       "ic_2024_now": -0.0048,
+       "top_pct": 0.405,
+       "bottom_pct": 0.392,
+       "all_pct": 0.405,
+       "top_hit": 54.1
       },
       "10": {
-       "ic": -0.0001,
-       "t": -0.01,
-       "ic_2019_23": -0.0038,
+       "ic": -0.0002,
+       "t": -0.02,
+       "ic_2019_23": -0.004,
        "ic_2024_now": -0.0026,
-       "top_pct": 0.752,
-       "bottom_pct": 0.767,
-       "all_pct": 0.793,
-       "top_hit": 55.5
+       "top_pct": 0.754,
+       "bottom_pct": 0.768,
+       "all_pct": 0.791,
+       "top_hit": 55.6
       }
      }
     },
     "volume": {
-     "obs": 188166,
+     "obs": 190033,
      "reaction": 0.014,
      "fwd": {
       "1": {
-       "ic": -0.001,
-       "t": -0.38,
-       "ic_2019_23": 0.0004,
-       "ic_2024_now": 0.0004,
+       "ic": -0.0009,
+       "t": -0.34,
+       "ic_2019_23": 0.0003,
+       "ic_2024_now": 0.0008,
        "top_pct": 0.089,
        "bottom_pct": 0.073,
-       "all_pct": 0.074,
+       "all_pct": 0.073,
        "top_hit": 51.7
       },
       "3": {
-       "ic": 0.0005,
-       "t": 0.11,
-       "ic_2019_23": 0.0035,
-       "ic_2024_now": 0.0066,
-       "top_pct": 0.25,
+       "ic": 0.0004,
+       "t": 0.08,
+       "ic_2019_23": 0.0032,
+       "ic_2024_now": 0.0064,
+       "top_pct": 0.248,
        "bottom_pct": 0.221,
-       "all_pct": 0.217,
-       "top_hit": 53.6
+       "all_pct": 0.215,
+       "top_hit": 53.5
       },
       "5": {
-       "ic": 0.0034,
-       "t": 0.6,
-       "ic_2019_23": 0.0044,
+       "ic": 0.0033,
+       "t": 0.58,
+       "ic_2019_23": 0.0041,
        "ic_2024_now": 0.0091,
-       "top_pct": 0.398,
+       "top_pct": 0.395,
        "bottom_pct": 0.363,
-       "all_pct": 0.357,
+       "all_pct": 0.354,
        "top_hit": 54.0
       },
       "10": {
-       "ic": 0.0024,
-       "t": 0.29,
-       "ic_2019_23": 0.0065,
+       "ic": 0.0022,
+       "t": 0.27,
+       "ic_2019_23": 0.0062,
        "ic_2024_now": 0.0156,
-       "top_pct": 0.751,
-       "bottom_pct": 0.737,
-       "all_pct": 0.704,
+       "top_pct": 0.747,
+       "bottom_pct": 0.738,
+       "all_pct": 0.699,
        "top_hit": 55.7
       }
      }
@@ -196,40 +196,40 @@
       "long": {
        "all": {
         "strategy": {
-         "cagr": 3.24,
+         "cagr": 3.38,
          "sharpe": 0.26,
-         "maxdd": -35.4
+         "maxdd": -35.8
         },
         "buy_hold": {
-         "cagr": 18.43,
-         "sharpe": 0.98,
-         "maxdd": -34.7
+         "cagr": 18.29,
+         "sharpe": 0.97,
+         "maxdd": -34.6
         },
         "beats": 0.0
        },
        "2019-2023": {
         "strategy": {
-         "cagr": 6.44,
-         "sharpe": 0.39,
-         "maxdd": -35.4
+         "cagr": 6.34,
+         "sharpe": 0.38,
+         "maxdd": -35.8
         },
         "buy_hold": {
-         "cagr": 17.95,
-         "sharpe": 0.86,
-         "maxdd": -34.7
+         "cagr": 17.83,
+         "sharpe": 0.85,
+         "maxdd": -34.6
         },
         "beats": 0.0
        },
        "2024-now": {
         "strategy": {
-         "cagr": -1.73,
-         "sharpe": -0.02,
-         "maxdd": -22.1
+         "cagr": -1.24,
+         "sharpe": 0.01,
+         "maxdd": -22.0
         },
         "buy_hold": {
-         "cagr": 19.21,
+         "cagr": 19.03,
          "sharpe": 1.39,
-         "maxdd": -15.7
+         "maxdd": -15.5
         },
         "beats": 0.0
        },
@@ -237,36 +237,36 @@
       },
       "worst_news_long": {
        "all": {
-        "cagr": 9.93,
-        "sharpe": 0.51,
-        "maxdd": -44.0
+        "cagr": 9.76,
+        "sharpe": 0.5,
+        "maxdd": -44.8
        },
        "2019-2023": {
-        "cagr": 8.82,
-        "sharpe": 0.45,
-        "maxdd": -44.0
+        "cagr": 8.36,
+        "sharpe": 0.43,
+        "maxdd": -44.8
        },
        "2024-now": {
-        "cagr": 11.77,
-        "sharpe": 0.65,
-        "maxdd": -22.4
+        "cagr": 12.08,
+        "sharpe": 0.67,
+        "maxdd": -21.8
        }
       },
       "long_short": {
        "all": {
-        "cagr": -35.38,
-        "sharpe": -2.7,
-        "maxdd": -96.1
+        "cagr": -35.22,
+        "sharpe": -2.68,
+        "maxdd": -96.0
        },
        "2019-2023": {
-        "cagr": -31.62,
-        "sharpe": -2.52,
-        "maxdd": -82.5
+        "cagr": -31.43,
+        "sharpe": -2.5,
+        "maxdd": -82.3
        },
        "2024-now": {
-        "cagr": -41.03,
-        "sharpe": -2.98,
-        "maxdd": -77.8
+        "cagr": -40.93,
+        "sharpe": -2.96,
+        "maxdd": -77.6
        }
       }
      },
@@ -274,40 +274,40 @@
       "long": {
        "all": {
         "strategy": {
-         "cagr": 16.29,
-         "sharpe": 0.86,
-         "maxdd": -30.3
+         "cagr": 16.55,
+         "sharpe": 0.87,
+         "maxdd": -30.7
         },
         "buy_hold": {
-         "cagr": 18.43,
-         "sharpe": 0.98,
-         "maxdd": -34.7
+         "cagr": 18.29,
+         "sharpe": 0.97,
+         "maxdd": -34.6
         },
         "beats": 0.0
        },
        "2019-2023": {
         "strategy": {
-         "cagr": 17.14,
+         "cagr": 17.11,
          "sharpe": 0.82,
-         "maxdd": -30.3
+         "maxdd": -30.7
         },
         "buy_hold": {
-         "cagr": 17.95,
-         "sharpe": 0.86,
-         "maxdd": -34.7
+         "cagr": 17.83,
+         "sharpe": 0.85,
+         "maxdd": -34.6
         },
         "beats": 0.0
        },
        "2024-now": {
         "strategy": {
-         "cagr": 14.94,
-         "sharpe": 0.98,
-         "maxdd": -17.7
+         "cagr": 15.66,
+         "sharpe": 1.03,
+         "maxdd": -17.3
         },
         "buy_hold": {
-         "cagr": 19.21,
+         "cagr": 19.03,
          "sharpe": 1.39,
-         "maxdd": -15.7
+         "maxdd": -15.5
         },
         "beats": 0.0
        },
@@ -315,36 +315,36 @@
       },
       "worst_news_long": {
        "all": {
-        "cagr": 17.37,
+        "cagr": 17.26,
         "sharpe": 0.81,
         "maxdd": -35.7
        },
        "2019-2023": {
-        "cagr": 15.35,
-        "sharpe": 0.69,
+        "cagr": 15.04,
+        "sharpe": 0.68,
         "maxdd": -35.7
        },
        "2024-now": {
-        "cagr": 20.72,
-        "sharpe": 1.13,
-        "maxdd": -20.8
+        "cagr": 20.93,
+        "sharpe": 1.14,
+        "maxdd": -20.6
        }
       },
       "long_short": {
        "all": {
-        "cagr": -13.37,
-        "sharpe": -1.34,
-        "maxdd": -69.2
+        "cagr": -13.11,
+        "sharpe": -1.31,
+        "maxdd": -68.5
        },
        "2019-2023": {
-        "cagr": -10.72,
-        "sharpe": -1.12,
-        "maxdd": -46.9
+        "cagr": -10.53,
+        "sharpe": -1.1,
+        "maxdd": -46.4
        },
        "2024-now": {
-        "cagr": -17.48,
-        "sharpe": -1.66,
-        "maxdd": -42.7
+        "cagr": -17.12,
+        "sharpe": -1.61,
+        "maxdd": -41.9
        }
       }
      },
@@ -352,40 +352,40 @@
       "long": {
        "all": {
         "strategy": {
-         "cagr": 18.99,
-         "sharpe": 0.98,
+         "cagr": 19.11,
+         "sharpe": 0.99,
          "maxdd": -29.7
         },
         "buy_hold": {
-         "cagr": 18.43,
-         "sharpe": 0.98,
-         "maxdd": -34.7
+         "cagr": 18.29,
+         "sharpe": 0.97,
+         "maxdd": -34.6
         },
         "beats": 1.0
        },
        "2019-2023": {
         "strategy": {
-         "cagr": 18.76,
+         "cagr": 18.68,
          "sharpe": 0.89,
          "maxdd": -29.7
         },
         "buy_hold": {
-         "cagr": 17.95,
-         "sharpe": 0.86,
-         "maxdd": -34.7
+         "cagr": 17.83,
+         "sharpe": 0.85,
+         "maxdd": -34.6
         },
         "beats": 1.0
        },
        "2024-now": {
         "strategy": {
-         "cagr": 19.37,
-         "sharpe": 1.25,
-         "maxdd": -18.0
+         "cagr": 19.8,
+         "sharpe": 1.28,
+         "maxdd": -17.8
         },
         "buy_hold": {
-         "cagr": 19.21,
+         "cagr": 19.03,
          "sharpe": 1.39,
-         "maxdd": -15.7
+         "maxdd": -15.5
         },
         "beats": 1.0
        },
@@ -393,36 +393,36 @@
       },
       "worst_news_long": {
        "all": {
-        "cagr": 18.69,
-        "sharpe": 0.87,
+        "cagr": 18.39,
+        "sharpe": 0.86,
         "maxdd": -35.8
        },
        "2019-2023": {
-        "cagr": 15.82,
-        "sharpe": 0.71,
+        "cagr": 15.53,
+        "sharpe": 0.7,
         "maxdd": -35.8
        },
        "2024-now": {
-        "cagr": 23.49,
-        "sharpe": 1.3,
-        "maxdd": -20.0
+        "cagr": 23.19,
+        "sharpe": 1.29,
+        "maxdd": -19.8
        }
       },
       "long_short": {
        "all": {
-        "cagr": -7.8,
-        "sharpe": -0.88,
-        "maxdd": -50.7
+        "cagr": -7.49,
+        "sharpe": -0.84,
+        "maxdd": -49.3
        },
        "2019-2023": {
-        "cagr": -5.48,
-        "sharpe": -0.62,
-        "maxdd": -29.0
+        "cagr": -5.31,
+        "sharpe": -0.6,
+        "maxdd": -28.2
        },
        "2024-now": {
-        "cagr": -11.43,
-        "sharpe": -1.29,
-        "maxdd": -33.2
+        "cagr": -10.9,
+        "sharpe": -1.22,
+        "maxdd": -32.0
        }
       }
      },
@@ -430,40 +430,40 @@
       "long": {
        "all": {
         "strategy": {
-         "cagr": 19.94,
+         "cagr": 20.03,
          "sharpe": 1.04,
          "maxdd": -31.1
         },
         "buy_hold": {
-         "cagr": 18.43,
-         "sharpe": 0.98,
-         "maxdd": -34.7
+         "cagr": 18.29,
+         "sharpe": 0.97,
+         "maxdd": -34.6
         },
         "beats": 1.0
        },
        "2019-2023": {
         "strategy": {
-         "cagr": 19.28,
+         "cagr": 19.29,
          "sharpe": 0.92,
          "maxdd": -31.1
         },
         "buy_hold": {
-         "cagr": 17.95,
-         "sharpe": 0.86,
-         "maxdd": -34.7
+         "cagr": 17.83,
+         "sharpe": 0.85,
+         "maxdd": -34.6
         },
         "beats": 1.0
        },
        "2024-now": {
         "strategy": {
-         "cagr": 21.02,
-         "sharpe": 1.38,
-         "maxdd": -18.2
+         "cagr": 21.25,
+         "sharpe": 1.4,
+         "maxdd": -18.0
         },
         "buy_hold": {
-         "cagr": 19.21,
+         "cagr": 19.03,
          "sharpe": 1.39,
-         "maxdd": -15.7
+         "maxdd": -15.5
         },
         "beats": 1.0
        },
@@ -471,36 +471,36 @@
       },
       "worst_news_long": {
        "all": {
-        "cagr": 20.0,
+        "cagr": 19.94,
         "sharpe": 0.93,
         "maxdd": -35.3
        },
        "2019-2023": {
-        "cagr": 17.33,
+        "cagr": 17.31,
         "sharpe": 0.76,
         "maxdd": -35.3
        },
        "2024-now": {
-        "cagr": 24.45,
-        "sharpe": 1.38,
-        "maxdd": -19.9
+        "cagr": 24.33,
+        "sharpe": 1.37,
+        "maxdd": -19.7
        }
       },
       "long_short": {
        "all": {
-        "cagr": -4.53,
-        "sharpe": -0.61,
-        "maxdd": -37.7
+        "cagr": -4.42,
+        "sharpe": -0.59,
+        "maxdd": -37.3
        },
        "2019-2023": {
-        "cagr": -2.87,
+        "cagr": -2.86,
         "sharpe": -0.37,
-        "maxdd": -20.4
+        "maxdd": -20.0
        },
        "2024-now": {
-        "cagr": -7.16,
-        "sharpe": -0.98,
-        "maxdd": -26.4
+        "cagr": -6.9,
+        "sharpe": -0.94,
+        "maxdd": -25.8
        }
       }
      }
@@ -510,40 +510,40 @@
       "long": {
        "all": {
         "strategy": {
-         "cagr": 1.16,
+         "cagr": 1.09,
          "sharpe": 0.16,
-         "maxdd": -39.3
+         "maxdd": -39.7
         },
         "buy_hold": {
-         "cagr": 18.43,
-         "sharpe": 0.98,
-         "maxdd": -34.7
+         "cagr": 18.29,
+         "sharpe": 0.97,
+         "maxdd": -34.6
         },
         "beats": 0.0
        },
        "2019-2023": {
         "strategy": {
-         "cagr": 1.76,
+         "cagr": 1.62,
          "sharpe": 0.19,
-         "maxdd": -39.3
+         "maxdd": -39.7
         },
         "buy_hold": {
-         "cagr": 17.95,
-         "sharpe": 0.86,
-         "maxdd": -34.7
+         "cagr": 17.83,
+         "sharpe": 0.85,
+         "maxdd": -34.6
         },
         "beats": 0.0
        },
        "2024-now": {
         "strategy": {
-         "cagr": 0.18,
+         "cagr": 0.25,
          "sharpe": 0.1,
-         "maxdd": -21.6
+         "maxdd": -22.0
         },
         "buy_hold": {
-         "cagr": 19.21,
+         "cagr": 19.03,
          "sharpe": 1.39,
-         "maxdd": -15.7
+         "maxdd": -15.5
         },
         "beats": 0.0
        },
@@ -551,36 +551,36 @@
       },
       "worst_news_long": {
        "all": {
-        "cagr": 8.57,
-        "sharpe": 0.45,
-        "maxdd": -45.0
+        "cagr": 8.73,
+        "sharpe": 0.46,
+        "maxdd": -44.8
        },
        "2019-2023": {
-        "cagr": 7.81,
+        "cagr": 7.85,
         "sharpe": 0.41,
-        "maxdd": -45.0
+        "maxdd": -44.8
        },
        "2024-now": {
-        "cagr": 9.82,
-        "sharpe": 0.56,
-        "maxdd": -19.8
+        "cagr": 10.17,
+        "sharpe": 0.57,
+        "maxdd": -19.3
        }
       },
       "long_short": {
        "all": {
-        "cagr": -38.53,
-        "sharpe": -2.67,
-        "maxdd": -97.3
+        "cagr": -38.69,
+        "sharpe": -2.68,
+        "maxdd": -97.4
        },
        "2019-2023": {
-        "cagr": -37.89,
-        "sharpe": -2.59,
-        "maxdd": -88.7
+        "cagr": -38.03,
+        "sharpe": -2.61,
+        "maxdd": -88.8
        },
        "2024-now": {
-        "cagr": -39.54,
-        "sharpe": -2.79,
-        "maxdd": -76.3
+        "cagr": -39.72,
+        "sharpe": -2.8,
+        "maxdd": -76.5
        }
       }
      },
@@ -588,40 +588,40 @@
       "long": {
        "all": {
         "strategy": {
-         "cagr": 14.34,
+         "cagr": 14.42,
          "sharpe": 0.75,
          "maxdd": -32.9
         },
         "buy_hold": {
-         "cagr": 18.43,
-         "sharpe": 0.98,
-         "maxdd": -34.7
+         "cagr": 18.29,
+         "sharpe": 0.97,
+         "maxdd": -34.6
         },
         "beats": 0.0
        },
        "2019-2023": {
         "strategy": {
-         "cagr": 13.79,
-         "sharpe": 0.67,
+         "cagr": 13.69,
+         "sharpe": 0.66,
          "maxdd": -32.9
         },
         "buy_hold": {
-         "cagr": 17.95,
-         "sharpe": 0.86,
-         "maxdd": -34.7
+         "cagr": 17.83,
+         "sharpe": 0.85,
+         "maxdd": -34.6
         },
         "beats": 0.0
        },
        "2024-now": {
         "strategy": {
-         "cagr": 15.24,
-         "sharpe": 0.97,
-         "maxdd": -18.5
+         "cagr": 15.62,
+         "sharpe": 1.0,
+         "maxdd": -18.1
         },
         "buy_hold": {
-         "cagr": 19.21,
+         "cagr": 19.03,
          "sharpe": 1.39,
-         "maxdd": -15.7
+         "maxdd": -15.5
         },
         "beats": 0.0
        },
@@ -629,19 +629,19 @@
       },
       "worst_news_long": {
        "all": {
-        "cagr": 18.44,
-        "sharpe": 0.85,
-        "maxdd": -34.6
+        "cagr": 18.51,
+        "sharpe": 0.86,
+        "maxdd": -34.9
        },
        "2019-2023": {
-        "cagr": 16.68,
-        "sharpe": 0.74,
-        "maxdd": -34.6
+        "cagr": 16.51,
+        "sharpe": 0.73,
+        "maxdd": -34.9
        },
        "2024-now": {
-        "cagr": 21.35,
-        "sharpe": 1.14,
-        "maxdd": -21.8
+        "cagr": 21.81,
+        "sharpe": 1.16,
+        "maxdd": -21.7
        }
       },
       "long_short": {
@@ -651,12 +651,12 @@
         "maxdd": -74.1
        },
        "2019-2023": {
-        "cagr": -15.64,
-        "sharpe": -1.59,
-        "maxdd": -54.7
+        "cagr": -15.59,
+        "sharpe": -1.58,
+        "maxdd": -54.6
        },
        "2024-now": {
-        "cagr": -17.89,
+        "cagr": -17.96,
         "sharpe": -1.77,
         "maxdd": -43.3
        }
@@ -666,40 +666,40 @@
       "long": {
        "all": {
         "strategy": {
-         "cagr": 17.28,
+         "cagr": 17.37,
          "sharpe": 0.88,
          "maxdd": -35.7
         },
         "buy_hold": {
-         "cagr": 18.43,
-         "sharpe": 0.98,
-         "maxdd": -34.7
+         "cagr": 18.29,
+         "sharpe": 0.97,
+         "maxdd": -34.6
         },
         "beats": 0.0
        },
        "2019-2023": {
         "strategy": {
-         "cagr": 16.78,
-         "sharpe": 0.79,
+         "cagr": 16.73,
+         "sharpe": 0.78,
          "maxdd": -35.7
         },
         "buy_hold": {
-         "cagr": 17.95,
-         "sharpe": 0.86,
-         "maxdd": -34.7
+         "cagr": 17.83,
+         "sharpe": 0.85,
+         "maxdd": -34.6
         },
         "beats": 0.0
        },
        "2024-now": {
         "strategy": {
-         "cagr": 18.1,
-         "sharpe": 1.13,
-         "maxdd": -18.0
+         "cagr": 18.4,
+         "sharpe": 1.15,
+         "maxdd": -17.5
         },
         "buy_hold": {
-         "cagr": 19.21,
+         "cagr": 19.03,
          "sharpe": 1.39,
-         "maxdd": -15.7
+         "maxdd": -15.5
         },
         "beats": 0.0
        },
@@ -707,36 +707,36 @@
       },
       "worst_news_long": {
        "all": {
-        "cagr": 18.81,
+        "cagr": 18.88,
         "sharpe": 0.89,
         "maxdd": -34.4
        },
        "2019-2023": {
-        "cagr": 15.78,
+        "cagr": 15.82,
         "sharpe": 0.72,
         "maxdd": -34.4
        },
        "2024-now": {
-        "cagr": 23.88,
+        "cagr": 24.02,
         "sharpe": 1.31,
         "maxdd": -20.4
        }
       },
       "long_short": {
        "all": {
-        "cagr": -9.65,
+        "cagr": -9.64,
         "sharpe": -1.15,
-        "maxdd": -52.9
+        "maxdd": -52.8
        },
        "2019-2023": {
-        "cagr": -7.71,
-        "sharpe": -0.89,
-        "maxdd": -32.0
+        "cagr": -7.77,
+        "sharpe": -0.9,
+        "maxdd": -32.3
        },
        "2024-now": {
-        "cagr": -12.69,
-        "sharpe": -1.59,
-        "maxdd": -34.0
+        "cagr": -12.59,
+        "sharpe": -1.56,
+        "maxdd": -33.7
        }
       }
      },
@@ -744,40 +744,40 @@
       "long": {
        "all": {
         "strategy": {
-         "cagr": 19.59,
+         "cagr": 19.58,
          "sharpe": 0.98,
          "maxdd": -36.1
         },
         "buy_hold": {
-         "cagr": 18.43,
-         "sharpe": 0.98,
-         "maxdd": -34.7
+         "cagr": 18.29,
+         "sharpe": 0.97,
+         "maxdd": -34.6
         },
         "beats": 1.0
        },
        "2019-2023": {
         "strategy": {
-         "cagr": 18.52,
+         "cagr": 18.5,
          "sharpe": 0.85,
          "maxdd": -36.1
         },
         "buy_hold": {
-         "cagr": 17.95,
-         "sharpe": 0.86,
-         "maxdd": -34.7
+         "cagr": 17.83,
+         "sharpe": 0.85,
+         "maxdd": -34.6
         },
         "beats": 1.0
        },
        "2024-now": {
         "strategy": {
-         "cagr": 21.34,
-         "sharpe": 1.32,
-         "maxdd": -18.4
+         "cagr": 21.35,
+         "sharpe": 1.33,
+         "maxdd": -18.0
         },
         "buy_hold": {
-         "cagr": 19.21,
+         "cagr": 19.03,
          "sharpe": 1.39,
-         "maxdd": -15.7
+         "maxdd": -15.5
         },
         "beats": 1.0
        },
@@ -785,36 +785,36 @@
       },
       "worst_news_long": {
        "all": {
-        "cagr": 20.21,
+        "cagr": 20.28,
         "sharpe": 0.95,
         "maxdd": -34.0
        },
        "2019-2023": {
-        "cagr": 17.08,
+        "cagr": 17.12,
         "sharpe": 0.77,
         "maxdd": -34.0
        },
        "2024-now": {
-        "cagr": 25.46,
+        "cagr": 25.57,
         "sharpe": 1.41,
-        "maxdd": -19.7
+        "maxdd": -19.6
        }
       },
       "long_short": {
        "all": {
-        "cagr": -4.96,
-        "sharpe": -0.78,
-        "maxdd": -31.4
+        "cagr": -5.03,
+        "sharpe": -0.79,
+        "maxdd": -31.8
        },
        "2019-2023": {
-        "cagr": -3.29,
-        "sharpe": -0.51,
-        "maxdd": -25.1
+        "cagr": -3.34,
+        "sharpe": -0.52,
+        "maxdd": -25.0
        },
        "2024-now": {
-        "cagr": -7.61,
-        "sharpe": -1.21,
-        "maxdd": -21.4
+        "cagr": -7.71,
+        "sharpe": -1.22,
+        "maxdd": -21.6
        }
       }
      }
@@ -824,77 +824,77 @@
       "long": {
        "all": {
         "strategy": {
-         "cagr": -23.68,
+         "cagr": -23.74,
          "sharpe": -0.81,
-         "maxdd": -87.0
+         "maxdd": -87.1
         },
         "buy_hold": {
-         "cagr": 18.43,
-         "sharpe": 0.98,
-         "maxdd": -34.7
+         "cagr": 18.29,
+         "sharpe": 0.97,
+         "maxdd": -34.6
         },
         "beats": 0.0
        },
        "2019-2023": {
         "strategy": {
-         "cagr": -19.13,
-         "sharpe": -0.58,
-         "maxdd": -71.8
+         "cagr": -19.31,
+         "sharpe": -0.59,
+         "maxdd": -71.7
         },
         "buy_hold": {
-         "cagr": 17.95,
-         "sharpe": 0.86,
-         "maxdd": -34.7
+         "cagr": 17.83,
+         "sharpe": 0.85,
+         "maxdd": -34.6
         },
         "beats": 0.0
        },
        "2024-now": {
         "strategy": {
-         "cagr": -30.5,
+         "cagr": -30.41,
          "sharpe": -1.21,
-         "maxdd": -73.9
+         "maxdd": -74.7
         },
         "buy_hold": {
-         "cagr": 19.21,
+         "cagr": 19.03,
          "sharpe": 1.39,
-         "maxdd": -15.7
+         "maxdd": -15.5
         },
         "beats": 0.0
        },
-       "exposure_pct": 92.4
+       "exposure_pct": 92.6
       },
       "worst_news_long": {
        "all": {
-        "cagr": -1.89,
-        "sharpe": 0.09,
-        "maxdd": -63.2
+        "cagr": -1.76,
+        "sharpe": 0.1,
+        "maxdd": -62.8
        },
        "2019-2023": {
-        "cagr": -7.92,
-        "sharpe": -0.12,
-        "maxdd": -50.9
+        "cagr": -8.28,
+        "sharpe": -0.13,
+        "maxdd": -52.1
        },
        "2024-now": {
-        "cagr": 8.73,
-        "sharpe": 0.42,
-        "maxdd": -44.5
+        "cagr": 9.79,
+        "sharpe": 0.45,
+        "maxdd": -42.9
        }
       },
       "long_short": {
        "all": {
-        "cagr": -51.47,
-        "sharpe": -1.92,
+        "cagr": -51.6,
+        "sharpe": -1.93,
         "maxdd": -99.5
        },
        "2019-2023": {
-        "cagr": -44.42,
+        "cagr": -44.34,
         "sharpe": -1.73,
         "maxdd": -93.3
        },
        "2024-now": {
-        "cagr": -61.04,
-        "sharpe": -2.19,
-        "maxdd": -93.2
+        "cagr": -61.4,
+        "sharpe": -2.2,
+        "maxdd": -93.3
        }
       }
      },
@@ -902,77 +902,77 @@
       "long": {
        "all": {
         "strategy": {
-         "cagr": 5.49,
+         "cagr": 5.37,
          "sharpe": 0.36,
-         "maxdd": -34.8
+         "maxdd": -35.5
         },
         "buy_hold": {
-         "cagr": 18.43,
-         "sharpe": 0.98,
-         "maxdd": -34.7
+         "cagr": 18.29,
+         "sharpe": 0.97,
+         "maxdd": -34.6
         },
         "beats": 0.0
        },
        "2019-2023": {
         "strategy": {
-         "cagr": 6.68,
-         "sharpe": 0.4,
-         "maxdd": -34.8
+         "cagr": 6.27,
+         "sharpe": 0.38,
+         "maxdd": -35.5
         },
         "buy_hold": {
-         "cagr": 17.95,
-         "sharpe": 0.86,
-         "maxdd": -34.7
+         "cagr": 17.83,
+         "sharpe": 0.85,
+         "maxdd": -34.6
         },
         "beats": 0.0
        },
        "2024-now": {
         "strategy": {
-         "cagr": 3.6,
-         "sharpe": 0.29,
-         "maxdd": -20.6
+         "cagr": 3.93,
+         "sharpe": 0.31,
+         "maxdd": -19.7
         },
         "buy_hold": {
-         "cagr": 19.21,
+         "cagr": 19.03,
          "sharpe": 1.39,
-         "maxdd": -15.7
+         "maxdd": -15.5
         },
         "beats": 0.0
        },
-       "exposure_pct": 92.3
+       "exposure_pct": 92.4
       },
       "worst_news_long": {
        "all": {
-        "cagr": 12.42,
-        "sharpe": 0.63,
+        "cagr": 12.67,
+        "sharpe": 0.64,
         "maxdd": -36.8
        },
        "2019-2023": {
-        "cagr": 4.17,
-        "sharpe": 0.29,
+        "cagr": 3.88,
+        "sharpe": 0.28,
         "maxdd": -36.8
        },
        "2024-now": {
-        "cagr": 27.19,
-        "sharpe": 1.35,
-        "maxdd": -17.3
+        "cagr": 28.48,
+        "sharpe": 1.41,
+        "maxdd": -16.9
        }
       },
       "long_short": {
        "all": {
-        "cagr": -20.39,
-        "sharpe": -1.15,
-        "maxdd": -81.8
+        "cagr": -20.66,
+        "sharpe": -1.17,
+        "maxdd": -82.3
        },
        "2019-2023": {
-        "cagr": -12.97,
-        "sharpe": -0.69,
-        "maxdd": -53.1
+        "cagr": -13.06,
+        "sharpe": -0.7,
+        "maxdd": -53.3
        },
        "2024-now": {
-        "cagr": -31.09,
-        "sharpe": -1.84,
-        "maxdd": -67.0
+        "cagr": -31.58,
+        "sharpe": -1.88,
+        "maxdd": -67.6
        }
       }
      },
@@ -980,77 +980,77 @@
       "long": {
        "all": {
         "strategy": {
-         "cagr": 5.66,
-         "sharpe": 0.39,
+         "cagr": 5.53,
+         "sharpe": 0.38,
          "maxdd": -32.3
         },
         "buy_hold": {
-         "cagr": 18.43,
-         "sharpe": 0.98,
-         "maxdd": -34.7
+         "cagr": 18.29,
+         "sharpe": 0.97,
+         "maxdd": -34.6
         },
         "beats": 0.0
        },
        "2019-2023": {
         "strategy": {
-         "cagr": 2.1,
-         "sharpe": 0.2,
+         "cagr": 1.85,
+         "sharpe": 0.19,
          "maxdd": -32.3
         },
         "buy_hold": {
-         "cagr": 17.95,
-         "sharpe": 0.86,
-         "maxdd": -34.7
+         "cagr": 17.83,
+         "sharpe": 0.85,
+         "maxdd": -34.6
         },
         "beats": 0.0
        },
        "2024-now": {
         "strategy": {
-         "cagr": 11.67,
-         "sharpe": 0.83,
-         "maxdd": -14.2
+         "cagr": 11.76,
+         "sharpe": 0.84,
+         "maxdd": -14.0
         },
         "buy_hold": {
-         "cagr": 19.21,
+         "cagr": 19.03,
          "sharpe": 1.39,
-         "maxdd": -15.7
+         "maxdd": -15.5
         },
         "beats": 0.0
        },
-       "exposure_pct": 92.2
+       "exposure_pct": 92.3
       },
       "worst_news_long": {
        "all": {
-        "cagr": 13.22,
-        "sharpe": 0.71,
+        "cagr": 13.54,
+        "sharpe": 0.72,
         "maxdd": -33.1
        },
        "2019-2023": {
-        "cagr": 7.56,
-        "sharpe": 0.44,
+        "cagr": 7.49,
+        "sharpe": 0.43,
         "maxdd": -33.1
        },
        "2024-now": {
-        "cagr": 23.03,
-        "sharpe": 1.35,
-        "maxdd": -21.2
+        "cagr": 24.08,
+        "sharpe": 1.41,
+        "maxdd": -20.2
        }
       },
       "long_short": {
        "all": {
-        "cagr": -15.49,
-        "sharpe": -1.2,
-        "maxdd": -71.9
+        "cagr": -15.84,
+        "sharpe": -1.24,
+        "maxdd": -72.7
        },
        "2019-2023": {
-        "cagr": -14.0,
-        "sharpe": -1.11,
-        "maxdd": -52.0
+        "cagr": -14.14,
+        "sharpe": -1.13,
+        "maxdd": -52.6
        },
        "2024-now": {
-        "cagr": -17.86,
-        "sharpe": -1.34,
-        "maxdd": -46.7
+        "cagr": -18.5,
+        "sharpe": -1.4,
+        "maxdd": -47.8
        }
       }
      },
@@ -1058,77 +1058,77 @@
       "long": {
        "all": {
         "strategy": {
-         "cagr": 11.36,
-         "sharpe": 0.7,
+         "cagr": 11.54,
+         "sharpe": 0.71,
          "maxdd": -30.6
         },
         "buy_hold": {
-         "cagr": 18.43,
-         "sharpe": 0.98,
-         "maxdd": -34.7
+         "cagr": 18.29,
+         "sharpe": 0.97,
+         "maxdd": -34.6
         },
         "beats": 0.0
        },
        "2019-2023": {
         "strategy": {
-         "cagr": 6.82,
+         "cagr": 6.85,
          "sharpe": 0.43,
          "maxdd": -30.6
         },
         "buy_hold": {
-         "cagr": 17.95,
-         "sharpe": 0.86,
-         "maxdd": -34.7
+         "cagr": 17.83,
+         "sharpe": 0.85,
+         "maxdd": -34.6
         },
         "beats": 0.0
        },
        "2024-now": {
         "strategy": {
-         "cagr": 19.13,
-         "sharpe": 1.47,
-         "maxdd": -10.9
+         "cagr": 19.58,
+         "sharpe": 1.51,
+         "maxdd": -10.5
         },
         "buy_hold": {
-         "cagr": 19.21,
+         "cagr": 19.03,
          "sharpe": 1.39,
-         "maxdd": -15.7
+         "maxdd": -15.5
         },
-        "beats": 0.0
+        "beats": 1.0
        },
-       "exposure_pct": 91.9
+       "exposure_pct": 92.1
       },
       "worst_news_long": {
        "all": {
-        "cagr": 16.41,
-        "sharpe": 0.88,
+        "cagr": 16.53,
+        "sharpe": 0.89,
         "maxdd": -36.7
        },
        "2019-2023": {
-        "cagr": 11.45,
-        "sharpe": 0.61,
+        "cagr": 11.23,
+        "sharpe": 0.6,
         "maxdd": -36.7
        },
        "2024-now": {
-        "cagr": 24.92,
-        "sharpe": 1.57,
-        "maxdd": -17.7
+        "cagr": 25.64,
+        "sharpe": 1.62,
+        "maxdd": -17.3
        }
       },
       "long_short": {
        "all": {
-        "cagr": -9.17,
-        "sharpe": -0.93,
-        "maxdd": -51.3
+        "cagr": -9.11,
+        "sharpe": -0.92,
+        "maxdd": -51.1
        },
        "2019-2023": {
-        "cagr": -8.92,
-        "sharpe": -0.97,
-        "maxdd": -38.3
+        "cagr": -8.71,
+        "sharpe": -0.95,
+        "maxdd": -37.9
        },
        "2024-now": {
-        "cagr": -9.58,
-        "sharpe": -0.87,
-        "maxdd": -34.7
+        "cagr": -9.76,
+        "sharpe": -0.9,
+        "maxdd": -35.1
        }
       }
      }
@@ -1141,30 +1141,30 @@
    "stats": {
     "mood": {
      "obs": 8298,
-     "reaction": 0.344,
+     "reaction": 0.343,
      "fwd": {
       "1": {
-       "ic": -0.0208,
-       "t": -1.89,
+       "ic": -0.0205,
+       "t": -1.87,
        "ic_2019_23": -0.0046,
-       "ic_2024_now": -0.0309,
+       "ic_2024_now": -0.0304,
        "top_pct": 0.162,
-       "bottom_pct": 0.1,
+       "bottom_pct": 0.097,
        "all_pct": 0.08,
        "top_hit": 47.7
       },
       "3": {
-       "ic": 0.0084,
-       "t": 0.44,
+       "ic": 0.0085,
+       "t": 0.45,
        "ic_2019_23": 0.0215,
-       "ic_2024_now": -0.0016,
+       "ic_2024_now": -0.0014,
        "top_pct": 0.69,
-       "bottom_pct": 0.207,
-       "all_pct": 0.195,
+       "bottom_pct": 0.206,
+       "all_pct": 0.194,
        "top_hit": 49.6
       },
       "5": {
-       "ic": -0.027,
+       "ic": -0.0269,
        "t": -1.1,
        "ic_2019_23": -0.0171,
        "ic_2024_now": -0.0349,
@@ -1178,7 +1178,7 @@
        "t": -0.32,
        "ic_2019_23": -0.0105,
        "ic_2024_now": -0.0116,
-       "top_pct": 1.363,
+       "top_pct": 1.362,
        "bottom_pct": 0.721,
        "all_pct": 0.642,
        "top_hit": 48.2
@@ -1190,33 +1190,33 @@
      "reaction": 0.314,
      "fwd": {
       "1": {
-       "ic": -0.025,
-       "t": -2.19,
+       "ic": -0.0247,
+       "t": -2.17,
        "ic_2019_23": -0.0128,
-       "ic_2024_now": -0.0335,
+       "ic_2024_now": -0.033,
        "top_pct": 0.182,
-       "bottom_pct": 0.161,
+       "bottom_pct": 0.158,
        "all_pct": 0.087,
        "top_hit": 48.4
       },
       "3": {
-       "ic": 0.0024,
-       "t": 0.12,
+       "ic": 0.0026,
+       "t": 0.13,
        "ic_2019_23": 0.0089,
-       "ic_2024_now": -0.0024,
+       "ic_2024_now": -0.0022,
        "top_pct": 0.61,
-       "bottom_pct": 0.201,
+       "bottom_pct": 0.199,
        "all_pct": 0.202,
        "top_hit": 49.9
       },
       "5": {
-       "ic": -0.0259,
+       "ic": -0.0258,
        "t": -1.01,
        "ic_2019_23": -0.0136,
-       "ic_2024_now": -0.0345,
+       "ic_2024_now": -0.0344,
        "top_pct": 0.572,
        "bottom_pct": 0.391,
-       "all_pct": 0.314,
+       "all_pct": 0.313,
        "top_hit": 45.4
       },
       "10": {
@@ -1226,7 +1226,7 @@
        "ic_2024_now": -0.0106,
        "top_pct": 1.063,
        "bottom_pct": 0.535,
-       "all_pct": 0.635,
+       "all_pct": 0.634,
        "top_hit": 48.2
       }
      }
@@ -1236,10 +1236,10 @@
      "reaction": 0.296,
      "fwd": {
       "1": {
-       "ic": -0.0146,
-       "t": -1.28,
+       "ic": -0.0145,
+       "t": -1.27,
        "ic_2019_23": 0.0012,
-       "ic_2024_now": -0.0245,
+       "ic_2024_now": -0.0244,
        "top_pct": 0.241,
        "bottom_pct": 0.14,
        "all_pct": 0.087,
@@ -1259,10 +1259,10 @@
        "ic": -0.0092,
        "t": -0.36,
        "ic_2019_23": -0.0126,
-       "ic_2024_now": -0.0063,
-       "top_pct": 0.57,
+       "ic_2024_now": -0.0062,
+       "top_pct": 0.569,
        "bottom_pct": 0.417,
-       "all_pct": 0.314,
+       "all_pct": 0.313,
        "top_hit": 48.0
       },
       "10": {
@@ -1272,7 +1272,7 @@
        "ic_2024_now": -0.0013,
        "top_pct": 1.063,
        "bottom_pct": 0.409,
-       "all_pct": 0.635,
+       "all_pct": 0.634,
        "top_hit": 46.2
       }
      }
@@ -1285,39 +1285,39 @@
        "ic": 0.0136,
        "t": 2.29,
        "ic_2019_23": 0.0307,
-       "ic_2024_now": -0.0136,
-       "top_pct": 0.126,
+       "ic_2024_now": -0.0137,
+       "top_pct": 0.125,
        "bottom_pct": -0.024,
-       "all_pct": 0.187,
+       "all_pct": 0.186,
        "top_hit": 49.8
       },
       "3": {
        "ic": 0.018,
        "t": 1.75,
        "ic_2019_23": 0.0324,
-       "ic_2024_now": -0.01,
-       "top_pct": 0.328,
+       "ic_2024_now": -0.0099,
+       "top_pct": 0.327,
        "bottom_pct": -0.021,
        "all_pct": 0.552,
        "top_hit": 49.4
       },
       "5": {
        "ic": 0.0266,
-       "t": 2.01,
+       "t": 2.0,
        "ic_2019_23": 0.0404,
-       "ic_2024_now": -0.0015,
-       "top_pct": 0.48,
+       "ic_2024_now": -0.0016,
+       "top_pct": 0.479,
        "bottom_pct": -0.051,
-       "all_pct": 0.954,
+       "all_pct": 0.953,
        "top_hit": 49.0
       },
       "10": {
        "ic": 0.0227,
        "t": 1.21,
        "ic_2019_23": 0.0494,
-       "ic_2024_now": -0.0253,
+       "ic_2024_now": -0.0252,
        "top_pct": 0.763,
-       "bottom_pct": 0.271,
+       "bottom_pct": 0.27,
        "all_pct": 2.011,
        "top_hit": 47.8
       }
@@ -1337,20 +1337,20 @@
        "ic": -0.0241,
        "t": -0.99,
        "ic_2019_23": 0.0114,
-       "ic_2024_now": -0.0485,
+       "ic_2024_now": -0.0484,
        "top_pct": 0.095,
        "bottom_pct": 0.147,
-       "all_pct": 0.07,
+       "all_pct": 0.069,
        "top_hit": 46.2
       },
       "3": {
-       "ic": 0.0197,
+       "ic": 0.0199,
        "t": 0.47,
        "ic_2019_23": 0.0399,
-       "ic_2024_now": 0.0016,
+       "ic_2024_now": 0.002,
        "top_pct": 0.688,
-       "bottom_pct": 0.122,
-       "all_pct": 0.157,
+       "bottom_pct": 0.12,
+       "all_pct": 0.156,
        "top_hit": 53.2
       },
       "5": {
@@ -1360,17 +1360,17 @@
        "ic_2024_now": -0.049,
        "top_pct": 0.867,
        "bottom_pct": 0.554,
-       "all_pct": 0.257,
+       "all_pct": 0.256,
        "top_hit": 50.0
       },
       "10": {
-       "ic": -0.0084,
+       "ic": -0.0085,
        "t": -0.11,
        "ic_2019_23": -0.0333,
        "ic_2024_now": 0.0069,
        "top_pct": 1.342,
        "bottom_pct": 0.868,
-       "all_pct": 0.6,
+       "all_pct": 0.599,
        "top_hit": 54.3
       }
      }
@@ -1380,23 +1380,23 @@
      "reaction": 0.175,
      "fwd": {
       "1": {
-       "ic": -0.024,
+       "ic": -0.0239,
        "t": -0.98,
        "ic_2019_23": 0.0145,
        "ic_2024_now": -0.0509,
        "top_pct": 0.021,
        "bottom_pct": 0.029,
-       "all_pct": 0.078,
+       "all_pct": 0.077,
        "top_hit": 44.2
       },
       "3": {
-       "ic": 0.0226,
-       "t": 0.53,
+       "ic": 0.0228,
+       "t": 0.54,
        "ic_2019_23": 0.0524,
-       "ic_2024_now": 0.0032,
+       "ic_2024_now": 0.0036,
        "top_pct": 0.623,
-       "bottom_pct": -0.075,
-       "all_pct": 0.199,
+       "bottom_pct": -0.077,
+       "all_pct": 0.198,
        "top_hit": 53.7
       },
       "5": {
@@ -1406,7 +1406,7 @@
        "ic_2024_now": -0.0471,
        "top_pct": 0.77,
        "bottom_pct": 0.268,
-       "all_pct": 0.321,
+       "all_pct": 0.32,
        "top_hit": 49.1
       },
       "10": {
@@ -1416,7 +1416,7 @@
        "ic_2024_now": 0.0096,
        "top_pct": 1.08,
        "bottom_pct": 0.603,
-       "all_pct": 0.676,
+       "all_pct": 0.675,
        "top_hit": 52.0
       }
      }
@@ -1426,13 +1426,13 @@
      "reaction": 0.177,
      "fwd": {
       "1": {
-       "ic": -0.0104,
-       "t": -0.43,
+       "ic": -0.0101,
+       "t": -0.41,
        "ic_2019_23": 0.0407,
-       "ic_2024_now": -0.0454,
+       "ic_2024_now": -0.0448,
        "top_pct": 0.045,
-       "bottom_pct": 0.004,
-       "all_pct": 0.078,
+       "bottom_pct": 0.002,
+       "all_pct": 0.077,
        "top_hit": 47.8
       },
       "3": {
@@ -1442,17 +1442,17 @@
        "ic_2024_now": 0.0073,
        "top_pct": 0.248,
        "bottom_pct": -0.333,
-       "all_pct": 0.199,
+       "all_pct": 0.198,
        "top_hit": 52.2
       },
       "5": {
-       "ic": 0.0234,
+       "ic": 0.0236,
        "t": 0.43,
        "ic_2019_23": 0.0682,
-       "ic_2024_now": -0.0068,
+       "ic_2024_now": -0.0067,
        "top_pct": 0.27,
        "bottom_pct": -0.181,
-       "all_pct": 0.321,
+       "all_pct": 0.32,
        "top_hit": 50.3
       },
       "10": {
@@ -1462,37 +1462,37 @@
        "ic_2024_now": 0.0167,
        "top_pct": 0.542,
        "bottom_pct": -0.176,
-       "all_pct": 0.676,
+       "all_pct": 0.675,
        "top_hit": 50.2
       }
      }
     },
     "volume": {
      "obs": 2713,
-     "reaction": -0.015,
+     "reaction": -0.016,
      "fwd": {
       "1": {
-       "ic": -0.0035,
-       "t": -0.18,
+       "ic": -0.0036,
+       "t": -0.19,
        "ic_2019_23": 0.0434,
-       "ic_2024_now": -0.0523,
-       "top_pct": 0.027,
+       "ic_2024_now": -0.0528,
+       "top_pct": 0.026,
        "bottom_pct": 0.16,
        "all_pct": 0.132,
        "top_hit": 48.6
       },
       "3": {
-       "ic": -0.0276,
+       "ic": -0.0275,
        "t": -0.83,
        "ic_2019_23": -0.0061,
-       "ic_2024_now": -0.0547,
+       "ic_2024_now": -0.0545,
        "top_pct": -0.108,
-       "bottom_pct": 0.483,
+       "bottom_pct": 0.482,
        "all_pct": 0.39,
        "top_hit": 52.1
       },
       "5": {
-       "ic": -0.0258,
+       "ic": -0.0259,
        "t": -0.6,
        "ic_2019_23": -0.0039,
        "ic_2024_now": -0.0492,
@@ -1505,9 +1505,9 @@
        "ic": -0.0472,
        "t": -0.78,
        "ic_2019_23": -0.0008,
-       "ic_2024_now": -0.0886,
+       "ic_2024_now": -0.0885,
        "top_pct": -0.004,
-       "bottom_pct": 1.079,
+       "bottom_pct": 1.078,
        "all_pct": 1.357,
        "top_hit": 47.1
       }
@@ -1525,7 +1525,7 @@
          "maxdd": -54.5
         },
         "buy_hold": {
-         "cagr": 34.52,
+         "cagr": 34.41,
          "sharpe": 0.8,
          "maxdd": -76.6
         },
@@ -1551,8 +1551,8 @@
          "maxdd": -36.7
         },
         "buy_hold": {
-         "cagr": 23.88,
-         "sharpe": 0.69,
+         "cagr": 23.61,
+         "sharpe": 0.68,
          "maxdd": -53.1
         },
         "beats": 0.0
@@ -1580,12 +1580,12 @@
       "avoid_bad_news": {
        "all": {
         "strategy": {
-         "cagr": 30.86,
+         "cagr": 30.75,
          "sharpe": 0.76,
          "maxdd": -67.1
         },
         "buy_hold": {
-         "cagr": 34.52,
+         "cagr": 34.41,
          "sharpe": 0.8,
          "maxdd": -76.6
         },
@@ -1606,13 +1606,13 @@
        },
        "2024-now": {
         "strategy": {
-         "cagr": 16.92,
-         "sharpe": 0.59,
+         "cagr": 16.66,
+         "sharpe": 0.58,
          "maxdd": -45.2
         },
         "buy_hold": {
-         "cagr": 23.88,
-         "sharpe": 0.69,
+         "cagr": 23.61,
+         "sharpe": 0.68,
          "maxdd": -53.1
         },
         "beats": 0.0
@@ -1628,7 +1628,7 @@
          "maxdd": -21.7
         },
         "buy_hold": {
-         "cagr": 34.52,
+         "cagr": 34.41,
          "sharpe": 0.8,
          "maxdd": -76.6
         },
@@ -1654,8 +1654,8 @@
          "maxdd": -21.7
         },
         "buy_hold": {
-         "cagr": 23.88,
-         "sharpe": 0.69,
+         "cagr": 23.61,
+         "sharpe": 0.68,
          "maxdd": -53.1
         },
         "beats": 0.0
@@ -1665,7 +1665,7 @@
       },
       "long_short": {
        "all": {
-        "cagr": 2.4,
+        "cagr": 2.43,
         "sharpe": 0.22,
         "maxdd": -27.1
        },
@@ -1675,20 +1675,20 @@
         "maxdd": -27.1
        },
        "2024-now": {
-        "cagr": -2.13,
-        "sharpe": 0.01,
+        "cagr": -2.06,
+        "sharpe": 0.02,
         "maxdd": -25.0
        }
       },
       "avoid_bad_news": {
        "all": {
         "strategy": {
-         "cagr": 38.48,
+         "cagr": 38.4,
          "sharpe": 0.87,
          "maxdd": -61.8
         },
         "buy_hold": {
-         "cagr": 34.52,
+         "cagr": 34.41,
          "sharpe": 0.8,
          "maxdd": -76.6
         },
@@ -1709,13 +1709,13 @@
        },
        "2024-now": {
         "strategy": {
-         "cagr": 21.84,
+         "cagr": 21.66,
          "sharpe": 0.71,
          "maxdd": -37.2
         },
         "buy_hold": {
-         "cagr": 23.88,
-         "sharpe": 0.69,
+         "cagr": 23.61,
+         "sharpe": 0.68,
          "maxdd": -53.1
         },
         "beats": 0.0
@@ -1731,7 +1731,7 @@
          "maxdd": -17.0
         },
         "buy_hold": {
-         "cagr": 34.52,
+         "cagr": 34.41,
          "sharpe": 0.8,
          "maxdd": -76.6
         },
@@ -1757,8 +1757,8 @@
          "maxdd": -16.9
         },
         "buy_hold": {
-         "cagr": 23.88,
-         "sharpe": 0.69,
+         "cagr": 23.61,
+         "sharpe": 0.68,
          "maxdd": -53.1
         },
         "beats": 0.0
@@ -1768,7 +1768,7 @@
       },
       "long_short": {
        "all": {
-        "cagr": 0.18,
+        "cagr": 0.21,
         "sharpe": 0.09,
         "maxdd": -32.6
        },
@@ -1778,7 +1778,7 @@
         "maxdd": -24.7
        },
        "2024-now": {
-        "cagr": -9.5,
+        "cagr": -9.41,
         "sharpe": -0.4,
         "maxdd": -31.0
        }
@@ -1786,12 +1786,12 @@
       "avoid_bad_news": {
        "all": {
         "strategy": {
-         "cagr": 36.84,
+         "cagr": 36.77,
          "sharpe": 0.85,
          "maxdd": -62.7
         },
         "buy_hold": {
-         "cagr": 34.52,
+         "cagr": 34.41,
          "sharpe": 0.8,
          "maxdd": -76.6
         },
@@ -1812,13 +1812,13 @@
        },
        "2024-now": {
         "strategy": {
-         "cagr": 14.64,
+         "cagr": 14.49,
          "sharpe": 0.55,
          "maxdd": -40.3
         },
         "buy_hold": {
-         "cagr": 23.88,
-         "sharpe": 0.69,
+         "cagr": 23.61,
+         "sharpe": 0.68,
          "maxdd": -53.1
         },
         "beats": 0.0
@@ -1829,12 +1829,12 @@
       "long": {
        "all": {
         "strategy": {
-         "cagr": 3.51,
+         "cagr": 3.5,
          "sharpe": 0.42,
          "maxdd": -14.9
         },
         "buy_hold": {
-         "cagr": 34.52,
+         "cagr": 34.41,
          "sharpe": 0.8,
          "maxdd": -76.6
         },
@@ -1855,13 +1855,13 @@
        },
        "2024-now": {
         "strategy": {
-         "cagr": 6.39,
+         "cagr": 6.37,
          "sharpe": 0.61,
          "maxdd": -14.9
         },
         "buy_hold": {
-         "cagr": 23.88,
-         "sharpe": 0.69,
+         "cagr": 23.61,
+         "sharpe": 0.68,
          "maxdd": -53.1
         },
         "beats": 0.0
@@ -1871,7 +1871,7 @@
       },
       "long_short": {
        "all": {
-        "cagr": 0.97,
+        "cagr": 0.98,
         "sharpe": 0.14,
         "maxdd": -26.8
        },
@@ -1881,7 +1881,7 @@
         "maxdd": -26.8
        },
        "2024-now": {
-        "cagr": 0.87,
+        "cagr": 0.89,
         "sharpe": 0.13,
         "maxdd": -14.4
        }
@@ -1889,12 +1889,12 @@
       "avoid_bad_news": {
        "all": {
         "strategy": {
-         "cagr": 37.0,
+         "cagr": 36.91,
          "sharpe": 0.85,
          "maxdd": -67.8
         },
         "buy_hold": {
-         "cagr": 34.52,
+         "cagr": 34.41,
          "sharpe": 0.8,
          "maxdd": -76.6
         },
@@ -1915,13 +1915,13 @@
        },
        "2024-now": {
         "strategy": {
-         "cagr": 23.1,
-         "sharpe": 0.75,
+         "cagr": 22.88,
+         "sharpe": 0.74,
          "maxdd": -39.0
         },
         "buy_hold": {
-         "cagr": 23.88,
-         "sharpe": 0.69,
+         "cagr": 23.61,
+         "sharpe": 0.68,
          "maxdd": -53.1
         },
         "beats": 0.0
@@ -1939,7 +1939,7 @@
          "maxdd": -34.7
         },
         "buy_hold": {
-         "cagr": 34.52,
+         "cagr": 34.41,
          "sharpe": 0.8,
          "maxdd": -76.6
         },
@@ -1965,8 +1965,8 @@
          "maxdd": -30.2
         },
         "buy_hold": {
-         "cagr": 23.88,
-         "sharpe": 0.69,
+         "cagr": 23.61,
+         "sharpe": 0.68,
          "maxdd": -53.1
         },
         "beats": 0.0
@@ -1994,12 +1994,12 @@
       "avoid_bad_news": {
        "all": {
         "strategy": {
-         "cagr": 20.09,
+         "cagr": 19.98,
          "sharpe": 0.61,
          "maxdd": -75.4
         },
         "buy_hold": {
-         "cagr": 34.52,
+         "cagr": 34.41,
          "sharpe": 0.8,
          "maxdd": -76.6
         },
@@ -2020,13 +2020,13 @@
        },
        "2024-now": {
         "strategy": {
-         "cagr": 4.35,
+         "cagr": 4.11,
          "sharpe": 0.31,
          "maxdd": -59.5
         },
         "buy_hold": {
-         "cagr": 23.88,
-         "sharpe": 0.69,
+         "cagr": 23.61,
+         "sharpe": 0.68,
          "maxdd": -53.1
         },
         "beats": 0.0
@@ -2042,7 +2042,7 @@
          "maxdd": -11.4
         },
         "buy_hold": {
-         "cagr": 34.52,
+         "cagr": 34.41,
          "sharpe": 0.8,
          "maxdd": -76.6
         },
@@ -2068,8 +2068,8 @@
          "maxdd": -11.4
         },
         "buy_hold": {
-         "cagr": 23.88,
-         "sharpe": 0.69,
+         "cagr": 23.61,
+         "sharpe": 0.68,
          "maxdd": -53.1
         },
         "beats": 0.0
@@ -2079,7 +2079,7 @@
       },
       "long_short": {
        "all": {
-        "cagr": -0.98,
+        "cagr": -0.95,
         "sharpe": -0.0,
         "maxdd": -33.6
        },
@@ -2089,20 +2089,20 @@
         "maxdd": -26.5
        },
        "2024-now": {
-        "cagr": -7.82,
-        "sharpe": -0.45,
+        "cagr": -7.75,
+        "sharpe": -0.44,
         "maxdd": -25.4
        }
       },
       "avoid_bad_news": {
        "all": {
         "strategy": {
-         "cagr": 30.97,
+         "cagr": 30.9,
          "sharpe": 0.76,
          "maxdd": -68.8
         },
         "buy_hold": {
-         "cagr": 34.52,
+         "cagr": 34.41,
          "sharpe": 0.8,
          "maxdd": -76.6
         },
@@ -2123,13 +2123,13 @@
        },
        "2024-now": {
         "strategy": {
-         "cagr": 14.69,
-         "sharpe": 0.54,
+         "cagr": 14.51,
+         "sharpe": 0.53,
          "maxdd": -53.1
         },
         "buy_hold": {
-         "cagr": 23.88,
-         "sharpe": 0.69,
+         "cagr": 23.61,
+         "sharpe": 0.68,
          "maxdd": -53.1
         },
         "beats": 0.0
@@ -2145,7 +2145,7 @@
          "maxdd": -11.2
         },
         "buy_hold": {
-         "cagr": 34.52,
+         "cagr": 34.41,
          "sharpe": 0.8,
          "maxdd": -76.6
         },
@@ -2171,8 +2171,8 @@
          "maxdd": -9.7
         },
         "buy_hold": {
-         "cagr": 23.88,
-         "sharpe": 0.69,
+         "cagr": 23.61,
+         "sharpe": 0.68,
          "maxdd": -53.1
         },
         "beats": 0.0
@@ -2182,7 +2182,7 @@
       },
       "long_short": {
        "all": {
-        "cagr": -2.94,
+        "cagr": -2.9,
         "sharpe": -0.21,
         "maxdd": -34.0
        },
@@ -2192,20 +2192,20 @@
         "maxdd": -18.9
        },
        "2024-now": {
-        "cagr": -10.45,
-        "sharpe": -0.78,
+        "cagr": -10.37,
+        "sharpe": -0.77,
         "maxdd": -26.9
        }
       },
       "avoid_bad_news": {
        "all": {
         "strategy": {
-         "cagr": 32.29,
+         "cagr": 32.22,
          "sharpe": 0.78,
          "maxdd": -69.8
         },
         "buy_hold": {
-         "cagr": 34.52,
+         "cagr": 34.41,
          "sharpe": 0.8,
          "maxdd": -76.6
         },
@@ -2226,13 +2226,13 @@
        },
        "2024-now": {
         "strategy": {
-         "cagr": 14.17,
-         "sharpe": 0.53,
+         "cagr": 14.02,
+         "sharpe": 0.52,
          "maxdd": -47.8
         },
         "buy_hold": {
-         "cagr": 23.88,
-         "sharpe": 0.69,
+         "cagr": 23.61,
+         "sharpe": 0.68,
          "maxdd": -53.1
         },
         "beats": 0.0
@@ -2248,7 +2248,7 @@
          "maxdd": -9.5
         },
         "buy_hold": {
-         "cagr": 34.52,
+         "cagr": 34.41,
          "sharpe": 0.8,
          "maxdd": -76.6
         },
@@ -2274,8 +2274,8 @@
          "maxdd": -9.5
         },
         "buy_hold": {
-         "cagr": 23.88,
-         "sharpe": 0.69,
+         "cagr": 23.61,
+         "sharpe": 0.68,
          "maxdd": -53.1
         },
         "beats": 0.0
@@ -2285,8 +2285,8 @@
       },
       "long_short": {
        "all": {
-        "cagr": -0.74,
-        "sharpe": -0.06,
+        "cagr": -0.72,
+        "sharpe": -0.05,
         "maxdd": -23.8
        },
        "2019-2023": {
@@ -2295,20 +2295,20 @@
         "maxdd": -19.5
        },
        "2024-now": {
-        "cagr": -1.64,
-        "sharpe": -0.14,
+        "cagr": -1.6,
+        "sharpe": -0.13,
         "maxdd": -11.1
        }
       },
       "avoid_bad_news": {
        "all": {
         "strategy": {
-         "cagr": 34.21,
+         "cagr": 34.12,
          "sharpe": 0.81,
          "maxdd": -72.0
         },
         "buy_hold": {
-         "cagr": 34.52,
+         "cagr": 34.41,
          "sharpe": 0.8,
          "maxdd": -76.6
         },
@@ -2329,13 +2329,13 @@
        },
        "2024-now": {
         "strategy": {
-         "cagr": 21.09,
+         "cagr": 20.88,
          "sharpe": 0.67,
          "maxdd": -48.6
         },
         "buy_hold": {
-         "cagr": 23.88,
-         "sharpe": 0.69,
+         "cagr": 23.61,
+         "sharpe": 0.68,
          "maxdd": -53.1
         },
         "beats": 0.0
@@ -2353,7 +2353,7 @@
          "maxdd": -10.8
         },
         "buy_hold": {
-         "cagr": 34.52,
+         "cagr": 34.41,
          "sharpe": 0.8,
          "maxdd": -76.6
         },
@@ -2379,8 +2379,8 @@
          "maxdd": -1.7
         },
         "buy_hold": {
-         "cagr": 23.88,
-         "sharpe": 0.69,
+         "cagr": 23.61,
+         "sharpe": 0.68,
          "maxdd": -53.1
         },
         "beats": 0.0
@@ -2408,12 +2408,12 @@
       "avoid_bad_news": {
        "all": {
         "strategy": {
-         "cagr": 37.42,
+         "cagr": 37.3,
          "sharpe": 0.84,
          "maxdd": -73.7
         },
         "buy_hold": {
-         "cagr": 34.52,
+         "cagr": 34.41,
          "sharpe": 0.8,
          "maxdd": -76.6
         },
@@ -2434,13 +2434,13 @@
        },
        "2024-now": {
         "strategy": {
-         "cagr": 21.86,
+         "cagr": 21.59,
          "sharpe": 0.66,
          "maxdd": -51.4
         },
         "buy_hold": {
-         "cagr": 23.88,
-         "sharpe": 0.69,
+         "cagr": 23.61,
+         "sharpe": 0.68,
          "maxdd": -53.1
         },
         "beats": 0.0
@@ -2456,7 +2456,7 @@
          "maxdd": -8.4
         },
         "buy_hold": {
-         "cagr": 34.52,
+         "cagr": 34.41,
          "sharpe": 0.8,
          "maxdd": -76.6
         },
@@ -2482,8 +2482,8 @@
          "maxdd": -3.4
         },
         "buy_hold": {
-         "cagr": 23.88,
-         "sharpe": 0.69,
+         "cagr": 23.61,
+         "sharpe": 0.68,
          "maxdd": -53.1
         },
         "beats": 0.0
@@ -2511,12 +2511,12 @@
       "avoid_bad_news": {
        "all": {
         "strategy": {
-         "cagr": 38.09,
+         "cagr": 37.97,
          "sharpe": 0.85,
          "maxdd": -73.3
         },
         "buy_hold": {
-         "cagr": 34.52,
+         "cagr": 34.41,
          "sharpe": 0.8,
          "maxdd": -76.6
         },
@@ -2537,13 +2537,13 @@
        },
        "2024-now": {
         "strategy": {
-         "cagr": 26.47,
-         "sharpe": 0.75,
+         "cagr": 26.19,
+         "sharpe": 0.74,
          "maxdd": -51.1
         },
         "buy_hold": {
-         "cagr": 23.88,
-         "sharpe": 0.69,
+         "cagr": 23.61,
+         "sharpe": 0.68,
          "maxdd": -53.1
         },
         "beats": 1.0
@@ -2559,7 +2559,7 @@
          "maxdd": -8.8
         },
         "buy_hold": {
-         "cagr": 34.52,
+         "cagr": 34.41,
          "sharpe": 0.8,
          "maxdd": -76.6
         },
@@ -2585,8 +2585,8 @@
          "maxdd": -4.6
         },
         "buy_hold": {
-         "cagr": 23.88,
-         "sharpe": 0.69,
+         "cagr": 23.61,
+         "sharpe": 0.68,
          "maxdd": -53.1
         },
         "beats": 0.0
@@ -2614,12 +2614,12 @@
       "avoid_bad_news": {
        "all": {
         "strategy": {
-         "cagr": 38.42,
+         "cagr": 38.31,
          "sharpe": 0.85,
          "maxdd": -73.7
         },
         "buy_hold": {
-         "cagr": 34.52,
+         "cagr": 34.41,
          "sharpe": 0.8,
          "maxdd": -76.6
         },
@@ -2640,13 +2640,13 @@
        },
        "2024-now": {
         "strategy": {
-         "cagr": 24.99,
-         "sharpe": 0.72,
+         "cagr": 24.71,
+         "sharpe": 0.71,
          "maxdd": -52.7
         },
         "buy_hold": {
-         "cagr": 23.88,
-         "sharpe": 0.69,
+         "cagr": 23.61,
+         "sharpe": 0.68,
          "maxdd": -53.1
         },
         "beats": 1.0
@@ -2662,7 +2662,7 @@
          "maxdd": -5.6
         },
         "buy_hold": {
-         "cagr": 34.52,
+         "cagr": 34.41,
          "sharpe": 0.8,
          "maxdd": -76.6
         },
@@ -2688,8 +2688,8 @@
          "maxdd": -1.7
         },
         "buy_hold": {
-         "cagr": 23.88,
-         "sharpe": 0.69,
+         "cagr": 23.61,
+         "sharpe": 0.68,
          "maxdd": -53.1
         },
         "beats": 0.0
@@ -2717,12 +2717,12 @@
       "avoid_bad_news": {
        "all": {
         "strategy": {
-         "cagr": 37.67,
+         "cagr": 37.55,
          "sharpe": 0.84,
          "maxdd": -74.3
         },
         "buy_hold": {
-         "cagr": 34.52,
+         "cagr": 34.41,
          "sharpe": 0.8,
          "maxdd": -76.6
         },
@@ -2743,13 +2743,13 @@
        },
        "2024-now": {
         "strategy": {
-         "cagr": 25.58,
+         "cagr": 25.3,
          "sharpe": 0.72,
          "maxdd": -52.2
         },
         "buy_hold": {
-         "cagr": 23.88,
-         "sharpe": 0.69,
+         "cagr": 23.61,
+         "sharpe": 0.68,
          "maxdd": -53.1
         },
         "beats": 1.0
@@ -2768,22 +2768,22 @@
      "reaction": 0.211,
      "fwd": {
       "1": {
-       "ic": -0.0243,
+       "ic": -0.0244,
        "t": -0.95,
        "ic_2019_23": -0.0111,
-       "ic_2024_now": -0.0321,
+       "ic_2024_now": -0.0322,
        "top_pct": 0.258,
        "bottom_pct": 0.218,
        "all_pct": 0.026,
        "top_hit": 48.5
       },
       "3": {
-       "ic": 0.0093,
+       "ic": 0.0094,
        "t": 0.21,
        "ic_2019_23": 0.0007,
-       "ic_2024_now": 0.0121,
+       "ic_2024_now": 0.0122,
        "top_pct": 0.571,
-       "bottom_pct": 0.116,
+       "bottom_pct": 0.115,
        "all_pct": 0.036,
        "top_hit": 50.8
       },
@@ -2798,10 +2798,10 @@
        "top_hit": 47.4
       },
       "10": {
-       "ic": 0.008,
+       "ic": 0.0079,
        "t": 0.1,
        "ic_2019_23": -0.0332,
-       "ic_2024_now": 0.0337,
+       "ic_2024_now": 0.0336,
        "top_pct": 1.27,
        "bottom_pct": 0.214,
        "all_pct": 0.286,
@@ -2814,22 +2814,22 @@
      "reaction": 0.2,
      "fwd": {
       "1": {
-       "ic": -0.0265,
+       "ic": -0.0266,
        "t": -1.03,
        "ic_2019_23": -0.0105,
-       "ic_2024_now": -0.0367,
+       "ic_2024_now": -0.0368,
        "top_pct": 0.243,
        "bottom_pct": 0.085,
        "all_pct": 0.023,
        "top_hit": 50.0
       },
       "3": {
-       "ic": 0.0072,
+       "ic": 0.0073,
        "t": 0.16,
        "ic_2019_23": 0.0107,
-       "ic_2024_now": 0.0057,
+       "ic_2024_now": 0.0058,
        "top_pct": 0.689,
-       "bottom_pct": 0.055,
+       "bottom_pct": 0.054,
        "all_pct": 0.08,
        "top_hit": 51.0
       },
@@ -2840,7 +2840,7 @@
        "ic_2024_now": 0.005,
        "top_pct": 0.681,
        "bottom_pct": 0.332,
-       "all_pct": 0.173,
+       "all_pct": 0.172,
        "top_hit": 46.8
       },
       "10": {
@@ -2860,11 +2860,11 @@
      "reaction": 0.159,
      "fwd": {
       "1": {
-       "ic": -0.0342,
+       "ic": -0.0343,
        "t": -1.33,
        "ic_2019_23": -0.0479,
-       "ic_2024_now": -0.0223,
-       "top_pct": 0.08,
+       "ic_2024_now": -0.0225,
+       "top_pct": 0.079,
        "bottom_pct": 0.286,
        "all_pct": 0.023,
        "top_hit": 49.7
@@ -2880,13 +2880,13 @@
        "top_hit": 50.3
       },
       "5": {
-       "ic": 0.0027,
+       "ic": 0.0028,
        "t": 0.05,
        "ic_2019_23": 0.0224,
-       "ic_2024_now": -0.0112,
+       "ic_2024_now": -0.0111,
        "top_pct": 0.625,
-       "bottom_pct": 0.294,
-       "all_pct": 0.173,
+       "bottom_pct": 0.293,
+       "all_pct": 0.172,
        "top_hit": 50.2
       },
       "10": {
@@ -2906,10 +2906,10 @@
      "reaction": -0.021,
      "fwd": {
       "1": {
-       "ic": -0.0015,
+       "ic": -0.0016,
        "t": -0.08,
        "ic_2019_23": 0.0242,
-       "ic_2024_now": -0.026,
+       "ic_2024_now": -0.0261,
        "top_pct": 0.196,
        "bottom_pct": 0.096,
        "all_pct": 0.166,
@@ -2919,7 +2919,7 @@
        "ic": -0.0147,
        "t": -0.44,
        "ic_2019_23": -0.0114,
-       "ic_2024_now": -0.0123,
+       "ic_2024_now": -0.0122,
        "top_pct": 0.154,
        "bottom_pct": 0.268,
        "all_pct": 0.489,
@@ -2959,8 +2959,8 @@
          "maxdd": -44.9
         },
         "buy_hold": {
-         "cagr": 33.39,
-         "sharpe": 0.77,
+         "cagr": 33.34,
+         "sharpe": 0.76,
          "maxdd": -79.4
         },
         "beats": 0.0
@@ -2985,7 +2985,7 @@
          "maxdd": -44.9
         },
         "buy_hold": {
-         "cagr": 0.02,
+         "cagr": -0.09,
          "sharpe": 0.33,
          "maxdd": -67.6
         },
@@ -3014,13 +3014,13 @@
       "avoid_bad_news": {
        "all": {
         "strategy": {
-         "cagr": 27.53,
-         "sharpe": 0.71,
+         "cagr": 27.48,
+         "sharpe": 0.7,
          "maxdd": -77.2
         },
         "buy_hold": {
-         "cagr": 33.39,
-         "sharpe": 0.77,
+         "cagr": 33.34,
+         "sharpe": 0.76,
          "maxdd": -79.4
         },
         "beats": 0.0
@@ -3040,12 +3040,12 @@
        },
        "2024-now": {
         "strategy": {
-         "cagr": 3.69,
+         "cagr": 3.58,
          "sharpe": 0.36,
          "maxdd": -61.1
         },
         "buy_hold": {
-         "cagr": 0.02,
+         "cagr": -0.09,
          "sharpe": 0.33,
          "maxdd": -67.6
         },
@@ -3062,8 +3062,8 @@
          "maxdd": -29.4
         },
         "buy_hold": {
-         "cagr": 33.39,
-         "sharpe": 0.77,
+         "cagr": 33.34,
+         "sharpe": 0.76,
          "maxdd": -79.4
         },
         "beats": 0.0
@@ -3088,7 +3088,7 @@
          "maxdd": -29.4
         },
         "buy_hold": {
-         "cagr": 0.02,
+         "cagr": -0.09,
          "sharpe": 0.33,
          "maxdd": -67.6
         },
@@ -3099,7 +3099,7 @@
       },
       "long_short": {
        "all": {
-        "cagr": -0.01,
+        "cagr": 0.0,
         "sharpe": 0.1,
         "maxdd": -42.9
        },
@@ -3109,7 +3109,7 @@
         "maxdd": -36.3
        },
        "2024-now": {
-        "cagr": -3.63,
+        "cagr": -3.6,
         "sharpe": -0.04,
         "maxdd": -42.9
        }
@@ -3117,13 +3117,13 @@
       "avoid_bad_news": {
        "all": {
         "strategy": {
-         "cagr": 38.62,
+         "cagr": 38.58,
          "sharpe": 0.82,
          "maxdd": -67.2
         },
         "buy_hold": {
-         "cagr": 33.39,
-         "sharpe": 0.77,
+         "cagr": 33.34,
+         "sharpe": 0.76,
          "maxdd": -79.4
         },
         "beats": 1.0
@@ -3143,12 +3143,12 @@
        },
        "2024-now": {
         "strategy": {
-         "cagr": 3.22,
+         "cagr": 3.14,
          "sharpe": 0.33,
          "maxdd": -62.0
         },
         "buy_hold": {
-         "cagr": 0.02,
+         "cagr": -0.09,
          "sharpe": 0.33,
          "maxdd": -67.6
         },
@@ -3165,8 +3165,8 @@
          "maxdd": -26.6
         },
         "buy_hold": {
-         "cagr": 33.39,
-         "sharpe": 0.77,
+         "cagr": 33.34,
+         "sharpe": 0.76,
          "maxdd": -79.4
         },
         "beats": 0.0
@@ -3191,7 +3191,7 @@
          "maxdd": -18.2
         },
         "buy_hold": {
-         "cagr": 0.02,
+         "cagr": -0.09,
          "sharpe": 0.33,
          "maxdd": -67.6
         },
@@ -3202,7 +3202,7 @@
       },
       "long_short": {
        "all": {
-        "cagr": 0.05,
+        "cagr": 0.06,
         "sharpe": 0.09,
         "maxdd": -33.5
        },
@@ -3212,7 +3212,7 @@
         "maxdd": -32.7
        },
        "2024-now": {
-        "cagr": -2.58,
+        "cagr": -2.56,
         "sharpe": -0.04,
         "maxdd": -33.5
        }
@@ -3220,13 +3220,13 @@
       "avoid_bad_news": {
        "all": {
         "strategy": {
-         "cagr": 39.93,
+         "cagr": 39.88,
          "sharpe": 0.83,
          "maxdd": -67.2
         },
         "buy_hold": {
-         "cagr": 33.39,
-         "sharpe": 0.77,
+         "cagr": 33.34,
+         "sharpe": 0.76,
          "maxdd": -79.4
         },
         "beats": 1.0
@@ -3246,12 +3246,12 @@
        },
        "2024-now": {
         "strategy": {
-         "cagr": -0.73,
+         "cagr": -0.82,
          "sharpe": 0.26,
          "maxdd": -61.9
         },
         "buy_hold": {
-         "cagr": 0.02,
+         "cagr": -0.09,
          "sharpe": 0.33,
          "maxdd": -67.6
         },
@@ -3268,8 +3268,8 @@
          "maxdd": -16.8
         },
         "buy_hold": {
-         "cagr": 33.39,
-         "sharpe": 0.77,
+         "cagr": 33.34,
+         "sharpe": 0.76,
          "maxdd": -79.4
         },
         "beats": 0.0
@@ -3294,7 +3294,7 @@
          "maxdd": -13.4
         },
         "buy_hold": {
-         "cagr": 0.02,
+         "cagr": -0.09,
          "sharpe": 0.33,
          "maxdd": -67.6
         },
@@ -3305,7 +3305,7 @@
       },
       "long_short": {
        "all": {
-        "cagr": 4.11,
+        "cagr": 4.12,
         "sharpe": 0.37,
         "maxdd": -25.7
        },
@@ -3315,7 +3315,7 @@
         "maxdd": -25.7
        },
        "2024-now": {
-        "cagr": 5.17,
+        "cagr": 5.19,
         "sharpe": 0.41,
         "maxdd": -18.3
        }
@@ -3323,13 +3323,13 @@
       "avoid_bad_news": {
        "all": {
         "strategy": {
-         "cagr": 42.34,
+         "cagr": 42.3,
          "sharpe": 0.86,
          "maxdd": -68.5
         },
         "buy_hold": {
-         "cagr": 33.39,
-         "sharpe": 0.77,
+         "cagr": 33.34,
+         "sharpe": 0.76,
          "maxdd": -79.4
         },
         "beats": 1.0
@@ -3349,12 +3349,12 @@
        },
        "2024-now": {
         "strategy": {
-         "cagr": 4.99,
+         "cagr": 4.9,
          "sharpe": 0.36,
          "maxdd": -61.8
         },
         "buy_hold": {
-         "cagr": 0.02,
+         "cagr": -0.09,
          "sharpe": 0.33,
          "maxdd": -67.6
         },
@@ -3373,8 +3373,8 @@
          "maxdd": -45.5
         },
         "buy_hold": {
-         "cagr": 33.39,
-         "sharpe": 0.77,
+         "cagr": 33.34,
+         "sharpe": 0.76,
          "maxdd": -79.4
         },
         "beats": 0.0
@@ -3399,7 +3399,7 @@
          "maxdd": -45.5
         },
         "buy_hold": {
-         "cagr": 0.02,
+         "cagr": -0.09,
          "sharpe": 0.33,
          "maxdd": -67.6
         },
@@ -3428,13 +3428,13 @@
       "avoid_bad_news": {
        "all": {
         "strategy": {
-         "cagr": 20.36,
+         "cagr": 20.31,
          "sharpe": 0.63,
          "maxdd": -83.5
         },
         "buy_hold": {
-         "cagr": 33.39,
-         "sharpe": 0.77,
+         "cagr": 33.34,
+         "sharpe": 0.76,
          "maxdd": -79.4
         },
         "beats": 0.0
@@ -3454,12 +3454,12 @@
        },
        "2024-now": {
         "strategy": {
-         "cagr": -3.34,
-         "sharpe": 0.26,
+         "cagr": -3.44,
+         "sharpe": 0.25,
          "maxdd": -69.9
         },
         "buy_hold": {
-         "cagr": 0.02,
+         "cagr": -0.09,
          "sharpe": 0.33,
          "maxdd": -67.6
         },
@@ -3476,8 +3476,8 @@
          "maxdd": -22.3
         },
         "buy_hold": {
-         "cagr": 33.39,
-         "sharpe": 0.77,
+         "cagr": 33.34,
+         "sharpe": 0.76,
          "maxdd": -79.4
         },
         "beats": 0.0
@@ -3502,7 +3502,7 @@
          "maxdd": -22.3
         },
         "buy_hold": {
-         "cagr": 0.02,
+         "cagr": -0.09,
          "sharpe": 0.33,
          "maxdd": -67.6
         },
@@ -3513,7 +3513,7 @@
       },
       "long_short": {
        "all": {
-        "cagr": -3.13,
+        "cagr": -3.12,
         "sharpe": -0.11,
         "maxdd": -42.6
        },
@@ -3523,7 +3523,7 @@
         "maxdd": -29.8
        },
        "2024-now": {
-        "cagr": -5.67,
+        "cagr": -5.64,
         "sharpe": -0.19,
         "maxdd": -42.6
        }
@@ -3531,13 +3531,13 @@
       "avoid_bad_news": {
        "all": {
         "strategy": {
-         "cagr": 32.76,
+         "cagr": 32.73,
          "sharpe": 0.76,
          "maxdd": -75.8
         },
         "buy_hold": {
-         "cagr": 33.39,
-         "sharpe": 0.77,
+         "cagr": 33.34,
+         "sharpe": 0.76,
          "maxdd": -79.4
         },
         "beats": 0.0
@@ -3557,12 +3557,12 @@
        },
        "2024-now": {
         "strategy": {
-         "cagr": -0.41,
+         "cagr": -0.48,
          "sharpe": 0.29,
          "maxdd": -66.5
         },
         "buy_hold": {
-         "cagr": 0.02,
+         "cagr": -0.09,
          "sharpe": 0.33,
          "maxdd": -67.6
         },
@@ -3579,8 +3579,8 @@
          "maxdd": -17.4
         },
         "buy_hold": {
-         "cagr": 33.39,
-         "sharpe": 0.77,
+         "cagr": 33.34,
+         "sharpe": 0.76,
          "maxdd": -79.4
         },
         "beats": 0.0
@@ -3605,7 +3605,7 @@
          "maxdd": -13.1
         },
         "buy_hold": {
-         "cagr": 0.02,
+         "cagr": -0.09,
          "sharpe": 0.33,
          "maxdd": -67.6
         },
@@ -3626,7 +3626,7 @@
         "maxdd": -28.8
        },
        "2024-now": {
-        "cagr": -2.3,
+        "cagr": -2.28,
         "sharpe": -0.06,
         "maxdd": -26.4
        }
@@ -3634,13 +3634,13 @@
       "avoid_bad_news": {
        "all": {
         "strategy": {
-         "cagr": 34.77,
+         "cagr": 34.72,
          "sharpe": 0.78,
          "maxdd": -74.1
         },
         "buy_hold": {
-         "cagr": 33.39,
-         "sharpe": 0.77,
+         "cagr": 33.34,
+         "sharpe": 0.76,
          "maxdd": -79.4
         },
         "beats": 1.0
@@ -3660,12 +3660,12 @@
        },
        "2024-now": {
         "strategy": {
-         "cagr": -0.7,
+         "cagr": -0.79,
          "sharpe": 0.28,
          "maxdd": -65.2
         },
         "buy_hold": {
-         "cagr": 0.02,
+         "cagr": -0.09,
          "sharpe": 0.33,
          "maxdd": -67.6
         },
@@ -3682,8 +3682,8 @@
          "maxdd": -10.3
         },
         "buy_hold": {
-         "cagr": 33.39,
-         "sharpe": 0.77,
+         "cagr": 33.34,
+         "sharpe": 0.76,
          "maxdd": -79.4
         },
         "beats": 0.0
@@ -3708,7 +3708,7 @@
          "maxdd": -9.8
         },
         "buy_hold": {
-         "cagr": 0.02,
+         "cagr": -0.09,
          "sharpe": 0.33,
          "maxdd": -67.6
         },
@@ -3719,7 +3719,7 @@
       },
       "long_short": {
        "all": {
-        "cagr": 1.53,
+        "cagr": 1.54,
         "sharpe": 0.2,
         "maxdd": -19.8
        },
@@ -3729,7 +3729,7 @@
         "maxdd": -19.8
        },
        "2024-now": {
-        "cagr": 7.4,
+        "cagr": 7.42,
         "sharpe": 0.6,
         "maxdd": -17.5
        }
@@ -3737,13 +3737,13 @@
       "avoid_bad_news": {
        "all": {
         "strategy": {
-         "cagr": 36.66,
+         "cagr": 36.61,
          "sharpe": 0.8,
          "maxdd": -76.1
         },
         "buy_hold": {
-         "cagr": 33.39,
-         "sharpe": 0.77,
+         "cagr": 33.34,
+         "sharpe": 0.76,
          "maxdd": -79.4
         },
         "beats": 1.0
@@ -3763,12 +3763,12 @@
        },
        "2024-now": {
         "strategy": {
-         "cagr": 3.36,
+         "cagr": 3.27,
          "sharpe": 0.34,
          "maxdd": -63.5
         },
         "buy_hold": {
-         "cagr": 0.02,
+         "cagr": -0.09,
          "sharpe": 0.33,
          "maxdd": -67.6
         },
@@ -3787,8 +3787,8 @@
          "maxdd": -18.2
         },
         "buy_hold": {
-         "cagr": 33.39,
-         "sharpe": 0.77,
+         "cagr": 33.34,
+         "sharpe": 0.76,
          "maxdd": -79.4
         },
         "beats": 0.0
@@ -3813,7 +3813,7 @@
          "maxdd": -11.3
         },
         "buy_hold": {
-         "cagr": 0.02,
+         "cagr": -0.09,
          "sharpe": 0.33,
          "maxdd": -67.6
         },
@@ -3842,13 +3842,13 @@
       "avoid_bad_news": {
        "all": {
         "strategy": {
-         "cagr": 28.03,
+         "cagr": 27.97,
          "sharpe": 0.71,
          "maxdd": -82.7
         },
         "buy_hold": {
-         "cagr": 33.39,
-         "sharpe": 0.77,
+         "cagr": 33.34,
+         "sharpe": 0.76,
          "maxdd": -79.4
         },
         "beats": 0.0
@@ -3868,12 +3868,12 @@
        },
        "2024-now": {
         "strategy": {
-         "cagr": -5.64,
+         "cagr": -5.75,
          "sharpe": 0.24,
          "maxdd": -68.0
         },
         "buy_hold": {
-         "cagr": 0.02,
+         "cagr": -0.09,
          "sharpe": 0.33,
          "maxdd": -67.6
         },
@@ -3890,8 +3890,8 @@
          "maxdd": -14.4
         },
         "buy_hold": {
-         "cagr": 33.39,
-         "sharpe": 0.77,
+         "cagr": 33.34,
+         "sharpe": 0.76,
          "maxdd": -79.4
         },
         "beats": 0.0
@@ -3916,7 +3916,7 @@
          "maxdd": -11.2
         },
         "buy_hold": {
-         "cagr": 0.02,
+         "cagr": -0.09,
          "sharpe": 0.33,
          "maxdd": -67.6
         },
@@ -3945,13 +3945,13 @@
       "avoid_bad_news": {
        "all": {
         "strategy": {
-         "cagr": 34.24,
+         "cagr": 34.18,
          "sharpe": 0.77,
          "maxdd": -78.4
         },
         "buy_hold": {
-         "cagr": 33.39,
-         "sharpe": 0.77,
+         "cagr": 33.34,
+         "sharpe": 0.76,
          "maxdd": -79.4
         },
         "beats": 1.0
@@ -3971,12 +3971,12 @@
        },
        "2024-now": {
         "strategy": {
-         "cagr": -1.48,
-         "sharpe": 0.31,
+         "cagr": -1.58,
+         "sharpe": 0.3,
          "maxdd": -68.1
         },
         "buy_hold": {
-         "cagr": 0.02,
+         "cagr": -0.09,
          "sharpe": 0.33,
          "maxdd": -67.6
         },
@@ -3993,8 +3993,8 @@
          "maxdd": -10.0
         },
         "buy_hold": {
-         "cagr": 33.39,
-         "sharpe": 0.77,
+         "cagr": 33.34,
+         "sharpe": 0.76,
          "maxdd": -79.4
         },
         "beats": 0.0
@@ -4019,7 +4019,7 @@
          "maxdd": -10.0
         },
         "buy_hold": {
-         "cagr": 0.02,
+         "cagr": -0.09,
          "sharpe": 0.33,
          "maxdd": -67.6
         },
@@ -4048,13 +4048,13 @@
       "avoid_bad_news": {
        "all": {
         "strategy": {
-         "cagr": 34.83,
+         "cagr": 34.77,
          "sharpe": 0.78,
          "maxdd": -78.4
         },
         "buy_hold": {
-         "cagr": 33.39,
-         "sharpe": 0.77,
+         "cagr": 33.34,
+         "sharpe": 0.76,
          "maxdd": -79.4
         },
         "beats": 1.0
@@ -4074,12 +4074,12 @@
        },
        "2024-now": {
         "strategy": {
-         "cagr": -2.0,
+         "cagr": -2.11,
          "sharpe": 0.3,
          "maxdd": -67.0
         },
         "buy_hold": {
-         "cagr": 0.02,
+         "cagr": -0.09,
          "sharpe": 0.33,
          "maxdd": -67.6
         },
@@ -4096,8 +4096,8 @@
          "maxdd": -7.4
         },
         "buy_hold": {
-         "cagr": 33.39,
-         "sharpe": 0.77,
+         "cagr": 33.34,
+         "sharpe": 0.76,
          "maxdd": -79.4
         },
         "beats": 0.0
@@ -4122,7 +4122,7 @@
          "maxdd": -7.4
         },
         "buy_hold": {
-         "cagr": 0.02,
+         "cagr": -0.09,
          "sharpe": 0.33,
          "maxdd": -67.6
         },
@@ -4151,13 +4151,13 @@
       "avoid_bad_news": {
        "all": {
         "strategy": {
-         "cagr": 34.83,
+         "cagr": 34.77,
          "sharpe": 0.78,
          "maxdd": -78.6
         },
         "buy_hold": {
-         "cagr": 33.39,
-         "sharpe": 0.77,
+         "cagr": 33.34,
+         "sharpe": 0.76,
          "maxdd": -79.4
         },
         "beats": 1.0
@@ -4177,12 +4177,12 @@
        },
        "2024-now": {
         "strategy": {
-         "cagr": -1.32,
+         "cagr": -1.43,
          "sharpe": 0.31,
          "maxdd": -67.5
         },
         "buy_hold": {
-         "cagr": 0.02,
+         "cagr": -0.09,
          "sharpe": 0.33,
          "maxdd": -67.6
         },
@@ -12839,8 +12839,8 @@
        "ic": -0.0088,
        "t": -0.14,
        "ic_2019_23": -0.037,
-       "ic_2024_now": 0.0596,
-       "top_pct": 1.875,
+       "ic_2024_now": 0.0595,
+       "top_pct": 1.874,
        "bottom_pct": 2.11,
        "all_pct": 1.286,
        "top_hit": 54.8
@@ -12885,17 +12885,17 @@
        "ic": -0.0168,
        "t": -0.26,
        "ic_2019_23": -0.0394,
-       "ic_2024_now": 0.0078,
-       "top_pct": 0.544,
+       "ic_2024_now": 0.0076,
+       "top_pct": 0.542,
        "bottom_pct": 0.875,
-       "all_pct": 1.364,
+       "all_pct": 1.363,
        "top_hit": 52.2
       }
      }
     },
     "burst": {
      "obs": 2459,
-     "reaction": 0.021,
+     "reaction": 0.022,
      "fwd": {
       "1": {
        "ic": 0.0281,
@@ -12928,13 +12928,13 @@
        "top_hit": 50.2
       },
       "10": {
-       "ic": 0.0016,
+       "ic": 0.0015,
        "t": 0.02,
        "ic_2019_23": 0.0086,
-       "ic_2024_now": -0.0147,
+       "ic_2024_now": -0.0148,
        "top_pct": 1.213,
        "bottom_pct": 1.024,
-       "all_pct": 1.364,
+       "all_pct": 1.363,
        "top_hit": 51.4
       }
      }
@@ -12944,32 +12944,32 @@
      "reaction": -0.005,
      "fwd": {
       "1": {
-       "ic": -0.0027,
-       "t": -0.14,
+       "ic": -0.0025,
+       "t": -0.13,
        "ic_2019_23": 0.0036,
-       "ic_2024_now": -0.0147,
+       "ic_2024_now": -0.0141,
        "top_pct": 0.081,
-       "bottom_pct": 0.202,
+       "bottom_pct": 0.2,
        "all_pct": 0.132,
        "top_hit": 50.6
       },
       "3": {
-       "ic": -0.0476,
+       "ic": -0.0475,
        "t": -1.43,
        "ic_2019_23": -0.0489,
-       "ic_2024_now": -0.0477,
+       "ic_2024_now": -0.0473,
        "top_pct": 0.12,
-       "bottom_pct": 0.892,
+       "bottom_pct": 0.891,
        "all_pct": 0.39,
        "top_hit": 49.5
       },
       "5": {
-       "ic": -0.0513,
+       "ic": -0.0512,
        "t": -1.19,
        "ic_2019_23": -0.0483,
-       "ic_2024_now": -0.0595,
+       "ic_2024_now": -0.0591,
        "top_pct": 0.384,
-       "bottom_pct": 1.242,
+       "bottom_pct": 1.241,
        "all_pct": 0.661,
        "top_hit": 48.3
       },
@@ -12997,7 +12997,7 @@
          "maxdd": -49.8
         },
         "buy_hold": {
-         "cagr": 34.52,
+         "cagr": 34.41,
          "sharpe": 0.8,
          "maxdd": -76.6
         },
@@ -13023,8 +13023,8 @@
          "maxdd": -29.1
         },
         "buy_hold": {
-         "cagr": 23.88,
-         "sharpe": 0.69,
+         "cagr": 23.61,
+         "sharpe": 0.68,
          "maxdd": -53.1
         },
         "beats": 0.0
@@ -13052,12 +13052,12 @@
       "avoid_bad_news": {
        "all": {
         "strategy": {
-         "cagr": 38.88,
+         "cagr": 38.76,
          "sharpe": 0.9,
          "maxdd": -71.6
         },
         "buy_hold": {
-         "cagr": 34.52,
+         "cagr": 34.41,
          "sharpe": 0.8,
          "maxdd": -76.6
         },
@@ -13078,13 +13078,13 @@
        },
        "2024-now": {
         "strategy": {
-         "cagr": 14.43,
+         "cagr": 14.17,
          "sharpe": 0.54,
          "maxdd": -33.5
         },
         "buy_hold": {
-         "cagr": 23.88,
-         "sharpe": 0.69,
+         "cagr": 23.61,
+         "sharpe": 0.68,
          "maxdd": -53.1
         },
         "beats": 0.0
@@ -13100,7 +13100,7 @@
          "maxdd": -38.0
         },
         "buy_hold": {
-         "cagr": 34.52,
+         "cagr": 34.41,
          "sharpe": 0.8,
          "maxdd": -76.6
         },
@@ -13126,8 +13126,8 @@
          "maxdd": -14.4
         },
         "buy_hold": {
-         "cagr": 23.88,
-         "sharpe": 0.69,
+         "cagr": 23.61,
+         "sharpe": 0.68,
          "maxdd": -53.1
         },
         "beats": 0.0
@@ -13155,12 +13155,12 @@
       "avoid_bad_news": {
        "all": {
         "strategy": {
-         "cagr": 24.79,
+         "cagr": 24.68,
          "sharpe": 0.7,
          "maxdd": -75.6
         },
         "buy_hold": {
-         "cagr": 34.52,
+         "cagr": 34.41,
          "sharpe": 0.8,
          "maxdd": -76.6
         },
@@ -13181,13 +13181,13 @@
        },
        "2024-now": {
         "strategy": {
-         "cagr": 6.44,
+         "cagr": 6.2,
          "sharpe": 0.35,
          "maxdd": -42.6
         },
         "buy_hold": {
-         "cagr": 23.88,
-         "sharpe": 0.69,
+         "cagr": 23.61,
+         "sharpe": 0.68,
          "maxdd": -53.1
         },
         "beats": 0.0
@@ -13203,7 +13203,7 @@
          "maxdd": -33.6
         },
         "buy_hold": {
-         "cagr": 34.52,
+         "cagr": 34.41,
          "sharpe": 0.8,
          "maxdd": -76.6
         },
@@ -13229,8 +13229,8 @@
          "maxdd": -12.4
         },
         "buy_hold": {
-         "cagr": 23.88,
-         "sharpe": 0.69,
+         "cagr": 23.61,
+         "sharpe": 0.68,
          "maxdd": -53.1
         },
         "beats": 0.0
@@ -13258,12 +13258,12 @@
       "avoid_bad_news": {
        "all": {
         "strategy": {
-         "cagr": 23.05,
-         "sharpe": 0.68,
+         "cagr": 22.94,
+         "sharpe": 0.67,
          "maxdd": -76.0
         },
         "buy_hold": {
-         "cagr": 34.52,
+         "cagr": 34.41,
          "sharpe": 0.8,
          "maxdd": -76.6
         },
@@ -13284,13 +13284,13 @@
        },
        "2024-now": {
         "strategy": {
-         "cagr": 13.08,
-         "sharpe": 0.53,
+         "cagr": 12.83,
+         "sharpe": 0.52,
          "maxdd": -42.1
         },
         "buy_hold": {
-         "cagr": 23.88,
-         "sharpe": 0.69,
+         "cagr": 23.61,
+         "sharpe": 0.68,
          "maxdd": -53.1
         },
         "beats": 0.0
@@ -13301,12 +13301,12 @@
       "long": {
        "all": {
         "strategy": {
-         "cagr": 3.62,
+         "cagr": 3.6,
          "sharpe": 0.32,
          "maxdd": -37.1
         },
         "buy_hold": {
-         "cagr": 34.52,
+         "cagr": 34.41,
          "sharpe": 0.8,
          "maxdd": -76.6
         },
@@ -13327,13 +13327,13 @@
        },
        "2024-now": {
         "strategy": {
-         "cagr": 9.77,
+         "cagr": 9.72,
          "sharpe": 0.98,
          "maxdd": -13.0
         },
         "buy_hold": {
-         "cagr": 23.88,
-         "sharpe": 0.69,
+         "cagr": 23.61,
+         "sharpe": 0.68,
          "maxdd": -53.1
         },
         "beats": 0.0
@@ -13343,7 +13343,7 @@
       },
       "long_short": {
        "all": {
-        "cagr": -8.15,
+        "cagr": -8.16,
         "sharpe": -0.25,
         "maxdd": -49.0
        },
@@ -13353,7 +13353,7 @@
         "maxdd": -49.0
        },
        "2024-now": {
-        "cagr": -1.85,
+        "cagr": -1.9,
         "sharpe": -0.0,
         "maxdd": -26.6
        }
@@ -13361,12 +13361,12 @@
       "avoid_bad_news": {
        "all": {
         "strategy": {
-         "cagr": 31.81,
+         "cagr": 31.7,
          "sharpe": 0.82,
          "maxdd": -72.0
         },
         "buy_hold": {
-         "cagr": 34.52,
+         "cagr": 34.41,
          "sharpe": 0.8,
          "maxdd": -76.6
         },
@@ -13387,13 +13387,13 @@
        },
        "2024-now": {
         "strategy": {
-         "cagr": 18.13,
+         "cagr": 17.87,
          "sharpe": 0.65,
          "maxdd": -44.6
         },
         "buy_hold": {
-         "cagr": 23.88,
-         "sharpe": 0.69,
+         "cagr": 23.61,
+         "sharpe": 0.68,
          "maxdd": -53.1
         },
         "beats": 0.0
@@ -13411,7 +13411,7 @@
          "maxdd": -52.6
         },
         "buy_hold": {
-         "cagr": 34.52,
+         "cagr": 34.41,
          "sharpe": 0.8,
          "maxdd": -76.6
         },
@@ -13437,8 +13437,8 @@
          "maxdd": -38.8
         },
         "buy_hold": {
-         "cagr": 23.88,
-         "sharpe": 0.69,
+         "cagr": 23.61,
+         "sharpe": 0.68,
          "maxdd": -53.1
         },
         "beats": 0.0
@@ -13466,12 +13466,12 @@
       "avoid_bad_news": {
        "all": {
         "strategy": {
-         "cagr": 36.52,
+         "cagr": 36.41,
          "sharpe": 0.85,
          "maxdd": -67.8
         },
         "buy_hold": {
-         "cagr": 34.52,
+         "cagr": 34.41,
          "sharpe": 0.8,
          "maxdd": -76.6
         },
@@ -13492,13 +13492,13 @@
        },
        "2024-now": {
         "strategy": {
-         "cagr": 13.02,
+         "cagr": 12.77,
          "sharpe": 0.5,
          "maxdd": -43.3
         },
         "buy_hold": {
-         "cagr": 23.88,
-         "sharpe": 0.69,
+         "cagr": 23.61,
+         "sharpe": 0.68,
          "maxdd": -53.1
         },
         "beats": 0.0
@@ -13514,7 +13514,7 @@
          "maxdd": -36.7
         },
         "buy_hold": {
-         "cagr": 34.52,
+         "cagr": 34.41,
          "sharpe": 0.8,
          "maxdd": -76.6
         },
@@ -13540,8 +13540,8 @@
          "maxdd": -19.4
         },
         "buy_hold": {
-         "cagr": 23.88,
-         "sharpe": 0.69,
+         "cagr": 23.61,
+         "sharpe": 0.68,
          "maxdd": -53.1
         },
         "beats": 0.0
@@ -13569,12 +13569,12 @@
       "avoid_bad_news": {
        "all": {
         "strategy": {
-         "cagr": 35.73,
+         "cagr": 35.61,
          "sharpe": 0.85,
          "maxdd": -72.9
         },
         "buy_hold": {
-         "cagr": 34.52,
+         "cagr": 34.41,
          "sharpe": 0.8,
          "maxdd": -76.6
         },
@@ -13595,13 +13595,13 @@
        },
        "2024-now": {
         "strategy": {
-         "cagr": 14.79,
-         "sharpe": 0.55,
+         "cagr": 14.54,
+         "sharpe": 0.54,
          "maxdd": -40.9
         },
         "buy_hold": {
-         "cagr": 23.88,
-         "sharpe": 0.69,
+         "cagr": 23.61,
+         "sharpe": 0.68,
          "maxdd": -53.1
         },
         "beats": 0.0
@@ -13617,7 +13617,7 @@
          "maxdd": -32.6
         },
         "buy_hold": {
-         "cagr": 34.52,
+         "cagr": 34.41,
          "sharpe": 0.8,
          "maxdd": -76.6
         },
@@ -13643,8 +13643,8 @@
          "maxdd": -11.0
         },
         "buy_hold": {
-         "cagr": 23.88,
-         "sharpe": 0.69,
+         "cagr": 23.61,
+         "sharpe": 0.68,
          "maxdd": -53.1
         },
         "beats": 0.0
@@ -13672,12 +13672,12 @@
       "avoid_bad_news": {
        "all": {
         "strategy": {
-         "cagr": 30.35,
+         "cagr": 30.24,
          "sharpe": 0.78,
          "maxdd": -74.9
         },
         "buy_hold": {
-         "cagr": 34.52,
+         "cagr": 34.41,
          "sharpe": 0.8,
          "maxdd": -76.6
         },
@@ -13698,13 +13698,13 @@
        },
        "2024-now": {
         "strategy": {
-         "cagr": 16.96,
-         "sharpe": 0.6,
+         "cagr": 16.7,
+         "sharpe": 0.59,
          "maxdd": -47.2
         },
         "buy_hold": {
-         "cagr": 23.88,
-         "sharpe": 0.69,
+         "cagr": 23.61,
+         "sharpe": 0.68,
          "maxdd": -53.1
         },
         "beats": 0.0
@@ -13715,12 +13715,12 @@
       "long": {
        "all": {
         "strategy": {
-         "cagr": 2.29,
+         "cagr": 2.27,
          "sharpe": 0.26,
          "maxdd": -32.7
         },
         "buy_hold": {
-         "cagr": 34.52,
+         "cagr": 34.41,
          "sharpe": 0.8,
          "maxdd": -76.6
         },
@@ -13741,13 +13741,13 @@
        },
        "2024-now": {
         "strategy": {
-         "cagr": 7.68,
-         "sharpe": 0.96,
+         "cagr": 7.63,
+         "sharpe": 0.95,
          "maxdd": -10.8
         },
         "buy_hold": {
-         "cagr": 23.88,
-         "sharpe": 0.69,
+         "cagr": 23.61,
+         "sharpe": 0.68,
          "maxdd": -53.1
         },
         "beats": 0.0
@@ -13757,7 +13757,7 @@
       },
       "long_short": {
        "all": {
-        "cagr": -5.0,
+        "cagr": -5.01,
         "sharpe": -0.2,
         "maxdd": -41.1
        },
@@ -13767,7 +13767,7 @@
         "maxdd": -41.1
        },
        "2024-now": {
-        "cagr": 1.86,
+        "cagr": 1.81,
         "sharpe": 0.21,
         "maxdd": -19.2
        }
@@ -13775,12 +13775,12 @@
       "avoid_bad_news": {
        "all": {
         "strategy": {
-         "cagr": 34.3,
-         "sharpe": 0.84,
+         "cagr": 34.19,
+         "sharpe": 0.83,
          "maxdd": -72.0
         },
         "buy_hold": {
-         "cagr": 34.52,
+         "cagr": 34.41,
          "sharpe": 0.8,
          "maxdd": -76.6
         },
@@ -13801,13 +13801,13 @@
        },
        "2024-now": {
         "strategy": {
-         "cagr": 21.9,
+         "cagr": 21.63,
          "sharpe": 0.7,
          "maxdd": -47.7
         },
         "buy_hold": {
-         "cagr": 23.88,
-         "sharpe": 0.69,
+         "cagr": 23.61,
+         "sharpe": 0.68,
          "maxdd": -53.1
         },
         "beats": 0.0
@@ -13825,7 +13825,7 @@
          "maxdd": -16.4
         },
         "buy_hold": {
-         "cagr": 34.52,
+         "cagr": 34.41,
          "sharpe": 0.8,
          "maxdd": -76.6
         },
@@ -13851,8 +13851,8 @@
          "maxdd": -15.1
         },
         "buy_hold": {
-         "cagr": 23.88,
-         "sharpe": 0.69,
+         "cagr": 23.61,
+         "sharpe": 0.68,
          "maxdd": -53.1
         },
         "beats": 0.0
@@ -13880,12 +13880,12 @@
       "avoid_bad_news": {
        "all": {
         "strategy": {
-         "cagr": 26.55,
+         "cagr": 26.44,
          "sharpe": 0.7,
          "maxdd": -77.7
         },
         "buy_hold": {
-         "cagr": 34.52,
+         "cagr": 34.41,
          "sharpe": 0.8,
          "maxdd": -76.6
         },
@@ -13906,13 +13906,13 @@
        },
        "2024-now": {
         "strategy": {
-         "cagr": 28.69,
+         "cagr": 28.4,
          "sharpe": 0.77,
          "maxdd": -49.9
         },
         "buy_hold": {
-         "cagr": 23.88,
-         "sharpe": 0.69,
+         "cagr": 23.61,
+         "sharpe": 0.68,
          "maxdd": -53.1
         },
         "beats": 1.0
@@ -13928,7 +13928,7 @@
          "maxdd": -11.3
         },
         "buy_hold": {
-         "cagr": 34.52,
+         "cagr": 34.41,
          "sharpe": 0.8,
          "maxdd": -76.6
         },
@@ -13954,8 +13954,8 @@
          "maxdd": -7.8
         },
         "buy_hold": {
-         "cagr": 23.88,
-         "sharpe": 0.69,
+         "cagr": 23.61,
+         "sharpe": 0.68,
          "maxdd": -53.1
         },
         "beats": 0.0
@@ -13983,12 +13983,12 @@
       "avoid_bad_news": {
        "all": {
         "strategy": {
-         "cagr": 36.89,
+         "cagr": 36.78,
          "sharpe": 0.83,
          "maxdd": -74.0
         },
         "buy_hold": {
-         "cagr": 34.52,
+         "cagr": 34.41,
          "sharpe": 0.8,
          "maxdd": -76.6
         },
@@ -14009,13 +14009,13 @@
        },
        "2024-now": {
         "strategy": {
-         "cagr": 30.86,
+         "cagr": 30.57,
          "sharpe": 0.81,
          "maxdd": -47.8
         },
         "buy_hold": {
-         "cagr": 23.88,
-         "sharpe": 0.69,
+         "cagr": 23.61,
+         "sharpe": 0.68,
          "maxdd": -53.1
         },
         "beats": 1.0
@@ -14031,7 +14031,7 @@
          "maxdd": -10.8
         },
         "buy_hold": {
-         "cagr": 34.52,
+         "cagr": 34.41,
          "sharpe": 0.8,
          "maxdd": -76.6
         },
@@ -14057,8 +14057,8 @@
          "maxdd": -9.0
         },
         "buy_hold": {
-         "cagr": 23.88,
-         "sharpe": 0.69,
+         "cagr": 23.61,
+         "sharpe": 0.68,
          "maxdd": -53.1
         },
         "beats": 0.0
@@ -14086,12 +14086,12 @@
       "avoid_bad_news": {
        "all": {
         "strategy": {
-         "cagr": 36.4,
+         "cagr": 36.29,
          "sharpe": 0.83,
          "maxdd": -75.2
         },
         "buy_hold": {
-         "cagr": 34.52,
+         "cagr": 34.41,
          "sharpe": 0.8,
          "maxdd": -76.6
         },
@@ -14112,13 +14112,13 @@
        },
        "2024-now": {
         "strategy": {
-         "cagr": 26.9,
-         "sharpe": 0.75,
+         "cagr": 26.61,
+         "sharpe": 0.74,
          "maxdd": -50.6
         },
         "buy_hold": {
-         "cagr": 23.88,
-         "sharpe": 0.69,
+         "cagr": 23.61,
+         "sharpe": 0.68,
          "maxdd": -53.1
         },
         "beats": 1.0
@@ -14134,7 +14134,7 @@
          "maxdd": -12.0
         },
         "buy_hold": {
-         "cagr": 34.52,
+         "cagr": 34.41,
          "sharpe": 0.8,
          "maxdd": -76.6
         },
@@ -14160,8 +14160,8 @@
          "maxdd": -5.2
         },
         "buy_hold": {
-         "cagr": 23.88,
-         "sharpe": 0.69,
+         "cagr": 23.61,
+         "sharpe": 0.68,
          "maxdd": -53.1
         },
         "beats": 0.0
@@ -14189,12 +14189,12 @@
       "avoid_bad_news": {
        "all": {
         "strategy": {
-         "cagr": 35.1,
+         "cagr": 34.98,
          "sharpe": 0.81,
          "maxdd": -76.6
         },
         "buy_hold": {
-         "cagr": 34.52,
+         "cagr": 34.41,
          "sharpe": 0.8,
          "maxdd": -76.6
         },
@@ -14215,13 +14215,13 @@
        },
        "2024-now": {
         "strategy": {
-         "cagr": 24.85,
+         "cagr": 24.57,
          "sharpe": 0.71,
          "maxdd": -51.9
         },
         "buy_hold": {
-         "cagr": 23.88,
-         "sharpe": 0.69,
+         "cagr": 23.61,
+         "sharpe": 0.68,
          "maxdd": -53.1
         },
         "beats": 1.0
@@ -14270,7 +14270,7 @@
        "top_hit": 56.0
       },
       "10": {
-       "ic": -0.1509,
+       "ic": -0.151,
        "t": -2.04,
        "ic_2019_23": -0.14,
        "ic_2024_now": -0.2234,
@@ -14289,7 +14289,7 @@
        "ic": -0.0207,
        "t": -0.89,
        "ic_2019_23": -0.0198,
-       "ic_2024_now": -0.0281,
+       "ic_2024_now": -0.028,
        "top_pct": 0.046,
        "bottom_pct": 0.127,
        "all_pct": 0.066,
@@ -14332,7 +14332,7 @@
      "reaction": 0.041,
      "fwd": {
       "1": {
-       "ic": -0.0188,
+       "ic": -0.0187,
        "t": -0.8,
        "ic_2019_23": -0.0161,
        "ic_2024_now": -0.0292,
@@ -14408,7 +14408,7 @@
        "top_hit": 62.2
       },
       "10": {
-       "ic": -0.0135,
+       "ic": -0.0136,
        "t": -0.18,
        "ic_2019_23": -0.0284,
        "ic_2024_now": 0.0042,
@@ -15668,7 +15668,7 @@
  ],
  "verdict": [
   "**Stocks (S&P 100, Benzinga headlines)**: same-day reaction up to +0.077; no signal predicts the next days reliably (all |t| < 2); beats buy & hold in both halves: none.",
-  "**Crypto, 11 coins pooled (Benzinga)**: same-day reaction up to +0.344; predictive (|t| \u2265 2, same sign before and after 2024): Mood vs usual 1d (IC -0.025); beats buy & hold in both halves: none.",
+  "**Crypto, 11 coins pooled (Benzinga)**: same-day reaction up to +0.343; predictive (|t| \u2265 2, same sign before and after 2024): Mood vs usual 1d (IC -0.025); beats buy & hold in both halves: none.",
   "**Bitcoin, Benzinga**: same-day reaction up to +0.177; no signal predicts the next days reliably (all |t| < 2); beats buy & hold in both halves: none.",
   "**Ethereum, Benzinga**: same-day reaction up to +0.211; no signal predicts the next days reliably (all |t| < 2); beats buy & hold in both halves: none.",
   "**Gold (GLD), Benzinga**: same-day reaction up to +0.040; no signal predicts the next days reliably (all |t| < 2); beats buy & hold in both halves: none.",

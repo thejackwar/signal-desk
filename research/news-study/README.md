@@ -1,6 +1,6 @@
 # News-only strategy study
 
-Data to 2026-11-03. Headlines from Alpaca/Benzinga (S&P 100, top coins, gold/silver/oil ETFs) scored by FinBERT, plus GDELT's worldwide tone and article counts for oil, gold, silver, bitcoin and the stock market. Signals are only used from the close after the news. Costs included. Nothing tuned: fixed rules, so 2024-now is an honest second look.
+Data to 2026-11-04. Headlines from Alpaca/Benzinga (S&P 100, top coins, gold/silver/oil ETFs) scored by FinBERT, plus GDELT's worldwide tone and article counts for oil, gold, silver, bitcoin and the stock market. Signals are only used from the close after the news. Costs included. Nothing tuned: fixed rules, so 2024-now is an honest second look.
 
 **How to read it.** *Reaction* = rank correlation between the day's news and that same day's move (news explaining the move — not tradable). *IC* = rank correlation between the signal and the *next* h days' return (tradable edge; 0.02+ is meaningful in finance, |t| > 2 is unlikely to be luck). *Top/Bottom* = average next-h-day return after the strongest fifth of signals vs the weakest fifth.
 
@@ -8,34 +8,34 @@ Data to 2026-11-03. Headlines from Alpaca/Benzinga (S&P 100, top coins, gold/sil
 
 | Signal | Obs | Reaction | IC 1d (t) | IC 3d (t) | IC 5d (t) | IC 10d (t) | 5d top / bottom / all |
 |---|---|---|---|---|---|---|---|
-| Mood | 93,971 | +0.077 | +0.002 (+0.5) | -0.004 (-0.6) | -0.004 (-0.4) | -0.004 (-0.3) | +0.38% / +0.42% / +0.41% |
-| Mood vs usual | 91,899 | +0.077 | +0.002 (+0.5) | -0.003 (-0.4) | -0.002 (-0.2) | +0.001 (+0.1) | +0.38% / +0.42% / +0.41% |
-| News burst | 91,886 | +0.076 | +0.001 (+0.4) | -0.002 (-0.4) | -0.001 (-0.2) | -0.000 (-0.0) | +0.40% / +0.39% / +0.41% |
-| News volume (unsigned) | 188,166 | +0.014 | -0.001 (-0.4) | +0.001 (+0.1) | +0.003 (+0.6) | +0.002 (+0.3) | +0.40% / +0.36% / +0.36% |
+| Mood | 94,392 | +0.077 | +0.002 (+0.5) | -0.004 (-0.6) | -0.004 (-0.5) | -0.004 (-0.3) | +0.38% / +0.43% / +0.41% |
+| Mood vs usual | 92,244 | +0.077 | +0.002 (+0.5) | -0.003 (-0.4) | -0.002 (-0.2) | +0.001 (+0.1) | +0.38% / +0.43% / +0.41% |
+| News burst | 92,231 | +0.076 | +0.002 (+0.4) | -0.003 (-0.4) | -0.002 (-0.2) | -0.000 (-0.0) | +0.41% / +0.39% / +0.41% |
+| News volume (unsigned) | 190,033 | +0.014 | -0.001 (-0.3) | +0.000 (+0.1) | +0.003 (+0.6) | +0.002 (+0.3) | +0.40% / +0.36% / +0.35% |
 
 Strategy (long only) vs buy & hold, yearly growth after costs:
 
 | Signal | Hold | All years | 2019-23 | 2024-now | Sharpe (vs B&H) | Time invested | Same rules on the worst news |
 |---|---|---|---|---|---|---|---|
-| Mood | 1d | +3.2% vs +18.4% | +6.4% vs +17.9% | -1.7% vs +19.2% | 0.26 vs 0.98 | 100% | +9.9% |
-| Mood | 3d | +16.3% vs +18.4% | +17.1% vs +17.9% | +14.9% vs +19.2% | 0.86 vs 0.98 | 100% | +17.4% |
-| Mood | 5d | +19.0% vs +18.4% ✓ | +18.8% vs +17.9% ✓ | +19.4% vs +19.2% ✓ | 0.98 vs 0.98 | 100% | +18.7% |
-| Mood | 10d | +19.9% vs +18.4% ✓ | +19.3% vs +17.9% ✓ | +21.0% vs +19.2% ✓ | 1.04 vs 0.98 | 100% | +20.0% |
-| Mood vs usual | 1d | +1.2% vs +18.4% | +1.8% vs +17.9% | +0.2% vs +19.2% | 0.16 vs 0.98 | 100% | +8.6% |
-| Mood vs usual | 3d | +14.3% vs +18.4% | +13.8% vs +17.9% | +15.2% vs +19.2% | 0.75 vs 0.98 | 100% | +18.4% |
-| Mood vs usual | 5d | +17.3% vs +18.4% | +16.8% vs +17.9% | +18.1% vs +19.2% | 0.88 vs 0.98 | 100% | +18.8% |
-| Mood vs usual | 10d | +19.6% vs +18.4% ✓ | +18.5% vs +17.9% ✓ | +21.3% vs +19.2% ✓ | 0.98 vs 0.98 | 99% | +20.2% |
-| News burst | 1d | -23.7% vs +18.4% | -19.1% vs +17.9% | -30.5% vs +19.2% | -0.81 vs 0.98 | 92% | -1.9% |
-| News burst | 3d | +5.5% vs +18.4% | +6.7% vs +17.9% | +3.6% vs +19.2% | 0.36 vs 0.98 | 92% | +12.4% |
-| News burst | 5d | +5.7% vs +18.4% | +2.1% vs +17.9% | +11.7% vs +19.2% | 0.39 vs 0.98 | 92% | +13.2% |
-| News burst | 10d | +11.4% vs +18.4% | +6.8% vs +17.9% | +19.1% vs +19.2% | 0.70 vs 0.98 | 92% | +16.4% |
+| Mood | 1d | +3.4% vs +18.3% | +6.3% vs +17.8% | -1.2% vs +19.0% | 0.26 vs 0.97 | 100% | +9.8% |
+| Mood | 3d | +16.6% vs +18.3% | +17.1% vs +17.8% | +15.7% vs +19.0% | 0.87 vs 0.97 | 100% | +17.3% |
+| Mood | 5d | +19.1% vs +18.3% ✓ | +18.7% vs +17.8% ✓ | +19.8% vs +19.0% ✓ | 0.99 vs 0.97 | 100% | +18.4% |
+| Mood | 10d | +20.0% vs +18.3% ✓ | +19.3% vs +17.8% ✓ | +21.2% vs +19.0% ✓ | 1.04 vs 0.97 | 100% | +19.9% |
+| Mood vs usual | 1d | +1.1% vs +18.3% | +1.6% vs +17.8% | +0.2% vs +19.0% | 0.16 vs 0.97 | 100% | +8.7% |
+| Mood vs usual | 3d | +14.4% vs +18.3% | +13.7% vs +17.8% | +15.6% vs +19.0% | 0.75 vs 0.97 | 100% | +18.5% |
+| Mood vs usual | 5d | +17.4% vs +18.3% | +16.7% vs +17.8% | +18.4% vs +19.0% | 0.88 vs 0.97 | 100% | +18.9% |
+| Mood vs usual | 10d | +19.6% vs +18.3% ✓ | +18.5% vs +17.8% ✓ | +21.4% vs +19.0% ✓ | 0.98 vs 0.97 | 99% | +20.3% |
+| News burst | 1d | -23.7% vs +18.3% | -19.3% vs +17.8% | -30.4% vs +19.0% | -0.81 vs 0.97 | 93% | -1.8% |
+| News burst | 3d | +5.4% vs +18.3% | +6.3% vs +17.8% | +3.9% vs +19.0% | 0.36 vs 0.97 | 92% | +12.7% |
+| News burst | 5d | +5.5% vs +18.3% | +1.9% vs +17.8% | +11.8% vs +19.0% | 0.38 vs 0.97 | 92% | +13.5% |
+| News burst | 10d | +11.5% vs +18.3% | +6.8% vs +17.8% | +19.6% vs +19.0% ✓ | 0.71 vs 0.97 | 92% | +16.5% |
 
 ## Crypto, 11 coins pooled (Benzinga)
 
 | Signal | Obs | Reaction | IC 1d (t) | IC 3d (t) | IC 5d (t) | IC 10d (t) | 5d top / bottom / all |
 |---|---|---|---|---|---|---|---|
-| Mood | 8,298 | +0.344 | -0.021 (-1.9) | +0.008 (+0.4) | -0.027 (-1.1) | -0.011 (-0.3) | +0.54% / +0.46% / +0.30% |
-| Mood vs usual | 7,686 | +0.314 | -0.025 (-2.2) | +0.002 (+0.1) | -0.026 (-1.0) | -0.014 (-0.4) | +0.57% / +0.39% / +0.31% |
+| Mood | 8,298 | +0.343 | -0.021 (-1.9) | +0.009 (+0.5) | -0.027 (-1.1) | -0.011 (-0.3) | +0.54% / +0.46% / +0.30% |
+| Mood vs usual | 7,686 | +0.314 | -0.025 (-2.2) | +0.003 (+0.1) | -0.026 (-1.0) | -0.014 (-0.4) | +0.57% / +0.39% / +0.31% |
 | News burst | 7,686 | +0.296 | -0.015 (-1.3) | +0.007 (+0.4) | -0.009 (-0.4) | -0.011 (-0.3) | +0.57% / +0.42% / +0.31% |
 | News volume (unsigned) | 28,486 | +0.005 | +0.014 (+2.3) | +0.018 (+1.8) | +0.027 (+2.0) | +0.023 (+1.2) | +0.48% / -0.05% / +0.95% |
 
@@ -43,34 +43,34 @@ Strategy (long only) vs buy & hold, yearly growth after costs:
 
 | Signal | Obs | Reaction | IC 1d (t) | IC 3d (t) | IC 5d (t) | IC 10d (t) | 5d top / bottom / all |
 |---|---|---|---|---|---|---|---|
-| Mood | 1,698 | +0.175 | -0.024 (-1.0) | +0.020 (+0.5) | -0.007 (-0.1) | -0.008 (-0.1) | +0.87% / +0.55% / +0.26% |
+| Mood | 1,698 | +0.175 | -0.024 (-1.0) | +0.020 (+0.5) | -0.007 (-0.1) | -0.009 (-0.1) | +0.87% / +0.55% / +0.26% |
 | Mood vs usual | 1,672 | +0.175 | -0.024 (-1.0) | +0.023 (+0.5) | +0.003 (+0.1) | -0.004 (-0.1) | +0.77% / +0.27% / +0.32% |
-| News burst | 1,672 | +0.177 | -0.010 (-0.4) | +0.030 (+0.7) | +0.023 (+0.4) | +0.013 (+0.2) | +0.27% / -0.18% / +0.32% |
-| News volume (unsigned) | 2,713 | -0.015 | -0.004 (-0.2) | -0.028 (-0.8) | -0.026 (-0.6) | -0.047 (-0.8) | -0.15% / +0.47% / +0.66% |
+| News burst | 1,672 | +0.177 | -0.010 (-0.4) | +0.030 (+0.7) | +0.024 (+0.4) | +0.013 (+0.2) | +0.27% / -0.18% / +0.32% |
+| News volume (unsigned) | 2,713 | -0.016 | -0.004 (-0.2) | -0.028 (-0.8) | -0.026 (-0.6) | -0.047 (-0.8) | -0.15% / +0.47% / +0.66% |
 
 Strategy (long only) vs buy & hold, yearly growth after costs:
 
 | Signal | Hold | All years | 2019-23 | 2024-now | Sharpe (vs B&H) | Time invested | Same rules on the worst news |
 |---|---|---|---|---|---|---|---|
-| Mood | 1d | -8.4% vs +34.5% | -7.3% vs +41.6% | -10.2% vs +23.9% | -0.39 vs 0.80 | 13% | – |
-| Mood | 3d | +4.2% vs +34.5% | +3.8% vs +41.6% | +4.9% vs +23.9% | 0.40 vs 0.80 | 13% | – |
-| Mood | 5d | +3.7% vs +34.5% | +4.0% vs +41.6% | +3.2% vs +23.9% | 0.39 vs 0.80 | 13% | – |
-| Mood | 10d | +3.5% vs +34.5% | +1.8% vs +41.6% | +6.4% vs +23.9% | 0.42 vs 0.80 | 13% | – |
-| Mood vs usual | 1d | -2.9% vs +34.5% | +1.8% vs +41.6% | -10.2% vs +23.9% | -0.14 vs 0.80 | 7% | – |
-| Mood vs usual | 3d | +4.9% vs +34.5% | +6.4% vs +41.6% | +2.7% vs +23.9% | 0.56 vs 0.80 | 7% | – |
-| Mood vs usual | 5d | +2.4% vs +34.5% | +3.7% vs +41.6% | +0.3% vs +23.9% | 0.35 vs 0.80 | 7% | – |
-| Mood vs usual | 10d | +2.7% vs +34.5% | +2.1% vs +41.6% | +3.6% vs +23.9% | 0.50 vs 0.80 | 7% | – |
-| News burst | 1d | +3.8% vs +34.5% | +2.0% vs +41.6% | +6.6% vs +23.9% | 0.64 vs 0.80 | 1% | – |
-| News burst | 3d | +1.1% vs +34.5% | +0.4% vs +41.6% | +2.1% vs +23.9% | 0.32 vs 0.80 | 1% | – |
-| News burst | 5d | +0.5% vs +34.5% | +0.7% vs +41.6% | +0.1% vs +23.9% | 0.18 vs 0.80 | 1% | – |
-| News burst | 10d | +1.1% vs +34.5% | +1.2% vs +41.6% | +0.9% vs +23.9% | 0.39 vs 0.80 | 1% | – |
+| Mood | 1d | -8.4% vs +34.4% | -7.3% vs +41.6% | -10.2% vs +23.6% | -0.39 vs 0.80 | 13% | – |
+| Mood | 3d | +4.2% vs +34.4% | +3.8% vs +41.6% | +4.9% vs +23.6% | 0.40 vs 0.80 | 13% | – |
+| Mood | 5d | +3.7% vs +34.4% | +4.0% vs +41.6% | +3.2% vs +23.6% | 0.39 vs 0.80 | 13% | – |
+| Mood | 10d | +3.5% vs +34.4% | +1.8% vs +41.6% | +6.4% vs +23.6% | 0.42 vs 0.80 | 13% | – |
+| Mood vs usual | 1d | -2.9% vs +34.4% | +1.8% vs +41.6% | -10.2% vs +23.6% | -0.14 vs 0.80 | 7% | – |
+| Mood vs usual | 3d | +4.9% vs +34.4% | +6.4% vs +41.6% | +2.7% vs +23.6% | 0.56 vs 0.80 | 7% | – |
+| Mood vs usual | 5d | +2.4% vs +34.4% | +3.7% vs +41.6% | +0.3% vs +23.6% | 0.35 vs 0.80 | 7% | – |
+| Mood vs usual | 10d | +2.7% vs +34.4% | +2.1% vs +41.6% | +3.6% vs +23.6% | 0.50 vs 0.80 | 7% | – |
+| News burst | 1d | +3.8% vs +34.4% | +2.0% vs +41.6% | +6.6% vs +23.6% | 0.64 vs 0.80 | 1% | – |
+| News burst | 3d | +1.1% vs +34.4% | +0.4% vs +41.6% | +2.1% vs +23.6% | 0.32 vs 0.80 | 1% | – |
+| News burst | 5d | +0.5% vs +34.4% | +0.7% vs +41.6% | +0.1% vs +23.6% | 0.18 vs 0.80 | 1% | – |
+| News burst | 10d | +1.1% vs +34.4% | +1.2% vs +41.6% | +0.9% vs +23.6% | 0.39 vs 0.80 | 1% | – |
 
 ## Ethereum, Benzinga
 
 | Signal | Obs | Reaction | IC 1d (t) | IC 3d (t) | IC 5d (t) | IC 10d (t) | 5d top / bottom / all |
 |---|---|---|---|---|---|---|---|
 | Mood | 1,532 | +0.211 | -0.024 (-0.9) | +0.009 (+0.2) | -0.004 (-0.1) | +0.008 (+0.1) | +0.79% / +0.36% / +0.11% |
-| Mood vs usual | 1,508 | +0.200 | -0.026 (-1.0) | +0.007 (+0.2) | +0.000 (+0.0) | +0.017 (+0.2) | +0.68% / +0.33% / +0.17% |
+| Mood vs usual | 1,508 | +0.200 | -0.027 (-1.0) | +0.007 (+0.2) | +0.000 (+0.0) | +0.017 (+0.2) | +0.68% / +0.33% / +0.17% |
 | News burst | 1,508 | +0.159 | -0.034 (-1.3) | +0.005 (+0.1) | +0.003 (+0.1) | -0.014 (-0.2) | +0.62% / +0.29% / +0.17% |
 | News volume (unsigned) | 2,713 | -0.021 | -0.002 (-0.1) | -0.015 (-0.4) | -0.003 (-0.1) | -0.024 (-0.4) | +0.16% / +0.19% / +0.83% |
 
@@ -78,18 +78,18 @@ Strategy (long only) vs buy & hold, yearly growth after costs:
 
 | Signal | Hold | All years | 2019-23 | 2024-now | Sharpe (vs B&H) | Time invested | Same rules on the worst news |
 |---|---|---|---|---|---|---|---|
-| Mood | 1d | -4.9% vs +33.4% | +2.5% vs +59.5% | -15.7% vs +0.0% | -0.12 vs 0.77 | 12% | – |
-| Mood | 3d | +2.9% vs +33.4% | +4.0% vs +59.5% | +1.2% vs +0.0% ✓ | 0.27 vs 0.77 | 12% | – |
-| Mood | 5d | +2.1% vs +33.4% | -0.3% vs +59.5% | +6.2% vs +0.0% ✓ | 0.23 vs 0.77 | 12% | – |
-| Mood | 10d | +4.0% vs +33.4% | +1.6% vs +59.5% | +7.9% vs +0.0% ✓ | 0.40 vs 0.77 | 12% | – |
-| Mood vs usual | 1d | -7.3% vs +33.4% | +0.1% vs +59.5% | -18.0% vs +0.0% | -0.36 vs 0.77 | 8% | – |
-| Mood vs usual | 3d | +1.8% vs +33.4% | +2.5% vs +59.5% | +0.6% vs +0.0% ✓ | 0.21 vs 0.77 | 8% | – |
-| Mood vs usual | 5d | +0.5% vs +33.4% | -1.8% vs +59.5% | +4.5% vs +0.0% ✓ | 0.10 vs 0.77 | 8% | – |
-| Mood vs usual | 10d | +3.6% vs +33.4% | -0.4% vs +59.5% | +10.3% vs +0.0% ✓ | 0.44 vs 0.77 | 8% | – |
-| News burst | 1d | +1.1% vs +33.4% | -0.9% vs +59.5% | +4.4% vs +0.0% ✓ | 0.16 vs 0.77 | 2% | – |
-| News burst | 3d | +1.1% vs +33.4% | +0.5% vs +59.5% | +2.2% vs +0.0% ✓ | 0.20 vs 0.77 | 2% | – |
-| News burst | 5d | +1.1% vs +33.4% | +1.9% vs +59.5% | -0.1% vs +0.0% | 0.24 vs 0.77 | 2% | – |
-| News burst | 10d | +1.5% vs +33.4% | +1.7% vs +59.5% | +1.2% vs +0.0% ✓ | 0.34 vs 0.77 | 2% | – |
+| Mood | 1d | -4.9% vs +33.3% | +2.5% vs +59.5% | -15.7% vs -0.1% | -0.12 vs 0.76 | 12% | – |
+| Mood | 3d | +2.9% vs +33.3% | +4.0% vs +59.5% | +1.2% vs -0.1% ✓ | 0.27 vs 0.76 | 12% | – |
+| Mood | 5d | +2.1% vs +33.3% | -0.3% vs +59.5% | +6.2% vs -0.1% ✓ | 0.23 vs 0.76 | 12% | – |
+| Mood | 10d | +4.0% vs +33.3% | +1.6% vs +59.5% | +7.9% vs -0.1% ✓ | 0.40 vs 0.76 | 12% | – |
+| Mood vs usual | 1d | -7.3% vs +33.3% | +0.1% vs +59.5% | -18.0% vs -0.1% | -0.36 vs 0.76 | 8% | – |
+| Mood vs usual | 3d | +1.8% vs +33.3% | +2.5% vs +59.5% | +0.6% vs -0.1% ✓ | 0.21 vs 0.76 | 8% | – |
+| Mood vs usual | 5d | +0.5% vs +33.3% | -1.8% vs +59.5% | +4.5% vs -0.1% ✓ | 0.10 vs 0.76 | 8% | – |
+| Mood vs usual | 10d | +3.6% vs +33.3% | -0.4% vs +59.5% | +10.3% vs -0.1% ✓ | 0.44 vs 0.76 | 8% | – |
+| News burst | 1d | +1.1% vs +33.3% | -0.9% vs +59.5% | +4.4% vs -0.1% ✓ | 0.16 vs 0.76 | 2% | – |
+| News burst | 3d | +1.1% vs +33.3% | +0.5% vs +59.5% | +2.2% vs -0.1% ✓ | 0.20 vs 0.76 | 2% | – |
+| News burst | 5d | +1.1% vs +33.3% | +1.9% vs +59.5% | -0.1% vs -0.1% | 0.24 vs 0.76 | 2% | – |
+| News burst | 10d | +1.5% vs +33.3% | +1.7% vs +59.5% | +1.2% vs -0.1% ✓ | 0.34 vs 0.76 | 2% | – |
 
 ## Gold (GLD), Benzinga
 
@@ -253,25 +253,25 @@ Strategy (long only) vs buy & hold, yearly growth after costs:
 |---|---|---|---|---|---|---|---|
 | Mood | 2,479 | +0.048 | +0.010 (+0.5) | -0.006 (-0.2) | -0.016 (-0.3) | -0.009 (-0.1) | +0.83% / +1.32% / +0.62% |
 | Mood vs usual | 2,459 | +0.055 | +0.004 (+0.2) | -0.015 (-0.4) | -0.027 (-0.6) | -0.017 (-0.3) | +0.44% / +0.85% / +0.67% |
-| News burst | 2,459 | +0.021 | +0.028 (+1.4) | +0.023 (+0.7) | +0.009 (+0.2) | +0.002 (+0.0) | +0.79% / +0.50% / +0.67% |
+| News burst | 2,459 | +0.022 | +0.028 (+1.4) | +0.023 (+0.7) | +0.009 (+0.2) | +0.002 (+0.0) | +0.79% / +0.50% / +0.67% |
 | News volume (unsigned) | 2,713 | -0.005 | -0.003 (-0.1) | -0.048 (-1.4) | -0.051 (-1.2) | -0.077 (-1.3) | +0.38% / +1.24% / +0.66% |
 
 Strategy (long only) vs buy & hold, yearly growth after costs:
 
 | Signal | Hold | All years | 2019-23 | 2024-now | Sharpe (vs B&H) | Time invested | Same rules on the worst news |
 |---|---|---|---|---|---|---|---|
-| Mood | 1d | -0.1% vs +34.5% | -6.8% vs +41.6% | +11.7% vs +23.9% | 0.10 vs 0.80 | 19% | – |
-| Mood | 3d | +7.3% vs +34.5% | +6.3% vs +41.6% | +9.0% vs +23.9% | 0.50 vs 0.80 | 19% | – |
-| Mood | 5d | +6.7% vs +34.5% | +6.1% vs +41.6% | +7.8% vs +23.9% | 0.50 vs 0.80 | 19% | – |
-| Mood | 10d | +3.6% vs +34.5% | -0.0% vs +41.6% | +9.8% vs +23.9% | 0.32 vs 0.80 | 19% | – |
-| Mood vs usual | 1d | -5.0% vs +34.5% | -8.3% vs +41.6% | +0.8% vs +23.9% | -0.20 vs 0.80 | 13% | – |
-| Mood vs usual | 3d | +0.1% vs +34.5% | -2.0% vs +41.6% | +3.4% vs +23.9% | 0.07 vs 0.80 | 13% | – |
-| Mood vs usual | 5d | +2.6% vs +34.5% | +0.9% vs +41.6% | +5.5% vs +23.9% | 0.27 vs 0.80 | 13% | – |
-| Mood vs usual | 10d | +2.3% vs +34.5% | -0.9% vs +41.6% | +7.7% vs +23.9% | 0.26 vs 0.80 | 13% | – |
-| News burst | 1d | +0.7% vs +34.5% | +4.8% vs +41.6% | -5.6% vs +23.9% | 0.12 vs 0.80 | 2% | – |
-| News burst | 3d | +2.2% vs +34.5% | +5.5% vs +41.6% | -2.8% vs +23.9% | 0.36 vs 0.80 | 2% | – |
-| News burst | 5d | +1.1% vs +34.5% | +3.9% vs +41.6% | -3.2% vs +23.9% | 0.24 vs 0.80 | 2% | – |
-| News burst | 10d | +1.4% vs +34.5% | +3.4% vs +41.6% | -1.8% vs +23.9% | 0.30 vs 0.80 | 2% | – |
+| Mood | 1d | -0.1% vs +34.4% | -6.8% vs +41.6% | +11.7% vs +23.6% | 0.10 vs 0.80 | 19% | – |
+| Mood | 3d | +7.3% vs +34.4% | +6.3% vs +41.6% | +9.0% vs +23.6% | 0.50 vs 0.80 | 19% | – |
+| Mood | 5d | +6.7% vs +34.4% | +6.1% vs +41.6% | +7.8% vs +23.6% | 0.50 vs 0.80 | 19% | – |
+| Mood | 10d | +3.6% vs +34.4% | -0.0% vs +41.6% | +9.7% vs +23.6% | 0.32 vs 0.80 | 19% | – |
+| Mood vs usual | 1d | -5.0% vs +34.4% | -8.3% vs +41.6% | +0.8% vs +23.6% | -0.20 vs 0.80 | 13% | – |
+| Mood vs usual | 3d | +0.1% vs +34.4% | -2.0% vs +41.6% | +3.4% vs +23.6% | 0.07 vs 0.80 | 13% | – |
+| Mood vs usual | 5d | +2.6% vs +34.4% | +0.9% vs +41.6% | +5.5% vs +23.6% | 0.27 vs 0.80 | 13% | – |
+| Mood vs usual | 10d | +2.3% vs +34.4% | -0.9% vs +41.6% | +7.6% vs +23.6% | 0.26 vs 0.80 | 13% | – |
+| News burst | 1d | +0.7% vs +34.4% | +4.8% vs +41.6% | -5.6% vs +23.6% | 0.12 vs 0.80 | 2% | – |
+| News burst | 3d | +2.2% vs +34.4% | +5.5% vs +41.6% | -2.8% vs +23.6% | 0.36 vs 0.80 | 2% | – |
+| News burst | 5d | +1.1% vs +34.4% | +3.9% vs +41.6% | -3.2% vs +23.6% | 0.24 vs 0.80 | 2% | – |
+| News burst | 10d | +1.4% vs +34.4% | +3.4% vs +41.6% | -1.8% vs +23.6% | 0.30 vs 0.80 | 2% | – |
 
 ## S&P 500 (SPY), GDELT world news
 
@@ -280,7 +280,7 @@ Strategy (long only) vs buy & hold, yearly growth after costs:
 | Mood | 1,840 | -0.014 | -0.033 (-1.4) | -0.086 (-2.1) | -0.109 (-2.1) | -0.151 (-2.0) | +0.05% / +0.72% / +0.32% |
 | Mood vs usual | 1,840 | -0.001 | -0.021 (-0.9) | -0.069 (-1.7) | -0.081 (-1.6) | -0.124 (-1.7) | +0.05% / +0.57% / +0.32% |
 | News burst | 1,840 | +0.041 | -0.019 (-0.8) | -0.027 (-0.7) | -0.003 (-0.1) | -0.069 (-0.9) | +0.32% / +0.27% / +0.32% |
-| News volume (unsigned) | 1,867 | +0.019 | -0.034 (-1.5) | -0.038 (-0.9) | -0.017 (-0.3) | -0.013 (-0.2) | +0.18% / +0.49% / +0.33% |
+| News volume (unsigned) | 1,867 | +0.019 | -0.034 (-1.5) | -0.038 (-0.9) | -0.017 (-0.3) | -0.014 (-0.2) | +0.18% / +0.49% / +0.33% |
 
 Strategy (long only) vs buy & hold, yearly growth after costs:
 
@@ -302,7 +302,7 @@ Strategy (long only) vs buy & hold, yearly growth after costs:
 ## Verdict
 
 - **Stocks (S&P 100, Benzinga headlines)**: same-day reaction up to +0.077; no signal predicts the next days reliably (all |t| < 2); beats buy & hold in both halves: none.
-- **Crypto, 11 coins pooled (Benzinga)**: same-day reaction up to +0.344; predictive (|t| ≥ 2, same sign before and after 2024): Mood vs usual 1d (IC -0.025); beats buy & hold in both halves: none.
+- **Crypto, 11 coins pooled (Benzinga)**: same-day reaction up to +0.343; predictive (|t| ≥ 2, same sign before and after 2024): Mood vs usual 1d (IC -0.025); beats buy & hold in both halves: none.
 - **Bitcoin, Benzinga**: same-day reaction up to +0.177; no signal predicts the next days reliably (all |t| < 2); beats buy & hold in both halves: none.
 - **Ethereum, Benzinga**: same-day reaction up to +0.211; no signal predicts the next days reliably (all |t| < 2); beats buy & hold in both halves: none.
 - **Gold (GLD), Benzinga**: same-day reaction up to +0.040; no signal predicts the next days reliably (all |t| < 2); beats buy & hold in both halves: none.
