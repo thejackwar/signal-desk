@@ -1,6 +1,6 @@
 # Strategy screen: 87 new stock strategies
 
-Generated 2026-11-04 01:02 UTC. Universe: the point-in-time top 100 (234 different stocks). Costs 10 bp per side. Idle money earns T-bills. Nothing on the website changes.
+Generated 2026-11-04 10:06 UTC. Universe: the point-in-time top 100 (234 different stocks). Costs 10 bp per side. Idle money earns T-bills. Nothing on the website changes.
 
 **How it works (fixed before the run):** every strategy is screened on 2021-01-01 to now. Those with a higher Sharpe than holding the same stocks are ranked by how often they beat holding in a block bootstrap; the best 15 are then run on 2018-01-01 to 2020-12-31, years never used to pick them. Confirmed = beats holding in at least 70% of bootstraps there, with a higher Sharpe. Failed = under 40%.
 

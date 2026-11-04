@@ -1,13 +1,13 @@
 {
  "meta": {
-  "generated": "2026-11-04 01:02 UTC",
+  "generated": "2026-11-04 10:06 UTC",
   "demo": false,
   "screen": "2021-01-01 to now",
   "confirm": "2018-01-01 to 2020-12-31",
   "cost_bps": 10,
   "tried": 87,
   "stocks": 234,
-  "runtime_min": 43.9
+  "runtime_min": 42.9
  },
  "benchmarks": {
   "hold_same_stocks": {
