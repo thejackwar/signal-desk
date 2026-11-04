@@ -42,6 +42,7 @@ import engine as E  # noqa: E402
 import metrics as M  # noqa: E402
 import universe as U  # noqa: E402
 import screen_strategies as S  # noqa: E402
+import screen_improve as I  # noqa: E402
 
 OUT = HERE / "results" / "screen"
 WARM = "2011-01-01"
@@ -49,6 +50,8 @@ SCREEN = ("2021-01-01", "2100-01-01")
 CONFIRM = ("2018-01-01", "2020-12-31")
 COST = 10
 FINALISTS = 15
+DEV = ("2018-01-01", "2100-01-01")          # improve: years already seen, used to pick
+HOLDOUT = ("2011-01-01", "2017-12-31")      # improve: never looked at, judged once
 
 
 def cut(s: pd.Series, p) -> pd.Series:
@@ -123,6 +126,7 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--demo", action="store_true")
     ap.add_argument("--only")
+    ap.add_argument("--set", default="screen", choices=["screen", "improve"])
     args = ap.parse_args()
     t0 = time.time()
 
@@ -154,7 +158,8 @@ def main():
     ew = E.equal_weight(x.R[pit.columns], pit)
     spy_r = x.spy_r
 
-    sids = list(S.REG)
+    REG = S.REG if args.set == "screen" else I.REG
+    sids = list(REG)
     if args.only:
         sids = [s for s in sids if s in args.only.split(",")]
     if "site_lineup_vote" in sids:
@@ -167,13 +172,16 @@ def main():
     for k, sid in enumerate(sids):
         t1 = time.time()
         try:
-            out = S.REG[sid][1](x)
+            out = REG[sid][1](x)
             acc[sid] = evaluate(x, out)
             print(f"  [{k + 1}/{len(sids)}] {sid}  {time.time() - t1:.0f}s", flush=True)
         except Exception as e:  # noqa: BLE001
             errors[sid] = f"{type(e).__name__}: {e}"
             print(f"  [{k + 1}/{len(sids)}] {sid}  ERROR {errors[sid]}", flush=True)
             traceback.print_exc()
+
+    if args.set == "improve":
+        return improve_report(acc, ew, spy_r, x, args, t0, len(data))
 
     rows = {}
     act = {s: cut(a["net"] - ew, SCREEN) for s, a in acc.items()}
@@ -212,9 +220,73 @@ def main():
             "tried": len(acc), "stocks": len(data), "runtime_min": round((time.time() - t0) / 60, 1)}
     rep = {"meta": meta, "benchmarks": bench, "finalists": finalists, "strategies": rows, "errors": errors}
     (OUT / "screen.json").write_text(json.dumps(r4(rep), indent=1))
-    pd.DataFrame({s: a["net"] for s, a in acc.items()})[lambda d: d.index >= WARM].astype("float32").to_parquet(OUT / "nets.parquet")
+    pd.DataFrame({**{s: a["net"] for s, a in acc.items()}, "_hold": ew, "_spy": spy_r})[lambda d: d.index >= WARM].astype("float32").to_parquet(OUT / "nets.parquet")
     (OUT / "REPORT.md").write_text(markdown(rep))
     print(f"Done in {(time.time() - t0) / 60:.1f} min. Finalists: {finalists}", flush=True)
+
+
+def improve_report(acc, ew, spy_r, x, args, t0, nstocks):
+    """Pick the best variant per strategy on DEV, judge it once on HOLDOUT."""
+    out_dir = HERE / "results" / "improve"
+    out_dir.mkdir(parents=True, exist_ok=True)
+    act = {s: (a["net"] - ew)[lambda r: r.index >= WARM] for s, a in acc.items()}
+    prev = OUT / "nets.parquet"
+    if prev.exists():                                   # the 87 screen strategies count as tries too
+        nets = pd.read_parquet(prev)
+        for c in nets.columns:
+            if not c.startswith("_") and c not in act:
+                act[c] = (nets[c].astype(float) - ew.reindex(nets.index)).dropna()
+    trial = [float(v.mean() / v.std()) for v in act.values() if v.std() > 0]
+    rows = {}
+    for s, a in acc.items():
+        rows[s] = {"group": I.REG[s][0], "base": s in I.BASE.values(),
+                   "dev": period_stats(a, ew, DEV), "holdout": period_stats(a, ew, HOLDOUT),
+                   "dsr_full": M.deflated_sharpe(act[s], trial)}
+    hd, hh = M.stats(cut(ew, DEV))["sharpe"], M.stats(cut(ew, HOLDOUT))["sharpe"]
+    picks = {}
+    for g in I.BASE:
+        mem = [s for s in rows if rows[s]["group"] == g]
+        best = max(mem, key=lambda s: (rows[s]["dev"].get("sharpe") or -9))
+        h = rows[best]["holdout"]
+        p = (h.get("vs_hold") or {}).get("p_better")
+        verdict = "No data" if p is None else "Holds up" if p >= 0.70 and (h.get("sharpe") or -9) > hh else "Fails" if p < 0.40 else "Mixed"
+        picks[g] = {"pick": best, "verdict": verdict}
+    bench = {n: {"dev": M.stats(cut(r, DEV)), "holdout": M.stats(cut(r, HOLDOUT))}
+             for n, r in (("hold_same_stocks", ew), ("spy", spy_r))}
+    meta = {"generated": datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC"), "demo": args.demo,
+            "dev": DEV[0] + " to now", "holdout": f"{HOLDOUT[0]} to {HOLDOUT[1]}", "tried_total": len(trial),
+            "stocks": nstocks, "runtime_min": round((time.time() - t0) / 60, 1)}
+    rep = r4({"meta": meta, "benchmarks": bench, "picks": picks, "strategies": rows})
+    (out_dir / "improve.json").write_text(json.dumps(rep, indent=1))
+    pd.DataFrame({s: a["net"] for s, a in acc.items()})[lambda d: d.index >= WARM].astype("float32").to_parquet(out_dir / "nets.parquet")
+
+    L = ["# Improving residual momentum and the high-volume premium", "",
+         f"Generated {meta['generated']}{' (DEMO prices, not real)' if args.demo else ''}. Same universe and 10 bp costs as the screen. "
+         "The ten variants and the rule for picking were fixed before the run (see screen_improve.py).", "",
+         f"**Step 1, pick on {meta['dev']}** (years already seen): the best Sharpe minus holding's per strategy.", "",
+         "| Strategy | Variant | CAGR | Sharpe | vs hold | Worst drop | Beats hold | Turnover/yr | Sharpe @25bp |",
+         "|---|---|---|---|---|---|---|---|---|"]
+    for g in I.BASE:
+        for s in [k for k in rows if rows[k]["group"] == g]:
+            d = rows[s]["dev"]
+            tag = " (base)" if rows[s]["base"] else ""
+            star = " ★" if picks[g]["pick"] == s else ""
+            L.append(f"| {g} | `{s}`{tag}{star} | {P(d.get('cagr'))} | {F(d.get('sharpe'))} | {F((d.get('sharpe') or 0) - hd)} | "
+                     f"{P(d.get('maxdd'), 0)} | {P((d.get('vs_hold') or {}).get('p_better'), 0)} | {F(d.get('turnover'), 1)} | {F(d.get('sharpe_25bp'))} |")
+    L += ["", f"Holding the same stocks: Sharpe {F(hd)}. ★ = picked.", "",
+          f"## Step 2, the one-shot check on {meta['holdout']} (never looked at before)", "",
+          "| Strategy | Picked | CAGR | Sharpe | Holding's Sharpe | Beats hold | Base, same years (Sharpe) | Verdict |",
+          "|---|---|---|---|---|---|---|---|"]
+    for g, pk in picks.items():
+        h, b = rows[pk["pick"]]["holdout"], rows[I.BASE[g]]["holdout"]
+        L.append(f"| {g} | `{pk['pick']}` | {P(h.get('cagr'))} | {F(h.get('sharpe'))} | {F(hh)} | "
+                 f"{P((h.get('vs_hold') or {}).get('p_better'), 0)} | {F(b.get('sharpe'))} | **{pk['verdict']}** |")
+    L += ["", "Holds up = beats holding in at least 70% of bootstraps on these years, with a higher Sharpe. "
+          "Residual momentum needs 3 years of history, so its check starts in 2012.", "",
+          f"Deflated Sharpe over 2011–now, counting all {len(trial)} strategies tried: " +
+          ", ".join(f"`{pk['pick']}` {F(rows[pk['pick']]['dsr_full'])}" for pk in picks.values()) + " (0.95 is the usual bar)."]
+    (out_dir / "REPORT.md").write_text("\n".join(L) + "\n")
+    print(f"Done in {(time.time() - t0) / 60:.1f} min. Picks: {picks}", flush=True)
 
 
 def r4(v):

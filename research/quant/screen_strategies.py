@@ -251,8 +251,16 @@ def mom_12_1(x):
     return _mom10(x)
 
 
+def resid_mom_score(x):
+    return x._get("residmom", lambda: _resid_mom_score(x))
+
+
 @strat("mom_residual_12_1", F_MOM)
 def mom_residual_12_1(x):
+    return topn(x, resid_mom_score(x), 10, x.me)
+
+
+def _resid_mom_score(x):
     # Residuals from a 3-year regression on SPY, summed over months 12 to 2 back (a regression
     # over only those months would make the residuals sum to zero by construction).
     R = x.R.values
@@ -272,7 +280,7 @@ def mom_residual_12_1(x):
         e = (Y - Xd @ coef)[-252:-21]
         sc = e.sum(axis=0) / e.std(axis=0)
         out.iloc[i, np.flatnonzero(good)] = sc
-    return topn(x, out, 10, x.me)
+    return out
 
 
 @strat("mom_52wk_high", F_MOM)
@@ -869,9 +877,12 @@ def amihud_illiquid(x):
 
 @strat("high_volume_premium", F_VOL)
 def high_volume_premium(x):
-    av = x.V.rolling(5).mean() / x.V.shift(5).rolling(50).mean()
-    r5 = x.ret(5)
-    return topn(x, av, 10, x.me, eligible=r5.abs() <= 0.05)
+    return topn(x, abnormal_volume(x), 10, x.me, eligible=x.ret(5).abs() <= 0.05)
+
+
+def abnormal_volume(x):
+    """Average volume of the last 5 days / of the 50 days before them."""
+    return x._get("av", lambda: x.V.rolling(5).mean() / x.V.shift(5).rolling(50).mean())
 
 
 @strat("obv_accumulation", F_VOL)

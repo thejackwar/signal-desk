@@ -1,13 +1,13 @@
 name: Strategy screen
 
 # The 87 new price-only stock strategies (research/quant/screen.py): screened on 2021-now,
-# the best 15 confirmed on 2018-2020. Writes research/quant/results/screen/ on this branch only;
-# the site's line-up and pages are not touched.
+# the best 15 confirmed on 2018-2020; then the improvement tests (screen.py --set improve) and the
+# Research page data (docs/data/research.json). Writes to this branch only; the live site is untouched.
 on:
   workflow_dispatch: {}
   push:
     branches: [strategy-screen]
-    paths: ["research/quant/screen*.py", ".github/workflows/strategy-screen.yml"]
+    paths: ["research/quant/screen*.py", "research/quant/data/screen_descriptions.json", ".github/workflows/strategy-screen.yml"]
 
 permissions:
   contents: write
@@ -40,12 +40,18 @@ jobs:
       - name: Run the screen
         run: python -u research/quant/screen.py
 
+      - name: Improvement tests (residual momentum, high-volume premium)
+        run: python -u research/quant/screen.py --set improve
+
+      - name: Research page data
+        run: python research/quant/screen_site.py
+
       - name: Publish results to this branch
         if: always()
         run: |
           git config user.name "signal-desk-bot"
           git config user.email "signal-desk-bot@users.noreply.github.com"
-          git add research/quant/results/screen || true
+          git add research/quant/results/screen research/quant/results/improve docs/data/research.json || true
           git diff --cached --quiet || git commit -m "Strategy screen $(date -u +%F)"
           git pull --rebase
           git push
