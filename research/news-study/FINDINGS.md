@@ -21,7 +21,12 @@ are describing a move that already happened, so this can't be traded.
   in the Vault (engine/news_signal.py, bot_strategies.btc_news_step_aside).
 - S&P 500 (SPY), world news: contrarian. Gloomy market news was followed by better SPY returns
   (IC -0.11 over 5 days, -0.15 over 10, same sign in both halves and stronger since 2024; gloomiest
-  fifth of days +0.72% over 5 days vs +0.32% on average). Not yet tested as a strategy.
+  fifth of days +0.72% over 5 days vs +0.32% on average). As a strategy on SPY (contrarian.md: buy
+  after a gloomy day, hold 5 sessions after the last one) it trails holding SPY, +11.2% vs +16.2% a
+  year since mid-2019 (+8.3% vs +14.4% in 2019-23, +16.0% vs +19.3% since 2024), because it's in cash
+  more than half the time. Its days in the market were better than average (+0.109% vs +0.067% a
+  day), but 10% of random sets of days did as well, so that's not proven either. On the site as
+  "News Contrarian (S&P 500)", in the Vault, so users can see the result.
 
 GDELT note: its API throttles GitHub's runners hard; fetch_gdelt.py asks for the whole span in one
 request per theme with long back-off, which took about 4 hours but got through.
