@@ -1,0 +1,3891 @@
+{
+ "meta": {
+  "generated": "2026-11-04 01:02 UTC",
+  "demo": false,
+  "screen": "2021-01-01 to now",
+  "confirm": "2018-01-01 to 2020-12-31",
+  "cost_bps": 10,
+  "tried": 87,
+  "stocks": 234,
+  "runtime_min": 43.9
+ },
+ "benchmarks": {
+  "hold_same_stocks": {
+   "screen": {
+    "cagr": 0.1506,
+    "vol": 0.1766,
+    "sharpe": 0.8826,
+    "sortino": 1.2816,
+    "maxdd": -0.2527
+   },
+   "confirm": {
+    "cagr": 0.1546,
+    "vol": 0.2479,
+    "sharpe": 0.7048,
+    "sortino": 0.9741,
+    "maxdd": -0.3469
+   }
+  },
+  "spy": {
+   "screen": {
+    "cagr": 0.1432,
+    "vol": 0.1658,
+    "sharpe": 0.8903,
+    "sortino": 1.295,
+    "maxdd": -0.245
+   },
+   "confirm": {
+    "cagr": 0.1401,
+    "vol": 0.2283,
+    "sharpe": 0.6893,
+    "sortino": 0.9411,
+    "maxdd": -0.3372
+   }
+  }
+ },
+ "finalists": [
+  "santa_rally",
+  "mom_residual_12_1",
+  "high_volume_premium",
+  "market_absorption_ratio",
+  "near_52wk_low_avoid",
+  "inv_vol_universe",
+  "lottery_max_avoid",
+  "low_idio_vol",
+  "site_lineup_vote",
+  "breadth_scaled_exposure",
+  "protective_breadth_mom",
+  "min_variance"
+ ],
+ "strategies": {
+  "mom_12_1": {
+   "family": "Cross-sectional momentum",
+   "intraday": null,
+   "screen": {
+    "cagr": 0.1797,
+    "vol": 0.3621,
+    "sharpe": 0.6383,
+    "sortino": 0.892,
+    "maxdd": -0.4032,
+    "turnover": 6.9446,
+    "invested": 1.0,
+    "exposure": 1.0,
+    "vs_hold": {
+     "diff": -0.2444,
+     "lo": -0.6734,
+     "hi": 0.3209,
+     "p_better": 0.2845
+    },
+    "sharpe_25bp": 0.6095,
+    "sharpe_0bp": 0.6575,
+    "sharpe_lag1": 0.6434
+   },
+   "confirm": {
+    "cagr": 0.1893,
+    "vol": 0.3227,
+    "sharpe": 0.6997,
+    "sortino": 0.9769,
+    "maxdd": -0.3376,
+    "turnover": 7.0667,
+    "invested": 1.0,
+    "exposure": 1.0,
+    "vs_hold": {
+     "diff": -0.0052,
+     "lo": -0.5816,
+     "hi": 0.4486,
+     "p_better": 0.464
+    },
+    "sharpe_25bp": 0.6669,
+    "sharpe_0bp": 0.7215,
+    "sharpe_lag1": 0.6634
+   },
+   "dsr_screen": 0.0,
+   "verdict": null
+  },
+  "mom_residual_12_1": {
+   "family": "Cross-sectional momentum",
+   "intraday": null,
+   "screen": {
+    "cagr": 0.2634,
+    "vol": 0.2607,
+    "sharpe": 1.0275,
+    "sortino": 1.4997,
+    "maxdd": -0.2499,
+    "turnover": 9.5231,
+    "invested": 1.0,
+    "exposure": 1.0,
+    "vs_hold": {
+     "diff": 0.1449,
+     "lo": -0.3228,
+     "hi": 0.6592,
+     "p_better": 0.73
+    },
+    "sharpe_25bp": 0.9725,
+    "sharpe_0bp": 1.0639,
+    "sharpe_lag1": 1.0416
+   },
+   "confirm": {
+    "cagr": 0.0895,
+    "vol": 0.2593,
+    "sharpe": 0.4612,
+    "sortino": 0.6306,
+    "maxdd": -0.3467,
+    "turnover": 9.9333,
+    "invested": 1.0,
+    "exposure": 1.0,
+    "vs_hold": {
+     "diff": -0.2437,
+     "lo": -0.6819,
+     "hi": 0.1115,
+     "p_better": 0.128
+    },
+    "sharpe_25bp": 0.4038,
+    "sharpe_0bp": 0.4995,
+    "sharpe_lag1": 0.4329
+   },
+   "dsr_screen": 0.0,
+   "verdict": "Failed"
+  },
+  "mom_52wk_high": {
+   "family": "Cross-sectional momentum",
+   "intraday": null,
+   "screen": {
+    "cagr": 0.0341,
+    "vol": 0.1895,
+    "sharpe": 0.2716,
+    "sortino": 0.3803,
+    "maxdd": -0.3017,
+    "turnover": 18.0835,
+    "invested": 1.0,
+    "exposure": 1.0,
+    "vs_hold": {
+     "diff": -0.6112,
+     "lo": -1.1473,
+     "hi": -0.0796,
+     "p_better": 0.0275
+    },
+    "sharpe_25bp": 0.1284,
+    "sharpe_0bp": 0.3669,
+    "sharpe_lag1": 0.2105
+   },
+   "confirm": {
+    "cagr": 0.1518,
+    "vol": 0.2291,
+    "sharpe": 0.7325,
+    "sortino": 1.0043,
+    "maxdd": -0.2728,
+    "turnover": 16.1333,
+    "invested": 1.0,
+    "exposure": 1.0,
+    "vs_hold": {
+     "diff": 0.0277,
+     "lo": -0.4572,
+     "hi": 0.456,
+     "p_better": 0.577
+    },
+    "sharpe_25bp": 0.6259,
+    "sharpe_0bp": 0.8033,
+    "sharpe_lag1": 0.7315
+   },
+   "dsr_screen": 0.0,
+   "verdict": null
+  },
+  "mom_frog_in_pan": {
+   "family": "Cross-sectional momentum",
+   "intraday": null,
+   "screen": {
+    "cagr": 0.1392,
+    "vol": 0.281,
+    "sharpe": 0.6045,
+    "sortino": 0.8521,
+    "maxdd": -0.3784,
+    "turnover": 8.1135,
+    "invested": 1.0,
+    "exposure": 1.0,
+    "vs_hold": {
+     "diff": -0.2782,
+     "lo": -0.6739,
+     "hi": 0.265,
+     "p_better": 0.2395
+    },
+    "sharpe_25bp": 0.561,
+    "sharpe_0bp": 0.6334,
+    "sharpe_lag1": 0.5922
+   },
+   "confirm": {
+    "cagr": 0.1967,
+    "vol": 0.2753,
+    "sharpe": 0.7901,
+    "sortino": 1.1181,
+    "maxdd": -0.3373,
+    "turnover": 7.0,
+    "invested": 1.0,
+    "exposure": 1.0,
+    "vs_hold": {
+     "diff": 0.0853,
+     "lo": -0.3875,
+     "hi": 0.5029,
+     "p_better": 0.604
+    },
+    "sharpe_25bp": 0.7519,
+    "sharpe_0bp": 0.8154,
+    "sharpe_lag1": 0.7372
+   },
+   "dsr_screen": 0.0,
+   "verdict": null
+  },
+  "mom_risk_adjusted": {
+   "family": "Cross-sectional momentum",
+   "intraday": null,
+   "screen": {
+    "cagr": 0.1987,
+    "vol": 0.3071,
+    "sharpe": 0.7439,
+    "sortino": 1.065,
+    "maxdd": -0.3524,
+    "turnover": 7.7697,
+    "invested": 1.0,
+    "exposure": 1.0,
+    "vs_hold": {
+     "diff": -0.1387,
+     "lo": -0.6206,
+     "hi": 0.4384,
+     "p_better": 0.3985
+    },
+    "sharpe_25bp": 0.7058,
+    "sharpe_0bp": 0.7693,
+    "sharpe_lag1": 0.7334
+   },
+   "confirm": {
+    "cagr": 0.1898,
+    "vol": 0.2768,
+    "sharpe": 0.7671,
+    "sortino": 1.075,
+    "maxdd": -0.3252,
+    "turnover": 8.3333,
+    "invested": 1.0,
+    "exposure": 1.0,
+    "vs_hold": {
+     "diff": 0.0623,
+     "lo": -0.5048,
+     "hi": 0.5291,
+     "p_better": 0.544
+    },
+    "sharpe_25bp": 0.7219,
+    "sharpe_0bp": 0.7972,
+    "sharpe_lag1": 0.7906
+   },
+   "dsr_screen": 0.0,
+   "verdict": null
+  },
+  "mom_vol_managed": {
+   "family": "Cross-sectional momentum",
+   "intraday": null,
+   "screen": {
+    "cagr": 0.1286,
+    "vol": 0.1635,
+    "sharpe": 0.8216,
+    "sortino": 1.1653,
+    "maxdd": -0.1835,
+    "turnover": 3.9654,
+    "invested": 1.0,
+    "exposure": 0.5145,
+    "vs_hold": {
+     "diff": -0.061,
+     "lo": -0.5252,
+     "hi": 0.4295,
+     "p_better": 0.4275
+    },
+    "sharpe_25bp": 0.7853,
+    "sharpe_0bp": 0.8458,
+    "sharpe_lag1": 0.8206
+   },
+   "confirm": {
+    "cagr": 0.0767,
+    "vol": 0.2145,
+    "sharpe": 0.4522,
+    "sortino": 0.6171,
+    "maxdd": -0.2756,
+    "turnover": 4.8618,
+    "invested": 1.0,
+    "exposure": 0.6055,
+    "vs_hold": {
+     "diff": -0.2528,
+     "lo": -0.8548,
+     "hi": 0.2162,
+     "p_better": 0.1885
+    },
+    "sharpe_25bp": 0.4183,
+    "sharpe_0bp": 0.4748,
+    "sharpe_lag1": 0.3808
+   },
+   "dsr_screen": 0.0,
+   "verdict": null
+  },
+  "mom_bear_switch": {
+   "family": "Cross-sectional momentum",
+   "intraday": null,
+   "screen": {
+    "cagr": 0.1702,
+    "vol": 0.3617,
+    "sharpe": 0.6164,
+    "sortino": 0.8603,
+    "maxdd": -0.4032,
+    "turnover": 7.3572,
+    "invested": 1.0,
+    "exposure": 1.0,
+    "vs_hold": {
+     "diff": -0.2663,
+     "lo": -0.701,
+     "hi": 0.2967,
+     "p_better": 0.259
+    },
+    "sharpe_25bp": 0.5858,
+    "sharpe_0bp": 0.6367,
+    "sharpe_lag1": 0.6343
+   },
+   "confirm": {
+    "cagr": 0.1893,
+    "vol": 0.3227,
+    "sharpe": 0.6997,
+    "sortino": 0.9769,
+    "maxdd": -0.3376,
+    "turnover": 7.0667,
+    "invested": 1.0,
+    "exposure": 1.0,
+    "vs_hold": {
+     "diff": -0.0052,
+     "lo": -0.5816,
+     "hi": 0.4486,
+     "p_better": 0.464
+    },
+    "sharpe_25bp": 0.6669,
+    "sharpe_0bp": 0.7215,
+    "sharpe_lag1": 0.6634
+   },
+   "dsr_screen": 0.0,
+   "verdict": null
+  },
+  "mom_time_series_stock": {
+   "family": "Dual / absolute momentum",
+   "intraday": null,
+   "screen": {
+    "cagr": 0.1448,
+    "vol": 0.1772,
+    "sharpe": 0.8517,
+    "sortino": 1.2117,
+    "maxdd": -0.2087,
+    "turnover": 4.128,
+    "invested": 1.0,
+    "exposure": 1.0,
+    "vs_hold": {
+     "diff": -0.0309,
+     "lo": -0.2473,
+     "hi": 0.2208,
+     "p_better": 0.488
+    },
+    "sharpe_25bp": 0.8168,
+    "sharpe_0bp": 0.8748,
+    "sharpe_lag1": 0.8127
+   },
+   "confirm": {
+    "cagr": 0.1442,
+    "vol": 0.24,
+    "sharpe": 0.682,
+    "sortino": 0.9438,
+    "maxdd": -0.322,
+    "turnover": 4.5695,
+    "invested": 1.0,
+    "exposure": 1.0,
+    "vs_hold": {
+     "diff": -0.0228,
+     "lo": -0.2455,
+     "hi": 0.165,
+     "p_better": 0.4425
+    },
+    "sharpe_25bp": 0.6533,
+    "sharpe_0bp": 0.7012,
+    "sharpe_lag1": 0.6745
+   },
+   "dsr_screen": 0.0,
+   "verdict": null
+  },
+  "mom_intermediate_12_7": {
+   "family": "Cross-sectional momentum",
+   "intraday": null,
+   "screen": {
+    "cagr": 0.2303,
+    "vol": 0.33,
+    "sharpe": 0.7938,
+    "sortino": 1.1321,
+    "maxdd": -0.3705,
+    "turnover": 9.5574,
+    "invested": 1.0,
+    "exposure": 1.0,
+    "vs_hold": {
+     "diff": -0.0888,
+     "lo": -0.4768,
+     "hi": 0.3858,
+     "p_better": 0.4385
+    },
+    "sharpe_25bp": 0.7503,
+    "sharpe_0bp": 0.8227,
+    "sharpe_lag1": 0.7448
+   },
+   "confirm": {
+    "cagr": 0.1147,
+    "vol": 0.2922,
+    "sharpe": 0.5185,
+    "sortino": 0.7167,
+    "maxdd": -0.3522,
+    "turnover": 10.8667,
+    "invested": 1.0,
+    "exposure": 1.0,
+    "vs_hold": {
+     "diff": -0.1865,
+     "lo": -0.7027,
+     "hi": 0.1855,
+     "p_better": 0.2325
+    },
+    "sharpe_25bp": 0.4628,
+    "sharpe_0bp": 0.5555,
+    "sharpe_lag1": 0.4198
+   },
+   "dsr_screen": 0.0,
+   "verdict": null
+  },
+  "mom_acceleration": {
+   "family": "Cross-sectional momentum",
+   "intraday": null,
+   "screen": {
+    "cagr": 0.1271,
+    "vol": 0.2768,
+    "sharpe": 0.5712,
+    "sortino": 0.7947,
+    "maxdd": -0.3385,
+    "turnover": 11.6202,
+    "invested": 1.0,
+    "exposure": 1.0,
+    "vs_hold": {
+     "diff": -0.3116,
+     "lo": -0.7921,
+     "hi": 0.25,
+     "p_better": 0.2085
+    },
+    "sharpe_25bp": 0.5081,
+    "sharpe_0bp": 0.6131,
+    "sharpe_lag1": 0.563
+   },
+   "confirm": {
+    "cagr": 0.2109,
+    "vol": 0.2633,
+    "sharpe": 0.86,
+    "sortino": 1.1908,
+    "maxdd": -0.3248,
+    "turnover": 11.6667,
+    "invested": 1.0,
+    "exposure": 1.0,
+    "vs_hold": {
+     "diff": 0.1553,
+     "lo": -0.2896,
+     "hi": 0.5778,
+     "p_better": 0.7535
+    },
+    "sharpe_25bp": 0.7927,
+    "sharpe_0bp": 0.9047,
+    "sharpe_lag1": 0.9444
+   },
+   "dsr_screen": 0.0,
+   "verdict": null
+  },
+  "mom_consistent": {
+   "family": "Cross-sectional momentum",
+   "intraday": null,
+   "screen": {
+    "cagr": 0.1288,
+    "vol": 0.3066,
+    "sharpe": 0.5488,
+    "sortino": 0.7799,
+    "maxdd": -0.3791,
+    "turnover": 9.5574,
+    "invested": 1.0,
+    "exposure": 0.9311,
+    "vs_hold": {
+     "diff": -0.3339,
+     "lo": -0.8287,
+     "hi": 0.2148,
+     "p_better": 0.181
+    },
+    "sharpe_25bp": 0.5018,
+    "sharpe_0bp": 0.58,
+    "sharpe_lag1": 0.5624
+   },
+   "confirm": {
+    "cagr": 0.1399,
+    "vol": 0.308,
+    "sharpe": 0.5797,
+    "sortino": 0.813,
+    "maxdd": -0.3305,
+    "turnover": 8.4667,
+    "invested": 1.0,
+    "exposure": 0.9922,
+    "vs_hold": {
+     "diff": -0.1252,
+     "lo": -0.699,
+     "hi": 0.3139,
+     "p_better": 0.312
+    },
+    "sharpe_25bp": 0.5386,
+    "sharpe_0bp": 0.6071,
+    "sharpe_lag1": 0.5355
+   },
+   "dsr_screen": 0.0,
+   "verdict": null
+  },
+  "mom_clenow_regression": {
+   "family": "Cross-sectional momentum",
+   "intraday": null,
+   "screen": {
+    "cagr": 0.1264,
+    "vol": 0.2202,
+    "sharpe": 0.6506,
+    "sortino": 0.9442,
+    "maxdd": -0.2487,
+    "turnover": 10.2794,
+    "invested": 0.9366,
+    "exposure": 0.8797,
+    "vs_hold": {
+     "diff": -0.2321,
+     "lo": -0.8902,
+     "hi": 0.3158,
+     "p_better": 0.2175
+    },
+    "sharpe_25bp": 0.5807,
+    "sharpe_0bp": 0.6971,
+    "sharpe_lag1": 0.6695
+   },
+   "confirm": {
+    "cagr": 0.125,
+    "vol": 0.2086,
+    "sharpe": 0.6696,
+    "sortino": 0.9057,
+    "maxdd": -0.2131,
+    "turnover": 9.7333,
+    "invested": 1.0,
+    "exposure": 0.8951,
+    "vs_hold": {
+     "diff": -0.0353,
+     "lo": -0.8333,
+     "hi": 0.5523,
+     "p_better": 0.4105
+    },
+    "sharpe_25bp": 0.5997,
+    "sharpe_0bp": 0.7161,
+    "sharpe_lag1": 0.584
+   },
+   "dsr_screen": 0.0,
+   "verdict": null
+  },
+  "rev_1w": {
+   "family": "Short-term reversal",
+   "intraday": null,
+   "screen": {
+    "cagr": 0.16,
+    "vol": 0.2965,
+    "sharpe": 0.6485,
+    "sortino": 0.95,
+    "maxdd": -0.3574,
+    "turnover": 90.2112,
+    "invested": 1.0,
+    "exposure": 1.0,
+    "vs_hold": {
+     "diff": -0.2342,
+     "lo": -0.6931,
+     "hi": 0.1609,
+     "p_better": 0.1705
+    },
+    "sharpe_25bp": 0.1917,
+    "sharpe_0bp": 0.9526,
+    "sharpe_lag1": 0.5957
+   },
+   "confirm": {
+    "cagr": 0.166,
+    "vol": 0.3488,
+    "sharpe": 0.615,
+    "sortino": 0.898,
+    "maxdd": -0.4668,
+    "turnover": 90.2,
+    "invested": 1.0,
+    "exposure": 1.0,
+    "vs_hold": {
+     "diff": -0.0898,
+     "lo": -0.6136,
+     "hi": 0.4013,
+     "p_better": 0.391
+    },
+    "sharpe_25bp": 0.2264,
+    "sharpe_0bp": 0.8743,
+    "sharpe_lag1": 0.529
+   },
+   "dsr_screen": 0.0,
+   "verdict": null
+  },
+  "rev_1m": {
+   "family": "Short-term reversal",
+   "intraday": null,
+   "screen": {
+    "cagr": 0.1307,
+    "vol": 0.2836,
+    "sharpe": 0.5747,
+    "sortino": 0.8412,
+    "maxdd": -0.3672,
+    "turnover": 21.3495,
+    "invested": 1.0,
+    "exposure": 1.0,
+    "vs_hold": {
+     "diff": -0.308,
+     "lo": -0.7713,
+     "hi": 0.1083,
+     "p_better": 0.1085
+    },
+    "sharpe_25bp": 0.4609,
+    "sharpe_0bp": 0.6505,
+    "sharpe_lag1": 0.7926
+   },
+   "confirm": {
+    "cagr": 0.0988,
+    "vol": 0.3436,
+    "sharpe": 0.448,
+    "sortino": 0.6265,
+    "maxdd": -0.5005,
+    "turnover": 20.3333,
+    "invested": 1.0,
+    "exposure": 1.0,
+    "vs_hold": {
+     "diff": -0.257,
+     "lo": -0.6108,
+     "hi": 0.11,
+     "p_better": 0.1145
+    },
+    "sharpe_25bp": 0.3591,
+    "sharpe_0bp": 0.5071,
+    "sharpe_lag1": 0.4012
+   },
+   "dsr_screen": 0.0,
+   "verdict": null
+  },
+  "rev_residual_1w": {
+   "family": "Short-term reversal",
+   "intraday": null,
+   "screen": {
+    "cagr": 0.0983,
+    "vol": 0.2897,
+    "sharpe": 0.4688,
+    "sortino": 0.6692,
+    "maxdd": -0.3893,
+    "turnover": 89.1454,
+    "invested": 1.0,
+    "exposure": 1.0,
+    "vs_hold": {
+     "diff": -0.414,
+     "lo": -0.8179,
+     "hi": -0.0465,
+     "p_better": 0.0355
+    },
+    "sharpe_25bp": 0.0072,
+    "sharpe_0bp": 0.7765,
+    "sharpe_lag1": 0.5883
+   },
+   "confirm": {
+    "cagr": 0.2308,
+    "vol": 0.3549,
+    "sharpe": 0.7617,
+    "sortino": 1.1494,
+    "maxdd": -0.4356,
+    "turnover": 90.7333,
+    "invested": 1.0,
+    "exposure": 1.0,
+    "vs_hold": {
+     "diff": 0.057,
+     "lo": -0.4499,
+     "hi": 0.4722,
+     "p_better": 0.5925
+    },
+    "sharpe_25bp": 0.377,
+    "sharpe_0bp": 1.0183,
+    "sharpe_lag1": 0.6974
+   },
+   "dsr_screen": 0.0,
+   "verdict": null
+  },
+  "rev_overnight_momentum": {
+   "family": "Short-term reversal",
+   "intraday": null,
+   "screen": {
+    "cagr": 0.0566,
+    "vol": 0.2942,
+    "sharpe": 0.3346,
+    "sortino": 0.4642,
+    "maxdd": -0.4231,
+    "turnover": 20.0087,
+    "invested": 1.0,
+    "exposure": 1.0,
+    "vs_hold": {
+     "diff": -0.5482,
+     "lo": -0.9826,
+     "hi": -0.0805,
+     "p_better": 0.027
+    },
+    "sharpe_25bp": 0.2325,
+    "sharpe_0bp": 0.4026,
+    "sharpe_lag1": 0.2104
+   },
+   "confirm": {
+    "cagr": 0.1497,
+    "vol": 0.2897,
+    "sharpe": 0.6267,
+    "sortino": 0.893,
+    "maxdd": -0.2782,
+    "turnover": 20.6,
+    "invested": 1.0,
+    "exposure": 1.0,
+    "vs_hold": {
+     "diff": -0.0781,
+     "lo": -0.6174,
+     "hi": 0.4102,
+     "p_better": 0.4085
+    },
+    "sharpe_25bp": 0.5197,
+    "sharpe_0bp": 0.6978,
+    "sharpe_lag1": 0.6349
+   },
+   "dsr_screen": 0.0,
+   "verdict": null
+  },
+  "rev_intraday_losers": {
+   "family": "Short-term reversal",
+   "intraday": null,
+   "screen": {
+    "cagr": 0.0002,
+    "vol": 0.2979,
+    "sharpe": 0.1494,
+    "sortino": 0.2114,
+    "maxdd": -0.484,
+    "turnover": 19.8025,
+    "invested": 1.0,
+    "exposure": 1.0,
+    "vs_hold": {
+     "diff": -0.7335,
+     "lo": -1.2228,
+     "hi": -0.311,
+     "p_better": 0.0015
+    },
+    "sharpe_25bp": 0.0496,
+    "sharpe_0bp": 0.2159,
+    "sharpe_lag1": 0.211
+   },
+   "confirm": {
+    "cagr": 0.1282,
+    "vol": 0.3118,
+    "sharpe": 0.5435,
+    "sortino": 0.7745,
+    "maxdd": -0.3557,
+    "turnover": 19.2,
+    "invested": 1.0,
+    "exposure": 1.0,
+    "vs_hold": {
+     "diff": -0.1614,
+     "lo": -0.7062,
+     "hi": 0.206,
+     "p_better": 0.228
+    },
+    "sharpe_25bp": 0.4509,
+    "sharpe_0bp": 0.605,
+    "sharpe_lag1": 0.4961
+   },
+   "dsr_screen": 0.0,
+   "verdict": null
+  },
+  "overnight_only_hold": {
+   "family": "Short-term reversal",
+   "intraday": "close -> next open",
+   "screen": {
+    "cagr": -0.3388,
+    "vol": 0.1082,
+    "sharpe": -3.7644,
+    "sortino": -4.4102,
+    "maxdd": -0.9115,
+    "turnover": 504.0,
+    "invested": 1.0,
+    "exposure": 1.0,
+    "vs_hold": {
+     "diff": -4.6486,
+     "lo": -5.2637,
+     "hi": -4.1282,
+     "p_better": 0.0
+    },
+    "sharpe_25bp": -10.7496,
+    "sharpe_0bp": 0.8923,
+    "sharpe_lag1": null
+   },
+   "confirm": {
+    "cagr": -0.2885,
+    "vol": 0.1715,
+    "sharpe": -1.8955,
+    "sortino": -2.2845,
+    "maxdd": -0.6919,
+    "turnover": 504.0,
+    "invested": 1.0,
+    "exposure": 1.0,
+    "vs_hold": {
+     "diff": -2.6021,
+     "lo": -3.802,
+     "hi": -1.9652,
+     "p_better": 0.0
+    },
+    "sharpe_25bp": -6.3032,
+    "sharpe_0bp": 1.0429,
+    "sharpe_lag1": null
+   },
+   "dsr_screen": 0.0,
+   "verdict": null
+  },
+  "lowvol_252": {
+   "family": "Low volatility / defensive",
+   "intraday": null,
+   "screen": {
+    "cagr": 0.1036,
+    "vol": 0.1207,
+    "sharpe": 0.8773,
+    "sortino": 1.2645,
+    "maxdd": -0.1575,
+    "turnover": 1.8909,
+    "invested": 1.0,
+    "exposure": 1.0,
+    "vs_hold": {
+     "diff": -0.0053,
+     "lo": -0.6786,
+     "hi": 0.4908,
+     "p_better": 0.4045
+    },
+    "sharpe_25bp": 0.8538,
+    "sharpe_0bp": 0.8929,
+    "sharpe_lag1": 0.8632
+   },
+   "confirm": {
+    "cagr": 0.1256,
+    "vol": 0.198,
+    "sharpe": 0.6968,
+    "sortino": 0.9723,
+    "maxdd": -0.2838,
+    "turnover": 2.5333,
+    "invested": 1.0,
+    "exposure": 1.0,
+    "vs_hold": {
+     "diff": -0.008,
+     "lo": -0.3925,
+     "hi": 0.436,
+     "p_better": 0.559
+    },
+    "sharpe_25bp": 0.6774,
+    "sharpe_0bp": 0.7098,
+    "sharpe_lag1": 0.6887
+   },
+   "dsr_screen": 0.0,
+   "verdict": null
+  },
+  "lowbeta_bab": {
+   "family": "Low volatility / defensive",
+   "intraday": null,
+   "screen": {
+    "cagr": 0.0999,
+    "vol": 0.1281,
+    "sharpe": 0.8081,
+    "sortino": 1.1654,
+    "maxdd": -0.1643,
+    "turnover": 1.4611,
+    "invested": 1.0,
+    "exposure": 1.0,
+    "vs_hold": {
+     "diff": -0.0745,
+     "lo": -0.8662,
+     "hi": 0.5104,
+     "p_better": 0.3275
+    },
+    "sharpe_25bp": 0.791,
+    "sharpe_0bp": 0.8195,
+    "sharpe_lag1": 0.8304
+   },
+   "confirm": {
+    "cagr": 0.1368,
+    "vol": 0.1934,
+    "sharpe": 0.76,
+    "sortino": 1.0702,
+    "maxdd": -0.2667,
+    "turnover": 1.7,
+    "invested": 1.0,
+    "exposure": 1.0,
+    "vs_hold": {
+     "diff": 0.0553,
+     "lo": -0.4193,
+     "hi": 0.571,
+     "p_better": 0.6155
+    },
+    "sharpe_25bp": 0.7466,
+    "sharpe_0bp": 0.769,
+    "sharpe_lag1": 0.7401
+   },
+   "dsr_screen": 0.0,
+   "verdict": null
+  },
+  "low_idio_vol": {
+   "family": "Low volatility / defensive",
+   "intraday": null,
+   "screen": {
+    "cagr": 0.1316,
+    "vol": 0.1402,
+    "sharpe": 0.9526,
+    "sortino": 1.3957,
+    "maxdd": -0.17,
+    "turnover": 5.5523,
+    "invested": 1.0,
+    "exposure": 1.0,
+    "vs_hold": {
+     "diff": 0.07,
+     "lo": -0.388,
+     "hi": 0.4271,
+     "p_better": 0.5515
+    },
+    "sharpe_25bp": 0.893,
+    "sharpe_0bp": 0.9922,
+    "sharpe_lag1": 0.9583
+   },
+   "confirm": {
+    "cagr": 0.1382,
+    "vol": 0.2329,
+    "sharpe": 0.6727,
+    "sortino": 0.9305,
+    "maxdd": -0.3474,
+    "turnover": 6.5,
+    "invested": 1.0,
+    "exposure": 1.0,
+    "vs_hold": {
+     "diff": -0.0321,
+     "lo": -0.2793,
+     "hi": 0.3328,
+     "p_better": 0.5155
+    },
+    "sharpe_25bp": 0.6305,
+    "sharpe_0bp": 0.7008,
+    "sharpe_lag1": 0.6929
+   },
+   "dsr_screen": 0.0,
+   "verdict": "Mixed"
+  },
+  "lottery_max_avoid": {
+   "family": "Low volatility / defensive",
+   "intraday": null,
+   "screen": {
+    "cagr": 0.1427,
+    "vol": 0.1571,
+    "sharpe": 0.9275,
+    "sortino": 1.3482,
+    "maxdd": -0.2253,
+    "turnover": 3.6915,
+    "invested": 1.0,
+    "exposure": 1.0,
+    "vs_hold": {
+     "diff": 0.0449,
+     "lo": -0.1527,
+     "hi": 0.1809,
+     "p_better": 0.565
+    },
+    "sharpe_25bp": 0.8923,
+    "sharpe_0bp": 0.9509,
+    "sharpe_lag1": 0.9317
+   },
+   "confirm": {
+    "cagr": 0.1223,
+    "vol": 0.2392,
+    "sharpe": 0.6025,
+    "sortino": 0.8285,
+    "maxdd": -0.3524,
+    "turnover": 4.2417,
+    "invested": 1.0,
+    "exposure": 1.0,
+    "vs_hold": {
+     "diff": -0.1023,
+     "lo": -0.1876,
+     "hi": -0.0019,
+     "p_better": 0.0475
+    },
+    "sharpe_25bp": 0.5759,
+    "sharpe_0bp": 0.6203,
+    "sharpe_lag1": 0.5945
+   },
+   "dsr_screen": 0.0,
+   "verdict": "Failed"
+  },
+  "low_realized_skew": {
+   "family": "Low volatility / defensive",
+   "intraday": null,
+   "screen": {
+    "cagr": 0.0884,
+    "vol": 0.1796,
+    "sharpe": 0.5614,
+    "sortino": 0.8115,
+    "maxdd": -0.2675,
+    "turnover": 9.5918,
+    "invested": 1.0,
+    "exposure": 1.0,
+    "vs_hold": {
+     "diff": -0.3213,
+     "lo": -0.6877,
+     "hi": -0.0229,
+     "p_better": 0.0395
+    },
+    "sharpe_25bp": 0.4809,
+    "sharpe_0bp": 0.6149,
+    "sharpe_lag1": 0.6447
+   },
+   "confirm": {
+    "cagr": 0.1507,
+    "vol": 0.2445,
+    "sharpe": 0.6968,
+    "sortino": 0.9754,
+    "maxdd": -0.3285,
+    "turnover": 10.5333,
+    "invested": 1.0,
+    "exposure": 1.0,
+    "vs_hold": {
+     "diff": -0.0081,
+     "lo": -0.2403,
+     "hi": 0.1488,
+     "p_better": 0.4035
+    },
+    "sharpe_25bp": 0.6317,
+    "sharpe_0bp": 0.74,
+    "sharpe_lag1": 0.7273
+   },
+   "dsr_screen": 0.0,
+   "verdict": null
+  },
+  "min_variance": {
+   "family": "Low volatility / defensive",
+   "intraday": null,
+   "screen": {
+    "cagr": 0.1018,
+    "vol": 0.1134,
+    "sharpe": 0.9123,
+    "sortino": 1.3207,
+    "maxdd": -0.1515,
+    "turnover": 2.471,
+    "invested": 1.0,
+    "exposure": 1.0,
+    "vs_hold": {
+     "diff": 0.0297,
+     "lo": -0.6871,
+     "hi": 0.5557,
+     "p_better": 0.451
+    },
+    "sharpe_25bp": 0.8796,
+    "sharpe_0bp": 0.934,
+    "sharpe_lag1": 0.9143
+   },
+   "confirm": {
+    "cagr": 0.0913,
+    "vol": 0.191,
+    "sharpe": 0.5533,
+    "sortino": 0.7713,
+    "maxdd": -0.2722,
+    "turnover": 3.2638,
+    "invested": 1.0,
+    "exposure": 1.0,
+    "vs_hold": {
+     "diff": -0.1516,
+     "lo": -0.6379,
+     "hi": 0.3768,
+     "p_better": 0.383
+    },
+    "sharpe_25bp": 0.5274,
+    "sharpe_0bp": 0.5706,
+    "sharpe_lag1": 0.5304
+   },
+   "dsr_screen": 0.0,
+   "verdict": "Failed"
+  },
+  "nr7_breakout": {
+   "family": "Volatility breakout",
+   "intraday": null,
+   "screen": {
+    "cagr": 0.0013,
+    "vol": 0.1789,
+    "sharpe": 0.0972,
+    "sortino": 0.1331,
+    "maxdd": -0.4134,
+    "turnover": 107.27,
+    "invested": 0.9932,
+    "exposure": 0.9932,
+    "vs_hold": {
+     "diff": -0.7857,
+     "lo": -1.1606,
+     "hi": -0.3677,
+     "p_better": 0.0
+    },
+    "sharpe_25bp": -0.801,
+    "sharpe_0bp": 0.6968,
+    "sharpe_lag1": -0.1088
+   },
+   "confirm": {
+    "cagr": -0.0331,
+    "vol": 0.1958,
+    "sharpe": -0.0733,
+    "sortino": -0.0946,
+    "maxdd": -0.4191,
+    "turnover": 110.6192,
+    "invested": 0.963,
+    "exposure": 0.963,
+    "vs_hold": {
+     "diff": -0.7786,
+     "lo": -1.32,
+     "hi": -0.4068,
+     "p_better": 0.0005
+    },
+    "sharpe_25bp": -0.9168,
+    "sharpe_0bp": 0.4927,
+    "sharpe_lag1": 0.4824
+   },
+   "dsr_screen": 0.0,
+   "verdict": null
+  },
+  "squeeze_breakout": {
+   "family": "Volatility breakout",
+   "intraday": null,
+   "screen": {
+    "cagr": 0.1783,
+    "vol": 0.2218,
+    "sharpe": 0.8503,
+    "sortino": 1.2951,
+    "maxdd": -0.3397,
+    "turnover": 43.6187,
+    "invested": 0.8404,
+    "exposure": 0.8404,
+    "vs_hold": {
+     "diff": -0.0323,
+     "lo": -0.7709,
+     "hi": 0.6954,
+     "p_better": 0.4975
+    },
+    "sharpe_25bp": 0.5547,
+    "sharpe_0bp": 1.047,
+    "sharpe_lag1": 0.6158
+   },
+   "confirm": {
+    "cagr": -0.0844,
+    "vol": 0.157,
+    "sharpe": -0.4825,
+    "sortino": -0.6035,
+    "maxdd": -0.2911,
+    "turnover": 37.909,
+    "invested": 0.6839,
+    "exposure": 0.6839,
+    "vs_hold": {
+     "diff": -1.1881,
+     "lo": -2.3949,
+     "hi": -0.0947,
+     "p_better": 0.036
+    },
+    "sharpe_25bp": -0.8409,
+    "sharpe_0bp": -0.2414,
+    "sharpe_lag1": -0.1856
+   },
+   "dsr_screen": 0.0,
+   "verdict": null
+  },
+  "keltner_trend": {
+   "family": "Volatility breakout",
+   "intraday": null,
+   "screen": {
+    "cagr": 0.0553,
+    "vol": 0.2117,
+    "sharpe": 0.3642,
+    "sortino": 0.4715,
+    "maxdd": -0.3868,
+    "turnover": 52.0011,
+    "invested": 0.9864,
+    "exposure": 0.9864,
+    "vs_hold": {
+     "diff": -0.5186,
+     "lo": -1.0138,
+     "hi": -0.0616,
+     "p_better": 0.0295
+    },
+    "sharpe_25bp": -0.0043,
+    "sharpe_0bp": 0.6102,
+    "sharpe_lag1": 0.2069
+   },
+   "confirm": {
+    "cagr": 0.0311,
+    "vol": 0.187,
+    "sharpe": 0.2581,
+    "sortino": 0.3391,
+    "maxdd": -0.2486,
+    "turnover": 53.3926,
+    "invested": 0.9418,
+    "exposure": 0.9418,
+    "vs_hold": {
+     "diff": -0.447,
+     "lo": -1.2094,
+     "hi": 0.1295,
+     "p_better": 0.1055
+    },
+    "sharpe_25bp": -0.1693,
+    "sharpe_0bp": 0.5453,
+    "sharpe_lag1": 0.786
+   },
+   "dsr_screen": 0.0,
+   "verdict": null
+  },
+  "wide_range_followthrough": {
+   "family": "Volatility breakout",
+   "intraday": null,
+   "screen": {
+    "cagr": 0.1615,
+    "vol": 0.2616,
+    "sharpe": 0.6998,
+    "sortino": 1.1325,
+    "maxdd": -0.3391,
+    "turnover": 84.8411,
+    "invested": 0.912,
+    "exposure": 0.912,
+    "vs_hold": {
+     "diff": -0.1829,
+     "lo": -0.757,
+     "hi": 0.3248,
+     "p_better": 0.258
+    },
+    "sharpe_25bp": 0.2134,
+    "sharpe_0bp": 1.0232,
+    "sharpe_lag1": 0.3657
+   },
+   "confirm": {
+    "cagr": -0.1432,
+    "vol": 0.2522,
+    "sharpe": -0.4845,
+    "sortino": -0.6115,
+    "maxdd": -0.4774,
+    "turnover": 80.2422,
+    "invested": 0.8413,
+    "exposure": 0.8413,
+    "vs_hold": {
+     "diff": -1.1901,
+     "lo": -2.0124,
+     "hi": -0.4564,
+     "p_better": 0.005
+    },
+    "sharpe_25bp": -0.9594,
+    "sharpe_0bp": -0.1665,
+    "sharpe_lag1": 0.2407
+   },
+   "dsr_screen": 0.0,
+   "verdict": null
+  },
+  "vol_open_breakout": {
+   "family": "Volatility breakout",
+   "intraday": "buy-stop after the open -> close",
+   "screen": {
+    "cagr": -0.5521,
+    "vol": 0.1142,
+    "sharpe": -6.9636,
+    "sortino": -6.8794,
+    "maxdd": -0.9905,
+    "turnover": 502.6248,
+    "invested": 0.9973,
+    "exposure": 0.9973,
+    "vs_hold": {
+     "diff": -7.8488,
+     "lo": -8.5761,
+     "hi": -7.2277,
+     "p_better": 0.0
+    },
+    "sharpe_25bp": -13.5551,
+    "sharpe_0bp": -2.563,
+    "sharpe_lag1": null
+   },
+   "confirm": {
+    "cagr": -0.63,
+    "vol": 0.1395,
+    "sharpe": -7.0417,
+    "sortino": -6.793,
+    "maxdd": -0.9497,
+    "turnover": 502.0,
+    "invested": 0.996,
+    "exposure": 0.996,
+    "vs_hold": {
+     "diff": -7.7517,
+     "lo": -9.4328,
+     "hi": -6.6525,
+     "p_better": 0.0
+    },
+    "sharpe_25bp": -12.4292,
+    "sharpe_0bp": -3.4441,
+    "sharpe_lag1": null
+   },
+   "dsr_screen": 0.0,
+   "verdict": null
+  },
+  "ibs_reversion": {
+   "family": "Mean reversion",
+   "intraday": null,
+   "screen": {
+    "cagr": -0.0661,
+    "vol": 0.197,
+    "sharpe": -0.2492,
+    "sortino": -0.3518,
+    "maxdd": -0.5228,
+    "turnover": 217.5662,
+    "invested": 0.9932,
+    "exposure": 0.9932,
+    "vs_hold": {
+     "diff": -1.1322,
+     "lo": -1.5685,
+     "hi": -0.7267,
+     "p_better": 0.0
+    },
+    "sharpe_25bp": -1.9027,
+    "sharpe_0bp": 0.855,
+    "sharpe_lag1": -0.3739
+   },
+   "confirm": {
+    "cagr": 0.0458,
+    "vol": 0.2296,
+    "sharpe": 0.3093,
+    "sortino": 0.443,
+    "maxdd": -0.3568,
+    "turnover": 230.2536,
+    "invested": 0.9934,
+    "exposure": 0.9934,
+    "vs_hold": {
+     "diff": -0.3958,
+     "lo": -1.167,
+     "hi": 0.1892,
+     "p_better": 0.137
+    },
+    "sharpe_25bp": -1.1925,
+    "sharpe_0bp": 1.3124,
+    "sharpe_lag1": 0.1195
+   },
+   "dsr_screen": 0.0,
+   "verdict": null
+  },
+  "consec_down_days": {
+   "family": "Mean reversion",
+   "intraday": null,
+   "screen": {
+    "cagr": -0.2458,
+    "vol": 0.2345,
+    "sharpe": -1.085,
+    "sortino": -1.4341,
+    "maxdd": -0.8354,
+    "turnover": 279.0441,
+    "invested": 0.8506,
+    "exposure": 0.8506,
+    "vs_hold": {
+     "diff": -1.9683,
+     "lo": -2.6511,
+     "hi": -1.3355,
+     "p_better": 0.0
+    },
+    "sharpe_25bp": -2.8534,
+    "sharpe_0bp": 0.1053,
+    "sharpe_lag1": -0.1863
+   },
+   "confirm": {
+    "cagr": -0.0002,
+    "vol": 0.2306,
+    "sharpe": 0.1156,
+    "sortino": 0.1573,
+    "maxdd": -0.4801,
+    "turnover": 269.1341,
+    "invested": 0.7765,
+    "exposure": 0.7765,
+    "vs_hold": {
+     "diff": -0.5896,
+     "lo": -1.4862,
+     "hi": 0.2336,
+     "p_better": 0.128
+    },
+    "sharpe_25bp": -1.6284,
+    "sharpe_0bp": 1.2833,
+    "sharpe_lag1": -0.3163
+   },
+   "dsr_screen": 0.0,
+   "verdict": null
+  },
+  "residual_zscore_reversion": {
+   "family": "Mean reversion",
+   "intraday": null,
+   "screen": {
+    "cagr": 0.1145,
+    "vol": 0.2502,
+    "sharpe": 0.5583,
+    "sortino": 0.8182,
+    "maxdd": -0.385,
+    "turnover": 108.2707,
+    "invested": 0.8206,
+    "exposure": 0.8206,
+    "vs_hold": {
+     "diff": -0.3245,
+     "lo": -1.0136,
+     "hi": 0.3054,
+     "p_better": 0.195
+    },
+    "sharpe_25bp": -0.0908,
+    "sharpe_0bp": 0.9912,
+    "sharpe_lag1": 0.4668
+   },
+   "confirm": {
+    "cagr": 0.0629,
+    "vol": 0.2582,
+    "sharpe": 0.3654,
+    "sortino": 0.5275,
+    "maxdd": -0.3161,
+    "turnover": 107.9137,
+    "invested": 0.8294,
+    "exposure": 0.8294,
+    "vs_hold": {
+     "diff": -0.3396,
+     "lo": -1.0848,
+     "hi": 0.3505,
+     "p_better": 0.2305
+    },
+    "sharpe_25bp": -0.2604,
+    "sharpe_0bp": 0.7847,
+    "sharpe_lag1": 0.322
+   },
+   "dsr_screen": 0.0,
+   "verdict": null
+  },
+  "variance_ratio_dip": {
+   "family": "Mean reversion",
+   "intraday": null,
+   "screen": {
+    "cagr": -0.0586,
+    "vol": 0.2349,
+    "sharpe": -0.1391,
+    "sortino": -0.19,
+    "maxdd": -0.4679,
+    "turnover": 122.4356,
+    "invested": 0.9059,
+    "exposure": 0.9059,
+    "vs_hold": {
+     "diff": -1.0221,
+     "lo": -1.5984,
+     "hi": -0.3564,
+     "p_better": 0.005
+    },
+    "sharpe_25bp": -0.9185,
+    "sharpe_0bp": 0.3822,
+    "sharpe_lag1": 0.1427
+   },
+   "confirm": {
+    "cagr": 0.0108,
+    "vol": 0.2494,
+    "sharpe": 0.1681,
+    "sortino": 0.2361,
+    "maxdd": -0.3615,
+    "turnover": 138.8888,
+    "invested": 0.8876,
+    "exposure": 0.8876,
+    "vs_hold": {
+     "diff": -0.5371,
+     "lo": -1.2249,
+     "hi": 0.0412,
+     "p_better": 0.061
+    },
+    "sharpe_25bp": -0.6662,
+    "sharpe_0bp": 0.7251,
+    "sharpe_lag1": -0.0346
+   },
+   "dsr_screen": 0.0,
+   "verdict": null
+  },
+  "cs_ibs_daily": {
+   "family": "Mean reversion",
+   "intraday": null,
+   "screen": {
+    "cagr": -0.2591,
+    "vol": 0.2334,
+    "sharpe": -1.1673,
+    "sortino": -1.5944,
+    "maxdd": -0.8812,
+    "turnover": 457.3817,
+    "invested": 1.0,
+    "exposure": 1.0,
+    "vs_hold": {
+     "diff": -2.0506,
+     "lo": -2.6734,
+     "hi": -1.5117,
+     "p_better": 0.0
+    },
+    "sharpe_25bp": -4.107,
+    "sharpe_0bp": 0.7916,
+    "sharpe_lag1": -1.4177
+   },
+   "confirm": {
+    "cagr": -0.0998,
+    "vol": 0.2515,
+    "sharpe": -0.2919,
+    "sortino": -0.4007,
+    "maxdd": -0.5518,
+    "turnover": 458.0,
+    "invested": 1.0,
+    "exposure": 0.9997,
+    "vs_hold": {
+     "diff": -0.9974,
+     "lo": -1.7978,
+     "hi": -0.4151,
+     "p_better": 0.0015
+    },
+    "sharpe_25bp": -3.0231,
+    "sharpe_0bp": 1.5289,
+    "sharpe_lag1": -0.9567
+   },
+   "dsr_screen": 0.0,
+   "verdict": null
+  },
+  "drawdown_turnaround": {
+   "family": "Mean reversion",
+   "intraday": null,
+   "screen": {
+    "cagr": 0.0438,
+    "vol": 0.3472,
+    "sharpe": 0.2965,
+    "sortino": 0.4379,
+    "maxdd": -0.6605,
+    "turnover": 28.9941,
+    "invested": 0.4454,
+    "exposure": 0.4454,
+    "vs_hold": {
+     "diff": -0.5863,
+     "lo": -1.3406,
+     "hi": 0.086,
+     "p_better": 0.065
+    },
+    "sharpe_25bp": 0.1712,
+    "sharpe_0bp": 0.38,
+    "sharpe_lag1": 0.222
+   },
+   "confirm": {
+    "cagr": 0.0703,
+    "vol": 0.3842,
+    "sharpe": 0.3556,
+    "sortino": 0.6603,
+    "maxdd": -0.5072,
+    "turnover": 29.1097,
+    "invested": 0.4206,
+    "exposure": 0.4206,
+    "vs_hold": {
+     "diff": -0.3495,
+     "lo": -1.5627,
+     "hi": 0.6211,
+     "p_better": 0.259
+    },
+    "sharpe_25bp": 0.242,
+    "sharpe_0bp": 0.4312,
+    "sharpe_lag1": 0.5505
+   },
+   "dsr_screen": 0.0,
+   "verdict": null
+  },
+  "gap_up_continuation": {
+   "family": "Gaps",
+   "intraday": null,
+   "screen": {
+    "cagr": -0.0068,
+    "vol": 0.2924,
+    "sharpe": 0.1224,
+    "sortino": 0.1787,
+    "maxdd": -0.5161,
+    "turnover": 45.5199,
+    "invested": 0.7401,
+    "exposure": 0.7401,
+    "vs_hold": {
+     "diff": -0.7605,
+     "lo": -1.4427,
+     "hi": -0.1104,
+     "p_better": 0.0265
+    },
+    "sharpe_25bp": -0.1109,
+    "sharpe_0bp": 0.2782,
+    "sharpe_lag1": 0.237
+   },
+   "confirm": {
+    "cagr": -0.0877,
+    "vol": 0.2641,
+    "sharpe": -0.2133,
+    "sortino": -0.2755,
+    "maxdd": -0.4343,
+    "turnover": 47.8139,
+    "invested": 0.7632,
+    "exposure": 0.7632,
+    "vs_hold": {
+     "diff": -0.9187,
+     "lo": -1.8498,
+     "hi": -0.1665,
+     "p_better": 0.0285
+    },
+    "sharpe_25bp": -0.4831,
+    "sharpe_0bp": -0.0323,
+    "sharpe_lag1": 0.2606
+   },
+   "dsr_screen": 0.0,
+   "verdict": null
+  },
+  "gap_down_reversal": {
+   "family": "Gaps",
+   "intraday": null,
+   "screen": {
+    "cagr": 0.0425,
+    "vol": 0.3261,
+    "sharpe": 0.2909,
+    "sortino": 0.4127,
+    "maxdd": -0.4796,
+    "turnover": 71.4983,
+    "invested": 0.4768,
+    "exposure": 0.4768,
+    "vs_hold": {
+     "diff": -0.5919,
+     "lo": -1.3341,
+     "hi": 0.1814,
+     "p_better": 0.113
+    },
+    "sharpe_25bp": -0.0379,
+    "sharpe_0bp": 0.5104,
+    "sharpe_lag1": 0.3002
+   },
+   "confirm": {
+    "cagr": -0.0396,
+    "vol": 0.2651,
+    "sharpe": -0.0214,
+    "sortino": -0.032,
+    "maxdd": -0.5064,
+    "turnover": 47.8272,
+    "invested": 0.3188,
+    "exposure": 0.3188,
+    "vs_hold": {
+     "diff": -0.7267,
+     "lo": -1.8169,
+     "hi": 0.21,
+     "p_better": 0.1135
+    },
+    "sharpe_25bp": -0.2923,
+    "sharpe_0bp": 0.1588,
+    "sharpe_lag1": 0.1317
+   },
+   "dsr_screen": 0.0,
+   "verdict": null
+  },
+  "gap_fill_intraday": {
+   "family": "Gaps",
+   "intraday": "open -> close",
+   "screen": {
+    "cagr": -0.4278,
+    "vol": 0.2981,
+    "sharpe": -1.7199,
+    "sortino": -2.1358,
+    "maxdd": -0.9623,
+    "turnover": 290.8486,
+    "invested": 0.5771,
+    "exposure": 0.5771,
+    "vs_hold": {
+     "diff": -2.6034,
+     "lo": -3.4652,
+     "hi": -1.8277,
+     "p_better": 0.0
+    },
+    "sharpe_25bp": -3.1491,
+    "sharpe_0bp": -0.7471,
+    "sharpe_lag1": null
+   },
+   "confirm": {
+    "cagr": -0.3688,
+    "vol": 0.239,
+    "sharpe": -1.8024,
+    "sortino": -2.1765,
+    "maxdd": -0.7739,
+    "turnover": 215.3333,
+    "invested": 0.4272,
+    "exposure": 0.4272,
+    "vs_hold": {
+     "diff": -2.5089,
+     "lo": -3.8292,
+     "hi": -1.2847,
+     "p_better": 0.0
+    },
+    "sharpe_25bp": -3.0979,
+    "sharpe_0bp": -0.9075,
+    "sharpe_lag1": null
+   },
+   "dsr_screen": 0.0,
+   "verdict": null
+  },
+  "shock_drift_up": {
+   "family": "Post-shock drift",
+   "intraday": null,
+   "screen": {
+    "cagr": 0.1713,
+    "vol": 0.2273,
+    "sharpe": 0.8092,
+    "sortino": 1.2021,
+    "maxdd": -0.4199,
+    "turnover": 47.1307,
+    "invested": 0.9952,
+    "exposure": 0.9952,
+    "vs_hold": {
+     "diff": -0.0735,
+     "lo": -0.5125,
+     "hi": 0.2984,
+     "p_better": 0.3195
+    },
+    "sharpe_25bp": 0.4975,
+    "sharpe_0bp": 1.0171,
+    "sharpe_lag1": 0.8245
+   },
+   "confirm": {
+    "cagr": 0.0511,
+    "vol": 0.2982,
+    "sharpe": 0.3163,
+    "sortino": 0.4495,
+    "maxdd": -0.3362,
+    "turnover": 46.959,
+    "invested": 0.9854,
+    "exposure": 0.9854,
+    "vs_hold": {
+     "diff": -0.3887,
+     "lo": -0.9538,
+     "hi": 0.0699,
+     "p_better": 0.0865
+    },
+    "sharpe_25bp": 0.08,
+    "sharpe_0bp": 0.474,
+    "sharpe_lag1": 0.4559
+   },
+   "dsr_screen": 0.0,
+   "verdict": null
+  },
+  "shock_reversal_no_volume": {
+   "family": "Post-shock drift",
+   "intraday": null,
+   "screen": {
+    "cagr": 0.1189,
+    "vol": 0.2139,
+    "sharpe": 0.632,
+    "sortino": 0.9518,
+    "maxdd": -0.3406,
+    "turnover": 40.218,
+    "invested": 0.5812,
+    "exposure": 0.5812,
+    "vs_hold": {
+     "diff": -0.2507,
+     "lo": -0.9724,
+     "hi": 0.3205,
+     "p_better": 0.2115
+    },
+    "sharpe_25bp": 0.3489,
+    "sharpe_0bp": 0.8211,
+    "sharpe_lag1": 0.8888
+   },
+   "confirm": {
+    "cagr": -0.0976,
+    "vol": 0.2806,
+    "sharpe": -0.2199,
+    "sortino": -0.2719,
+    "maxdd": -0.587,
+    "turnover": 37.6997,
+    "invested": 0.5093,
+    "exposure": 0.5093,
+    "vs_hold": {
+     "diff": -0.9254,
+     "lo": -1.4525,
+     "hi": 0.0199,
+     "p_better": 0.0575
+    },
+    "sharpe_25bp": -0.4201,
+    "sharpe_0bp": -0.0857,
+    "sharpe_lag1": 0.2411
+   },
+   "dsr_screen": 0.0,
+   "verdict": null
+  },
+  "market_crash_rebound": {
+   "family": "Post-shock drift",
+   "intraday": null,
+   "screen": {
+    "cagr": 0.0247,
+    "vol": 0.0662,
+    "sharpe": 0.4015,
+    "sortino": 0.6,
+    "maxdd": -0.0886,
+    "turnover": 2.0628,
+    "invested": 0.03,
+    "exposure": 0.03,
+    "vs_hold": {
+     "diff": -0.4813,
+     "lo": -1.1059,
+     "hi": 0.3258,
+     "p_better": 0.149
+    },
+    "sharpe_25bp": 0.3531,
+    "sharpe_0bp": 0.4338,
+    "sharpe_lag1": 0.5826
+   },
+   "confirm": {
+    "cagr": 0.0237,
+    "vol": 0.183,
+    "sharpe": 0.2201,
+    "sortino": 0.3067,
+    "maxdd": -0.3224,
+    "turnover": 7.3333,
+    "invested": 0.1019,
+    "exposure": 0.1019,
+    "vs_hold": {
+     "diff": -0.485,
+     "lo": -0.9748,
+     "hi": 0.466,
+     "p_better": 0.225
+    },
+    "sharpe_25bp": 0.16,
+    "sharpe_0bp": 0.26,
+    "sharpe_lag1": 0.3058
+   },
+   "dsr_screen": 0.0,
+   "verdict": null
+  },
+  "turn_of_month": {
+   "family": "Calendar & seasonality",
+   "intraday": null,
+   "screen": {
+    "cagr": 0.0282,
+    "vol": 0.0783,
+    "sharpe": 0.3952,
+    "sortino": 0.5549,
+    "maxdd": -0.0984,
+    "turnover": 24.5262,
+    "invested": 0.1924,
+    "exposure": 0.1924,
+    "vs_hold": {
+     "diff": -0.4876,
+     "lo": -1.1121,
+     "hi": 0.2482,
+     "p_better": 0.154
+    },
+    "sharpe_25bp": -0.0742,
+    "sharpe_0bp": 0.7102,
+    "sharpe_lag1": 0.2486
+   },
+   "confirm": {
+    "cagr": 0.0474,
+    "vol": 0.0958,
+    "sharpe": 0.531,
+    "sortino": 0.7395,
+    "maxdd": -0.0937,
+    "turnover": 24.4933,
+    "invested": 0.1905,
+    "exposure": 0.1905,
+    "vs_hold": {
+     "diff": -0.174,
+     "lo": -1.5636,
+     "hi": 1.0213,
+     "p_better": 0.374
+    },
+    "sharpe_25bp": 0.1464,
+    "sharpe_0bp": 0.7887,
+    "sharpe_lag1": 0.9227
+   },
+   "dsr_screen": 0.0,
+   "verdict": null
+  },
+  "halloween": {
+   "family": "Calendar & seasonality",
+   "intraday": null,
+   "screen": {
+    "cagr": 0.0835,
+    "vol": 0.1305,
+    "sharpe": 0.6793,
+    "sortino": 0.9927,
+    "maxdd": -0.1917,
+    "turnover": 2.2931,
+    "invested": 0.4782,
+    "exposure": 0.4782,
+    "vs_hold": {
+     "diff": -0.2034,
+     "lo": -0.6709,
+     "hi": 0.2041,
+     "p_better": 0.1925
+    },
+    "sharpe_25bp": 0.6528,
+    "sharpe_0bp": 0.6968,
+    "sharpe_lag1": 0.6925
+   },
+   "confirm": {
+    "cagr": 0.0993,
+    "vol": 0.216,
+    "sharpe": 0.547,
+    "sortino": 0.7651,
+    "maxdd": -0.3469,
+    "turnover": 2.2133,
+    "invested": 0.4894,
+    "exposure": 0.4894,
+    "vs_hold": {
+     "diff": -0.1579,
+     "lo": -0.6513,
+     "hi": 0.4269,
+     "p_better": 0.33
+    },
+    "sharpe_25bp": 0.5318,
+    "sharpe_0bp": 0.5571,
+    "sharpe_lag1": 0.4377
+   },
+   "dsr_screen": 0.0,
+   "verdict": null
+  },
+  "month_seasonality_cs": {
+   "family": "Calendar & seasonality",
+   "intraday": null,
+   "screen": {
+    "cagr": 0.0952,
+    "vol": 0.2812,
+    "sharpe": 0.4641,
+    "sortino": 0.6539,
+    "maxdd": -0.5135,
+    "turnover": 20.1806,
+    "invested": 1.0,
+    "exposure": 1.0,
+    "vs_hold": {
+     "diff": -0.4186,
+     "lo": -0.7093,
+     "hi": -0.0205,
+     "p_better": 0.042
+    },
+    "sharpe_25bp": 0.3562,
+    "sharpe_0bp": 0.5359,
+    "sharpe_lag1": 0.468
+   },
+   "confirm": {
+    "cagr": 0.221,
+    "vol": 0.3007,
+    "sharpe": 0.816,
+    "sortino": 1.1308,
+    "maxdd": -0.3889,
+    "turnover": 20.3333,
+    "invested": 1.0,
+    "exposure": 1.0,
+    "vs_hold": {
+     "diff": 0.1113,
+     "lo": -0.2964,
+     "hi": 0.502,
+     "p_better": 0.6855
+    },
+    "sharpe_25bp": 0.7144,
+    "sharpe_0bp": 0.8834,
+    "sharpe_lag1": 0.7409
+   },
+   "dsr_screen": 0.0,
+   "verdict": null
+  },
+  "dec_tax_loss_rebound": {
+   "family": "Calendar & seasonality",
+   "intraday": null,
+   "screen": {
+    "cagr": 0.0313,
+    "vol": 0.0807,
+    "sharpe": 0.422,
+    "sortino": 0.6157,
+    "maxdd": -0.1623,
+    "turnover": 1.8909,
+    "invested": 0.103,
+    "exposure": 0.103,
+    "vs_hold": {
+     "diff": -0.4608,
+     "lo": -1.4762,
+     "hi": 0.4623,
+     "p_better": 0.1995
+    },
+    "sharpe_25bp": 0.3864,
+    "sharpe_0bp": 0.4456,
+    "sharpe_lag1": 0.5473
+   },
+   "confirm": {
+    "cagr": 0.0954,
+    "vol": 0.077,
+    "sharpe": 1.2208,
+    "sortino": 2.2789,
+    "maxdd": -0.1216,
+    "turnover": 2.0,
+    "invested": 0.1058,
+    "exposure": 0.1058,
+    "vs_hold": {
+     "diff": 0.5164,
+     "lo": -1.5449,
+     "hi": 1.6262,
+     "p_better": 0.608
+    },
+    "sharpe_25bp": 1.1836,
+    "sharpe_0bp": 1.2451,
+    "sharpe_lag1": 1.2452
+   },
+   "dsr_screen": 0.0,
+   "verdict": null
+  },
+  "santa_rally": {
+   "family": "Calendar & seasonality",
+   "intraday": null,
+   "screen": {
+    "cagr": 0.0358,
+    "vol": 0.0193,
+    "sharpe": 1.8366,
+    "sortino": 2.9341,
+    "maxdd": -0.0231,
+    "turnover": 2.0043,
+    "invested": 0.0252,
+    "exposure": 0.0252,
+    "vs_hold": {
+     "diff": 0.9543,
+     "lo": 0.3157,
+     "hi": 2.6897,
+     "p_better": 0.9905
+    },
+    "sharpe_25bp": 1.7034,
+    "sharpe_0bp": 1.9117,
+    "sharpe_lag1": 1.4273
+   },
+   "confirm": {
+    "cagr": 0.0325,
+    "vol": 0.0415,
+    "sharpe": 0.791,
+    "sortino": 1.3892,
+    "maxdd": -0.0293,
+    "turnover": 2.0867,
+    "invested": 0.0278,
+    "exposure": 0.0278,
+    "vs_hold": {
+     "diff": 0.0863,
+     "lo": -1.0838,
+     "hi": 14.4318,
+     "p_better": 0.518
+    },
+    "sharpe_25bp": 0.7077,
+    "sharpe_0bp": 0.8464,
+    "sharpe_lag1": 1.3066
+   },
+   "dsr_screen": 0.0,
+   "verdict": "Mixed"
+  },
+  "opex_week": {
+   "family": "Calendar & seasonality",
+   "intraday": null,
+   "screen": {
+    "cagr": -0.0156,
+    "vol": 0.0811,
+    "sharpe": -0.1536,
+    "sortino": -0.2042,
+    "maxdd": -0.251,
+    "turnover": 24.0655,
+    "invested": 0.2333,
+    "exposure": 0.2333,
+    "vs_hold": {
+     "diff": -1.0365,
+     "lo": -1.6751,
+     "hi": -0.4128,
+     "p_better": 0.0025
+    },
+    "sharpe_25bp": -0.5963,
+    "sharpe_0bp": 0.1428,
+    "sharpe_lag1": -0.1139
+   },
+   "confirm": {
+    "cagr": -0.0223,
+    "vol": 0.115,
+    "sharpe": -0.1363,
+    "sortino": -0.1612,
+    "maxdd": -0.171,
+    "turnover": 24.0,
+    "invested": 0.2341,
+    "exposure": 0.2341,
+    "vs_hold": {
+     "diff": -0.8416,
+     "lo": -1.6061,
+     "hi": 0.2076,
+     "p_better": 0.0885
+    },
+    "sharpe_25bp": -0.4454,
+    "sharpe_0bp": 0.0727,
+    "sharpe_lag1": -0.088
+   },
+   "dsr_screen": 0.0,
+   "verdict": null
+  },
+  "weekday_skip_monday": {
+   "family": "Calendar & seasonality",
+   "intraday": null,
+   "screen": {
+    "cagr": -0.0058,
+    "vol": 0.1621,
+    "sharpe": 0.045,
+    "sortino": 0.0647,
+    "maxdd": -0.233,
+    "turnover": 105.0527,
+    "invested": 0.792,
+    "exposure": 0.792,
+    "vs_hold": {
+     "diff": -0.8379,
+     "lo": -1.1576,
+     "hi": -0.582,
+     "p_better": 0.0
+    },
+    "sharpe_25bp": -0.9203,
+    "sharpe_0bp": 0.6942,
+    "sharpe_lag1": 0.2228
+   },
+   "confirm": {
+    "cagr": 0.071,
+    "vol": 0.2093,
+    "sharpe": 0.432,
+    "sortino": 0.6253,
+    "maxdd": -0.2217,
+    "turnover": 104.9333,
+    "invested": 0.7923,
+    "exposure": 0.7923,
+    "vs_hold": {
+     "diff": -0.273,
+     "lo": -0.9161,
+     "hi": 0.2287,
+     "p_better": 0.1925
+    },
+    "sharpe_25bp": -0.3195,
+    "sharpe_0bp": 0.9326,
+    "sharpe_lag1": -0.2991
+   },
+   "dsr_screen": 0.0,
+   "verdict": null
+  },
+  "quarter_end_winners": {
+   "family": "Calendar & seasonality",
+   "intraday": null,
+   "screen": {
+    "cagr": 0.015,
+    "vol": 0.0772,
+    "sharpe": 0.2311,
+    "sortino": 0.3312,
+    "maxdd": -0.1453,
+    "turnover": 8.251,
+    "invested": 0.0819,
+    "exposure": 0.0819,
+    "vs_hold": {
+     "diff": -0.6517,
+     "lo": -1.4289,
+     "hi": 0.0524,
+     "p_better": 0.065
+    },
+    "sharpe_25bp": 0.0706,
+    "sharpe_0bp": 0.3381,
+    "sharpe_lag1": 0.3136
+   },
+   "confirm": {
+    "cagr": -0.0043,
+    "vol": 0.0869,
+    "sharpe": -0.0062,
+    "sortino": -0.0087,
+    "maxdd": -0.1089,
+    "turnover": 8.0,
+    "invested": 0.0794,
+    "exposure": 0.0794,
+    "vs_hold": {
+     "diff": -0.7115,
+     "lo": -1.9245,
+     "hi": 0.3612,
+     "p_better": 0.1435
+    },
+    "sharpe_25bp": -0.1422,
+    "sharpe_0bp": 0.0865,
+    "sharpe_lag1": 0.7184
+   },
+   "dsr_screen": 0.0,
+   "verdict": null
+  },
+  "beta_rotation_breadth": {
+   "family": "Market breadth & regime",
+   "intraday": null,
+   "screen": {
+    "cagr": 0.0799,
+    "vol": 0.3089,
+    "sharpe": 0.4043,
+    "sortino": 0.5534,
+    "maxdd": -0.4081,
+    "turnover": 5.5007,
+    "invested": 1.0,
+    "exposure": 1.0,
+    "vs_hold": {
+     "diff": -0.4785,
+     "lo": -0.9988,
+     "hi": 0.1138,
+     "p_better": 0.095
+    },
+    "sharpe_25bp": 0.3776,
+    "sharpe_0bp": 0.422,
+    "sharpe_lag1": 0.3871
+   },
+   "confirm": {
+    "cagr": 0.1932,
+    "vol": 0.3022,
+    "sharpe": 0.7349,
+    "sortino": 1.0962,
+    "maxdd": -0.2814,
+    "turnover": 6.1667,
+    "invested": 1.0,
+    "exposure": 1.0,
+    "vs_hold": {
+     "diff": 0.0301,
+     "lo": -0.5438,
+     "hi": 0.4799,
+     "p_better": 0.4935
+    },
+    "sharpe_25bp": 0.7046,
+    "sharpe_0bp": 0.755,
+    "sharpe_lag1": 0.7007
+   },
+   "dsr_screen": 0.0,
+   "verdict": null
+  },
+  "breadth_200d_regime": {
+   "family": "Market breadth & regime",
+   "intraday": null,
+   "screen": {
+    "cagr": 0.1022,
+    "vol": 0.1365,
+    "sharpe": 0.7816,
+    "sortino": 1.0892,
+    "maxdd": -0.2005,
+    "turnover": 1.7465,
+    "invested": 0.8452,
+    "exposure": 0.8452,
+    "vs_hold": {
+     "diff": -0.1011,
+     "lo": -0.5498,
+     "hi": 0.3886,
+     "p_better": 0.3685
+    },
+    "sharpe_25bp": 0.7624,
+    "sharpe_0bp": 0.7943,
+    "sharpe_lag1": 0.7676
+   },
+   "confirm": {
+    "cagr": 0.0565,
+    "vol": 0.1857,
+    "sharpe": 0.3896,
+    "sortino": 0.5089,
+    "maxdd": -0.2811,
+    "turnover": 3.0933,
+    "invested": 0.8545,
+    "exposure": 0.8545,
+    "vs_hold": {
+     "diff": -0.3154,
+     "lo": -0.855,
+     "hi": 0.055,
+     "p_better": 0.0805
+    },
+    "sharpe_25bp": 0.3642,
+    "sharpe_0bp": 0.4065,
+    "sharpe_lag1": 0.3771
+   },
+   "dsr_screen": 0.0,
+   "verdict": null
+  },
+  "nh_nl_regime": {
+   "family": "Market breadth & regime",
+   "intraday": null,
+   "screen": {
+    "cagr": 0.0552,
+    "vol": 0.1448,
+    "sharpe": 0.4438,
+    "sortino": 0.6065,
+    "maxdd": -0.3628,
+    "turnover": 4.5106,
+    "invested": 0.8383,
+    "exposure": 0.8383,
+    "vs_hold": {
+     "diff": -0.4389,
+     "lo": -0.7876,
+     "hi": -0.0967,
+     "p_better": 0.0185
+    },
+    "sharpe_25bp": 0.3969,
+    "sharpe_0bp": 0.475,
+    "sharpe_lag1": 0.4636
+   },
+   "confirm": {
+    "cagr": 0.1017,
+    "vol": 0.1639,
+    "sharpe": 0.6735,
+    "sortino": 0.9108,
+    "maxdd": -0.1837,
+    "turnover": 6.3733,
+    "invested": 0.8479,
+    "exposure": 0.8479,
+    "vs_hold": {
+     "diff": -0.0313,
+     "lo": -0.7531,
+     "hi": 0.4636,
+     "p_better": 0.3545
+    },
+    "sharpe_25bp": 0.6151,
+    "sharpe_0bp": 0.7123,
+    "sharpe_lag1": 0.4236
+   },
+   "dsr_screen": 0.0,
+   "verdict": null
+  },
+  "breadth_thrust": {
+   "family": "Market breadth & regime",
+   "intraday": null,
+   "screen": {
+    "cagr": 0.0591,
+    "vol": 0.1094,
+    "sharpe": 0.5799,
+    "sortino": 0.8257,
+    "maxdd": -0.3058,
+    "turnover": 2.41,
+    "invested": 0.3322,
+    "exposure": 0.3322,
+    "vs_hold": {
+     "diff": -0.3028,
+     "lo": -0.8729,
+     "hi": 0.2302,
+     "p_better": 0.1515
+    },
+    "sharpe_25bp": 0.5462,
+    "sharpe_0bp": 0.6023,
+    "sharpe_lag1": 0.6818
+   },
+   "confirm": {
+    "cagr": 0.1314,
+    "vol": 0.1121,
+    "sharpe": 1.1575,
+    "sortino": 1.695,
+    "maxdd": -0.1842,
+    "turnover": 3.88,
+    "invested": 0.5278,
+    "exposure": 0.5278,
+    "vs_hold": {
+     "diff": 0.453,
+     "lo": -0.493,
+     "hi": 1.5436,
+     "p_better": 0.761
+    },
+    "sharpe_25bp": 1.1045,
+    "sharpe_0bp": 1.1924,
+    "sharpe_lag1": 1.1686
+   },
+   "dsr_screen": 0.0,
+   "verdict": null
+  },
+  "breadth_washout_buy": {
+   "family": "Market breadth & regime",
+   "intraday": null,
+   "screen": {
+    "cagr": 0.0741,
+    "vol": 0.0926,
+    "sharpe": 0.8179,
+    "sortino": 1.3455,
+    "maxdd": -0.1317,
+    "turnover": 2.8157,
+    "invested": 0.1303,
+    "exposure": 0.1303,
+    "vs_hold": {
+     "diff": -0.0647,
+     "lo": -0.7393,
+     "hi": 0.5173,
+     "p_better": 0.3885
+    },
+    "sharpe_25bp": 0.7717,
+    "sharpe_0bp": 0.8485,
+    "sharpe_lag1": 0.8308
+   },
+   "confirm": {
+    "cagr": 0.1066,
+    "vol": 0.2098,
+    "sharpe": 0.5886,
+    "sortino": 0.8373,
+    "maxdd": -0.2917,
+    "turnover": 6.16,
+    "invested": 0.3122,
+    "exposure": 0.3122,
+    "vs_hold": {
+     "diff": -0.1163,
+     "lo": -0.5644,
+     "hi": 0.6712,
+     "p_better": 0.526
+    },
+    "sharpe_25bp": 0.5449,
+    "sharpe_0bp": 0.6176,
+    "sharpe_lag1": 0.4816
+   },
+   "dsr_screen": 0.0,
+   "verdict": null
+  },
+  "ad_line_divergence": {
+   "family": "Market breadth & regime",
+   "intraday": null,
+   "screen": {
+    "cagr": 0.0792,
+    "vol": 0.1595,
+    "sharpe": 0.5578,
+    "sortino": 0.8064,
+    "maxdd": -0.248,
+    "turnover": 14.2605,
+    "invested": 0.7183,
+    "exposure": 0.7183,
+    "vs_hold": {
+     "diff": -0.3249,
+     "lo": -0.6011,
+     "hi": -0.0851,
+     "p_better": 0.01
+    },
+    "sharpe_25bp": 0.4234,
+    "sharpe_0bp": 0.6471,
+    "sharpe_lag1": 0.5548
+   },
+   "confirm": {
+    "cagr": 0.1188,
+    "vol": 0.238,
+    "sharpe": 0.5914,
+    "sortino": 0.8209,
+    "maxdd": -0.2917,
+    "turnover": 14.4267,
+    "invested": 0.8214,
+    "exposure": 0.8214,
+    "vs_hold": {
+     "diff": -0.1135,
+     "lo": -0.4307,
+     "hi": 0.288,
+     "p_better": 0.3995
+    },
+    "sharpe_25bp": 0.5004,
+    "sharpe_0bp": 0.6519,
+    "sharpe_lag1": 0.5111
+   },
+   "dsr_screen": 0.0,
+   "verdict": null
+  },
+  "market_absorption_ratio": {
+   "family": "Market breadth & regime",
+   "intraday": null,
+   "screen": {
+    "cagr": 0.1288,
+    "vol": 0.1347,
+    "sharpe": 0.967,
+    "sortino": 1.3896,
+    "maxdd": -0.1806,
+    "turnover": 1.1998,
+    "invested": 0.7387,
+    "exposure": 0.7387,
+    "vs_hold": {
+     "diff": 0.0844,
+     "lo": -0.3857,
+     "hi": 0.5706,
+     "p_better": 0.632
+    },
+    "sharpe_25bp": 0.9538,
+    "sharpe_0bp": 0.9758,
+    "sharpe_lag1": 0.9285
+   },
+   "confirm": {
+    "cagr": -0.0273,
+    "vol": 0.1909,
+    "sharpe": -0.0475,
+    "sortino": -0.0597,
+    "maxdd": -0.3584,
+    "turnover": 2.9867,
+    "invested": 0.623,
+    "exposure": 0.623,
+    "vs_hold": {
+     "diff": -0.7528,
+     "lo": -1.3194,
+     "hi": -0.2068,
+     "p_better": 0.0165
+    },
+    "sharpe_25bp": -0.0709,
+    "sharpe_0bp": -0.0318,
+    "sharpe_lag1": -0.0945
+   },
+   "dsr_screen": 0.0,
+   "verdict": "Failed"
+  },
+  "market_turbulence": {
+   "family": "Market breadth & regime",
+   "intraday": null,
+   "screen": {
+    "cagr": 0.0812,
+    "vol": 0.1504,
+    "sharpe": 0.5946,
+    "sortino": 0.8235,
+    "maxdd": -0.3086,
+    "turnover": 5.2532,
+    "invested": 0.7974,
+    "exposure": 0.7974,
+    "vs_hold": {
+     "diff": -0.2881,
+     "lo": -0.6231,
+     "hi": 0.0778,
+     "p_better": 0.095
+    },
+    "sharpe_25bp": 0.5424,
+    "sharpe_0bp": 0.6292,
+    "sharpe_lag1": 0.5581
+   },
+   "confirm": {
+    "cagr": 0.1618,
+    "vol": 0.1172,
+    "sharpe": 1.3384,
+    "sortino": 1.9111,
+    "maxdd": -0.1174,
+    "turnover": 5.68,
+    "invested": 0.6746,
+    "exposure": 0.6746,
+    "vs_hold": {
+     "diff": 0.634,
+     "lo": -0.4822,
+     "hi": 1.5522,
+     "p_better": 0.782
+    },
+    "sharpe_25bp": 1.2639,
+    "sharpe_0bp": 1.3876,
+    "sharpe_lag1": 1.2499
+   },
+   "dsr_screen": 0.0,
+   "verdict": null
+  },
+  "dual_momentum_top10": {
+   "family": "Dual / absolute momentum",
+   "intraday": null,
+   "screen": {
+    "cagr": 0.1998,
+    "vol": 0.3558,
+    "sharpe": 0.6905,
+    "sortino": 0.9755,
+    "maxdd": -0.4244,
+    "turnover": 6.8071,
+    "invested": 1.0,
+    "exposure": 1.0,
+    "vs_hold": {
+     "diff": -0.1921,
+     "lo": -0.6428,
+     "hi": 0.4082,
+     "p_better": 0.36
+    },
+    "sharpe_25bp": 0.6619,
+    "sharpe_0bp": 0.7096,
+    "sharpe_lag1": 0.6462
+   },
+   "confirm": {
+    "cagr": 0.2034,
+    "vol": 0.3176,
+    "sharpe": 0.743,
+    "sortino": 1.0307,
+    "maxdd": -0.3415,
+    "turnover": 7.0,
+    "invested": 1.0,
+    "exposure": 1.0,
+    "vs_hold": {
+     "diff": 0.0382,
+     "lo": -0.5565,
+     "hi": 0.4966,
+     "p_better": 0.527
+    },
+    "sharpe_25bp": 0.7101,
+    "sharpe_0bp": 0.7649,
+    "sharpe_lag1": 0.7253
+   },
+   "dsr_screen": 0.0,
+   "verdict": null
+  },
+  "protective_breadth_mom": {
+   "family": "Dual / absolute momentum",
+   "intraday": null,
+   "screen": {
+    "cagr": 0.099,
+    "vol": 0.1129,
+    "sharpe": 0.8928,
+    "sortino": 1.3015,
+    "maxdd": -0.1267,
+    "turnover": 6.4486,
+    "invested": 0.7851,
+    "exposure": 0.3481,
+    "vs_hold": {
+     "diff": 0.0102,
+     "lo": -0.6676,
+     "hi": 0.618,
+     "p_better": 0.4905
+    },
+    "sharpe_25bp": 0.8061,
+    "sharpe_0bp": 0.9503,
+    "sharpe_lag1": 0.7589
+   },
+   "confirm": {
+    "cagr": 0.0644,
+    "vol": 0.1101,
+    "sharpe": 0.6221,
+    "sortino": 0.8451,
+    "maxdd": -0.1353,
+    "turnover": 7.3613,
+    "invested": 0.7778,
+    "exposure": 0.4023,
+    "vs_hold": {
+     "diff": -0.0828,
+     "lo": -1.0618,
+     "hi": 0.8429,
+     "p_better": 0.4135
+    },
+    "sharpe_25bp": 0.5216,
+    "sharpe_0bp": 0.6887,
+    "sharpe_lag1": 0.6568
+   },
+   "dsr_screen": 0.0,
+   "verdict": "Mixed"
+  },
+  "canary_universe": {
+   "family": "Dual / absolute momentum",
+   "intraday": null,
+   "screen": {
+    "cagr": 0.1196,
+    "vol": 0.291,
+    "sharpe": 0.5341,
+    "sortino": 0.7535,
+    "maxdd": -0.3698,
+    "turnover": 12.6859,
+    "invested": 0.7851,
+    "exposure": 0.7851,
+    "vs_hold": {
+     "diff": -0.3486,
+     "lo": -0.9529,
+     "hi": 0.3059,
+     "p_better": 0.2075
+    },
+    "sharpe_25bp": 0.4686,
+    "sharpe_0bp": 0.5778,
+    "sharpe_lag1": 0.4393
+   },
+   "confirm": {
+    "cagr": 0.0673,
+    "vol": 0.1948,
+    "sharpe": 0.4323,
+    "sortino": 0.5767,
+    "maxdd": -0.2733,
+    "turnover": 13.2,
+    "invested": 0.7778,
+    "exposure": 0.7778,
+    "vs_hold": {
+     "diff": -0.2727,
+     "lo": -1.1506,
+     "hi": 0.5111,
+     "p_better": 0.2695
+    },
+    "sharpe_25bp": 0.3305,
+    "sharpe_0bp": 0.5,
+    "sharpe_lag1": 0.5008
+   },
+   "dsr_screen": 0.0,
+   "verdict": null
+  },
+  "winners_on_dips": {
+   "family": "Trend + pullback",
+   "intraday": null,
+   "screen": {
+    "cagr": 0.193,
+    "vol": 0.3465,
+    "sharpe": 0.6827,
+    "sortino": 0.9814,
+    "maxdd": -0.3136,
+    "turnover": 45.2431,
+    "invested": 1.0,
+    "exposure": 1.0272,
+    "vs_hold": {
+     "diff": -0.2,
+     "lo": -0.7086,
+     "hi": 0.3428,
+     "p_better": 0.3045
+    },
+    "sharpe_25bp": 0.4869,
+    "sharpe_0bp": 0.813,
+    "sharpe_lag1": 0.7031
+   },
+   "confirm": {
+    "cagr": 0.1655,
+    "vol": 0.3128,
+    "sharpe": 0.6463,
+    "sortino": 0.9201,
+    "maxdd": -0.338,
+    "turnover": 44.8667,
+    "invested": 1.0,
+    "exposure": 1.0275,
+    "vs_hold": {
+     "diff": -0.0586,
+     "lo": -0.6691,
+     "hi": 0.4004,
+     "p_better": 0.4205
+    },
+    "sharpe_25bp": 0.4311,
+    "sharpe_0bp": 0.7895,
+    "sharpe_lag1": 0.6133
+   },
+   "dsr_screen": 0.0,
+   "verdict": null
+  },
+  "trend_pullback_ema": {
+   "family": "Trend + pullback",
+   "intraday": null,
+   "screen": {
+    "cagr": 0.0229,
+    "vol": 0.1875,
+    "sharpe": 0.2147,
+    "sortino": 0.2947,
+    "maxdd": -0.2961,
+    "turnover": 103.1727,
+    "invested": 0.9973,
+    "exposure": 0.9973,
+    "vs_hold": {
+     "diff": -0.6681,
+     "lo": -1.1677,
+     "hi": -0.2498,
+     "p_better": 0.0045
+    },
+    "sharpe_25bp": -0.61,
+    "sharpe_0bp": 0.7647,
+    "sharpe_lag1": -0.0042
+   },
+   "confirm": {
+    "cagr": -0.1443,
+    "vol": 0.2251,
+    "sharpe": -0.5768,
+    "sortino": -0.7057,
+    "maxdd": -0.5425,
+    "turnover": 106.261,
+    "invested": 0.996,
+    "exposure": 0.996,
+    "vs_hold": {
+     "diff": -1.2825,
+     "lo": -1.8413,
+     "hi": -0.735,
+     "p_better": 0.0
+    },
+    "sharpe_25bp": -1.277,
+    "sharpe_0bp": -0.1051,
+    "sharpe_lag1": 0.2613
+   },
+   "dsr_screen": 0.0,
+   "verdict": null
+  },
+  "high_near_52wh_pullback": {
+   "family": "Trend + pullback",
+   "intraday": null,
+   "screen": {
+    "cagr": 0.0248,
+    "vol": 0.213,
+    "sharpe": 0.2218,
+    "sortino": 0.3109,
+    "maxdd": -0.3901,
+    "turnover": 91.901,
+    "invested": 0.9898,
+    "exposure": 0.9898,
+    "vs_hold": {
+     "diff": -0.661,
+     "lo": -1.1402,
+     "hi": -0.188,
+     "p_better": 0.0095
+    },
+    "sharpe_25bp": -0.4244,
+    "sharpe_0bp": 0.6535,
+    "sharpe_lag1": 0.3398
+   },
+   "confirm": {
+    "cagr": 0.0035,
+    "vol": 0.249,
+    "sharpe": 0.1391,
+    "sortino": 0.1877,
+    "maxdd": -0.3667,
+    "turnover": 95.6397,
+    "invested": 0.9907,
+    "exposure": 0.9907,
+    "vs_hold": {
+     "diff": -0.5661,
+     "lo": -1.0152,
+     "hi": -0.1778,
+     "p_better": 0.0055
+    },
+    "sharpe_25bp": -0.4359,
+    "sharpe_0bp": 0.5235,
+    "sharpe_lag1": 0.396
+   },
+   "dsr_screen": 0.0,
+   "verdict": null
+  },
+  "ma_slope_trend_strength": {
+   "family": "Trend + pullback",
+   "intraday": null,
+   "screen": {
+    "cagr": -0.0157,
+    "vol": 0.2144,
+    "sharpe": 0.0372,
+    "sortino": 0.0485,
+    "maxdd": -0.4726,
+    "turnover": 61.6681,
+    "invested": 0.9413,
+    "exposure": 0.9413,
+    "vs_hold": {
+     "diff": -0.8457,
+     "lo": -1.5054,
+     "hi": -0.2385,
+     "p_better": 0.0125
+    },
+    "sharpe_25bp": -0.3934,
+    "sharpe_0bp": 0.3252,
+    "sharpe_lag1": 0.0322
+   },
+   "confirm": {
+    "cagr": 0.0669,
+    "vol": 0.1724,
+    "sharpe": 0.4624,
+    "sortino": 0.6319,
+    "maxdd": -0.2673,
+    "turnover": 59.0064,
+    "invested": 0.8611,
+    "exposure": 0.8611,
+    "vs_hold": {
+     "diff": -0.2426,
+     "lo": -1.1502,
+     "hi": 0.5085,
+     "p_better": 0.244
+    },
+    "sharpe_25bp": -0.0509,
+    "sharpe_0bp": 0.8047,
+    "sharpe_lag1": 0.5292
+   },
+   "dsr_screen": 0.0,
+   "verdict": null
+  },
+  "mom_top_trend_exit": {
+   "family": "Trend + pullback",
+   "intraday": null,
+   "screen": {
+    "cagr": 0.1041,
+    "vol": 0.2804,
+    "sharpe": 0.4939,
+    "sortino": 0.6911,
+    "maxdd": -0.3505,
+    "turnover": 7.8729,
+    "invested": 1.0,
+    "exposure": 0.8342,
+    "vs_hold": {
+     "diff": -0.3889,
+     "lo": -0.9965,
+     "hi": 0.2286,
+     "p_better": 0.1385
+    },
+    "sharpe_25bp": 0.4518,
+    "sharpe_0bp": 0.5219,
+    "sharpe_lag1": 0.5159
+   },
+   "confirm": {
+    "cagr": 0.1642,
+    "vol": 0.218,
+    "sharpe": 0.8069,
+    "sortino": 1.092,
+    "maxdd": -0.2466,
+    "turnover": 7.2667,
+    "invested": 0.9868,
+    "exposure": 0.8513,
+    "vs_hold": {
+     "diff": 0.1021,
+     "lo": -0.6326,
+     "hi": 0.559,
+     "p_better": 0.5035
+    },
+    "sharpe_25bp": 0.7566,
+    "sharpe_0bp": 0.8403,
+    "sharpe_lag1": 0.6688
+   },
+   "dsr_screen": 0.0,
+   "verdict": null
+  },
+  "amihud_illiquid": {
+   "family": "Volume & liquidity",
+   "intraday": null,
+   "screen": {
+    "cagr": 0.1915,
+    "vol": 0.2757,
+    "sharpe": 0.7736,
+    "sortino": 1.1015,
+    "maxdd": -0.2612,
+    "turnover": 2.716,
+    "invested": 1.0,
+    "exposure": 1.0,
+    "vs_hold": {
+     "diff": -0.1091,
+     "lo": -0.379,
+     "hi": 0.1591,
+     "p_better": 0.2435
+    },
+    "sharpe_25bp": 0.7588,
+    "sharpe_0bp": 0.7834,
+    "sharpe_lag1": 0.7606
+   },
+   "confirm": {
+    "cagr": 0.1197,
+    "vol": 0.3071,
+    "sharpe": 0.5226,
+    "sortino": 0.739,
+    "maxdd": -0.4289,
+    "turnover": 3.0333,
+    "invested": 1.0,
+    "exposure": 1.0,
+    "vs_hold": {
+     "diff": -0.1823,
+     "lo": -0.4309,
+     "hi": 0.0491,
+     "p_better": 0.0985
+    },
+    "sharpe_25bp": 0.5078,
+    "sharpe_0bp": 0.5326,
+    "sharpe_lag1": 0.5195
+   },
+   "dsr_screen": 0.0,
+   "verdict": null
+  },
+  "high_volume_premium": {
+   "family": "Volume & liquidity",
+   "intraday": null,
+   "screen": {
+    "cagr": 0.188,
+    "vol": 0.1786,
+    "sharpe": 1.0542,
+    "sortino": 1.5569,
+    "maxdd": -0.2015,
+    "turnover": 22.3465,
+    "invested": 1.0,
+    "exposure": 1.0,
+    "vs_hold": {
+     "diff": 0.1716,
+     "lo": -0.29,
+     "hi": 0.5457,
+     "p_better": 0.696
+    },
+    "sharpe_25bp": 0.8643,
+    "sharpe_0bp": 1.1795,
+    "sharpe_lag1": 1.0876
+   },
+   "confirm": {
+    "cagr": 0.2271,
+    "vol": 0.1911,
+    "sharpe": 1.1667,
+    "sortino": 1.6899,
+    "maxdd": -0.1955,
+    "turnover": 22.0667,
+    "invested": 1.0,
+    "exposure": 0.9796,
+    "vs_hold": {
+     "diff": 0.4622,
+     "lo": -0.1609,
+     "hi": 0.9177,
+     "p_better": 0.8505
+    },
+    "sharpe_25bp": 0.9909,
+    "sharpe_0bp": 1.2827,
+    "sharpe_lag1": 1.2928
+   },
+   "dsr_screen": 0.0,
+   "verdict": "Confirmed"
+  },
+  "obv_accumulation": {
+   "family": "Volume & liquidity",
+   "intraday": null,
+   "screen": {
+    "cagr": 0.1063,
+    "vol": 0.181,
+    "sharpe": 0.6488,
+    "sortino": 0.9276,
+    "maxdd": -0.2038,
+    "turnover": 64.4179,
+    "invested": 0.9884,
+    "exposure": 0.9884,
+    "vs_hold": {
+     "diff": -0.2338,
+     "lo": -0.6732,
+     "hi": 0.1363,
+     "p_better": 0.1455
+    },
+    "sharpe_25bp": 0.1148,
+    "sharpe_0bp": 1.0046,
+    "sharpe_lag1": 0.548
+   },
+   "confirm": {
+    "cagr": 0.0626,
+    "vol": 0.2084,
+    "sharpe": 0.3957,
+    "sortino": 0.5412,
+    "maxdd": -0.2582,
+    "turnover": 67.235,
+    "invested": 0.9881,
+    "exposure": 0.9881,
+    "vs_hold": {
+     "diff": -0.3093,
+     "lo": -0.8709,
+     "hi": 0.0856,
+     "p_better": 0.096
+    },
+    "sharpe_25bp": -0.0885,
+    "sharpe_0bp": 0.7171,
+    "sharpe_lag1": 0.1468
+   },
+   "dsr_screen": 0.0,
+   "verdict": null
+  },
+  "chaikin_money_flow": {
+   "family": "Volume & liquidity",
+   "intraday": null,
+   "screen": {
+    "cagr": 0.1284,
+    "vol": 0.1825,
+    "sharpe": 0.7536,
+    "sortino": 1.0678,
+    "maxdd": -0.2559,
+    "turnover": 37.2513,
+    "invested": 1.0,
+    "exposure": 1.0,
+    "vs_hold": {
+     "diff": -0.129,
+     "lo": -0.5042,
+     "hi": 0.2535,
+     "p_better": 0.302
+    },
+    "sharpe_25bp": 0.4468,
+    "sharpe_0bp": 0.9584,
+    "sharpe_lag1": 0.811
+   },
+   "confirm": {
+    "cagr": 0.0519,
+    "vol": 0.2411,
+    "sharpe": 0.3315,
+    "sortino": 0.4467,
+    "maxdd": -0.3019,
+    "turnover": 44.2724,
+    "invested": 1.0,
+    "exposure": 1.0,
+    "vs_hold": {
+     "diff": -0.3735,
+     "lo": -0.7907,
+     "hi": -0.021,
+     "p_better": 0.045
+    },
+    "sharpe_25bp": 0.0562,
+    "sharpe_0bp": 0.5147,
+    "sharpe_lag1": 0.4279
+   },
+   "dsr_screen": 0.0,
+   "verdict": null
+  },
+  "volume_dryup_pullback": {
+   "family": "Volume & liquidity",
+   "intraday": null,
+   "screen": {
+    "cagr": 0.1204,
+    "vol": 0.1881,
+    "sharpe": 0.6981,
+    "sortino": 1.0669,
+    "maxdd": -0.2346,
+    "turnover": 32.5113,
+    "invested": 0.5948,
+    "exposure": 0.5948,
+    "vs_hold": {
+     "diff": -0.1845,
+     "lo": -1.0157,
+     "hi": 0.6294,
+     "p_better": 0.361
+    },
+    "sharpe_25bp": 0.4391,
+    "sharpe_0bp": 0.8699,
+    "sharpe_lag1": 0.155
+   },
+   "confirm": {
+    "cagr": -0.0076,
+    "vol": 0.1592,
+    "sharpe": 0.0314,
+    "sortino": 0.0445,
+    "maxdd": -0.3025,
+    "turnover": 31.0349,
+    "invested": 0.4762,
+    "exposure": 0.4762,
+    "vs_hold": {
+     "diff": -0.6738,
+     "lo": -2.0612,
+     "hi": 0.3617,
+     "p_better": 0.1185
+    },
+    "sharpe_25bp": -0.2603,
+    "sharpe_0bp": 0.2264,
+    "sharpe_lag1": 0.3565
+   },
+   "dsr_screen": 0.0,
+   "verdict": null
+  },
+  "corr_spike_filter": {
+   "family": "Correlation & dispersion",
+   "intraday": null,
+   "screen": {
+    "cagr": 0.1305,
+    "vol": 0.1537,
+    "sharpe": 0.8755,
+    "sortino": 1.2462,
+    "maxdd": -0.2069,
+    "turnover": 1.798,
+    "invested": 0.925,
+    "exposure": 0.925,
+    "vs_hold": {
+     "diff": -0.0071,
+     "lo": -0.3025,
+     "hi": 0.3184,
+     "p_better": 0.492
+    },
+    "sharpe_25bp": 0.8579,
+    "sharpe_0bp": 0.8871,
+    "sharpe_lag1": 0.8177
+   },
+   "confirm": {
+    "cagr": 0.0649,
+    "vol": 0.1536,
+    "sharpe": 0.4865,
+    "sortino": 0.6432,
+    "maxdd": -0.1792,
+    "turnover": 6.96,
+    "invested": 0.791,
+    "exposure": 0.791,
+    "vs_hold": {
+     "diff": -0.2184,
+     "lo": -1.0369,
+     "hi": 0.3208,
+     "p_better": 0.1905
+    },
+    "sharpe_25bp": 0.418,
+    "sharpe_0bp": 0.5322,
+    "sharpe_lag1": 0.7396
+   },
+   "dsr_screen": 0.0,
+   "verdict": null
+  },
+  "dispersion_mom_switch": {
+   "family": "Correlation & dispersion",
+   "intraday": null,
+   "screen": {
+    "cagr": 0.1158,
+    "vol": 0.3151,
+    "sharpe": 0.5058,
+    "sortino": 0.7104,
+    "maxdd": -0.3653,
+    "turnover": 14.9756,
+    "invested": 1.0,
+    "exposure": 1.0,
+    "vs_hold": {
+     "diff": -0.3769,
+     "lo": -0.7923,
+     "hi": 0.0559,
+     "p_better": 0.0755
+    },
+    "sharpe_25bp": 0.4342,
+    "sharpe_0bp": 0.5534,
+    "sharpe_lag1": 0.5715
+   },
+   "confirm": {
+    "cagr": 0.233,
+    "vol": 0.2784,
+    "sharpe": 0.8927,
+    "sortino": 1.2385,
+    "maxdd": -0.3623,
+    "turnover": 14.1067,
+    "invested": 1.0,
+    "exposure": 1.0,
+    "vs_hold": {
+     "diff": 0.188,
+     "lo": -0.1562,
+     "hi": 0.5323,
+     "p_better": 0.839
+    },
+    "sharpe_25bp": 0.8163,
+    "sharpe_0bp": 0.9433,
+    "sharpe_lag1": 0.8826
+   },
+   "dsr_screen": 0.0,
+   "verdict": null
+  },
+  "low_corr_stocks": {
+   "family": "Correlation & dispersion",
+   "intraday": null,
+   "screen": {
+    "cagr": 0.108,
+    "vol": 0.1473,
+    "sharpe": 0.77,
+    "sortino": 1.1244,
+    "maxdd": -0.1349,
+    "turnover": 2.6128,
+    "invested": 1.0,
+    "exposure": 1.0,
+    "vs_hold": {
+     "diff": -0.1127,
+     "lo": -0.874,
+     "hi": 0.4364,
+     "p_better": 0.278
+    },
+    "sharpe_25bp": 0.7435,
+    "sharpe_0bp": 0.7876,
+    "sharpe_lag1": 0.7331
+   },
+   "confirm": {
+    "cagr": 0.207,
+    "vol": 0.2357,
+    "sharpe": 0.9166,
+    "sortino": 1.3218,
+    "maxdd": -0.3136,
+    "turnover": 3.6333,
+    "invested": 1.0,
+    "exposure": 1.0,
+    "vs_hold": {
+     "diff": 0.2119,
+     "lo": -0.0342,
+     "hi": 0.4824,
+     "p_better": 0.9285
+    },
+    "sharpe_25bp": 0.893,
+    "sharpe_0bp": 0.9323,
+    "sharpe_lag1": 0.9473
+   },
+   "dsr_screen": 0.0,
+   "verdict": null
+  },
+  "first_new_high_after_base": {
+   "family": "52-week highs/lows & index events",
+   "intraday": null,
+   "screen": {
+    "cagr": 0.0576,
+    "vol": 0.1693,
+    "sharpe": 0.4158,
+    "sortino": 0.5811,
+    "maxdd": -0.3259,
+    "turnover": 25.731,
+    "invested": 0.9475,
+    "exposure": 0.9475,
+    "vs_hold": {
+     "diff": -0.4669,
+     "lo": -1.0382,
+     "hi": 0.0627,
+     "p_better": 0.0655
+    },
+    "sharpe_25bp": 0.1877,
+    "sharpe_0bp": 0.5679,
+    "sharpe_lag1": 0.4195
+   },
+   "confirm": {
+    "cagr": 0.0716,
+    "vol": 0.2324,
+    "sharpe": 0.4139,
+    "sortino": 0.5711,
+    "maxdd": -0.1971,
+    "turnover": 27.0761,
+    "invested": 0.9735,
+    "exposure": 0.9735,
+    "vs_hold": {
+     "diff": -0.2911,
+     "lo": -1.0631,
+     "hi": 0.3419,
+     "p_better": 0.2285
+    },
+    "sharpe_25bp": 0.2389,
+    "sharpe_0bp": 0.5307,
+    "sharpe_lag1": 0.5697
+   },
+   "dsr_screen": 0.0,
+   "verdict": null
+  },
+  "universe_entry": {
+   "family": "52-week highs/lows & index events",
+   "intraday": null,
+   "screen": {
+    "cagr": 0.0983,
+    "vol": 0.2885,
+    "sharpe": 0.469,
+    "sortino": 0.6852,
+    "maxdd": -0.4752,
+    "turnover": 8.251,
+    "invested": 0.9939,
+    "exposure": 0.9939,
+    "vs_hold": {
+     "diff": -0.4137,
+     "lo": -1.0645,
+     "hi": 0.0871,
+     "p_better": 0.084
+    },
+    "sharpe_25bp": 0.4259,
+    "sharpe_0bp": 0.4977,
+    "sharpe_lag1": 0.5074
+   },
+   "confirm": {
+    "cagr": 0.0392,
+    "vol": 0.2942,
+    "sharpe": 0.2782,
+    "sortino": 0.3914,
+    "maxdd": -0.4403,
+    "turnover": 8.0,
+    "invested": 0.9947,
+    "exposure": 0.9947,
+    "vs_hold": {
+     "diff": -0.4269,
+     "lo": -1.0219,
+     "hi": -0.0092,
+     "p_better": 0.0475
+    },
+    "sharpe_25bp": 0.2372,
+    "sharpe_0bp": 0.3054,
+    "sharpe_lag1": 0.3454
+   },
+   "dsr_screen": 0.0,
+   "verdict": null
+  },
+  "near_52wk_low_avoid": {
+   "family": "52-week highs/lows & index events",
+   "intraday": null,
+   "screen": {
+    "cagr": 0.1506,
+    "vol": 0.1757,
+    "sharpe": 0.8864,
+    "sortino": 1.2792,
+    "maxdd": -0.2664,
+    "turnover": 2.6458,
+    "invested": 1.0,
+    "exposure": 1.0,
+    "vs_hold": {
+     "diff": 0.0038,
+     "lo": -0.0526,
+     "hi": 0.0715,
+     "p_better": 0.599
+    },
+    "sharpe_25bp": 0.864,
+    "sharpe_0bp": 0.9013,
+    "sharpe_lag1": 0.8701
+   },
+   "confirm": {
+    "cagr": 0.1672,
+    "vol": 0.2461,
+    "sharpe": 0.7523,
+    "sortino": 1.048,
+    "maxdd": -0.3264,
+    "turnover": 1.8715,
+    "invested": 1.0,
+    "exposure": 1.0,
+    "vs_hold": {
+     "diff": 0.0475,
+     "lo": -0.0308,
+     "hi": 0.1011,
+     "p_better": 0.8285
+    },
+    "sharpe_25bp": 0.7409,
+    "sharpe_0bp": 0.7599,
+    "sharpe_lag1": 0.7576
+   },
+   "dsr_screen": 0.0,
+   "verdict": "Confirmed"
+  },
+  "composite_mom_lowvol_52wh": {
+   "family": "Ensembles & composites",
+   "intraday": null,
+   "screen": {
+    "cagr": 0.111,
+    "vol": 0.1366,
+    "sharpe": 0.8391,
+    "sortino": 1.2073,
+    "maxdd": -0.1596,
+    "turnover": 5.2256,
+    "invested": 1.0,
+    "exposure": 1.0,
+    "vs_hold": {
+     "diff": -0.0436,
+     "lo": -0.6746,
+     "hi": 0.4413,
+     "p_better": 0.372
+    },
+    "sharpe_25bp": 0.7816,
+    "sharpe_0bp": 0.8772,
+    "sharpe_lag1": 0.8613
+   },
+   "confirm": {
+    "cagr": 0.1236,
+    "vol": 0.2282,
+    "sharpe": 0.6257,
+    "sortino": 0.8726,
+    "maxdd": -0.3169,
+    "turnover": 5.3778,
+    "invested": 1.0,
+    "exposure": 1.0,
+    "vs_hold": {
+     "diff": -0.0792,
+     "lo": -0.498,
+     "hi": 0.3557,
+     "p_better": 0.4345
+    },
+    "sharpe_25bp": 0.5902,
+    "sharpe_0bp": 0.6493,
+    "sharpe_lag1": 0.6246
+   },
+   "dsr_screen": 0.0,
+   "verdict": null
+  },
+  "trend_lowvol": {
+   "family": "Ensembles & composites",
+   "intraday": null,
+   "screen": {
+    "cagr": 0.0928,
+    "vol": 0.1214,
+    "sharpe": 0.792,
+    "sortino": 1.1252,
+    "maxdd": -0.1656,
+    "turnover": 6.0851,
+    "invested": 1.0,
+    "exposure": 0.9928,
+    "vs_hold": {
+     "diff": -0.0906,
+     "lo": -0.7354,
+     "hi": 0.3703,
+     "p_better": 0.311
+    },
+    "sharpe_25bp": 0.7166,
+    "sharpe_0bp": 0.8421,
+    "sharpe_lag1": 0.7971
+   },
+   "confirm": {
+    "cagr": 0.1089,
+    "vol": 0.208,
+    "sharpe": 0.6015,
+    "sortino": 0.8248,
+    "maxdd": -0.3,
+    "turnover": 6.3333,
+    "invested": 1.0,
+    "exposure": 0.9917,
+    "vs_hold": {
+     "diff": -0.1034,
+     "lo": -0.4565,
+     "hi": 0.3292,
+     "p_better": 0.408
+    },
+    "sharpe_25bp": 0.5558,
+    "sharpe_0bp": 0.6319,
+    "sharpe_lag1": 0.5659
+   },
+   "dsr_screen": 0.0,
+   "verdict": null
+  },
+  "trend_vote_5": {
+   "family": "Ensembles & composites",
+   "intraday": null,
+   "screen": {
+    "cagr": 0.1322,
+    "vol": 0.1668,
+    "sharpe": 0.8277,
+    "sortino": 1.1742,
+    "maxdd": -0.2124,
+    "turnover": 6.4776,
+    "invested": 1.0,
+    "exposure": 0.9974,
+    "vs_hold": {
+     "diff": -0.0549,
+     "lo": -0.3406,
+     "hi": 0.2438,
+     "p_better": 0.438
+    },
+    "sharpe_25bp": 0.7695,
+    "sharpe_0bp": 0.8665,
+    "sharpe_lag1": 0.8278
+   },
+   "confirm": {
+    "cagr": 0.12,
+    "vol": 0.231,
+    "sharpe": 0.6069,
+    "sortino": 0.8293,
+    "maxdd": -0.3145,
+    "turnover": 7.5066,
+    "invested": 1.0,
+    "exposure": 1.0,
+    "vs_hold": {
+     "diff": -0.098,
+     "lo": -0.3759,
+     "hi": 0.1366,
+     "p_better": 0.2535
+    },
+    "sharpe_25bp": 0.5581,
+    "sharpe_0bp": 0.6394,
+    "sharpe_lag1": 0.5935
+   },
+   "dsr_screen": 0.0,
+   "verdict": null
+  },
+  "site_lineup_vote": {
+   "family": "Ensembles & composites",
+   "intraday": null,
+   "screen": {
+    "cagr": 0.1369,
+    "vol": 0.1568,
+    "sharpe": 0.897,
+    "sortino": 1.2798,
+    "maxdd": -0.2659,
+    "turnover": 12.1675,
+    "invested": 1.0,
+    "exposure": 1.0,
+    "vs_hold": {
+     "diff": 0.0144,
+     "lo": -0.2342,
+     "hi": 0.2333,
+     "p_better": 0.528
+    },
+    "sharpe_25bp": 0.7802,
+    "sharpe_0bp": 0.9749,
+    "sharpe_lag1": 0.8654
+   },
+   "confirm": {
+    "cagr": 0.1249,
+    "vol": 0.2299,
+    "sharpe": 0.6277,
+    "sortino": 0.8551,
+    "maxdd": -0.3173,
+    "turnover": 11.3367,
+    "invested": 1.0,
+    "exposure": 1.0,
+    "vs_hold": {
+     "diff": -0.0771,
+     "lo": -0.2989,
+     "hi": 0.1384,
+     "p_better": 0.2955
+    },
+    "sharpe_25bp": 0.554,
+    "sharpe_0bp": 0.6768,
+    "sharpe_lag1": 0.6613
+   },
+   "dsr_screen": 0.0,
+   "verdict": "Failed"
+  },
+  "mom_breadth_filter": {
+   "family": "Ensembles & composites",
+   "intraday": null,
+   "screen": {
+    "cagr": 0.0358,
+    "vol": 0.3301,
+    "sharpe": 0.2725,
+    "sortino": 0.3754,
+    "maxdd": -0.3653,
+    "turnover": 7.1165,
+    "invested": 0.7967,
+    "exposure": 0.7967,
+    "vs_hold": {
+     "diff": -0.6104,
+     "lo": -1.1942,
+     "hi": 0.0151,
+     "p_better": 0.054
+    },
+    "sharpe_25bp": 0.2401,
+    "sharpe_0bp": 0.294,
+    "sharpe_lag1": 0.2712
+   },
+   "confirm": {
+    "cagr": 0.0642,
+    "vol": 0.2258,
+    "sharpe": 0.3891,
+    "sortino": 0.5186,
+    "maxdd": -0.3392,
+    "turnover": 7.6,
+    "invested": 0.7817,
+    "exposure": 0.7817,
+    "vs_hold": {
+     "diff": -0.3159,
+     "lo": -1.2962,
+     "hi": 0.4049,
+     "p_better": 0.206
+    },
+    "sharpe_25bp": 0.3388,
+    "sharpe_0bp": 0.4226,
+    "sharpe_lag1": 0.3952
+   },
+   "dsr_screen": 0.0,
+   "verdict": null
+  },
+  "factor_rotation_mom": {
+   "family": "Ensembles & composites",
+   "intraday": null,
+   "screen": {
+    "cagr": 0.0602,
+    "vol": 0.3134,
+    "sharpe": 0.3436,
+    "sortino": 0.4792,
+    "maxdd": -0.3653,
+    "turnover": 11.7233,
+    "invested": 1.0,
+    "exposure": 1.0,
+    "vs_hold": {
+     "diff": -0.5392,
+     "lo": -1.0197,
+     "hi": 0.0588,
+     "p_better": 0.0725
+    },
+    "sharpe_25bp": 0.2875,
+    "sharpe_0bp": 0.3809,
+    "sharpe_lag1": 0.2461
+   },
+   "confirm": {
+    "cagr": 0.1848,
+    "vol": 0.2918,
+    "sharpe": 0.7281,
+    "sortino": 1.0159,
+    "maxdd": -0.3376,
+    "turnover": 10.5333,
+    "invested": 1.0,
+    "exposure": 1.0,
+    "vs_hold": {
+     "diff": 0.0233,
+     "lo": -0.5163,
+     "hi": 0.4549,
+     "p_better": 0.5065
+    },
+    "sharpe_25bp": 0.6738,
+    "sharpe_0bp": 0.7641,
+    "sharpe_lag1": 0.6816
+   },
+   "dsr_screen": 0.0,
+   "verdict": null
+  },
+  "multi_horizon_trend_score": {
+   "family": "Ensembles & composites",
+   "intraday": null,
+   "screen": {
+    "cagr": 0.0714,
+    "vol": 0.1517,
+    "sharpe": 0.5304,
+    "sortino": 0.741,
+    "maxdd": -0.2446,
+    "turnover": 27.2237,
+    "invested": 0.987,
+    "exposure": 0.8893,
+    "vs_hold": {
+     "diff": -0.3523,
+     "lo": -0.8369,
+     "hi": 0.0853,
+     "p_better": 0.0945
+    },
+    "sharpe_25bp": 0.2614,
+    "sharpe_0bp": 0.7091,
+    "sharpe_lag1": 0.4927
+   },
+   "confirm": {
+    "cagr": 0.053,
+    "vol": 0.1506,
+    "sharpe": 0.4189,
+    "sortino": 0.5353,
+    "maxdd": -0.1669,
+    "turnover": 28.1357,
+    "invested": 0.9881,
+    "exposure": 0.8794,
+    "vs_hold": {
+     "diff": -0.2861,
+     "lo": -1.0518,
+     "hi": 0.2377,
+     "p_better": 0.165
+    },
+    "sharpe_25bp": 0.1382,
+    "sharpe_0bp": 0.6064,
+    "sharpe_lag1": 0.4887
+   },
+   "dsr_screen": 0.0,
+   "verdict": null
+  },
+  "inv_vol_universe": {
+   "family": "Risk overlays",
+   "intraday": null,
+   "screen": {
+    "cagr": 0.1376,
+    "vol": 0.1509,
+    "sharpe": 0.9299,
+    "sortino": 1.352,
+    "maxdd": -0.2145,
+    "turnover": 1.5135,
+    "invested": 1.0,
+    "exposure": 1.0,
+    "vs_hold": {
+     "diff": 0.0473,
+     "lo": -0.1255,
+     "hi": 0.1709,
+     "p_better": 0.582
+    },
+    "sharpe_25bp": 0.9149,
+    "sharpe_0bp": 0.9399,
+    "sharpe_lag1": 0.9245
+   },
+   "confirm": {
+    "cagr": 0.15,
+    "vol": 0.2357,
+    "sharpe": 0.7114,
+    "sortino": 0.9839,
+    "maxdd": -0.3361,
+    "turnover": 1.5833,
+    "invested": 1.0,
+    "exposure": 1.0,
+    "vs_hold": {
+     "diff": 0.0066,
+     "lo": -0.0536,
+     "hi": 0.0991,
+     "p_better": 0.6345
+    },
+    "sharpe_25bp": 0.7013,
+    "sharpe_0bp": 0.7182,
+    "sharpe_lag1": 0.7082
+   },
+   "dsr_screen": 0.0,
+   "verdict": "Mixed"
+  },
+  "vol_target_mom": {
+   "family": "Risk overlays",
+   "intraday": null,
+   "screen": {
+    "cagr": 0.0945,
+    "vol": 0.1178,
+    "sharpe": 0.8258,
+    "sortino": 1.1845,
+    "maxdd": -0.135,
+    "turnover": 5.6849,
+    "invested": 1.0,
+    "exposure": 0.8877,
+    "vs_hold": {
+     "diff": -0.0568,
+     "lo": -0.7084,
+     "hi": 0.4679,
+     "p_better": 0.356
+    },
+    "sharpe_25bp": 0.7532,
+    "sharpe_0bp": 0.8741,
+    "sharpe_lag1": 0.8637
+   },
+   "confirm": {
+    "cagr": 0.0756,
+    "vol": 0.1384,
+    "sharpe": 0.596,
+    "sortino": 0.8035,
+    "maxdd": -0.1768,
+    "turnover": 5.4546,
+    "invested": 1.0,
+    "exposure": 0.7461,
+    "vs_hold": {
+     "diff": -0.1089,
+     "lo": -0.6899,
+     "hi": 0.364,
+     "p_better": 0.3165
+    },
+    "sharpe_25bp": 0.5368,
+    "sharpe_0bp": 0.6353,
+    "sharpe_lag1": 0.5072
+   },
+   "dsr_screen": 0.0,
+   "verdict": null
+  },
+  "drawdown_brake": {
+   "family": "Risk overlays",
+   "intraday": null,
+   "screen": {
+    "cagr": 0.1214,
+    "vol": 0.1416,
+    "sharpe": 0.8804,
+    "sortino": 1.2417,
+    "maxdd": -0.1876,
+    "turnover": 1.2755,
+    "invested": 1.0,
+    "exposure": 0.8721,
+    "vs_hold": {
+     "diff": -0.0022,
+     "lo": -0.2042,
+     "hi": 0.236,
+     "p_better": 0.511
+    },
+    "sharpe_25bp": 0.8668,
+    "sharpe_0bp": 0.8895,
+    "sharpe_lag1": 0.8545
+   },
+   "confirm": {
+    "cagr": 0.0935,
+    "vol": 0.1722,
+    "sharpe": 0.6058,
+    "sortino": 0.8026,
+    "maxdd": -0.2388,
+    "turnover": 1.7533,
+    "invested": 1.0,
+    "exposure": 0.873,
+    "vs_hold": {
+     "diff": -0.0991,
+     "lo": -0.5069,
+     "hi": 0.1434,
+     "p_better": 0.1785
+    },
+    "sharpe_25bp": 0.5908,
+    "sharpe_0bp": 0.6157,
+    "sharpe_lag1": 0.6127
+   },
+   "dsr_screen": 0.0,
+   "verdict": null
+  },
+  "breadth_scaled_exposure": {
+   "family": "Risk overlays",
+   "intraday": null,
+   "screen": {
+    "cagr": 0.0997,
+    "vol": 0.114,
+    "sharpe": 0.8914,
+    "sortino": 1.2692,
+    "maxdd": -0.1461,
+    "turnover": 3.9473,
+    "invested": 0.9243,
+    "exposure": 0.7536,
+    "vs_hold": {
+     "diff": 0.0088,
+     "lo": -0.4213,
+     "hi": 0.4266,
+     "p_better": 0.5025
+    },
+    "sharpe_25bp": 0.8395,
+    "sharpe_0bp": 0.9259,
+    "sharpe_lag1": 0.8998
+   },
+   "confirm": {
+    "cagr": 0.042,
+    "vol": 0.1476,
+    "sharpe": 0.3529,
+    "sortino": 0.4528,
+    "maxdd": -0.2089,
+    "turnover": 5.7633,
+    "invested": 0.9577,
+    "exposure": 0.7792,
+    "vs_hold": {
+     "diff": -0.3522,
+     "lo": -0.9802,
+     "hi": 0.031,
+     "p_better": 0.0655
+    },
+    "sharpe_25bp": 0.2944,
+    "sharpe_0bp": 0.3918,
+    "sharpe_lag1": 0.3697
+   },
+   "dsr_screen": 0.0,
+   "verdict": "Failed"
+  }
+ },
+ "errors": {}
+}
