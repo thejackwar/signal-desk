@@ -7,7 +7,14 @@ name: Dark pool blocks
 on:
   schedule:
     - cron: "6,36 13-21 * * 1-5"   # 13:06-21:36 UTC covers 9:30-16:00 New York (+16 min) in summer and winter
-  workflow_dispatch: {}
+  workflow_dispatch:
+    inputs:
+      test_day:
+        description: "Test on a past session (YYYY-MM-DD): prints a summary, publishes nothing"
+        required: false
+      symbols:
+        description: "Test only: comma-separated symbols (empty = all)"
+        required: false
 
 permissions:
   contents: write
@@ -30,8 +37,15 @@ jobs:
           ALPACA_KEY_ID: ${{ secrets.ALPACA_KEY_ID }}
           ALPACA_SECRET_KEY: ${{ secrets.ALPACA_SECRET_KEY }}
           NTFY_PREFIX: ${{ vars.NTFY_PREFIX }}
-        run: python engine/darkpool.py blocks
+        run: |
+          if [ -n "${{ inputs.test_day }}" ]; then
+            python engine/darkpool.py blocks --day "${{ inputs.test_day }}" --symbols "${{ inputs.symbols }}" --out /tmp/dp-test
+            python -c "import json;b=json.load(open('/tmp/dp-test/blocks.json'));p=sorted(b['prints'],key=lambda x:-x['v']);print(len(p),'blocks');[print(x) for x in p[:15]];print({k:v for k,v in list(b['stocks'].items())[:8]})"
+            exit 0
+          fi
+          python engine/darkpool.py blocks
       - name: Publish
+        if: inputs.test_day == ''
         run: |
           git config user.name "signal-desk-bot"
           git config user.email "signal-desk-bot@users.noreply.github.com"

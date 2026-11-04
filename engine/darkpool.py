@@ -362,7 +362,8 @@ def cmd_weekly(args) -> None:
             if not t:
                 continue
             m = x.get("MPID") or "?"
-            venues[m] = x.get("marketParticipantName") or m
+            nm_ = (x.get("marketParticipantName") or m).strip()
+            venues[m] = nm_[len(m) + 1:].strip() if nm_.upper().startswith(m.upper() + " ") else nm_   # "UBSA UBS ATS" -> "UBS ATS"
             a = per.setdefault(t, {})
             a[m] = a.get(m, 0) + int(x.get("totalWeeklyShareQuantity") or 0)
         write_json(adir / f"{wk}.json", {"week": wk, "venues": venues, "shares": per})
@@ -381,7 +382,7 @@ def build_weekly(err: str | None = None) -> None:
     weeks = [w["week"] for w in wkd]
     vn: dict = {}
     for w in wkd:
-        vn.update(w["venues"])
+        vn.update({m: n[len(m) + 1:].strip() if n.upper().startswith(m.upper() + " ") else n for m, n in w["venues"].items()})
     # consolidated weekly volume from Yahoo, to turn shares into "% of all trading"
     cons = {}
     try:
@@ -476,8 +477,14 @@ def roll_history(b: dict) -> None:
 
 
 def cmd_blocks(args) -> None:
+    global OUT
     now = now_utc()
     d = now.astimezone(NY).date()
+    if args.day:                                     # test on a past session, written to --out, nothing published
+        d = date.fromisoformat(args.day)
+        OUT = Path(args.out)
+        o, c = session_bounds(d)
+        now = c + timedelta(minutes=20)
     if d.weekday() >= 5:
         print("weekend: nothing to do"); return
     o, c = session_bounds(d)
@@ -499,7 +506,7 @@ def cmd_blocks(args) -> None:
                 adv[s["t"]] = s["adv"] * 1e6
     except Exception:
         pass
-    alp = {t.replace("-", "."): t for t in universe()}
+    alp = {t.replace("-", "."): t for t in (args.symbols.split(",") if args.symbols else universe())}
     syms = list(alp)
     print(f"  window {start:%H:%M}..{end:%H:%M} UTC, {len(syms)} symbols")
     st = b["stocks"]
@@ -634,9 +641,20 @@ def run_backtest(sv, tv, opn, close, split: str) -> dict:
     curves = {"dates": [days[i] for i in pick], **{k: [r(e.iloc[i] * 100000, 0) for i in pick] for k, e in eq.items()}}
     # verdict in plain words
     oo = [e for e in events if e["period"] == "out" and e["sig"] == "buying"]
+    os_ = [e for e in events if e["period"] == "out" and e["sig"] == "selling"]
     good = [e for e in oo if (e["edge"] or 0) > 0.15]
-    verdict = ("Out of sample, stocks with unusual off-exchange short volume beat the average stock "
-               f"on {len(good)} of {len(oo)} holding periods.") if oo else "Not enough data yet."
+    o = out.get("out", {})
+    if not oo:
+        verdict = "Not enough data yet."
+    else:
+        eb = sum(e["edge"] for e in oo) / len(oo)
+        es = sum(e["edge"] for e in os_) / len(os_) if os_ else 0
+        beat = (o.get("dark_buys", {}).get("cagr") or -99) > (o.get("equal_weight", {}).get("cagr") or 99)
+        strength = "a small edge" if eb > 0.05 else "no real edge" if eb > -0.05 else "the wrong way round"
+        verdict = (f"Out of sample, stocks after a dark buying signal did {eb:+.2f}% better on average than the same stocks "
+                   f"on any day ({strength}), and after a dark selling signal {es:+.2f}%. "
+                   + ("As a strategy it beat holding all the stocks equally." if beat else
+                      "As a strategy it did not beat simply holding all the stocks equally."))
     return {"generated_at": now_utc().strftime("%Y-%m-%dT%H:%MZ"), "start": days[0], "end": days[-1], "split": split,
             "z_hot": Z_HOT, "z_win": Z_WIN, "cost": cost, "events": events, "results": out, "curves": curves,
             "verdict": verdict, "good": len(good), "of": len(oo)}
@@ -733,7 +751,9 @@ def main():
     ap.add_argument("cmd", choices=["daily", "weekly", "blocks", "backfill", "backtest", "demo"])
     ap.add_argument("--since", default="2019-01-02", help="first day of the FINRA history (backfill/backtest)")
     ap.add_argument("--split", default="2023-01-01", help="out-of-sample starts here")
-    ap.add_argument("--out", default="/tmp/darkpool-demo", help="demo output folder")
+    ap.add_argument("--out", default="/tmp/darkpool-demo", help="demo / test output folder")
+    ap.add_argument("--day", help="blocks: test on this past session (YYYY-MM-DD), written to --out")
+    ap.add_argument("--symbols", help="blocks: only these symbols (comma separated)")
     a = ap.parse_args()
     {"daily": cmd_daily, "weekly": cmd_weekly, "blocks": cmd_blocks, "backfill": cmd_backfill,
      "backtest": cmd_backtest, "demo": cmd_demo}[a.cmd](a)
