@@ -114,10 +114,12 @@ function viewToday() {
     v == null ? `<td class="empty" data-i="${i}" data-j="${j}">–</td>`
       : `<td data-i="${i}" data-j="${j}" style="background:${heatBg(v)};color:${heatFg(v)}" tabindex="0">${p0(v)}</td>`).join("")}</tr>`).join("");
 
+  const cbl = n => { const a = (D.cboe || {})[n]; return a && a.length ? a[a.length - 1] : null; };
+  const c1 = cbl("COR1M"), c3 = cbl("COR3M");
   $("#v-today").innerHTML = `
   <div class="kpis">
-    <div class="kpi"><dt>1-month, at the money</dt><dd>${p0(h.rho_1m)}</dd><small>${lv}</small></div>
-    <div class="kpi"><dt>3-month, at the money</dt><dd>${p0(h.rho_3m)}</dd><small>Cboe's COR3M measures this</small></div>
+    <div class="kpi"><dt>1-month, at the money</dt><dd>${p0(h.rho_1m)}</dd><small>${lv}${c1 ? ` · Cboe COR1M ${p0(c1[1])} (${fmtDate(c1[0])})` : ""}</small></div>
+    <div class="kpi"><dt>3-month, at the money</dt><dd>${p0(h.rho_3m)}</dd><small>${c3 ? `Cboe COR3M ${p0(c3[1])} (${fmtDate(c3[0])})` : "Cboe's COR3M measures this"}</small></div>
     <div class="kpi"><dt>Realized, last month</dt><dd>${p0(h.realized_1m)}</dd><small>what stocks actually did</small></div>
     <div class="kpi"><dt>Implied minus realized</dt><dd class="${prem > 0 ? "" : "neg"}">${sp(prem)}</dd><small>1 month</small></div>
     <div class="kpi"><dt>Downside skew</dt><dd>${sp(skew)}</dd><small>25Δ put minus 25Δ call, 1 month</small></div>

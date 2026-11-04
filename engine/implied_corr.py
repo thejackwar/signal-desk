@@ -58,6 +58,8 @@ TENORS = [30, 60, 91, 182]               # calendar days
 DELTAS = [0.90, 0.75, 0.50, 0.25, 0.10]
 DELTA_LABELS = ["10Δ put", "25Δ put", "At the money", "25Δ call", "10Δ call"]
 MIN_COVER = 0.80                         # share of basket weight a cell needs
+LONG_FROM = 130                          # expiries past this many days come from one window fetch (6 months)
+LONG_TO = 260
 R = 0.04
 NY = ZoneInfo("America/New_York")
 DATA = "https://data.alpaca.markets"
@@ -135,7 +137,7 @@ def tenor_vol(by_exp: dict[date, float], days: int, today: date) -> float | None
         w = (v0 * v0 * t0 + (v1 * v1 * t1 - v0 * v0 * t0) * (days - t0) / (t1 - t0)) / days
         return math.sqrt(w) if w > 0 else None
     near = (lo or hi)[-1 if lo else 0]
-    return near[1] if abs(near[0] - days) <= 12 else None     # small flat extrapolation only
+    return near[1] if abs(near[0] - days) <= (12 if days < 120 else 35) else None     # small flat extrapolation only
 
 
 def third_friday(y: int, m: int) -> date:
@@ -162,7 +164,7 @@ def target_expiries(today: date) -> list[date]:
             need.add(lo[-1])
         if hi:
             need.add(hi[0])
-    return sorted(need)
+    return sorted(e for e in need if (e - today).days < LONG_FROM)
 
 
 # ------------------------------------------------------------------ Alpaca
@@ -201,6 +203,28 @@ def spot_prices(symbols: list[str]) -> dict[str, float]:
                     out[s] = float(p)
             if all(s in out for s in chunk):
                 break
+    return out
+
+
+def window_quotes(sym: str, S: float, lo: date, hi: date) -> list[dict]:
+    """Every expiry between lo and hi (used for 6 months: stocks list different months that far out)."""
+    p = {"feed": "indicative", "limit": "1000",
+         "strike_price_gte": f"{S * 0.45:.2f}", "strike_price_lte": f"{S * 1.55:.2f}",
+         "expiration_date_gte": lo.isoformat(), "expiration_date_lte": hi.isoformat()}
+    out = []
+    for _ in range(20):
+        js = _get(f"{DATA}/v1beta1/options/snapshots/{sym}", p)
+        for occ, s in (js.get("snapshots") or {}).items():
+            iv = s.get("impliedVolatility")
+            q = s.get("latestQuote") or {}
+            if not iv or not (0.02 < iv < 4) or float(q.get("ap") or 0) <= 0:
+                continue
+            e, t, k = parse_occ(occ)
+            out.append({"exp": e, "type": t, "strike": k, "iv": float(iv)})
+        tok = js.get("next_page_token")
+        if not tok:
+            break
+        p["page_token"] = tok
     return out
 
 
@@ -382,7 +406,7 @@ def demo_inputs(tickers: list[str], today: date):
         atm = 0.155 if t == INDEX else rnd.uniform(0.21, 0.34)
         skew = 0.75 if t == INDEX else 0.25
         rows = []
-        for e in target_expiries(today):
+        for e in target_expiries(today) + [today + timedelta(days=168), today + timedelta(days=196)]:
             T = years_to(e, now)
             term = 1 + (0.06 if t == INDEX else 0.02) * math.sqrt(T)
             for k in range(-55, 56):
@@ -423,7 +447,7 @@ def main() -> None:
         px = closes([INDEX] + basket)
 
     exps = target_expiries(today)
-    print("Expiries:", ", ".join(e.isoformat() for e in exps))
+    print("Expiries:", ", ".join(e.isoformat() for e in exps), f"+ every expiry {LONG_FROM}-{LONG_TO} days out")
 
     surfaces: dict[str, list] = {}
     for t in [INDEX] + basket:
@@ -435,11 +459,18 @@ def main() -> None:
             quotes = demo_q[t]
         else:
             quotes = []
-            for e in exps:
+            for sym in ([alp(t)] + (["BRKB"] if t == "BRK-B" else [])):   # Berkshire's options root is BRKB
+                for e in exps:
+                    try:
+                        quotes += option_quotes(sym, S, e)
+                    except Exception as ex:                    # noqa: BLE001
+                        print(f"  ! {sym} {e}: {ex}")
                 try:
-                    quotes += option_quotes(alp(t), S, e)
+                    quotes += window_quotes(sym, S, today + timedelta(days=LONG_FROM), today + timedelta(days=LONG_TO))
                 except Exception as ex:                        # noqa: BLE001
-                    print(f"  ! {t} {e}: {ex}")
+                    print(f"  ! {sym} long-dated: {ex}")
+                if quotes:
+                    break
         surf = surface_for(smile_by_delta(quotes, S, now), today)
         filled = sum(v is not None for row in surf for v in row)
         print(f"  {t:6s} {len(quotes):5d} quotes, {filled}/{len(TENORS) * len(DELTAS)} cells")
