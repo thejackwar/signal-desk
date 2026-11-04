@@ -1,0 +1,51 @@
+name: Strategy screen
+
+# The 87 new price-only stock strategies (research/quant/screen.py): screened on 2021-now,
+# the best 15 confirmed on 2018-2020. Writes research/quant/results/screen/ on this branch only;
+# the site's line-up and pages are not touched.
+on:
+  workflow_dispatch: {}
+  push:
+    branches: [strategy-screen]
+    paths: ["research/quant/screen*.py", ".github/workflows/strategy-screen.yml"]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: screen-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  screen:
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - run: pip install -r requirements.txt scipy pyarrow
+
+      - name: Price cache (shared with the research engine)
+        uses: actions/cache@v4
+        with:
+          path: research/quant/cache
+          key: prices-${{ github.run_id }}
+          restore-keys: prices-
+
+      - name: Run the screen
+        run: python -u research/quant/screen.py
+
+      - name: Publish results to this branch
+        if: always()
+        run: |
+          git config user.name "signal-desk-bot"
+          git config user.email "signal-desk-bot@users.noreply.github.com"
+          git add research/quant/results/screen || true
+          git diff --cached --quiet || git commit -m "Strategy screen $(date -u +%F)"
+          git pull --rebase
+          git push
