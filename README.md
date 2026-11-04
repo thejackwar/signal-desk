@@ -40,7 +40,7 @@ docs/                    the website (served by GitHub Pages)
   data/pairs/            pairs.json, grid.json (weekly), live.json (paper trades, closed ones never changed),
                          written by engine/pairs.py from the Strategy Lab's price files (.github/workflows/pairs.yml)
   data/sentiment.json    News mood: per-stock headline tone from Google News, established outlets (engine/sentiment.py, FinBERT, hourly news job)
-  research/mood-compare/ News mood source test, Google vs Alpaca, moods only (engine/mood_compare.py; until 3 Nov 2026)
+  research/mood-compare/ News mood source test, Google vs Alpaca, 29 Oct - 3 Nov 2026, moods only (engine/mood_compare.py); kept as a record
   data/calendar.json     upcoming earnings, IPOs, economy (written by engine/events.py)
   data/topdown/          Top-Down alerts (written by engine/topdown.py)
   data/brokers.json      Brokers page: facts and links (edit by hand; affiliate links go here)

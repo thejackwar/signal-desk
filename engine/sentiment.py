@@ -2,15 +2,14 @@
 News mood: is the latest news on each S&P 100 stock bullish or bearish?
 
   python engine/sentiment.py                       # Google News (what the website shows)
-  ALPACA_KEY_ID=... ALPACA_SECRET_KEY=... python engine/sentiment.py --source alpaca --out FILE
   python engine/sentiment.py --demo                # made-up headlines and a simple stand-in scorer, no internet
 
 1. Headlines: Google News searches per company (the same searches as the "Most mentioned" page),
    kept only from established news outlets (TRUSTED below), only when the headline names the
    company, and with the same story from several outlets merged into one. Each hourly run
    refreshes a third of the stocks, so every stock is searched every 3 hours.
-   "--source alpaca" uses Alpaca's news feed (Benzinga) instead; Alpaca's terms don't allow
-   republishing its data, so that is only for private comparisons, never the public site.
+   (Alpaca/Benzinga was compared in a 5-day test, 29 Oct - 3 Nov 2026, see research/mood-compare/;
+   its terms don't allow republishing its headlines, and Google News covered more stocks.)
 2. Each new headline is scored by FinBERT (ProsusAI/finbert), a free language model trained on
    financial news: probability positive minus probability negative, from -1 to +1.
    Scores are kept in the output file, so each run only scores headlines it hasn't seen.
@@ -41,7 +40,6 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 ENGINE = Path(__file__).parent
 OUT = ROOT / "docs" / "data" / "sentiment.json"
-NEWS_URL = "https://data.alpaca.markets/v1beta1/news"
 MODEL = "ProsusAI/finbert"
 
 WINDOW_DAYS = 7          # headlines older than this are dropped
@@ -111,10 +109,6 @@ def load_tickers() -> list[str]:
 
 
 NAMES = json.loads((ENGINE / "names.json").read_text())
-
-
-def alpaca_symbol(t: str) -> str:
-    return t.replace("-", ".")   # BRK-B (Yahoo) -> BRK.B (Alpaca)
 
 
 # ------------------------------------------------------------------ fetch
@@ -219,43 +213,6 @@ def merge_google(items: dict, fetched: list[dict]) -> list[dict]:
     return new
 
 
-def fetch_alpaca(tickers: list[str], start: datetime, end: datetime) -> list[dict]:
-    key, secret = os.environ.get("ALPACA_KEY_ID"), os.environ.get("ALPACA_SECRET_KEY")
-    by_alp = {alpaca_symbol(t): t for t in tickers}
-    out, token, pages = [], None, 0
-    while pages < MAX_PAGES:
-        params = {"symbols": ",".join(by_alp), "start": iso(start), "end": iso(end), "limit": 50,
-                  "sort": "desc", "include_content": "false"}
-        if token:
-            params["page_token"] = token
-        req = urllib.request.Request(NEWS_URL + "?" + urllib.parse.urlencode(params),
-                                     headers={"APCA-API-KEY-ID": key, "APCA-API-SECRET-KEY": secret})
-        for attempt in range(4):
-            try:
-                with urllib.request.urlopen(req, timeout=30) as r:
-                    data = json.load(r)
-                break
-            except urllib.error.HTTPError as e:
-                if e.code == 429 and attempt < 3:   # rate limited: wait and retry
-                    time.sleep(3 * (attempt + 1))
-                    continue
-                raise
-        for n in data.get("news", []):
-            syms = n.get("symbols") or []
-            mine = sorted({by_alp[s] for s in syms if s in by_alp})
-            title = (n.get("headline") or "").strip()
-            if not mine or not title:
-                continue
-            out.append({"id": str(n["id"]), "t": iso(parse(n["created_at"])), "title": title,
-                        "url": n.get("url") or "", "src": (n.get("source") or "").title() or "Benzinga",
-                        "syms": mine, "nsym": len(syms)})
-        pages += 1
-        token = data.get("next_page_token")
-        if not token:
-            break
-    return out
-
-
 def fetch_demo(tickers: list[str], start: datetime, end: datetime, seed: int = 4) -> list[dict]:
     rng = random.Random(seed)
     good = ["{} beats estimates and raises full-year guidance", "{} upgraded to Buy at a major broker",
@@ -350,7 +307,7 @@ def weight(item: dict, t: str, now: datetime) -> float:
 
 
 def is_named(item: dict, t: str) -> bool:
-    """Is the headline about this company? Named in it, or (Alpaca) the only company tagged."""
+    """Is the headline about this company? Named in it, or (feeds that tag companies) the only one tagged."""
     return t in item.get("about", item["syms"]) or (item.get("k") != "g" and item.get("nsym", len(item["syms"])) == 1)
 
 
@@ -409,25 +366,20 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--demo", action="store_true")
     ap.add_argument("--out", default=str(OUT))
-    ap.add_argument("--source", choices=["google", "alpaca"], default="google")
     ap.add_argument("--all", action="store_true", help="search every stock this run (default: a third, by the hour)")
     args = ap.parse_args()
-    src = "demo" if args.demo else args.source
+    src = "demo" if args.demo else "google"
     out_path = Path(args.out)
     tickers = load_tickers()
     now = datetime.now(timezone.utc)
     window_start = now - timedelta(days=WINDOW_DAYS)
-
-    if src == "alpaca" and not (os.environ.get("ALPACA_KEY_ID") and os.environ.get("ALPACA_SECRET_KEY")):
-        print("Skipped: add the ALPACA_KEY_ID and ALPACA_SECRET_KEY secrets to the repository (see README).")
-        return
 
     old = {}
     if out_path.exists() and not args.demo:
         try:
             prev = json.loads(out_path.read_text())
             # a file from the other source, or from before the v2 merge fix (wrong merges baked in), starts over
-            if prev.get("source_id", "alpaca") == src and (src != "google" or prev.get("v", 1) >= 2):
+            if prev.get("source_id") == src and (src != "google" or prev.get("v", 1) >= 2):
                 old = {x["id"]: x for x in prev.get("items", []) if parse(x["t"]) >= window_start}
         except (ValueError, KeyError):
             old = {}
@@ -438,10 +390,10 @@ def main():
         fetched = fetch_google(part, f"{WINDOW_DAYS}d" if not old else "1d")
         print(f"{len(fetched)} trusted headlines for {len(part)} stocks ({len(old)} already scored)")
         new = merge_google(items, [x for x in fetched if parse(x["t"]) >= window_start])
-    else:
+    else:   # demo: made-up headlines
         # refetch the last 6 hours too, in case a headline was tagged late; older ones are kept from the file
         since = window_start if not old else max(window_start, max(parse(x["t"]) for x in old.values()) - timedelta(hours=6))
-        fetched = (fetch_demo if args.demo else fetch_alpaca)(tickers, since, now)
+        fetched = fetch_demo(tickers, since, now)
         print(f"{len(fetched)} headlines since {iso(since)} ({len(old)} already scored)")
         new = [x for x in fetched if x["id"] not in old and x["nsym"] <= MAX_SYMBOLS]
         for x in fetched:   # keep tags fresh on ones we already scored
@@ -463,7 +415,7 @@ def main():
     out = {
         "generated_at": now.strftime("%Y-%m-%dT%H:%M+00:00"), "demo": args.demo,
         "model": "Keyword stand-in (demo)" if args.demo else "FinBERT (ProsusAI/finbert)",
-        "source": {"demo": "Demo headlines", "alpaca": "Alpaca news (Benzinga)", "google": "Google News, established outlets only"}[src],
+        "source": {"demo": "Demo headlines", "google": "Google News, established outlets only"}[src],
         "source_id": src, "v": 2,
         "window_days": WINDOW_DAYS, "baseline": round(base, 3), "half_life_h": HALF_LIFE_H, "headline_cut": HEADLINE_CUT, "mood_cuts": list(MOOD_CUTS),
         "stocks": stocks,
