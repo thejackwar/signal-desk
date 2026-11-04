@@ -77,7 +77,7 @@ FILLER = re.compile(r"key facts|here'?s why|here'?s what|should you|is it (time|
                     r"stock (sinks|rises|falls|moves))( (higher|lower) than| as)? market|is .* (a buy|undervalued|overvalued)\??$", re.I)
 # Not news at all: fund / option / quote pages and "seasonal chart" pages Yahoo lists as articles,
 # daily "X stock outperforms competitors" templates, and first-person or question-only opinion.
-NOT_NEWS = re.compile(r"seasonal returns? chart|interactive stock chart|stock price,? news,? quote|what you need to know|"
+NOT_NEWS = re.compile(r"seasonal returns? chart|interactive stock chart|stock price,? news,? quote|stock forecasts?\s*$|what you need to know|"
                       r"what key metrics|attracting investor attention|investors heavily search|what'?s wrong with|"
                       r"\bi'?m (buying|selling)|can still (gain|rise|run)|still a buy|undervaluation|"
                       r"(stock|shares) (out|under)performs|when compared to competitors|strong trading day|"
