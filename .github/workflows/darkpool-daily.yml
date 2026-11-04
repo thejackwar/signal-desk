@@ -1,0 +1,55 @@
+name: Dark pool daily
+
+# After FINRA publishes the day's short sale volume (by 18:00 New York):
+#   daily     per-stock off-exchange short ratio vs its last 60 days, and the S&P 100 dark index
+#   weekly    FINRA's ATS data: shares per named dark pool per stock (published 2 weeks late)
+#   backtest  on Fridays, on manual runs and when it's missing: does the daily score predict returns?
+# The first run downloads the FINRA history since 2019 (about 2,000 small files), so it takes longer.
+on:
+  schedule:
+    - cron: "15 23 * * 1-5"    # 23:15 UTC = 18:15 New York in winter, 19:15 in summer
+  push:
+    branches: [main]
+    paths: ["engine/darkpool.py"]
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+concurrency:
+  group: darkpool-daily
+  cancel-in-progress: false
+
+jobs:
+  daily:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: pip install -r requirements.txt
+      - name: Daily dark pool pressure
+        env:
+          NTFY_PREFIX: ${{ vars.NTFY_PREFIX }}
+        run: python engine/darkpool.py daily
+      - name: Weekly dark pool venues
+        env:
+          FINRA_API_CLIENT: ${{ secrets.FINRA_API_CLIENT }}
+          FINRA_API_SECRET: ${{ secrets.FINRA_API_SECRET }}
+        run: python engine/darkpool.py weekly || echo "::warning::FINRA ATS data not available this run"
+      - name: Backtest
+        run: |
+          if [ "$(date -u +%u)" = 5 ] || [ ! -f docs/data/darkpool/backtest.json ] || [ "$GITHUB_EVENT_NAME" != schedule ]; then
+            python engine/darkpool.py backtest
+          fi
+      - name: Publish
+        run: |
+          git config user.name "signal-desk-bot"
+          git config user.email "signal-desk-bot@users.noreply.github.com"
+          git add -A docs/data/darkpool
+          git diff --cached --quiet && exit 0
+          git commit -m "Dark pool daily $(date -u +%F)"
+          for i in 1 2 3; do git pull --rebase && git push && break; sleep 5; done

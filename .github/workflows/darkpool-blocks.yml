@@ -1,0 +1,41 @@
+name: Dark pool blocks
+
+# Large off-exchange prints (exchange code "D" in the SIP feed) for the S&P 100, from Alpaca:
+# engine/darkpool.py blocks. Every 30 minutes while the US market is open. Alpaca's free plan serves
+# SIP trades that are at least 15 minutes old, so each run reads up to 16 minutes ago; the script exits
+# straight away when there's nothing new. Big blocks go to the ntfy topic <NTFY_PREFIX>-darkpool.
+on:
+  schedule:
+    - cron: "6,36 13-21 * * 1-5"   # 13:06-21:36 UTC covers 9:30-16:00 New York (+16 min) in summer and winter
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+concurrency:
+  group: darkpool-blocks
+  cancel-in-progress: false
+
+jobs:
+  blocks:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Read the latest off-exchange prints
+        env:
+          ALPACA_KEY_ID: ${{ secrets.ALPACA_KEY_ID }}
+          ALPACA_SECRET_KEY: ${{ secrets.ALPACA_SECRET_KEY }}
+          NTFY_PREFIX: ${{ vars.NTFY_PREFIX }}
+        run: python engine/darkpool.py blocks
+      - name: Publish
+        run: |
+          git config user.name "signal-desk-bot"
+          git config user.email "signal-desk-bot@users.noreply.github.com"
+          git add -A docs/data/darkpool
+          git diff --cached --quiet && exit 0
+          git commit -m "Dark pool blocks $(date -u +%FT%H:%M)"
+          for i in 1 2 3; do git pull --rebase && git push && break; sleep 5; done
