@@ -1,0 +1,510 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0b0f14">
+<title>Strategy Research</title>
+<meta name="description" content="87 popular stock trading strategies, tested the honest way against simply holding the same stocks: after costs, on two separate periods. Every result, and why most of them failed. Free, information only.">
+<!-- Link previews (WhatsApp, LinkedIn, Reddit, X…). Absolute addresses: update SITE if the site moves to its own domain. -->
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Investment Center Signals">
+<meta property="og:title" content="87 trading strategies tested: what worked and why most didn't | Investment Center Signals">
+<meta property="og:description" content="87 popular stock trading strategies, tested the honest way against simply holding the same stocks: after costs, on two separate periods. Every result, and why most of them failed. Free, information only.">
+<meta property="og:url" content="https://thejackwar.github.io/signal-desk/research.html">
+<meta property="og:image" content="https://thejackwar.github.io/signal-desk/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Investment Center Signals: trading strategies, explained and backtested">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="canonical" href="https://thejackwar.github.io/signal-desk/research.html">
+<!-- Cloudflare Web Analytics (free, no cookies): paste the token from Cloudflare → Analytics &amp; Logs → Web Analytics → Add a site. Empty = off. -->
+<script>
+(() => {
+  const CF_ANALYTICS_TOKEN = "a2d6810a28f64b999832485d1635915a";
+  if (!CF_ANALYTICS_TOKEN || location.hostname === "localhost") return;
+  const s = document.createElement("script");
+  s.defer = true; s.src = "https://static.cloudflareinsights.com/beacon.min.js";
+  s.dataset.cfBeacon = JSON.stringify({ token: CF_ANALYTICS_TOKEN });
+  document.head.appendChild(s);
+})();
+</script>
+<link rel="icon" href="favicon.ico?v=2" sizes="any">
+<link rel="icon" type="image/svg+xml" href="logo.svg?v=2">
+<link rel="apple-touch-icon" href="icon-180.png?v=2">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+<style>
+/* Clean, Apple-like: system font, lots of air, soft grey canvas with white cards. Follows the device's light/dark setting. */
+:root {
+  --bg: #f5f5f7; --card: #ffffff; --fill: #e8e8ed; --fill-2: #f5f5f7; --hair: #d2d2d7; --hair-2: #e8e8ed;
+  --fg: #1d1d1f; --muted: #6e6e73; --faint: #86868b; --accent: #0071e3; --accent-hover: #0077ed; --link: #0066cc;
+  --shadow: 0 2px 12px rgba(0,0,0,.04), 0 1px 2px rgba(0,0,0,.04);
+  --bar: rgba(245,245,247,.8);
+  /* chart: candles soft, lines strong */
+  --c-bg: #ffffff; --c-grid: #f0f0f2; --c-txt: #86868b; --c-cup: #34c759; --c-cdn: #ff3b30;
+  --up-line: #1d9a3f; --down-line: #e0242b; --sup: #0071e3; --res: #f08c00;
+  --pill-up: rgba(52,199,89,.14); --pill-down: rgba(255,59,48,.12); --pill-sq: rgba(255,149,0,.15); --pill-sq-fg: #c25e00;
+  --font: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", Inter, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  color-scheme: light;
+}
+@media all {
+  :root {
+    --bg: #0b0f14; --card: #121820; --fill: #1a222c; --fill-2: #121820; --hair: #2b3644; --hair-2: #1f2833;
+    --fg: #e6edf3; --muted: #a5b1bd; --faint: #7d8a97; --accent: #38bdf8; --accent-hover: #7dd3fc; --link: #7dd3fc; --on-accent: #04121a;
+    --shadow: none; --bar: rgba(11,15,20,.86);
+    --c-bg: #121820; --c-grid: #1f2833; --c-txt: #8b98a5; --c-cup: #4ade80; --c-cdn: #f87171;
+    --up-line: #4ade80; --down-line: #f87171; --sup: #60a5fa; --res: #f59e0b;
+    --pill-up: rgba(48,209,88,.18); --pill-down: rgba(255,69,58,.18); --pill-sq: rgba(255,159,10,.18); --pill-sq-fg: #ff9f0a;
+    color-scheme: dark;
+  }
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body { background: var(--bg); color: var(--fg); font: 17px/1.47 var(--font); letter-spacing: -.022em;
+  -webkit-font-smoothing: antialiased; font-feature-settings: "tnum"; padding-bottom: calc(40px + env(safe-area-inset-bottom, 0px)); }
+a { color: var(--link); text-decoration: none; }
+a:hover { text-decoration: underline; }
+.wrap { max-width: 1080px; margin: 0 auto; padding: 0 22px; }
+@media (max-width: 560px) { .wrap { padding: 0 16px; } }
+
+/* frosted top bar */
+.bar { position: sticky; top: 0; z-index: 20; background: var(--bar); backdrop-filter: saturate(180%) blur(20px); -webkit-backdrop-filter: saturate(180%) blur(20px);
+  border-bottom: 1px solid var(--hair-2); padding-top: env(safe-area-inset-top, 0px); }
+.bar-in { max-width: 1080px; margin: 0 auto; padding: 0 22px; height: 48px; display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; }
+.back { font-size: 14px; color: var(--link); }
+.bar-title { font-size: 15px; font-weight: 600; letter-spacing: -.01em; }
+
+/* hero */
+.hero { text-align: center; padding: 64px 0 28px; }
+.hero h1 { font-size: clamp(40px, 7vw, 64px); line-height: 1.06; font-weight: 700; letter-spacing: -.035em; margin: 0; }
+.lede { font-size: clamp(19px, 2.4vw, 24px); line-height: 1.33; color: var(--muted); font-weight: 400; letter-spacing: -.015em; margin: 12px auto 0; max-width: 640px; }
+@media (max-width: 560px) { .hero { padding: 40px 0 20px; } }
+
+/* segmented control */
+.seg { display: inline-flex; flex-wrap: wrap; gap: 2px; background: var(--fill); border-radius: 10px; padding: 2px; }
+.seg button { appearance: none; border: 0; background: none; color: var(--fg); font: 500 13px/1 var(--font); letter-spacing: -.01em;
+  padding: 8px 14px; border-radius: 8px; cursor: pointer; transition: background .2s, box-shadow .2s; }
+.seg button[aria-pressed="true"] { background: var(--card); font-weight: 600; box-shadow: 0 1px 3px rgba(0,0,0,.12), 0 0 0 .5px rgba(0,0,0,.04); }
+@media all { .seg button[aria-pressed="true"] { background: #636366; box-shadow: none; } }
+.mk { margin: 32px 0 16px; }
+.mk button { padding: 9px 22px; font-size: 14px; }
+
+/* search */
+form.pick { display: flex; gap: 10px; justify-content: center; max-width: 560px; margin: 0 auto; }
+.field { flex: 1; min-width: 0; position: relative; }
+.field svg { position: absolute; left: 16px; top: 50%; transform: translateY(-50%); width: 18px; height: 18px; color: var(--faint); pointer-events: none; }
+form.pick input { width: 100%; height: 52px; background: var(--card); border: 1px solid var(--hair); border-radius: 14px; padding: 0 16px 0 44px;
+  color: var(--fg); font: 500 17px var(--font); letter-spacing: -.01em; text-transform: uppercase; box-shadow: var(--shadow); transition: border-color .2s, box-shadow .2s; }
+form.pick input::placeholder { text-transform: none; color: var(--faint); font-weight: 400; }
+form.pick input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent) 22%, transparent); }
+.btn { appearance: none; border: 0; background: var(--accent); color: var(--on-accent); border-radius: 980px; padding: 0 26px; height: 52px;
+  font: 500 17px var(--font); letter-spacing: -.01em; cursor: pointer; transition: background .2s; }
+.btn:hover { background: var(--accent-hover); }
+.btn:disabled { opacity: .45; cursor: default; }
+
+.status { color: var(--muted); font-size: 14px; margin: 16px 0 0; min-height: 1.4em; letter-spacing: -.01em; }
+.status.err { color: var(--down-line); }
+
+/* settings */
+details.settings { max-width: 720px; margin: 4px auto 40px; }
+details.settings summary { list-style: none; cursor: pointer; text-align: center; color: var(--link); font-size: 15px; }
+details.settings summary::-webkit-details-marker { display: none; }
+details.settings .cz::after { content: ""; display: inline-block; width: 6px; height: 6px; margin-left: 7px; border: solid currentColor;
+  border-width: 0 1.5px 1.5px 0; transform: translateY(-3px) rotate(45deg); transition: transform .2s; }
+details.settings[open] .cz::after { transform: translateY(0) rotate(-135deg); }
+details.settings summary:hover .cz { text-decoration: underline; }
+#setsum { display: block; color: var(--faint); font-size: 13px; margin-top: 2px; }
+.set { margin-top: 18px; background: var(--card); border-radius: 18px; box-shadow: var(--shadow); padding: 0 22px; text-align: left; }
+.row { display: flex; justify-content: space-between; align-items: center; gap: 18px; padding: 16px 0; }
+.row + .row { border-top: 1px solid var(--hair-2); }
+.row .lbl { min-width: 0; }
+.row .lbl b { display: block; font-size: 15px; font-weight: 600; letter-spacing: -.01em; }
+.row .lbl small { display: block; color: var(--muted); font-size: 13px; line-height: 1.38; margin-top: 2px; letter-spacing: -.005em; }
+.row .seg { flex-shrink: 0; }
+.set input[type=url] { width: 100%; max-width: 320px; height: 36px; background: var(--fill-2); border: 1px solid var(--hair); border-radius: 9px; padding: 0 12px;
+  color: var(--fg); font: 13px ui-monospace, "SF Mono", Menlo, Consolas, monospace; }
+.set input[type=url]:focus { outline: none; border-color: var(--accent); }
+@media (max-width: 640px) { .row { flex-direction: column; align-items: flex-start; gap: 10px; } .set input[type=url] { max-width: none; } }
+
+/* empty / info states */
+.msg { text-align: center; color: var(--muted); max-width: 560px; margin: 0 auto; padding: 8px 0 24px; font-size: 17px; }
+.msg strong { display: block; color: var(--fg); font-size: 24px; font-weight: 600; letter-spacing: -.02em; margin-bottom: 6px; }
+.msg.small { font-size: 15px; padding: 40px 16px; }
+
+/* section titles */
+.sec { font-size: clamp(24px, 3vw, 32px); font-weight: 700; letter-spacing: -.028em; margin: 0 0 16px; }
+.sec small { font-size: 17px; font-weight: 400; color: var(--muted); letter-spacing: -.015em; margin-left: 8px; }
+
+/* overview table */
+.summary { background: var(--card); border-radius: 18px; box-shadow: var(--shadow); overflow-x: auto; margin-bottom: 56px; }
+.summary table { border-collapse: collapse; width: 100%; font-size: 15px; letter-spacing: -.01em; }
+.summary th, .summary td { padding: 13px 20px; text-align: right; white-space: nowrap; }
+.summary th { color: var(--muted); font-size: 12px; font-weight: 500; letter-spacing: 0; }
+.summary th:first-child, .summary td:first-child { text-align: left; }
+.summary tbody td { border-top: 1px solid var(--hair-2); }
+.summary td.tf a { color: var(--fg); font-weight: 600; }
+.summary td.tf a:hover { color: var(--link); text-decoration: none; }
+.summary td.up { color: var(--up-line); } .summary td.down { color: var(--down-line); }
+.summary td.sup { color: var(--sup); } .summary td.res { color: var(--res); }
+.summary td.dim { color: var(--faint); }
+.summary td .tc { color: var(--faint); font-size: 12px; margin-left: 2px; }
+.bias { display: inline-block; border-radius: 980px; padding: 3px 11px; font-size: 12px; font-weight: 600; letter-spacing: 0; }
+.bias.Up { background: var(--pill-up); color: var(--up-line); }
+.bias.Down { background: var(--pill-down); color: var(--down-line); }
+.bias.Squeeze { background: var(--pill-sq); color: var(--pill-sq-fg); }
+.bias.none { color: var(--faint); }
+
+/* chart cards */
+.charts { display: grid; gap: 28px; }
+.card { background: var(--card); border-radius: 22px; box-shadow: var(--shadow); overflow: hidden; scroll-margin-top: 64px; }
+.card header { display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 10px 24px; padding: 22px 24px 12px; }
+.card h2 { margin: 0; font-size: 24px; font-weight: 700; letter-spacing: -.025em; line-height: 1.1; }
+.card h2 span { display: block; font-size: 13px; font-weight: 500; color: var(--muted); letter-spacing: -.005em; margin-bottom: 4px; }
+.lv { display: flex; flex-wrap: wrap; gap: 6px 22px; margin: 0; }
+.lv div { display: flex; flex-direction: column; }
+.lv dt { font-size: 11px; color: var(--muted); font-weight: 500; letter-spacing: 0; }
+.lv dd { margin: 0; font-size: 15px; font-weight: 600; letter-spacing: -.01em; color: var(--faint); }
+.lv .u { color: var(--up-line); } .lv .d { color: var(--down-line); } .lv .s { color: var(--sup); } .lv .r { color: var(--res); }
+.chart { position: relative; height: clamp(300px, 56vh, 520px); margin: 0 8px 10px; }
+.overlay { position: absolute; inset: 0; pointer-events: none; z-index: 3; overflow: hidden; }
+.overlay span { position: absolute; transform: translate(-50%, -50%); font: 600 11px var(--font); letter-spacing: 0; white-space: nowrap; }
+.overlay span.x { font-size: 15px; }
+@media (max-width: 560px) { .lv { display: grid; grid-template-columns: 1fr 1fr; width: 100%; } .card { border-radius: 18px; } .card header { padding: 18px 18px 10px; } .chart { margin: 0 2px 6px; } }
+
+.feat { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+.feat > div { background: var(--card); border-radius: 22px; box-shadow: var(--shadow); padding: 28px 26px; }
+.feat h3 { margin: 14px 0 6px; font-size: 21px; font-weight: 700; letter-spacing: -.022em; }
+.feat p { margin: 0; color: var(--muted); font-size: 15px; line-height: 1.47; letter-spacing: -.01em; }
+.dot { display: block; width: 28px; height: 4px; border-radius: 2px; }
+.dot.dash { height: 0; border-top: 3px dashed; border-radius: 0; margin-top: 2px; }
+@media (max-width: 760px) { .feat { grid-template-columns: 1fr; gap: 14px; } .feat > div { padding: 22px; } }
+
+.fine { color: var(--faint); font-size: 12px; line-height: 1.5; letter-spacing: -.005em; margin: 0; }
+footer.foot { border-top: 1px solid var(--hair); margin-top: 56px; padding-top: 18px; display: grid; gap: 10px; }
+
+/* a little more colour, as in the app */
+:root { --accent2: #32ade6; --title-grad: linear-gradient(95deg, #0071e3 0%, #32ade6 55%, #34c759 100%); }
+@media all { :root { --accent2: #4ade80; --title-grad: linear-gradient(95deg, #e6edf3 0%, #e6edf3 40%, #7dd3fc 65%, #86efac 100%); } }
+body { background: radial-gradient(1100px 560px at 85% -10%, color-mix(in srgb, var(--accent) 16%, transparent), transparent 65%),
+  radial-gradient(900px 480px at -5% 105%, color-mix(in srgb, var(--accent2) 11%, transparent), transparent 62%), var(--bg); background-attachment: fixed; }
+.hero h1, .sec { background: var(--title-grad); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.sec small { -webkit-text-fill-color: var(--muted); }
+.seg button[aria-pressed="true"] { background: linear-gradient(95deg, #38bdf8 0%, #34d399 60%, #4ade80 100%); color: var(--on-accent); box-shadow: 0 1px 6px color-mix(in srgb, var(--accent) 35%, transparent); }
+@media all { .seg button[aria-pressed="true"] { background: linear-gradient(95deg, #38bdf8 0%, #34d399 60%, #4ade80 100%); } }
+.btn { background: linear-gradient(95deg, #38bdf8 0%, #34d399 60%, #4ade80 100%); color: var(--on-accent); }
+.feat > div, .card, .summary, .set { background: linear-gradient(150deg, color-mix(in srgb, var(--accent) 7%, var(--card)) 0%, var(--card) 55%); }
+
+/* ---------------------------------------------------------------- shared with the Options page */
+.tabsel { margin: 28px 0 0; }
+.tabsel button { padding: 9px 20px; font-size: 14px; }
+.warn { max-width: 720px; margin: 18px auto 0; color: var(--muted); font-size: 13px; line-height: 1.45; }
+.view { margin-top: 40px; }
+.view[hidden] { display: none; }
+.grp { margin: 0 0 30px; }
+.grp h3 { font-size: 13px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; margin: 0 0 10px 4px; }
+.sgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 14px; }
+a.scard { display: block; color: var(--fg); background: var(--card); border-radius: 18px; box-shadow: var(--shadow); padding: 18px 20px; text-decoration: none;
+  background: linear-gradient(150deg, color-mix(in srgb, var(--accent) 7%, var(--card)) 0%, var(--card) 55%); transition: transform .15s; }
+a.scard:hover { text-decoration: none; transform: translateY(-1px); }
+.scard b { display: block; font-size: 19px; letter-spacing: -.02em; }
+.scard p { margin: 6px 0 10px; color: var(--muted); font-size: 14px; line-height: 1.42; }
+.scard svg.mini { display: block; width: 100%; height: 54px; margin-top: 6px; }
+.pills { display: flex; flex-wrap: wrap; gap: 6px; }
+.pill { display: inline-block; border-radius: 980px; padding: 3px 10px; font-size: 12px; font-weight: 600; letter-spacing: 0; background: var(--fill); color: var(--muted); }
+.pill.r-defined { background: var(--pill-up); color: var(--up-line); }
+.pill.r-stock { background: var(--pill-sq); color: var(--pill-sq-fg); }
+.pill.r-premium { background: var(--pill-down); color: var(--down-line); }
+.panel { background: var(--card); border-radius: 22px; box-shadow: var(--shadow); padding: 24px; margin-bottom: 22px;
+  background: linear-gradient(150deg, color-mix(in srgb, var(--accent) 6%, var(--card)) 0%, var(--card) 55%); }
+.panel h2 { margin: 0 0 6px; font-size: 28px; letter-spacing: -.03em; line-height: 1.1; }
+.panel h4 { margin: 18px 0 6px; font-size: 15px; letter-spacing: -.01em; }
+.panel p, .panel li { color: var(--fg); font-size: 15px; line-height: 1.5; }
+.panel ol { margin: 4px 0 0; padding-left: 20px; }
+.panel .lead { color: var(--muted); font-size: 17px; margin: 6px 0 14px; }
+.back2 { display: inline-block; font-size: 14px; margin-bottom: 14px; }
+.stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(118px, 1fr)); gap: 10px 18px; margin: 16px 0 6px; }
+.stats div { display: flex; flex-direction: column; }
+.stats dt { font-size: 11px; color: var(--muted); font-weight: 500; }
+.stats dd { margin: 0; font-size: 17px; font-weight: 650; letter-spacing: -.015em; }
+.pos { color: var(--up-line); } .neg { color: var(--down-line); }
+.chartbox { position: relative; margin: 8px -6px 0; }
+.chartbox svg { display: block; width: 100%; max-width: 780px; margin: 0 auto; height: auto; touch-action: pan-y; }
+.chartbox .tip { position: absolute; top: 4px; left: 50%; transform: translateX(-50%); font-size: 12px; font-weight: 600; background: var(--card);
+  border: 1px solid var(--hair); border-radius: 8px; padding: 3px 8px; pointer-events: none; white-space: nowrap; }
+.legend { display: flex; flex-wrap: wrap; gap: 4px 16px; font-size: 12px; color: var(--muted); margin: 6px 2px 0; }
+.legend i { display: inline-block; width: 16px; height: 0; border-top: 2.5px solid; vertical-align: middle; margin-right: 6px; }
+.legend i.dash { border-top-style: dashed; }
+.sliders { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 24px; margin-top: 14px; }
+.sliders label { font-size: 13px; color: var(--muted); display: flex; flex-direction: column; gap: 4px; }
+.sliders label span b { color: var(--fg); }
+input[type=range] { width: 100%; accent-color: var(--accent); }
+@media (max-width: 560px) { .sliders { grid-template-columns: 1fr; } .panel { padding: 18px 16px; border-radius: 18px; } }
+.btnrow { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 18px; }
+.btn.ghost { background: var(--fill); color: var(--fg); height: 40px; font-size: 15px; padding: 0 18px; display: inline-flex; align-items: center; }
+.btn.ghost:hover { background: var(--hair); text-decoration: none; }
+.form { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+.form input, .form select, select.k { height: 44px; background: var(--card); border: 1px solid var(--hair); border-radius: 12px; padding: 0 12px;
+  color: var(--fg); font: 500 16px var(--font); }
+.form input { width: 130px; text-transform: uppercase; }
+.form select { min-width: 190px; }
+select.k { height: 34px; font-size: 14px; border-radius: 9px; padding: 0 6px; }
+.form .btn { height: 44px; font-size: 16px; }
+.subrow { display: flex; flex-wrap: wrap; gap: 10px 20px; align-items: center; margin: 14px 0 4px; }
+.subrow .lbl { font-size: 13px; color: var(--muted); }
+.qty { display: inline-flex; align-items: center; gap: 6px; }
+.qty button { width: 30px; height: 30px; border-radius: 50%; border: 0; background: var(--fill); color: var(--fg); font-size: 17px; cursor: pointer; }
+.tbl { overflow-x: auto; margin: 10px -4px 0; }
+.tbl table { border-collapse: collapse; width: 100%; font-size: 14px; }
+.tbl th, .tbl td { padding: 9px 10px; text-align: right; white-space: nowrap; }
+.tbl th { color: var(--muted); font-size: 11px; font-weight: 500; }
+.tbl th:first-child, .tbl td:first-child { text-align: left; }
+.tbl tbody td { border-top: 1px solid var(--hair-2); }
+.tbl tr.sel td { background: color-mix(in srgb, var(--accent) 9%, transparent); }
+.tbl tr.click { cursor: pointer; }
+.tbl tr.click:hover td { background: color-mix(in srgb, var(--accent) 5%, transparent); }
+.tbl td.dim, .dim { color: var(--faint); }
+.tbl tr.bench td { color: var(--muted); font-style: italic; }
+.note { color: var(--muted); font-size: 13px; line-height: 1.5; margin: 10px 0 0; }
+.note.err { color: var(--down-line); }
+.split { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; }
+@media (max-width: 820px) { .split { grid-template-columns: 1fr; } }
+.find { margin: 8px 0 0; padding-left: 20px; }
+.find li { margin: 6px 0; font-size: 15px; line-height: 1.5; }
+details.ass summary { cursor: pointer; color: var(--link); font-size: 15px; }
+details.ass ul { color: var(--muted); font-size: 14px; line-height: 1.5; padding-left: 20px; }
+
+/* ---------------------------------------------------------------- Research page */
+.verdict { border-left: 3px solid var(--res); padding: 4px 0 4px 14px; margin: 14px 0 4px; }
+.verdict.good { border-color: var(--up-line); }
+.steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; margin-top: 14px; }
+.steps > div { background: var(--fill-2); border-radius: 14px; padding: 16px; }
+.steps b { display: block; font-size: 15px; margin-bottom: 4px; }
+.steps p { margin: 0; color: var(--muted); font-size: 14px; line-height: 1.45; }
+.steps .n { display: inline-flex; width: 24px; height: 24px; border-radius: 50%; align-items: center; justify-content: center; background: var(--accent); color: var(--on-accent); font-size: 13px; font-weight: 700; margin-bottom: 8px; }
+@media (max-width: 560px) { .hm { display: none; } .tbl th, .tbl td { padding: 9px 6px; } }
+.tiles { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 0 0 22px; }
+.tile { appearance: none; text-align: left; border: 1px solid transparent; background: var(--card); border-radius: 16px; padding: 14px 16px; cursor: pointer;
+  color: var(--fg); font: inherit; box-shadow: var(--shadow); transition: border-color .15s, transform .15s; }
+.tile:hover { transform: translateY(-1px); }
+.tile[aria-pressed="true"] { border-color: var(--accent); }
+.tile b { display: block; font-size: 28px; font-weight: 700; letter-spacing: -.03em; line-height: 1.05; }
+.tile span { display: block; font-size: 13px; color: var(--muted); margin-top: 3px; line-height: 1.3; }
+.tile.passed b { color: var(--up-line); } .tile.mixed b { color: var(--res); } .tile.failed_check b, .tile.worse b { color: var(--down-line); }
+@media (max-width: 760px) { .tiles { grid-template-columns: repeat(2, 1fr); } }
+.tools { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin: 0 0 16px; }
+.tools input, .tools select { height: 40px; background: var(--card); border: 1px solid var(--hair); border-radius: 11px; padding: 0 12px; color: var(--fg); font: 500 15px var(--font); }
+.tools input { flex: 1; min-width: 180px; }
+.tools .count { color: var(--muted); font-size: 13px; margin-left: auto; }
+@media (max-width: 560px) { .tools select { flex: 1; } .tools .count { width: 100%; margin: 0; } }
+.rgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(420px, 1fr)); gap: 14px; }
+@media (max-width: 900px) { .rgrid { grid-template-columns: 1fr; } }
+.rcard { background: linear-gradient(150deg, color-mix(in srgb, var(--accent) 6%, var(--card)) 0%, var(--card) 55%); border-radius: 20px; box-shadow: var(--shadow); padding: 20px 22px; min-width: 0; }
+.rcard h3 { margin: 0; font-size: 20px; letter-spacing: -.022em; line-height: 1.2; }
+.rcard .pills { margin: 8px 0 10px; }
+.rcard p { margin: 0 0 8px; font-size: 15px; line-height: 1.45; }
+.rcard p.idea { color: var(--muted); font-size: 14px; }
+.pill.o-passed { background: var(--pill-up); color: var(--up-line); }
+.pill.o-mixed, .pill.o-riskier { background: var(--pill-sq); color: var(--pill-sq-fg); }
+.pill.o-failed_check, .pill.o-worse { background: var(--pill-down); color: var(--down-line); }
+.verdict.bad { border-color: var(--down-line); }
+.verdict p { margin: 0; font-size: 14px; line-height: 1.45; }
+.cmp { display: grid; grid-template-columns: auto 1fr 1fr 1fr; gap: 2px 14px; font-size: 13px; margin: 12px 0 2px; align-items: baseline; }
+.cmp .h { color: var(--muted); font-size: 11px; font-weight: 500; }
+.cmp b { font-size: 15px; font-weight: 650; letter-spacing: -.01em; }
+.cmp .dim { font-size: 12px; white-space: nowrap; }
+.cmp small { color: var(--faint); font-size: 11px; margin-left: 4px; }
+svg.spark { display: block; width: 100%; height: 76px; margin-top: 10px; }
+.sparkleg { display: flex; gap: 14px; font-size: 11px; color: var(--muted); margin-top: 2px; }
+.sparkleg i { display: inline-block; width: 14px; height: 0; border-top: 2px solid; vertical-align: middle; margin-right: 5px; }
+details.more { margin-top: 8px; }
+details.more summary { cursor: pointer; color: var(--link); font-size: 13px; }
+details.more dl { display: grid; grid-template-columns: 1fr auto; gap: 4px 12px; font-size: 13px; margin: 8px 0 0; }
+details.more dt { color: var(--muted); } details.more dd { margin: 0; text-align: right; font-weight: 600; }
+.lessons { margin: 6px 0 0; padding-left: 20px; }
+.lessons li { margin: 6px 0; font-size: 15px; line-height: 1.5; }
+.imp { margin-top: 6px; }
+.imp h3 { margin: 18px 0 4px; font-size: 19px; letter-spacing: -.02em; }
+.vchip { display: inline-block; border-radius: 980px; padding: 2px 10px; font-size: 12px; font-weight: 700; margin-left: 6px; vertical-align: 2px; }
+.vchip.good { background: var(--pill-up); color: var(--up-line); } .vchip.bad { background: var(--pill-down); color: var(--down-line); } .vchip.mid { background: var(--pill-sq); color: var(--pill-sq-fg); }
+.empty2 { text-align: center; color: var(--muted); padding: 40px 0; }
+</style>
+</head>
+<body>
+<nav class="bar" aria-label="Page">
+  <div class="bar-in">
+    <a class="back" href="index.html#home" aria-label="Back to Signals">‹ Signals</a>
+    <span class="bar-title">Strategy Research</span>
+    <span></span>
+  </div>
+</nav>
+<main class="wrap">
+  <section class="hero">
+    <h1>We tested 87 strategies.</h1>
+    <p class="lede" id="lede">Popular trading ideas, tested the honest way against simply holding the same stocks. Here's every result, and why most of them didn't work.</p>
+  </section>
+
+  <section class="panel">
+    <h2>How we tested</h2>
+    <p class="lead">Every strategy had to beat the simplest thing you could do: buy all the stocks it picks from and hold them.</p>
+    <div class="steps">
+      <div><span class="n">1</span><b>Screen: 2021 to now</b><p>All 87 run on the 100 biggest US stocks of each moment (not today's winners), paying 0.10% every time they buy or sell.</p></div>
+      <div><span class="n">2</span><b>Re-test: 2018–2020</b><p>The ones that beat holding were run again on years that played no part in picking them. Luck rarely repeats.</p></div>
+      <div><span class="n">3</span><b>Count the luck</b><p>Try 87 ideas and a few will look great by pure chance, like coin-flippers on a lucky streak. So the bar goes up with every try.</p></div>
+    </div>
+    <p class="note" id="bench"></p>
+  </section>
+
+  <section class="panel" id="lessons-p" hidden>
+    <h2>What 87 tests teach</h2>
+    <ul class="lessons" id="lessons"></ul>
+  </section>
+
+  <section class="panel" id="improve-p" hidden></section>
+
+  <h2 class="sec" style="margin-top:40px">Every result</h2>
+  <div class="tiles" id="tiles"></div>
+  <div class="tools">
+    <input id="q" type="search" placeholder="Search a strategy" aria-label="Search a strategy">
+    <select id="fam" aria-label="Family"></select>
+    <select id="sort" aria-label="Sort">
+      <option value="sharpe">Best risk-adjusted (2021–now)</option>
+      <option value="cagr">Highest return (2021–now)</option>
+      <option value="confirm">Best in 2018–2020</option>
+      <option value="name">A–Z</option>
+    </select>
+    <span class="count" id="count"></span>
+  </div>
+  <div class="rgrid" id="list"><p class="empty2">Loading…</p></div>
+
+  <footer class="foot">
+    <p class="fine" id="foot">Universe: the 100 S&amp;P 500 stocks with the highest trading value at the start of each quarter, so companies that later shrank or were taken over are included while they were big (Yahoo Finance has no prices for some delisted stocks). Daily prices adjusted for splits and dividends. Costs 0.10% per buy or sell; money not invested earns the 3-month T-bill rate. "Holding the same stocks" = all of them in equal amounts. "Beats holding" = how often the strategy's Sharpe ratio came out higher when the past was reshuffled 2,000 times in one-month blocks. Past results don't guarantee future ones. For information only. Not investment advice.</p>
+  </footer>
+</main>
+<script>
+(async () => {
+  const $ = id => document.getElementById(id);
+  const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  const P = (v, d = 1) => v == null ? "–" : `${(v * 100).toFixed(d)}%`;
+  const F = v => v == null ? "–" : v.toFixed(2);
+  const OUT = {
+    passed: ["Passed both tests", "Beat holding on both periods"],
+    mixed: ["Mixed", "Won 2021–now, about even in 2018–2020"],
+    failed_check: ["Failed the re-test", "Won 2021–now, lost in 2018–2020"],
+    riskier: ["More return, more risk", "Made more, but with bigger drops"],
+    costs: ["Eaten by costs", "Worked before trading costs only"],
+    out_of_market: ["Sat out too much", "Smaller drops, much less return"],
+    no_edge: ["Same as holding", "No real difference"],
+    worse: ["Worse than holding", "Lower return per unit of risk"],
+  };
+  const ORDER = Object.keys(OUT);
+
+  let D;
+  try { D = await (await fetch("data/research.json", { cache: "no-cache" })).json(); }
+  catch (e) { $("list").innerHTML = `<p class="empty2">Couldn't load the results. Try again later.</p>`; return; }
+
+  const S = D.strategies, H = D.benchmarks.hold_same_stocks, SPY = D.benchmarks.spy;
+  const cnt = o => S.filter(s => s.outcome === o).length;
+  const passed = cnt("passed");
+  $("lede").textContent = `${D.tried} popular trading ideas, tested the honest way against simply holding the same stocks. ${passed} passed both tests. Here's every result, and why the rest didn't work.`;
+  $("bench").innerHTML = `The bar to beat. Holding the same stocks: <b>${P(H.screen.cagr)}</b> a year in 2021–now (Sharpe ${F(H.screen.sharpe)}, worst drop ${P(H.screen.maxdd, 0)}) and ${P(H.confirm.cagr)} in 2018–2020. The S&amp;P 500 (SPY): ${P(SPY.screen.cagr)} and ${P(SPY.confirm.cagr)}. Results updated ${esc(D.generated)}.`;
+
+  // lessons, worked out from the counts
+  const notBeat = S.length - cnt("passed") - cnt("mixed") - cnt("failed_check");
+  const L = [
+    `<b>${notBeat} of ${S.length}</b> didn't beat simply holding the same stocks in 2021–now, after costs. Doing nothing is a hard benchmark.`,
+    `<b>${cnt("failed_check")} of the ${cnt("passed") + cnt("mixed") + cnt("failed_check")} winners</b> of 2021–now lost to holding in 2018–2020. A strategy that worked in one period often just fit that period.`,
+    `<b>${cnt("costs")}</b> had a real edge before costs, but traded so often that 0.10% per trade wiped it out. Short-term strategies need a big edge to survive costs.`,
+    `<b>${cnt("out_of_market")}</b> cut drops by sitting in cash, but missed so much of the rise that they earned far less. A high Sharpe ratio with little time invested can be misleading.`,
+    `<b>${cnt("riskier")}</b> made more money than holding, but with much bigger falls along the way. More return isn't better if it comes with a lot more risk.`,
+  ];
+  $("lessons").innerHTML = L.map(x => `<li>${x}</li>`).join(""); $("lessons-p").hidden = false;
+
+  // improvement tests
+  if (D.improve) {
+    const I = D.improve, hh = I.hold_holdout, hd = I.hold_dev;
+    const vc = v => v === "Holds up" ? "good" : v === "Fails" ? "bad" : "mid";
+    let h = `<h2>Working on it</h2><p class="lead">Two strategies looked worth improving. We fixed a short list of changes in advance, picked the best on ${I.dev}, then checked it once on ${I.holdout}, years no test had looked at.</p><div class="imp">`;
+    for (const g of I.groups) {
+      const name = (S.find(s => s.id === g.variants.find(v => v.base)?.id) || {}).name || g.name;
+      h += `<h3>${esc(name)}<span class="vchip ${vc(g.verdict)}">${esc(g.verdict)} in ${I.holdout}</span></h3><div class="tbl"><table><thead><tr><th>Version (${I.dev})</th><th>Return/yr</th><th>Sharpe</th><th class="hm">Worst drop</th><th>Beats holding</th></tr></thead><tbody>`;
+      for (const v of g.variants) h += `<tr${v.id === g.pick ? ' class="sel"' : ""}><td>${esc(VNAME[v.id] || v.id)}${v.id === g.pick ? " ★" : ""}</td><td>${P(v.dev.cagr)}</td><td>${F(v.dev.sharpe)}</td><td class="hm">${P(v.dev.maxdd, 0)}</td><td>${P(v.dev.beats, 0)}</td></tr>`;
+      h += `<tr class="bench"><td>Holding the same stocks</td><td>${P(hd.cagr)}</td><td>${F(hd.sharpe)}</td><td class="hm">${P(hd.maxdd, 0)}</td><td></td></tr></tbody></table></div>`;
+      h += `<p class="note">★ picked on ${I.dev}. On ${I.holdout}: ${P(g.holdout.cagr)} a year, Sharpe ${F(g.holdout.sharpe)} vs ${F(hh.sharpe)} for holding, beating it in ${P(g.holdout.beats, 0)} of the resampled tests.</p>`;
+    }
+    $("improve-p").innerHTML = h + `</div>`; $("improve-p").hidden = false;
+  }
+
+  // filters
+  let filt = "all";
+  const tile = (o, n, a, b) => `<button type="button" class="tile ${o}" data-o="${o}" aria-pressed="${filt === o}"><b>${n}</b><span>${a}</span></button>`;
+  const drawTiles = () => { $("tiles").innerHTML = tile("all", S.length, "All strategies") + ORDER.filter(o => cnt(o)).map(o => tile(o, cnt(o), OUT[o][0])).join(""); };
+  $("tiles").onclick = e => { const b = e.target.closest(".tile"); if (!b) return; filt = filt === b.dataset.o ? "all" : b.dataset.o; drawTiles(); draw(); };
+  const fams = [...new Set(S.map(s => s.family))].sort();
+  $("fam").innerHTML = `<option value="">All families</option>` + fams.map(f => `<option>${esc(f)}</option>`).join("");
+  ["q", "fam", "sort"].forEach(id => $(id).addEventListener("input", draw));
+
+  function spark(s) {
+    const a = s.curve, b = D.hold_curve, n = a.length;
+    if (n < 2) return "";
+    const all = a.concat(b.slice(0, n)), lo = Math.min(...all), hi = Math.max(...all), W = 400, Hh = 76;
+    const x = i => (i / (n - 1)) * W, y = v => Hh - 4 - ((v - lo) / ((hi - lo) || 1)) * (Hh - 8);
+    const path = v => v.slice(0, n).map((p, i) => `${i ? "L" : "M"}${x(i).toFixed(1)},${y(p).toFixed(1)}`).join("");
+    const k = D.months.indexOf("2021-01"), xs = k > 0 ? x(k).toFixed(1) : null;
+    const col = a[n - 1] >= (b[n - 1] ?? 0) ? "var(--up-line)" : "var(--down-line)";
+    return `<svg class="spark" viewBox="0 0 ${W} ${Hh}" preserveAspectRatio="none" role="img" aria-label="Growth since 2018 vs holding the same stocks">`
+      + (xs ? `<line x1="${xs}" x2="${xs}" y1="0" y2="${Hh}" stroke="var(--hair)" stroke-dasharray="3 3" vector-effect="non-scaling-stroke"/>` : "")
+      + (b.length ? `<path d="${path(b)}" fill="none" stroke="var(--faint)" stroke-width="1.5" stroke-dasharray="4 3" vector-effect="non-scaling-stroke"/>` : "")
+      + `<path d="${path(a)}" fill="none" stroke="${col}" stroke-width="2" vector-effect="non-scaling-stroke"/></svg>`
+      + `<div class="sparkleg"><span><i style="border-color:${col}"></i>$100 in Jan 2018 → $${Math.round(a[n - 1])}</span>${b.length ? `<span><i style="border-color:var(--faint);border-top-style:dashed"></i>Holding → $${Math.round(b[n - 1])}</span>` : ""}</div>`;
+  }
+
+  function card(s) {
+    const a = s.screen, c = s.confirm, good = s.outcome === "passed", mid = ["mixed", "riskier"].includes(s.outcome);
+    const cell = (v, ref, fmt, hiGood = true) => { const d = v == null || ref == null ? 0 : v - ref; const cl = !d ? "" : (d > 0) === hiGood ? "pos" : "neg"; return `<b class="${cl}">${fmt(v)}</b>`; };
+    return `<article class="rcard" id="${esc(s.id)}">
+      <h3>${esc(s.name)}</h3>
+      <div class="pills"><span class="pill o-${s.outcome}">${esc(OUT[s.outcome][0])}</span><span class="pill">${esc(s.family)}</span>${s.intraday ? `<span class="pill">Trades inside the day</span>` : ""}</div>
+      <p>${esc(s.what)}</p>
+      <p class="idea"><b>The idea:</b> ${esc(s.idea)}</p>
+      <div class="verdict ${good ? "good" : mid ? "" : "bad"}"><p>${esc(s.reason)}</p></div>
+      <div class="cmp">
+        <span class="h"></span><span class="h">Return/yr</span><span class="h">Sharpe</span><span class="h">Worst drop</span>
+        <span class="h">2021–now</span>${cell(a.cagr, H.screen.cagr, P)}${cell(a.sharpe, H.screen.sharpe, F)}${cell(a.maxdd, H.screen.maxdd, v => P(v, 0))}
+        <span class="h">2018–2020</span>${cell(c.cagr, H.confirm.cagr, P)}${cell(c.sharpe, H.confirm.sharpe, F)}${cell(c.maxdd, H.confirm.maxdd, v => P(v, 0))}
+        <span class="h">Holding</span><span class="dim">${P(H.screen.cagr)} / ${P(H.confirm.cagr)}</span><span class="dim">${F(H.screen.sharpe)} / ${F(H.confirm.sharpe)}</span><span class="dim">${P(H.screen.maxdd, 0)} / ${P(H.confirm.maxdd, 0)}</span>
+      </div>
+      ${spark(s)}
+      <details class="more"><summary>More numbers</summary><dl>
+        <dt>Beats holding (2021–now / 2018–2020)</dt><dd>${P(a.beats, 0)} / ${P(c.beats, 0)}</dd>
+        <dt>Sharpe before costs / at 0.25% per trade</dt><dd>${F(a.sharpe0)} / ${F(a.sharpe25)}</dd>
+        <dt>Account traded per year</dt><dd>${a.turnover == null ? "–" : a.turnover.toFixed(1) + "×"}</dd>
+        <dt>Average share of money in stocks</dt><dd>${P(a.exposure, 0)}</dd>
+        <dt>Code name</dt><dd>${esc(s.id)}</dd>
+      </dl></details>
+    </article>`;
+  }
+
+  function draw() {
+    const q = $("q").value.trim().toLowerCase(), fam = $("fam").value, so = $("sort").value;
+    let list = S.filter(s => (filt === "all" || s.outcome === filt) && (!fam || s.family === fam)
+      && (!q || (s.name + " " + s.what + " " + s.id + " " + s.family).toLowerCase().includes(q)));
+    const k = { sharpe: s => -(s.screen.sharpe ?? -9), cagr: s => -(s.screen.cagr ?? -9), confirm: s => -(s.confirm.sharpe ?? -9) }[so];
+    list.sort(so === "name" ? (a, b) => a.name.localeCompare(b.name) : (a, b) => k(a) - k(b));
+    $("count").textContent = `${list.length} shown`;
+    $("list").innerHTML = list.length ? list.map(card).join("") : `<p class="empty2">No strategy matches.</p>`;
+  }
+  drawTiles(); draw();
+  if (location.hash) document.getElementById(location.hash.slice(1))?.scrollIntoView();
+})();
+const VNAME = {
+  mom_residual_12_1: "As tested (top 10)", mrv_top20: "20 stocks instead of 10", mrv_buffer: "Keep until out of the top 25",
+  mrv_mkt_trend: "Only when the S&P 500 is above its 200-day average", mrv_vol_scaled: "Invest less when volatile",
+  mrv_stock_trend: "Only stocks above their 200-day average",
+  high_volume_premium: "As tested (top 10)", hvp_top20: "20 stocks instead of 10", hvp_stock_trend: "Only stocks above their 200-day average",
+  hvp_up_volume: "Only volume jumps on a flat-to-rising week", hvp_two_month: "Hold each month's picks for two months",
+  hvp_mkt_trend: "Only when the S&P 500 is above its 200-day average",
+};
+</script>
+</body>
+</html>
