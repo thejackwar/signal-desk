@@ -34,6 +34,12 @@ jobs:
           NTFY_PREFIX: ${{ vars.NTFY_PREFIX }}
         run: python engine/crash_filter.py
 
+      - name: VIX Seasonality (page + Strategy Lab VIX filter)
+        continue-on-error: true   # never hold back the alerts
+        env:
+          NTFY_PREFIX: ${{ vars.NTFY_PREFIX }}
+        run: python engine/vix_season.py
+
       - name: Publish new alerts
         run: |
           git config user.name "signal-desk-bot"

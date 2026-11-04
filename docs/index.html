@@ -468,6 +468,10 @@ table.cxder td img, table.cxrs td img, table.cxder td .coin, table.cxrs td .coin
 @media (max-width: 600px) { table.cxrs, table.cxder { font-size: 13px; } table.cxrs td small, table.cxder td small { max-width: 92px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; } }
 .cxetfh { display: flex; justify-content: space-between; align-items: baseline; font-size: 13.5px; }
 .cxetfh span { color: var(--muted); font-size: 12.5px; }
+.vxt th, .vxt td { padding-left: 5px !important; padding-right: 5px !important; font-size: 13.5px; }
+.vxt td:first-child, .vxt th:first-child { padding-left: 12px !important; max-width: 120px; white-space: normal; }
+.vxt td b { font-size: 14.5px; }
+.vxt small { white-space: nowrap; }
 .cxbars { display: flex; align-items: center; height: 90px; gap: 3px; margin-top: 8px; position: relative; }
 .cxbars::before { content: ""; position: absolute; left: 0; right: 0; top: 50%; border-top: 1px solid var(--line); }
 .cxbars i { flex: 1; height: 100%; position: relative; }
@@ -1643,6 +1647,7 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
   <a class="nav" href="#trades" data-tab="trades"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19h16"/><path d="m5 15 4-4 3 3 7-7"/><path d="M15 7h4v4"/></svg>Live trades</a>
   <a class="nav" href="#practice" data-tab="practice"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6.5" width="18" height="13" rx="2"/><path d="M8.5 6.5V5a1.5 1.5 0 0 1 1.5-1.5h4A1.5 1.5 0 0 1 15.5 5v1.5"/><path d="M3 12h18"/><path d="M11 12v2h2v-2"/></svg>Practice</a>
   <a class="nav" href="#crashes" data-tab="crashes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 3v5c0 4.6-3 8.3-7 10-4-1.7-7-5.4-7-10V6z"/><path d="M8.5 12.5l2.4 2.4 4.6-5"/></svg>Smaller Crashes</a>
+  <a class="nav" href="#vix" data-tab="vix"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h3.5l2.5-6 4 12 2.5-6H21"/></svg>VIX Seasonality</a>
   <a class="nav" href="#learn" data-tab="learn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 6.5C10 5 7 4.5 3.5 5v13.5c3.5-.5 6.5 0 8.5 1.5 2-1.5 5-2 8.5-1.5V5C17 4.5 14 5 12 6.5Z"/><path d="M12 6.5V20"/></svg>Learn</a>
   <a class="nav" href="#notify" data-tab="notify"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="2.5" width="12" height="19" rx="2.5"/><path d="M11 18.5h2"/></svg>Phone alerts</a>
   <a class="nav" href="#brokers" data-tab="brokers"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9.5 12 4l9 5.5"/><path d="M4.5 10v8"/><path d="M9.5 10v8"/><path d="M14.5 10v8"/><path d="M19.5 10v8"/><path d="M3 20.5h18"/></svg>Brokers</a>
@@ -1684,6 +1689,7 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
       <a href="#trades" data-tab="trades"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19h16"/><path d="m5 15 4-4 3 3 7-7"/><path d="M15 7h4v4"/></svg><span>Live trades</span></a>
       <a href="#practice" data-tab="practice"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6.5" width="18" height="13" rx="2"/><path d="M8.5 6.5V5a1.5 1.5 0 0 1 1.5-1.5h4A1.5 1.5 0 0 1 15.5 5v1.5"/><path d="M3 12h18"/><path d="M11 12v2h2v-2"/></svg><span>Practice</span></a>
       <a href="#crashes" data-tab="crashes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 3v5c0 4.6-3 8.3-7 10-4-1.7-7-5.4-7-10V6z"/><path d="M8.5 12.5l2.4 2.4 4.6-5"/></svg><span>Smaller Crashes</span></a>
+      <a href="#vix" data-tab="vix"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h3.5l2.5-6 4 12 2.5-6H21"/></svg><span>VIX Seasonality</span></a>
       <a href="#news" data-tab="news"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h13a1 1 0 0 1 1 1v12a2 2 0 0 0 2 2H6a2 2 0 0 1-2-2Z"/><path d="M18 9h2a1 1 0 0 1 1 1v8a2 2 0 0 1-2 2"/><path d="M8 9h6"/><path d="M8 13h6"/><path d="M8 17h4"/></svg><span>News</span></a>
       <a href="#calendar" data-tab="calendar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5" width="17" height="15.5" rx="2"/><path d="M3.5 10h17"/><path d="M8 3v4"/><path d="M16 3v4"/><path d="M7.5 14h2"/><path d="M11 14h2"/><path d="M14.5 14h2"/><path d="M7.5 17h2"/></svg><span>Calendar</span></a>
       <a href="#strategies" data-tab="strategies"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 20h18"/><path d="M6 16V9"/><path d="M4.5 9h3"/><path d="M12 16V5"/><path d="M10.5 5h3"/><path d="M18 16v-5"/><path d="M16.5 11h3"/></svg><span>Strategies</span></a>
@@ -2200,6 +2206,150 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
     return h;
   }
 
+  // VIX Seasonality: when in the year the VIX tends to be high, and whether that helps an S&P 500
+  // holder (engine/vix_season.py, data/vix.json). The Strategy Lab's VIX filter uses the same file.
+  function viewVix() {
+    let h = header("VIX Seasonality");
+    const X = S.vix;
+    const MN = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"], LONG = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+    let pat = "";
+    if (X?.months) {
+      const by = X.months.map((m, i) => [i, m.rel]).sort((a, b) => b[1] - a[1]);
+      pat = ` Since ${esc(X.vix_start.slice(0, 4))} it has usually been highest, against its own recent average, in ${LONG[by[0][0]]} and ${LONG[by[1][0]]}, and lowest in ${LONG[by[11][0]]} and ${LONG[by[10][0]]}.`;
+    }
+    h += `<p class="tag" style="margin-top:2px;font-size:14.5px">The VIX is the S&amp;P 500's “fear gauge”: the volatility option traders expect over the next month.${pat} Here's the pattern, what it means today, and whether trading on it would have helped.</p>`;
+    if (X === undefined) {
+      S.vix = null;
+      opt("data/vix.json").then(d => { S.vix = d || false; if (location.hash === "#vix") rerender(); });
+      return h + `<p class="loading">Loading…</p>`;
+    }
+    if (!X) return h + `<div class="empty"><strong>Not available yet</strong>The data appears after the next daily scan.</div>`;
+    const N = X.now, A = N.ahead, inSpy = N.position === "spy";
+    const pc = (v, d = 1) => v == null ? "–" : (v > 0 ? "+" : v < 0 ? "−" : "") + Math.abs(v).toFixed(d) + "%";
+    const pl = (v, d = 1) => v == null ? "–" : Math.abs(v).toFixed(d) + "%";
+    const rp = v => v == null ? "–" : pc((v - 1) * 100, 0);
+    const day = d => fmtDate(d, { day: "numeric", month: "short", year: "numeric" });
+    const hot = N.vs_normal > X.gate.th, calm = N.vs_normal < -15;
+
+    // ---- today
+    h += `<div class="card" style="border:1px solid ${hot ? "var(--amber)" : "var(--line)"}">
+      <div style="font:500 11px var(--font-mono);letter-spacing:.06em;text-transform:uppercase;color:var(--muted)">VIX · ${esc(day(N.date))}</div>
+      <div style="display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin:6px 0">
+        <b style="font-size:34px;letter-spacing:-.02em">${N.vix.toFixed(2)}</b>
+        <span class="${N.vs_normal > 0 ? "down" : "up"}" style="font-weight:600">${pc(N.vs_normal, 0)} vs normal for early ${esc(N.month)}</span></div>
+      <p style="margin:0 0 8px">Normal for this week of the year is about <b>${N.normal.toFixed(1)}</b>: its past-year average (${N.avg.toFixed(1)}) ${N.factor >= 1 ? "plus" : "minus"} the usual ${pl(Math.abs(N.factor - 1) * 100, 0)} ${N.factor >= 1 ? "seasonal lift" : "seasonal dip"} this week. ${hot ? "That's unusually high for the time of year." : calm ? "That's unusually calm for the time of year." : "That's within the normal range."} Higher than on ${N.pctile}% of days since ${esc(X.vix_start.slice(0, 4))}.</p>
+      <p style="margin:0"><b>From this week, in past years</b> (${A.years}): over the next 20 sessions the VIX fell in <b>${A.vix_down}%</b> of years (median ${pc(A.vix_med, 0)}), and the S&amp;P 500 rose in <b>${A.spy_up}%</b> (median ${pc(A.spy_med)}).</p></div>`;
+
+    // ---- the year
+    const CU = X.curve, toPts = arr => (arr || []).map((v, i) => [i + 1, v == null ? NaN : (v - 1) * 100]);
+    const wkMonth = w => Math.min(11, Math.floor((w - 1) * 7 / 30.44));
+    const curveSeries = [{ pts: toPts(CU.p75), color: C.muted, w: 1, dash: "3 3", noDot: true }, { pts: toPts(CU.p25), color: C.muted, w: 1, dash: "3 3", noDot: true },
+      { pts: toPts(CU.median), color: C.accent2, w: 2.2, noDot: true }];
+    if (CU.this_year?.some(v => v != null)) curveSeries.push({ pts: toPts(CU.this_year), color: C.accent, w: 1.8 });
+    h += `<h2>The VIX through the year</h2>` + cxCard("VIX vs its past-year average", `${CU.n} years, ${esc(CU.years)}`,
+      cxLine(curveSeries, { h: 200, grid: [-20, -10, 0, 10, 20, 30], zero: 0, fmt: v => (v > 0 ? "+" : "") + v + "%", xKey: w => wkMonth(w), xLabel: w => MN[wkMonth(w)], label: "Typical VIX path through the year" })
+      + cxLegend([[C.accent2, "Typical year (median)"], [C.muted, "Middle half of years"], ...(curveSeries.length > 3 ? [[C.accent, `${esc(N.date.slice(0, 4))} so far`]] : [])])
+      + cxWhy("Each week's VIX divided by its average over the year before it, so a calm 2017 and a panicky 2008 count equally. Above 0 the VIX is usually higher than its own recent average that week; the dashed lines show how wide the range is."));
+
+    // ---- months
+    const M = X.months, mx = Math.max(...M.map(m => Math.abs(m.rel - 1)));
+    const cur = MN.indexOf(N.month);
+    h += cxCard("Month by month", "VIX vs past-year average",
+      `<div class="cxbars">${M.map(m => `<i class="${m.rel >= 1 ? "neg" : "pos"}" style="--h:${Math.abs(m.rel - 1) / mx * 100}%" title="${m.m} ${rp(m.rel)}"></i>`).join("")}</div>
+      <div class="cxbarsx">${M.map(m => `<span>${m.m[0]}</span>`).join("")}</div>
+      <div class="tablewrap" style="margin-top:10px"><table class="bt"><thead><tr><th>Month</th><th>VIX vs avg</th><th>VIX rose</th><th>S&amp;P 500</th></tr></thead><tbody>` +
+      M.map((m, i) => `<tr${i === cur ? ` style="background:color-mix(in srgb, var(--accent, ${C.accent}) 12%, transparent)"` : ""}><td>${m.m}${i === cur ? " ·&nbsp;now" : ""}</td><td><b class="${m.rel > 1 ? "down" : "up"}">${rp(m.rel)}</b></td><td>${m.vix_up}%</td><td><b class="${m.spy >= 0 ? "up" : "down"}">${pc(m.spy, 1)}</b> <small style="color:var(--muted)">up ${m.spy_up}%</small></td></tr>`).join("") +
+      `</tbody></table></div>`
+      + cxWhy(`Red bars: months when the VIX is usually above its own past-year average (more fear); green: below. “VIX rose” is how often the VIX ended the month higher than it started. The S&amp;P 500 column is its average monthly return and how often it rose, since ${esc(X.start.slice(0, 4))}. Around ${M[0].n} years per month, so a single 2008 or 2020 still moves the averages.`));
+
+    // ---- holidays and weekdays
+    const HO = X.holidays;
+    if (HO.list.length) h += cxCard("Around market holidays", "VIX, median change",
+      `<div class="tablewrap"><table class="bt"><thead><tr><th>Holiday</th><th>3 sessions before</th><th>2 sessions after</th></tr></thead><tbody>` +
+      HO.list.map(x => `<tr><td>${esc(x.name)}<br><small style="color:var(--faint)">${x.n} times</small></td><td><b class="${x.into <= 0 ? "up" : "down"}">${pc(x.into)}</b><br><small style="color:var(--muted)">fell ${x.into_down}%</small></td><td><b class="${x.after <= 0 ? "up" : "down"}">${pc(x.after)}</b><br><small style="color:var(--muted)">rose ${x.after_up}%</small></td></tr>`).join("") +
+      `<tr class="cxavg"><td>Any day, for comparison</td><td><b>${pc(HO.normal.into)}</b><br><small style="color:var(--muted)">fell ${HO.normal.into_down}%</small></td><td><b>${pc(HO.normal.after)}</b><br><small style="color:var(--muted)">rose ${HO.normal.after_up}%</small></td></tr></tbody></table></div>`
+      + cxWhy(HO.all.into < HO.normal.into && HO.all.after > HO.normal.after
+        ? `Across all ${HO.all.n} holidays the VIX fell into the break more often than on a normal stretch (${HO.all.into_down}% vs ${HO.normal.into_down}%) and bounced after it. Options lose value over days the market is shut, so traders mark them down ahead of a long weekend: a pricing effect more than a change in real risk.`
+        : `Across all ${HO.all.n} holidays the VIX changed about as it does on any stretch of days (fell ${HO.all.into_down}% of the time into a holiday vs ${HO.normal.into_down}% normally), so there's no reliable holiday effect in this data.`));
+    const WD = X.weekdays, wmx = Math.max(...WD.map(x => Math.abs(x.mean)));
+    h += cxCard("Day of the week", "VIX, average daily change",
+      `<div class="cxwd">${WD.map(x => `<div><span class="cxwdb"><i class="${x.mean <= 0 ? "pos" : "neg"}" style="--h:${Math.abs(x.mean) / wmx * 100}%"></i></span><b class="${x.mean <= 0 ? "up" : "down"}">${pc(x.mean, 2)}</b><small>${x.d}<br>${x.up}% up</small></div>`).join("")}</div>`
+      + cxWhy((() => { const hi = WD.reduce((a, b) => b.mean > a.mean ? b : a), lo = WD.reduce((a, b) => b.mean < a.mean ? b : a);
+        return hi.d === "Mon" ? `Monday's change covers the weekend, so it's usually the VIX's biggest rise of the week (${pc(hi.mean, 2)} on average); ${lo.d} is usually the weakest. Small next to a normal day's swing, and partly a pricing quirk of how weekends count in option prices.`
+          : `${hi.d} has the biggest average rise (${pc(hi.mean, 2)}) and ${lo.d} the weakest (${pc(lo.mean, 2)}). Differences this small are mostly noise next to a normal day's swing.`; })()));
+
+    // ---- elections
+    const E = X.elections;
+    if (E.midterm?.n) {
+      const ePts = arr => arr.map((v, i) => [i - E.pre, v]);
+      const es = [{ pts: ePts(E.presidential.median), color: C.muted, w: 1.5, noDot: true }, { pts: ePts(E.midterm.median), color: C.accent2, w: 2.2, noDot: true }];
+      if (E.current) es.push({ pts: ePts(E.current.path), color: C.accent, w: 2 });
+      const sp = E.midterm.spy, lbl = { 20: "1 month", 60: "3 months", 120: "6 months", 250: "1 year" };
+      h += `<h2>Election years</h2>` + cxCard("VIX around US Election Day", "day before = 100",
+        cxLine(es, { h: 180, grid: [80, 90, 100, 110, 120], zero: 100, fmt: v => v, xKey: k => Math.floor((k + E.pre) / 10), xLabel: k => k === 0 ? "vote" : (k > 0 ? "+" : "") + k, label: "VIX around election day" })
+        + cxLegend([[C.accent2, `Midterms (${E.midterm.n})`], [C.muted, `Presidential (${E.presidential.n})`], ...(E.current ? [[C.accent, `${E.current.year} ${E.current.kind}, ${day(E.current.date)}`]] : [])])
+        + `<div class="tablewrap" style="margin-top:10px"><table class="bt"><thead><tr><th>S&amp;P 500 after a midterm</th>${sp.map(s => `<th>${lbl[s.h]}</th>`).join("")}</tr></thead><tbody>
+          <tr><td>Median</td>${sp.map(s => `<td><b class="${s.median >= 0 ? "up" : "down"}">${pc(s.median)}</b></td>`).join("")}</tr>
+          <tr><td>Rose</td>${sp.map(s => `<td>${s.up}% <small style="color:var(--faint)">of ${s.n}</small></td>`).join("")}</tr></tbody></table></div>`
+        + cxWhy(`Sessions before and after the vote, x-axis. Uncertainty gets priced into options before the vote and comes out once the result is known, the classic “vol crush”. Only ${E.midterm.n} midterms since ${esc(X.vix_start.slice(0, 4))}: a pattern worth knowing, far too few to bet on alone.`));
+    }
+
+    // ---- do the filters help?
+    const R = Object.fromEntries(X.rules.map(r => [r.id, r])), HD = X.hold;
+    const NM = { calendar: "Skip the high-VIX months", seasonal: "VIX above its seasonal normal", plain: "VIX above its average (no seasonality)" };
+    const SH = { calendar: "Calendar", seasonal: "Seasonal", plain: "Plain" };
+    const COL = { hold: C.muted, calendar: C.accent2, seasonal: C.accent, plain: "#a78bfa" };
+    const W = X.weekly, ser = k => W.dates.map((d, i) => [d, W[k][i]]);
+    h += `<h2>Would it have helped? ${esc(X.start.slice(0, 4))} to today</h2>
+      <p class="hint" style="margin:0 2px 8px">Three ways an S&amp;P 500 holder could use the VIX, each against simply holding. All out of sample: the “normal” levels and the months to skip only use the years before each day.</p>`;
+    h += cxCard("€10,000 in each", "log scale",
+      cxLine([{ pts: ser("hold"), color: COL.hold, w: 1.4, noDot: true }, ...["plain", "calendar", "seasonal"].map(k => ({ pts: ser(k), color: COL[k], w: k === "seasonal" ? 2 : 1.4 }))],
+        { h: 200, log: true, grid: [10000, 20000, 50000, 100000, 200000], fmt: v => "€" + Math.round(v / 1000) + "k", label: "Account value of each VIX filter vs holding" })
+      + cxLegend([[COL.hold, `Holding €${Math.round(W.hold.at(-1)).toLocaleString("en-US")}`], ...["seasonal", "calendar", "plain"].map(k => [COL[k], `${NM[k]} €${Math.round(W[k].at(-1)).toLocaleString("en-US")}`])])
+      + cxWhy(`<b>Seasonal</b>: T-bills when the VIX is ${X.gate.th}%+ above its normal for the time of year. <b>Calendar</b>: T-bills in the ${N.skip.length || 3} months that were most volatile in earlier years. <b>Plain</b>: the seasonal rule without the seasonality. In US dollars, dividends included, T-bill interest while out, 10 bp per switch.`));
+    const cols = ["seasonal", "calendar", "plain"];
+    const row = (lab, f, cls) => `<tr><td>${lab}</td>${cols.map(k => `<td><b${cls ? ` class="${cls(R[k])}"` : ""}>${f(R[k])}</b></td>`).join("")}<td><b${cls ? ` class="${cls(HD)}"` : ""}>${f(HD)}</b></td></tr>`;
+    h += `<div class="tablewrap"><table class="bt vxt"><thead><tr><th></th>${cols.map(k => `<th>${SH[k]}</th>`).join("")}<th>Hold</th></tr></thead><tbody>
+      ${row("Yearly growth", x => pl(x.stats.cagr))}
+      ${row("After Italian tax", x => pl(x.after_tax))}
+      ${row("Worst fall", x => pc(x.stats.maxdd, 0), () => "down")}
+      ${row("Volatility", x => pl(x.stats.vol, 0))}
+      ${row("Sharpe", x => x.stats.sharpe.toFixed(2))}
+      ${row("Time invested", x => x.invested == null ? "100%" : pl(x.invested, 0))}
+      ${row("Switches a year", x => x.per_year == null ? "0" : x.per_year)}</tbody></table></div>`;
+    h += `<h3 class="h3">In the big falls</h3><div class="tablewrap"><table class="bt vxt"><thead><tr><th>Fall</th>${cols.map(k => `<th>${SH[k]}</th>`).join("")}<th>Hold</th></tr></thead><tbody>` +
+      X.crashes.map((c, i) => HD.crashes[i] == null ? "" : `<tr><td>${esc(c.name)}<br><small style="color:var(--faint)">${esc(c.from.slice(0, 7))} → ${esc(c.to.slice(0, 7))}</small></td>${cols.map(k => `<td><b class="down">${pc(R[k].crashes[i], 0)}</b></td>`).join("")}<td><b class="down">${pc(HD.crashes[i], 0)}</b></td></tr>`).join("") +
+      `</tbody></table></div><p class="hint" style="margin:6px 2px 0">Biggest drop from a high inside each period. A VIX spike usually comes with the fall, not before it, so a filter tends to step aside after the first drop.</p>`;
+
+    // ---- the honest verdict, from the numbers
+    const hs = HD.stats, verdict = k => {
+      const s = R[k].stats, better = s.maxdd > hs.maxdd + 3, richer = s.cagr >= hs.cagr - 0.05, sharper = s.sharpe > hs.sharpe + 0.02;
+      return richer && better ? "beat holding and fell less" : better && sharper ? "earned less but fell less, with a better return for the risk" : better ? "fell less but earned less, and wasn't better for the risk" : richer ? "kept up with holding but didn't cut the falls" : "earned less without cutting the falls";
+    };
+    const S1 = R.seasonal.stats, P1 = R.plain.stats;
+    h += `<div class="card"><h3>What the numbers say</h3><div class="prose"><p><b>${NM.seasonal}</b> ${verdict("seasonal")}. <b>${NM.calendar}</b> ${verdict("calendar")}. <b>${NM.plain}</b> ${verdict("plain")}.</p>
+      <p>Does the seasonal part add anything? ${S1.sharpe > P1.sharpe + 0.02 ? `Yes, a little: the seasonal version's return for the risk was ${S1.sharpe.toFixed(2)} against ${P1.sharpe.toFixed(2)} without it, because a VIX of 25 means less in October than in July.` : S1.sharpe < P1.sharpe - 0.02 ? `No: without the seasonal adjustment the rule did better (${P1.sharpe.toFixed(2)} vs ${S1.sharpe.toFixed(2)} return for the risk). The VIX's level matters more than the time of year.` : `Barely: the two versions ended up with about the same return for the risk (${S1.sharpe.toFixed(2)} vs ${P1.sharpe.toFixed(2)}).`} Either way, the seasonal swing is small next to the moves the VIX makes in a real scare, so it's better used as context (is today's VIX high <em>for the time of year</em>?) than as a trading rule on its own.</p></div></div>`;
+    const G = X.grid, gc = kind => G.filter(g => g.kind === kind);
+    h += `<h3 class="h3">Is 25% a lucky threshold?</h3><div class="tablewrap"><table class="bt vxt"><thead><tr><th>VIX over</th>${gc("seasonal").map(g => `<th>+${Math.round((g.th - 1) * 100)}%</th>`).join("")}</tr></thead><tbody>
+      ${["seasonal", "plain"].map(kind => `<tr><td>${SH[kind]}</td>${gc(kind).map(g => `<td><b>${pl(g.cagr)}</b><br><small style="color:var(--muted)">${pc(g.maxdd, 0)}</small></td>`).join("")}</tr>`).join("")}</tbody></table></div>
+      <p class="hint" style="margin:6px 2px 0">Yearly growth and worst fall at other thresholds. The rule's 25% was fixed before testing; if the results jump around a lot from one column to the next, the edge is fragile. Holding: ${pl(hs.cagr)} a year, worst ${pc(hs.maxdd, 0)}, Sharpe ${hs.sharpe.toFixed(2)}.</p>`;
+
+    // ---- now, for the rules; notifications; the Lab
+    h += `<div class="card" style="border:1px solid ${inSpy ? "var(--bull)" : "var(--amber)"}"><h3>The seasonal rule today: ${inSpy ? "in the S&amp;P 500" : "in T-bills"}</h3>
+      <p style="margin:0 0 6px">Since ${esc(day(N.since))}. ${N.week_end ? "Checked at this week's close." : N.over !== !inSpy ? `<b>Heads-up:</b> the VIX is ${N.over ? `more than ${X.gate.th}% above` : "back within"} its seasonal normal today, but the rule only acts on the week's last close.` : "It checks again at this week's last close."}</p>
+      <p style="margin:0">The calendar rule skips <b>${N.skip.map(esc).join(", ") || "no months yet"}</b> this year${N.skip_next.join() !== N.skip.join() ? ` and ${N.skip_next.map(esc).join(", ")} next year` : ""}${N.in_skip ? ", so it's out of the market this month" : ""}.</p></div>`;
+    const pre = S.feed?.ntfy_prefix;
+    if (pre) {
+      const t = `${pre}-vix`;
+      h += `<h2>Get a notification when it switches</h2><p class="hint" style="margin:0 2px 8px">In the free <b>ntfy</b> app, subscribe to this channel (server: ntfy.sh): one message when the seasonal rule moves to T-bills or back.</p>
+        <div class="topic"><span style="min-width:0"><code>${esc(t)}</code></span><button data-copy="${esc(t)}">Copy</button></div>`;
+    }
+    h += `<a class="labhero" href="#strategylab"><span class="ico">${LAB_FLASK}</span><span><b>Use it on any strategy</b><small>In the Strategy Lab, Filters → VIX: only buy outside the high-VIX months, or only while the VIX isn't above its seasonal normal. Then compare with the filter off.</small></span><span class="go">Open the Lab ›</span></a>`;
+    h += `<div class="card"><h3>The rules</h3>${X.rules.map(r => `<p style="margin:0 0 8px"><b>${esc(NM[r.id])}.</b> ${esc(r.rule)}</p>`).join("")}<p style="margin:0">Fixed in advance, not tuned to the results. After tax: 26% on each sale's gain (ETF losses can't offset ETF gains in Italy), 12.5% on T-bill interest; holding is taxed once, when sold today. From Italy, use a UCITS S&amp;P 500 ETF and BOTs or a money-market fund (see <a href="#crashes">Smaller Crashes</a> and <a href="#brokers-stocks">Brokers</a>).</p></div>`;
+    h += `<p class="fine">${X.demo ? "Simulated prices. " : ""}VIX since ${esc(X.vix_start.slice(0, 4))}, S&amp;P 500 (SPY) since ${esc(X.start.slice(0, 4))}, from Yahoo Finance, updated after each daily scan. For information and learning only. Not investment advice. Past results don't predict future ones.</p>`;
+    return h;
+  }
+
   function viewPractice() {
     const P = prLoad();
     let h = header("Practice portfolio") + `<p class="tag" style="font-size:14.5px;margin-top:2px">Pretend trades from the alerts, ${eurS(PR_SIZE)} each, at the close of the day you add them. Nothing is real and nothing leaves this browser, so it's a safe way to see how you'd do following the signals.</p>`;
@@ -2404,6 +2554,7 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
         ["#strategies", "Strategies", `${nStrat} strategies, each explained with a real chart and graded on how well it really did`],
         ["#strategies-vault", "Vault", "Strategies taken off the site, with the numbers that put them there", "#strategies"],
         ["#crashes", "Smaller Crashes", "Hold the S&P 500 in uptrends, T-bills in downtrends"],
+        ["#vix", "VIX Seasonality", "When the fear gauge usually rises, what it says today, and if it helps"],
         ["#learn", "Learn", "Charts, indicators, risk and how to read a backtest, from zero"],
       ]],
       ["Signals", [
@@ -3440,8 +3591,17 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
       const raw = await fetch(`${L().base}lab.json`, { cache: "no-cache" }).then(r => { if (!r.ok) throw new Error(r.status); return r.json(); });
       LAB.data[mk] = LAB.mod.decode(raw);
     }
+    await labVix(LAB.data[mk]);
     LAB.data[mk].sectors = LAB.data[mk].sectors && Object.keys(LAB.data[mk].sectors).length ? LAB.data[mk].sectors : labSectors();   // the sector limit
     return LAB.data[mk];
+  }
+  // the VIX filter's states (data/vix.json, the VIX Seasonality page's file), joined to the Lab's dates
+  async function labVix(d) {
+    if (d.vixOk) return d;
+    const v = S.vix || (S.vix === false ? null : await opt("data/vix.json"));
+    if (v && !S.vix) S.vix = v;
+    if (v?.gate) LAB.mod.attachVix(d, v.gate);
+    return d;
   }
   function labHero() {
     return `<a class="labhero" href="#strategylab"><span class="ico">${LAB_FLASK}</span><span><b>Strategy Lab</b><small>Backtest any strategy your way: your own settings, stops, filters, ${L().noun}, account, costs and years.</small></span><span class="go">Open the Lab ›</span></a>`;
@@ -3597,13 +3757,14 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
       ${labSlider(cfg, "trail", "Trailing stop", esc(I.avg ? "follows the best price since the last buy" : R.trail.about), R.trail.min, R.trail.max, R.trail.step)}`}
       <p class="hint" style="margin:0">Whichever comes first closes the trade. Stops and targets are checked on each day's high and low${pro ? "; ATRs are measured on the signal day" : ""}.</p>`);
     // 3) filters
-    const nF = [cfg.fMa, cfg.fMkt, cfg.fInd].filter(Boolean).length, bm = benchOf().name;
+    const nF = [cfg.fMa, cfg.fMkt, cfg.fInd, cfg.fVix].filter(Boolean).length, bm = benchOf().name;
     h += sec("filters", "Filters", nF ? `${nF} on` : "Off",
       `${labSlider(cfg, "fMa", `Only buy above the ${L().one}'s average`, I.buysOnly ? "" : "and only short below it", 0, 300, 10)}
       <div class="lrow"><span>Market trend</span>${labSeg("labmkt", cfg.fMkt, [[0, "Off"], [1, `${bm} above its 200-day`]], "Market filter")}</div>
+      ${data.vixOk ? `<div class="lrow"><span>VIX <a href="#vix" style="font-weight:400">(?)</a></span>${labSeg("labvix", cfg.fVix || 0, [[0, "Off"], [1, "Outside high-VIX months"], [2, `VIX not ${data.vixTh}%+ above normal`]], "VIX filter")}</div>` : ""}
       <label class="lrow"><span>Confirm with</span><span class="yrpick"><select data-labfind aria-label="Second indicator">${Object.entries(M.FILTER_IND).map(([k, v]) =>
         `<option value="${k}"${k === cfg.fInd ? " selected" : ""}>${esc(v)}</option>`).join("")}</select></span></label>
-      <p class="hint" style="margin:0">A filtered alert doesn't open a trade, but still closes one on the other side.${I.buysOnly ? "" : " Shorts need the opposite: below the average, a falling market, a bearish second indicator."}</p>`);
+      <p class="hint" style="margin:0">A filtered alert doesn't open a trade, but still closes one on the other side.${I.buysOnly ? "" : ` Shorts need the opposite: below the average, a falling market, a bearish second indicator${data.vixOk ? ", the high-VIX months or a VIX above its normal" : ""}.`}</p>`);
     // 4) what to trade
     const sectors = [...new Set(data.tickers.map(T => S.stockBy[T.t]?.sector).filter(Boolean))].sort();
     const picks = st.uni.picks || [];
@@ -4049,13 +4210,13 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
   }
   // pick an indicator: keep the exits and extras, except to or from one with its own default exit (Buy the dip)
   function labPickInd(st, ind) {
-    const M = LAB.mod, o = M.clean(st.cfg), own = k => M.INDICATORS[k]?.buysOnly, keep = { tp: o.tp, sl: o.sl, trail: o.trail, fMa: o.fMa, fMkt: o.fMkt, fInd: o.fInd, maxPos: o.maxPos, cost: o.cost };
+    const M = LAB.mod, o = M.clean(st.cfg), own = k => M.INDICATORS[k]?.buysOnly, keep = { tp: o.tp, sl: o.sl, trail: o.trail, fMa: o.fMa, fMkt: o.fMkt, fInd: o.fInd, fVix: o.fVix, maxPos: o.maxPos, cost: o.cost };
     const proOk = k => !M.INDICATORS[k]?.own && !M.INDICATORS[k]?.avg;
     const pro = proOk(o.ind) && proOk(ind) ? Object.fromEntries(["entry", "slMode", "slAtr", "swing", "tpMode", "tpAtr", "rr", "trailMode", "trailAtr", "atrN", "be", "part", "p1", "p1Be", "tLose", "size", "risk", "secMax", "cool", "pyr"].map(k => [k, o[k]])) : {};
     if (M.INDICATORS[o.ind]?.custom) st.lastRules = o.rules;   // your rules come back when you return to them
     const rules = M.INDICATORS[ind]?.custom ? { rules: st.lastRules || M.START_RULES } : {};
     LAB.edit = null;
-    return own(o.ind) || own(ind) ? { ind, sl: o.sl, trail: o.trail, fMa: o.fMa, fMkt: o.fMkt, fInd: o.fInd, maxPos: o.maxPos, cost: o.cost, ...pro, ...rules } : { ind, ...keep, ...pro, ...rules };
+    return own(o.ind) || own(ind) ? { ind, sl: o.sl, trail: o.trail, fMa: o.fMa, fMkt: o.fMkt, fInd: o.fInd, fVix: o.fVix, maxPos: o.maxPos, cost: o.cost, ...pro, ...rules } : { ind, ...keep, ...pro, ...rules };
   }
 
   function labCsv() {
@@ -4719,6 +4880,7 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
       LAB.mod = LAB.mod || await import("./lab.js");
       const raw = await opt(`${L().base}lab_recent.json`);
       LAB.recent[mk] = raw ? LAB.mod.decode(raw) : null;
+      if (LAB.recent[mk]) await labVix(LAB.recent[mk]);
     }
     if (LAB.recent[mk]) { LAB.recent[mk].sectors = LAB.recent[mk].sectors || labSectors(); return LAB.recent[mk]; }
     return labEnsure();   // before the first daily update: the weekly prices
@@ -4863,7 +5025,7 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
       else if (d.labsize) { c.size = d.labsize; if (d.labsize === "risk" && !labStopTxt(c)) { c.slMode = "atr"; c.slAtr = P.slAtr.def; } if (d.labsize === "risk" && !c.maxPos) c.maxPos = 10; }
       st.cfg = M.clean(c); saveLab(st); renderLab(); return true;
     }
-    const t = e.target.closest("[data-labind], [data-labexit], [data-labside], [data-labreset], [data-labtab], [data-labmkt], [data-labtax], [data-labmode], [data-labunpick], [data-labshare], [data-labcsv], [data-labrunopt], [data-labrunrob], [data-labrobapply], [data-labapply], [data-laboptview], [data-labcmp], [data-labdel], [data-labload], [data-labcalrisk], [data-labcaltax], [data-labcalm], [data-labcalday], [data-labcaltrade]");
+    const t = e.target.closest("[data-labind], [data-labexit], [data-labside], [data-labreset], [data-labtab], [data-labmkt], [data-labvix], [data-labtax], [data-labmode], [data-labunpick], [data-labshare], [data-labcsv], [data-labrunopt], [data-labrunrob], [data-labrobapply], [data-labapply], [data-laboptview], [data-labcmp], [data-labdel], [data-labload], [data-labcalrisk], [data-labcaltax], [data-labcalm], [data-labcalday], [data-labcaltrade]");
     if (!t) return false;
     const st = labState(), d = t.dataset;
     if (d.labind) st.cfg = labPickInd(st, d.labind);
@@ -4886,6 +5048,7 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
     else if (d.labexit) st.cfg = { ...M.clean(st.cfg), exit: d.labexit };
     else if (d.labside) st.side = d.labside;
     else if (d.labmkt != null) st.cfg = { ...M.clean(st.cfg), fMkt: +d.labmkt };
+    else if (d.labvix != null) st.cfg = { ...M.clean(st.cfg), fVix: +d.labvix };
     else if (d.labtax != null) st.tax = d.labtax === "1";
     else if (d.labmode) st.uni = { ...st.uni, mode: d.labmode };
     else if (d.labunpick) st.uni = { ...st.uni, picks: (st.uni.picks || []).filter(x => x !== d.labunpick) };
@@ -6643,13 +6806,13 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
   function route() {
     if (!location.hash) history.replaceState(null, "", "#home");
     const r = (location.hash || "#home").slice(1);
-    const tab = r === "news" || r === "buzz" || r === "mood" || r === "earnings" || r.startsWith("earnings-") ? "news" : r.startsWith("calendar") ? "calendar" : r === "crypto" || r.startsWith("crypto-") ? "cryptohub" : r.startsWith("strategylab") ? "lab" : r.startsWith("strateg") ? "strategies" : r.startsWith("stock") || r === "heatmap" ? "stocks" : r === "notify" ? "notify" : r.startsWith("brokers") ? "brokers" : r.startsWith("learn") ? "learn" : r === "practice" ? "practice" : r === "crashes" ? "crashes" : r === "home" ? "home" : r === "about" ? "about" : "alerts";
+    const tab = r === "news" || r === "buzz" || r === "mood" || r === "earnings" || r.startsWith("earnings-") ? "news" : r.startsWith("calendar") ? "calendar" : r === "crypto" || r.startsWith("crypto-") ? "cryptohub" : r.startsWith("strategylab") ? "lab" : r.startsWith("strateg") ? "strategies" : r.startsWith("stock") || r === "heatmap" ? "stocks" : r === "notify" ? "notify" : r.startsWith("brokers") ? "brokers" : r.startsWith("learn") ? "learn" : r === "practice" ? "practice" : r === "crashes" ? "crashes" : r === "vix" ? "vix" : r === "home" ? "home" : r === "about" ? "about" : "alerts";
     if (r === "winners" || r === "record" || r === "trades") S.alView = r; else if (tab === "alerts" && !r.startsWith("alert-")) S.alView = "alerts";
-    const list = { alerts: S.alView === "winners" ? viewWinners : S.alView === "record" ? viewRecord : S.alView === "trades" ? viewTrades : viewAlerts, stocks: viewStocks, home: viewHome, strategies: viewStrategies, notify: viewNotify, brokers: viewBrokers, learn: viewLearn, practice: viewPractice, crashes: viewCrashes, about: viewAbout, lab: () => viewLab(r.slice(11)), cryptohub: () => viewCrypto(r), news: r === "buzz" ? viewBuzz : r === "mood" ? viewMood : r === "earnings" || r.startsWith("earnings-") ? () => viewEarnings(r.slice(9)) : viewNews, calendar: () => viewCalendar(r.slice(9)) }[tab];
+    const list = { alerts: S.alView === "winners" ? viewWinners : S.alView === "record" ? viewRecord : S.alView === "trades" ? viewTrades : viewAlerts, stocks: viewStocks, home: viewHome, strategies: viewStrategies, notify: viewNotify, brokers: viewBrokers, learn: viewLearn, practice: viewPractice, crashes: viewCrashes, vix: viewVix, about: viewAbout, lab: () => viewLab(r.slice(11)), cryptohub: () => viewCrypto(r), news: r === "buzz" ? viewBuzz : r === "mood" ? viewMood : r === "earnings" || r.startsWith("earnings-") ? () => viewEarnings(r.slice(9)) : viewNews, calendar: () => viewCalendar(r.slice(9)) }[tab];
     let detail = detailFor(r), sel = detail ? r : null;
     charts.length = 0;
 
-    if (WIDE.matches && tab !== "home" && tab !== "about" && tab !== "notify" && tab !== "brokers" && tab !== "learn" && tab !== "news" && tab !== "calendar" && tab !== "practice" && tab !== "crashes" && tab !== "lab" && tab !== "cryptohub" && r !== "record" && r !== "trades") {
+    if (WIDE.matches && tab !== "home" && tab !== "about" && tab !== "notify" && tab !== "brokers" && tab !== "learn" && tab !== "news" && tab !== "calendar" && tab !== "practice" && tab !== "crashes" && tab !== "vix" && tab !== "lab" && tab !== "cryptohub" && r !== "record" && r !== "trades") {
       const lp = app.querySelector(".pane.list"), dp = app.querySelector(".pane.detail");
       const listTop = lp?.scrollTop || 0, detTop = dp?.scrollTop || 0;
       const L = norm(list());
@@ -6675,7 +6838,7 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
     if (nsearch) { nsearch.addEventListener("input", () => { S.nq = nsearch.value; filterNews(); }); filterNews(); }
     // the phone tab bar has no Calendar button: it lives under News there
     // phone bar: pages without their own button light up Menu
-    const inBar = { news: "menu", calendar: "menu", brokers: "menu", notify: "menu", learn: "menu", practice: "menu", crashes: "menu", cryptohub: "menu", about: "menu" }[tab] || tab;
+    const inBar = { news: "menu", calendar: "menu", brokers: "menu", notify: "menu", learn: "menu", practice: "menu", crashes: "menu", vix: "menu", cryptohub: "menu", about: "menu" }[tab] || tab;
     const navTab = tab === "alerts" && (S.alView === "winners" || S.alView === "record" || S.alView === "trades") ? S.alView : tab;
     document.querySelectorAll("[data-tab]").forEach(a => a.setAttribute("aria-current", (a.closest(".tabs") ? a.dataset.tab === inBar : a.dataset.tab === navTab) ? "page" : "false"));
     S.routed = true;

@@ -178,6 +178,9 @@ RISK.trail = { label: "Trailing stop", min: 0, max: 30, step: 0.5, about: "follo
 //   fMa    only buy when the stock is above its N-day average (and only short when below); 0 = off
 //   fMkt   only buy when the benchmark (SPY, or Bitcoin / gold) is above its 200-day average, short when below
 //   fInd   only take an alert when a second indicator (at its usual settings) agrees
+//   fVix   VIX seasonality (data/vix.json, engine/vix_season.py): 1 = only buy outside the high-VIX months,
+//          2 = only buy while the VIX isn't 25%+ above its normal level for the time of year; shorts the
+//          opposite. Needs attachVix(); without the VIX file it does nothing
 //   maxPos at most N positions at once, each 1/N of the account (0 = split across every open position)
 //   cost   % paid on every buy and every sell (commission + spread + slippage)
 export const FILTER_IND = {
@@ -268,6 +271,7 @@ export function clean(cfg) {
   out.cost = +snap(EXTRA.cost, out.cost).toFixed(2);
   out.fMkt = out.fMkt ? 1 : 0;
   out.fInd = Object.hasOwn(FILTER_IND, out.fInd) ? out.fInd : "";
+  out.fVix = out.fVix === 1 || out.fVix === 2 || out.fVix === "1" || out.fVix === "2" ? +out.fVix : 0;
   // the advanced exits and money rules: only for strategies that make their own alerts (not the
   // trading-bot ones, which come with their own trades, or Average down, which has its own buys)
   const pro = { ...PRO_OFF };
@@ -299,9 +303,10 @@ export function clean(cfg) {
   }
   const rules = INDICATORS[I].custom ? cleanRules(cfg.rules) : undefined;
   // fixed key order, so sameCfg can compare JSON
-  const { ind, p, exit, hold, tp, sl, trail, fMa, fMkt, fInd, maxPos, cost } = out;
+  const { ind, p, exit, hold, tp, sl, trail, fMa, fMkt, fInd, maxPos, cost, fVix } = out;
   const P = pro;
-  return { ind, p, exit, hold, tp, sl, trail, fMa, fMkt, fInd, maxPos, cost, ...(rules ? { rules } : {}),
+  // fVix only appears when on, so settings saved before it existed compare and share unchanged
+  return { ind, p, exit, hold, tp, sl, trail, fMa, fMkt, fInd, maxPos, cost, ...(fVix ? { fVix } : {}), ...(rules ? { rules } : {}),
     entry: P.entry, slMode: P.slMode, slAtr: P.slAtr, swing: P.swing, tpMode: P.tpMode, tpAtr: P.tpAtr, rr: P.rr, trailMode: P.trailMode, trailAtr: P.trailAtr,
     atrN: P.atrN, be: P.be, part: P.part, p1: P.p1, p1Be: P.p1Be, tLose: P.tLose, size: P.size, risk: P.risk, secMax: P.secMax, cool: P.cool, pyr: P.pyr };
 }
@@ -309,7 +314,7 @@ export function clean(cfg) {
 export const isPro = cfg => !!INDICATORS[cfg.ind]?.custom || cfg.entry === "open" || cfg.slMode !== "pct" || cfg.tpMode !== "pct" || cfg.trailMode !== "pct"
   || cfg.be > 0 || cfg.part > 0 || cfg.tLose > 0 || cfg.size === "risk" || cfg.secMax > 0 || cfg.cool > 0 || cfg.pyr > 1;
 // how many of the extra rules are on (for the UI)
-export const extrasOn = cfg => ["trail", "fMa", "fMkt", "fInd", "maxPos", "cost", "be", "part", "tLose", "secMax", "cool"].filter(k => cfg[k]).length
+export const extrasOn = cfg => ["trail", "fMa", "fMkt", "fInd", "fVix", "maxPos", "cost", "be", "part", "tLose", "secMax", "cool"].filter(k => cfg[k]).length
   + (cfg.size === "risk") + (cfg.pyr > 1) + (cfg.entry === "open");
 export const sameCfg = (a, b) => JSON.stringify(clean(a)) === JSON.stringify(clean(b));
 
@@ -345,6 +350,23 @@ export function decode(raw) {
     raw.bench.forEach((d, i) => { L += d; bench[i] = Math.exp(L / 1e4); });
   }
   return { dates: raw.dates, tickers, spy, bench, benchName: raw.bench_name || "the market" };
+}
+
+// The VIX filter's two states for every date in the data, from data/vix.json's gate: a list of
+// [date, outside the high-VIX months (0/1), VIX not above its seasonal normal (0/1)] on the days they
+// change. Each date takes the last change on or before it (weekends, for crypto, keep Friday's), so an
+// alert on a day's close only uses that close's VIX. Dates before the VIX file: both allowed.
+export function attachVix(data, gate) {
+  const ch = gate?.changes;
+  if (!Array.isArray(ch) || !ch.length) return data;
+  const D = data.dates.length, cal = new Uint8Array(D), nrm = new Uint8Array(D);
+  let k = -1;
+  for (let i = 0; i < D; i++) {
+    while (k + 1 < ch.length && ch[k + 1][0] <= data.dates[i]) k++;
+    cal[i] = k < 0 ? 1 : ch[k][1] ? 1 : 0; nrm[i] = k < 0 ? 1 : ch[k][2] ? 1 : 0;
+  }
+  data.vixOk = { 1: cal, 2: nrm }; data.vixTh = gate.th;
+  return data;
 }
 
 // -------------------------------------------------------------- indicators
@@ -495,7 +517,7 @@ export function states(T, ind) {
 
 // Which alerts may open a position: allowBuy / allowShort per bar (null = no filter on).
 function gates(T, cfg, data) {
-  if (!cfg.fMa && !cfg.fMkt && !cfg.fInd) return null;
+  if (!cfg.fMa && !cfg.fMkt && !cfg.fInd && !(cfg.fVix && data.vixOk)) return null;
   const n = T.c.length, buy = new Uint8Array(n).fill(1), short = new Uint8Array(n).fill(1);
   if (cfg.fMa) {
     const m = sma(T.c, cfg.fMa);
@@ -505,6 +527,10 @@ function gates(T, cfg, data) {
     data._bm200 = data._bm200 || sma(data.spy, 200);
     const b = data.spy, m = data._bm200;
     for (let i = 0; i < n; i++) { const g = T.idx[i]; buy[i] &= b[g] > m[g]; short[i] &= b[g] < m[g]; }
+  }
+  if (cfg.fVix && data.vixOk) {
+    const ok = data.vixOk[cfg.fVix];
+    for (let i = 0; i < n; i++) { const g = ok[T.idx[i]]; buy[i] &= g; short[i] &= 1 - g; }
   }
   if (cfg.fInd) {
     const s = states(T, cfg.fInd);
@@ -517,7 +543,8 @@ function gates(T, cfg, data) {
 export function subset(data, { tickers = null, to = null } = {}) {
   const end = to == null ? data.dates.length - 1 : Math.min(to, data.dates.length - 1);
   const out = { dates: data.dates.slice(0, end + 1), spy: data.spy ? data.spy.subarray(0, end + 1) : null,
-    bench: data.bench ? data.bench.subarray(0, end + 1) : null, benchName: data.benchName, sectors: data.sectors, tickers: [] };
+    bench: data.bench ? data.bench.subarray(0, end + 1) : null, benchName: data.benchName, sectors: data.sectors, tickers: [],
+    ...(data.vixOk ? { vixOk: { 1: data.vixOk[1].subarray(0, end + 1), 2: data.vixOk[2].subarray(0, end + 1) }, vixTh: data.vixTh } : {}) };
   for (const T of data.tickers) {
     if (tickers && !tickers.has(T.t)) continue;
     let k = T.idx.length; while (k > 0 && T.idx[k - 1] > end) k--;

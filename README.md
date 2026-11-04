@@ -42,6 +42,11 @@ docs/                    the website (served by GitHub Pages)
   data/sentiment.json    News mood: per-stock headline tone from Google News, established outlets (engine/sentiment.py, FinBERT, hourly news job)
   research/mood-compare/ News mood source test, Google vs Alpaca, 29 Oct - 3 Nov 2026, moods only (engine/mood_compare.py); kept as a record
   data/calendar.json     upcoming earnings, IPOs, economy (written by engine/events.py)
+  data/vix.json          VIX Seasonality page (#vix): the VIX vs its past-year average by week and month, holidays,
+                         weekdays, US election days, and three out-of-sample VIX filters for an S&P 500 holder vs
+                         holding (after Italian tax too); also the Strategy Lab's VIX filter (fVix, attachVix in
+                         lab.js; test: tests/lab/test_vix.mjs). Written by engine/vix_season.py after each daily scan
+                         (or the VIX Seasonality workflow); ntfy topic <NTFY_PREFIX>-vix when the seasonal rule switches
   data/topdown/          Top-Down alerts (written by engine/topdown.py)
   data/brokers.json      Brokers page: facts and links (edit by hand; affiliate links go here)
   data/ucits.json        EU-buyable versions of SPY/QQQ and an ETC per commodity (edit by hand)
