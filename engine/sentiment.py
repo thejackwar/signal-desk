@@ -77,6 +77,21 @@ FILLER = re.compile(r"key facts|here'?s why|here'?s what|should you|is it (time|
                     r"\bvs\.?\b.*\bwhich\b|\bwhich\b.*\b(better|buy)\b|jim cramer|cramer (says|on)|(could|will) .* make you|"
                     r"millionaire|retire|dividend stocks?|\(\w+(-\w)?\) (rises|falls|dips|gains|outpaces|lags|trails|surpasses|"
                     r"stock (sinks|rises|falls|moves))( (higher|lower) than| as)? market|is .* (a buy|undervalued|overvalued)\??$", re.I)
+# Not news at all: fund / option / quote pages and "seasonal chart" pages Yahoo lists as articles,
+# daily "X stock outperforms competitors" templates, and first-person or question-only opinion.
+NOT_NEWS = re.compile(r"seasonal returns? chart|interactive stock chart|stock price,? news,? quote|what you need to know|"
+                      r"what key metrics|attracting investor attention|investors heavily search|what'?s wrong with|"
+                      r"\bi'?m (buying|selling)|can still (gain|rise|run)|still a buy|undervaluation|"
+                      r"(stock|shares) (out|under)performs|when compared to competitors|strong trading day|"
+                      r"\b(fund|etf|portfolio|529|note|notes)\b.*\([A-Z]{4,6}\)", re.I)
+
+
+def filler(title: str) -> bool:
+    t = title.strip()
+    question = t.endswith("?") and not re.search(r"\d%|\bwhy (is|are|did)\b", t, re.I)   # "Is X a buy?" etc.
+    return bool(FILLER.search(t) or NOT_NEWS.search(t) or question)
+
+
 SYNDICATOR = {"Yahoo Finance": 0.5}   # an aggregator's own copy counts half unless another outlet ran the story too
 STOP = set("the a an and or of to in on for with at by from as is are its it this that after over into says said new than "
            "will be has have shares stock stocks".split())
@@ -158,7 +173,7 @@ def fetch_google(tickers: list[str], window: str) -> list[dict]:
             title = html_unescape(g("title"))
             title = re.sub(r"\s+-\s+[^-]+$", "", title).strip()        # Google adds " - Outlet"
             named = t in news.tag(title, ms) or any(p in title for p in phrases)
-            if not title or not named or FILLER.search(title):
+            if not title or not named or filler(title):
                 continue
             try:
                 when = parsedate_to_datetime(g("pubDate")).astimezone(timezone.utc)
@@ -180,11 +195,17 @@ def html_unescape(s: str) -> str:
 def merge_google(items: dict, fetched: list[dict]) -> list[dict]:
     """Add fetched Google headlines to items, merging the same story (from any outlet, found for any
     stock) into one headline that lists every stock it names. Returns the headlines that are new."""
+    sys.path.insert(0, str(ENGINE))
+    import news
+    ms = news.matchers("stocks")
     new = []
-    sig = {i: words(x["title"]) for i, x in items.items()}
+    names = lambda x: set(news.tag(x["title"], ms)) | set(x["about"][:1])
+    sig = {i: (words(x["title"]), names(x)) for i, x in items.items()}
     for x in sorted(fetched, key=lambda x: x["t"]):
-        w = words(x["title"])
-        twin = x["id"] if x["id"] in items else next((i for i, ws in sig.items() if same_story(w, ws)), None)
+        w, nm = words(x["title"]), names(x)
+        # same story = mostly the same words AND a company in common (templated headlines like
+        # "X stock outperforms competitors" share their words but are about different companies)
+        twin = x["id"] if x["id"] in items else next((i for i, (ws, ns) in sig.items() if nm & ns and same_story(w, ws)), None)
         if twin:
             y = items[twin]
             y["syms"] = y["about"] = sorted(set(y["syms"]) | set(x["syms"]))
@@ -193,7 +214,7 @@ def merge_google(items: dict, fetched: list[dict]) -> list[dict]:
                 y.setdefault("also", []).append(x["src"])   # other outlets that ran the story
             continue
         items[x["id"]] = x
-        sig[x["id"]] = w
+        sig[x["id"]] = (w, nm)
         new.append(x)
     return new
 
@@ -405,7 +426,8 @@ def main():
     if out_path.exists() and not args.demo:
         try:
             prev = json.loads(out_path.read_text())
-            if prev.get("source_id", "alpaca") == src:   # a file from the other source starts over
+            # a file from the other source, or from before the v2 merge fix (wrong merges baked in), starts over
+            if prev.get("source_id", "alpaca") == src and (src != "google" or prev.get("v", 1) >= 2):
                 old = {x["id"]: x for x in prev.get("items", []) if parse(x["t"]) >= window_start}
         except (ValueError, KeyError):
             old = {}
@@ -434,7 +456,7 @@ def main():
         x.setdefault("f", x.get("s", 0.0))
         x["s"] = adjust(x["title"], x["f"])
     keep = sorted((x for x in items.values() if parse(x["t"]) >= window_start
-                   and not (x.get("k") == "g" and FILLER.search(x["title"]))), key=lambda x: x["t"], reverse=True)
+                   and not (x.get("k") == "g" and filler(x["title"]))), key=lambda x: x["t"], reverse=True)
     named_in(keep)
     base = baseline(keep, now)
     stocks = aggregate(keep, tickers, now, base)
@@ -442,7 +464,7 @@ def main():
         "generated_at": now.strftime("%Y-%m-%dT%H:%M+00:00"), "demo": args.demo,
         "model": "Keyword stand-in (demo)" if args.demo else "FinBERT (ProsusAI/finbert)",
         "source": {"demo": "Demo headlines", "alpaca": "Alpaca news (Benzinga)", "google": "Google News, established outlets only"}[src],
-        "source_id": src,
+        "source_id": src, "v": 2,
         "window_days": WINDOW_DAYS, "baseline": round(base, 3), "half_life_h": HALF_LIFE_H, "headline_cut": HEADLINE_CUT, "mood_cuts": list(MOOD_CUTS),
         "stocks": stocks,
         "items": [{k: x[k] for k in ("id", "t", "title", "url", "src", "syms", "nsym", "about", "f", "s", "k", "also") if k in x} for x in keep],
