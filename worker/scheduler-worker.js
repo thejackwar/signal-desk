@@ -14,6 +14,7 @@ const SCHEDULE = [
   ["topdown.yml",      "2,32 13-21 * * 1-5", "Top-Down alerts: every 30 min while the US market is open"],
   ["gamma-setup.yml",  "1-59/5 13-21 * * 1-5", "Gamma rejection setup: every 5 min while the US market is open"],
   ["gex.yml",          "0 13 * * 1-5",       "Gamma levels (before the open)"],
+  ["correlation.yml",  "45 19 * * 1-5",      "Implied correlation (near the close)"],
   ["live-stocks.yml",  "5,35 13-20 * * 1-5", "Live stock scan (provisional): every 30 min while the US market is open"],
   ["live-commodities.yml", "50 7-21 * * 1-5", "Live commodities scan (provisional): every hour on weekdays"],
   ["live-crypto.yml",  "25 3-23/4 * * *",    "Live crypto scan (provisional): every 4 hours"],
