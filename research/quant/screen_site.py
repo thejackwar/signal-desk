@@ -107,8 +107,23 @@ def main():
             "spy_curve": monthly_curve(nets["_spy"]) if "_spy" in nets else [],
             "strategies": out}
 
+    site["max_dsr"] = max((r.get("dsr_screen") or 0) for r in rep["strategies"].values())
     if (IMPROVE / "improve.json").exists():                 # the improvement tests, when they've run
         im = json.loads((IMPROVE / "improve.json").read_text())
+        hh = im["benchmarks"]["hold_same_stocks"]["holdout"]
+        for st in out:                                      # the two base strategies were also run on 2011-2017
+            if st["id"] in im["strategies"] and im["strategies"][st["id"]]["base"]:
+                ho = slim(im["strategies"][st["id"]]["holdout"])
+                st["holdout"] = ho
+                won = [st["screen"].get("sharpe", -9) > hs, st["confirm"].get("sharpe", -9) > hc, (ho.get("sharpe") or -9) > hh["sharpe"]]
+                lab = ["2021–now", "2018–2020", "2011–2017"]
+                w = [l for l, x in zip(lab, won) if x]
+                lo = [l for l, x in zip(lab, won) if not x]
+                if lo:
+                    st["outcome"] = "mixed"
+                    st["reason"] = (f"Checked on three periods: it beat holding in {' and '.join(w)}, but lost in {' and '.join(lo)} "
+                                    f"(2011–2017: Sharpe {ho['sharpe']:.2f} vs {hh['sharpe']:.2f} for holding). "
+                                    "Not reliable enough to follow on its own; we're working on improved versions (see above).")
         inets = pd.read_parquet(IMPROVE / "nets.parquet")
         groups = []
         for g, pk in im["picks"].items():

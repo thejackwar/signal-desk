@@ -327,6 +327,7 @@ details.more dt { color: var(--muted); } details.more dd { margin: 0; text-align
 .imp h3 { margin: 18px 0 4px; font-size: 19px; letter-spacing: -.02em; }
 .vchip { display: inline-block; border-radius: 980px; padding: 2px 10px; font-size: 12px; font-weight: 700; margin-left: 6px; vertical-align: 2px; }
 .vchip.good { background: var(--pill-up); color: var(--up-line); } .vchip.bad { background: var(--pill-down); color: var(--down-line); } .vchip.mid { background: var(--pill-sq); color: var(--pill-sq-fg); }
+.imp .tbl td:first-child { white-space: normal; min-width: 140px; }
 .empty2 { text-align: center; color: var(--muted); padding: 40px 0; }
 </style>
 </head>
@@ -416,6 +417,7 @@ details.more dt { color: var(--muted); } details.more dd { margin: 0; text-align
     `<b>${cnt("failed_check")} of the ${cnt("passed") + cnt("mixed") + cnt("failed_check")} winners</b> of 2021–now lost to holding in 2018–2020. A strategy that worked in one period often just fit that period.`,
     `<b>${cnt("costs")}</b> had a real edge before costs, but traded so often that 0.10% per trade wiped it out. Short-term strategies need a big edge to survive costs.`,
     `<b>${cnt("out_of_market")}</b> cut drops by sitting in cash, but missed so much of the rise that they earned far less. A high Sharpe ratio with little time invested can be misleading.`,
+    `<b>None of the ${S.length}</b> cleared the luck bar on its own: with this many tries, even the best results are within what chance could produce. That's why we re-test on years the strategy has never seen.`,
     `<b>${cnt("riskier")}</b> made more money than holding, but with much bigger falls along the way. More return isn't better if it comes with a lot more risk.`,
   ];
   $("lessons").innerHTML = L.map(x => `<li>${x}</li>`).join(""); $("lessons-p").hidden = false;
@@ -472,6 +474,7 @@ details.more dt { color: var(--muted); } details.more dd { margin: 0; text-align
         <span class="h"></span><span class="h">Return/yr</span><span class="h">Sharpe</span><span class="h">Worst drop</span>
         <span class="h">2021–now</span>${cell(a.cagr, H.screen.cagr, P)}${cell(a.sharpe, H.screen.sharpe, F)}${cell(a.maxdd, H.screen.maxdd, v => P(v, 0))}
         <span class="h">2018–2020</span>${cell(c.cagr, H.confirm.cagr, P)}${cell(c.sharpe, H.confirm.sharpe, F)}${cell(c.maxdd, H.confirm.maxdd, v => P(v, 0))}
+        ${s.holdout && D.improve ? `<span class="h">2011–2017</span>${cell(s.holdout.cagr, D.improve.hold_holdout.cagr, P)}${cell(s.holdout.sharpe, D.improve.hold_holdout.sharpe, F)}${cell(s.holdout.maxdd, D.improve.hold_holdout.maxdd, v => P(v, 0))}` : ""}
         <span class="h">Holding</span><span class="dim">${P(H.screen.cagr)} / ${P(H.confirm.cagr)}</span><span class="dim">${F(H.screen.sharpe)} / ${F(H.confirm.sharpe)}</span><span class="dim">${P(H.screen.maxdd, 0)} / ${P(H.confirm.maxdd, 0)}</span>
       </div>
       ${spark(s)}
