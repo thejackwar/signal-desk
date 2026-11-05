@@ -1624,6 +1624,151 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
 }
 @media (prefers-reduced-motion: reduce) { .about figure img { transform: none; transition: none; } }
 
+/* ================= sidebar groups ================= */
+@media (min-width: 1000px) {
+  .side { overflow-y: auto; scrollbar-width: none; }
+  .side .sgroup { margin: 2px 0; }
+  .side .sgroup summary { list-style: none; cursor: pointer; display: flex; align-items: center; gap: 8px; padding: 9px 10px 5px; font: 600 11px/1 var(--font-body); letter-spacing: .07em; text-transform: uppercase; color: var(--faint); border-radius: 8px; user-select: none; }
+  .side .sgroup summary::-webkit-details-marker { display: none; }
+  .side .sgroup summary::after { content: ""; margin-left: auto; width: 6px; height: 6px; border-right: 1.5px solid currentColor; border-bottom: 1.5px solid currentColor; transform: rotate(-45deg); transition: transform .15s; }
+  .side .sgroup[open] summary::after { transform: rotate(45deg); }
+  .side .sgroup summary:hover { color: var(--muted); }
+  .side .sgroup a.nav { font-size: 14px; padding: 6px 10px 6px 12px; }
+  .side .sgroup a.nav svg { width: 18px; height: 18px; }
+  .side > a.nav .new, .side .sgroup .new { margin-left: auto; }
+}
+
+/* ================= Terminal ================= */
+#app.term { max-width: none; padding: 8px 10px 90px; }
+@media (min-width: 1000px) { #app.term { margin-left: var(--side); padding: 12px 14px 28px; } }
+.tm { --tc: var(--amber); font-size: 13px; font-variant-numeric: tabular-nums; }
+.tm .mono, .tm .num { font-family: var(--font-code); }
+.tm .tmbar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; padding: 8px 10px; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; }
+.tm .tmlogo { font: 700 13px/1 var(--font-code); letter-spacing: .12em; color: var(--tc); white-space: nowrap; }
+.tm .tmlogo i { font-style: normal; color: var(--fg); }
+.tm .tmcmd { flex: 1 1 260px; display: flex; align-items: center; gap: 8px; background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 0 10px; min-width: 0; }
+.tm .tmcmd:focus-within { border-color: var(--tc); box-shadow: 0 0 0 3px var(--amber-bg); }
+.tm .tmcmd span { font: 700 13px var(--font-code); color: var(--tc); }
+.tm .tmcmd input { flex: 1; min-width: 0; background: none; border: 0; outline: 0; color: var(--fg); font: 500 14px var(--font-code); padding: 9px 0; text-transform: uppercase; }
+.tm .tmcmd input::placeholder { text-transform: none; color: var(--faint); }
+.tm .tmcmd kbd { font: 600 11px var(--font-code); color: var(--faint); border: 1px solid var(--line); border-radius: 5px; padding: 2px 6px; }
+.tm .tmclock { display: flex; gap: 14px; font: 500 12px var(--font-code); color: var(--muted); white-space: nowrap; }
+.tm .tmclock b { color: var(--fg); font-weight: 600; }
+.tm .tmclock .open { color: var(--bull); } .tm .tmclock .closed { color: var(--faint); }
+.tm .tmmk { display: flex; gap: 4px; }
+.tm .tmmk button { font: 600 11px var(--font-code); letter-spacing: .05em; padding: 6px 8px; border-radius: 6px; color: var(--muted); border: 1px solid var(--line); }
+.tm .tmmk button[aria-pressed="true"] { color: var(--on-accent); background: var(--tc); border-color: var(--tc); }
+.tm .tmmsg { margin: 6px 2px 0; font: 500 12px var(--font-code); color: var(--muted); min-height: 0; }
+.tm .tmmsg:empty { display: none; }
+.tm .tmmsg.err { color: var(--bear); }
+
+.tm .tmkeys { display: flex; gap: 4px; overflow-x: auto; scrollbar-width: none; padding: 8px 0 6px; }
+.tm .tmkeys::-webkit-scrollbar { display: none; }
+.tm .tmkeys a { flex: none; display: flex; flex-direction: column; gap: 1px; padding: 5px 9px 6px; border-radius: 7px; background: var(--surface); border: 1px solid var(--line); color: var(--muted); text-decoration: none; font-size: 11px; line-height: 1.2; }
+.tm .tmkeys a b { font: 700 11.5px var(--font-code); color: var(--tc); letter-spacing: .04em; }
+.tm .tmkeys a:hover { border-color: var(--tc); color: var(--fg); }
+
+.tm .tape { overflow: hidden; border-block: 1px solid var(--line); margin: 2px 0 10px; white-space: nowrap; mask-image: linear-gradient(90deg, transparent, #000 4%, #000 96%, transparent); }
+.tm .tape .run { display: inline-flex; gap: 22px; padding: 6px 0; animation: tmtape 140s linear infinite; }
+.tm .tape:hover .run { animation-play-state: paused; }
+.tm .tape button { font: 500 12px var(--font-code); color: var(--muted); text-decoration: none; }
+.tm .tape button b { color: var(--fg); font-weight: 600; margin-right: 6px; }
+@keyframes tmtape { to { transform: translateX(-50%); } }
+@media (prefers-reduced-motion: reduce) { .tm .tape { overflow-x: auto; } .tm .tape .run { animation: none; } }
+
+.tm .tmgrid { display: grid; gap: 10px; grid-template-columns: minmax(0, 1fr); }
+@media (min-width: 820px) { .tm .tmgrid { grid-template-columns: repeat(2, minmax(0, 1fr)); } .tm .p-sec { grid-column: span 2; } }
+@media (min-width: 1280px) {
+  .tm .tmgrid { grid-template-columns: minmax(280px, .9fr) minmax(0, 1.25fr) minmax(0, 1.25fr); }
+  .tm .p-mon { grid-row: span 2; }
+  .tm .p-sec { grid-column: span 2; }
+}
+.tm .pn { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; min-width: 0; display: flex; flex-direction: column; overflow: hidden; }
+.tm .pnh { display: flex; align-items: center; gap: 8px; padding: 7px 10px; border-bottom: 1px solid var(--line); background: color-mix(in srgb, var(--surface-2) 60%, transparent); }
+.tm .pnh .code { font: 700 11px var(--font-code); color: var(--on-accent); background: var(--tc); border-radius: 4px; padding: 2px 5px; letter-spacing: .04em; }
+.tm .pnh h2 { margin: 0; font: 600 12px var(--font-body); text-transform: uppercase; letter-spacing: .06em; color: var(--fg); }
+.tm .pnh small { color: var(--faint); font: 500 11px var(--font-code); }
+.tm .pnh .go { margin-left: auto; font: 600 11.5px var(--font-body); color: var(--blue); text-decoration: none; white-space: nowrap; }
+.tm .pnh .go:hover { text-decoration: underline; }
+.tm .pnb { padding: 6px 10px 10px; overflow-y: auto; scrollbar-width: thin; scrollbar-color: var(--line) transparent; }
+.tm .p-alrt .pnb, .tm .p-news .pnb, .tm .p-cal .pnb, .tm .p-live .pnb, .tm .p-grd .pnb, .tm .p-brd .pnb { max-height: 340px; }
+.tm .p-mon .pnb { max-height: 420px; padding-top: 0; }
+@media (min-width: 1280px) { .tm .p-mon { contain: size; min-height: 640px; } .tm .p-mon .pnb { max-height: none; flex: 1; min-height: 0; } }
+.tm .sal { grid-template-columns: 46px 84px minmax(0, 1fr) 66px; }
+.tm .empty2 { color: var(--muted); padding: 14px 0; font-size: 13px; }
+
+/* rows */
+.tm .tr { display: grid; align-items: center; gap: 8px; padding: 5px 4px; border-bottom: 1px solid color-mix(in srgb, var(--line) 70%, transparent); color: inherit; text-decoration: none; border-radius: 4px; min-width: 0; }
+.tm .tr:last-child { border-bottom: 0; }
+.tm a.tr:hover, .tm button.tr:hover { background: var(--hover); }
+.tm .tr > * { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.tm .tr .tk { font: 700 12.5px var(--font-code); color: var(--fg); }
+.tm .tr .dim { color: var(--faint); font-size: 11.5px; }
+.tm .tr .r { text-align: right; font-family: var(--font-code); }
+.tm .th { position: sticky; top: 0; background: var(--surface); z-index: 1; font: 600 10.5px var(--font-body); text-transform: uppercase; letter-spacing: .06em; color: var(--faint); border-bottom: 1px solid var(--line); padding-top: 8px; }
+.tm .th button { font: inherit; color: inherit; text-transform: inherit; letter-spacing: inherit; }
+.tm .th button[aria-pressed="true"] { color: var(--tc); }
+.tm .th button[aria-pressed="true"]::after { content: " ↓"; }
+
+.tm .mon { grid-template-columns: 58px minmax(0, 1fr) 70px 58px 36px; width: 100%; text-align: left; }
+.tm .mon[aria-current="true"] { background: var(--amber-bg); box-shadow: inset 2px 0 0 var(--tc); }
+.tm .monf { display: flex; gap: 6px; padding: 8px 0 4px; position: sticky; top: 0; background: var(--surface); z-index: 2; }
+.tm .monf input { flex: 1; min-width: 0; background: var(--bg); border: 1px solid var(--line); border-radius: 6px; color: var(--fg); font: 500 12.5px var(--font-code); padding: 6px 8px; }
+.tm .p-mon .th { top: 40px; }
+
+.tm .al { grid-template-columns: 44px 58px 18px minmax(0, 1fr) 58px; }
+.tm .side-b { color: var(--bull); } .tm .side-s { color: var(--bear); }
+.tm .lt { grid-template-columns: 58px minmax(0, 1fr) 56px 60px; }
+.tm .nw { grid-template-columns: 44px minmax(0, 1fr); align-items: start; white-space: normal; }
+.tm .nw > * { white-space: normal; }
+.tm .nw .ttl { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; line-height: 1.35; }
+.tm .nw .meta { display: block; color: var(--faint); font-size: 11px; margin-top: 1px; }
+.tm .nw .meta a { color: var(--blue); text-decoration: none; margin-right: 6px; font-family: var(--font-code); }
+.tm .cl { grid-template-columns: 50px 58px minmax(0, 1fr) 62px; }
+.tm .gr { grid-template-columns: minmax(0, 1fr) 30px 62px 54px; }
+.tm .gr .g { font: 700 11px var(--font-code); text-align: center; border-radius: 4px; padding: 1px 0; background: var(--surface-2); }
+.tm .gr .gA { color: var(--bull); background: var(--bull-bg); } .tm .gr .gD { color: var(--bear); background: var(--bear-bg); }
+.tm .sub2 { font: 600 10.5px var(--font-body); text-transform: uppercase; letter-spacing: .06em; color: var(--faint); margin: 10px 0 2px; }
+.tm .sub2:first-child { margin-top: 6px; }
+
+/* stat strip */
+.tm .kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(86px, 1fr)); gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: 8px; overflow: hidden; margin: 6px 0 8px; }
+.tm .kpis div { background: var(--surface); padding: 6px 8px; min-width: 0; }
+.tm .kpis small { display: block; font: 600 10px var(--font-body); text-transform: uppercase; letter-spacing: .06em; color: var(--faint); }
+.tm .kpis b { font: 600 14px var(--font-code); }
+
+/* breadth */
+.tm .bbar { display: flex; height: 8px; border-radius: 4px; overflow: hidden; margin: 6px 0 4px; background: var(--surface-2); }
+.tm .bbar i { background: var(--bull); } .tm .bbar u { background: var(--bear); text-decoration: none; }
+.tm .sec { grid-template-columns: minmax(0, 1fr) 100px 52px; }
+.tm .sec .bar { position: relative; height: 6px; background: var(--surface-2); border-radius: 3px; }
+.tm .sec .bar i { position: absolute; top: 0; bottom: 0; border-radius: 3px; }
+.tm .sec .bar::after { content: ""; position: absolute; left: 50%; top: -2px; bottom: -2px; width: 1px; background: var(--faint); opacity: .5; }
+.tm .two { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.tm .mv { grid-template-columns: 54px minmax(0, 1fr) 56px; }
+
+/* security */
+.tm .sech { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 12px; padding: 8px 0 2px; }
+.tm .sech .stk { font: 700 22px var(--font-code); letter-spacing: .02em; }
+.tm .sech .spx { font: 600 20px var(--font-code); }
+.tm .sech .sch { font: 600 15px var(--font-code); }
+.tm .sech .snm { color: var(--muted); font-size: 13px; flex-basis: 100%; }
+.tm .secbody { display: grid; gap: 10px; grid-template-columns: minmax(0, 1fr); }
+@media (min-width: 1100px) { .tm .secbody { grid-template-columns: minmax(0, 1.7fr) minmax(250px, 1fr); } }
+.tm .secbody .chartbox { border-radius: 8px; min-height: 260px; }
+.tm .secbody .card.rating { margin-top: 10px; border: 1px solid var(--line); }
+.tm .secacts { display: flex; flex-wrap: wrap; gap: 5px; margin: 8px 0 2px; }
+.tm .secacts a { font: 600 11px var(--font-code); letter-spacing: .03em; color: var(--fg); text-decoration: none; border: 1px solid var(--line); border-radius: 6px; padding: 5px 8px; background: var(--bg); }
+.tm .secacts a b { color: var(--tc); margin-right: 4px; }
+.tm .secacts a:hover { border-color: var(--tc); }
+.tm .mood { display: inline-block; font: 600 11px var(--font-body); padding: 2px 7px; border-radius: 999px; background: var(--surface-2); }
+.tm .mood.bull { color: var(--bull); background: var(--bull-bg); } .tm .mood.bear { color: var(--bear); background: var(--bear-bg); }
+.tm .help { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 2px 14px; margin: 8px 0 0; padding: 10px; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; font-size: 12.5px; }
+.tm .help div { display: flex; gap: 8px; } .tm .help b { font-family: var(--font-code); color: var(--tc); min-width: 62px; }
+.tm .help p { grid-column: 1 / -1; margin: 0 0 6px; color: var(--muted); }
+.tm .fine2 { color: var(--faint); font-size: 11.5px; margin: 12px 2px 0; }
+@media (max-width: 999px) { .tm .tmmk { display: none; } .tm .tmcmd kbd { display: none; } }
+
 </style>
 </head>
 <body>
@@ -1631,31 +1776,42 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
   <a class="brand" href="#home" data-tab="home" aria-label="Home"><img src="logo.svg?v=2" alt=""><span>Investment Center<br><em>Signals</em></span></a>
   <div class="mswitch side-sw" role="group" aria-label="Market"></div>
   <a class="nav" href="#home" data-tab="home"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 10.5 12 4l8.5 6.5"/><path d="M5.5 9v10.5h13V9"/><path d="M10 19.5v-5h4v5"/></svg>Home</a>
+  <a class="nav" href="#terminal" data-tab="terminal"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="4" width="19" height="16" rx="2.5"/><path d="m6.5 9.5 3 2.5-3 2.5"/><path d="M12 15h5"/></svg>Terminal<span class="new">New</span></a>
   <a class="nav" href="#alerts" data-tab="alerts"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9a6 6 0 1 1 12 0c0 6 2.5 7.5 2.5 7.5h-17S6 15 6 9Z"/><path d="M10 20a2 2 0 0 0 4 0"/></svg>Alerts<span class="count" hidden></span></a>
   <a class="nav" href="#stocks" data-tab="stocks"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="m7 15 4-4 3 3 6-7"/></svg><span data-l="tab">Stocks</span></a>
-  <a class="nav" href="trendlines.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M6 8l13 5"/><path d="M6 18l13-9"/></svg>Trendlines</a>
-  <a class="nav" href="options.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 20h18"/><path d="M4 17c3 0 4-10 8-10s5 10 8 10"/><path d="M12 7v13" stroke-dasharray="2 2"/></svg>Options</a>
-  <a class="nav" href="volumeprofile.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M20 7h-6"/><path d="M20 11h-9"/><path d="M20 15h-4"/><path d="M20 19h-7"/></svg>Volume profile</a>
-  <a class="nav" href="maxpain.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 20h18"/><path d="M4 6c3 0 5 12 8 12s5-12 8-12"/><circle cx="12" cy="18" r="1.6"/></svg>Max pain</a>
-  <a class="nav" href="pairs.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9c3-4 6 2 9-1s6-2 9 0"/><path d="M3 16c3-2 6 2 9-1s6 1 9-1"/><path d="M12 8v8" stroke-dasharray="2 2"/></svg>Pairs trading</a>
-  <a class="nav" href="research.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3h6"/><path d="M10 3v6L5 18a2 2 0 0 0 1.8 3h10.4a2 2 0 0 0 1.8-3L14 9V3"/><path d="M7.5 15h9"/></svg>Strategy research</a>
-  <a class="nav" href="darkpool.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 18h16"/><path d="M6 18V11"/><path d="M10 18V7"/><path d="M14 18v-5"/><path d="M18 18V9"/><circle cx="12" cy="12" r="10" stroke-opacity=".35"/></svg>Dark pools</a>
-  <a class="nav" href="correlation.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="3.5" y="13.5" width="7" height="7" rx="1.5"/><path d="m14 20 6-6"/></svg>Correlation</a>
-  <a class="nav" href="#news" data-tab="news"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h13a1 1 0 0 1 1 1v12a2 2 0 0 0 2 2H6a2 2 0 0 1-2-2Z"/><path d="M18 9h2a1 1 0 0 1 1 1v8a2 2 0 0 1-2 2"/><path d="M8 9h6"/><path d="M8 13h6"/><path d="M8 17h4"/></svg>News</a>
-  <a class="nav" href="#calendar" data-tab="calendar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5" width="17" height="15.5" rx="2"/><path d="M3.5 10h17"/><path d="M8 3v4"/><path d="M16 3v4"/><path d="M7.5 14h2"/><path d="M11 14h2"/><path d="M14.5 14h2"/><path d="M7.5 17h2"/></svg>Calendar</a>
-  <a class="nav" href="#strategies" data-tab="strategies"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 20h18"/><path d="M6 16V9"/><path d="M4.5 9h3"/><path d="M12 16V5"/><path d="M10.5 5h3"/><path d="M18 16v-5"/><path d="M16.5 11h3"/></svg>Strategies</a>
   <a class="nav" href="#strategylab" data-tab="lab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3h6"/><path d="M10 3v6.2L4.6 18.8A1.6 1.6 0 0 0 6 21h12a1.6 1.6 0 0 0 1.4-2.2L14 9.2V3"/><path d="M7.2 15h9.6"/></svg>Strategy Lab</a>
-  <a class="nav crypto-only" href="#crypto" data-tab="cryptohub"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><path d="M9.5 8h4a2 2 0 0 1 0 4h-4m0 0h4.5a2 2 0 0 1 0 4H9.5m0-8v8m1.5-9.5V8m0 8v1.5m2-11V8m0 8v1.5"/></svg>Crypto dashboard</a>
-  <a class="nav" href="#winners" data-tab="winners"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 4h8v5a4 4 0 0 1-8 0Z"/><path d="M8 6H5a3 3 0 0 0 3 4"/><path d="M16 6h3a3 3 0 0 1-3 4"/><path d="M12 13v4"/><path d="M8.5 20.5h7"/><path d="M10 17h4"/></svg>Best trades</a>
-  <a class="nav" href="#record" data-tab="record"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3.5" width="16" height="17" rx="2"/><path d="m8 9 1.5 1.5L12 8"/><path d="M14 9.5h3"/><path d="m8 15 1.5 1.5L12 14"/><path d="M14 15.5h3"/></svg>Track record</a>
-  <a class="nav" href="#trades" data-tab="trades"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19h16"/><path d="m5 15 4-4 3 3 7-7"/><path d="M15 7h4v4"/></svg>Live trades</a>
-  <a class="nav" href="#practice" data-tab="practice"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6.5" width="18" height="13" rx="2"/><path d="M8.5 6.5V5a1.5 1.5 0 0 1 1.5-1.5h4A1.5 1.5 0 0 1 15.5 5v1.5"/><path d="M3 12h18"/><path d="M11 12v2h2v-2"/></svg>Practice</a>
-  <a class="nav" href="#crashes" data-tab="crashes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 3v5c0 4.6-3 8.3-7 10-4-1.7-7-5.4-7-10V6z"/><path d="M8.5 12.5l2.4 2.4 4.6-5"/></svg>Smaller Crashes</a>
-  <a class="nav" href="#vix" data-tab="vix"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h3.5l2.5-6 4 12 2.5-6H21"/></svg>VIX Seasonality</a>
-  <a class="nav" href="#learn" data-tab="learn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 6.5C10 5 7 4.5 3.5 5v13.5c3.5-.5 6.5 0 8.5 1.5 2-1.5 5-2 8.5-1.5V5C17 4.5 14 5 12 6.5Z"/><path d="M12 6.5V20"/></svg>Learn</a>
-  <a class="nav" href="#notify" data-tab="notify"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="2.5" width="12" height="19" rx="2.5"/><path d="M11 18.5h2"/></svg>Phone alerts</a>
-  <a class="nav" href="#brokers" data-tab="brokers"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9.5 12 4l9 5.5"/><path d="M4.5 10v8"/><path d="M9.5 10v8"/><path d="M14.5 10v8"/><path d="M19.5 10v8"/><path d="M3 20.5h18"/></svg>Brokers</a>
-  <a class="nav" href="#about" data-tab="about"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.2"/><path d="M3 19.5c0-3.3 2.7-5.5 6-5.5s6 2.2 6 5.5"/><circle cx="17" cy="9" r="2.6"/><path d="M16 14.2c2.9-.3 5 1.6 5 4.8"/></svg>About us</a>
+  <details class="sgroup"><summary>Signals</summary>
+    <a class="nav" href="#winners" data-tab="winners"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 4h8v5a4 4 0 0 1-8 0Z"/><path d="M8 6H5a3 3 0 0 0 3 4"/><path d="M16 6h3a3 3 0 0 1-3 4"/><path d="M12 13v4"/><path d="M8.5 20.5h7"/><path d="M10 17h4"/></svg>Best trades</a>
+    <a class="nav" href="#record" data-tab="record"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3.5" width="16" height="17" rx="2"/><path d="m8 9 1.5 1.5L12 8"/><path d="M14 9.5h3"/><path d="m8 15 1.5 1.5L12 14"/><path d="M14 15.5h3"/></svg>Track record</a>
+    <a class="nav" href="#trades" data-tab="trades"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19h16"/><path d="m5 15 4-4 3 3 7-7"/><path d="M15 7h4v4"/></svg>Live trades</a>
+    <a class="nav" href="#notify" data-tab="notify"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="2.5" width="12" height="19" rx="2.5"/><path d="M11 18.5h2"/></svg>Phone alerts</a>
+  </details>
+  <details class="sgroup"><summary>Research</summary>
+    <a class="nav" href="#strategies" data-tab="strategies"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 20h18"/><path d="M6 16V9"/><path d="M4.5 9h3"/><path d="M12 16V5"/><path d="M10.5 5h3"/><path d="M18 16v-5"/><path d="M16.5 11h3"/></svg>Strategies</a>
+    <a class="nav" href="research.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3h6"/><path d="M10 3v6L5 18a2 2 0 0 0 1.8 3h10.4a2 2 0 0 0 1.8-3L14 9V3"/><path d="M7.5 15h9"/></svg>Strategy research</a>
+    <a class="nav" href="#crashes" data-tab="crashes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 3v5c0 4.6-3 8.3-7 10-4-1.7-7-5.4-7-10V6z"/><path d="M8.5 12.5l2.4 2.4 4.6-5"/></svg>Smaller Crashes</a>
+    <a class="nav" href="#vix" data-tab="vix"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h3.5l2.5-6 4 12 2.5-6H21"/></svg>VIX Seasonality</a>
+    <a class="nav" href="#learn" data-tab="learn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 6.5C10 5 7 4.5 3.5 5v13.5c3.5-.5 6.5 0 8.5 1.5 2-1.5 5-2 8.5-1.5V5C17 4.5 14 5 12 6.5Z"/><path d="M12 6.5V20"/></svg>Learn</a>
+  </details>
+  <details class="sgroup"><summary>Charts &amp; tools</summary>
+    <a class="nav" href="trendlines.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M6 8l13 5"/><path d="M6 18l13-9"/></svg>Trendlines</a>
+    <a class="nav" href="options.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 20h18"/><path d="M4 17c3 0 4-10 8-10s5 10 8 10"/><path d="M12 7v13" stroke-dasharray="2 2"/></svg>Options</a>
+    <a class="nav" href="volumeprofile.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M20 7h-6"/><path d="M20 11h-9"/><path d="M20 15h-4"/><path d="M20 19h-7"/></svg>Volume profile</a>
+    <a class="nav" href="maxpain.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 20h18"/><path d="M4 6c3 0 5 12 8 12s5-12 8-12"/><circle cx="12" cy="18" r="1.6"/></svg>Max pain</a>
+    <a class="nav" href="pairs.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9c3-4 6 2 9-1s6-2 9 0"/><path d="M3 16c3-2 6 2 9-1s6 1 9-1"/><path d="M12 8v8" stroke-dasharray="2 2"/></svg>Pairs trading</a>
+    <a class="nav" href="darkpool.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 18h16"/><path d="M6 18V11"/><path d="M10 18V7"/><path d="M14 18v-5"/><path d="M18 18V9"/><circle cx="12" cy="12" r="10" stroke-opacity=".35"/></svg>Dark pools</a>
+    <a class="nav" href="correlation.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="3.5" y="13.5" width="7" height="7" rx="1.5"/><path d="m14 20 6-6"/></svg>Correlation</a>
+    <a class="nav crypto-only" href="#crypto" data-tab="cryptohub"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><path d="M9.5 8h4a2 2 0 0 1 0 4h-4m0 0h4.5a2 2 0 0 1 0 4H9.5m0-8v8m1.5-9.5V8m0 8v1.5m2-11V8m0 8v1.5"/></svg>Crypto dashboard</a>
+  </details>
+  <details class="sgroup"><summary>News &amp; events</summary>
+    <a class="nav" href="#news" data-tab="news"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h13a1 1 0 0 1 1 1v12a2 2 0 0 0 2 2H6a2 2 0 0 1-2-2Z"/><path d="M18 9h2a1 1 0 0 1 1 1v8a2 2 0 0 1-2 2"/><path d="M8 9h6"/><path d="M8 13h6"/><path d="M8 17h4"/></svg>News</a>
+    <a class="nav" href="#calendar" data-tab="calendar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5" width="17" height="15.5" rx="2"/><path d="M3.5 10h17"/><path d="M8 3v4"/><path d="M16 3v4"/><path d="M7.5 14h2"/><path d="M11 14h2"/><path d="M14.5 14h2"/><path d="M7.5 17h2"/></svg>Calendar</a>
+  </details>
+  <details class="sgroup"><summary>More</summary>
+    <a class="nav" href="#practice" data-tab="practice"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6.5" width="18" height="13" rx="2"/><path d="M8.5 6.5V5a1.5 1.5 0 0 1 1.5-1.5h4A1.5 1.5 0 0 1 15.5 5v1.5"/><path d="M3 12h18"/><path d="M11 12v2h2v-2"/></svg>Practice</a>
+    <a class="nav" href="#brokers" data-tab="brokers"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9.5 12 4l9 5.5"/><path d="M4.5 10v8"/><path d="M9.5 10v8"/><path d="M14.5 10v8"/><path d="M19.5 10v8"/><path d="M3 20.5h18"/></svg>Brokers</a>
+    <a class="nav" href="#about" data-tab="about"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.2"/><path d="M3 19.5c0-3.3 2.7-5.5 6-5.5s6 2.2 6 5.5"/><circle cx="17" cy="9" r="2.6"/><path d="M16 14.2c2.9-.3 5 1.6 5 4.8"/></svg>About us</a>
+  </details>
   <div class="foot" id="sidefoot"></div>
   <div class="disc"><a href="#brokers-about">Affiliate disclosure</a></div>
 </aside>
@@ -1680,6 +1836,7 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
     <div class="grab" aria-hidden="true"></div>
     <nav class="mgrid" aria-label="All sections">
       <a href="#home" data-tab="home"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 10.5 12 4l8.5 6.5"/><path d="M5.5 9v10.5h13V9"/><path d="M10 19.5v-5h4v5"/></svg><span>Home</span></a>
+      <a href="#terminal" data-tab="terminal"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="4" width="19" height="16" rx="2.5"/><path d="m6.5 9.5 3 2.5-3 2.5"/><path d="M12 15h5"/></svg><span>Terminal</span></a>
       <a href="#alerts" data-tab="alerts"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9a6 6 0 1 1 12 0c0 6 2.5 7.5 2.5 7.5h-17S6 15 6 9Z"/><path d="M10 20a2 2 0 0 0 4 0"/></svg><span>Alerts</span></a>
       <a href="#stocks" data-tab="stocks"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="m7 15 4-4 3 3 6-7"/></svg><span data-l="tab">Stocks</span></a>
       <a href="trendlines.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M6 8l13 5"/><path d="M6 18l13-9"/></svg><span>Trendlines</span></a>
@@ -2571,6 +2728,7 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
         ["#notify", "Phone alerts", "Get a notification on your iPhone when a strategy you follow fires"],
       ]],
       ["Markets & charts", [
+        ["#terminal", "Terminal", "Everything on one screen: command line, monitor, chart, alerts, live trades, news and calendar"],
         ["#stocks", L().Title || L().Tab, `Every ${L().one} with its chart, technical rating and latest alerts`],
         ["#heatmap", "Heatmap", "The whole market on one screen, coloured by today's move", "#stocks"],
         ["trendlines.html", "Trendlines", "Automatic trendlines and support/resistance on seven timeframes"],
@@ -3489,7 +3647,7 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
   }
   async function loadRating(t) {
     const Rm = await import("./rating.js");
-    const draw = () => { const b = document.getElementById("rating"); if (b && b.dataset.t !== "x" ) renderRating(b, t); };
+    const draw = () => { const b = document.getElementById("rating"); if (b && (!b.dataset.sym || b.dataset.sym === t)) renderRating(b, t); };
     const rateFrames = fr => Object.fromEntries(RTFS.map(([k]) => [k, fr[k] && fr[k].length >= 30 ? Rm.rate(fr[k]) : null]));
     if (!RATING[t]) {
       // 1. quick: the daily file this page already uses
@@ -6823,16 +6981,315 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
   }
   const norm = x => typeof x === "string" ? { html: x } : x;
 
+  // -------------------------------------------------------------- terminal
+  // One dense screen that pulls the whole site together, Bloomberg-style: a command line (type a ticker
+  // or a function code), function keys to every page, a ticker tape, and panels for the market monitor,
+  // the selected security, alerts, live paper trades, news, the calendar, strategy grades and breadth.
+  // Clicking a ticker anywhere loads it in the security panel without leaving the page.
+  const TM_FN = [
+    ["ALRT", "#alerts", "Alerts"], ["LIVE", "#trades", "Live trades"], ["BEST", "#winners", "Best trades"], ["REC", "#record", "Track record"],
+    ["LAB", "#strategylab", "Strategy Lab"], ["STRAT", "#strategies", "Strategies"], ["VAULT", "#strategies-vault", "Vault"], ["RSCH", "research.html", "Strategy research"],
+    ["STK", "#stocks", "Markets list"], ["HEAT", "#heatmap", "Heatmap"], ["NEWS", "#news", "News"], ["MOOD", "#mood", "News mood"], ["BUZZ", "#buzz", "Most mentioned"],
+    ["CAL", "#calendar", "Calendar"], ["ERN", "#earnings", "After earnings"], ["TL", "trendlines.html", "Trendlines"], ["OPT", "options.html", "Options"],
+    ["VP", "volumeprofile.html", "Volume profile"], ["MXP", "maxpain.html", "Max pain"], ["PAIR", "pairs.html", "Pairs trading"], ["DARK", "darkpool.html", "Dark pools"],
+    ["CORR", "correlation.html", "Implied correlation"], ["CRYP", "#crypto", "Crypto dashboard"], ["VIX", "#vix", "VIX seasonality"], ["CRSH", "#crashes", "Smaller Crashes"],
+    ["PRAC", "#practice", "Practice portfolio"], ["NTFY", "#notify", "Phone alerts"], ["LRN", "#learn", "Learn"], ["BRKR", "#brokers", "Brokers"], ["HOME", "#home", "Home"], ["ABOUT", "#about", "About us"],
+  ];
+  // ticker + code, e.g. "NVDA TL"
+  const tmTickerFn = t => {
+    const e = encodeURIComponent(t), list = [["DES", `#stock-${e}`, "Full stock page"], ["BT", `#strategylab?s=${e}`, "Backtest it in the Lab"]];
+    if (!isComm()) list.push(["TL", `trendlines.html#${e}`, "Trendlines"]);
+    if (S.market === "stocks") list.push(["ERN", `#earnings-${e}`, "After earnings"], ["VP", `volumeprofile.html#${e}`, "Volume profile"], ["MXP", `maxpain.html#stock/${e}`, "Max pain"]);
+    return list;
+  };
+  const TM_MK = { STOCKS: "stocks", CRYPTO: "crypto", COINS: "crypto", COMM: "commodities", COMMODITIES: "commodities" };
+  const tmToday = () => new Date().toISOString().slice(0, 10);
+  const tmAgo = iso => {
+    const d = new Date(String(iso).replace(/\+00:00$/, "Z")); if (isNaN(d)) return "";
+    const m = (Date.now() - d) / 6e4;
+    return m < 1 ? "now" : m < 60 ? Math.round(m) + "m" : m < 1440 ? Math.round(m / 60) + "h" : Math.round(m / 1440) + "d";
+  };
+  const tmPct = (v, dp = 1) => v == null ? `<span class="dim">–</span>` : `<span class="${v >= 0 ? "up" : "down"}">${v > 0 ? "+" : v < 0 ? "−" : ""}${Math.abs(v).toFixed(dp)}%</span>`;
+  function tmFind(q) {
+    const u = q.toUpperCase().replace(".", "-"), rows = S.stocks?.stocks || [];
+    return rows.find(r => r.ticker.toUpperCase() === u || sym(r.ticker).toUpperCase() === u)?.ticker
+      || (u.length >= 3 ? rows.find(r => (r.name || "").toUpperCase() === u)?.ticker || rows.find(r => (r.name || "").toUpperCase().startsWith(u))?.ticker : null);
+  }
+  function tmSorted() {
+    const k = pref("tmSort", "abs"), rows = (S.stocks?.stocks || []).slice();
+    const f = { abs: r => -Math.abs(r.chg1d ?? 0), chg: r => -(r.chg1d ?? -1e9), tk: null, rsi: r => -(r.rsi ?? -1) }[k];
+    return f ? rows.sort((a, b) => f(a) - f(b)) : rows.sort((a, b) => sym(a.ticker).localeCompare(sym(b.ticker)));
+  }
+  const tmPanel = (cls, code, title, go, body, extra = "") =>
+    `<section class="pn ${cls}" aria-label="${esc(title)}"><header class="pnh"><span class="code">${code}</span><h2>${title}</h2>${extra}${go ? `<a class="go" href="${go[0]}">${go[1]} ›</a>` : ""}</header><div class="pnb">${body}</div></section>`;
+
+  function tmMonitor() {
+    const k = pref("tmSort", "abs"), q = (S.tmQ || "").toLowerCase();
+    const sb = (key, t) => `<button type="button" data-tmsort="${key}" aria-pressed="${k === key}">${t}</button>`;
+    const rows = tmSorted().map(r => {
+      const hid = q && !(sym(r.ticker).toLowerCase().includes(q) || (r.name || "").toLowerCase().includes(q) || (r.sector || "").toLowerCase().includes(q));
+      return `<button type="button" class="tr mon" data-tmsel="${esc(r.ticker)}" data-q="${esc((sym(r.ticker) + " " + (r.name || "") + " " + (r.sector || "")).toLowerCase())}" aria-current="${r.ticker === S.tmSel}"${hid ? " hidden" : ""}>
+        <span class="tk">${esc(disp(r.ticker).slice(0, 8))}</span><span class="dim">${esc(r.name || "")}</span><span class="r">${money(r.price)}</span><span class="r">${tmPct(r.chg1d)}</span><span class="r dim">${r.rsi == null ? "–" : Math.round(r.rsi)}</span></button>`;
+    }).join("");
+    const body = `<div class="monf"><input id="tmfilter" type="search" placeholder="Filter ${L().noun}…" value="${esc(S.tmQ || "")}" aria-label="Filter the list" autocomplete="off"></div>
+      <div class="tr mon th"><span>${sb("tk", "Sym")}</span><span></span><span class="r">Last</span><span class="r">${sb("abs", "Move")} ${sb("chg", "Chg")}</span><span class="r">${sb("rsi", "RSI")}</span></div>${rows || `<p class="empty2">Loading…</p>`}`;
+    return tmPanel("p-mon", "MON", "Monitor", [isCrypto() ? "#stocks" : "#heatmap", isCrypto() ? "All coins" : "Heatmap"], body, `<small>${(S.stocks?.stocks || []).length} ${L().noun}</small>`);
+  }
+
+  function tmSecHtml(t) {
+    const r = S.stockBy[t];
+    if (!r) return `<p class="empty2">Type a ticker in the command line, or pick one on the left.</p>`;
+    const today = tmToday();
+    const m = S.sent?.stocks?.[t], ne = S.market === "stocks" ? (S.cal?.earnings || []).find(e => e.ticker === t && e.date >= today) : null;
+    const moodCls = m ? (m.mood.includes("bull") ? "bull" : m.mood.includes("bear") ? "bear" : "") : "";
+    let h = `<div class="sech"><span class="stk">${esc(disp(t))}</span><span class="spx">${money(r.price)}</span><span class="sch">${tmPct(r.chg1d, 2)}</span>
+      ${m ? `<span class="mood ${moodCls}" title="News mood from the last ${S.sent.window_days || 7} days">News: ${esc(m.mood.replace(/_/g, " "))}</span>` : ""}
+      <span class="snm">${esc(r.name || "")}${r.sector ? " · " + esc(r.sector) : ""}${ne ? ` · <b>Earnings ${esc(fmtDate(ne.date, { day: "numeric", month: "short" }))}</b>${ne.eps_est != null ? `, EPS est. ${ne.eps_est}` : ""}` : ""}</span></div>`;
+    h += `<div class="kpis"><div><small>1 month</small><b>${tmPct(r.chg1m)}</b></div><div><small>1 year</small><b>${tmPct(r.chg1y)}</b></div>
+      <div><small>vs 200-day</small><b>${tmPct(r.vs200)}</b></div><div><small>RSI 14</small><b>${r.rsi ?? "–"}</b></div>
+      <div><small>52w low</small><b>${money(r.lo52)}</b></div><div><small>52w high</small><b>${money(r.hi52)}</b></div><div><small>Of 52w range</small><b>${r.pos52 == null ? "–" : Math.round(r.pos52) + "%"}</b></div></div>`;
+    const al = (S.feed?.alerts || []).filter(a => a.ticker === t).slice(0, 8);
+    const news = (S.news?.items || []).filter(n => (n.tickers || []).includes(t)).slice(0, 5);
+    h += `<div class="secbody"><div><div class="chartbox" id="tmchart"><p class="loading">Loading chart…</p></div>
+        <div class="secacts">${tmTickerFn(t).map(([c, href, lbl]) => `<a href="${href}" title="${esc(lbl)}"><b>${c}</b>${esc(lbl)}</a>`).join("")}</div></div>
+      <div><div class="card rating" id="rating" data-sym="${esc(t)}"><div class="hd"><h3>Technical rating</h3></div><p class="loading" style="padding:18px 0">Reading the indicators…</p></div>
+        <p class="sub2">Recent alerts</p>${al.length ? al.map(a => { const up = a.side === "bullish";
+          return `<a class="tr sal" href="#alert-${S.feed.alerts.indexOf(a)}"><span class="dim">${esc(fmtDate(a.date, { day: "numeric", month: "short" }))}</span><span class="${up ? "side-b" : "side-s"}">${up ? "▲" : "▼"} ${esc(sideLbl(a))}</span><span>${esc(stratName(a.strategy))}${a.tf ? ` · ${esc(a.tf)}` : ""}</span><span class="r dim">${esc(a.strength?.label || "")}</span></a>`; }).join("")
+          : `<p class="empty2">No strategy has fired on ${esc(disp(t))} in the last few weeks.</p>`}
+        ${news.length ? `<p class="sub2">Headlines</p>${news.map(n => `<a class="tr nw" href="${esc(n.link)}" target="_blank" rel="noopener"><span class="dim">${esc(tmAgo(n.time))}</span><span><span class="ttl">${esc(n.title)}</span><span class="meta">${esc(n.source || "")}</span></span></a>`).join("")}` : ""}
+      </div></div>`;
+    return h;
+  }
+  async function tmSecAfter(t) {
+    if (!S.stockBy[t]) return;
+    for (let i = charts.length - 1; i >= 0; i--) if (!charts[i][0].isConnected) charts.splice(i, 1);
+    loadRating(t);
+    const box = document.getElementById("tmchart");
+    try {
+      const data = S.stockData[t] || (S.stockData[t] = await (await fetch(`${L().base}stocks/${t}.json`, { cache: "no-cache" })).json());
+      if (!box?.isConnected || S.tmSel !== t) return;
+      const alerts = (S.feed?.alerts || []).filter(a => a.ticker === t), pos = {}, seen = new Set(), markers = [];
+      data.dates.forEach((d, i) => pos[d] = i);
+      for (const a of alerts) { const i = pos[a.date]; if (i == null || seen.has(i + a.side)) continue; seen.add(i + a.side); markers.push({ i, side: a.side === "bullish" ? 1 : -1 }); }
+      mountChart(box, { ...data, markers, shapes: [] }, { label: `${t} one-year chart` });
+    } catch { if (box?.isConnected) box.innerHTML = `<p class="loading">The chart couldn't load.</p>`; }
+  }
+  function tmSelect(t, push) {
+    if (!S.stockBy[t]) return false;
+    S.tmSel = t; setPref("tmSel." + S.market, t);
+    history[push ? "pushState" : "replaceState"](null, "", "#terminal-" + encodeURIComponent(t));
+    const box = document.getElementById("tmsec");
+    if (!box) return true;
+    box.innerHTML = tmSecHtml(t);
+    box.closest(".pn").querySelector(".pnh small").textContent = disp(t);
+    document.querySelectorAll(".tm .mon[data-tmsel]").forEach(b => b.setAttribute("aria-current", b.dataset.tmsel === t));
+    tmSecAfter(t);
+    if (!WIDE.matches || innerWidth < 1280) box.closest(".pn").scrollIntoView({ behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "start" });
+    return true;
+  }
+
+  function tmAlerts() {
+    const A = (S.feed?.alerts || []).slice(0, 60);
+    const body = !S.feed ? `<p class="empty2">Loading…</p>` : !A.length ? `<p class="empty2">No alerts yet.</p>` : A.map(a => {
+      const up = a.side === "bullish";
+      return `<button type="button" class="tr al" data-tmsel="${esc(a.ticker)}" title="${esc(a.note || "")}"><span class="dim">${esc(a.date === S.feed.as_of && a.found_at ? foundTime(a).trim() : fmtDate(a.date, { day: "numeric", month: "short" }))}</span><span class="tk">${esc(disp(a.ticker).slice(0, 8))}</span><span class="${up ? "side-b" : "side-s"}">${up ? "▲" : "▼"}</span><span>${esc(stratName(a.strategy))}${a.tf ? ` <span class="dim">${esc(a.tf)}</span>` : ""}</span><span class="r dim">${esc(a.strength?.label || "")}</span></button>`;
+    }).join("");
+    const today = S.feed ? S.feed.alerts.filter(a => a.date === S.feed.as_of) : [], bu = today.filter(a => a.side === "bullish").length;
+    return tmPanel("p-alrt", "ALRT", "Alerts", ["#alerts", "All alerts"], body, S.feed ? `<small>${bu}▲ ${today.length - bu}▼ last close</small>` : "");
+  }
+
+  function tmLive() {
+    const T = CACHE[S.market]?.trades;
+    if (T === undefined) loadTrades().then(() => { const p = document.querySelector(".tm .p-live"); if (p) p.outerHTML = tmLive(); });
+    let body;
+    if (!T) body = `<p class="empty2">${T === false ? "No live trades for this market yet." : "Loading…"}</p>`;
+    else {
+      const nm = id => T.strategies?.[id]?.name || stratName(id), C = T.closed || [], O = T.open || [];
+      const wins = C.filter(x => x.ret > 0).length, avg = C.length ? C.reduce((s, x) => s + x.ret, 0) / C.length : null;
+      const openRet = O.length ? O.reduce((s, x) => s + (x.ret || 0), 0) / O.length : null;
+      body = `<div class="kpis"><div><small>Open</small><b>${O.length}</b></div><div><small>Avg open</small><b>${tmPct(openRet, 2)}</b></div><div><small>Closed</small><b>${C.length}</b></div><div><small>Won</small><b>${C.length ? Math.round(wins / C.length * 100) + "%" : "–"}</b></div><div><small>Avg closed</small><b>${tmPct(avg, 2)}</b></div></div>`;
+      const row = (x, open) => `<button type="button" class="tr lt" data-tmsel="${esc(x.t)}"><span class="tk">${esc(disp(x.t).slice(0, 8))}</span><span>${x.side < 0 ? `<span class="side-s">short</span> ` : ""}${esc(nm(x.s))}</span><span class="r dim">${open ? "open" : esc(fmtDate(x.d1, { day: "numeric", month: "short" }))}</span><span class="r">${tmPct(x.ret, 2)}</span></button>`;
+      const bigOpen = O.slice().sort((a, b) => Math.abs(b.ret || 0) - Math.abs(a.ret || 0)).slice(0, 12);
+      const lastClosed = C.slice().sort((a, b) => (b.d1 || "").localeCompare(a.d1 || "")).slice(0, 15);
+      body += (bigOpen.length ? `<p class="sub2">Open · biggest moves</p>${bigOpen.map(x => row(x, true)).join("")}` : "")
+        + (lastClosed.length ? `<p class="sub2">Just closed</p>${lastClosed.map(x => row(x, false)).join("")}` : "");
+    }
+    return tmPanel("p-live", "LIVE", "Live paper trades", ["#trades", "All trades"], body, T ? `<small>since ${esc(fmtDate(T.start, { day: "numeric", month: "short" }))}</small>` : "");
+  }
+
+  function tmNews() {
+    const N = (S.news?.items || []).slice(0, 30);
+    const body = !S.news ? `<p class="empty2">No headlines loaded.</p>` : N.map(n => `<div class="tr nw"><span class="dim">${esc(tmAgo(n.time))}</span><span><a class="ttl" href="${esc(n.link)}" target="_blank" rel="noopener" style="color:inherit;text-decoration:none">${esc(n.title)}</a>
+      <span class="meta">${(n.tickers || []).filter(x => S.stockBy[x]).slice(0, 4).map(x => `<a href="#terminal-${encodeURIComponent(x)}" data-tmsel="${esc(x)}">${esc(disp(x))}</a>`).join("")}${esc(n.source || "")}</span></span></div>`).join("");
+    return tmPanel("p-news", "NEWS", "Headlines", ["#news", "All news"], body, S.market === "stocks" ? `<a class="go" href="#mood" style="margin-left:auto">Mood ›</a>` : "");
+  }
+
+  function tmCal() {
+    const C = S.cal, today = tmToday();
+    let body = "";
+    if (!C) body = `<p class="empty2">Loading…</p>`;
+    else {
+      const tm = { bmo: "pre", amc: "post", tns: "–" };
+      if (S.market === "stocks") {
+        const E = (C.earnings || []).filter(e => e.date >= today && e.sp100).slice(0, 14);
+        body += `<p class="sub2">Earnings · S&amp;P 100</p>` + (E.length ? E.map(e => `<button type="button" class="tr cl" data-tmsel="${esc(e.ticker)}"><span class="dim">${esc(fmtDate(e.date, { day: "numeric", month: "short" }))}</span><span class="tk">${esc(e.ticker)}</span><span>${esc(e.name || "")}</span><span class="r dim">${esc(tm[e.time] || e.time || "")}${e.eps_est != null ? " · " + e.eps_est : ""}</span></button>`).join("") : `<p class="empty2">None in the next few weeks.</p>`);
+      }
+      const X = (C.economy || []).filter(e => e.date >= today).slice(0, 10);
+      body += `<p class="sub2">Economy · US</p>` + (X.length ? X.map(e => `<a class="tr cl" href="#calendar-${esc(e.date)}" title="${esc(e.why || "")}"><span class="dim">${esc(fmtDate(e.date, { day: "numeric", month: "short" }))}</span><span class="dim">${esc(e.time || "")}</span><span>${esc(e.kind || e.name)}${e.period ? ` <span class="dim">${esc(e.period)}</span>` : ""}</span><span class="r dim">${e.last != null ? "prev " + e.last : ""}</span></a>`).join("") : `<p class="empty2">Nothing scheduled.</p>`);
+    }
+    return tmPanel("p-cal", "CAL", "Calendar", ["#calendar", "Calendar"], body, `<small>US times</small>`);
+  }
+
+  function tmGrades() {
+    const EV = S.lineup?.evidence?.[S.market];
+    let body;
+    if (!EV) body = `<p class="empty2">No graded line-up for this market yet.</p><a class="tr gr" href="#strategies"><span>See every strategy</span><span></span><span></span><span class="r">›</span></a>`;
+    else {
+      const yr = v => v == null ? "–" : tmPct(v * 100);
+      body = `<div class="tr gr th"><span>Strategy</span><span>Gr.</span><span class="r">A year</span><span class="r">Beat hold</span></div>`
+        + Object.entries(EV.strategies).filter(([id]) => S.byId[id]).slice(0, 14).map(([id, e]) => `<a class="tr gr" href="#strategy-${slug(id)}" title="${esc(e.label)}"><span>${esc(stratName(id))}${isCore(id) ? "" : ` <span class="dim">vault</span>`}</span><span class="g g${esc(e.grade)}">${esc(e.grade)}</span><span class="r">${yr(e.cagr)}</span><span class="r ${e.beats_hold >= .5 ? "up" : "down"}">${e.beats_hold == null ? "–" : Math.round(e.beats_hold * 100) + "%"}</span></a>`).join("")
+        + `<div class="tr gr"><span class="dim">Just holding (${esc(EV.vs || "")})</span><span></span><span class="r">${yr(EV.hold?.cagr)}</span><span></span></div>`;
+    }
+    return tmPanel("p-grd", "GRD", "Strategy grades", ["#strategylab", "Open Lab"], body, EV ? `<small>after costs · ${esc(EV.period || "")}</small>` : "");
+  }
+
+  function tmBreadth() {
+    const M = S.stocks;
+    if (!M?.stocks?.length) return tmPanel("p-brd", "BRD", "Breadth", null, `<p class="empty2">Loading…</p>`);
+    const n = M.stocks.length, adv = M.advancers ?? M.stocks.filter(r => r.chg1d > 0).length, dec = M.decliners ?? M.stocks.filter(r => r.chg1d < 0).length;
+    let body = `<div class="kpis"><div><small>Up today</small><b class="up">${adv}</b></div><div><small>Down today</small><b class="down">${dec}</b></div><div><small>Above 200-day</small><b>${M.breadth200 == null ? "–" : Math.round(M.breadth200) + "%"}</b></div><div><small>Avg move</small><b>${tmPct(M.stocks.reduce((s, r) => s + (r.chg1d || 0), 0) / n, 2)}</b></div></div>
+      <div class="bbar" aria-hidden="true"><i style="width:${adv / n * 100}%"></i><span style="flex:1"></span><u style="width:${dec / n * 100}%"></u></div>`;
+    const by = {};
+    M.stocks.forEach(r => { if (r.sector && r.chg1d != null) (by[r.sector] = by[r.sector] || []).push(r.chg1d); });
+    const secs = Object.entries(by).map(([k, v]) => [k, v.reduce((a, b) => a + b, 0) / v.length, v.length]).sort((a, b) => b[1] - a[1]);
+    if (secs.length > 1) {
+      const mx = Math.max(...secs.map(x => Math.abs(x[1]))) || 1;
+      body += `<p class="sub2">Sectors today</p>` + secs.map(([k, v, c]) => { const w = Math.abs(v) / mx * 50;
+        return `<button type="button" class="tr sec" data-tmfilter="${esc(k)}" title="${c} stocks · filter the monitor"><span>${esc(k)}</span><span class="bar"><i style="${v >= 0 ? `left:50%;width:${w}%;background:var(--bull)` : `right:50%;width:${w}%;background:var(--bear)`}"></i></span><span class="r">${tmPct(v, 2)}</span></button>`; }).join("");
+    }
+    const s = M.stocks.filter(r => r.chg1d != null).slice().sort((a, b) => b.chg1d - a.chg1d);
+    const mv = r => `<button type="button" class="tr mv" data-tmsel="${esc(r.ticker)}"><span class="tk">${esc(disp(r.ticker).slice(0, 8))}</span><span class="r">${money(r.price)}</span><span class="r">${tmPct(r.chg1d)}</span></button>`;
+    body += `<div class="two"><div><p class="sub2">Top gainers</p>${s.slice(0, 6).map(mv).join("")}</div><div><p class="sub2">Top losers</p>${s.slice(-6).reverse().map(mv).join("")}</div></div>`;
+    return tmPanel("p-brd", "BRD", "Breadth &amp; movers", [isCrypto() ? "#crypto" : "#heatmap", isCrypto() ? "Dashboard" : "Heatmap"], body);
+  }
+
+  function tmClock() {
+    const now = new Date(), f = tz => now.toLocaleTimeString("en-GB", { timeZone: tz, hour: "2-digit", minute: "2-digit" });
+    const ny = new Date(now.toLocaleString("en-US", { timeZone: "America/New_York" })), mins = ny.getHours() * 60 + ny.getMinutes(), wd = ny.getDay();
+    const open = isCrypto() || (wd > 0 && wd < 6 && mins >= 570 && mins < 960);
+    const st = isCrypto() ? "24/7" : open ? "US open" : wd > 0 && wd < 6 && mins >= 240 && mins < 570 ? "Pre-market" : wd > 0 && wd < 6 && mins >= 960 && mins < 1200 ? "After hours" : "US closed";
+    return `<span>MIL <b>${f("Europe/Rome")}</b></span><span>NY <b>${f("America/New_York")}</b></span><span class="${open ? "open" : "closed"}">● ${st}</span>`;
+  }
+
+  function tmHelp() {
+    return `<div class="help" id="tmhelp"><p>Type in the command line and press Enter. A ticker on its own loads it here. Add a code after a ticker to jump straight to that tool, e.g. <b style="min-width:0">NVDA TL</b>. Press <b style="min-width:0">/</b> or just start typing to focus the command line.</p>
+      ${TM_FN.map(([c, , l]) => `<div><b>${c}</b><span>${esc(l)}</span></div>`).join("")}
+      <div><b>STOCKS</b><span>Switch to stocks</span></div><div><b>CRYPTO</b><span>Switch to crypto</span></div><div><b>COMM</b><span>Switch to commodities</span></div>
+      <div><b>&lt;T&gt; DES</b><span>Full stock page</span></div><div><b>&lt;T&gt; BT</b><span>Backtest it in the Lab</span></div><div><b>&lt;T&gt; TL</b><span>Trendlines</span></div><div><b>&lt;T&gt; ERN</b><span>After earnings</span></div><div><b>&lt;T&gt; VP</b><span>Volume profile</span></div><div><b>&lt;T&gt; MXP</b><span>Max pain</span></div></div>`;
+  }
+
+  function viewTerminal(arg = "") {
+    S.firstSel = null;
+    const want = decodeURIComponent(arg.replace(/^-/, ""));
+    const t = S.stockBy[want] ? want : S.stockBy[S.tmSel] ? S.tmSel : S.stockBy[pref("tmSel." + S.market)] ? pref("tmSel." + S.market) : (S.stocks?.stocks || []).slice().sort((a, b) => Math.abs(b.chg1d ?? 0) - Math.abs(a.chg1d ?? 0))[0]?.ticker;
+    S.tmSel = t;
+    const rows = S.stocks?.stocks || [];
+    const tape = rows.map(r => `<button type="button" data-tmsel="${esc(r.ticker)}"><b>${esc(disp(r.ticker).slice(0, 10))}</b>${money(r.price)} ${tmPct(r.chg1d, 2)}</button>`).join("");
+    const opts = rows.map(r => `<option value="${esc(sym(r.ticker))}">${esc(r.name || "")}</option>`).join("") + TM_FN.map(([c, , l]) => `<option value="${c}">${esc(l)}</option>`).join("");
+    let h = `<div class="tm">
+      <div class="tmbar"><span class="tmlogo">IC<i>/</i>TERMINAL</span>
+        <form class="tmcmd" id="tmform" role="search" autocomplete="off"><span aria-hidden="true">&gt;</span><input id="tmcmd" list="tmlist" spellcheck="false" autocapitalize="characters" placeholder="Ticker or code — try AAPL, NVDA TL, LAB, HELP" aria-label="Command line: type a ticker or a function code"><kbd>/</kbd><datalist id="tmlist">${opts}</datalist></form>
+        <span class="tmmk">${[["stocks", "STK"], ["crypto", "CRYP"], ["commodities", "COMM"]].map(([m, c]) => `<button type="button" data-market="${m}" aria-pressed="${S.market === m}">${c}</button>`).join("")}</span>
+        <span class="tmclock" id="tmclock">${tmClock()}</span>
+      </div>
+      <p class="tmmsg" id="tmmsg" role="status"></p>
+      ${S.tmHelp ? tmHelp() : ""}
+      <nav class="tmkeys" aria-label="Function codes">${TM_FN.filter(([c]) => S.market === "crypto" || c !== "CRYP").map(([c, href, l]) => `<a href="${href}"><b>${c}</b>${esc(l)}</a>`).join("")}<a href="#terminal" data-tmhelp><b>HELP</b>All codes</a></nav>
+      ${rows.length ? `<div class="tape" aria-label="Prices"><div class="run">${tape}${tape.replace(/<button /g, '<button tabindex="-1" aria-hidden="true" ')}</div></div>` : ""}
+      ${demoNote()}
+      <div class="tmgrid">
+        ${tmMonitor()}
+        ${tmPanel("p-sec", "DES", "Security", t ? [`#stock-${encodeURIComponent(t)}`, "Full page"] : null, `<div id="tmsec">${tmSecHtml(t)}</div>`, `<small>${esc(t ? disp(t) : "")}</small>`)}
+        ${tmAlerts()}
+        ${tmLive()}
+        ${tmNews()}
+        ${tmCal()}
+        ${tmGrades()}
+        ${tmBreadth()}
+      </div>
+      <p class="fine2">Prices are from the last scan (${S.stocks?.as_of ? esc(fmtDate(S.stocks.as_of, { day: "numeric", month: "short", year: "numeric" })) : "–"}), not live quotes. Live trades are paper (simulated). For information only, not investment advice.</p>
+    </div>`;
+    return { html: h, after: () => {
+      if (t && S.stockBy[t] && arg !== "-" + t && location.hash !== "#terminal-" + encodeURIComponent(t)) history.replaceState(null, "", "#terminal-" + encodeURIComponent(t));
+      tmSecAfter(t);
+      clearInterval(S.tmTimer);
+      S.tmTimer = setInterval(() => { const c = document.getElementById("tmclock"); if (c) c.innerHTML = tmClock(); else clearInterval(S.tmTimer); }, 15000);
+      const sel = document.querySelector(".tm .mon[aria-current='true']");
+      if (sel) { const b = sel.closest(".pnb"); b.scrollTop = sel.offsetTop - b.clientHeight / 2; }
+      const f = document.getElementById("tmfilter");
+      f?.addEventListener("input", () => {
+        S.tmQ = f.value; const q = f.value.toLowerCase();
+        document.querySelectorAll(".tm .mon[data-q]").forEach(b => b.hidden = !!q && !b.dataset.q.includes(q));
+      });
+      document.getElementById("tmform")?.addEventListener("submit", e => { e.preventDefault(); tmRun(document.getElementById("tmcmd").value); });
+      if (WIDE.matches && !S.tmFocused) { S.tmFocused = true; document.getElementById("tmcmd")?.focus({ preventScroll: true }); }
+    } };
+  }
+
+  function tmRun(raw) {
+    const msg = document.getElementById("tmmsg"), inp = document.getElementById("tmcmd");
+    const say = (t, err) => { if (msg) { msg.textContent = t; msg.classList.toggle("err", !!err); } };
+    const parts = raw.trim().toUpperCase().split(/\s+/).filter(Boolean);
+    if (!parts.length) return;
+    const go = href => { inp.value = ""; if (href.startsWith("#")) location.hash = href; else location.href = href; };
+    const [a, b] = parts;
+    if (a === "HELP" || a === "?") { S.tmHelp = !S.tmHelp; inp.value = ""; rerender(); return; }
+    if (TM_MK[a] && !b) { inp.value = ""; switchMarket(TM_MK[a]); return; }
+    const t = tmFind(b ? a : parts.join(" "));
+    if (t && !b) { inp.value = ""; say(""); tmSelect(t, true); return; }
+    if (t && b) {
+      const f = tmTickerFn(t).find(([c]) => c === b || (b === "GP" && c === "DES") || (b === "LAB" && c === "BT"));
+      if (f) return go(f[1]);
+      return say(`${b} isn't available for ${disp(t)}. Try: ${tmTickerFn(t).map(x => x[0]).join(", ")}.`, true);
+    }
+    const fn = TM_FN.find(([c]) => c === a) || TM_FN.find(([, , l]) => l.toUpperCase() === parts.join(" "));
+    if (fn) return go(fn[1]);
+    const t2 = tmFind(a);
+    if (t2) { inp.value = ""; tmSelect(t2, true); return; }
+    say(`"${raw.trim()}" isn't a ${L().one} on this market or a code. Type HELP for the list.`, true);
+  }
+
+  function tmClick(e) {
+    if (!e.target.closest(".tm")) return false;
+    const hp = e.target.closest("[data-tmhelp]");
+    if (hp) { e.preventDefault(); S.tmHelp = !S.tmHelp; rerender(); return true; }
+    const so = e.target.closest("[data-tmsort]");
+    if (so) { setPref("tmSort", so.dataset.tmsort); const p = document.querySelector(".tm .p-mon"), top = p.querySelector(".pnb").scrollTop; p.outerHTML = tmMonitor(); const np = document.querySelector(".tm .p-mon");
+      np.querySelector(".pnb").scrollTop = top; const f = np.querySelector("#tmfilter"); f.addEventListener("input", () => { S.tmQ = f.value; const q = f.value.toLowerCase(); np.querySelectorAll(".mon[data-q]").forEach(b => b.hidden = !!q && !b.dataset.q.includes(q)); }); return true; }
+    const fl = e.target.closest("[data-tmfilter]");
+    if (fl) { const f = document.getElementById("tmfilter"); if (f) { f.value = S.tmQ === fl.dataset.tmfilter ? "" : fl.dataset.tmfilter; f.dispatchEvent(new Event("input")); f.closest(".pn").scrollIntoView({ block: "nearest" }); } return true; }
+    const s = e.target.closest("[data-tmsel]");
+    if (s) { e.preventDefault(); tmSelect(s.dataset.tmsel, true); return true; }
+    return false;
+  }
+  // Bloomberg habit: start typing anywhere and it goes to the command line
+  addEventListener("keydown", e => {
+    const inp = document.getElementById("tmcmd");
+    if (!inp || e.metaKey || e.ctrlKey || e.altKey || e.target.closest?.("input, textarea, select, [contenteditable]")) return;
+    if (e.key === "/") { e.preventDefault(); inp.focus(); return; }
+    if (e.key.length === 1 && /[a-z0-9]/i.test(e.key)) inp.focus();
+  });
+
   function route() {
     if (!location.hash) history.replaceState(null, "", "#home");
     const r = (location.hash || "#home").slice(1);
-    const tab = r === "news" || r === "buzz" || r === "mood" || r === "earnings" || r.startsWith("earnings-") ? "news" : r.startsWith("calendar") ? "calendar" : r === "crypto" || r.startsWith("crypto-") ? "cryptohub" : r.startsWith("strategylab") ? "lab" : r.startsWith("strateg") ? "strategies" : r.startsWith("stock") || r === "heatmap" ? "stocks" : r === "notify" ? "notify" : r.startsWith("brokers") ? "brokers" : r.startsWith("learn") ? "learn" : r === "practice" ? "practice" : r === "crashes" ? "crashes" : r === "vix" ? "vix" : r === "home" ? "home" : r === "about" ? "about" : "alerts";
+    const tab = r.startsWith("terminal") ? "terminal" : r === "news" || r === "buzz" || r === "mood" || r === "earnings" || r.startsWith("earnings-") ? "news" : r.startsWith("calendar") ? "calendar" : r === "crypto" || r.startsWith("crypto-") ? "cryptohub" : r.startsWith("strategylab") ? "lab" : r.startsWith("strateg") ? "strategies" : r.startsWith("stock") || r === "heatmap" ? "stocks" : r === "notify" ? "notify" : r.startsWith("brokers") ? "brokers" : r.startsWith("learn") ? "learn" : r === "practice" ? "practice" : r === "crashes" ? "crashes" : r === "vix" ? "vix" : r === "home" ? "home" : r === "about" ? "about" : "alerts";
     if (r === "winners" || r === "record" || r === "trades") S.alView = r; else if (tab === "alerts" && !r.startsWith("alert-")) S.alView = "alerts";
-    const list = { alerts: S.alView === "winners" ? viewWinners : S.alView === "record" ? viewRecord : S.alView === "trades" ? viewTrades : viewAlerts, stocks: viewStocks, home: viewHome, strategies: viewStrategies, notify: viewNotify, brokers: viewBrokers, learn: viewLearn, practice: viewPractice, crashes: viewCrashes, vix: viewVix, about: viewAbout, lab: () => viewLab(r.slice(11)), cryptohub: () => viewCrypto(r), news: r === "buzz" ? viewBuzz : r === "mood" ? viewMood : r === "earnings" || r.startsWith("earnings-") ? () => viewEarnings(r.slice(9)) : viewNews, calendar: () => viewCalendar(r.slice(9)) }[tab];
+    const list = { alerts: S.alView === "winners" ? viewWinners : S.alView === "record" ? viewRecord : S.alView === "trades" ? viewTrades : viewAlerts, stocks: viewStocks, home: viewHome, strategies: viewStrategies, notify: viewNotify, brokers: viewBrokers, learn: viewLearn, practice: viewPractice, crashes: viewCrashes, vix: viewVix, about: viewAbout, terminal: () => viewTerminal(r.slice(8)), lab: () => viewLab(r.slice(11)), cryptohub: () => viewCrypto(r), news: r === "buzz" ? viewBuzz : r === "mood" ? viewMood : r === "earnings" || r.startsWith("earnings-") ? () => viewEarnings(r.slice(9)) : viewNews, calendar: () => viewCalendar(r.slice(9)) }[tab];
     let detail = detailFor(r), sel = detail ? r : null;
     charts.length = 0;
 
-    if (WIDE.matches && tab !== "home" && tab !== "about" && tab !== "notify" && tab !== "brokers" && tab !== "learn" && tab !== "news" && tab !== "calendar" && tab !== "practice" && tab !== "crashes" && tab !== "vix" && tab !== "lab" && tab !== "cryptohub" && r !== "record" && r !== "trades") {
+    if (WIDE.matches && tab !== "terminal" && tab !== "home" && tab !== "about" && tab !== "notify" && tab !== "brokers" && tab !== "learn" && tab !== "news" && tab !== "calendar" && tab !== "practice" && tab !== "crashes" && tab !== "vix" && tab !== "lab" && tab !== "cryptohub" && r !== "record" && r !== "trades") {
       const lp = app.querySelector(".pane.list"), dp = app.querySelector(".pane.detail");
       const listTop = lp?.scrollTop || 0, detTop = dp?.scrollTop || 0;
       const L = norm(list());
@@ -6845,9 +7302,9 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
       L.after?.(); D.after?.();
       if (sel) app.querySelectorAll(`.pane.list a[href="#${CSS.escape(sel)}"]`).forEach(a => (a.closest(".srow") || a).classList.add("sel"));
     } else {
-      app.className = (WIDE.matches ? "single" : "") + (tab === "home" ? " homex" : "");
+      app.className = tab === "terminal" ? "term" : (WIDE.matches ? "single" : "") + (tab === "home" ? " homex" : "");
       const V = norm(detail ? detail() : list());
-      app.innerHTML = (detail || WIDE.matches ? "" : `<div class="mswitch inline" role="group" aria-label="Market">${switchHtml()}</div>`) + V.html;
+      app.innerHTML = (detail || WIDE.matches || tab === "terminal" ? "" : `<div class="mswitch inline" role="group" aria-label="Market">${switchHtml()}</div>`) + V.html;
       V.after?.();
     }
     S.lastTab = tab; S.lastSel = sel;
@@ -6858,9 +7315,10 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
     if (nsearch) { nsearch.addEventListener("input", () => { S.nq = nsearch.value; filterNews(); }); filterNews(); }
     // the phone tab bar has no Calendar button: it lives under News there
     // phone bar: pages without their own button light up Menu
-    const inBar = { news: "menu", calendar: "menu", brokers: "menu", notify: "menu", learn: "menu", practice: "menu", crashes: "menu", vix: "menu", cryptohub: "menu", about: "menu" }[tab] || tab;
+    const inBar = { terminal: "menu", news: "menu", calendar: "menu", brokers: "menu", notify: "menu", learn: "menu", practice: "menu", crashes: "menu", vix: "menu", cryptohub: "menu", about: "menu" }[tab] || tab;
     const navTab = tab === "alerts" && (S.alView === "winners" || S.alView === "record" || S.alView === "trades") ? S.alView : tab;
     document.querySelectorAll("[data-tab]").forEach(a => a.setAttribute("aria-current", (a.closest(".tabs") ? a.dataset.tab === inBar : a.dataset.tab === navTab) ? "page" : "false"));
+    document.querySelectorAll(".side .sgroup").forEach(g => { if (g.querySelector('[aria-current="page"]')) g.open = true; });
     S.routed = true;
     if (tab === "alerts" && !r.startsWith("alert-") && r !== "winners" && r !== "record" && r !== "trades") markSeen();
     updateBadge();
@@ -6900,6 +7358,7 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
   }
 
   app.addEventListener("click", e => {
+    if (tmClick(e)) return;
     if (labClick(e)) return;
     if (cxClick(e)) return;
     const bk = e.target.closest("[data-back]");
@@ -7289,7 +7748,7 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
     await loadMarket(m);
     S.lastSel = null; S.lastTab = null;
     const tab = (location.hash || "#alerts").slice(1);
-    const base = tab.startsWith("strategylab") || tab === "crypto" || tab.startsWith("crypto-") ? tab : tab.startsWith("strateg") ? (tab.startsWith("strategy-") || tab === "strategies-vault" ? tab : "strategies") : tab.startsWith("stock") || tab === "heatmap" ? "stocks" : tab === "news" || tab === "buzz" || tab === "mood" ? tab : tab.startsWith("calendar") ? tab : tab === "notify" ? "notify" : tab.startsWith("brokers") ? "brokers" : tab.startsWith("learn") ? tab : tab === "home" ? "home" : tab === "winners" || tab === "record" || tab === "trades" || tab === "practice" ? tab : "alerts";
+    const base = tab.startsWith("terminal") ? "terminal" : tab.startsWith("strategylab") || tab === "crypto" || tab.startsWith("crypto-") ? tab : tab.startsWith("strateg") ? (tab.startsWith("strategy-") || tab === "strategies-vault" ? tab : "strategies") : tab.startsWith("stock") || tab === "heatmap" ? "stocks" : tab === "news" || tab === "buzz" || tab === "mood" ? tab : tab.startsWith("calendar") ? tab : tab === "notify" ? "notify" : tab.startsWith("brokers") ? "brokers" : tab.startsWith("learn") ? tab : tab === "home" ? "home" : tab === "winners" || tab === "record" || tab === "trades" || tab === "practice" ? tab : "alerts";
     if ("#" + base !== location.hash) location.hash = base; else route();
     scrollTo(0, 0);
   }
@@ -7303,7 +7762,7 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
     try {
       if (!sessionStorage.getItem("ics.visit")) {
         sessionStorage.setItem("ics.visit", "1");
-        if (!/^#(stock-|alert-|strategy-|earnings-.|calendar-.|learn-|strategylab[-?]|about$)/.test(location.hash)) history.replaceState(null, "", "#home");
+        if (!/^#(terminal|stock-|alert-|strategy-|earnings-.|calendar-.|learn-|strategylab[-?]|about$)/.test(location.hash)) history.replaceState(null, "", "#home");
       }
     } catch (e) {}
     S.follow = new Set(load(STORE, DEFAULT_FOLLOW));
