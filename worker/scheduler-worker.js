@@ -119,7 +119,7 @@ export default {
     const now = Date.now();
     let token = "missing: add the GITHUB_TOKEN secret";
     if (env.GITHUB_TOKEN) {
-      const r = await gh(env, "/actions/workflows");
+      const r = await gh(env, "/actions/workflows?per_page=100");
       const names = r.ok ? (await r.json()).workflows.map(w => w.path.split("/").pop()) : [];
       const missing = [...new Set(SCHEDULE.map(s => s[0]))].filter(w => !names.includes(w));
       token = !r.ok ? `not working (GitHub said HTTP ${r.status})` : missing.length ? `works, but these workflows weren't found: ${missing.join(", ")}` : "works";
