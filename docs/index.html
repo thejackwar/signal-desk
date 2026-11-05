@@ -1649,8 +1649,9 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
 }
 
 /* ================= Terminal ================= */
-#app.term { max-width: none; padding: 8px 10px 90px; }
-@media (min-width: 1000px) { #app.term { margin-left: var(--side); padding: 12px 14px 28px; } }
+#app.term { max-width: none;
+  padding: calc(10px + env(safe-area-inset-top, 0px)) max(10px, env(safe-area-inset-right, 0px)) calc(var(--tabbar) + 28px + env(safe-area-inset-bottom, 0px)) max(10px, env(safe-area-inset-left, 0px)); }
+@media (min-width: 1000px) { #app.term { margin-left: var(--side); padding: calc(12px + env(safe-area-inset-top, 0px)) 14px 28px; } }
 .tm { --tc: var(--amber); font-size: 13px; font-variant-numeric: tabular-nums; }
 .tm .mono, .tm .num { font-family: var(--font-code); }
 .tm .tmbar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; padding: 8px 10px; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; }
