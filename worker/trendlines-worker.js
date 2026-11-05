@@ -18,6 +18,17 @@
 //
 // Volume profile (for docs/volumeprofile.html): GET /?vp=AAPL&range=1|5|20|60|250&hours=rth|all -> intraday bars
 // with volume for the last `range` sessions (see volumeBars below).
+//
+// Live quotes (for the Terminal): GET /?quotes=stocks | crypto  ->  { source, at, q: { TICKER: [price, prevClose, changePct, time] } }
+// Stocks: Alpaca snapshots on the free IEX feed (real time, IEX trades only). Coins: Binance 24h tickers, Kraken for XMR.
+// Cached for 15 seconds.
+//
+// Price alerts (for the Terminal): the page stores an alert, this Worker checks prices every few minutes (Cron Trigger)
+// and sends a phone notification through ntfy.sh to the viewer's own channel when the price crosses the level.
+//   POST /?px=add   {topic, sym, level, dir: "above"|"below", note}   ->  {ok, alert}
+//   GET  /?px=list&topic=...                                          ->  {alerts: [...]}
+//   POST /?px=del   {topic, id}                                       ->  {ok}
+// Needs a KV namespace bound as PX and a Cron Trigger (every 5 minutes); see worker/README.md.
 
 const ALPACA = "https://data.alpaca.markets/v2/stocks/bars";
 const DAY = 86400e3;
@@ -223,7 +234,7 @@ async function cryptoFrames(coin) {
   throw new Error(errors.join(" · "));
 }
 
-const cors = { "Access-Control-Allow-Origin": "*", "Access-Control-Allow-Methods": "GET, OPTIONS" };
+const cors = { "Access-Control-Allow-Origin": "*", "Access-Control-Allow-Methods": "GET, POST, OPTIONS", "Access-Control-Allow-Headers": "Content-Type" };
 const json = (body, status = 200, extra = {}) =>
   new Response(JSON.stringify(body), { status, headers: { "Content-Type": "application/json", ...cors, ...extra } });
 
@@ -233,6 +244,8 @@ export default {
     const url = new URL(request.url);
     if (url.searchParams.has("options")) return options(url.searchParams.get("options"), env, ctx);
     if (url.searchParams.has("vp")) return volumeBars(url.searchParams, env, ctx);
+    if (url.searchParams.has("quotes")) return quotes(url.searchParams.get("quotes"), env, ctx);
+    if (url.searchParams.has("px")) return priceAlerts(request, url, env);
     let sym = (url.searchParams.get("symbol") || "").trim().toUpperCase().replace(/\./g, "-");
     if (["SPX", "^SPX", "^GSPC"].includes(sym)) sym = "SPY";       // index: no Alpaca data
     const coin = TICKERS.has(sym) ? null : coinOf(sym);
@@ -261,6 +274,10 @@ export default {
     } catch (e) {
       return json({ error: String(e.message || e) }, 502);
     }
+  },
+  // Cron Trigger: check the price alerts
+  async scheduled(event, env, ctx) {
+    ctx.waitUntil(checkPriceAlerts(env));
   },
 };
 
@@ -454,4 +471,126 @@ async function krakenVolume(coin, minutes) {
   const k = Object.keys(js.result || {}).find(x => x !== "last");
   if (!k) throw new Error(`Kraken: no ${coin}/USD data`);
   return js.result[k].map(r => [+r[0], +r[1], +r[2], +r[3], +r[4], +r[6]]);
+}
+
+// ------------------------------------------------------------------ live quotes
+async function stockQuotes(syms, env) {
+  const headers = { "APCA-API-KEY-ID": env.ALPACA_KEY_ID, "APCA-API-SECRET-KEY": env.ALPACA_SECRET_KEY };
+  const list = syms.map(s => s.replace(/-/g, "."));
+  const out = {};
+  for (let i = 0; i < list.length; i += 100) {
+    const r = await fetch(`https://data.alpaca.markets/v2/stocks/snapshots?symbols=${encodeURIComponent(list.slice(i, i + 100).join(","))}&feed=iex`, { headers });
+    if (!r.ok) throw new Error(`Alpaca ${r.status}`);
+    const d = await r.json();
+    for (const [k, v] of Object.entries(d || {})) {
+      if (!v) continue;
+      const p = v.latestTrade?.p ?? v.minuteBar?.c ?? v.dailyBar?.c, prev = v.prevDailyBar?.c;
+      if (p == null) continue;
+      out[k.replace(/\./g, "-")] = [p, prev ?? null, prev ? +((p / prev - 1) * 100).toFixed(2) : null, v.latestTrade?.t || v.minuteBar?.t || null];
+    }
+  }
+  return out;
+}
+async function coinQuotes(coins) {
+  const out = {};
+  const bin = coins.filter(c => c !== "XMR");
+  try {
+    const r = await fetch(`https://data-api.binance.vision/api/v3/ticker/24hr?symbols=${encodeURIComponent(JSON.stringify(bin.map(c => c + "USDT")))}`);
+    if (r.ok) for (const x of await r.json()) {
+      const c = x.symbol.replace(/USDT$/, ""), p = +x.lastPrice, o = +x.openPrice;
+      out[`${c}-USD`] = [p, o, o ? +((p / o - 1) * 100).toFixed(2) : null, new Date(x.closeTime).toISOString()];
+    }
+  } catch {}
+  const missing = coins.filter(c => !out[`${c}-USD`]);
+  if (missing.length) {
+    try {
+      const pairs = missing.map(c => (KRAKEN_NAME[c] || c) + "USD");
+      const r = await fetch(`https://api.kraken.com/0/public/Ticker?pair=${pairs.join(",")}`);
+      const d = await r.json();
+      for (const c of missing) {
+        const k = Object.keys(d.result || {}).find(k => k.includes(KRAKEN_NAME[c] || c));
+        if (!k) continue;
+        const p = +d.result[k].c[0], o = +d.result[k].o;
+        out[`${c}-USD`] = [p, o, o ? +((p / o - 1) * 100).toFixed(2) : null, new Date().toISOString()];
+      }
+    } catch {}
+  }
+  return out;
+}
+async function quotes(kind, env, ctx) {
+  kind = kind === "crypto" ? "crypto" : "stocks";
+  const cache = typeof caches !== "undefined" ? caches.default : null;
+  const key = new Request(`https://trendlines.cache/quotes-${kind}`);
+  if (cache) { const hit = await cache.match(key); if (hit) return hit; }
+  try {
+    if (kind === "stocks" && (!env.ALPACA_KEY_ID || !env.ALPACA_SECRET_KEY)) return json({ error: "The Alpaca keys are not set on the Worker." }, 500);
+    const q = kind === "crypto" ? await coinQuotes([...COINS]) : await stockQuotes([...TICKERS], env);
+    const res = json({ source: kind === "crypto" ? "Binance (Kraken for XMR)" : "Alpaca, IEX real-time trades", at: new Date().toISOString(), q }, 200, { "Cache-Control": "max-age=15" });
+    if (cache) ctx?.waitUntil?.(cache.put(key, res.clone()));
+    return res;
+  } catch (e) {
+    return json({ error: String(e.message || e) }, 502);
+  }
+}
+
+// ------------------------------------------------------------------ price alerts
+const PX_KEY = "alerts", PX_MAX = 2000, PX_PER_TOPIC = 40;
+const topicOk = t => typeof t === "string" && /^[a-z0-9_-]{12,64}$/.test(t);
+async function pxLoad(env) { try { return JSON.parse(await env.PX.get(PX_KEY) || "[]"); } catch { return []; } }
+async function priceAlerts(request, url, env) {
+  if (!env.PX) return json({ error: "Price alerts aren't set up on the Worker yet (no PX storage)." }, 501);
+  const op = url.searchParams.get("px");
+  if (op === "list") {
+    const topic = url.searchParams.get("topic");
+    if (!topicOk(topic)) return json({ error: "bad channel" }, 400);
+    return json({ alerts: (await pxLoad(env)).filter(a => a.topic === topic) });
+  }
+  if (request.method !== "POST") return json({ error: "use POST" }, 405);
+  let b; try { b = await request.json(); } catch { return json({ error: "bad body" }, 400); }
+  if (!topicOk(b.topic)) return json({ error: "bad channel" }, 400);
+  const all = await pxLoad(env);
+  if (op === "del") {
+    const left = all.filter(a => !(a.topic === b.topic && (b.id === "*" || a.id === b.id)));
+    await env.PX.put(PX_KEY, JSON.stringify(left));
+    return json({ ok: true });
+  }
+  if (op === "add") {
+    let sym = String(b.sym || "").toUpperCase().replace(/\./g, "-");
+    const coin = TICKERS.has(sym) ? null : coinOf(sym);
+    if (coin) sym = `${coin}-USD`;
+    const level = +b.level;
+    if (!TICKERS.has(sym) && !coin) return json({ error: "Only S&P 100 stocks and the app's coins." }, 400);
+    if (!(level > 0)) return json({ error: "bad level" }, 400);
+    if (all.length >= PX_MAX) return json({ error: "Too many alerts on the server right now." }, 429);
+    if (all.filter(a => a.topic === b.topic).length >= PX_PER_TOPIC) return json({ error: `Up to ${PX_PER_TOPIC} alerts per channel.` }, 429);
+    const a = { id: Math.random().toString(36).slice(2, 10), topic: b.topic, sym, level, dir: b.dir === "below" ? "below" : "above",
+                note: String(b.note || "").slice(0, 80), created: new Date().toISOString() };
+    all.push(a);
+    await env.PX.put(PX_KEY, JSON.stringify(all));
+    return json({ ok: true, alert: a });
+  }
+  return json({ error: "unknown" }, 400);
+}
+async function checkPriceAlerts(env) {
+  if (!env.PX) return;
+  const all = await pxLoad(env);
+  if (!all.length) return;
+  const stocks = [...new Set(all.filter(a => !a.sym.endsWith("-USD")).map(a => a.sym))];
+  const coins = [...new Set(all.filter(a => a.sym.endsWith("-USD")).map(a => a.sym.replace(/-USD$/, "")))];
+  const px = {};
+  try { if (stocks.length && env.ALPACA_KEY_ID) Object.assign(px, await stockQuotes(stocks, env)); } catch {}
+  try { if (coins.length) Object.assign(px, await coinQuotes(coins)); } catch {}
+  const keep = [];
+  for (const a of all) {
+    const p = px[a.sym]?.[0];
+    const hit = p != null && (a.dir === "above" ? p >= a.level : p <= a.level);
+    if (!hit) { keep.push(a); continue; }
+    const name = a.sym.replace(/-USD$/, "");
+    try {
+      await fetch(`https://ntfy.sh/${a.topic}`, { method: "POST", body: `${name} is ${a.dir} ${a.level}: last ${p}${a.note ? ` · ${a.note}` : ""}`,
+        headers: { Title: `${name} ${a.dir === "above" ? "▲" : "▼"} ${a.level}`, Tags: a.dir === "above" ? "chart_with_upwards_trend" : "chart_with_downwards_trend",
+                   Click: `https://thejackwar.github.io/signal-desk/#terminal-${a.sym}` } });
+    } catch { keep.push(a); }
+  }
+  if (keep.length !== all.length) await env.PX.put(PX_KEY, JSON.stringify(keep));
 }

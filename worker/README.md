@@ -48,6 +48,19 @@ full-market SIP feed (`feed=sip`, end = now − 16 min, so the free plan works),
 (`hours=all`). Coins come from Binance with their dollar (USDT) volume, Kraken as a fallback. Same keys, nothing to add:
 just paste the updated code (step 3) once. Test: `node tests/volumeprofile/test_vp.mjs`.
 
+**Live quotes and price alerts (Terminal):** `GET /?quotes=stocks` (Alpaca snapshots, free IEX real-time feed) and
+`GET /?quotes=crypto` (Binance, Kraken for XMR) give the Terminal live prices, cached for 15 seconds. Price alerts need
+two extra things on this same Worker, once:
+
+1. **Storage:** Workers & Pages → **KV** → **Create namespace**, name it `px`. Then the Worker's **Settings → Bindings →
+   Add → KV namespace**: variable name `PX`, namespace `px`.
+2. **Clock:** the Worker's **Settings → Triggers → Cron Triggers → Add**: `*/5 * * * *` (every 5 minutes).
+3. Paste the updated code (step 3) and deploy.
+
+Each viewer gets their own random ntfy channel on the Terminal (shown in the price alerts panel); the Worker checks
+every alert every 5 minutes and sends a notification to that channel when the price crosses the level, then removes
+the alert. Free plan limits (KV: 1,000 writes and 100,000 reads a day) are far above what this uses.
+
 If you change the code, paste it again in step 3. Tests: `python tests/trendlines/test_parity.py`,
 `node tests/trendlines/test_crypto.mjs`, `node tests/trendlines/test_sr.mjs`.
 
