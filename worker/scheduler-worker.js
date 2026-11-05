@@ -26,6 +26,7 @@ const SCHEDULE = [
   ["scan.yml",             "15 22 * * 1-5",        "Daily scan (S&P 100)"],
   ["commodities.yml",      "40 22 * * 1-5",        "Daily commodities scan"],
   ["darkpool-daily.yml",   "15 23 * * 1-5",        "Dark pool daily pressure + weekly venues (after FINRA publishes)"],
+  ["company.yml",          "50 22 * * 1-5",        "Company data for the Terminal (financials, analysts, holders, dividends)"],
   // commodities and crypto
   ["live-commodities.yml", "50 7-21 * * 1-5",      "Live commodities scan (provisional): every hour on weekdays"],
   ["crypto.yml",           "20 0 * * *",           "Daily crypto scan"],
@@ -38,6 +39,9 @@ const SCHEDULE = [
   ["mentions.yml",         "20 */6 * * *",         "News mentions: every 6 hours"],
   ["news-market.yml",      "17 5 * * *",           "Market news tone (morning)"],
   ["calendar.yml",         "37 5 * * *",           "Market calendar (morning)"],
+  // Terminal market boards (indices, FX, yields, Fed odds, futures curves, COT)
+  ["markets.yml",          "22 6-21 * * 1-5",      "Terminal market boards: every hour on weekdays"],
+  ["markets.yml",          "22 9 * * 0,6",         "Terminal market boards (weekend)"],
   // weekly and monthly
   ["backtest.yml",         "0 6 * * 6",            "Weekly backtest (Saturday)"],
   ["options.yml",          "30 6 * * 6",           "Options backtests (Saturday, after the weekly backtest)"],
