@@ -665,14 +665,20 @@ table.lheat tbody th { font: 600 12px var(--font-mono); color: var(--muted); tex
 .lcalyear button b.up { color: var(--bull); } .lcalyear button b.down { color: var(--bear); }
 .lcalyear button[aria-pressed="true"] { border-color: var(--amber); }
 .lcalyear button:disabled { opacity: .35; }
-.lcal { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 4px; }
+.lcal { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 4px; container-type: inline-size; }
 .lcalwd { text-align: center; font: 500 11px var(--font-body); color: var(--faint); padding: 2px 0; }
 .lcald { position: relative; display: flex; flex-direction: column; justify-content: space-between; min-height: 52px; padding: 5px 4px; border-radius: 10px; background: var(--surface); border: 2px solid transparent; text-align: left; color: var(--fg); min-width: 0; }
 .lcald.wk { opacity: .55; }
 .lcald i { font: 500 11px var(--font-body); font-style: normal; color: var(--muted); }
+.lcald b small { font-size: .8em; opacity: .7; font-weight: 500; }
 .lcald b { font: 600 11px var(--font-mono); font-variant-numeric: tabular-nums; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; letter-spacing: -.02em; }
-.lcald em, .lcaldot { display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--amber); }
-.lcald em { position: absolute; top: 6px; right: 5px; }
+.lcald em, .lcaldot { display: inline-block; max-width: 100%; padding: 1px 5px; border-radius: 6px; font: 600 10px var(--font-body); font-style: normal; line-height: 1.4; color: var(--amber); background: color-mix(in srgb, var(--amber) 16%, transparent); border: 1px solid color-mix(in srgb, var(--amber) 45%, transparent); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; letter-spacing: 0; vertical-align: 1px; }
+.lcald em.sh, .lcaldot.sh { color: var(--bear); background: color-mix(in srgb, var(--bear) 14%, transparent); border-color: color-mix(in srgb, var(--bear) 45%, transparent); }
+.lcald.op:not(.has) { background: color-mix(in srgb, var(--amber) 7%, var(--surface)); }
+.lcald em::before { content: "▲ "; font-size: .8em; }
+.lcald em.sh::before { content: "▼ "; }
+@container (max-width: 640px) { .lcald .bw { display: none; } }
+@media (max-width: 420px) { .lcald em { font-size: 9px; padding: 0 3px; } }
 button.lcald { cursor: pointer; }
 button.lcald:hover { border-color: var(--muted); }
 .lcald.sel { border-color: var(--fg); }
@@ -4336,6 +4342,15 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
     return s + "€" + (a >= 1e6 ? (a / 1e6).toFixed(1) + "M" : a >= 1e4 ? Math.round(a / 1e3) + "k" : a >= 1e3 ? (a / 1e3).toFixed(1) + "k" : Math.round(a));
   };
   const labCalSum = l => l.reduce((s, t) => s + t.net, 0);
+  // % instead of euros: a trade's own return on the money put in it (after tax when that's on),
+  // a day's average trade return, and a month's or year's growth of the whole account
+  const labTrPct = t => t.size > 0 ? t.net / t.size * 100 : t.ret * 100;
+  const labCalAvg = l => l.reduce((s, t) => s + labTrPct(t), 0) / l.length;
+  const labCalPc = v => { const a = Math.abs(v); return (v >= 0 ? "+" : "−") + (a >= 100 ? String(Math.round(a)) : a >= 10 ? a.toFixed(1) : a.toFixed(2)).replace(/\.?0+$/, "") + "%"; };
+  function labCalAcct(X, from, net) {   // net profit as a % of the account's value just before the period starts
+    let g = X.D.findIndex(d => d >= from); if (g < 0) g = X.D.length - 1; g = Math.max(X.fi, g - 1);
+    const e = X.eq[g] || X.eq[X.fi]; return e > 0 ? net / e * 100 : 0;
+  }
   function labCalendar(st) {
     const M = LAB.mod, base = M.clean(st.cfg), c = labCal(st), I = M.INDICATORS[base.ind], R = M.RISK;
     let h = `<div class="lcalctl lsbody">
@@ -4365,7 +4380,8 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
     const prev = shift(-1), next = shift(1), fy = +X.first.slice(0, 4), ly = +X.last.slice(0, 4);
     const tone = v => v > 0 ? "up" : v < 0 ? "down" : "";
     // month, year and the twelve months of the year
-    const yTot = ms.filter(m => +m.slice(0, 4) === y).reduce((s, m) => s + X.months[m].net, 0);
+    const yTot = labCalAcct(X, y + "-01-01", ms.filter(m => +m.slice(0, 4) === y).reduce((s, m) => s + X.months[m].net, 0));
+    const mPc = m => labCalAcct(X, m + "-01", X.months[m].net);
     let h = vsw + `<div class="lcalnav"><button class="btn ghost sm" data-labcalm="${prev}"${prev < X.first ? " disabled" : ""} aria-label="Previous month">‹</button>
       <b>${esc(fmtDate(ym + "-01", { month: "long", year: "numeric" }))}</b>
       <button class="btn ghost sm" data-labcalm="${next}"${next > X.last ? " disabled" : ""} aria-label="Next month">›</button>
@@ -4373,20 +4389,20 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
         `<option value="${v}"${v === y ? " selected" : ""}>${v}</option>`).join("")}</select></span></div>`;
     h += `<div class="lcalyear" role="group" aria-label="Months of ${y}">${LAB_MON.map((n, i) => {
       const m = y + "-" + pad(i + 1), o = X.months[m], off = m < X.first || m > X.last;
-      return `<button data-labcalm="${m}"${off ? " disabled" : ""} aria-pressed="${m === ym}"><span>${n}</span><b class="${o ? tone(o.net) : ""}">${o ? labCalEur(o.net) : "–"}</b></button>`;
+      return `<button data-labcalm="${m}"${off ? " disabled" : ""} aria-pressed="${m === ym}"><span>${n}</span><b class="${o ? tone(o.net) : ""}">${o ? labCalPc(mPc(m)) : "–"}</b></button>`;
     }).join("")}</div>
-      <p class="hint" style="margin:6px 2px 14px">${y}: <b class="${tone(yTot)}">${eurSigned(yTot)}</b> from the trades that closed in the year${c.tax ? ", after tax and fees" : ""}.</p>`;
+      <p class="hint" style="margin:6px 2px 14px">${y}: the account grew <b class="${tone(yTot)}">${labCalPc(yTot)}</b> from the trades that closed in the year${c.tax ? ", after tax and fees" : ""}. Months show the account's growth too.</p>`;
     // the month's summary
     const o = X.months[ym];
-    h += o ? `<p class="labverdict">${esc(fmtDate(ym + "-01", { month: "long" }))}: <b class="${tone(o.net)}">${eurSigned(o.net)}</b> from ${o.n} closed trade${o.n > 1 ? "s" : ""}, ${o.w} in profit (${Math.round(o.w / o.n * 100)}%).</p>
-      <p class="hint" style="margin:0 2px 12px">Best ${esc(disp(o.best.t))} ${eurSigned(o.best.net)} · worst ${esc(disp(o.worst.t))} ${eurSigned(o.worst.net)}${c.tax && o.cost > 0.5 ? ` · ${eurS(o.cost)} paid in tax, stamp duty and fees` : ""}.</p>`
+    h += o ? `<p class="labverdict">${esc(fmtDate(ym + "-01", { month: "long" }))}: account <b class="${tone(o.net)}">${labCalPc(mPc(ym))}</b> from ${o.n} closed trade${o.n > 1 ? "s" : ""}, ${o.w} in profit (${Math.round(o.w / o.n * 100)}%).</p>
+      <p class="hint" style="margin:0 2px 12px">Best ${esc(disp(o.best.t))} ${labPct(labTrPct(o.best))} · worst ${esc(disp(o.worst.t))} ${labPct(labTrPct(o.worst))}${c.tax ? " · after tax, stamp duty and fees" : ""}.</p>`
       : `<p class="labverdict">No trade closed in ${esc(fmtDate(ym + "-01", { month: "long" }))}.</p>`;
     // the grid, Monday first
     const nd = new Date(Date.UTC(y, mo, 0)).getUTCDate(), lead = (new Date(Date.UTC(y, mo - 1, 1)).getUTCDay() + 6) % 7;
     const val = {}; let mx = 0, sel = null;
     for (let d = 1; d <= nd; d++) {
       const k = ym + "-" + pad(d);
-      if (X.closed[k]) { val[k] = labCalSum(X.closed[k]); mx = Math.max(mx, Math.abs(val[k])); sel = k; }
+      if (X.closed[k]) { val[k] = labCalAvg(X.closed[k]); mx = Math.max(mx, Math.abs(val[k])); sel = k; }
     }
     if (c.day && c.day.slice(0, 7) === ym && (X.closed[c.day] || X.opened[c.day])) sel = c.day;
     h += `<div class="lcal" role="grid" aria-label="Trades in ${esc(fmtDate(ym + "-01", { month: "long", year: "numeric" }))}">${["M", "T", "W", "T", "F", "S", "S"].map(d => `<span class="lcalwd" aria-hidden="true">${d}</span>`).join("")}`;
@@ -4396,12 +4412,15 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
       if (!cl && !op) { h += `<span class="lcald${wk ? " wk" : ""}"><i>${d}</i></span>`; continue; }
       const a = cl ? Math.round(14 + 52 * Math.pow(Math.min(1, Math.abs(v) / (mx || 1)), 0.6)) : 0;
       const bg = cl ? `style="background:color-mix(in srgb, var(--${v >= 0 ? "bull" : "bear"}) ${a}%, var(--surface))"` : "";
-      const lbl = `${fmtDate(k, { day: "numeric", month: "long" })}: ${cl ? `${cl.length} closed, ${eurSigned(v)}` : "no trade closed"}${op ? `, ${op.length} opened` : ""}`;
-      h += `<button class="lcald${cl ? " has" : ""}${k === sel ? " sel" : ""}" data-labcalday="${k}" ${bg} aria-label="${esc(lbl)}" aria-pressed="${k === sel}"><i>${d}</i>${cl ? `<b>${labCalEur(v)}</b>` : ""}${op ? `<em title="${op.length} opened"></em>` : ""}</button>`;
+      const lbl = `${fmtDate(k, { day: "numeric", month: "long" })}: ${cl ? `${cl.length} closed, ${cl.length > 1 ? "average " : ""}${labCalPc(v)}` : "no trade closed"}${op ? `, ${op.length} opened` : ""}`;
+      const nl = op ? op.filter(t => t.side > 0).length : 0, ns = op ? op.length - nl : 0;
+      const buys = !op ? "" : op.length === 1 ? `<span class="bw">${ns ? "Short" : "Buy"} </span>${esc(disp(op[0].t))}` : ns && nl ? `${op.length} in` : `${op.length}<span class="bw"> ${ns ? "shorts" : "buys"}</span>`;
+      const tip = op ? `Opened: ${op.map(t => `${disp(t.t)} ${t.side > 0 ? "long" : "short"}`).join(", ")}` : "";
+      h += `<button class="lcald${cl ? " has" : ""}${op ? " op" : ""}${k === sel ? " sel" : ""}" data-labcalday="${k}" ${bg} aria-label="${esc(lbl)}" aria-pressed="${k === sel}"><i>${d}</i>${op ? `<em class="${ns && !nl ? "sh" : ""}" title="${esc(tip)}">${buys}</em>` : ""}${cl ? `<b>${labPct(v)}${cl.length > 1 ? `<small> ×${cl.length}</small>` : ""}</b>` : ""}</button>`;
     }
-    h += `</div><p class="hint" style="margin:8px 2px 0">Each trade is counted on the day it closed; <span class="lcaldot"></span> marks a day trades were opened. Tap a day for its trades.</p>`;
+    h += `</div><p class="hint" style="margin:8px 2px 0">Each trade's % gain or loss shows on the day it closed (the average when several closed, ×2 = two trades); <span class="lcaldot">Buy</span> marks the day a trade was opened${X.side === "all" || X.trades.some(t => t.side < 0) ? ` (<span class="lcaldot sh">Short</span> for shorts)` : ""}. Tap a day for its trades.</p>`;
     if (sel) h += labCalDay(X, sel, c);
-    h += `<p class="hint" style="margin-top:14px">Euro amounts are what each trade added to the account day by day (${X.cfg.maxPos ? `each position is 1/${X.cfg.maxPos} of the account` : "the account is split across every open position"}), so together they come to the Results tab's gain before tax, apart from trades still open. When alerts overlap on one ${L().one}, the shared days count for the first trade. "On" is the position's size when it opened. ${c.tax ? "Tax is applied trade by trade as each one closes; simplified." : "Before tax and with no fees."}</p>`;
+    h += `<p class="hint" style="margin-top:14px">A trade's % is its gain or loss from the buy price to the sell price. Months and years show how much the whole account grew, since each trade only uses part of it (${X.cfg.maxPos ? `each position is 1/${X.cfg.maxPos} of the account` : "the account is split across every open position"}); trades still open aren't counted yet. When alerts overlap on one ${L().one}, the shared days count for the first trade. ${c.tax ? "Tax is applied trade by trade as each one closes; simplified." : "Before tax and with no fees."}</p>`;
     return h;
   }
   // Every day as one tile, a row of tiles per year: green if the account rose that day, red if it fell
@@ -4434,19 +4453,17 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
     let h = `<div class="lcalday"><h3 class="h3">${esc(fmtDate(day, { weekday: "long", day: "numeric", month: "long", year: "numeric" }))}</h3>`;
     if (pick) h += `<div class="chartbox ltchart" id="lcaltc"></div>${all.length > 1 ? `<p class="hint" style="margin:6px 2px 12px">Tap a trade below to see it on the chart.</p>` : `<div style="height:12px"></div>`}`;
     if (cl.length) {
-      const v = labCalSum(cl);
-      h += `<p class="hint" style="margin:0 2px 8px">${cl.length} trade${cl.length > 1 ? "s" : ""} closed: <b class="${v >= 0 ? "up" : "down"}">${eurSigned(v)}</b></p>
-      <div class="tablewrap"><table class="bt ltrades lcpick"><thead><tr><th>${esc(L().one[0].toUpperCase() + L().one.slice(1))}</th><th>In → out</th><th style="text-align:right">Return</th><th style="text-align:right">Result</th></tr></thead><tbody>` +
+            h += `<p class="hint" style="margin:0 2px 8px">${cl.length} trade${cl.length > 1 ? "s" : ""} closed${cl.length > 1 ? `, average <b class="${labCalAvg(cl) >= 0 ? "up" : "down"}">${labPct(labCalAvg(cl))}</b>` : ""}</p>
+      <div class="tablewrap"><table class="bt ltrades lcpick"><thead><tr><th>${esc(L().one[0].toUpperCase() + L().one.slice(1))}</th><th>In → out</th><th style="text-align:right">${c.tax ? "After tax" : "Return"}</th></tr></thead><tbody>` +
         clS.map(t => `<tr ${row(t)}><td>${tk(t)}<small>${why[t.why]}</small></td>
           <td style="white-space:nowrap">${sd(D[t.g0])}<small>→ ${sd(D[t.g1])} · ${t.days}d</small></td>
-          <td style="text-align:right" class="${t.ret >= 0 ? "up" : "down"}">${labPct(t.ret * 100)}</td>
-          <td style="text-align:right"><b class="${t.net >= 0 ? "up" : "down"}">${eurSigned(t.net)}</b><small>on ${kEur(t.size)}${c.tax && t.tax + t.stamp > 0.5 ? ` · ${eurS(t.tax + t.stamp)} ${t.tax > 0.5 ? "tax + duty" : "stamp duty"}` : ""}</small></td></tr>`).join("") + `</tbody></table></div>`;
+          <td style="text-align:right"><b class="${labTrPct(t) >= 0 ? "up" : "down"}">${labPct(labTrPct(t))}</b>${c.tax ? `<small>${labPct(t.ret * 100)} before tax</small>` : ""}</td></tr>`).join("") + `</tbody></table></div>`;
     }
     if (op.length) {
       h += `<p class="hint" style="margin:14px 2px 8px">${op.length} trade${op.length > 1 ? "s" : ""} opened this day, and how ${op.length > 1 ? "they" : "it"} ended:</p>
       <div class="tablewrap"><table class="bt ltrades lcpick"><tbody>` +
         op.map(t => `<tr ${row(t)}><td>${tk(t)}</td><td style="white-space:nowrap"><button class="linkbtn" data-labcalday="${D[t.g1]}">closed ${sd(D[t.g1])}</button><small>${t.days}d · ${why[t.why]}</small></td>
-          <td style="text-align:right" class="${t.ret >= 0 ? "up" : "down"}">${labPct(t.ret * 100)}</td><td style="text-align:right"><b class="${t.net >= 0 ? "up" : "down"}">${eurSigned(t.net)}</b></td></tr>`).join("") + `</tbody></table></div>`;
+          <td style="text-align:right"><b class="${labTrPct(t) >= 0 ? "up" : "down"}">${labPct(labTrPct(t))}</b></td></tr>`).join("") + `</tbody></table></div>`;
     }
     return h + `</div>`;
   }
