@@ -5,8 +5,7 @@ name: Gamma rejection setup
 #    yesterday's high/low/close, opens and closes paper trades (docs/data/gamma/live.json) and sends
 #    phone alerts on the ntfy topic <NTFY_PREFIX>-gamma. The script exits straight away when the market
 #    is closed, so the wide hours below cover summer and winter time.
-#    Runs on GitHub's timer AND (once the Worker is pasted again) the scheduler Worker: a second run of the
-#    same 5 minutes finds nothing new, so the two never double a trade.
+#    Started on time by the scheduler Worker (worker/README.md); GitHub's own timer is the backup.
 #  - backtest: the same rules on two years of 5-minute bars, every Saturday and when the engine changes.
 on:
   schedule:
@@ -32,6 +31,7 @@ concurrency:
 
 jobs:
   run:
+    if: github.event_name != 'schedule' || vars.EXTERNAL_SCHEDULER != 'on'   # the scheduler Worker starts it on time instead (worker/README.md)
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:

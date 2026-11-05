@@ -5,7 +5,7 @@ name: Session Momentum
 #    candle of QQQ (long above the 12 EMA, short below), then trails the stop until 15:55. Paper trades in
 #    docs/data/session/live.json, phone alerts on the ntfy topic <NTFY_PREFIX>-session. The script exits
 #    straight away when the market is closed, so the wide hours below cover summer and winter time.
-#    Runs on GitHub's timer AND the scheduler Worker: a second run of the same 5 minutes finds nothing new.
+#    Started on time by the scheduler Worker (worker/README.md); GitHub's own timer is the backup.
 #  - backtest: every variant on 5-minute bars since 2020, every Saturday and when the engine changes.
 on:
   schedule:
@@ -31,6 +31,7 @@ concurrency:
 
 jobs:
   run:
+    if: github.event_name != 'schedule' || vars.EXTERNAL_SCHEDULER != 'on'   # the scheduler Worker starts it on time instead (worker/README.md)
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:

@@ -22,6 +22,7 @@ concurrency:
 
 jobs:
   daily:
+    if: github.event_name != 'schedule' || vars.EXTERNAL_SCHEDULER != 'on'   # the scheduler Worker starts it on time instead (worker/README.md)
     runs-on: ubuntu-latest
     timeout-minutes: 60
     steps:

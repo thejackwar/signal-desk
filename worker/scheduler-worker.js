@@ -11,25 +11,40 @@
 // day-of-month month day-of-week, Sunday = 0). Change a time here, then paste the Worker again.
 
 const SCHEDULE = [
-  ["topdown.yml",      "2,32 13-21 * * 1-5", "Top-Down alerts: every 30 min while the US market is open"],
-  ["gamma-setup.yml",  "1-59/5 13-21 * * 1-5", "Gamma rejection setup: every 5 min while the US market is open"],
-  ["session-momentum.yml", "2-59/5 13-21 * * 1-5", "Session Momentum (QQQ first 5-min candle): every 5 min while the US market is open"],
-  ["gex.yml",          "0 13 * * 1-5",       "Gamma levels (before the open)"],
-  ["correlation.yml",  "45 19 * * 1-5",      "Implied correlation (near the close)"],
-  ["live-stocks.yml",  "5,35 13-20 * * 1-5", "Live stock scan (provisional): every 30 min while the US market is open"],
-  ["live-commodities.yml", "50 7-21 * * 1-5", "Live commodities scan (provisional): every hour on weekdays"],
-  ["live-crypto.yml",  "25 3-23/4 * * *",    "Live crypto scan (provisional): every 4 hours"],
-  ["darkpool-blocks.yml", "6,36 13-21 * * 1-5", "Dark pool block prints: every 30 min while the US market is open"],
-  ["darkpool-daily.yml", "15 23 * * 1-5",     "Dark pool daily pressure + weekly venues (after FINRA publishes)"],
-  ["scan.yml",         "15 22 * * 1-5",      "Daily scan (S&P 100)"],
-  ["commodities.yml",  "40 22 * * 1-5",      "Daily commodities scan"],
-  ["crypto.yml",       "20 0 * * *",         "Daily crypto scan"],
-  ["news.yml",         "10 * * * *",         "News: every hour"],
-  ["mentions.yml",     "20 */6 * * *",       "News mentions: every 6 hours"],
-  ["liquidations.yml", "40 */4 * * *",       "BTC liquidation heatmap: every 4 hours"],
-  ["calendar.yml",     "37 5 * * *",         "Market calendar (morning)"],
-  ["calendar.yml",     "43 21 * * 1-5",      "Market calendar (evening)"],
-  ["backtest.yml",     "0 6 * * 6",          "Weekly backtest (Saturday)"],
+  // [workflow file, cron (UTC), what it is, optional inputs for "Run workflow"]
+  // US market hours (wide enough for summer and winter time; the scripts exit when the market is closed)
+  ["gex.yml",              "0 13 * * 1-5",         "Gamma levels (before the open)"],
+  ["maxpain.yml",          "20 13 * * 1-5",        "Max pain (backup, in case the gamma levels didn't run)"],
+  ["gamma-setup.yml",      "1-59/5 13-21 * * 1-5", "Gamma rejection setup: every 5 min while the US market is open", { job: "live" }],
+  ["session-momentum.yml", "2-59/5 13-21 * * 1-5", "Session Momentum (QQQ first 5-min candle): every 5 min while the US market is open", { job: "live" }],
+  ["topdown.yml",          "2,32 13-21 * * 1-5",   "Top-Down alerts: every 30 min while the US market is open"],
+  ["live-stocks.yml",      "5,35 13-20 * * 1-5",   "Live stock scan (provisional): every 30 min while the US market is open"],
+  ["darkpool-blocks.yml",  "6,36 13-21 * * 1-5",   "Dark pool block prints: every 30 min while the US market is open"],
+  ["correlation.yml",      "45 19 * * 1-5",        "Implied correlation (near the close)"],
+  // after the close
+  ["calendar.yml",         "43 21 * * 1-5",        "Market calendar (evening)"],
+  ["scan.yml",             "15 22 * * 1-5",        "Daily scan (S&P 100)"],
+  ["commodities.yml",      "40 22 * * 1-5",        "Daily commodities scan"],
+  ["darkpool-daily.yml",   "15 23 * * 1-5",        "Dark pool daily pressure + weekly venues (after FINRA publishes)"],
+  // commodities and crypto
+  ["live-commodities.yml", "50 7-21 * * 1-5",      "Live commodities scan (provisional): every hour on weekdays"],
+  ["crypto.yml",           "20 0 * * *",           "Daily crypto scan"],
+  ["live-crypto.yml",      "25 3-23/4 * * *",      "Live crypto scan (provisional): every 4 hours"],
+  ["topdown-crypto.yml",   "7,37 * * * *",         "Top-Down crypto alerts: every 30 min, every day"],
+  ["btc-dip-forward.yml",  "7 * * * *",            "BTC dip forward test: every hour"],
+  ["liquidations.yml",     "40 */4 * * *",         "BTC liquidation heatmap: every 4 hours"],
+  // news and calendar
+  ["news.yml",             "10 * * * *",           "News: every hour"],
+  ["mentions.yml",         "20 */6 * * *",         "News mentions: every 6 hours"],
+  ["news-market.yml",      "17 5 * * *",           "Market news tone (morning)"],
+  ["calendar.yml",         "37 5 * * *",           "Market calendar (morning)"],
+  // weekly and monthly
+  ["backtest.yml",         "0 6 * * 6",            "Weekly backtest (Saturday)"],
+  ["options.yml",          "30 6 * * 6",           "Options backtests (Saturday, after the weekly backtest)"],
+  ["pairs.yml",            "45 6 * * 6",           "Pairs trading (Saturday)"],
+  ["gamma-setup.yml",      "15 7 * * 6",           "Gamma setup backtest (Saturday)", { job: "backtest" }],
+  ["session-momentum.yml", "35 7 * * 6",           "Session Momentum backtest (Saturday)", { job: "backtest" }],
+  ["research.yml",         "30 7 1 * *",           "Research engine (first day of each month)"],
 ];
 
 // ------------------------------------------------------------- cron matching
@@ -60,7 +75,10 @@ export function cronMatches(expr, d) {
 }
 export function due(date) {
   const d = new Date(date); d.setUTCSeconds(0, 0);
-  return SCHEDULE.filter(([, cron]) => cronMatches(cron, d)).map(([wf]) => wf).filter((w, i, a) => a.indexOf(w) === i);
+  const seen = new Set();
+  return SCHEDULE.filter(([, cron]) => cronMatches(cron, d))
+    .map(([wf, , , inputs]) => ({ wf, inputs }))
+    .filter(r => { const k = r.wf + JSON.stringify(r.inputs || {}); return !seen.has(k) && seen.add(k); });
 }
 function nextRun(cron, from) {
   const d = new Date(from); d.setUTCSeconds(0, 0);
@@ -77,8 +95,9 @@ const gh = (env, path, init = {}) => fetch(`https://api.github.com/repos/${env.R
   headers: { Authorization: `Bearer ${env.GITHUB_TOKEN}`, Accept: "application/vnd.github+json",
              "X-GitHub-Api-Version": "2022-11-28", "User-Agent": "signal-desk-scheduler", ...(init.headers || {}) },
 });
-async function start(env, wf) {
-  const r = await gh(env, `/actions/workflows/${wf}/dispatches`, { method: "POST", body: JSON.stringify({ ref: "main" }) });
+async function start(env, { wf, inputs }) {
+  const body = inputs ? { ref: "main", inputs } : { ref: "main" };
+  const r = await gh(env, `/actions/workflows/${wf}/dispatches`, { method: "POST", body: JSON.stringify(body) });
   if (r.status !== 204) throw new Error(`${wf}: HTTP ${r.status} ${(await r.text()).slice(0, 200)}`);
 }
 
@@ -87,7 +106,9 @@ export default {
     if (!env.GITHUB_TOKEN) { console.error("GITHUB_TOKEN secret is missing"); return; }
     const list = due(event.scheduledTime);
     const results = await Promise.allSettled(list.map(wf => start(env, wf)));
-    results.forEach((r, k) => r.status === "fulfilled" ? console.log(`started ${list[k]}`) : console.error(String(r.reason)));
+    results.forEach((r, k) => r.status === "fulfilled"
+      ? console.log(`started ${list[k].wf}${list[k].inputs ? " " + JSON.stringify(list[k].inputs) : ""}`)
+      : console.error(String(r.reason)));
   },
 
   async fetch(req, env) {
@@ -102,7 +123,7 @@ export default {
     return new Response(JSON.stringify({
       now: new Date(now).toISOString().slice(0, 16).replace("T", " ") + " UTC",
       token,
-      schedule: SCHEDULE.map(([wf, cron, what]) => ({ workflow: wf, what, cron_utc: cron, next: nextRun(cron, now) })),
+      schedule: SCHEDULE.map(([wf, cron, what, inputs]) => ({ workflow: wf, what, cron_utc: cron, ...(inputs ? { inputs } : {}), next: nextRun(cron, now) })),
     }, null, 2), { headers: { "Content-Type": "application/json", "Cache-Control": "no-store" } });
   },
 };

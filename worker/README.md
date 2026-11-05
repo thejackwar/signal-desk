@@ -116,5 +116,7 @@ Back to GitHub's timer at any moment: set `EXTERNAL_SCHEDULER` to `off` (or dele
 
 To change a time, edit it in `SCHEDULE` near the top of `scheduler-worker.js`, paste the
 Worker again, and change the matching `cron:` line in the workflow too (that's the backup).
+A new scheduled workflow needs a line in `SCHEDULE` too (and the `EXTERNAL_SCHEDULER` line
+under its job), otherwise only GitHub's late timer starts it.
 When the token expires, the page in step 5 says "not working": make a new token (step 1) and
 replace the secret (step 3). Each start shows up in the Worker's **Logs** as `started <file>`.

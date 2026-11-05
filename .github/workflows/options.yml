@@ -31,7 +31,7 @@ concurrency:
 
 jobs:
   options:
-    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
+    if: (github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success') && (github.event_name != 'schedule' || vars.EXTERNAL_SCHEDULER != 'on')   # the scheduler Worker starts it on time instead (worker/README.md)
     runs-on: ubuntu-latest
     timeout-minutes: 40
     steps:
