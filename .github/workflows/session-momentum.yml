@@ -1,0 +1,62 @@
+name: Session Momentum
+
+# engine/session_momentum.py
+#  - live: every 5 minutes while the US market is open. At 09:35 New York it reads the first 5-minute
+#    candle of QQQ (long above the 12 EMA, short below), then trails the stop until 15:55. Paper trades in
+#    docs/data/session/live.json, phone alerts on the ntfy topic <NTFY_PREFIX>-session. The script exits
+#    straight away when the market is closed, so the wide hours below cover summer and winter time.
+#    Runs on GitHub's timer AND the scheduler Worker: a second run of the same 5 minutes finds nothing new.
+#  - backtest: every variant on 5-minute bars since 2020, every Saturday and when the engine changes.
+on:
+  schedule:
+    - cron: "2-59/5 13-21 * * 1-5"   # live
+    - cron: "35 7 * * 6"             # backtest, Saturday 07:35 UTC
+  push:
+    branches: [main]
+    paths: ["engine/session_momentum.py"]
+  workflow_dispatch:
+    inputs:
+      job:
+        description: "What to run"
+        type: choice
+        options: [live, backtest]
+        default: backtest
+
+permissions:
+  contents: write
+
+concurrency:
+  group: session-momentum
+  cancel-in-progress: false
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Live
+        if: (github.event_name == 'schedule' && github.event.schedule != '35 7 * * 6') || (github.event_name == 'workflow_dispatch' && inputs.job == 'live')
+        env:
+          ALPACA_KEY_ID: ${{ secrets.ALPACA_KEY_ID }}
+          ALPACA_SECRET_KEY: ${{ secrets.ALPACA_SECRET_KEY }}
+          NTFY_PREFIX: ${{ vars.NTFY_PREFIX }}
+        run: python engine/session_momentum.py
+      - name: Backtest
+        if: github.event.schedule == '35 7 * * 6' || github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.job == 'backtest')
+        env:
+          ALPACA_KEY_ID: ${{ secrets.ALPACA_KEY_ID }}
+          ALPACA_SECRET_KEY: ${{ secrets.ALPACA_SECRET_KEY }}
+        run: python engine/session_momentum.py --backtest
+      - name: Publish
+        run: |
+          git config user.name "signal-desk-bot"
+          git config user.email "signal-desk-bot@users.noreply.github.com"
+          mkdir -p docs/data/session
+          git add docs/data/session
+          git diff --cached --quiet && exit 0
+          git commit -m "Session Momentum $(date -u +%F\ %H:%M)"
+          for i in 1 2 3; do git pull --rebase && git push && break; sleep 5; done

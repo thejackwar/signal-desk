@@ -678,6 +678,16 @@ button.lcald:hover { border-color: var(--muted); }
 .lcald.sel { border-color: var(--fg); }
 @media (min-width: 560px) { .lcald { min-height: 64px; padding: 7px 8px; } .lcald b { font-size: 12.5px; } }
 .lcalday { margin-top: 16px; }
+/* Strategy Lab calendar, "Every day": one tile per session */
+.lwall { display: grid; gap: 6px; background: var(--surface); border-radius: 14px; padding: 12px; }
+.lwyr { display: grid; grid-template-columns: 34px 1fr; gap: 8px; align-items: start; }
+.lwyr > span { font: 500 11px/10px var(--font-body); color: var(--faint); }
+.lwyr > div { display: flex; flex-wrap: wrap; gap: 2px; }
+.lwt { display: inline-block; width: 9px; height: 9px; border-radius: 2px; background: var(--line); border: 0; padding: 0; cursor: pointer; vertical-align: -1px; }
+.lwt.u { background: color-mix(in srgb, var(--bull) 55%, var(--surface)); } .lwt.u.s { background: var(--bull); }
+.lwt.d { background: color-mix(in srgb, var(--bear) 55%, var(--surface)); } .lwt.d.s { background: var(--bear); }
+button.lwt:hover { outline: 1px solid var(--fg); }
+@media (min-width: 700px) { .lwt { width: 11px; height: 11px; } }
 .ltchart .legend { padding: 4px 12px 10px; }
 table.lcpick tbody tr { cursor: pointer; }
 table.lcpick tbody tr:hover td { background: var(--hover); }
@@ -1798,6 +1808,7 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
     <a class="nav" href="options.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 20h18"/><path d="M4 17c3 0 4-10 8-10s5 10 8 10"/><path d="M12 7v13" stroke-dasharray="2 2"/></svg>Options</a>
     <a class="nav" href="volumeprofile.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M20 7h-6"/><path d="M20 11h-9"/><path d="M20 15h-4"/><path d="M20 19h-7"/></svg>Volume profile</a>
     <a class="nav" href="maxpain.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 20h18"/><path d="M4 6c3 0 5 12 8 12s5-12 8-12"/><circle cx="12" cy="18" r="1.6"/></svg>Max pain</a>
+    <a class="nav" href="session.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="5" height="5" rx="1"/><rect x="10" y="3" width="5" height="5" rx="1"/><rect x="17" y="3" width="4" height="5" rx="1"/><rect x="3" y="10" width="5" height="5" rx="1"/><rect x="10" y="10" width="5" height="5" rx="1"/><path d="M12 21v-3M9 18h6"/></svg>Session Momentum</a>
     <a class="nav" href="pairs.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9c3-4 6 2 9-1s6-2 9 0"/><path d="M3 16c3-2 6 2 9-1s6 1 9-1"/><path d="M12 8v8" stroke-dasharray="2 2"/></svg>Pairs trading</a>
     <a class="nav" href="darkpool.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 18h16"/><path d="M6 18V11"/><path d="M10 18V7"/><path d="M14 18v-5"/><path d="M18 18V9"/><circle cx="12" cy="12" r="10" stroke-opacity=".35"/></svg>Dark pools</a>
     <a class="nav" href="correlation.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="3.5" y="13.5" width="7" height="7" rx="1.5"/><path d="m14 20 6-6"/></svg>Correlation</a>
@@ -1843,6 +1854,7 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
       <a href="options.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 20h18"/><path d="M4 17c3 0 4-10 8-10s5 10 8 10"/><path d="M12 7v13" stroke-dasharray="2 2"/></svg><span>Options</span></a>
       <a href="volumeprofile.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M20 7h-6"/><path d="M20 11h-9"/><path d="M20 15h-4"/><path d="M20 19h-7"/></svg><span>Volume profile</span></a>
       <a href="maxpain.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 20h18"/><path d="M4 6c3 0 5 12 8 12s5-12 8-12"/><circle cx="12" cy="18" r="1.6"/></svg><span>Max pain</span></a>
+      <a href="session.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="5" height="5" rx="1"/><rect x="10" y="3" width="5" height="5" rx="1"/><rect x="17" y="3" width="4" height="5" rx="1"/><rect x="3" y="10" width="5" height="5" rx="1"/><rect x="10" y="10" width="5" height="5" rx="1"/><path d="M12 21v-3M9 18h6"/></svg><span>Session Momentum</span></a>
       <a href="pairs.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9c3-4 6 2 9-1s6-2 9 0"/><path d="M3 16c3-2 6 2 9-1s6 1 9-1"/><path d="M12 8v8" stroke-dasharray="2 2"/></svg><span>Pairs trading</span></a>
       <a href="research.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3h6"/><path d="M10 3v6L5 18a2 2 0 0 0 1.8 3h10.4a2 2 0 0 0 1.8-3L14 9V3"/><path d="M7.5 15h9"/></svg><span>Strategy research</span></a>
       <a href="darkpool.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 18h16"/><path d="M6 18V11"/><path d="M10 18V7"/><path d="M14 18v-5"/><path d="M18 18V9"/><circle cx="12" cy="12" r="10" stroke-opacity=".35"/></svg><span>Dark pools</span></a>
@@ -2735,6 +2747,7 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
         ["options.html", "Options", "How option strategies pay off, a live option chain builder and backtests"],
         ["volumeprofile.html", "Volume profile", "How much traded at each price: point of control, value area, thin and busy zones, naked POCs"],
         ["maxpain.html", "Max pain", "Where the most options expire worthless, for every S&P 100 stock, and whether prices really pin there"],
+        ["session.html", "Session Momentum", "One Nasdaq 100 trade a day from the first 5-minute candle, every session as a green or red tile"],
         ["pairs.html", "Pairs trading", "Two stocks that move together, traded when their gap stretches"],
         ["research.html", "Strategy research", "87 strategies tested against holding: what worked and why most didn't"],
         ["darkpool.html", "Dark pools", "Big off-exchange block prints, daily dark buying/selling pressure and which dark pools trade each stock"],
@@ -4111,7 +4124,7 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
   // (1/N of the account with N positions open, or 1/maxPos with a position limit).
   const LAB_FEE = 0.1;   // % per buy and per sell with "after tax & fees" on and no cost set in the Lab
   const LAB_MON = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-  const labCal = st => ({ risk: st.cal?.risk !== false, tax: st.cal?.tax ?? !!st.tax, ym: st.cal?.ym || null, day: st.cal?.day || null });
+  const labCal = st => ({ risk: st.cal?.risk !== false, tax: st.cal?.tax ?? !!st.tax, ym: st.cal?.ym || null, day: st.cal?.day || null, view: st.cal?.view === "days" ? "days" : "month" });
   function labCalCfg(st) {
     const M = LAB.mod, base = M.clean(st.cfg), c = labCal(st);
     return M.clean({ ...base, ...(c.risk ? {} : { tp: 0, sl: 0, trail: 0, slMode: "pct", tpMode: "pct", trailMode: "pct", be: 0, part: 0, tLose: 0 }), cost: c.tax ? (base.cost || LAB_FEE) : 0 });
@@ -4173,7 +4186,7 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
       if (!o.best || t.net > o.best.net) o.best = t;
       if (!o.worst || t.net < o.worst.net) o.worst = t;
     }
-    return LAB.calc = { key, D, cfg, I, byT, side, trades, closed, opened, months, first: D[fi].slice(0, 7), last: D[D.length - 1].slice(0, 7) };
+    return LAB.calc = { key, D, cfg, I, byT, side, trades, closed, opened, months, eq: mine.eq, fi, first: D[fi].slice(0, 7), last: D[D.length - 1].slice(0, 7) };
   }
   // compact euro for the small day cells: +€840, +€1.2k, −€15k
   const labCalEur = v => {
@@ -4200,6 +4213,8 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
   function labCalBody(st) {
     const X = labCalCompute(st), c = labCal(st), D = X.D;
     if (!X.trades.length) return `<div class="empty"><strong>No closed trades</strong>No trade closed with these settings in these years.</div>`;
+    const vsw = `<div class="lrow" style="margin:0 0 12px"><span>View</span>${labSeg("labcalview", c.view, [["month", "Month"], ["days", "Every day"]], "Calendar view")}</div>`;
+    if (c.view === "days") return vsw + labCalWall(X, c);
     const ms = Object.keys(X.months).sort();
     let ym = c.ym || ms[ms.length - 1];
     if (ym < X.first) ym = X.first; if (ym > X.last) ym = X.last;
@@ -4209,7 +4224,7 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
     const tone = v => v > 0 ? "up" : v < 0 ? "down" : "";
     // month, year and the twelve months of the year
     const yTot = ms.filter(m => +m.slice(0, 4) === y).reduce((s, m) => s + X.months[m].net, 0);
-    let h = `<div class="lcalnav"><button class="btn ghost sm" data-labcalm="${prev}"${prev < X.first ? " disabled" : ""} aria-label="Previous month">‹</button>
+    let h = vsw + `<div class="lcalnav"><button class="btn ghost sm" data-labcalm="${prev}"${prev < X.first ? " disabled" : ""} aria-label="Previous month">‹</button>
       <b>${esc(fmtDate(ym + "-01", { month: "long", year: "numeric" }))}</b>
       <button class="btn ghost sm" data-labcalm="${next}"${next > X.last ? " disabled" : ""} aria-label="Next month">›</button>
       <span class="yrpick"><select data-labcalyr aria-label="Year">${Array.from({ length: ly - fy + 1 }, (_, i) => ly - i).map(v =>
@@ -4246,6 +4261,24 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
     if (sel) h += labCalDay(X, sel, c);
     h += `<p class="hint" style="margin-top:14px">Euro amounts are what each trade added to the account day by day (${X.cfg.maxPos ? `each position is 1/${X.cfg.maxPos} of the account` : "the account is split across every open position"}), so together they come to the Results tab's gain before tax, apart from trades still open. When alerts overlap on one ${L().one}, the shared days count for the first trade. "On" is the position's size when it opened. ${c.tax ? "Tax is applied trade by trade as each one closes; simplified." : "Before tax and with no fees."}</p>`;
     return h;
+  }
+  // Every day as one tile, a row of tiles per year: green if the account rose that day, red if it fell
+  function labCalWall(X, c) {
+    const D = X.D, eq = X.eq, years = {}, ch = [];
+    for (let g = X.fi + 1; g < D.length; g++) ch.push([g, eq[g - 1] > 0 ? eq[g] / eq[g - 1] - 1 : 0]);
+    const f0 = ch.findIndex(([, r]) => Math.abs(r) > 1e-9); if (f0 > 0) ch.splice(0, f0);   // start at the first trade
+    const mv = ch.filter(([, r]) => Math.abs(r) > 1e-9).map(([, r]) => Math.abs(r)).sort((a, b) => a - b), med = mv[mv.length >> 1] || 1;
+    let up = 0, dn = 0;
+    for (const [g, r] of ch) {
+      const d = D[g], k = Math.abs(r) <= 1e-9 ? "" : r > 0 ? " u" : " d", s = Math.abs(r) > med ? " s" : "";
+      if (k === " u") up++; else if (k === " d") dn++;
+      const cl = X.closed[d];
+      (years[d.slice(0, 4)] ||= []).push(`<button class="lwt${k}${s}" data-labcalday="${d}" title="${esc(fmtDate(d, { day: "numeric", month: "short", year: "numeric" }))}: ${k ? labPct(r * 100) : "flat"}${cl ? ` · ${cl.length} closed` : ""}" aria-label="${esc(d)} ${k ? labPct(r * 100) : "flat"}"></button>`);
+    }
+    const n = up + dn;
+    return `<p class="labverdict">${n ? `<b class="up">${up.toLocaleString("en")}</b> up days and <b class="down">${dn.toLocaleString("en")}</b> down days (${Math.round(up / n * 100)}% up), out of ${ch.length.toLocaleString("en")} sessions.` : "No day with a position open."}</p>
+      <div class="lwall">${Object.keys(years).sort().map(y => `<div class="lwyr"><span>${y}</span><div>${years[y].join("")}</div></div>`).join("")}</div>
+      <p class="hint" style="margin:10px 2px 0"><span class="lwt u s"></span> profit · <span class="lwt d s"></span> loss · <span class="lwt"></span> no position, brighter = a bigger move than a typical day. Each tile is the whole account's change that day, open trades included, before tax and fees. Tap a tile to open that day in the month view.</p>`;
   }
   function labCalDay(X, day, c) {
     const D = X.D, cl = X.closed[day] || [], op = X.opened[day] || [], why = { rule: "exit rule", tp: "take profit", sl: "stop loss", trail: "trailing stop" };
@@ -5191,7 +5224,7 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
       else if (d.labsize) { c.size = d.labsize; if (d.labsize === "risk" && !labStopTxt(c)) { c.slMode = "atr"; c.slAtr = P.slAtr.def; } if (d.labsize === "risk" && !c.maxPos) c.maxPos = 10; }
       st.cfg = M.clean(c); saveLab(st); renderLab(); return true;
     }
-    const t = e.target.closest("[data-labind], [data-labexit], [data-labside], [data-labreset], [data-labtab], [data-labmkt], [data-labvix], [data-labtax], [data-labmode], [data-labunpick], [data-labshare], [data-labcsv], [data-labrunopt], [data-labrunrob], [data-labrobapply], [data-labapply], [data-laboptview], [data-labcmp], [data-labdel], [data-labload], [data-labcalrisk], [data-labcaltax], [data-labcalm], [data-labcalday], [data-labcaltrade]");
+    const t = e.target.closest("[data-labind], [data-labexit], [data-labside], [data-labreset], [data-labtab], [data-labmkt], [data-labvix], [data-labtax], [data-labmode], [data-labunpick], [data-labshare], [data-labcsv], [data-labrunopt], [data-labrunrob], [data-labrobapply], [data-labapply], [data-laboptview], [data-labcmp], [data-labdel], [data-labload], [data-labcalrisk], [data-labcaltax], [data-labcalm], [data-labcalday], [data-labcaltrade], [data-labcalview]");
     if (!t) return false;
     const st = labState(), d = t.dataset;
     if (d.labind) st.cfg = labPickInd(st, d.labind);
@@ -5205,8 +5238,9 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
       document.getElementById("lcaltc")?.scrollIntoView({ block: "nearest", behavior: "smooth" });
       return true;
     }
+    else if (d.labcalview) { st.cal = { ...st.cal, view: d.labcalview }; saveLab(st); labCalRefresh(); return true; }
     else if (d.labcalm || d.labcalday) {   // another month or day: only the calendar below the switches changes
-      st.cal = d.labcalm ? { ...st.cal, ym: d.labcalm, day: null } : { ...st.cal, ym: d.labcalday.slice(0, 7), day: d.labcalday };
+      st.cal = d.labcalm ? { ...st.cal, ym: d.labcalm, day: null } : { ...st.cal, ym: d.labcalday.slice(0, 7), day: d.labcalday, view: "month" };
       saveLab(st); labCalRefresh();
       if (d.labcalday && t.closest(".lcalday")) document.querySelector(".lcalday")?.scrollIntoView({ block: "nearest", behavior: "smooth" });
       return true;
@@ -6991,7 +7025,7 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
     ["LAB", "#strategylab", "Strategy Lab"], ["STRAT", "#strategies", "Strategies"], ["VAULT", "#strategies-vault", "Vault"], ["RSCH", "research.html", "Strategy research"],
     ["STK", "#stocks", "Markets list"], ["HEAT", "#heatmap", "Heatmap"], ["NEWS", "#news", "News"], ["MOOD", "#mood", "News mood"], ["BUZZ", "#buzz", "Most mentioned"],
     ["CAL", "#calendar", "Calendar"], ["ERN", "#earnings", "After earnings"], ["TL", "trendlines.html", "Trendlines"], ["OPT", "options.html", "Options"],
-    ["VP", "volumeprofile.html", "Volume profile"], ["MXP", "maxpain.html", "Max pain"], ["PAIR", "pairs.html", "Pairs trading"], ["DARK", "darkpool.html", "Dark pools"],
+    ["VP", "volumeprofile.html", "Volume profile"], ["MXP", "maxpain.html", "Max pain"], ["PAIR", "pairs.html", "Pairs trading"], ["SESS", "session.html", "Session Momentum"], ["DARK", "darkpool.html", "Dark pools"],
     ["CORR", "correlation.html", "Implied correlation"], ["CRYP", "#crypto", "Crypto dashboard"], ["VIX", "#vix", "VIX seasonality"], ["CRSH", "#crashes", "Smaller Crashes"],
     ["PRAC", "#practice", "Practice portfolio"], ["NTFY", "#notify", "Phone alerts"], ["LRN", "#learn", "Learn"], ["BRKR", "#brokers", "Brokers"], ["HOME", "#home", "Home"], ["ABOUT", "#about", "About us"],
   ];

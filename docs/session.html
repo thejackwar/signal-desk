@@ -1,0 +1,381 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0b0f14">
+<title>Session Momentum</title>
+<meta name="description" content="Session Momentum: one Nasdaq 100 trade a day from the first 5-minute candle and the 12 EMA, with a trailing stop. Backtested since 2020, every session shown as a green or red tile, and paper-traded live. Free, information only.">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Investment Center Signals">
+<meta property="og:title" content="Session Momentum, backtested and tracked live | Investment Center Signals">
+<meta property="og:description" content="One Nasdaq 100 trade a day from the first 5-minute candle. Every session since 2020 as a green or red tile, plus live paper trades.">
+<meta property="og:url" content="https://thejackwar.github.io/signal-desk/session.html">
+<meta property="og:image" content="https://thejackwar.github.io/signal-desk/og-image.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="canonical" href="https://thejackwar.github.io/signal-desk/session.html">
+<script>
+(() => {
+  const CF_ANALYTICS_TOKEN = "a2d6810a28f64b999832485d1635915a";
+  if (!CF_ANALYTICS_TOKEN || location.hostname === "localhost") return;
+  const s = document.createElement("script");
+  s.defer = true; s.src = "https://static.cloudflareinsights.com/beacon.min.js";
+  s.dataset.cfBeacon = JSON.stringify({ token: CF_ANALYTICS_TOKEN });
+  document.head.appendChild(s);
+})();
+</script>
+<link rel="icon" href="favicon.ico?v=2" sizes="any">
+<link rel="icon" type="image/svg+xml" href="logo.svg?v=2">
+<link rel="apple-touch-icon" href="icon-180.png?v=2">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+:root {
+  --bg: #0b0f14; --panel: #0e141c; --panel-2: #121a24; --line: #1e2834; --line-2: #2a3644;
+  --fg: #e8eef4; --muted: #9aa7b4; --faint: #6b7886;
+  --up: #2fd6a0; --up-2: #1c8f6b; --down: #f0566a; --down-2: #9c3443; --none: #18212c;
+  --blue: #6cb4ff; --blue-bg: rgba(108,180,255,.12);
+  --font: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body { background: radial-gradient(1200px 600px at 50% -200px, #132033 0%, var(--bg) 60%) no-repeat, var(--bg); color: var(--fg);
+  font: 16px/1.5 var(--font); -webkit-font-smoothing: antialiased; font-feature-settings: "tnum"; padding-bottom: calc(40px + env(safe-area-inset-bottom, 0px)); }
+a { color: var(--blue); text-decoration: none; }
+a:hover { text-decoration: underline; }
+.wrap { max-width: 920px; margin: 0 auto; padding: 0 22px; }
+@media (max-width: 560px) { .wrap { padding: 0 16px; } }
+
+.bar { position: sticky; top: 0; z-index: 20; background: rgba(11,15,20,.86); backdrop-filter: saturate(180%) blur(20px); -webkit-backdrop-filter: saturate(180%) blur(20px);
+  border-bottom: 1px solid var(--line); padding-top: env(safe-area-inset-top, 0px); }
+.bar-in { max-width: 920px; margin: 0 auto; padding: 0 22px; height: 48px; display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; }
+.back { font-size: 14px; }
+.bar-title { font-size: 15px; font-weight: 600; }
+
+.k { font: 500 11px/1.3 var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.k.blue { color: var(--blue); }
+.live-dot { display: inline-flex; align-items: center; gap: 6px; }
+.live-dot::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--blue); box-shadow: 0 0 0 0 rgba(108,180,255,.6); animation: pulse 2s infinite; }
+@keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(108,180,255,.55); } 70% { box-shadow: 0 0 0 7px rgba(108,180,255,0); } 100% { box-shadow: 0 0 0 0 rgba(108,180,255,0); } }
+@media (prefers-reduced-motion: reduce) { .live-dot::before { animation: none; } }
+
+.hero { padding: 44px 0 18px; }
+.hero h1 { font-size: clamp(36px, 7vw, 56px); line-height: 1.04; letter-spacing: -.035em; margin: 10px 0 12px; font-weight: 700; }
+.hero p.lede { color: var(--muted); font-size: 18px; max-width: 640px; margin: 0; }
+.big { display: flex; flex-wrap: wrap; gap: 10px 36px; align-items: flex-end; margin: 28px 0 6px; }
+.big .n { font: 600 clamp(48px, 11vw, 84px)/1 var(--font); letter-spacing: -.04em; }
+.big .n.up { color: var(--fg); } .big .n.down { color: var(--down); }
+.big .sub { display: grid; gap: 4px; padding-bottom: 8px; }
+.big .sub b { font: 500 15px var(--mono); }
+.fine { color: var(--faint); font-size: 13px; }
+
+.panel { background: linear-gradient(180deg, var(--panel-2), var(--panel)); border: 1px solid var(--line); border-radius: 4px; padding: 14px 16px 12px; margin: 14px 0; }
+.ph { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 10px; }
+.pf { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-top: 10px; flex-wrap: wrap; }
+
+/* chart */
+svg.chart { display: block; width: 100%; height: auto; }
+.tag { font: 600 9px var(--mono); letter-spacing: .06em; }
+
+/* the tile wall */
+.wall { display: grid; gap: 6px; }
+.yr { display: grid; grid-template-columns: 38px 1fr; gap: 8px; align-items: start; }
+.yr > span { font: 500 11px/10px var(--mono); color: var(--faint); padding-top: 1px; }
+.tiles { display: flex; flex-wrap: wrap; gap: 2px; }
+.t { width: 9px; height: 9px; border-radius: 1px; background: var(--none); border: 0; padding: 0; cursor: pointer; }
+.t.u { background: var(--up-2); } .t.u.s { background: var(--up); }
+.t.d { background: var(--down-2); } .t.d.s { background: var(--down); }
+.t.lv { outline: 1px solid var(--blue); outline-offset: 0; }
+.t.on { outline: 2px solid var(--fg); outline-offset: 1px; }
+@media (min-width: 700px) { .t { width: 11px; height: 11px; } .yr > span { line-height: 12px; } }
+.track { display: flex; gap: 2px; margin-top: 10px; overflow: hidden; }
+.track i { flex: 1; height: 3px; background: var(--line); }
+.track i.f { background: var(--blue); }
+.readout { min-height: 22px; margin-top: 10px; font: 500 12.5px var(--mono); color: var(--muted); }
+.readout b.up { color: var(--up); } .readout b.down { color: var(--down); }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 14px; font: 500 11px var(--mono); color: var(--faint); }
+.legend i { display: inline-block; width: 9px; height: 9px; border-radius: 1px; margin-right: 6px; vertical-align: -1px; }
+
+/* trade activity */
+.sess { display: flex; gap: 5px; flex-wrap: nowrap; overflow: hidden; }
+.sess i { flex: 1; min-width: 0; max-width: 22px; aspect-ratio: 1; border: 1px solid var(--line-2); border-radius: 2px; }
+.sess i.u { background: var(--up-2); border-color: var(--up-2); } .sess i.d { background: var(--down-2); border-color: var(--down-2); }
+.sess i.today { background: #1d4f86; border-color: var(--blue); }
+
+/* controls */
+.ctl { display: grid; gap: 10px; margin: 4px 0 12px; }
+.row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+.row > .k { min-width: 108px; }
+.seg { display: inline-flex; flex-wrap: wrap; gap: 2px; background: #0a1017; border: 1px solid var(--line); border-radius: 6px; padding: 2px; }
+.seg button { font: 500 12.5px var(--font); color: var(--muted); background: none; border: 0; border-radius: 4px; padding: 6px 10px; cursor: pointer; }
+.seg button[aria-pressed="true"] { background: var(--blue-bg); color: var(--fg); box-shadow: inset 0 0 0 1px rgba(108,180,255,.35); }
+
+/* steps */
+.steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 10px; margin: 10px 0; }
+.step { border: 1px solid var(--line); border-radius: 4px; padding: 14px; background: var(--panel); }
+.step h3 { margin: 6px 0 4px; font-size: 17px; letter-spacing: -.01em; }
+.step p { margin: 0; color: var(--muted); font-size: 14px; }
+.step h3 .g { color: var(--up); } .step h3 .r { color: var(--down); }
+
+h2 { font-size: 26px; letter-spacing: -.02em; margin: 44px 0 6px; }
+h2 + p { color: var(--muted); margin: 0 0 8px; }
+.tw { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+table { width: 100%; border-collapse: collapse; font-size: 14px; }
+th, td { padding: 8px 8px; text-align: right; border-bottom: 1px solid var(--line); white-space: nowrap; }
+th { font: 500 11px var(--mono); letter-spacing: .06em; text-transform: uppercase; color: var(--faint); }
+th:first-child, td:first-child { text-align: left; }
+td.up { color: var(--up); } td.down { color: var(--down); }
+.cmp { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; }
+.cmp > div { border: 1px solid var(--line); border-radius: 4px; padding: 14px; background: var(--panel); }
+.cmp b { display: block; font: 600 26px var(--font); letter-spacing: -.02em; margin-top: 4px; }
+.cmp small { color: var(--muted); }
+.note { border-left: 2px solid var(--blue); padding: 4px 0 4px 14px; color: var(--muted); margin: 16px 0; font-size: 15px; }
+.empty { padding: 26px 0; text-align: center; color: var(--muted); }
+footer { margin-top: 48px; border-top: 1px solid var(--line); padding-top: 16px; }
+</style>
+</head>
+<body>
+<nav class="bar" aria-label="Page">
+  <div class="bar-in">
+    <a class="back" href="index.html#home" aria-label="Back to Signals">‹ Signals</a>
+    <span class="bar-title">Session Momentum</span>
+    <span></span>
+  </div>
+</nav>
+
+<main class="wrap">
+  <section class="hero">
+    <span class="k">Nasdaq 100 · 5 min · Session momentum</span>
+    <h1>One candle a day.</h1>
+    <p class="lede">At the New York open, watch the first five minutes. If that candle closes above the 12 EMA, buy; below it, sell. The stop follows the trend and winners run until the close.</p>
+    <div class="big" id="big"></div>
+    <p class="fine" id="bigfine"></p>
+  </section>
+
+  <div class="panel" id="p-live">
+    <div class="ph"><span class="k" id="lc-title">Live chart · QQQ 5m</span><span class="k blue live-dot">Live</span></div>
+    <div id="lc"></div>
+  </div>
+
+  <div class="panel" id="p-wall">
+    <div class="ph"><span class="k">Performance tracking</span><span class="k" id="wall-n"></span></div>
+    <div class="ctl" id="ctl"></div>
+    <div class="wall" id="wall"></div>
+    <div class="track" id="track" aria-hidden="true"></div>
+    <div class="pf"><span class="k" id="wall-left"></span><span class="k blue">Live · tracking</span></div>
+    <div class="readout" id="readout" aria-live="polite">Tap a tile to see that session.</div>
+    <div class="legend"><span><i style="background:var(--up)"></i>Profit</span><span><i style="background:var(--down)"></i>Loss</span><span><i style="background:var(--none)"></i>No trade</span><span><i style="outline:1px solid var(--blue);background:var(--none)"></i>Live paper trade</span><span>Brighter = bigger than a typical day</span></div>
+  </div>
+
+  <div class="panel">
+    <div class="ph"><span class="k">Trade activity</span><span class="k" id="act-n"></span></div>
+    <div class="sess" id="sess"></div>
+    <div class="pf"><span class="k">Sessions</span><span class="k blue">Today · automated</span></div>
+  </div>
+
+  <h2>The rules</h2>
+  <p>Exactly what the engine does, every weekday.</p>
+  <div class="steps">
+    <div class="step"><span class="k">New York open</span><h3>Wait for 09:30</h3><p>Nothing happens before the US cash session opens.</p></div>
+    <div class="step"><span class="k">First 5-min candle</span><h3>Watch one candle</h3><p>The 09:30–09:35 candle of QQQ, the Nasdaq 100 ETF.</p></div>
+    <div class="step"><span class="k">Entry signal</span><h3>Close above the 12 EMA: <span class="g">buy</span></h3><p>Close below it: <b style="color:var(--down)">sell</b> (short). Entry at the candle's close.</p></div>
+    <div class="step"><span class="k">Trade management</span><h3>The stop follows the trend</h3><p>First stop at the other end of the candle, then trailed. No fixed target; out at 15:55 at the latest.</p></div>
+  </div>
+
+  <h2>By year</h2>
+  <p id="yr-p">The selected settings, year by year, against simply holding QQQ.</p>
+  <div class="tw"><table id="yrs"></table></div>
+
+  <h2>Every setting we tested</h2>
+  <p>The video says not to take a small fixed profit. Here is that rule, and the other ways to trail the stop, side by side.</p>
+  <div class="tw"><table id="vars"></table></div>
+
+  <h2>Video vs our test</h2>
+  <div class="cmp" id="cmp"></div>
+  <p class="note" id="cmp-note"></p>
+
+  <h2>Live paper trades</h2>
+  <p id="live-p">Every session from the go-live day, on real-time prices. Closed trades are never changed.</p>
+  <div class="tw"><table id="lt"></table></div>
+
+  <footer>
+    <p class="fine">Data: Alpaca 5-minute bars of QQQ (all US exchanges for the backtest, IEX real time for the live trades). QQQ stands in for the NAS100 CFD in the video; a CFD trades almost round the clock, so the "including pre-market" EMA setting is the closer match. Costs: 0.01% a side, the full account in each trade, no leverage, no tax. The stop is assumed to fill at its price (or the bar's open after a gap). Backtests are not a promise of future results. For information only. Not investment advice.</p>
+  </footer>
+</main>
+
+<script>
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const pc = (v, d = 1) => v == null ? "–" : (v > 0 ? "+" : v < 0 ? "−" : "") + Math.abs(v).toFixed(d) + "%";
+const tone = v => v > 0 ? "up" : v < 0 ? "down" : "";
+const fmtD = (d, o = { day: "numeric", month: "short", year: "numeric" }) => new Date(d + "T12:00:00Z").toLocaleDateString("en-GB", { timeZone: "UTC", ...o });
+const TRAILS = [["swing", "Last 3 bars"], ["ema", "12 EMA cross"], ["atr", "2× ATR"], ["none", "First stop only"], ["fixed1r", "Fixed 1R target"]];
+const TRAIL_TXT = { swing: "stop trailed under the last 3 bars", ema: "out when a bar closes back across the 12 EMA", atr: "stop trailed 2× ATR from the best close", none: "first stop only, out at 15:55", fixed1r: "a fixed 1R profit target" };
+const WHY = { stop: "first stop", trail: "trailing stop", target: "target", close: "15:55 close" };
+let B = null, LV = null;
+const S = (() => { try { return JSON.parse(localStorage.getItem("sessionMom") || "{}"); } catch { return {}; } })();
+S.ema ||= "ext"; S.trail ||= "swing"; S.side ||= "both";
+const save = () => { try { localStorage.setItem("sessionMom", JSON.stringify(S)); } catch {} };
+const vkey = () => `${S.ema}|${S.trail}|${S.side}`;
+
+async function load(p) { try { const r = await fetch(p + "?t=" + Date.now()); return r.ok ? r.json() : null; } catch { return null; } }
+
+function seg(name, val, opts) {
+  return `<div class="seg" role="group">${opts.map(([v, l]) => `<button type="button" data-${name}="${v}" aria-pressed="${v === val}">${esc(l)}</button>`).join("")}</div>`;
+}
+
+// ------------------------------------------------------------------ the live chart
+function liveChart() {
+  const T = LV?.today, bars = T?.bars || [];
+  const tr = (LV?.trades || []).find(t => t.date === T?.date);
+  if (!bars.length) {
+    const last = (LV?.trades || []).slice(-1)[0];
+    $("lc").innerHTML = `<div class="empty">${LV ? "Waiting for the New York open: the first candle closes at 09:35 (15:35 in Italy)." : "Live paper trades start on the next session."}${last ? `<br><span class="fine">Last trade ${esc(fmtD(last.date))}: ${last.side > 0 ? "long" : "short"}, ${last.exit ? `<b class="${tone(last.pct)}">${pc(last.pct, 2)}</b>` : "still open"}.</span>` : ""}</div>`;
+    return;
+  }
+  $("lc-title").textContent = `Live chart · QQQ 5m · ${fmtD(T.date, { weekday: "short", day: "numeric", month: "short" })}`;
+  const W = 720, H = 230, pl = 6, pr = 64, pt = 14, pb = 20, n = Math.max(bars.length, 78);
+  let lo = Infinity, hi = -Infinity;
+  for (const b of bars) { lo = Math.min(lo, b[3], b[5] ?? Infinity); hi = Math.max(hi, b[2], b[5] ?? -Infinity); }
+  if (tr) { lo = Math.min(lo, tr.stop0, tr.stop); hi = Math.max(hi, tr.stop0, tr.stop); }
+  const pad = (hi - lo) * .08 || 1; lo -= pad; hi += pad;
+  const x = i => pl + (i + .5) * (W - pl - pr) / n, y = v => pt + (hi - v) / (hi - lo) * (H - pt - pb), cw = Math.max(2, (W - pl - pr) / n * .62);
+  let g = `<line x1="${x(0)}" x2="${x(0)}" y1="${pt}" y2="${H - pb}" stroke="#2a3644" stroke-dasharray="2 3"/><text x="${x(0) + 4}" y="${H - 6}" fill="#6b7886" font-size="10" font-family="var(--mono)">09:30</text>`;
+  bars.forEach((b, i) => {
+    const up = b[4] >= b[1], c = up ? "var(--up)" : "var(--down)";
+    g += `<line x1="${x(i)}" x2="${x(i)}" y1="${y(b[2])}" y2="${y(b[3])}" stroke="${c}" stroke-width="1"/><rect x="${x(i) - cw / 2}" y="${y(Math.max(b[1], b[4]))}" width="${cw}" height="${Math.max(1, Math.abs(y(b[1]) - y(b[4])))}" fill="${c}"/>`;
+  });
+  const ema = bars.map((b, i) => b[5] == null ? null : `${x(i)},${y(b[5])}`).filter(Boolean).join(" ");
+  if (ema) g += `<polyline points="${ema}" fill="none" stroke="var(--blue)" stroke-width="1.4" opacity=".9"/>`;
+  if (tr) {
+    const long = tr.side > 0, idx = Math.max(0, bars.findIndex(b => b[0] >= (tr.bar_after || "").slice(11, 16)));
+    // the stop: stepped, from the first stop through each move
+    const pts = [[idx, tr.stop0], ...(tr.hist || []).map(([tm, v]) => [bars.findIndex(b => b[0] === tm) + 1, v])];
+    const end = tr.exit ? Math.max(idx, bars.findIndex(b => b[0] === tr.exit.at.slice(11, 16))) : bars.length - 1;
+    let d = "";
+    pts.forEach(([i, v], k) => { const nx = k + 1 < pts.length ? pts[k + 1][0] : end + 1; d += `${k ? "L" : "M"}${x(i - .5)},${y(v)} L${x(nx - .5)},${y(v)} `; });
+    g += `<path d="${d}" fill="none" stroke="${long ? "var(--down)" : "var(--down)"}" stroke-width="1" stroke-dasharray="3 3" opacity=".9"/>`;
+    g += `<line x1="${x(idx - .5)}" x2="${W - pr}" y1="${y(tr.entry)}" y2="${y(tr.entry)}" stroke="#9aa7b4" stroke-width=".8" stroke-dasharray="1 3"/>`;
+    const tx = x(0) - 2, ty = long ? y(bars[0][2]) - 20 : y(bars[0][3]) + 6;
+    g += `<rect x="${tx}" y="${ty}" width="38" height="14" rx="2" fill="${long ? "var(--up)" : "var(--down)"}"/><text class="tag" x="${tx + 19}" y="${ty + 10}" text-anchor="middle" fill="#04120c">${long ? "LONG" : "SHORT"}</text>`;
+    const ys = y(tr.stop), ye = Math.abs(ys - y(tr.entry)) < 17 ? ys + (ys > y(tr.entry) ? -17 : 17) : y(tr.entry);
+    const lab = (v, t, c, yy = y(v)) => `<rect x="${W - pr + 4}" y="${yy - 8}" width="${pr - 6}" height="16" rx="2" fill="#0b0f14" stroke="${c}"/><text class="tag" x="${W - pr + 4 + (pr - 6) / 2}" y="${yy + 3}" text-anchor="middle" fill="${c}">${t}</text>`;
+    g += lab(tr.entry, "ENTRY", "#9aa7b4", ye) + lab(tr.stop, tr.exit ? "STOP" : "STOP MGD", "var(--down)");
+    if (tr.exit) g += `<circle cx="${x(end)}" cy="${y(tr.exit.price)}" r="3.5" fill="none" stroke="var(--fg)"/>`;
+  }
+  const last = bars[bars.length - 1];
+  $("lc").innerHTML = `<svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="Today's 5-minute QQQ candles with the 12 EMA${tr ? " and today's trade" : ""}">${g}</svg>
+    <p class="fine" style="margin:6px 0 0">${tr ? `${tr.side > 0 ? "Long" : "Short"} at ${tr.entry} (first candle closed ${tr.side > 0 ? "above" : "below"} the EMA, ${tr.sig_close} vs ${(+tr.ema).toFixed(2)}). ${tr.exit ? `Closed at ${tr.exit.price}, ${WHY[tr.exit.reason]}: <b class="${tone(tr.pct)}" style="color:var(--${tr.pct >= 0 ? "up" : "down"})">${pc(tr.pct, 2)}</b>.` : `Stop now ${tr.stop}; last price ${last[4]}, <b style="color:var(--${(last[4] - tr.entry) * tr.side >= 0 ? "up" : "down"})">${pc(100 * tr.side * (last[4] / tr.entry - 1), 2)}</b> so far.`}` : (LV.missed || []).find(m => m.date === T.date) ? `No trade today: ${esc(LV.missed.find(m => m.date === T.date).why)}.` : "No trade yet today."} Updated ${esc((LV.updated || "").replace("T", " "))} UTC.</p>`;
+}
+
+// ------------------------------------------------------------------ the wall
+function controls() {
+  $("ctl").innerHTML = `<div class="row"><span class="k">Trailing stop</span>${seg("trail", S.trail, TRAILS)}</div>
+    <div class="row"><span class="k">12 EMA from</span>${seg("ema", S.ema, [["ext", "Incl. pre-market"], ["rth", "Regular hours"]])}</div>
+    <div class="row"><span class="k">Trades</span>${seg("side", S.side, [["both", "Long + short"], ["long", "Long only"]])}</div>`;
+}
+
+function wall() {
+  const V = B.variants[vkey()], days = B.dates, vals = V.days;
+  const live = (LV?.trades || []).filter(t => t.exit && t.date > B.to);
+  const abs = vals.filter(v => v != null).map(Math.abs).sort((a, b) => a - b), med = abs[abs.length >> 1] || 1;
+  const cls = (v, extra = "") => `t${v == null ? "" : v > 0 ? " u" : " d"}${v != null && Math.abs(v) > med ? " s" : ""}${extra}`;
+  const years = {};
+  days.forEach((d, i) => (years[d.slice(0, 4)] ||= []).push(`<button class="${cls(vals[i])}" data-i="${i}" aria-label="${esc(d)}"></button>`));
+  live.forEach((t, k) => (years[t.date.slice(0, 4)] ||= []).push(`<button class="${cls(Math.round(t.pct * 100), " lv")}" data-l="${k}" aria-label="${esc(t.date)} live"></button>`));
+  $("wall").innerHTML = Object.keys(years).sort().map(y => `<div class="yr"><span>${y}</span><div class="tiles">${years[y].join("")}</div></div>`).join("");
+  const n = vals.filter(v => v != null).length;
+  $("wall-left").textContent = `Backtest · ${n.toLocaleString("en")} trades${live.length ? ` + ${live.length} live` : ""}`;
+  $("wall-n").textContent = `${days.length.toLocaleString("en")} sessions`;
+  const fill = Math.min(40, Math.max(1, Math.round(40 * (LV?.trades?.length || 0) / 60)));
+  $("track").innerHTML = Array.from({ length: 40 }, (_, i) => `<i class="${i < fill ? "f" : ""}"></i>`).join("");
+  $("wall").onclick = e => {
+    const b = e.target.closest(".t"); if (!b) return;
+    document.querySelectorAll(".t.on").forEach(x => x.classList.remove("on")); b.classList.add("on");
+    if (b.dataset.l != null) {
+      const t = live[+b.dataset.l];
+      $("readout").innerHTML = `${esc(fmtD(t.date, { weekday: "short", day: "numeric", month: "short", year: "numeric" }))} · LIVE · ${t.side > 0 ? "long" : "short"} ${t.entry} → ${t.exit.price} · <b class="${tone(t.pct)}">${pc(t.pct, 2)}</b> · ${WHY[t.exit.reason]}`;
+      return;
+    }
+    const i = +b.dataset.i, v = vals[i], d = days[i], r = (B.recent || []).find(t => t.date === d && vkey() === B.default);
+    $("readout").innerHTML = `${esc(fmtD(d, { weekday: "short", day: "numeric", month: "short", year: "numeric" }))} · ${v == null ? "no trade" : `<b class="${tone(v)}">${pc(v / 100, 2)}</b>`}${r ? ` · ${r.side > 0 ? "long" : "short"} ${r.entry} → ${r.exit.price} · ${WHY[r.exit.reason]}` : ""}`;
+  };
+}
+
+function headline() {
+  const A = B.variants[vkey()].all;
+  $("big").innerHTML = `<div class="n ${tone(A.total_pct)}">${pc(A.total_pct, 0)}</div>
+    <div class="sub"><span class="k">${esc(fmtD(B.from, { month: "short", year: "numeric" }))} – ${esc(fmtD(B.to, { month: "short", year: "numeric" }))} · backtest</span>
+      <b>${A.trades.toLocaleString("en")} trades · ${Math.round(A.win_rate * 100)}% won · max drop ${pc(A.max_dd_pct, 0)}</b>
+      <span class="k">QQQ held: ${pc(B.hold_pct, 0)}</span></div>`;
+  $("bigfine").textContent = `Settings: ${TRAIL_TXT[S.trail]}, EMA ${S.ema === "ext" ? "including pre-market and after-hours bars" : "on regular hours only"}, ${S.side === "both" ? "long and short" : "long only"}. ${B.demo ? "DEMO DATA, not real prices." : ""}`;
+}
+
+function years() {
+  const V = B.variants[vkey()];
+  $("yrs").innerHTML = `<thead><tr><th>Year</th><th>Trades</th><th>Won</th><th>Avg win / loss</th><th>Strategy</th><th>QQQ held</th><th>Max drop</th></tr></thead><tbody>` +
+    Object.entries(V.by_year).map(([y, s]) => `<tr><td>${y}</td><td>${s.trades}</td><td>${s.trades ? Math.round(s.win_rate * 100) + "%" : "–"}</td><td>${s.trades ? `${pc(s.avg_win_pct, 2)} / ${pc(s.avg_loss_pct, 2)}` : "–"}</td><td class="${tone(s.total_pct)}">${pc(s.total_pct)}</td><td class="${tone(B.hold_by_year[y])}">${pc(B.hold_by_year[y])}</td><td>${pc(s.max_dd_pct)}</td></tr>`).join("") + `</tbody>`;
+}
+
+function variants() {
+  const rows = [];
+  for (const [t, tl] of TRAILS) for (const [e, el] of [["ext", "pre-mkt"], ["rth", "reg. hours"]]) for (const [s, sl] of [["both", "L+S"], ["long", "long"]]) {
+    const k = `${e}|${t}|${s}`, A = B.variants[k]?.all; if (!A) continue;
+    rows.push(`<tr style="${k === vkey() ? "background:var(--blue-bg)" : ""}${k === B.default ? ";font-weight:600" : ""}" data-k="${k}"><td>${esc(tl)} · ${el} · ${sl}</td><td>${A.trades}</td><td>${Math.round(A.win_rate * 100)}%</td><td class="${tone(A.total_pct)}">${pc(A.total_pct, 0)}</td><td>${pc(A.cagr_pct)}</td><td>${pc(A.max_dd_pct)}</td><td>${A.profit_factor ?? "–"}</td></tr>`);
+  }
+  $("vars").innerHTML = `<thead><tr><th>Setting (tap to show)</th><th>Trades</th><th>Won</th><th>Total</th><th>A year</th><th>Max drop</th><th>Profit factor</th></tr></thead><tbody>${rows.join("")}</tbody>`;
+  $("vars").onclick = e => { const r = e.target.closest("tr[data-k]"); if (!r) return; [S.ema, S.trail, S.side] = r.dataset.k.split("|"); save(); render(); $("p-wall").scrollIntoView({ behavior: "smooth", block: "start" }); };
+  $("vars").querySelectorAll("tr[data-k]").forEach(r => r.style.cursor = "pointer");
+}
+
+function compare() {
+  const A = B.variants[B.default].all, spy = B.checks?.SPY;
+  $("cmp").innerHTML = `<div><span class="k">The video (6 years)</span><b>+508%</b><small>1,430 trades · 57% won · NAS100 CFD, sizing not stated</small></div>
+    <div><span class="k">Our test (default)</span><b class="${tone(A.total_pct)}" style="color:var(--${A.total_pct >= 0 ? "up" : "down"})">${pc(A.total_pct, 0)}</b><small>${A.trades.toLocaleString("en")} trades · ${Math.round(A.win_rate * 100)}% won · QQQ, no leverage</small></div>
+    <div><span class="k">Holding QQQ</span><b>${pc(B.hold_pct, 0)}</b><small>same period, buy once and wait</small></div>
+    ${spy ? `<div><span class="k">Same rules on SPY</span><b style="color:var(--${spy.strategy.total_pct >= 0 ? "up" : "down"})">${pc(spy.strategy.total_pct, 0)}</b><small>${Math.round(spy.strategy.win_rate * 100)}% won · SPY held ${pc(spy.hold_pct, 0)}</small></div>` : ""}`;
+  const best = Object.entries(B.variants).filter(([k]) => !k.endsWith("fixed1r|both") && !k.endsWith("fixed1r|long")).sort((a, b) => b[1].all.total_pct - a[1].all.total_pct)[0];
+  $("cmp-note").innerHTML = `The video doesn't say how big each trade is or how the stop is trailed, so the totals can't match exactly; a CFD with leverage multiplies every result. What can be checked is the edge per trade: our default averages <b>${pc(A.avg_pct, 3)}</b> a trade after costs, with a profit factor of <b>${A.profit_factor ?? "–"}</b> (above 1 = the wins outweigh the losses). The best of the trailing settings here is <b>${esc(best[0].replace(/\|/g, " · "))}</b> at ${pc(best[1].all.total_pct, 0)}; picking the best after the fact flatters it, so judge it on the live tiles.`;
+}
+
+function liveTable() {
+  const ts = (LV?.trades || []).slice().reverse(), ms = LV?.missed || [];
+  if (!ts.length && !ms.length) { $("lt").innerHTML = `<tbody><tr><td class="fine" style="text-align:left;white-space:normal">No live trades yet. The first one opens at 09:35 New York on ${esc(fmtD(LV?.start || "2026-11-06", { weekday: "long", day: "numeric", month: "long" }))}. Phone alerts: subscribe to the ntfy channel ending in <b>-session</b>.</td></tr></tbody>`; return; }
+  $("lt").innerHTML = `<thead><tr><th>Day</th><th>Side</th><th>Entry</th><th>Exit</th><th>Why</th><th>Result</th></tr></thead><tbody>` +
+    ts.map(t => `<tr><td>${esc(fmtD(t.date, { day: "numeric", month: "short" }))}</td><td>${t.side > 0 ? "Long" : "Short"}</td><td>${t.entry}</td><td>${t.exit ? t.exit.price : "open · stop " + t.stop}</td><td>${t.exit ? WHY[t.exit.reason] : "–"}</td><td class="${tone(t.pct)}">${t.exit ? pc(t.pct, 2) : "–"}</td></tr>`).join("") +
+    ms.slice().reverse().map(m => `<tr><td>${esc(fmtD(m.date, { day: "numeric", month: "short" }))}</td><td colspan="5" class="fine" style="text-align:left">Not traded: ${esc(m.why)}</td></tr>`).join("") + `</tbody>`;
+  $("live-p").innerHTML = `Every session since ${esc(fmtD(LV.start, { day: "numeric", month: "long", year: "numeric" }))}, on real-time prices. Closed trades are never changed. Phone alerts: the ntfy channel ending in <b>-session</b>.`;
+}
+
+function activity() {
+  const tr = LV?.trades || [], today = LV?.today?.date, N = 25;
+  const cells = tr.slice(-N).map(t => `<i class="${t.date === today && !t.exit ? "today" : t.exit ? (t.pct >= 0 ? "u" : "d") : "today"}" title="${esc(t.date)}"></i>`);
+  while (cells.length < N) cells.unshift(`<i></i>`);
+  $("sess").innerHTML = cells.join("");
+  $("act-n").textContent = `${tr.filter(t => t.exit).length} live sessions`;
+}
+
+function render() { controls(); headline(); wall(); years(); variants(); compare(); }
+
+document.addEventListener("click", e => {
+  const b = e.target.closest("[data-trail], [data-ema], [data-side]"); if (!b) return;
+  const d = b.dataset; if (d.trail) S.trail = d.trail; if (d.ema) S.ema = d.ema; if (d.side) S.side = d.side;
+  save(); render();
+});
+
+(async () => {
+  [B, LV] = await Promise.all([load("data/session/backtest.json"), load("data/session/live.json")]);
+  liveChart(); activity(); liveTable();
+  if (!B) {
+    $("big").innerHTML = ""; $("wall").innerHTML = `<div class="empty">The first backtest is running on GitHub. Check back in a few minutes.</div>`;
+    ["ctl", "track"].forEach(i => $(i).innerHTML = ""); return;
+  }
+  if (!B.variants[vkey()]) [S.ema, S.trail, S.side] = B.default.split("|");
+  render();
+  if (LV?.today?.bars?.length && !LV.trades?.find(t => t.date === LV.today.date && t.exit)) setInterval(async () => { const n = await load("data/session/live.json"); if (n) { LV = n; liveChart(); activity(); } }, 60000);
+})();
+</script>
+</body>
+</html>
