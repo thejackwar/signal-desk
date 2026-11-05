@@ -1,0 +1,278 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0b0f14">
+<title>Chart</title>
+<meta name="description" content="A candle chart for SPY, every S&amp;P 100 stock, the main coins and commodities where you tap the technical analysis tools you want: moving averages, Bollinger Bands, RSI, MACD, volume, trendlines, support and resistance, Fibonacci, pivots and more, each with a plain-English reading. Free, information only.">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Investment Center Signals">
+<meta property="og:title" content="Technical analysis chart | Investment Center Signals">
+<meta property="og:description" content="Tap the tools you want on the candles: moving averages, Bollinger Bands, RSI, MACD, volume, trendlines, support and resistance, Fibonacci, pivots and more, each with a plain-English reading.">
+<meta property="og:url" content="https://thejackwar.github.io/signal-desk/chart.html">
+<meta property="og:image" content="https://thejackwar.github.io/signal-desk/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Investment Center Signals: trading strategies, explained and backtested">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="canonical" href="https://thejackwar.github.io/signal-desk/chart.html">
+<!-- Cloudflare Web Analytics (free, no cookies). Empty token = off. -->
+<script>
+(() => {
+  const CF_ANALYTICS_TOKEN = "a2d6810a28f64b999832485d1635915a";
+  if (!CF_ANALYTICS_TOKEN || location.hostname === "localhost") return;
+  const s = document.createElement("script");
+  s.defer = true; s.src = "https://static.cloudflareinsights.com/beacon.min.js";
+  s.dataset.cfBeacon = JSON.stringify({ token: CF_ANALYTICS_TOKEN });
+  document.head.appendChild(s);
+})();
+</script>
+<link rel="icon" href="favicon.ico?v=2" sizes="any">
+<link rel="icon" type="image/svg+xml" href="logo.svg?v=2">
+<link rel="apple-touch-icon" href="icon-180.png?v=2">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+<script src="https://unpkg.com/lightweight-charts@4.2.3/dist/lightweight-charts.standalone.production.js"></script>
+<style>
+/* Same dark design as the rest of the site (home page): dark canvas, light-blue/green accents. */
+:root {
+  --bg: #0b0f14; --card: #121820; --fill: #1a222c; --fill-2: #0f141b; --hair: #2b3644; --hair-2: #1f2833;
+  --fg: #e6edf3; --muted: #a5b1bd; --faint: #7d8a97; --accent: #38bdf8; --accent-hover: #7dd3fc; --link: #7dd3fc; --on-accent: #04121a;
+  --accent2: #4ade80; --bar: rgba(11,15,20,.86);
+  --c-bg: #121820; --c-grid: #1a222c; --c-txt: #8b98a5; --c-cup: #4ade80; --c-cdn: #f87171;
+  --up-line: #4ade80; --down-line: #f87171; --sup: #60a5fa; --res: #f59e0b;
+  --pill-up: rgba(48,209,88,.18); --pill-down: rgba(255,69,58,.18); --pill-sq: rgba(255,159,10,.18); --pill-sq-fg: #ff9f0a;
+  --grad: linear-gradient(95deg, #38bdf8 0%, #34d399 60%, #4ade80 100%);
+  --title-grad: linear-gradient(95deg, #e6edf3 0%, #e6edf3 40%, #7dd3fc 65%, #86efac 100%);
+  --font: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", Inter, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body { color: var(--fg); font: 17px/1.47 var(--font); letter-spacing: -.022em; -webkit-font-smoothing: antialiased; font-feature-settings: "tnum";
+  padding-bottom: calc(40px + env(safe-area-inset-bottom, 0px));
+  background: radial-gradient(1100px 560px at 85% -10%, color-mix(in srgb, var(--accent) 14%, transparent), transparent 65%),
+    radial-gradient(900px 480px at -5% 105%, color-mix(in srgb, var(--accent2) 9%, transparent), transparent 62%), var(--bg); background-attachment: fixed; }
+a { color: var(--link); text-decoration: none; }
+a:hover { text-decoration: underline; }
+.wrap { max-width: 1280px; margin: 0 auto; padding: 0 22px; }
+@media (max-width: 560px) { .wrap { padding: 0 12px; } }
+
+.bar { position: sticky; top: 0; z-index: 30; background: var(--bar); backdrop-filter: saturate(180%) blur(20px); -webkit-backdrop-filter: saturate(180%) blur(20px);
+  border-bottom: 1px solid var(--hair-2); padding-top: env(safe-area-inset-top, 0px); }
+.bar-in { max-width: 1280px; margin: 0 auto; padding: 0 22px; height: 48px; display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; }
+.back { font-size: 14px; }
+.bar-title { font-size: 15px; font-weight: 600; letter-spacing: -.01em; }
+
+.hero { text-align: center; padding: 40px 0 18px; }
+.hero h1 { font-size: clamp(36px, 6vw, 56px); line-height: 1.06; font-weight: 700; letter-spacing: -.035em; margin: 0;
+  background: var(--title-grad); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.lede { font-size: clamp(17px, 2vw, 21px); line-height: 1.35; color: var(--muted); margin: 10px auto 0; max-width: 640px; }
+@media (max-width: 560px) { .hero { padding: 26px 0 12px; } }
+
+form.pick { display: flex; gap: 10px; justify-content: center; max-width: 560px; margin: 22px auto 0; }
+.field { flex: 1; min-width: 0; position: relative; }
+.field svg { position: absolute; left: 16px; top: 50%; transform: translateY(-50%); width: 18px; height: 18px; color: var(--faint); pointer-events: none; }
+form.pick input { width: 100%; height: 48px; background: var(--card); border: 1px solid var(--hair); border-radius: 14px; padding: 0 16px 0 44px;
+  color: var(--fg); font: 500 17px var(--font); text-transform: uppercase; }
+form.pick input::placeholder { text-transform: none; color: var(--faint); font-weight: 400; }
+form.pick input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent) 22%, transparent); }
+.btn { appearance: none; border: 0; background: var(--grad); color: var(--on-accent); border-radius: 980px; padding: 0 24px; height: 48px;
+  font: 600 16px var(--font); cursor: pointer; }
+.quick { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; margin: 12px 0 0; }
+.quick button { appearance: none; border: 1px solid var(--hair); background: none; color: var(--muted); border-radius: 980px; padding: 5px 12px; font: 500 13px var(--font); cursor: pointer; }
+.quick button:hover { color: var(--fg); border-color: var(--faint); }
+
+.seg { display: inline-flex; flex-wrap: wrap; gap: 2px; background: var(--fill); border-radius: 10px; padding: 2px; }
+.seg button { appearance: none; border: 0; background: none; color: var(--fg); font: 500 13px/1 var(--font); padding: 8px 12px; border-radius: 8px; cursor: pointer; }
+.seg button[aria-pressed="true"] { background: var(--grad); color: var(--on-accent); font-weight: 600; }
+.seg button:disabled { color: var(--faint); opacity: .45; cursor: default; }
+
+.status { color: var(--muted); font-size: 14px; margin: 12px 0 0; min-height: 1.4em; text-align: center; }
+.status.err { color: var(--down-line); }
+
+/* the chart card */
+.card { background: linear-gradient(150deg, color-mix(in srgb, var(--accent) 6%, var(--card)) 0%, var(--card) 55%); border: 1px solid var(--hair-2);
+  border-radius: 22px; overflow: hidden; margin-top: 16px; }
+.head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-end; gap: 12px 20px; padding: 18px 20px 12px; }
+.head h2 { margin: 0; font-size: 26px; font-weight: 700; letter-spacing: -.025em; line-height: 1.1; }
+.head h2 small { display: block; font-size: 13px; font-weight: 500; color: var(--muted); letter-spacing: -.005em; margin-bottom: 4px; }
+.head .px { font-size: 22px; font-weight: 650; letter-spacing: -.02em; margin-left: 10px; }
+.head .chg { font-size: 15px; font-weight: 600; margin-left: 8px; }
+.up { color: var(--up-line); } .down { color: var(--down-line); } .dim { color: var(--faint); }
+
+/* indicator picker */
+.picker { padding: 4px 20px 10px; border-top: 1px solid var(--hair-2); }
+.picker-top { display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: center; justify-content: space-between; margin: 10px 0 2px; }
+.picker-top b { font-size: 13px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; }
+.presets { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.presets span { font-size: 12px; color: var(--faint); margin-right: 2px; }
+.presets button { appearance: none; border: 0; background: var(--fill); color: var(--fg); border-radius: 980px; padding: 5px 11px; font: 500 12px var(--font); cursor: pointer; }
+.presets button:hover { background: var(--hair); }
+.groups { display: grid; gap: 8px; margin-top: 10px; }
+.grp { display: flex; gap: 10px; align-items: baseline; }
+.grp > em { flex: 0 0 96px; font-style: normal; font-size: 12px; color: var(--faint); font-weight: 500; padding-top: 7px; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+@media (max-width: 640px) { .grp { flex-direction: column; gap: 4px; } .grp > em { flex: none; padding: 0; } .picker { padding: 2px 12px 8px; } .head { padding: 14px 14px 10px; }
+  .chips { flex-wrap: nowrap; overflow-x: auto; margin: 0 -12px; padding: 0 12px 2px; scrollbar-width: none; } .chips::-webkit-scrollbar { display: none; } .chip { flex: none; } }
+.chip { display: inline-flex; align-items: stretch; border-radius: 980px; border: 1px solid var(--hair); background: var(--fill-2); overflow: hidden; }
+.chip button { appearance: none; border: 0; background: none; color: var(--muted); font: 500 13px/1 var(--font); padding: 7px 12px; cursor: pointer; display: inline-flex; align-items: center; gap: 7px; }
+.chip button:hover { color: var(--fg); }
+.chip i { width: 9px; height: 9px; border-radius: 50%; border: 1.5px solid currentColor; opacity: .55; }
+.chip.on { border-color: color-mix(in srgb, var(--c) 60%, transparent); background: color-mix(in srgb, var(--c) 14%, var(--card)); }
+.chip.on button { color: var(--fg); }
+.chip.on i { background: var(--c); border-color: var(--c); opacity: 1; }
+.chip .gear { padding: 7px 10px 7px 6px; color: var(--muted); font-size: 13px; border-left: 1px solid color-mix(in srgb, var(--c) 35%, transparent); }
+.chip.off { opacity: .45; }
+.chip.off button { cursor: help; }
+
+.settings { margin: 10px 0 2px; background: var(--fill-2); border: 1px solid var(--hair); border-radius: 14px; padding: 12px 14px; display: flex; flex-wrap: wrap; gap: 10px 16px; align-items: flex-end; }
+.settings[hidden] { display: none; }
+.settings h4 { flex: 1 0 100%; margin: 0; font-size: 15px; display: flex; align-items: center; gap: 8px; }
+.settings h4 i { width: 10px; height: 10px; border-radius: 50%; }
+.settings p { flex: 1 0 100%; margin: -4px 0 0; color: var(--muted); font-size: 13px; line-height: 1.45; }
+.settings label { display: flex; flex-direction: column; gap: 4px; font-size: 12px; color: var(--muted); }
+.settings input, .settings select { height: 34px; width: 92px; background: var(--card); border: 1px solid var(--hair); border-radius: 9px; padding: 0 8px; color: var(--fg); font: 500 15px var(--font); }
+.settings select { width: auto; }
+.settings .acts { display: flex; gap: 8px; margin-left: auto; }
+.settings .acts button { appearance: none; border: 0; border-radius: 980px; padding: 0 14px; height: 34px; font: 600 13px var(--font); cursor: pointer; background: var(--fill); color: var(--fg); }
+.settings .acts button.rm { color: var(--down-line); }
+
+/* toolbar above the chart */
+.tools { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; justify-content: space-between; padding: 10px 20px; border-top: 1px solid var(--hair-2); }
+.tools .seg button { padding: 7px 11px; }
+.draw { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+.draw button { appearance: none; border: 1px solid var(--hair); background: none; color: var(--muted); border-radius: 9px; padding: 6px 10px; font: 500 13px var(--font); cursor: pointer; display: inline-flex; gap: 6px; align-items: center; }
+.draw button svg { width: 15px; height: 15px; }
+.draw button[aria-pressed="true"] { color: var(--on-accent); background: var(--accent); border-color: var(--accent); }
+.draw button:hover { color: var(--fg); }
+.hint { font-size: 12px; color: var(--accent); }
+@media (max-width: 640px) { .tools { padding: 8px 12px; } }
+
+.stage { position: relative; }
+.main { position: relative; height: clamp(340px, 58vh, 620px); }
+.pane { position: relative; height: 140px; border-top: 1px solid var(--hair-2); }
+@media (max-width: 560px) { .pane { height: 118px; } }
+.lg { position: absolute; left: 10px; top: 8px; z-index: 5; font-size: 12px; line-height: 1.55; pointer-events: none; max-width: calc(100% - 100px);
+  text-shadow: 0 0 4px var(--c-bg), 0 0 8px var(--c-bg); }
+.lg div { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.lg b { font-weight: 600; }
+.lg .x { pointer-events: auto; cursor: pointer; color: var(--faint); margin-left: 6px; font-size: 13px; }
+.lg .x:hover { color: var(--down-line); }
+.lg .o { color: var(--muted); }
+.lg .o span { margin-right: 8px; }
+.marks { position: absolute; inset: 0; pointer-events: none; z-index: 4; overflow: hidden; }
+.marks span { position: absolute; transform: translate(-50%, -50%); font: 600 11px var(--font); white-space: nowrap; }
+.marks span.x { font-size: 15px; }
+.foot-note { padding: 8px 20px 14px; font-size: 12px; color: var(--faint); border-top: 1px solid var(--hair-2); }
+
+/* readings */
+.sec { font-size: clamp(24px, 3vw, 30px); font-weight: 700; letter-spacing: -.028em; margin: 40px 0 6px;
+  background: var(--title-grad); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.sub { color: var(--muted); margin: 0 0 16px; font-size: 15px; }
+.tally { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin: 0 0 14px; font-size: 15px; }
+.reads { background: var(--card); border: 1px solid var(--hair-2); border-radius: 18px; overflow: hidden; }
+.reads .r { display: grid; grid-template-columns: 14px minmax(120px, 200px) 1fr auto; gap: 4px 14px; align-items: center; padding: 12px 18px; }
+.reads .r + .r { border-top: 1px solid var(--hair-2); }
+.reads .r i { width: 10px; height: 10px; border-radius: 50%; }
+.reads .r b { font-size: 15px; font-weight: 600; }
+.reads .r span { color: var(--muted); font-size: 14px; line-height: 1.4; }
+.reads .empty { padding: 22px 18px; color: var(--muted); font-size: 15px; }
+@media (max-width: 640px) { .reads .r { grid-template-columns: 12px 1fr auto; } .reads .r span { grid-column: 2 / 4; } }
+.pill { display: inline-block; border-radius: 980px; padding: 3px 11px; font-size: 12px; font-weight: 600; letter-spacing: 0; white-space: nowrap; }
+.pill.bull { background: var(--pill-up); color: var(--up-line); }
+.pill.bear { background: var(--pill-down); color: var(--down-line); }
+.pill.neu { background: var(--fill); color: var(--muted); }
+.pill.warn { background: var(--pill-sq); color: var(--pill-sq-fg); }
+
+.panel { background: var(--card); border: 1px solid var(--hair-2); border-radius: 22px; padding: 24px; margin-top: 40px; }
+.panel h2 { margin: 0 0 6px; font-size: 26px; letter-spacing: -.03em; }
+.panel .lead { color: var(--muted); font-size: 16px; margin: 4px 0 14px; }
+.steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; }
+.steps > div { background: var(--fill-2); border-radius: 14px; padding: 16px; }
+.steps b { display: block; font-size: 15px; margin-bottom: 4px; }
+.steps p { margin: 0; color: var(--muted); font-size: 14px; line-height: 1.45; }
+.fine { color: var(--faint); font-size: 12px; line-height: 1.5; margin: 0; }
+footer.foot { border-top: 1px solid var(--hair); margin-top: 48px; padding-top: 18px; }
+.loading { text-align: center; color: var(--muted); padding: 120px 0; font-size: 15px; }
+</style>
+</head>
+<body>
+<nav class="bar" aria-label="Page">
+  <div class="bar-in">
+    <a class="back" href="index.html#home" aria-label="Back to Signals">‹ Signals</a>
+    <span class="bar-title">Chart</span>
+    <span></span>
+  </div>
+</nav>
+
+<main class="wrap">
+  <section class="hero">
+    <h1>Chart.</h1>
+    <p class="lede">Pick a market, then tap the tools you want: they're drawn on the candles, and each one gets a plain-English reading underneath.</p>
+    <form class="pick" id="pick" autocomplete="off">
+      <div class="field">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+        <input id="sym" list="syms" placeholder="Ticker, e.g. SPY, NVDA, BTC or Gold" aria-label="Ticker" spellcheck="false" autocapitalize="characters">
+        <datalist id="syms"></datalist>
+      </div>
+      <button class="btn" type="submit">Show</button>
+    </form>
+    <div class="quick" id="quick"></div>
+    <p class="status" id="status"></p>
+  </section>
+
+  <section class="card" id="card">
+    <div class="head">
+      <h2 id="title"><small>&nbsp;</small>–</h2>
+      <div class="seg" role="group" aria-label="Timeframe" id="tfs"></div>
+    </div>
+    <div class="picker">
+      <div class="picker-top">
+        <b>Add to the chart</b>
+        <div class="presets" id="presets"></div>
+      </div>
+      <div class="groups" id="groups"></div>
+      <div class="settings" id="settings" hidden></div>
+    </div>
+    <div class="tools">
+      <div class="draw" id="draw">
+        <button type="button" data-mode="h" aria-pressed="false" title="Tap the chart to place a horizontal level"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 12h18"/></svg>Level</button>
+        <button type="button" data-mode="l" aria-pressed="false" title="Tap two points to draw a line"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 19 20 5"/><circle cx="4" cy="19" r="1.6"/><circle cx="20" cy="5" r="1.6"/></svg>Line</button>
+        <button type="button" data-act="undo" title="Remove the last drawing">Undo</button>
+        <button type="button" data-act="clear" title="Remove every drawing on this market">Clear</button>
+        <span class="hint" id="hint"></span>
+      </div>
+      <div class="draw"><button type="button" data-act="fit" title="Show the whole history">Fit</button><button type="button" data-act="recent" title="Back to the latest candles">Latest</button></div>
+    </div>
+    <div class="stage" id="stage"><div class="loading">Loading…</div></div>
+    <p class="foot-note" id="note"></p>
+  </section>
+
+  <h2 class="sec">What the chart says</h2>
+  <p class="sub" id="readsub">One line per tool you've added, read on the latest candle.</p>
+  <div class="tally" id="tally"></div>
+  <div class="reads" id="reads"></div>
+
+  <section class="panel">
+    <h2>Getting started</h2>
+    <p class="lead">Technical analysis reads price and volume only. The tools come in a few families; most traders use one or two from each, not all of them.</p>
+    <div class="steps">
+      <div><b>Trend: is it going up?</b><p>Moving averages, Supertrend, Parabolic SAR, Ichimoku and ADX. Price above a rising 200-day average is the classic "uptrend".</p></div>
+      <div><b>Momentum: how hard?</b><p>RSI, MACD, Stochastic and CCI. They show when a move is speeding up or tiring. "Overbought" isn't a sell signal by itself in a strong trend.</p></div>
+      <div><b>Volatility: how wild?</b><p>Bollinger and Keltner bands, Donchian channels and ATR. Narrow bands often come before a big move; ATR helps size a stop loss.</p></div>
+      <div><b>Levels: where might it stop?</b><p>Trendlines, support and resistance, Fibonacci, pivot points and the previous high/low. Prices often react near them; a clean break is a signal in itself.</p></div>
+      <div><b>Volume: is anyone behind it?</b><p>Volume, VWAP and OBV. A breakout on heavy volume is more convincing than one on light volume.</p></div>
+      <div><b>Your own lines</b><p>Tap <strong>Level</strong> or <strong>Line</strong>, then the chart. Your drawings are kept on this device for each market and show on every timeframe.</p></div>
+    </div>
+  </section>
+
+  <footer class="foot">
+    <p class="fine" id="foot">Stocks: Alpaca (all US exchanges, at least 15 minutes old). Crypto: Binance coin/USDT, or Kraken. Commodities: daily futures prices from the site's nightly update. Readings are mechanical rules of thumb, not predictions. For information only. Not investment advice.</p>
+  </footer>
+</main>
+
+<script type="module" src="chart.js?v=1"></script>
+</body>
+</html>

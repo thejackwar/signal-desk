@@ -28,7 +28,7 @@ the candles. Free plan: 100,000 requests a day; one ticker = one request.
 `GET /?symbol=AAPL` fetches 5 Alpaca series in parallel (`1Week` 8 years, `1Day` 460 days,
 `30Min` 330 days, `15Min` 95 days, `5Min` 35 days; `feed=sip`, `adjustment=all`,
 end = now − 16 min), keeps regular hours (9:30–16:00 New York) for intraday bars, and returns
-`[time, open, high, low, close]` rows with New York times. The page builds 1H and 4H from the
+`[time, open, high, low, close, volume]` rows with New York times (volume added for the Chart page; older pages ignore it). The page builds 1H and 4H from the
 30-min bars and draws the lines itself (`docs/trendlines.js`). Only S&P 100 stocks and SPY are
 accepted (SPX → SPY, BRK.B → BRK-B). Answers are cached for a minute.
 

@@ -114,7 +114,7 @@ async function cachedHistory(sym, tf, start, end, today, env, cache) {
 }
 
 function shape(bars, kind) {
-  bars = bars.map(b => [nyWall(b.t), b.o, b.h, b.l, b.c]).sort((a, b) => a[0] - b[0]);
+  bars = bars.map(b => [nyWall(b.t), b.o, b.h, b.l, b.c, b.v ?? 0]).sort((a, b) => a[0] - b[0]);
   const out = [];
   if (kind === "session") {
     let prev = null;
@@ -182,7 +182,7 @@ async function binanceSeries(coin, interval, want) {
     if (js.length < +q.get("limit")) break;              // reached the coin's first candle
     endTime = js[0][0] - 1;
   }
-  return rows.map(k => [Math.floor(k[0] / 1000), +k[1], +k[2], +k[3], +k[4]]);
+  return rows.map(k => [Math.floor(k[0] / 1000), +k[1], +k[2], +k[3], +k[4], +k[5]]);   // + coin volume
 }
 
 // Kraken allows about one public request per second: callers go one at a time, and a
@@ -198,7 +198,7 @@ async function krakenSeries(coin, minutes) {
   if (js.error && js.error.length) throw new Error(`Kraken: ${js.error.join(", ")}`);
   const key = Object.keys(js.result || {}).find(k => k !== "last");
   if (!key) throw new Error(`Kraken: no ${coin}/USD data`);
-  return js.result[key].map(k => [+k[0], +k[1], +k[2], +k[3], +k[4]]);
+  return js.result[key].map(k => [+k[0], +k[1], +k[2], +k[3], +k[4], +k[6]]);   // + coin volume
 }
 
 // sorted, one candle per time

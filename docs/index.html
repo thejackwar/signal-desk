@@ -1939,6 +1939,7 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
     <a class="nav" href="#learn" data-tab="learn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 6.5C10 5 7 4.5 3.5 5v13.5c3.5-.5 6.5 0 8.5 1.5 2-1.5 5-2 8.5-1.5V5C17 4.5 14 5 12 6.5Z"/><path d="M12 6.5V20"/></svg>Learn</a>
   </details>
   <details class="sgroup"><summary>Charts &amp; tools</summary>
+    <a class="nav" href="chart.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 8v7"/><rect x="5.8" y="10" width="2.4" height="3.5" rx=".5"/><path d="M12 6v9"/><rect x="10.8" y="8" width="2.4" height="5" rx=".5"/><path d="M17 9v7"/><rect x="15.8" y="10.5" width="2.4" height="3.5" rx=".5"/><path d="M4.5 17c4-1 9-6 15-9" stroke-opacity=".6"/></svg>Chart</a>
     <a class="nav" href="trendlines.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M6 8l13 5"/><path d="M6 18l13-9"/></svg>Trendlines</a>
     <a class="nav" href="options.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 20h18"/><path d="M4 17c3 0 4-10 8-10s5 10 8 10"/><path d="M12 7v13" stroke-dasharray="2 2"/></svg>Options</a>
     <a class="nav" href="volumeprofile.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M20 7h-6"/><path d="M20 11h-9"/><path d="M20 15h-4"/><path d="M20 19h-7"/></svg>Volume profile</a>
@@ -1986,6 +1987,7 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
       <a href="#terminal" data-tab="terminal"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="4" width="19" height="16" rx="2.5"/><path d="m6.5 9.5 3 2.5-3 2.5"/><path d="M12 15h5"/></svg><span>Terminal</span></a>
       <a href="#alerts" data-tab="alerts"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9a6 6 0 1 1 12 0c0 6 2.5 7.5 2.5 7.5h-17S6 15 6 9Z"/><path d="M10 20a2 2 0 0 0 4 0"/></svg><span>Alerts</span></a>
       <a href="#stocks" data-tab="stocks"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="m7 15 4-4 3 3 6-7"/></svg><span data-l="tab">Stocks</span></a>
+      <a href="chart.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 8v7"/><rect x="5.8" y="10" width="2.4" height="3.5" rx=".5"/><path d="M12 6v9"/><rect x="10.8" y="8" width="2.4" height="5" rx=".5"/><path d="M17 9v7"/><rect x="15.8" y="10.5" width="2.4" height="3.5" rx=".5"/><path d="M4.5 17c4-1 9-6 15-9" stroke-opacity=".6"/></svg><span>Chart</span></a>
       <a href="trendlines.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M6 8l13 5"/><path d="M6 18l13-9"/></svg><span>Trendlines</span></a>
       <a href="options.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 20h18"/><path d="M4 17c3 0 4-10 8-10s5 10 8 10"/><path d="M12 7v13" stroke-dasharray="2 2"/></svg><span>Options</span></a>
       <a href="volumeprofile.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M20 7h-6"/><path d="M20 11h-9"/><path d="M20 15h-4"/><path d="M20 19h-7"/></svg><span>Volume profile</span></a>
@@ -2880,6 +2882,7 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
         ["#terminal", "Terminal", "Everything on one screen: command line, monitor, chart, alerts, live trades, news and calendar"],
         ["#stocks", L().Title || L().Tab, `Every ${L().one} with its chart, technical rating and latest alerts`],
         ["#heatmap", "Heatmap", "The whole market on one screen, coloured by today's move", "#stocks"],
+        ["chart.html", "Chart", "Candles plus any technical tool you tap: averages, bands, RSI, MACD, volume, trendlines, Fibonacci, pivots, with a reading for each"],
         ["trendlines.html", "Trendlines", "Automatic trendlines and support/resistance on seven timeframes"],
         ["options.html", "Options", "How option strategies pay off, a live option chain builder and backtests"],
         ["volumeprofile.html", "Volume profile", "How much traded at each price: point of control, value area, thin and busy zones, naked POCs"],
@@ -3240,7 +3243,7 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
     h += `<div class="card rating" id="rating"><div class="hd"><h3>Technical rating</h3></div><p class="loading" style="padding:18px 0">Reading the indicators…</p></div>`;
     if (isComm() && r.drivers) h += `<div class="card drivers"><h3>What moves the price</h3><p>${esc(r.drivers)}.</p><p class="hint" style="margin:0">Prices follow the nearest contract, so the chart can jump a little when it rolls to the next month.</p></div>`;
     if (isComm()) h += etcCard(t);
-    h += `<p class="btnrow" style="margin:4px 0 18px"><a class="btn ghost" href="#strategylab?s=${encodeURIComponent(t)}">Backtest a strategy on ${esc(disp(t))} ›</a>${isComm() ? "" : `<a class="btn ghost" href="trendlines.html#${encodeURIComponent(t)}">Trendlines on 7 timeframes ›</a>`}${S.market === "stocks" ? `<a class="btn ghost" href="#earnings-${encodeURIComponent(t)}">How it moves after earnings ›</a>` : ""}</p>`;
+    h += `<p class="btnrow" style="margin:4px 0 18px"><a class="btn ghost" href="#strategylab?s=${encodeURIComponent(t)}">Backtest a strategy on ${esc(disp(t))} ›</a><a class="btn ghost" href="chart.html#${encodeURIComponent(t)}/D">Chart with indicators ›</a>${isComm() ? "" : `<a class="btn ghost" href="trendlines.html#${encodeURIComponent(t)}">Trendlines on 7 timeframes ›</a>`}${S.market === "stocks" ? `<a class="btn ghost" href="#earnings-${encodeURIComponent(t)}">How it moves after earnings ›</a>` : ""}</p>`;
     h += nextEarningsCard(t) + moodCard(t) + mentionsCard(t) + newsFor(t);
     h += `<h2>Recent alerts on ${esc(disp(t))}</h2>`;
     if (!alerts.length) h += `<p class="tag" style="font-size:14px">No strategy has fired on ${esc(disp(t))} in the last few weeks.</p>`;
@@ -7197,7 +7200,7 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
     ["ALRT", "#alerts", "Alerts"], ["LIVE", "#trades", "Live trades"], ["BEST", "#winners", "Best trades"], ["REC", "#record", "Track record"],
     ["LAB", "#strategylab", "Strategy Lab"], ["STRAT", "#strategies", "Strategies"], ["VAULT", "#strategies-vault", "Vault"], ["RSCH", "research.html", "Strategy research"],
     ["STK", "#stocks", "Markets list"], ["HEAT", "#heatmap", "Heatmap"], ["NEWS", "#news", "News"], ["MOOD", "#mood", "News mood"], ["BUZZ", "#buzz", "Most mentioned"],
-    ["CAL", "#calendar", "Calendar"], ["ERN", "#earnings", "After earnings"], ["TL", "trendlines.html", "Trendlines"], ["OPT", "options.html", "Options"],
+    ["CAL", "#calendar", "Calendar"], ["ERN", "#earnings", "After earnings"], ["CHRT", "chart.html", "Chart (technical analysis)"], ["TL", "trendlines.html", "Trendlines"], ["OPT", "options.html", "Options"],
     ["VP", "volumeprofile.html", "Volume profile"], ["MXP", "maxpain.html", "Max pain"], ["PAIR", "pairs.html", "Pairs trading"], ["DARK", "darkpool.html", "Dark pools"],
     ["CORR", "correlation.html", "Implied correlation"], ["CRYP", "#crypto", "Crypto dashboard"], ["VIX", "#vix", "VIX seasonality"], ["CRSH", "#crashes", "Smaller Crashes"],
     ["PRAC", "#practice", "Practice portfolio"], ["NTFY", "#notify", "Phone alerts"], ["LRN", "#learn", "Learn"], ["BRKR", "#brokers", "Brokers"], ["HOME", "#home", "Home"], ["ABOUT", "#about", "About us"],
@@ -7217,7 +7220,7 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
   const TM_SEC = [["DES", "Overview"], ["FA", "Financials"], ["ANR", "Analysts"], ["EE", "Estimates"], ["RV", "Comparables"], ["HDS", "Holders"], ["DVD", "Dividends"]];
   // ticker + code, e.g. "NVDA TL"
   const tmTickerFn = t => {
-    const e = encodeURIComponent(t), list = [["GP", `#stock-${e}`, "Full stock page"], ["BT", `#strategylab?s=${e}`, "Backtest it in the Lab"]];
+    const e = encodeURIComponent(t), list = [["GP", `#stock-${e}`, "Full stock page"], ["BT", `#strategylab?s=${e}`, "Backtest it in the Lab"], ["CHRT", `chart.html#${e}/D`, "Chart with indicators"]];
     if (!isComm()) list.push(["TL", `trendlines.html#${e}`, "Trendlines"]);
     if (S.market === "stocks") list.push(["ERN", `#earnings-${e}`, "After earnings"], ["VP", `volumeprofile.html#${e}`, "Volume profile"], ["MXP", `maxpain.html#stock/${e}`, "Max pain"]);
     return list;

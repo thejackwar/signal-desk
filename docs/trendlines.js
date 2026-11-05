@@ -215,7 +215,7 @@ async function binanceSeries(coin, interval, want) {
     if (js.length < +q.get("limit")) break;                // reached the coin's first candle
     endTime = js[0][0] - 1;
   }
-  const out = rows.map(k => [Math.floor(k[0] / 1000), +k[1], +k[2], +k[3], +k[4]]).sort((a, b) => a[0] - b[0]);
+  const out = rows.map(k => [Math.floor(k[0] / 1000), +k[1], +k[2], +k[3], +k[4], +k[5]]).sort((a, b) => a[0] - b[0]);
   return out.filter((r, i) => i === 0 || r[0] !== out[i - 1][0]);
 }
 
