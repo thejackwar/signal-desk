@@ -172,7 +172,7 @@ def fed_odds(cal_path: Path):
     days = []
     try:
         cal = json.loads(cal_path.read_text())
-        days = sorted({e["date"] for e in cal.get("economy", []) if "FOMC" in e.get("name", "") and "Rate" in e.get("name", "") and e["date"] >= date.today().isoformat()})
+        days = sorted({e["date"] for e in cal.get("economy", []) if ("FOMC" in e.get("name", "") or e.get("kind") == "Fed rate decision") and "rate" in (e.get("name", "") + e.get("kind", "")).lower() and e["date"] >= date.today().isoformat()})
     except Exception:
         pass
     if not days:
