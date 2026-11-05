@@ -1,0 +1,209 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0b0f14">
+<title>Strategy Board</title>
+<meta name="description" content="Every strategy, every day: one green or red tile per trading day for each Strategy Lab strategy, on stocks, crypto and commodities, with the live paper-trading days marked. Free, information only.">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Investment Center Signals">
+<meta property="og:title" content="Strategy Board: every strategy, every day | Investment Center Signals">
+<meta property="og:description" content="One green or red tile per trading day for every strategy, backtest and live.">
+<meta property="og:url" content="https://thejackwar.github.io/signal-desk/board.html">
+<meta property="og:image" content="https://thejackwar.github.io/signal-desk/og-image.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="canonical" href="https://thejackwar.github.io/signal-desk/board.html">
+<script>
+(() => {
+  const CF_ANALYTICS_TOKEN = "a2d6810a28f64b999832485d1635915a";
+  if (!CF_ANALYTICS_TOKEN || location.hostname === "localhost") return;
+  const s = document.createElement("script");
+  s.defer = true; s.src = "https://static.cloudflareinsights.com/beacon.min.js";
+  s.dataset.cfBeacon = JSON.stringify({ token: CF_ANALYTICS_TOKEN });
+  document.head.appendChild(s);
+})();
+</script>
+<link rel="icon" href="favicon.ico?v=2" sizes="any">
+<link rel="icon" type="image/svg+xml" href="logo.svg?v=2">
+<link rel="apple-touch-icon" href="icon-180.png?v=2">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+:root {
+  --bg: #0b0f14; --panel: #0e141c; --panel-2: #121a24; --line: #1e2834; --line-2: #2a3644;
+  --fg: #e8eef4; --muted: #9aa7b4; --faint: #6b7886;
+  --up: #2fd6a0; --up-2: #1c8f6b; --down: #f0566a; --down-2: #9c3443; --none: #18212c;
+  --blue: #6cb4ff; --blue-bg: rgba(108,180,255,.12);
+  --font: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body { background: radial-gradient(1200px 600px at 50% -200px, #132033 0%, var(--bg) 60%) no-repeat, var(--bg); color: var(--fg);
+  font: 16px/1.5 var(--font); -webkit-font-smoothing: antialiased; font-feature-settings: "tnum"; padding-bottom: calc(40px + env(safe-area-inset-bottom, 0px)); }
+a { color: var(--blue); text-decoration: none; }
+a:hover { text-decoration: underline; }
+.wrap { max-width: 980px; margin: 0 auto; padding: 0 22px; }
+@media (max-width: 560px) { .wrap { padding: 0 16px; } }
+.bar { position: sticky; top: 0; z-index: 20; background: rgba(11,15,20,.86); backdrop-filter: saturate(180%) blur(20px); -webkit-backdrop-filter: saturate(180%) blur(20px);
+  border-bottom: 1px solid var(--line); padding-top: env(safe-area-inset-top, 0px); }
+.bar-in { max-width: 980px; margin: 0 auto; padding: 0 22px; height: 48px; display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; }
+.back { font-size: 14px; } .bar-title { font-size: 15px; font-weight: 600; }
+.k { font: 500 11px/1.3 var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.k.blue { color: var(--blue); }
+.hero { padding: 40px 0 10px; }
+.hero h1 { font-size: clamp(34px, 7vw, 54px); line-height: 1.04; letter-spacing: -.035em; margin: 10px 0 12px; font-weight: 700; }
+.hero p { color: var(--muted); font-size: 17px; max-width: 660px; margin: 0; }
+.fine { color: var(--faint); font-size: 13px; }
+
+.ctl { position: sticky; top: calc(48px + env(safe-area-inset-top, 0px)); z-index: 10; background: rgba(11,15,20,.92); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+  display: flex; flex-wrap: wrap; gap: 8px 10px; padding: 12px 0; margin: 18px 0 4px; border-bottom: 1px solid var(--line); }
+.seg { display: inline-flex; flex-wrap: wrap; gap: 2px; background: #0a1017; border: 1px solid var(--line); border-radius: 6px; padding: 2px; }
+.seg button { font: 500 12.5px var(--font); color: var(--muted); background: none; border: 0; border-radius: 4px; padding: 6px 10px; cursor: pointer; }
+.seg button[aria-pressed="true"] { background: var(--blue-bg); color: var(--fg); box-shadow: inset 0 0 0 1px rgba(108,180,255,.35); }
+
+.panel { background: linear-gradient(180deg, var(--panel-2), var(--panel)); border: 1px solid var(--line); border-radius: 4px; padding: 12px 14px; margin: 12px 0; }
+.head { display: grid; grid-template-columns: 1fr 74px 64px; gap: 8px; padding: 0 0 6px; border-bottom: 1px solid var(--line); margin-bottom: 4px; }
+.head span:not(:first-child) { text-align: right; }
+.row { display: grid; gap: 6px; padding: 10px 0; border-bottom: 1px solid var(--line); cursor: pointer; }
+.row:last-child { border-bottom: 0; }
+.row:hover .nm b { color: var(--blue); }
+.nm { display: grid; grid-template-columns: 1fr 74px 64px; gap: 8px; align-items: baseline; }
+.nm b { font-size: 14.5px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.nm b small { font: 500 10px var(--mono); letter-spacing: .06em; color: var(--faint); margin-left: 6px; text-transform: uppercase; }
+.nm span { text-align: right; font: 500 13px var(--mono); }
+.up { color: var(--up); } .down { color: var(--down); }
+.row.hold { cursor: default; background: linear-gradient(90deg, rgba(108,180,255,.06), transparent); margin: 0 -14px; padding: 10px 14px; }
+.row.hold .nm b { color: var(--muted); }
+.tiles { display: flex; flex-wrap: wrap; gap: 2px; }
+.t { width: var(--ts, 9px); height: var(--ts, 9px); border-radius: 1px; background: var(--none); flex: none; }
+.t.u { background: var(--up-2); } .t.u.s { background: var(--up); }
+.t.d { background: var(--down-2); } .t.d.s { background: var(--down); }
+.t.lv { box-shadow: inset 0 0 0 1px var(--blue); }
+.more { display: none; padding: 8px 0 4px; }
+.row.open .more { display: block; }
+.yr { display: grid; grid-template-columns: 38px 1fr; gap: 8px; align-items: start; margin: 4px 0; }
+.yr > span { font: 500 11px/10px var(--mono); color: var(--faint); }
+.more p { margin: 10px 0 0; font-size: 13px; color: var(--muted); }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 14px; font: 500 11px var(--mono); color: var(--faint); margin: 8px 0; }
+.legend i { display: inline-block; width: 9px; height: 9px; border-radius: 1px; margin-right: 6px; vertical-align: -1px; }
+.empty { padding: 26px 0; text-align: center; color: var(--muted); }
+footer { margin-top: 40px; border-top: 1px solid var(--line); padding-top: 16px; }
+</style>
+</head>
+<body>
+<nav class="bar" aria-label="Page">
+  <div class="bar-in">
+    <a class="back" href="index.html#home" aria-label="Back to Signals">‹ Signals</a>
+    <span class="bar-title">Strategy Board</span>
+    <span></span>
+  </div>
+</nav>
+<main class="wrap">
+  <section class="hero">
+    <span class="k">Performance tracking · every strategy</span>
+    <h1>Every strategy, every day.</h1>
+    <p>One tile per trading day: green when the strategy's account made money that day, red when it lost. Tiles with a blue edge are live paper-trading days.</p>
+  </section>
+
+  <div class="ctl" id="ctl"></div>
+  <div class="legend"><span><i style="background:var(--up)"></i>Profit</span><span><i style="background:var(--down)"></i>Loss</span><span><i style="background:var(--none)"></i>No position</span><span><i style="box-shadow:inset 0 0 0 1px var(--blue);background:var(--none)"></i>Live</span><span>Brighter = bigger than that strategy's typical day</span></div>
+  <div class="panel" id="board"><div class="empty">Loading…</div></div>
+  <p class="fine" id="asof"></p>
+
+  <footer>
+    <p class="fine">Each Strategy Lab strategy with its default settings, buys only (the Lab's default), from 2021, through the same code as the Lab: a tile is the whole account's change that day, open trades included, before tax and fees. Live days (from 2 Nov 2026) are the same rules on fresh prices after each daily scan. Session Momentum is a day trade on QQQ (one trade per session, long and short), from its own page. Tap a strategy to see every day since 2021. Backtests are not a promise of future results. For information only. Not investment advice.</p>
+  </footer>
+</main>
+<script>
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const pc = (v, d = 1) => v == null || !isFinite(v) ? "–" : (v > 0 ? "+" : v < 0 ? "−" : "") + Math.abs(v).toFixed(d) + "%";
+const fmtD = (d, o = { day: "numeric", month: "short", year: "numeric" }) => new Date(d + "T12:00:00Z").toLocaleDateString("en-GB", { timeZone: "UTC", ...o });
+const MK = [["stocks", "Stocks"], ["crypto", "Crypto"], ["commodities", "Commodities"]];
+const PER = [["21", "1 month"], ["63", "3 months"], ["252", "1 year"], ["all", "Since 2021"]];
+const S = (() => { try { return JSON.parse(localStorage.getItem("board") || "{}"); } catch { return {}; } })();
+S.m ||= "stocks"; S.p ||= "63"; S.show ||= "core"; S.sort ||= "ret";
+const save = () => { try { localStorage.setItem("board", JSON.stringify(S)); } catch {} };
+const cache = {};
+async function get(p) { if (p in cache) return cache[p]; try { const r = await fetch(p + "?t=" + Math.floor(Date.now() / 6e5)); cache[p] = r.ok ? await r.json() : null; } catch { cache[p] = null; } return cache[p]; }
+const seg = (k, v, o) => `<div class="seg" role="group">${o.map(([a, l]) => `<button type="button" data-${k}="${a}" aria-pressed="${a === v}">${esc(l)}</button>`).join("")}</div>`;
+
+function controls() {
+  $("ctl").innerHTML = seg("m", S.m, MK) + seg("p", S.p, PER) + seg("show", S.show, [["core", "Main strategies"], ["all", "All, incl. vault"]]) + seg("sort", S.sort, [["ret", "Best first"], ["name", "A–Z"]]);
+}
+
+// one tile list for a row: the period's days (or weeks, for "since 2021", so it stays readable)
+function tiles(dates, vals, live, cls = "") {
+  const n = S.p === "all" ? vals.length : Math.min(vals.length, +S.p);
+  let ds = dates.slice(-n), vs = vals.slice(-n);
+  if (S.p === "all") {     // weekly tiles: the week's compounded change
+    const W = new Map();
+    ds.forEach((d, i) => { const dt = new Date(d + "T12:00:00Z"), mon = new Date(dt - ((dt.getUTCDay() + 6) % 7) * 864e5).toISOString().slice(0, 10);
+      const w = W.get(mon) || { v: 1, any: false, lv: false }; w.v *= 1 + vs[i] / 1e5; w.any ||= vs[i] !== 0; w.lv ||= d >= live; W.set(mon, w); });
+    ds = [...W.keys()]; const ws = [...W.values()]; vs = ws.map(w => w.any ? Math.round((w.v - 1) * 1e5) || (w.v > 1 ? 1 : -1) : 0);
+    var lvs = ws.map(w => w.lv);
+  }
+  const abs = vs.filter(v => v).map(Math.abs).sort((a, b) => a - b), med = abs[abs.length >> 1] || 1;
+  const ret = (vs.reduce((v, x) => v * (1 + x / 1e5), 1) - 1) * 100, up = vs.filter(v => v > 0).length, act = vs.filter(v => v).length;
+  const html = vs.map((v, i) => `<i class="t${v > 0 ? " u" : v < 0 ? " d" : ""}${Math.abs(v) > med ? " s" : ""}${(lvs ? lvs[i] : ds[i] >= live) ? " lv" : ""}" title="${esc(fmtD(ds[i]))}${S.p === "all" ? " (week)" : ""}: ${v ? pc(v / 1e3, 2) : "no position"}"></i>`).join("");
+  return { html, ret, upPct: act ? up / act * 100 : null };
+}
+
+function wall(dates, vals, live) {
+  const Y = {};
+  const abs = vals.filter(v => v).map(Math.abs).sort((a, b) => a - b), med = abs[abs.length >> 1] || 1;
+  dates.forEach((d, i) => { const v = vals[i]; (Y[d.slice(0, 4)] ||= []).push(`<i class="t${v > 0 ? " u" : v < 0 ? " d" : ""}${Math.abs(v) > med ? " s" : ""}${d >= live ? " lv" : ""}" title="${esc(fmtD(d))}: ${v ? pc(v / 1e3, 2) : "no position"}"></i>`); });
+  return Object.keys(Y).sort().map(y => `<div class="yr"><span>${y}</span><div class="tiles">${Y[y].join("")}</div></div>`).join("");
+}
+
+const labLink = (m, ind) => "index.html#strategylab?c=" + btoa(JSON.stringify({ m, cfg: { ind }, side: "long" })).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+
+async function render() {
+  controls();
+  const B = await get(S.m === "stocks" ? "data/board.json" : `data/${S.m}/board.json`);
+  if (!B) { $("board").innerHTML = `<div class="empty">The board for ${esc(S.m)} is being built after the next daily scan.</div>`; $("asof").textContent = ""; return; }
+  const rows = B.strategies.filter(s => s.id !== "custom" && (S.show === "all" || s.core)).map(s => ({ ...s, dates: B.dates }));
+  if (S.m === "stocks") {     // the day trade from its own page
+    const SM = await get("data/session/backtest.json");
+    const V = SM?.variants?.[SM.default];
+    if (V) rows.push({ id: "session", name: "Session Momentum", tag: "intraday", href: "session.html", dates: SM.dates, days: V.days.map(v => v == null ? 0 : v * 10), core: true, total: V.all.total_pct });
+  }
+  const ts = S.p === "all" ? "7px" : S.p === "252" ? "7px" : S.p === "63" ? "10px" : "14px";
+  const out = rows.map(r => ({ r, T: tiles(r.dates, r.days, B.live_from) }));
+  if (S.sort === "ret") out.sort((a, b) => b.T.ret - a.T.ret); else out.sort((a, b) => a.r.name.localeCompare(b.r.name));
+  const H = tiles(B.dates, B.hold.days, B.live_from);
+  const per = PER.find(p => p[0] === S.p)[1];
+  const holdName = S.m === "stocks" ? "Holding the S&P 100" : S.m === "crypto" ? "Holding the coins" : "Holding the commodities";
+  let h = `<div class="head"><span class="k">Strategy · ${esc(per)}${S.p === "all" ? " · 1 tile = 1 week" : " · 1 tile = 1 day"}</span><span class="k">Return</span><span class="k">Up days</span></div>`;
+  h += `<div class="row hold" style="--ts:${ts}"><div class="nm"><b>${holdName}<small>benchmark</small></b><span class="${H.ret >= 0 ? "up" : "down"}">${pc(H.ret)}</span><span>${H.upPct == null ? "–" : Math.round(H.upPct) + "%"}</span></div><div class="tiles">${H.html}</div></div>`;
+  h += out.map(({ r, T }) => `<div class="row" data-id="${esc(r.id)}" style="--ts:${ts}" tabindex="0" role="button" aria-expanded="false">
+      <div class="nm"><b>${esc(r.name)}${r.tag ? `<small>${esc(r.tag)}</small>` : !r.core ? `<small>vault</small>` : ""}</b><span class="${T.ret >= 0 ? "up" : "down"}">${pc(T.ret)}</span><span>${T.upPct == null ? "–" : Math.round(T.upPct) + "%"}</span></div>
+      <div class="tiles">${T.html}</div>
+      <div class="more"></div></div>`).join("");
+  $("board").innerHTML = h;
+  $("board").onclick = e => {
+    const row = e.target.closest(".row[data-id]"); if (!row || e.target.closest("a")) return;
+    const r = rows.find(x => x.id === row.dataset.id), M = row.querySelector(".more");
+    if (!row.classList.contains("open") && !M.innerHTML) {
+      const up = r.days.filter(v => v > 0).length, dn = r.days.filter(v => v < 0).length;
+      M.innerHTML = `<div style="--ts:7px">${wall(r.dates, r.days, B.live_from)}</div>
+        <p>Since ${esc(fmtD(r.dates[0], { month: "short", year: "numeric" }))}: <b class="${r.total >= 0 ? "up" : "down"}">${pc(r.total)}</b> (holding: ${pc(B.hold.total)}), ${up} up days and ${dn} down days. ${r.href ? `<a href="${r.href}">Open Session Momentum ›</a>` : `<a href="${labLink(S.m, r.lab)}">Open in the Strategy Lab ›</a>`}</p>`;
+    }
+    row.classList.toggle("open"); row.setAttribute("aria-expanded", row.classList.contains("open"));
+  };
+  $("asof").textContent = `${rows.length} strategies · prices to ${fmtD(B.to)} · updated after each daily scan.`;
+}
+
+document.addEventListener("click", e => {
+  const b = e.target.closest("[data-m], [data-p], [data-show], [data-sort]"); if (!b) return;
+  const d = b.dataset; if (d.m) S.m = d.m; if (d.p) S.p = d.p; if (d.show) S.show = d.show; if (d.sort) S.sort = d.sort;
+  save(); render();
+});
+document.addEventListener("keydown", e => { if ((e.key === "Enter" || e.key === " ") && e.target.matches(".row[data-id]")) { e.preventDefault(); e.target.click(); } });
+render();
+</script>
+</body>
+</html>

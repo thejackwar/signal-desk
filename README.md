@@ -56,6 +56,9 @@ docs/                    the website (served by GitHub Pages)
                          since 2 Nov 2026, €1,000 a trade (engine/live_trades.py + live_trades.mjs, which run
                          docs/lab.js on fresh prices after each daily scan). Closed trades are never changed
                          or removed. Crypto and commodities keep their own in their folders.
+  board.html             Strategy Board: every Lab strategy (default settings, buys only) as one green/red tile per
+                         trading day since 2021, stocks/crypto/commodities, live days outlined; data/board.json (and
+                         crypto/, commodities/) written by engine/day_board.mjs after each daily scan (live-trades.yml)
   session.html           Session Momentum: QQQ's first 5-minute candle vs the 12 EMA, one trade a day with a trailing stop;
                          every session since 2020 as a green/red tile, each setting tested, live paper trades
   data/session/          backtest.json (Saturdays) and live.json (every 5 min in market hours), engine/session_momentum.py
