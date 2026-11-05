@@ -178,7 +178,7 @@ async function getData(sym) {
     const payload = await worker(sym);
     return { sym, kind, frames: L.buildFrames(payload), source: "Alpaca, all US exchanges, regular hours, at least 15 minutes old." };
   } catch (e) {
-    const js = await fetchJson(`data/stocks/${encodeURIComponent(sym)}.json`);
+    const js = await fetchJson(`data/stocks/${encodeURIComponent(sym)}.json`).catch(() => { throw new Error(`the data server didn't answer (${e.message})`); });
     return { sym, kind, frames: L.framesFromDaily(js), fallback: true,
       source: `The live data server didn't answer (${e.message}), so this is the site's nightly daily data: daily and weekly only, no volume.` };
   }
