@@ -1780,6 +1780,134 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
 .tm .fine2 { color: var(--faint); font-size: 11.5px; margin: 12px 2px 0; }
 @media (max-width: 999px) { .tm .tmmk { display: none; } .tm .tmcmd kbd { display: none; } }
 
+/* Terminal: panels the viewer can rearrange, tabs, boards, screener, multi-chart */
+.tm .tmgrid { grid-auto-flow: row dense; }
+.tm .pn.wide { grid-column: 1 / -1; }
+.tm .pn.flash { animation: tmflash 1.3s ease; }
+@keyframes tmflash { 0%, 40% { box-shadow: 0 0 0 2px var(--tc); } 100% { box-shadow: 0 0 0 0 transparent; } }
+.tm .pn.editing { outline: 1px dashed color-mix(in srgb, var(--tc) 55%, transparent); outline-offset: -1px; }
+.tm .pctl { margin-left: auto; display: flex; gap: 3px; }
+.tm .pctl button { font: 600 12px var(--font-code); width: 26px; height: 24px; border-radius: 6px; border: 1px solid var(--line); color: var(--muted); background: var(--bg); }
+.tm .pctl button:hover, .tm .pctl button[aria-pressed="true"] { color: var(--tc); border-color: var(--tc); }
+.tm .tmedit { font: 600 11.5px var(--font-body); padding: 6px 10px; border-radius: 7px; border: 1px solid var(--line); color: var(--fg); }
+.tm .tmedit[aria-pressed="true"] { background: var(--tc); color: var(--on-accent); border-color: var(--tc); }
+.tm .tmed { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: 8px 0 0; padding: 8px 10px; border: 1px dashed var(--line); border-radius: 10px; font-size: 12.5px; color: var(--muted); }
+.tm .tmed button { font: 600 12px var(--font-body); padding: 5px 9px; border-radius: 999px; border: 1px solid var(--line); color: var(--fg); }
+.tm .tmed button.r { margin-left: auto; color: var(--bear); }
+.tm .tmclock .tml { font-size: 11.5px; color: var(--faint); } .tm .tmclock .tml .on { color: var(--bull); font-weight: 700; }
+.tm .tmkeys a[data-tmjump] { border-color: color-mix(in srgb, var(--tc) 40%, var(--line)); }
+
+.tm .ptabs { display: flex; gap: 3px; overflow-x: auto; scrollbar-width: none; margin: 4px 0 8px; padding: 3px; background: var(--bg); border: 1px solid var(--line); border-radius: 8px; }
+.tm .ptabs::-webkit-scrollbar { display: none; }
+.tm .ptabs button { flex: none; font: 500 12px var(--font-body); padding: 5px 9px; border-radius: 6px; color: var(--muted); white-space: nowrap; }
+.tm .ptabs button b { font: 700 10.5px var(--font-code); color: var(--tc); margin-right: 3px; }
+.tm .ptabs button[aria-selected="true"] { background: var(--surface-2); color: var(--fg); }
+.tm .chips2 { display: flex; flex-wrap: wrap; gap: 4px; margin: 2px 0 8px; }
+.tm .chips2 button { font: 500 11.5px var(--font-body); padding: 4px 9px; border-radius: 999px; border: 1px solid var(--line); color: var(--muted); }
+.tm .chips2 button[aria-pressed="true"] { color: var(--on-accent); background: var(--tc); border-color: var(--tc); }
+.tm .chips2 button.mine { color: var(--tc); border-color: color-mix(in srgb, var(--tc) 50%, var(--line)); }
+.tm .chips2 button.x { padding: 4px 6px; margin-left: -3px; border: 0; color: var(--faint); }
+.tm .hint2 { font-size: 12px; line-height: 1.5; color: var(--muted); margin: 8px 0 4px; }
+.tm .spk { display: block; margin-left: auto; overflow: visible; }
+.tm .spk polyline { fill: none; stroke-width: 1.4; stroke: var(--bull); } .tm .spk.down polyline { stroke: var(--bear); }
+.tm .cotx .spk { width: 100%; height: 54px; margin: 4px 0 0; }
+
+/* monitor + watchlists */
+.tm .monf { flex-wrap: wrap; }
+.tm .monf input { flex: 1 1 100%; }
+.tm .p-mon .th { position: static; flex: 1 1 100%; padding-top: 4px; margin-bottom: -4px; border-bottom: 0; }
+.tm .wlc { display: flex; gap: 4px; overflow-x: auto; scrollbar-width: none; flex: 1 1 100%; }
+.tm .wlc button { flex: none; font: 600 11.5px var(--font-body); padding: 4px 9px; border-radius: 999px; border: 1px solid var(--line); color: var(--muted); }
+.tm .wlc button small { color: var(--faint); font-weight: 500; }
+.tm .wlc button[aria-pressed="true"] { color: var(--on-accent); background: var(--tc); border-color: var(--tc); } .tm .wlc button[aria-pressed="true"] small { color: inherit; opacity: .7; }
+.tm .wlc .wlx { border: 0; color: var(--faint); font-weight: 500; }
+.tm .sech .star { font-size: 20px; line-height: 1; color: var(--faint); padding: 0 2px; align-self: center; }
+.tm .sech .star[aria-pressed="true"] { color: #fbbf24; }
+.tm .about2 { font-size: 12.5px; line-height: 1.5; color: var(--muted); margin: 0; display: -webkit-box; -webkit-line-clamp: 5; -webkit-box-orient: vertical; overflow: hidden; }
+
+/* tables */
+.tm .tw { overflow-x: auto; margin: 4px 0; border: 1px solid var(--line); border-radius: 8px; }
+.tm table.tt { width: 100%; border-collapse: collapse; font-size: 12px; }
+.tm .tt th, .tm .tt td { padding: 5px 8px; text-align: right; white-space: nowrap; border-bottom: 1px solid color-mix(in srgb, var(--line) 70%, transparent); font-family: var(--font-code); }
+.tm .tt th:first-child, .tm .tt td:first-child { text-align: left; font-family: var(--font-body); position: sticky; left: 0; background: var(--surface); }
+.tm .tt th { font: 600 10.5px var(--font-body); text-transform: uppercase; letter-spacing: .04em; color: var(--faint); background: var(--surface); position: sticky; top: 0; }
+.tm .tt th button { font: inherit; color: inherit; text-transform: inherit; letter-spacing: inherit; } .tm .tt th button[aria-pressed="true"] { color: var(--tc); }
+.tm .tt tr:last-child td { border-bottom: 0; }
+.tm .tt tr[data-tmsel] { cursor: pointer; } .tm .tt tr[data-tmsel]:hover td { background: var(--hover); }
+.tm .tt tr.me td { background: var(--amber-bg); } .tm .tt tr.med td { color: var(--muted); font-weight: 600; }
+.tm .bars { width: 100%; height: 90px; display: block; } .tm .bars rect.pos { fill: color-mix(in srgb, var(--tc) 75%, transparent); } .tm .bars rect.neg { fill: var(--bear); }
+.tm .barl { display: flex; } .tm .barl span { flex: 1; text-align: center; font-size: 10.5px; color: var(--faint); min-width: 0; } .tm .barl b { display: block; font: 600 10.5px var(--font-code); color: var(--fg); }
+
+/* analysts */
+.tm .trange { margin: 6px 0 10px; } .tm .trange .bar { position: relative; height: 8px; background: var(--surface-2); border-radius: 4px; margin: 10px 4px 4px; }
+.tm .trange .bar i { position: absolute; top: 0; bottom: 0; background: color-mix(in srgb, var(--tc) 35%, transparent); border-radius: 4px; }
+.tm .trange .px { position: absolute; top: -6px; width: 0; height: 0; border: 6px solid transparent; border-top-color: var(--fg); transform: translateX(-6px); }
+.tm .trange .mean { position: absolute; top: -1px; width: 10px; height: 10px; background: var(--tc); transform: translateX(-5px) rotate(45deg); }
+.tm .trange .ends { display: flex; justify-content: space-between; font-size: 11px; color: var(--faint); }
+.tm .rtr { display: grid; grid-template-columns: 96px 1fr; gap: 8px; align-items: center; margin: 3px 0; font-size: 12px; color: var(--muted); }
+.tm .rtr .stack { display: flex; height: 18px; border-radius: 4px; overflow: hidden; }
+.tm .rtr .stack i { font: 600 10.5px/18px var(--font-code); font-style: normal; text-align: center; color: #0b0f14; min-width: 0; overflow: hidden; }
+.tm .r0 { background: #16a34a; } .tm .r1 { background: #4ade80; } .tm .r2 { background: #94a3b8; } .tm .r3 { background: #f87171; } .tm .r4 { background: #dc2626; }
+.tm .rleg { display: flex; flex-wrap: wrap; gap: 8px; margin: 4px 0 0 104px; font-size: 10.5px; color: var(--faint); } .tm .rleg span { background: none !important; padding-left: 12px; position: relative; }
+.tm .rleg span::before { content: ""; position: absolute; left: 0; top: 3px; width: 8px; height: 8px; border-radius: 2px; }
+.tm .rleg .r0::before { background: #16a34a; } .tm .rleg .r1::before { background: #4ade80; } .tm .rleg .r2::before { background: #94a3b8; } .tm .rleg .r3::before { background: #f87171; } .tm .rleg .r4::before { background: #dc2626; }
+.tm .anr { grid-template-columns: 76px minmax(0, 1fr) minmax(0, 1.2fr) minmax(0, 1fr); }
+.tm .ee { grid-template-columns: 80px 1fr 1fr 64px; }
+.tm .ins { grid-template-columns: 76px minmax(0, 1.4fr) minmax(0, 1fr) minmax(0, .9fr); }
+.tm .hf { grid-template-columns: minmax(0, 1fr) 70px 60px; }
+.tm .pxr { grid-template-columns: 54px minmax(0, 1fr) 70px 24px; }
+.tm .x { color: var(--faint); font-size: 16px; line-height: 1; }
+
+/* boards */
+.tm .wei { grid-template-columns: minmax(0, 1.3fr) 76px 60px 56px 56px 68px; }
+@media (max-width: 560px) { .tm .wei { grid-template-columns: minmax(0, 1.2fr) 70px 58px 52px 0 64px; } .tm .wei > :nth-child(5) { visibility: hidden; } }
+.tm .crv { width: 100%; height: auto; display: block; margin: 4px 0 0; }
+.tm .crv polyline { fill: none; stroke: var(--tc); stroke-width: 2; } .tm .crv circle { fill: var(--tc); }
+.tm .crv text { font: 600 9px var(--font-code); fill: var(--fg); text-anchor: middle; } .tm .crv text.ax { fill: var(--faint); text-anchor: start; font-weight: 500; }
+.tm .yc polyline.m1 { stroke: var(--muted); stroke-width: 1.3; opacity: .7; } .tm .yc polyline.y1 { stroke: var(--faint); stroke-width: 1.2; stroke-dasharray: 3 3; opacity: .7; }
+.tm .crvx { display: flex; justify-content: space-between; padding: 0 2px 0 18px; font: 500 10px var(--font-code); color: var(--faint); }
+.tm .leg2 { display: flex; gap: 12px; font-size: 11px; color: var(--muted); margin: 6px 0; } .tm .leg2 span::before { content: ""; display: inline-block; width: 12px; height: 2px; margin-right: 5px; vertical-align: middle; background: var(--tc); }
+.tm .leg2 .m1::before { background: var(--muted); } .tm .leg2 .y1::before { background: repeating-linear-gradient(90deg, var(--faint) 0 3px, transparent 3px 6px); }
+.tm .wirp { border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; margin: 6px 0; }
+.tm .wirp .wh { display: flex; justify-content: space-between; gap: 8px; font-size: 12.5px; margin-bottom: 4px; flex-wrap: wrap; } .tm .wirp .wh span { color: var(--muted); font-family: var(--font-code); font-size: 12px; }
+.tm .pb { display: grid; grid-template-columns: 92px 1fr 44px; gap: 8px; align-items: center; font: 500 11.5px var(--font-code); margin: 2px 0; }
+.tm .pb .bar { height: 8px; background: var(--surface-2); border-radius: 4px; overflow: hidden; } .tm .pb .bar i { display: block; height: 100%; background: var(--tc); } .tm .pb b { text-align: right; }
+.tm .eu { grid-template-columns: 70px 1fr 1fr 70px; }
+.tm .cot { grid-template-columns: minmax(0, 1.2fr) 66px 62px 50px minmax(60px, .9fr); width: 100%; text-align: left; }
+.tm .cbar { position: relative; height: 8px; border-radius: 4px; background: linear-gradient(90deg, var(--bear-bg), var(--surface-2) 50%, var(--bull-bg)); overflow: visible !important; }
+.tm .cbar i { position: absolute; top: -3px; width: 3px; height: 14px; border-radius: 2px; background: var(--fg); transform: translateX(-1px); }
+.tm .most { grid-template-columns: 58px minmax(0, 1fr) 70px 58px 74px; width: 100%; text-align: left; }
+
+/* screener */
+.tm .eqc { display: flex; flex-direction: column; gap: 5px; margin-bottom: 6px; }
+.tm .eqr { display: flex; flex-wrap: wrap; gap: 5px; align-items: center; }
+.tm .eqr select, .tm .eqr input, .tm .pxf input, .tm .pxf select, .tm .gch input { background: var(--bg); color: var(--fg); border: 1px solid var(--line); border-radius: 6px; font: 500 12.5px var(--font-body); padding: 6px 8px; min-width: 0; }
+.tm .eqr select:first-child { flex: 1 1 170px; } .tm .eqr input { width: 90px; font-family: var(--font-code); }
+.tm .eqr .u { font: 500 12px var(--font-code); color: var(--faint); min-width: 16px; }
+.tm .eqr .b, .tm .pxf .b { font: 600 12px var(--font-body); padding: 6px 10px; border-radius: 6px; border: 1px solid var(--line); color: var(--tc); }
+.tm .pxf .b { background: var(--tc); color: var(--on-accent); border-color: var(--tc); } .tm .pxf .b:disabled { opacity: .5; }
+.tm .eqn { font-size: 12px; color: var(--muted); margin: 6px 0 2px; } .tm .eqn b { color: var(--fg); }
+.tm .p-eqs .pnb { max-height: 560px; } .tm .eqt td:first-child { max-width: 220px; overflow: hidden; text-overflow: ellipsis; }
+
+/* multi-chart */
+.tm .gipbar { display: flex; align-items: center; gap: 4px; margin: 2px 0 8px; font-size: 12px; }
+.tm .gipbar button, .tm .gtf button { font: 600 11px var(--font-code); padding: 4px 8px; border-radius: 6px; border: 1px solid var(--line); color: var(--muted); }
+.tm .gipbar button[aria-pressed="true"], .tm .gtf button[aria-pressed="true"] { color: var(--on-accent); background: var(--tc); border-color: var(--tc); }
+.tm .gip { display: grid; gap: 8px; grid-template-columns: 1fr; }
+@media (min-width: 820px) { .tm .gip.n2, .tm .gip.n4 { grid-template-columns: 1fr 1fr; } }
+.tm .gc { border: 1px solid var(--line); border-radius: 8px; padding: 6px; min-width: 0; }
+.tm .gch { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; font: 600 12px var(--font-code); margin-bottom: 4px; }
+.tm .gch input { width: 74px; font: 700 12.5px var(--font-code); text-transform: uppercase; padding: 4px 6px; }
+.tm .gtf { margin-left: auto; display: flex; gap: 3px; }
+.tm .gc canvas { display: block; width: 100%; height: 220px; }
+.tm .gip.n1 canvas { height: 340px; }
+
+/* price alerts */
+.tm .pxf { display: flex; flex-wrap: wrap; gap: 5px; margin: 4px 0; } .tm .pxf input[name=sym] { width: 78px; text-transform: uppercase; font-family: var(--font-code); } .tm .pxf input[name=level] { width: 96px; font-family: var(--font-code); } .tm .pxf input[name=note] { flex: 1 1 120px; }
+.tm .code2 { display: flex; align-items: center; gap: 6px; background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 6px 8px; }
+.tm .code2 span { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; } .tm .code2 code { font: 600 12.5px var(--font-code); color: var(--fg); }
+.tm .code2 button { font: 600 11.5px var(--font-body); color: var(--tc); }
+
 </style>
 </head>
 <body>
@@ -7043,21 +7171,36 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
 
   // -------------------------------------------------------------- terminal
   // One dense screen that pulls the whole site together, Bloomberg-style: a command line (type a ticker
-  // or a function code), function keys to every page, a ticker tape, and panels for the market monitor,
-  // the selected security, alerts, live paper trades, news, the calendar, strategy grades and breadth.
-  // Clicking a ticker anywhere loads it in the security panel without leaving the page.
+  // or a function code), function keys to every page, a ticker tape, and panels the viewer can reorder,
+  // widen or hide (LAYOUT). Clicking a ticker anywhere loads it in the security panel without leaving.
+  // Data: the site's own files, docs/data/terminal/markets.json (engine/markets_board.py),
+  // docs/data/company.json + company/<T>.json (engine/company.py), and the Worker for live prices,
+  // intraday charts and price alerts (worker/trendlines-worker.js).
   const TM_FN = [
     ["ALRT", "#alerts", "Alerts"], ["LIVE", "#trades", "Live trades"], ["BEST", "#winners", "Best trades"], ["REC", "#record", "Track record"],
     ["LAB", "#strategylab", "Strategy Lab"], ["STRAT", "#strategies", "Strategies"], ["VAULT", "#strategies-vault", "Vault"], ["RSCH", "research.html", "Strategy research"],
     ["STK", "#stocks", "Markets list"], ["HEAT", "#heatmap", "Heatmap"], ["NEWS", "#news", "News"], ["MOOD", "#mood", "News mood"], ["BUZZ", "#buzz", "Most mentioned"],
     ["CAL", "#calendar", "Calendar"], ["ERN", "#earnings", "After earnings"], ["TL", "trendlines.html", "Trendlines"], ["OPT", "options.html", "Options"],
-    ["VP", "volumeprofile.html", "Volume profile"], ["MXP", "maxpain.html", "Max pain"], ["PAIR", "pairs.html", "Pairs trading"], ["SESS", "session.html", "Session Momentum"], ["BOARD", "board.html", "Strategy Board"], ["DARK", "darkpool.html", "Dark pools"],
+    ["VP", "volumeprofile.html", "Volume profile"], ["MXP", "maxpain.html", "Max pain"], ["PAIR", "pairs.html", "Pairs trading"], ["DARK", "darkpool.html", "Dark pools"],
     ["CORR", "correlation.html", "Implied correlation"], ["CRYP", "#crypto", "Crypto dashboard"], ["VIX", "#vix", "VIX seasonality"], ["CRSH", "#crashes", "Smaller Crashes"],
     ["PRAC", "#practice", "Practice portfolio"], ["NTFY", "#notify", "Phone alerts"], ["LRN", "#learn", "Learn"], ["BRKR", "#brokers", "Brokers"], ["HOME", "#home", "Home"], ["ABOUT", "#about", "About us"],
   ];
+  // panels of the Terminal: id -> [code, title]
+  const TM_P = {
+    mon: ["MON", "Monitor"], sec: ["DES", "Security"], alrt: ["ALRT", "Alerts"], wei: ["WEI", "World markets"], most: ["MOST", "Most active"],
+    live: ["LIVE", "Live paper trades"], news: ["NEWS", "Headlines"], cal: ["CAL", "Calendar"], gc: ["GC", "Rates &amp; Fed"], eqs: ["EQS", "Screener"],
+    ctm: ["CTM", "Futures &amp; positioning"], gip: ["GIP", "Multi-chart"], grd: ["GRD", "Strategy grades"], brd: ["BRD", "Breadth &amp; movers"],
+    port: ["PORT", "Practice portfolio"], pxa: ["PXA", "Price alerts"],
+  };
+  const TM_ORDER = Object.keys(TM_P), TM_WIDE = ["eqs", "gip"];
+  // codes that open a panel (and the tab inside it)
+  const TM_JUMP = { MON: ["mon"], WL: ["mon"], WEI: ["wei", "idx"], FUT: ["wei", "fut"], FX: ["wei", "fx"], VOL: ["wei", "vol"], GC: ["gc", "curve"], WIRP: ["gc", "fed"],
+    ECB: ["gc", "fed"], EU: ["gc", "eu"], CTM: ["ctm", "curve"], COT: ["ctm", "cot"], MOST: ["most"], EQS: ["eqs"], GIP: ["gip"], PORT: ["port"], PXA: ["pxa"], GRD: ["grd"], BRD: ["brd"] };
+  // tabs of the security panel (company data: stocks only)
+  const TM_SEC = [["DES", "Overview"], ["FA", "Financials"], ["ANR", "Analysts"], ["EE", "Estimates"], ["RV", "Comparables"], ["HDS", "Holders"], ["DVD", "Dividends"]];
   // ticker + code, e.g. "NVDA TL"
   const tmTickerFn = t => {
-    const e = encodeURIComponent(t), list = [["DES", `#stock-${e}`, "Full stock page"], ["BT", `#strategylab?s=${e}`, "Backtest it in the Lab"]];
+    const e = encodeURIComponent(t), list = [["GP", `#stock-${e}`, "Full stock page"], ["BT", `#strategylab?s=${e}`, "Backtest it in the Lab"]];
     if (!isComm()) list.push(["TL", `trendlines.html#${e}`, "Trendlines"]);
     if (S.market === "stocks") list.push(["ERN", `#earnings-${e}`, "After earnings"], ["VP", `volumeprofile.html#${e}`, "Volume profile"], ["MXP", `maxpain.html#stock/${e}`, "Max pain"]);
     return list;
@@ -7069,49 +7212,165 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
     const m = (Date.now() - d) / 6e4;
     return m < 1 ? "now" : m < 60 ? Math.round(m) + "m" : m < 1440 ? Math.round(m / 60) + "h" : Math.round(m / 1440) + "d";
   };
-  const tmPct = (v, dp = 1) => v == null ? `<span class="dim">–</span>` : `<span class="${v >= 0 ? "up" : "down"}">${v > 0 ? "+" : v < 0 ? "−" : ""}${Math.abs(v).toFixed(dp)}%</span>`;
+  const tmPct = (v, dp = 1) => v == null || isNaN(v) ? `<span class="dim">–</span>` : `<span class="${v >= 0 ? "up" : "down"}">${v > 0 ? "+" : v < 0 ? "−" : ""}${Math.abs(v).toFixed(dp)}%</span>`;
+  const tmNum = (v, dp = 2) => v == null || isNaN(v) ? "–" : (+v).toLocaleString("en-US", { minimumFractionDigits: dp, maximumFractionDigits: dp });
+  const tmBig = v => v == null || isNaN(v) ? "–" : Math.abs(v) >= 1e12 ? (v / 1e12).toFixed(2) + "T" : Math.abs(v) >= 1e9 ? (v / 1e9).toFixed(1) + "B" : Math.abs(v) >= 1e6 ? (v / 1e6).toFixed(1) + "M" : Math.abs(v) >= 1e3 ? (v / 1e3).toFixed(1) + "K" : (+v).toFixed(0);
+  const tmFr = (v, dp = 1) => v == null || isNaN(v) ? "–" : (v * 100).toFixed(dp) + "%";   // a fraction shown as a percentage
+  const tmSpark = (xs, w = 64, h = 18) => {
+    const v = (xs || []).filter(x => x != null); if (v.length < 2) return "";
+    const lo = Math.min(...v), hi = Math.max(...v), sp = hi - lo || 1;
+    return `<svg class="spk ${v[v.length - 1] >= v[0] ? "up" : "down"}" viewBox="0 0 ${w} ${h}" width="${w}" height="${h}" aria-hidden="true"><polyline points="${v.map((x, i) => `${(i / (v.length - 1) * w).toFixed(1)},${(h - 1 - (x - lo) / sp * (h - 2)).toFixed(1)}`).join(" ")}"/></svg>`;
+  };
+  const tmTabs = (key, tabs, cur) => `<div class="ptabs" role="tablist">${tabs.map(([k, l]) => `<button type="button" role="tab" data-tmtab="${key}:${k}" aria-selected="${k === cur}">${l}</button>`).join("")}</div>`;
   function tmFind(q) {
     const u = q.toUpperCase().replace(".", "-"), rows = S.stocks?.stocks || [];
     return rows.find(r => r.ticker.toUpperCase() === u || sym(r.ticker).toUpperCase() === u)?.ticker
       || (u.length >= 3 ? rows.find(r => (r.name || "").toUpperCase() === u)?.ticker || rows.find(r => (r.name || "").toUpperCase().startsWith(u))?.ticker : null);
   }
+
+  // ------------------------------------------------ layout (LAYOUT / launchpad)
+  function tmLayout() {
+    const L0 = pref("tmLayout", null) || {};
+    const order = (L0.order || []).filter(id => TM_P[id]);
+    TM_ORDER.forEach(id => { if (!order.includes(id)) order.splice(Math.min(TM_ORDER.indexOf(id), order.length), 0, id); });
+    return { order, hidden: (L0.hidden || []).filter(id => TM_P[id]), wide: L0.wide || TM_WIDE };
+  }
+  const tmSetLayout = L0 => setPref("tmLayout", L0);
+  const tmPanel = (cls, code, title, go, body, extra = "") => {
+    const id = cls.replace(/^p-/, ""), L0 = tmLayout(), ed = S.tmEdit;
+    const ctl = ed ? `<span class="pctl"><button type="button" data-tmmove="${id}:-1" aria-label="Move earlier">◀</button><button type="button" data-tmmove="${id}:1" aria-label="Move later">▶</button><button type="button" data-tmwide="${id}" aria-pressed="${L0.wide.includes(id)}" aria-label="Full width">⤢</button><button type="button" data-tmhide="${id}" aria-label="Hide">✕</button></span>` : "";
+    return `<section class="pn ${cls}${L0.wide.includes(id) ? " wide" : ""}${ed ? " editing" : ""}" data-p="${id}" aria-label="${title.replace(/&amp;/g, "&")}"><header class="pnh"><span class="code">${code}</span><h2>${title}</h2>${extra}${!ed && go ? `<a class="go" href="${go[0]}">${go[1]} ›</a>` : ""}${ctl}</header><div class="pnb">${body}</div></section>`;
+  };
+  const TM_R = {};   // id -> render function, filled below
+  function tmRefresh(id) {
+    const el = document.querySelector(`.tm [data-p="${id}"]`);
+    if (!el || !TM_R[id]) return;
+    const top = el.querySelector(".pnb")?.scrollTop || 0;
+    if (id === "sec") { tmSecRender(); return; }
+    el.outerHTML = TM_R[id]();
+    const n = document.querySelector(`.tm [data-p="${id}"] .pnb`); if (n) n.scrollTop = top;
+    if (id === "gip") tmGipDraw();
+  }
+  function tmOpen(id, tab) {
+    const L0 = tmLayout();
+    if (tab) setPref("tmTab." + id, tab);
+    if (L0.hidden.includes(id)) { L0.hidden = L0.hidden.filter(x => x !== id); tmSetLayout(L0); rerender(); }
+    else tmRefresh(id);
+    requestAnimationFrame(() => {
+      const el = document.querySelector(`.tm [data-p="${id}"]`); if (!el) return;
+      el.scrollIntoView({ behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "start" });
+      el.classList.add("flash"); setTimeout(() => el.classList.remove("flash"), 1300);
+    });
+  }
+
+  // ------------------------------------------------ data loaders
+  function tmLoadMarkets() {
+    if (S.mb !== undefined && Date.now() - (S.mbAt || 0) < 10 * 6e4) return S.mb;
+    const first = S.mb === undefined; if (first) S.mb = null;
+    S.mbAt = Date.now();
+    opt("data/terminal/markets.json").then(d => { if (d || first) S.mb = d || false; ["wei", "gc", "ctm"].forEach(tmRefresh); });
+    return S.mb;
+  }
+  function tmLoadCo() {
+    if (S.coSum !== undefined) return S.coSum;
+    S.coSum = null;
+    opt("data/company.json").then(d => { S.coSum = d || false; ["eqs", "most"].forEach(tmRefresh); if (pref("tmTab.sec", "DES") === "RV") tmSecRender(); });
+    return S.coSum;
+  }
+  function tmCoDet(t) {
+    S.co = S.co || {};
+    if (S.co[t] !== undefined) return S.co[t];
+    S.co[t] = null;
+    opt(`data/company/${encodeURIComponent(t)}.json`).then(d => { S.co[t] = d || false; if (S.tmSel === t) tmSecRender(); });
+    return null;
+  }
+  // live prices from the Worker (stocks: IEX real time; coins: Binance); commodities stay on the last close
+  async function tmLiveLoad(force) {
+    const m = S.market; if (m === "commodities" || document.hidden) return;
+    S.lq = S.lq || {};
+    const cur = S.lq[m];
+    if (!force && cur && Date.now() - cur.tried < (cur.fail ? 5 * 6e4 : 18e3)) return;
+    S.lq[m] = { ...(cur || {}), tried: Date.now() };
+    try {
+      const r = await fetch(`${trendApi()}/?quotes=${m === "crypto" ? "crypto" : "stocks"}`);
+      const d = await r.json();
+      if (!r.ok || d.error || !d.q) throw new Error(d.error || r.status);
+      S.lq[m] = { q: d.q, at: d.at, src: d.source, tried: Date.now() };
+    } catch { S.lq[m] = { ...(S.lq[m] || {}), fail: true, tried: Date.now() }; }
+    tmLiveApply();
+  }
+  const tmLiveQ = t => S.lq?.[S.market]?.q?.[t] || null;
+  const tmPx = t => tmLiveQ(t)?.[0] ?? S.stockBy[t]?.price;
+  function tmLiveApply() {
+    const L1 = S.lq?.[S.market], b = document.getElementById("tmlive");
+    if (b) b.innerHTML = L1?.q ? `<span class="on">● LIVE</span> ${esc(new Date(L1.at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }))}` : `<span>Last close ${S.stocks?.as_of ? esc(fmtDate(S.stocks.as_of, { day: "numeric", month: "short" })) : ""}</span>`;
+    if (!L1?.q) return;
+    document.querySelectorAll(".tm [data-lp]").forEach(el => { const q = L1.q[el.dataset.lp]; if (q) el.textContent = money(q[0]); });
+    document.querySelectorAll(".tm [data-lc]").forEach(el => { const q = L1.q[el.dataset.lc]; if (q && q[2] != null) el.innerHTML = tmPct(q[2], +el.dataset.dp || 1); });
+  }
+
+  // ------------------------------------------------ watchlists (WL)
+  function wlGet() {
+    const v = pref("tmWL", null);
+    return v && v.lists ? JSON.parse(JSON.stringify(v)) : { lists: { "My list": [] }, cur: "All" };
+  }
+  const wlSet = v => setPref("tmWL", v);
+  const wlTarget = W => W.cur !== "All" && W.lists[W.cur] ? W.cur : Object.keys(W.lists)[0] || "My list";
+  const wlHas = t => { const W = wlGet(); return (W.lists[wlTarget(W)] || []).includes(t); };
+
+  // ------------------------------------------------ monitor (MON)
   function tmSorted() {
     const k = pref("tmSort", "abs"), rows = (S.stocks?.stocks || []).slice();
     const f = { abs: r => -Math.abs(r.chg1d ?? 0), chg: r => -(r.chg1d ?? -1e9), tk: null, rsi: r => -(r.rsi ?? -1) }[k];
     return f ? rows.sort((a, b) => f(a) - f(b)) : rows.sort((a, b) => sym(a.ticker).localeCompare(sym(b.ticker)));
   }
-  const tmPanel = (cls, code, title, go, body, extra = "") =>
-    `<section class="pn ${cls}" aria-label="${esc(title)}"><header class="pnh"><span class="code">${code}</span><h2>${title}</h2>${extra}${go ? `<a class="go" href="${go[0]}">${go[1]} ›</a>` : ""}</header><div class="pnb">${body}</div></section>`;
-
-  function tmMonitor() {
-    const k = pref("tmSort", "abs"), q = (S.tmQ || "").toLowerCase();
+  TM_R.mon = function tmMonitor() {
+    const k = pref("tmSort", "abs"), q = (S.tmQ || "").toLowerCase(), W = wlGet();
+    const inList = W.cur !== "All" && W.lists[W.cur] ? new Set(W.lists[W.cur]) : null;
     const sb = (key, t) => `<button type="button" data-tmsort="${key}" aria-pressed="${k === key}">${t}</button>`;
-    const rows = tmSorted().map(r => {
+    const rows = tmSorted().filter(r => !inList || inList.has(r.ticker)).map(r => {
       const hid = q && !(sym(r.ticker).toLowerCase().includes(q) || (r.name || "").toLowerCase().includes(q) || (r.sector || "").toLowerCase().includes(q));
       return `<button type="button" class="tr mon" data-tmsel="${esc(r.ticker)}" data-q="${esc((sym(r.ticker) + " " + (r.name || "") + " " + (r.sector || "")).toLowerCase())}" aria-current="${r.ticker === S.tmSel}"${hid ? " hidden" : ""}>
-        <span class="tk">${esc(disp(r.ticker).slice(0, 8))}</span><span class="dim">${esc(r.name || "")}</span><span class="r">${money(r.price)}</span><span class="r">${tmPct(r.chg1d)}</span><span class="r dim">${r.rsi == null ? "–" : Math.round(r.rsi)}</span></button>`;
+        <span class="tk">${esc(disp(r.ticker).slice(0, 8))}</span><span class="dim">${esc(r.name || "")}</span><span class="r" data-lp="${esc(r.ticker)}">${money(r.price)}</span><span class="r" data-lc="${esc(r.ticker)}">${tmPct(r.chg1d)}</span><span class="r dim">${r.rsi == null ? "–" : Math.round(r.rsi)}</span></button>`;
     }).join("");
-    const body = `<div class="monf"><input id="tmfilter" type="search" placeholder="Filter ${L().noun}…" value="${esc(S.tmQ || "")}" aria-label="Filter the list" autocomplete="off"></div>
-      <div class="tr mon th"><span>${sb("tk", "Sym")}</span><span></span><span class="r">Last</span><span class="r">${sb("abs", "Move")} ${sb("chg", "Chg")}</span><span class="r">${sb("rsi", "RSI")}</span></div>${rows || `<p class="empty2">Loading…</p>`}`;
+    const chips = `<div class="wlc">${["All", ...Object.keys(W.lists)].map(n => `<button type="button" data-tmwl="${esc(n)}" aria-pressed="${W.cur === n}">${n === "All" ? "All" : "★ " + esc(n)}${n !== "All" ? ` <small>${(W.lists[n] || []).filter(t => S.stockBy[t]).length}</small>` : ""}</button>`).join("")}<button type="button" data-tmwlnew aria-label="New watchlist">+</button>${inList ? `<button type="button" class="wlx" data-tmwlren>Rename</button><button type="button" class="wlx" data-tmwldel>Delete</button>` : ""}</div>`;
+    const empty = inList && !rows ? `<p class="empty2">This list is empty. Load a ${L().one} and tap ☆ next to its name to add it.</p>` : "";
+    const body = `<div class="monf">${chips}<input id="tmfilter" type="search" placeholder="Filter ${L().noun}…" value="${esc(S.tmQ || "")}" aria-label="Filter the list" autocomplete="off">
+      <div class="tr mon th"><span>${sb("tk", "Sym")}</span><span></span><span class="r">Last</span><span class="r">${sb("abs", "Move")} ${sb("chg", "Chg")}</span><span class="r">${sb("rsi", "RSI")}</span></div></div>${rows || (inList ? "" : `<p class="empty2">Loading…</p>`)}${empty}`;
     return tmPanel("p-mon", "MON", "Monitor", [isCrypto() ? "#stocks" : "#heatmap", isCrypto() ? "All coins" : "Heatmap"], body, `<small>${(S.stocks?.stocks || []).length} ${L().noun}</small>`);
-  }
+  };
 
+  // ------------------------------------------------ security (DES / FA / ANR / EE / RV / HDS / DVD)
+  const tmTab = (id, d) => pref("tmTab." + id, d);
+  function tmSecHead(t) {
+    const r = S.stockBy[t], today = tmToday();
+    const m = S.sent?.stocks?.[t], ne = S.market === "stocks" ? (S.cal?.earnings || []).find(e => e.ticker === t && e.date >= today) : null;
+    const moodCls = m ? (m.mood.includes("bull") ? "bull" : m.mood.includes("bear") ? "bear" : "") : "";
+    const star = wlHas(t);
+    return `<div class="sech"><button type="button" class="star" data-tmstar="${esc(t)}" aria-pressed="${star}" aria-label="${star ? "Remove from" : "Add to"} watchlist" title="${star ? "Remove from" : "Add to"} ${esc(wlTarget(wlGet()))}">${star ? "★" : "☆"}</button><span class="stk">${esc(disp(t))}</span><span class="spx" data-lp="${esc(t)}">${money(r.price)}</span><span class="sch" data-lc="${esc(t)}" data-dp="2">${tmPct(r.chg1d, 2)}</span>
+      ${m ? `<span class="mood ${moodCls}" title="News mood from the last ${S.sent.window_days || 7} days">News: ${esc(m.mood.replace(/_/g, " "))}</span>` : ""}
+      <span class="snm">${esc(r.name || "")}${r.sector ? " · " + esc(r.sector) : ""}${ne ? ` · <b>Earnings ${esc(fmtDate(ne.date, { day: "numeric", month: "short" }))}</b>${ne.eps_est != null ? `, EPS est. ${ne.eps_est}` : ""}` : ""}</span></div>`;
+  }
   function tmSecHtml(t) {
     const r = S.stockBy[t];
     if (!r) return `<p class="empty2">Type a ticker in the command line, or pick one on the left.</p>`;
-    const today = tmToday();
-    const m = S.sent?.stocks?.[t], ne = S.market === "stocks" ? (S.cal?.earnings || []).find(e => e.ticker === t && e.date >= today) : null;
-    const moodCls = m ? (m.mood.includes("bull") ? "bull" : m.mood.includes("bear") ? "bear" : "") : "";
-    let h = `<div class="sech"><span class="stk">${esc(disp(t))}</span><span class="spx">${money(r.price)}</span><span class="sch">${tmPct(r.chg1d, 2)}</span>
-      ${m ? `<span class="mood ${moodCls}" title="News mood from the last ${S.sent.window_days || 7} days">News: ${esc(m.mood.replace(/_/g, " "))}</span>` : ""}
-      <span class="snm">${esc(r.name || "")}${r.sector ? " · " + esc(r.sector) : ""}${ne ? ` · <b>Earnings ${esc(fmtDate(ne.date, { day: "numeric", month: "short" }))}</b>${ne.eps_est != null ? `, EPS est. ${ne.eps_est}` : ""}` : ""}</span></div>`;
+    const tab = S.market === "stocks" ? tmTab("sec", "DES") : "DES";
+    let h = tmSecHead(t);
+    if (S.market === "stocks") h += tmTabs("sec", TM_SEC.map(([k, l]) => [k, `<b>${k}</b> ${l}`]), tab);
+    if (tab !== "DES") {
+      const det = tab === "RV" ? null : tmCoDet(t);
+      if (tab !== "RV" && !det) return h + `<p class="empty2">${det === false ? "No company data for this stock yet. It's refreshed every evening after the US close." : "Loading company data…"}</p>`;
+      return h + ({ FA: tmFA, ANR: tmANR, EE: tmEE, RV: tmRV, HDS: tmHDS, DVD: tmDVD }[tab])(t, det);
+    }
     h += `<div class="kpis"><div><small>1 month</small><b>${tmPct(r.chg1m)}</b></div><div><small>1 year</small><b>${tmPct(r.chg1y)}</b></div>
       <div><small>vs 200-day</small><b>${tmPct(r.vs200)}</b></div><div><small>RSI 14</small><b>${r.rsi ?? "–"}</b></div>
       <div><small>52w low</small><b>${money(r.lo52)}</b></div><div><small>52w high</small><b>${money(r.hi52)}</b></div><div><small>Of 52w range</small><b>${r.pos52 == null ? "–" : Math.round(r.pos52) + "%"}</b></div></div>`;
     const al = (S.feed?.alerts || []).filter(a => a.ticker === t).slice(0, 8);
     const news = (S.news?.items || []).filter(n => (n.tickers || []).includes(t)).slice(0, 5);
+    const det = S.market === "stocks" ? tmCoDet(t) : null, pf = det?.profile;
     h += `<div class="secbody"><div><div class="chartbox" id="tmchart"><p class="loading">Loading chart…</p></div>
-        <div class="secacts">${tmTickerFn(t).map(([c, href, lbl]) => `<a href="${href}" title="${esc(lbl)}"><b>${c}</b>${esc(lbl)}</a>`).join("")}</div></div>
+        <div class="secacts">${tmTickerFn(t).map(([c, href, lbl]) => `<a href="${href}" title="${esc(lbl)}"><b>${c}</b>${esc(lbl)}</a>`).join("")}<a href="#terminal" data-tmpxfor="${esc(t)}"><b>PXA</b>Price alert</a><a href="#terminal" data-tmgipadd="${esc(t)}"><b>GIP</b>Add to multi-chart</a></div>
+        ${pf?.summary ? `<p class="sub2">About</p><p class="about2">${esc(pf.summary)}</p><p class="dim" style="font-size:12px;margin:4px 0 0">${[pf.industry, pf.employees ? tmBig(pf.employees) + " employees" : "", pf.country].filter(Boolean).map(esc).join(" · ")}${pf.website ? ` · <a href="${esc(pf.website)}" target="_blank" rel="noopener">website</a>` : ""}</p>` : ""}</div>
       <div><div class="card rating" id="rating" data-sym="${esc(t)}"><div class="hd"><h3>Technical rating</h3></div><p class="loading" style="padding:18px 0">Reading the indicators…</p></div>
         <p class="sub2">Recent alerts</p>${al.length ? al.map(a => { const up = a.side === "bullish";
           return `<a class="tr sal" href="#alert-${S.feed.alerts.indexOf(a)}"><span class="dim">${esc(fmtDate(a.date, { day: "numeric", month: "short" }))}</span><span class="${up ? "side-b" : "side-s"}">${up ? "▲" : "▼"} ${esc(sideLbl(a))}</span><span>${esc(stratName(a.strategy))}${a.tf ? ` · ${esc(a.tf)}` : ""}</span><span class="r dim">${esc(a.strength?.label || "")}</span></a>`; }).join("")
@@ -7120,11 +7379,106 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
       </div></div>`;
     return h;
   }
+  // a statement table: periods across, items down
+  function tmStmt(st, items, label) {
+    if (!st?.periods?.length) return "";
+    const cols = st.periods.map(p => p.slice(0, 7));
+    return `<div class="tw"><table class="tt"><thead><tr><th>${label}</th>${cols.map(c => `<th>${esc(c)}</th>`).join("")}</tr></thead><tbody>${items.filter(([k]) => st[k]).map(([k, l, f]) =>
+      `<tr><td>${l}</td>${st[k].map(v => `<td>${f ? f(v) : tmBig(v)}</td>`).join("")}</tr>`).join("")}</tbody></table></div>`;
+  }
+  function tmBars(rows, fmt = tmBig, h = 90) {   // [[label, value]] -> simple bar chart
+    const v = rows.filter(r => r[1] != null); if (!v.length) return "";
+    const mx = Math.max(...v.map(r => Math.abs(r[1]))) || 1, w = 100 / v.length;
+    return `<svg class="bars" viewBox="0 0 100 ${h}" preserveAspectRatio="none" aria-hidden="true">${v.map(([, x], i) => { const bh = Math.abs(x) / mx * (h - 14);
+      return `<rect class="${x >= 0 ? "pos" : "neg"}" x="${(i * w + w * .18).toFixed(2)}" y="${(h - 12 - bh).toFixed(1)}" width="${(w * .64).toFixed(2)}" height="${bh.toFixed(1)}" rx=".6"/>`; }).join("")}</svg>
+      <div class="barl">${v.map(([l, x]) => `<span><b>${fmt(x)}</b>${esc(String(l))}</span>`).join("")}</div>`;
+  }
+  function tmFA(t, d) {
+    const R = d.fa?.ratios || {}, f = d.fa || {};
+    const k = (l, v) => `<div><small>${l}</small><b>${v}</b></div>`;
+    let h = `<div class="kpis">${k("Market cap", tmBig(R.marketCap))}${k("P/E", tmNum(R.trailingPE, 1))}${k("Fwd P/E", tmNum(R.forwardPE, 1))}${k("PEG", tmNum(R.trailingPegRatio, 2))}${k("P/B", tmNum(R.priceToBook, 1))}${k("P/S", tmNum(R.priceToSalesTrailing12Months, 1))}${k("EV/EBITDA", tmNum(R.enterpriseToEbitda, 1))}
+      ${k("Gross margin", tmFr(R.grossMargins))}${k("Op. margin", tmFr(R.operatingMargins))}${k("Net margin", tmFr(R.profitMargins))}${k("ROE", tmFr(R.returnOnEquity))}${k("Revenue growth", tmFr(R.revenueGrowth))}${k("EPS growth", tmFr(R.earningsGrowth))}
+      ${k("Debt/equity", tmNum(R.debtToEquity, 0))}${k("Cash", tmBig(R.totalCash))}${k("Debt", tmBig(R.totalDebt))}${k("Free cash flow", tmBig(R.freeCashflow))}${k("Beta", tmNum(R.beta, 2))}</div>`;
+    const y = f.y;
+    if (y?.revenue) h += `<div class="two"><div><p class="sub2">Revenue by year</p>${tmBars(y.periods.map((p, i) => [p.slice(0, 4), y.revenue[i]]).reverse())}</div><div><p class="sub2">Net income by year</p>${tmBars(y.periods.map((p, i) => [p.slice(0, 4), y.net?.[i]]).reverse())}</div></div>`;
+    const items = [["revenue", "Revenue"], ["gross", "Gross profit"], ["operating", "Operating income"], ["net", "Net income"], ["eps", "EPS (diluted)", v => tmNum(v, 2)]];
+    h += `<p class="sub2">Last quarters</p>${tmStmt(f.q, items, "Quarter") || `<p class="empty2">Not available.</p>`}`;
+    h += `<p class="sub2">Last years</p>${tmStmt(f.y, items, "Year") || `<p class="empty2">Not available.</p>`}`;
+    if (f.cf) h += tmStmt(f.cf, [["fcf", "Free cash flow"], ["buybacks", "Share buybacks"], ["dividends", "Dividends paid"]], "Cash flow");
+    return h + `<p class="fine2">Yahoo Finance, updated ${esc(d.updated || "")}. Figures in the company's reporting currency.</p>`;
+  }
+  function tmANR(t, d) {
+    const A = d.anr || {}, px = tmPx(t), T = A.target || {};
+    const recTxt = A.mean == null ? "–" : A.mean <= 1.5 ? "Strong buy" : A.mean <= 2.5 ? "Buy" : A.mean <= 3.5 ? "Hold" : A.mean <= 4.5 ? "Sell" : "Strong sell";
+    let h = `<div class="kpis"><div><small>Consensus</small><b class="${A.mean <= 2.5 ? "up" : A.mean > 3.5 ? "down" : ""}">${recTxt}</b></div><div><small>Score (1 buy · 5 sell)</small><b>${tmNum(A.mean, 2)}</b></div><div><small>Analysts</small><b>${A.n ?? "–"}</b></div>
+      <div><small>Mean target</small><b>${money(T.mean)}</b></div><div><small>Upside</small><b>${T.mean && px ? tmPct((T.mean / px - 1) * 100) : "–"}</b></div><div><small>Low / high</small><b>${money(T.low)} – ${money(T.high)}</b></div></div>`;
+    if (T.low && T.high && px) {
+      const lo = Math.min(T.low, px), hi = Math.max(T.high, px), p = v => ((v - lo) / (hi - lo || 1) * 100).toFixed(1);
+      h += `<div class="trange"><div class="bar"><i style="left:${p(T.low)}%;right:${100 - p(T.high)}%"></i><b class="px" style="left:${p(px)}%" title="Price"></b><b class="mean" style="left:${p(T.mean)}%" title="Mean target"></b></div><div class="ends"><span>Low ${money(T.low)}</span><span>▲ price · ◆ mean target</span><span>High ${money(T.high)}</span></div></div>`;
+    }
+    const tr = (A.trend || []).slice(0, 4);
+    if (tr.length) {
+      const lbl = { "0m": "Now", "-1m": "1 month ago", "-2m": "2 months ago", "-3m": "3 months ago" };
+      h += `<p class="sub2">Ratings over time</p>${tr.map(x => { const v = [x.strongBuy, x.buy, x.hold, x.sell, x.strongSell].map(n => +n || 0), n = v.reduce((a, b) => a + b, 0) || 1;
+        return `<div class="rtr"><span>${esc(lbl[x.period] || x.period || "")}</span><span class="stack">${v.map((c, i) => c ? `<i class="r${i}" style="width:${c / n * 100}%" title="${["Strong buy", "Buy", "Hold", "Sell", "Strong sell"][i]}: ${c}">${c}</i>` : "").join("")}</span></div>`; }).join("")}
+        <div class="rleg"><span class="r0">Strong buy</span><span class="r1">Buy</span><span class="r2">Hold</span><span class="r3">Sell</span><span class="r4">Strong sell</span></div>`;
+    }
+    const ch = A.changes || [];
+    if (ch.length) h += `<p class="sub2">Latest rating changes</p>${ch.map(c => `<div class="tr anr"><span class="dim">${esc((c.date || "").slice(0, 10))}</span><span>${esc(c.Firm || "")}</span><span>${c.FromGrade && c.FromGrade !== c.ToGrade ? `<span class="dim">${esc(c.FromGrade)} →</span> ` : ""}${esc(c.ToGrade || "")}</span><span class="r ${/up/i.test(c.Action || "") ? "up" : /down/i.test(c.Action || "") ? "down" : "dim"}">${esc({ up: "upgrade", down: "downgrade", main: "maintained", reit: "reiterated", init: "initiated" }[c.Action] || c.Action || "")}${c.currentPriceTarget ? ` · ${money(c.currentPriceTarget)}` : ""}</span></div>`).join("")}`;
+    return h + `<p class="fine2">Analyst views from Yahoo Finance. Targets are opinions, not forecasts this site makes.</p>`;
+  }
+  function tmEE(t, d) {
+    const E = d.ee || {}, lbl = { "0q": "This quarter", "+1q": "Next quarter", "0y": "This year", "+1y": "Next year" };
+    const tbl = (rows, money_) => rows.length ? `<div class="tw"><table class="tt"><thead><tr><th>Period</th><th>Average</th><th>Low</th><th>High</th><th>Year ago</th><th>Growth</th><th>Analysts</th></tr></thead><tbody>${rows.map(x =>
+      `<tr><td>${esc(lbl[x.period] || x.period)}</td><td>${money_(x.avg)}</td><td>${money_(x.low)}</td><td>${money_(x.high)}</td><td>${money_(x.yearAgoEps ?? x.yearAgoRevenue)}</td><td>${x.growth == null ? "–" : tmPct(x.growth * 100)}</td><td>${x.numberOfAnalysts ?? "–"}</td></tr>`).join("")}</tbody></table></div>` : `<p class="empty2">Not available.</p>`;
+    let h = `<p class="sub2">EPS estimates</p>${tbl(E.eps || [], v => tmNum(v, 2))}<p class="sub2">Revenue estimates</p>${tbl(E.rev || [], tmBig)}`;
+    if ((E.trend || []).length) h += `<p class="sub2">How EPS estimates moved</p><div class="tw"><table class="tt"><thead><tr><th>Period</th><th>Now</th><th>7 days ago</th><th>30 days</th><th>60 days</th><th>90 days</th><th>Change 90d</th></tr></thead><tbody>${E.trend.map(x =>
+      `<tr><td>${esc(lbl[x.period] || x.period)}</td><td>${tmNum(x.current)}</td><td>${tmNum(x["7daysAgo"])}</td><td>${tmNum(x["30daysAgo"])}</td><td>${tmNum(x["60daysAgo"])}</td><td>${tmNum(x["90daysAgo"])}</td><td>${x.current && x["90daysAgo"] ? tmPct((x.current / x["90daysAgo"] - 1) * 100) : "–"}</td></tr>`).join("")}</tbody></table></div>`;
+    if ((E.history || []).length) h += `<p class="sub2">Last reports: estimate vs actual</p>${E.history.map(x => { const s = x.surprisePercent != null ? x.surprisePercent * (Math.abs(x.surprisePercent) < 2 ? 100 : 1) : null;
+      return `<div class="tr ee"><span class="dim">${esc((x.date || x.quarter || "").slice(0, 10))}</span><span>Est. ${tmNum(x.epsEstimate)}</span><span>Actual ${tmNum(x.epsActual)}</span><span class="r">${s == null ? "–" : tmPct(s)}</span></div>`; }).join("")}`;
+    return h + `<p class="fine2">Consensus estimates from Yahoo Finance. Also see <a href="#earnings-${encodeURIComponent(t)}">how ${esc(disp(t))} moves after earnings</a>.</p>`;
+  }
+  function tmRV(t) {
+    const C = tmLoadCo();
+    if (!C) return `<p class="empty2">${C === false ? "No company data yet." : "Loading…"}</p>`;
+    const me = C.stocks?.[t], sec = me?.sector || S.stockBy[t]?.sector;
+    const peers = Object.entries(C.stocks || {}).filter(([k, v]) => v.sector === sec && S.stockBy[k]).sort((a, b) => (b[1].mcap || 0) - (a[1].mcap || 0));
+    if (!peers.length) return `<p class="empty2">No peers found.</p>`;
+    const cols = [["mcap", "Mkt cap", tmBig], ["pe", "P/E", v => tmNum(v, 1)], ["fpe", "Fwd P/E", v => tmNum(v, 1)], ["ev_ebitda", "EV/EBITDA", v => tmNum(v, 1)], ["margin", "Margin", tmFr], ["roe", "ROE", tmFr], ["rev_g", "Rev. gr.", tmFr], ["div_y", "Div. yield", v => v == null ? "–" : v.toFixed(2) + "%"], ["upside", "Upside", v => tmPct(v)]];
+    const med = k => { const v = peers.map(([, x]) => x[k]).filter(x => x != null).sort((a, b) => a - b); return v.length ? v[Math.floor(v.length / 2)] : null; };
+    return `<p class="sub2">${esc(sec || "")} · ${peers.length} stocks in the S&amp;P 100</p><div class="tw"><table class="tt rv"><thead><tr><th>Stock</th><th>1 year</th>${cols.map(c => `<th>${c[1]}</th>`).join("")}</tr></thead><tbody>
+      ${peers.map(([k, v]) => `<tr class="${k === t ? "me" : ""}" data-tmsel="${esc(k)}"><td><b>${esc(disp(k))}</b></td><td>${tmPct(S.stockBy[k]?.chg1y)}</td>${cols.map(([c, , f]) => `<td>${f(v[c])}</td>`).join("")}</tr>`).join("")}
+      <tr class="med"><td>Median</td><td></td>${cols.map(([c, , f]) => `<td>${f(med(c))}</td>`).join("")}</tr></tbody></table></div><p class="fine2">Tap a row to load that stock. Valuation from Yahoo Finance.</p>`;
+  }
+  function tmHDS(t, d) {
+    const H = d.hds || {}, SI = d.si || {}, I = d.ins || [];
+    let h = `<div class="kpis"><div><small>Insiders own</small><b>${tmFr(H.insiders_pct, 2)}</b></div><div><small>Institutions own</small><b>${tmFr(H.inst_pct)}</b></div>
+      <div><small>Short % of float</small><b>${tmFr(SI.pct_float, 2)}</b></div><div><small>Days to cover</small><b>${tmNum(SI.days, 1)}</b></div><div><small>Shares short</small><b>${tmBig(SI.shares)}</b></div>
+      <div><small>vs month before</small><b>${SI.shares && SI.prior ? tmPct((SI.shares / SI.prior - 1) * 100) : "–"}</b></div></div>`;
+    if (SI.date) h += `<p class="dim" style="font-size:11.5px;margin:-2px 0 6px">Short interest as of ${esc(SI.date)} (published twice a month).</p>`;
+    if ((H.inst || []).length) h += `<p class="sub2">Top institutions</p><div class="tw"><table class="tt"><thead><tr><th>Holder</th><th>% held</th><th>Shares</th><th>Value</th><th>Change</th><th>Reported</th></tr></thead><tbody>${H.inst.map(x =>
+      `<tr><td>${esc(x.Holder || "")}</td><td>${tmFr(x.pctHeld, 2)}</td><td>${tmBig(x.Shares)}</td><td>${tmBig(x.Value)}</td><td>${x.pctChange == null ? "–" : tmPct(x.pctChange * 100)}</td><td class="dim">${esc((x["Date Reported"] || "").slice(0, 10))}</td></tr>`).join("")}</tbody></table></div>`;
+    if ((H.funds || []).length) h += `<p class="sub2">Top funds</p>${H.funds.map(x => `<div class="tr hf"><span>${esc(x.Holder || "")}</span><span class="r">${tmFr(x.pctHeld, 2)}</span><span class="r dim">${tmBig(x.Value)}</span></div>`).join("")}`;
+    h += `<p class="sub2">Insider trades</p>` + (I.length ? I.map(x => { const sell = /sale|sell/i.test((x.Text || "") + (x.Transaction || "")), buy = /purchase|buy/i.test((x.Text || "") + (x.Transaction || ""));
+      return `<div class="tr ins"><span class="dim">${esc((x["Start Date"] || "").slice(0, 10))}</span><span>${esc(x.Insider || "")}<small class="dim"> · ${esc(x.Position || "")}</small></span><span class="${buy ? "up" : sell ? "down" : "dim"}">${esc(x.Text || x.Transaction || (buy ? "Buy" : sell ? "Sale" : "Other"))}</span><span class="r">${tmBig(x.Shares)} sh${x.Value ? ` · $${tmBig(x.Value)}` : ""}</span></div>`; }).join("") : `<p class="empty2">No recent insider trades reported.</p>`);
+    return h + `<p class="fine2">From SEC filings (Form 4, 13F) via Yahoo Finance. 13F holdings are reported up to 45 days after each quarter.</p>`;
+  }
+  function tmDVD(t, d) {
+    const D = d.dvd || {};
+    if (!D.rate && !(D.years || []).length) return `<p class="empty2">${esc(disp(t))} doesn't pay a dividend.</p>`;
+    let h = `<div class="kpis"><div><small>Per year</small><b>${money(D.rate)}</b></div><div><small>Yield</small><b>${D.yield == null ? "–" : D.yield.toFixed(2) + "%"}</b></div><div><small>5-year avg yield</small><b>${D.avg5y == null ? "–" : D.avg5y.toFixed(2) + "%"}</b></div>
+      <div><small>Payout ratio</small><b>${tmFr(D.payout, 0)}</b></div><div><small>Last ex-date</small><b>${D.ex ? esc(fmtDate(D.ex, { day: "numeric", month: "short", year: "2-digit" })) : "–"}</b></div></div>`;
+    const yrs = (D.years || []).filter(([y]) => y < new Date().getFullYear() || (D.years || []).length < 3);
+    if (yrs.length) h += `<p class="sub2">Paid per share, by year</p>${tmBars(yrs.map(([y, v]) => [y, v]), v => tmNum(v, 2))}`;
+    if ((D.last || []).length) h += `<p class="sub2">Last payments (ex-date)</p>${D.last.map(([dt, v]) => `<div class="tr hf"><span>${esc(fmtDate(dt, { day: "numeric", month: "short", year: "numeric" }))}</span><span class="r">${tmNum(v, 4)}</span><span></span></div>`).join("")}`;
+    return h + `<p class="fine2">In Italy, dividends from US stocks are taxed at 26% plus the US withholding (15% with the W-8BEN form).</p>`;
+  }
   async function tmSecAfter(t) {
     if (!S.stockBy[t]) return;
     for (let i = charts.length - 1; i >= 0; i--) if (!charts[i][0].isConnected) charts.splice(i, 1);
     loadRating(t);
     const box = document.getElementById("tmchart");
+    if (!box) return;
     try {
       const data = S.stockData[t] || (S.stockData[t] = await (await fetch(`${L().base}stocks/${t}.json`, { cache: "no-cache" })).json());
       if (!box?.isConnected || S.tmSel !== t) return;
@@ -7134,21 +7488,29 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
       mountChart(box, { ...data, markers, shapes: [] }, { label: `${t} one-year chart` });
     } catch { if (box?.isConnected) box.innerHTML = `<p class="loading">The chart couldn't load.</p>`; }
   }
+  function tmSecRender() {
+    const box = document.getElementById("tmsec"), t = S.tmSel;
+    if (!box) return;
+    box.innerHTML = tmSecHtml(t);
+    const pn = box.closest(".pn"); if (pn) { pn.querySelector(".pnh small").textContent = t ? disp(t) : ""; const g = pn.querySelector(".pnh .go"); if (g && t) g.href = `#stock-${encodeURIComponent(t)}`; }
+    if ((S.market !== "stocks" || tmTab("sec", "DES") === "DES")) tmSecAfter(t);
+    tmLiveApply();
+  }
+  TM_R.sec = () => { const t = S.tmSel; return tmPanel("p-sec", "DES", "Security", t ? [`#stock-${encodeURIComponent(t)}`, "Full page"] : null, `<div id="tmsec">${tmSecHtml(t)}</div>`, `<small>${esc(t ? disp(t) : "")}</small>`); };
   function tmSelect(t, push) {
     if (!S.stockBy[t]) return false;
     S.tmSel = t; setPref("tmSel." + S.market, t);
     history[push ? "pushState" : "replaceState"](null, "", "#terminal-" + encodeURIComponent(t));
-    const box = document.getElementById("tmsec");
-    if (!box) return true;
-    box.innerHTML = tmSecHtml(t);
-    box.closest(".pn").querySelector(".pnh small").textContent = disp(t);
+    if (!document.getElementById("tmsec")) return true;
+    tmSecRender();
     document.querySelectorAll(".tm .mon[data-tmsel]").forEach(b => b.setAttribute("aria-current", b.dataset.tmsel === t));
-    tmSecAfter(t);
-    if (!WIDE.matches || innerWidth < 1280) box.closest(".pn").scrollIntoView({ behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "start" });
+    const pn = document.querySelector(".tm [data-p='sec']");
+    if (pn && (!WIDE.matches || innerWidth < 1280)) pn.scrollIntoView({ behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "start" });
     return true;
   }
 
-  function tmAlerts() {
+  // ------------------------------------------------ alerts, live trades, news, calendar, grades, breadth
+  TM_R.alrt = () => {
     const A = (S.feed?.alerts || []).slice(0, 60);
     const body = !S.feed ? `<p class="empty2">Loading…</p>` : !A.length ? `<p class="empty2">No alerts yet.</p>` : A.map(a => {
       const up = a.side === "bullish";
@@ -7156,11 +7518,10 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
     }).join("");
     const today = S.feed ? S.feed.alerts.filter(a => a.date === S.feed.as_of) : [], bu = today.filter(a => a.side === "bullish").length;
     return tmPanel("p-alrt", "ALRT", "Alerts", ["#alerts", "All alerts"], body, S.feed ? `<small>${bu}▲ ${today.length - bu}▼ last close</small>` : "");
-  }
-
-  function tmLive() {
+  };
+  TM_R.live = () => {
     const T = CACHE[S.market]?.trades;
-    if (T === undefined) loadTrades().then(() => { const p = document.querySelector(".tm .p-live"); if (p) p.outerHTML = tmLive(); });
+    if (T === undefined) loadTrades().then(() => tmRefresh("live"));
     let body;
     if (!T) body = `<p class="empty2">${T === false ? "No live trades for this market yet." : "Loading…"}</p>`;
     else {
@@ -7175,16 +7536,14 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
         + (lastClosed.length ? `<p class="sub2">Just closed</p>${lastClosed.map(x => row(x, false)).join("")}` : "");
     }
     return tmPanel("p-live", "LIVE", "Live paper trades", ["#trades", "All trades"], body, T ? `<small>since ${esc(fmtDate(T.start, { day: "numeric", month: "short" }))}</small>` : "");
-  }
-
-  function tmNews() {
+  };
+  TM_R.news = () => {
     const N = (S.news?.items || []).slice(0, 30);
     const body = !S.news ? `<p class="empty2">No headlines loaded.</p>` : N.map(n => `<div class="tr nw"><span class="dim">${esc(tmAgo(n.time))}</span><span><a class="ttl" href="${esc(n.link)}" target="_blank" rel="noopener" style="color:inherit;text-decoration:none">${esc(n.title)}</a>
       <span class="meta">${(n.tickers || []).filter(x => S.stockBy[x]).slice(0, 4).map(x => `<a href="#terminal-${encodeURIComponent(x)}" data-tmsel="${esc(x)}">${esc(disp(x))}</a>`).join("")}${esc(n.source || "")}</span></span></div>`).join("");
-    return tmPanel("p-news", "NEWS", "Headlines", ["#news", "All news"], body, S.market === "stocks" ? `<a class="go" href="#mood" style="margin-left:auto">Mood ›</a>` : "");
-  }
-
-  function tmCal() {
+    return tmPanel("p-news", "NEWS", "Headlines", ["#news", "All news"], body, S.market === "stocks" && !S.tmEdit ? `<a class="go" href="#mood" style="margin-left:auto">Mood ›</a>` : "");
+  };
+  TM_R.cal = () => {
     const C = S.cal, today = tmToday();
     let body = "";
     if (!C) body = `<p class="empty2">Loading…</p>`;
@@ -7198,9 +7557,8 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
       body += `<p class="sub2">Economy · US</p>` + (X.length ? X.map(e => `<a class="tr cl" href="#calendar-${esc(e.date)}" title="${esc(e.why || "")}"><span class="dim">${esc(fmtDate(e.date, { day: "numeric", month: "short" }))}</span><span class="dim">${esc(e.time || "")}</span><span>${esc(e.kind || e.name)}${e.period ? ` <span class="dim">${esc(e.period)}</span>` : ""}</span><span class="r dim">${e.last != null ? "prev " + e.last : ""}</span></a>`).join("") : `<p class="empty2">Nothing scheduled.</p>`);
     }
     return tmPanel("p-cal", "CAL", "Calendar", ["#calendar", "Calendar"], body, `<small>US times</small>`);
-  }
-
-  function tmGrades() {
+  };
+  TM_R.grd = () => {
     const EV = S.lineup?.evidence?.[S.market];
     let body;
     if (!EV) body = `<p class="empty2">No graded line-up for this market yet.</p><a class="tr gr" href="#strategies"><span>See every strategy</span><span></span><span></span><span class="r">›</span></a>`;
@@ -7211,11 +7569,10 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
         + `<div class="tr gr"><span class="dim">Just holding (${esc(EV.vs || "")})</span><span></span><span class="r">${yr(EV.hold?.cagr)}</span><span></span></div>`;
     }
     return tmPanel("p-grd", "GRD", "Strategy grades", ["#strategylab", "Open Lab"], body, EV ? `<small>after costs · ${esc(EV.period || "")}</small>` : "");
-  }
-
-  function tmBreadth() {
+  };
+  TM_R.brd = () => {
     const M = S.stocks;
-    if (!M?.stocks?.length) return tmPanel("p-brd", "BRD", "Breadth", null, `<p class="empty2">Loading…</p>`);
+    if (!M?.stocks?.length) return tmPanel("p-brd", "BRD", "Breadth &amp; movers", null, `<p class="empty2">Loading…</p>`);
     const n = M.stocks.length, adv = M.advancers ?? M.stocks.filter(r => r.chg1d > 0).length, dec = M.decliners ?? M.stocks.filter(r => r.chg1d < 0).length;
     let body = `<div class="kpis"><div><small>Up today</small><b class="up">${adv}</b></div><div><small>Down today</small><b class="down">${dec}</b></div><div><small>Above 200-day</small><b>${M.breadth200 == null ? "–" : Math.round(M.breadth200) + "%"}</b></div><div><small>Avg move</small><b>${tmPct(M.stocks.reduce((s, r) => s + (r.chg1d || 0), 0) / n, 2)}</b></div></div>
       <div class="bbar" aria-hidden="true"><i style="width:${adv / n * 100}%"></i><span style="flex:1"></span><u style="width:${dec / n * 100}%"></u></div>`;
@@ -7231,8 +7588,284 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
     const mv = r => `<button type="button" class="tr mv" data-tmsel="${esc(r.ticker)}"><span class="tk">${esc(disp(r.ticker).slice(0, 8))}</span><span class="r">${money(r.price)}</span><span class="r">${tmPct(r.chg1d)}</span></button>`;
     body += `<div class="two"><div><p class="sub2">Top gainers</p>${s.slice(0, 6).map(mv).join("")}</div><div><p class="sub2">Top losers</p>${s.slice(-6).reverse().map(mv).join("")}</div></div>`;
     return tmPanel("p-brd", "BRD", "Breadth &amp; movers", [isCrypto() ? "#crypto" : "#heatmap", isCrypto() ? "Dashboard" : "Heatmap"], body);
+  };
+
+  // ------------------------------------------------ world markets (WEI / FUT / FX / VOL)
+  TM_R.wei = () => {
+    const M = tmLoadMarkets(), tab = tmTab("wei", "idx");
+    const tabs = tmTabs("wei", [["idx", "<b>WEI</b> Indices"], ["fut", "<b>FUT</b> US futures"], ["fx", "<b>FX</b> Currencies"], ["vol", "<b>VOL</b> VIX curve"]], tab);
+    let body = tabs;
+    if (!M) body += `<p class="empty2">${M === false ? "Market boards aren't available yet." : "Loading…"}</p>`;
+    else {
+      const row = x => `<div class="tr wei"><span>${esc(x.name)}</span><span class="r">${tmNum(x.last, x.last < 10 ? 4 : 2)}</span><span class="r">${tmPct(x.chg, 2)}</span><span class="r">${tmPct(x.m1)}</span><span class="r">${tmPct(x.y1)}</span><span class="r">${tmSpark(x.spark)}</span></div>`;
+      const hd = `<div class="tr wei th"><span>Name</span><span class="r">Last</span><span class="r">Day</span><span class="r">1M</span><span class="r">1Y</span><span class="r">1 month</span></div>`;
+      if (tab === "idx") { const W = (M.wei || []).filter(x => !/futures/.test(x.region)); body += hd + ["US", "Europe", "Asia", "Americas"].map(g => { const xs = W.filter(x => x.region === g); return xs.length ? `<p class="sub2">${g}</p>${xs.map(row).join("")}` : ""; }).join(""); }
+      else if (tab === "fut") body += hd + (M.wei || []).filter(x => /futures/.test(x.region)).map(row).join("") + `<p class="fine2">Index futures trade almost around the clock, so they show where US stocks are heading before the open.</p>`;
+      else if (tab === "fx") body += hd + (M.fx || []).map(row).join("") + `<p class="fine2">EUR/USD up means the euro buys more dollars: US stocks get cheaper for a European, and dollar gains shrink once changed back to euros.</p>`;
+      else {
+        const V = M.vol || [], v = V.map(x => x.last), mx = Math.max(...v), mn = Math.min(...v), sp = mx - mn || 1;
+        const shape = V.length > 1 ? (V[V.length - 1].last > V[1]?.last ? "contango" : "backwardation") : "";
+        body += `<svg class="crv" viewBox="0 0 300 110" aria-label="VIX term structure"><polyline points="${V.map((x, i) => `${20 + i * (260 / Math.max(1, V.length - 1))},${(95 - (x.last - mn) / sp * 70).toFixed(1)}`).join(" ")}"/>${V.map((x, i) => `<circle cx="${20 + i * (260 / Math.max(1, V.length - 1))}" cy="${(95 - (x.last - mn) / sp * 70).toFixed(1)}" r="3"/><text x="${20 + i * (260 / Math.max(1, V.length - 1))}" y="${(88 - (x.last - mn) / sp * 70).toFixed(1)}">${tmNum(x.last, 1)}</text>`).join("")}</svg>
+          <div class="crvx">${V.map(x => `<span>${esc(x.name)}</span>`).join("")}</div>
+          <p class="hint2"><b class="${shape === "contango" ? "up" : "down"}">${shape === "contango" ? "Contango" : "Backwardation"}</b>: ${shape === "contango" ? "longer-dated volatility is higher than near-term. That's the normal, calm shape." : "near-term volatility is above longer-dated. That usually means stress right now."} <a href="#vix">VIX seasonality ›</a></p>` + hd + V.map(row).join("");
+      }
+      body += `<p class="fine2">Yahoo Finance, delayed, updated ${esc(tmAgo(M.generated_at))} ago.</p>`;
+    }
+    return tmPanel("p-wei", "WEI", "World markets", null, body);
+  };
+
+  // ------------------------------------------------ rates (GC / WIRP / EU)
+  TM_R.gc = () => {
+    const M = tmLoadMarkets(), tab = tmTab("gc", "curve");
+    let body = tmTabs("gc", [["curve", "<b>GC</b> US yield curve"], ["fed", "<b>WIRP</b> Fed &amp; ECB"], ["eu", "<b>EU</b> BTP–Bund"]], tab);
+    if (!M) return tmPanel("p-gc", "GC", "Rates &amp; Fed", null, body + `<p class="empty2">${M === false ? "Not available yet." : "Loading…"}</p>`);
+    if (tab === "curve" && M.curve) {
+      const C = M.curve, P = C.points, all = [...C.now, ...C.m1, ...C.y1].filter(x => x != null), lo = Math.min(...all) - .1, hi = Math.max(...all) + .1;
+      const X = i => 24 + i * (280 / (P.length - 1)), Y = v => (100 - (v - lo) / (hi - lo) * 86).toFixed(1);
+      const line = (vs, cls) => `<polyline class="${cls}" points="${vs.map((v, i) => v == null ? "" : `${X(i)},${Y(v)}`).filter(Boolean).join(" ")}"/>`;
+      body += `<svg class="crv yc" viewBox="0 0 320 112" aria-label="US Treasury yield curve">${[lo + .1, (lo + hi) / 2, hi - .1].map(v => `<text class="ax" x="2" y="${+Y(v) + 3}">${v.toFixed(1)}</text>`).join("")}${line(C.y1, "y1")}${line(C.m1, "m1")}${line(C.now, "now")}${C.now.map((v, i) => v == null ? "" : `<circle cx="${X(i)}" cy="${Y(v)}" r="2.5"/>`).join("")}</svg>
+        <div class="crvx">${P.map(p => `<span>${p.k}</span>`).join("")}</div>
+        <div class="leg2"><span class="now">Today (${esc(C.date)})</span><span class="m1">1 month ago</span><span class="y1">1 year ago</span></div>
+        <div class="kpis"><div><small>2Y</small><b>${tmNum(C.now[4], 2)}%</b></div><div><small>10Y</small><b>${tmNum(C.now[8], 2)}%</b></div><div><small>30Y</small><b>${tmNum(C.now[10], 2)}%</b></div>
+          <div><small>10Y − 2Y</small><b class="${C.s2s10 < 0 ? "down" : ""}">${C.s2s10 == null ? "–" : Math.round(C.s2s10 * 100) + " bp"}</b></div><div><small>10Y − 3M</small><b class="${C.s3m10 < 0 ? "down" : ""}">${C.s3m10 == null ? "–" : Math.round(C.s3m10 * 100) + " bp"}</b></div></div>
+        <div class="tw"><table class="tt"><thead><tr><th>Maturity</th>${P.map(p => `<th>${p.k}</th>`).join("")}</tr></thead><tbody>
+          <tr><td>Yield</td>${C.now.map(v => `<td>${tmNum(v, 2)}</td>`).join("")}</tr>
+          <tr><td>1M change</td>${C.now.map((v, i) => `<td>${v != null && C.m1[i] != null ? (v - C.m1[i] >= 0 ? "+" : "−") + Math.abs(Math.round((v - C.m1[i]) * 100)) : "–"}</td>`).join("")}</tr></tbody></table></div>
+        <p class="hint2">When short rates sit above long ones (10Y − 2Y below zero) the curve is <b>inverted</b>: markets expect rate cuts, and it has often come before a slowdown. Source: US Treasury via FRED.</p>`;
+    } else if (tab === "fed" && M.fed) {
+      const F = M.fed, ms = F.meetings || [];
+      body += `<div class="kpis"><div><small>Fed target range</small><b>${tmNum(F.lower, 2)}–${tmNum(F.upper, 2)}%</b></div><div><small>Effective fed funds</small><b>${tmNum(F.effr, 2)}%</b></div><div><small>ECB deposit rate</small><b>${tmNum(F.ecb_deposit, 2)}%</b></div></div>`;
+      body += ms.length ? `<p class="sub2">What fed funds futures price for each meeting</p>${ms.map(m => `<div class="wirp"><div class="wh"><b>${esc(fmtDate(m.date, { day: "numeric", month: "short", year: "numeric" }))}</b><span>implied ${tmNum(m.implied, 2)}% · <span class="${m.change_bp < -2 ? "up" : m.change_bp > 2 ? "down" : "dim"}">${m.change_bp > 0 ? "+" : ""}${tmNum(m.change_bp, 0)} bp vs today</span></span></div>
+          ${Object.entries(m.probs).map(([rg, p]) => `<div class="pb"><span>${esc(rg)}%</span><span class="bar"><i style="width:${p}%"></i></span><b>${tmNum(p, 0)}%</b></div>`).join("")}</div>`).join("")}<p class="hint2">Probabilities are worked out from 30-day fed funds futures, the same idea as CME FedWatch. They move every day with the data.</p>`
+        : `<p class="empty2">${esc(F.note || "No upcoming meeting in the calendar right now.")}</p>`;
+    } else if (tab === "eu" && M.eu) {
+      const R = M.eu.rows.slice().reverse().slice(0, 13);
+      body += `<div class="kpis"><div><small>BTP 10Y</small><b>${tmNum(R[0]?.[1], 2)}%</b></div><div><small>Bund 10Y</small><b>${tmNum(R[0]?.[2], 2)}%</b></div><div><small>Spread</small><b>${R[0]?.[3] ?? "–"} bp</b></div></div>
+        <p class="sub2">Monthly average</p>${R.map(([m, it, de, sp]) => `<div class="tr eu"><span>${esc(m)}</span><span class="r">${tmNum(it, 2)}%</span><span class="r">${tmNum(de, 2)}%</span><span class="r"><b>${sp}</b> bp</span></div>`).join("")}
+        <p class="hint2">The BTP–Bund spread is the extra yield Italy pays over Germany to borrow for 10 years: a quick gauge of how markets see Italian risk. Source: OECD via FRED (monthly).</p>`;
+    } else body += `<p class="empty2">Not available yet.</p>`;
+    if (M.stale?.includes(tab === "fed" ? "fed" : tab === "eu" ? "eu" : "curve")) body += `<p class="fine2">This board couldn't refresh last time; showing the previous copy.</p>`;
+    return tmPanel("p-gc", "GC", "Rates &amp; Fed", null, body);
+  };
+
+  // ------------------------------------------------ futures curves (CTM) and positioning (COT)
+  TM_R.ctm = () => {
+    const M = tmLoadMarkets(), tab = tmTab("ctm", "curve");
+    let body = tmTabs("ctm", [["curve", "<b>CTM</b> Futures curves"], ["cot", "<b>COT</b> Positioning"]], tab);
+    if (!M) return tmPanel("p-ctm", "CTM", "Futures &amp; positioning", null, body + `<p class="empty2">${M === false ? "Not available yet." : "Loading…"}</p>`);
+    if (tab === "curve") {
+      const L1 = M.ctm || [], cur = L1.find(x => x.root === pref("tmCtmRoot", "CL")) || L1[0];
+      if (!cur) return tmPanel("p-ctm", "CTM", "Futures &amp; positioning", null, body + `<p class="empty2">Not available.</p>`);
+      const P = cur.points, v = P.map(p => p.p), lo = Math.min(...v), hi = Math.max(...v), sp = hi - lo || 1;
+      const X = i => 20 + i * (280 / Math.max(1, P.length - 1)), Y = x => (96 - (x - lo) / sp * 76).toFixed(1);
+      body += `<div class="chips2">${L1.map(x => `<button type="button" data-tmctm="${esc(x.root)}" aria-pressed="${x.root === cur.root}">${esc(x.name)}</button>`).join("")}</div>
+        <svg class="crv" viewBox="0 0 320 112" aria-label="${esc(cur.name)} futures curve"><polyline points="${P.map((p, i) => `${X(i)},${Y(p.p)}`).join(" ")}"/>${P.map((p, i) => `<circle cx="${X(i)}" cy="${Y(p.p)}" r="2.5"/>`).join("")}<text x="${X(0)}" y="${+Y(P[0].p) - 7}">${tmNum(P[0].p)}</text><text x="${X(P.length - 1)}" y="${+Y(P[P.length - 1].p) - 7}" text-anchor="end">${tmNum(P[P.length - 1].p)}</text></svg>
+        <div class="crvx">${P.map(p => `<span>${esc(p.c)}</span>`).join("")}</div>
+        <p class="hint2"><b class="${cur.shape === "backwardation" ? "down" : "up"}">${cur.shape[0].toUpperCase() + cur.shape.slice(1)}</b> (${cur.slope > 0 ? "+" : ""}${tmNum(cur.slope, 1)}% from first to last contract, ${esc(cur.unit)}). ${cur.shape === "backwardation" ? "Buyers pay more to have it now than later: supply is tight today. Holders of a futures ETC earn a small roll yield." : cur.shape === "contango" ? "Later contracts cost more: supply is ample and storing it costs money. A futures ETC loses a little each time it rolls." : "Prices are about the same across the curve."}</p>`;
+    } else {
+      const C = M.cot || [], open = S.tmCot;
+      body += `<div class="tr cot th"><span>Market</span><span class="r">Specs net</span><span class="r">Week</span><span class="r">% OI</span><span>1-year range</span></div>` +
+        ["Commodities", "Stock indices", "Rates", "Currencies", "Crypto"].map(g => { const xs = C.filter(x => x.group === g); return xs.length ? `<p class="sub2">${g}</p>${xs.map(x =>
+          `<button type="button" class="tr cot" data-tmcot="${esc(x.code)}" aria-expanded="${open === x.code}"><span>${esc(x.name)}</span><span class="r ${x.net >= 0 ? "up" : "down"}">${tmBig(x.net)}</span><span class="r ${x.chg_week >= 0 ? "up" : "down"}">${x.chg_week >= 0 ? "+" : "−"}${tmBig(Math.abs(x.chg_week))}</span><span class="r">${tmNum(x.net_pct_oi, 1)}%</span><span class="cbar"><i style="left:${x.index_1y ?? 50}%"></i></span></button>${open === x.code ? `<div class="cotx">${tmSpark(x.hist.map(h => h[1]), 300, 54)}<p class="dim" style="margin:2px 0 6px;font-size:11.5px">Net position of large speculators, weekly, last year. Report of ${esc(x.date)}; commercial hedgers net ${tmBig(x.comm_net)}.</p></div>` : ""}`).join("")}` : ""; }).join("") +
+        `<p class="hint2">Large speculators (funds) net long or short in each future, from the CFTC's weekly Commitments of Traders. The bar shows where today's position sits in its 1-year range: far right is the most bullish of the year, which can mean a crowded trade.</p>`;
+    }
+    return tmPanel("p-ctm", "CTM", "Futures &amp; positioning", isComm() ? null : null, body);
+  };
+
+  // ------------------------------------------------ most active (MOST)
+  TM_R.most = () => {
+    const tab = tmTab("most", "act"), C = S.market === "stocks" ? tmLoadCo() : null, rows = S.stocks?.stocks || [];
+    const stockTabs = [["act", "Volume"], ["up", "Gainers"], ["down", "Losers"], ["gap", "Gaps"], ["hilo", "52w high/low"], ["wk", "5 days"]];
+    const tabs = S.market === "stocks" ? stockTabs : [["up", "Gainers"], ["down", "Losers"], ["m1", "1 month"]];
+    const tb = tabs.some(x => x[0] === tab) ? tab : tabs[0][0];
+    let body = tmTabs("most", tabs, tb);
+    const A = t => C?.stocks?.[t]?.act || {};
+    const needCo = ["act", "gap", "hilo", "wk"].includes(tb);
+    if (needCo && !C) return tmPanel("p-most", "MOST", "Most active", null, body + `<p class="empty2">${C === false ? "Volume data isn't available yet." : "Loading…"}</p>`);
+    let list, col;
+    if (tb === "act") { list = rows.filter(r => A(r.ticker).rel_vol).sort((a, b) => A(b.ticker).rel_vol - A(a.ticker).rel_vol); col = r => `${tmNum(A(r.ticker).rel_vol, 1)}×`; }
+    else if (tb === "up") { list = rows.filter(r => r.chg1d != null).sort((a, b) => b.chg1d - a.chg1d); col = r => tmPct(r.chg1m); }
+    else if (tb === "down") { list = rows.filter(r => r.chg1d != null).sort((a, b) => a.chg1d - b.chg1d); col = r => tmPct(r.chg1m); }
+    else if (tb === "m1") { list = rows.filter(r => r.chg1m != null).sort((a, b) => Math.abs(b.chg1m) - Math.abs(a.chg1m)); col = r => tmPct(r.chg1m); }
+    else if (tb === "gap") { list = rows.filter(r => A(r.ticker).gap != null).sort((a, b) => Math.abs(A(b.ticker).gap) - Math.abs(A(a.ticker).gap)); col = r => tmPct(A(r.ticker).gap, 2); }
+    else if (tb === "wk") { list = rows.filter(r => A(r.ticker).chg5d != null).sort((a, b) => Math.abs(A(b.ticker).chg5d) - Math.abs(A(a.ticker).chg5d)); col = r => tmPct(A(r.ticker).chg5d); }
+    else { list = rows.filter(r => A(r.ticker).new_hi || A(r.ticker).new_lo); col = r => A(r.ticker).new_hi ? `<span class="up">new high</span>` : `<span class="down">new low</span>`; }
+    const head = { act: "Vol. vs 20d", up: "1M", down: "1M", m1: "1M", gap: "Open gap", wk: "5 days", hilo: "" }[tb];
+    body += `<div class="tr most th"><span>Sym</span><span></span><span class="r">Last</span><span class="r">Day</span><span class="r">${head}</span></div>` + (list.length ? list.slice(0, 20).map(r =>
+      `<button type="button" class="tr most" data-tmsel="${esc(r.ticker)}"><span class="tk">${esc(disp(r.ticker).slice(0, 8))}</span><span class="dim">${tb === "act" ? tmBig(A(r.ticker).dollar_vol) + "$ traded" : esc(r.name || "")}</span><span class="r">${money(r.price)}</span><span class="r">${tmPct(r.chg1d)}</span><span class="r">${col(r)}</span></button>`).join("") : `<p class="empty2">${tb === "hilo" ? "No stock made a new 52-week high or low on the last session." : "Nothing to show."}</p>`);
+    if (needCo && C?.generated_at) body += `<p class="fine2">Volume stats from the last full session (${esc(Object.values(C.stocks || {})[0]?.act?.date || "")}).</p>`;
+    return tmPanel("p-most", "MOST", "Most active", null, body);
+  };
+
+  // ------------------------------------------------ screener (EQS)
+  const EQF = [   // key, label, unit, value getter, decimals, needs company data
+    ["price", "Price", "", t => S.stockBy[t]?.price, 2], ["chg1d", "Day change", "%", t => S.stockBy[t]?.chg1d, 1], ["chg1m", "1 month", "%", t => S.stockBy[t]?.chg1m, 1],
+    ["chg1y", "1 year", "%", t => S.stockBy[t]?.chg1y, 1], ["vs200", "vs 200-day avg", "%", t => S.stockBy[t]?.vs200, 1], ["rsi", "RSI 14", "", t => S.stockBy[t]?.rsi, 0],
+    ["pos52", "Of 52-week range", "%", t => S.stockBy[t]?.pos52, 0],
+    ["mood", "News mood (−100…100)", "", t => S.sent?.stocks?.[t]?.score != null ? S.sent.stocks[t].score * 100 : null, 0, 0, 1],
+    ["bull", "Buy alerts, last close", "", t => (S.feed?.alerts || []).filter(a => a.ticker === t && a.date === S.feed.as_of && a.side === "bullish").length, 0],
+    ["mcap", "Market cap ($B)", "B", t => S.coSum?.stocks?.[t]?.mcap != null ? S.coSum.stocks[t].mcap / 1e9 : null, 0, 1],
+    ["pe", "P/E", "", t => S.coSum?.stocks?.[t]?.pe, 1, 1], ["fpe", "Forward P/E", "", t => S.coSum?.stocks?.[t]?.fpe, 1, 1], ["peg", "PEG", "", t => S.coSum?.stocks?.[t]?.peg, 2, 1],
+    ["pb", "P/B", "", t => S.coSum?.stocks?.[t]?.pb, 1, 1], ["ev_ebitda", "EV/EBITDA", "", t => S.coSum?.stocks?.[t]?.ev_ebitda, 1, 1],
+    ["margin", "Net margin", "%", t => S.coSum?.stocks?.[t]?.margin != null ? S.coSum.stocks[t].margin * 100 : null, 1, 1],
+    ["roe", "ROE", "%", t => S.coSum?.stocks?.[t]?.roe != null ? S.coSum.stocks[t].roe * 100 : null, 1, 1],
+    ["rev_g", "Revenue growth", "%", t => S.coSum?.stocks?.[t]?.rev_g != null ? S.coSum.stocks[t].rev_g * 100 : null, 1, 1],
+    ["eps_g", "EPS growth", "%", t => S.coSum?.stocks?.[t]?.eps_g != null ? S.coSum.stocks[t].eps_g * 100 : null, 1, 1],
+    ["de", "Debt/equity", "", t => S.coSum?.stocks?.[t]?.de, 0, 1], ["beta", "Beta", "", t => S.coSum?.stocks?.[t]?.beta, 2, 1],
+    ["div_y", "Dividend yield", "%", t => S.coSum?.stocks?.[t]?.div_y, 2, 1],
+    ["upside", "Upside to target", "%", t => S.coSum?.stocks?.[t]?.upside, 1, 1], ["rec", "Analyst score (1 buy…5 sell)", "", t => S.coSum?.stocks?.[t]?.rec, 2, 1],
+    ["short_pct", "Short % of float", "%", t => S.coSum?.stocks?.[t]?.short_pct != null ? S.coSum.stocks[t].short_pct * 100 : null, 1, 1],
+    ["rel_vol", "Volume vs 20-day", "×", t => S.coSum?.stocks?.[t]?.act?.rel_vol, 1, 1], ["gap", "Open gap", "%", t => S.coSum?.stocks?.[t]?.act?.gap, 1, 1],
+  ];
+  const EQ_BY = Object.fromEntries(EQF.map(f => [f[0], f]));
+  const EQ_PRE = [
+    ["Oversold in an uptrend", [["rsi", "<", 35], ["vs200", ">", 0]]], ["Cheap growth", [["fpe", "<", 20], ["eps_g", ">", 10]]],
+    ["Dividend payers", [["div_y", ">", 3]]], ["Analysts most bullish", [["upside", ">", 15], ["rec", "<", 2.2]]],
+    ["Heavy volume today", [["rel_vol", ">", 1.8]]], ["Near 52-week highs", [["pos52", ">", 90]]], ["Short-squeeze watch", [["short_pct", ">", 2.5], ["chg1m", ">", 0]]],
+    ["Bullish news mood", [["mood", ">", 30]]], ["Quality", [["roe", ">", 20], ["margin", ">", 15], ["de", "<", 100]]],
+  ];
+  const eqFields = () => EQF.filter(f => S.market === "stocks" || !f[5]);
+  const eqConds = () => { const v = pref("tmScr." + S.market, null); return Array.isArray(v) ? v.filter(c => EQ_BY[c[0]]) : [["rsi", "<", 35]]; };
+  const eqSave = c => setPref("tmScr." + S.market, c);
+  function eqResults() {
+    const conds = eqConds(), secF = pref("tmScrSec", ""), [sk, sd] = pref("tmScrSort", ["chg1d", -1]);
+    const rows = (S.stocks?.stocks || []).filter(r => (!secF || r.sector === secF) && conds.every(([f, op, v]) => { const x = EQ_BY[f][3](r.ticker); return x != null && (op === ">" ? x > +v : x < +v); }));
+    const get = EQ_BY[sk]?.[3] || (t => S.stockBy[t]?.chg1d);
+    rows.sort((a, b) => ((get(b.ticker) ?? -1e12) - (get(a.ticker) ?? -1e12)) * -sd * -1);
+    const show = [...new Set(["chg1d", ...conds.map(c => c[0]), ...(S.market === "stocks" ? ["mcap", "pe"] : ["chg1m"])])].slice(0, 7);
+    const fmt = (f, t) => { const [, , u, g, dp] = EQ_BY[f], x = g(t); return x == null ? "–" : u === "%" && ["chg1d", "chg1m", "chg1y", "vs200", "upside", "gap"].includes(f) ? tmPct(x, dp) : tmNum(x, dp) + (u === "%" ? "%" : u === "×" ? "×" : ""); };
+    return `<p class="eqn"><b>${rows.length}</b> of ${(S.stocks?.stocks || []).length} ${L().noun} match</p><div class="tw"><table class="tt eqt"><thead><tr><th><button type="button" data-tmscrsort="tk">Stock</button></th><th>Last</th>${show.map(f => `<th><button type="button" data-tmscrsort="${f}" aria-pressed="${sk === f}">${esc(EQ_BY[f][1].replace(/ \(.*\)$/, ""))}${sk === f ? (sd < 0 ? " ↓" : " ↑") : ""}</button></th>`).join("")}</tr></thead>
+      <tbody>${rows.map(r => `<tr data-tmsel="${esc(r.ticker)}"><td><b>${esc(disp(r.ticker))}</b> <span class="dim">${esc((r.name || "").slice(0, 22))}</span></td><td data-lp="${esc(r.ticker)}">${money(r.price)}</td>${show.map(f => `<td>${fmt(f, r.ticker)}</td>`).join("")}</tr>`).join("") || `<tr><td colspan="9" class="dim">Nothing matches. Loosen a condition.</td></tr>`}</tbody></table></div>`;
+  }
+  TM_R.eqs = () => {
+    if (S.market === "stocks") tmLoadCo();
+    const conds = eqConds(), F = eqFields(), saved = pref("tmScreens", []) || [];
+    const secs = [...new Set((S.stocks?.stocks || []).map(r => r.sector).filter(Boolean))].sort();
+    let body = `<div class="chips2"><span class="dim" style="font-size:11.5px;align-self:center">Presets:</span>${EQ_PRE.filter(([, c]) => c.every(x => F.some(f => f[0] === x[0]))).map(([n], i) => `<button type="button" data-tmscrpre="${i}">${esc(n)}</button>`).join("")}
+      ${saved.filter(s => s.m === S.market).map(s => `<button type="button" class="mine" data-tmscrload="${esc(s.n)}">★ ${esc(s.n)}</button><button type="button" class="x" data-tmscrdel="${esc(s.n)}" aria-label="Delete ${esc(s.n)}">×</button>`).join("")}</div>
+      <div class="eqc">${conds.map(([f, op, v], i) => `<div class="eqr"><select data-tmscr="${i}:f" aria-label="Field">${F.map(x => `<option value="${x[0]}"${x[0] === f ? " selected" : ""}>${esc(x[1])}</option>`).join("")}</select>
+        <select data-tmscr="${i}:op" aria-label="Above or below"><option value=">"${op === ">" ? " selected" : ""}>above</option><option value="<"${op === "<" ? " selected" : ""}>below</option></select>
+        <input type="number" step="any" inputmode="decimal" value="${esc(v)}" data-tmscr="${i}:v" aria-label="Value"><span class="u">${esc(EQ_BY[f][2] === "B" ? "$B" : EQ_BY[f][2])}</span><button type="button" data-tmscrrm="${i}" aria-label="Remove condition">×</button></div>`).join("")}
+        <div class="eqr add">${secs.length > 1 ? `<select data-tmscrsec aria-label="Sector"><option value="">All sectors</option>${secs.map(s => `<option${s === pref("tmScrSec", "") ? " selected" : ""}>${esc(s)}</option>`).join("")}</select>` : ""}<button type="button" class="b" data-tmscradd>+ Condition</button><button type="button" class="b" data-tmscrsave>Save screen</button></div></div>
+      <div id="tmscrres">${S.market === "stocks" && !S.coSum && conds.some(c => EQ_BY[c[0]][5]) ? `<p class="empty2">${S.coSum === false ? "Company data isn't available yet." : "Loading company data…"}</p>` : eqResults()}</div>`;
+    return tmPanel("p-eqs", "EQS", "Screener", null, body);
+  };
+
+  // ------------------------------------------------ multi-chart (GIP)
+  const GIP_TF = [["1H", "1H"], ["4H", "4H"], ["D", "Day"], ["W", "Week"]];
+  function gipSlots() {
+    const v = pref("tmGip." + S.market, null), n = pref("tmGipN", 4);
+    let s = Array.isArray(v) ? v.filter(x => x && S.stockBy[x.t]) : [];
+    const fill = [S.tmSel, ...(wlGet().lists[wlTarget(wlGet())] || []), ...tmSorted().map(r => r.ticker)].filter(t => S.stockBy[t]);
+    for (const t of fill) { if (s.length >= n) break; if (!s.some(x => x.t === t)) s.push({ t, tf: "D" }); }
+    return s.slice(0, n);
+  }
+  TM_R.gip = () => {
+    const sl = gipSlots(), n = pref("tmGipN", 4);
+    const body = `<div class="gipbar"><span class="dim">Charts:</span>${[1, 2, 4].map(k => `<button type="button" data-tmgipn="${k}" aria-pressed="${n === k}">${k}</button>`).join("")}<span class="dim" style="margin-left:auto;font-size:11.5px">${isComm() ? "Daily and weekly" : "Intraday from the data server, delayed"}</span></div>
+      <div class="gip n${n}">${sl.map((x, i) => `<div class="gc" data-gip="${i}"><div class="gch"><input value="${esc(sym(x.t))}" list="tmlist" data-tmgipt="${i}" aria-label="Chart ${i + 1} ticker" spellcheck="false" autocapitalize="characters"><span class="gpx" data-lp="${esc(x.t)}">${money(S.stockBy[x.t]?.price)}</span><span data-lc="${esc(x.t)}">${tmPct(S.stockBy[x.t]?.chg1d)}</span>
+        <span class="gtf">${GIP_TF.filter(([k]) => !isComm() || k === "D" || k === "W").map(([k, l]) => `<button type="button" data-tmgiptf="${i}:${k}" aria-pressed="${x.tf === k}">${l}</button>`).join("")}</span></div><canvas data-gipc="${i}" aria-label="${esc(disp(x.t))} ${x.tf} chart"></canvas></div>`).join("")}</div>`;
+    return tmPanel("p-gip", "GIP", "Multi-chart", null, body);
+  };
+  async function gipFrames(t) {
+    S.gipF = S.gipF || {};
+    const c = S.gipF[t]; if (c && Date.now() - c.at < 5 * 6e4) return c.f;
+    const daily = async () => {
+      const d = S.stockData[t] || (S.stockData[t] = await (await fetch(`${L().base}stocks/${t}.json`, { cache: "no-cache" })).json());
+      const D = d.dates.map((x, i) => ({ time: Date.parse(x + "T00:00:00Z") / 1000, open: d.o[i], high: d.h[i], low: d.l[i], close: d.c[i] }));
+      const W = []; for (const b of D) { const dt = new Date(b.time * 1000), wk = Math.floor((b.time / 86400 + 3) / 7); const l = W[W.length - 1]; if (l && l.wk === wk) { l.high = Math.max(l.high, b.high); l.low = Math.min(l.low, b.low); l.close = b.close; } else W.push({ ...b, wk, time: b.time }); void dt; }
+      return { D, W };
+    };
+    let f;
+    if (!isComm()) {
+      try {
+        const T = await import("./trendlines.js");
+        let payload = null;
+        if (isCrypto()) { try { payload = await T.binanceCrypto(disp(t)); } catch {} }
+        if (!payload) { const r = await fetch(`${trendApi()}/?symbol=${encodeURIComponent(t)}`); payload = await r.json(); if (!r.ok || payload.error) throw new Error(payload.error); }
+        f = T.buildFrames(payload);
+      } catch { f = await daily(); }
+    } else f = await daily();
+    S.gipF[t] = { f, at: Date.now() };
+    return f;
+  }
+  function gipDraw(cv, bars) {
+    const box = cv.getBoundingClientRect(), dpr = devicePixelRatio || 1, W = Math.max(200, box.width), H = Math.max(140, box.height);
+    cv.width = W * dpr; cv.height = H * dpr;
+    const g = cv.getContext("2d"); g.scale(dpr, dpr); g.clearRect(0, 0, W, H);
+    const cs = getComputedStyle(document.documentElement), up = cs.getPropertyValue("--bull").trim(), dn = cs.getPropertyValue("--bear").trim(), ln = cs.getPropertyValue("--line").trim(), mu = cs.getPropertyValue("--faint").trim(), ac = cs.getPropertyValue("--amber").trim();
+    const n = Math.min(bars.length, Math.max(40, Math.floor(W / 6))), B = bars.slice(-n);
+    if (!B.length) { g.fillStyle = mu; g.font = "12px sans-serif"; g.fillText("No data", 10, 20); return; }
+    const lo = Math.min(...B.map(b => b.low)), hi = Math.max(...B.map(b => b.high)), pad = (hi - lo) * .06 || 1, L0 = lo - pad, H0 = hi + pad;
+    const pr = 46, cw = (W - pr) / n, y = v => (H0 - v) / (H0 - L0) * (H - 16) + 4;
+    g.strokeStyle = ln; g.lineWidth = 1; g.fillStyle = mu; g.font = "10px ui-monospace, monospace";
+    for (let k = 0; k <= 3; k++) { const v = L0 + (H0 - L0) * k / 3, yy = Math.round(y(v)) + .5; g.beginPath(); g.moveTo(0, yy); g.lineTo(W - pr, yy); g.stroke(); g.fillText(v >= 1000 ? v.toFixed(0) : v.toPrecision(4), W - pr + 4, yy + 3); }
+    B.forEach((b, i) => { const x = i * cw + cw / 2, c = b.close >= b.open ? up : dn; g.strokeStyle = g.fillStyle = c;
+      g.beginPath(); g.moveTo(Math.round(x) + .5, y(b.high)); g.lineTo(Math.round(x) + .5, y(b.low)); g.stroke();
+      g.fillRect(x - Math.max(1, cw * .32), y(Math.max(b.open, b.close)), Math.max(1, cw * .64), Math.max(1, Math.abs(y(b.open) - y(b.close)))); });
+    const all = bars.slice(-n - 19); g.strokeStyle = ac; g.lineWidth = 1.3; g.beginPath();
+    B.forEach((_, i) => { const j = all.length - n + i; if (j < 19) return; let s = 0; for (let k = 0; k < 20; k++) s += all[j - k].close; const yy = y(s / 20), x = i * cw + cw / 2; i && j > 19 ? g.lineTo(x, yy) : g.moveTo(x, yy); }); g.stroke();
+    const last = B[B.length - 1].close; g.fillStyle = ac; g.fillRect(W - pr, y(last) - 7, pr, 14); g.fillStyle = cs.getPropertyValue("--on-accent").trim() || "#000"; g.fillText(last >= 1000 ? last.toFixed(0) : last.toPrecision(5), W - pr + 3, y(last) + 3);
+  }
+  function tmGipDraw() {
+    const sl = gipSlots();
+    document.querySelectorAll(".tm canvas[data-gipc]").forEach(async cv => {
+      const x = sl[+cv.dataset.gipc]; if (!x) return;
+      try { const f = await gipFrames(x.t); if (cv.isConnected) gipDraw(cv, f[x.tf] || f.D || []); }
+      catch { const g = cv.getContext("2d"); g.fillStyle = "#888"; g.fillText("Chart couldn't load", 10, 20); }
+    });
   }
 
+  // ------------------------------------------------ practice portfolio (PORT)
+  TM_R.port = () => {
+    const P = prLoad();
+    if (!P.length) return tmPanel("p-port", "PORT", "Practice portfolio", ["#practice", "Portfolio"], `<p class="empty2">No practice trades yet. Open any alert and tap “Practice buy” to follow it with pretend money.</p><a class="tr hf" href="#alerts"><span>Go to alerts</span><span></span><span class="r">›</span></a>`);
+    const mks = [...new Set(P.map(p => p.m))];
+    if (mks.some(m => !PRICES[m])) { Promise.all(mks.map(prPrices)).then(() => tmRefresh("port")); return tmPanel("p-port", "PORT", "Practice portfolio", ["#practice", "Portfolio"], `<p class="empty2">Loading prices…</p>`); }
+    const now = p => p.exit ?? (p.m === S.market && tmLiveQ(p.t) ? tmLiveQ(p.t)[0] : PRICES[p.m]?.px?.[p.t]);
+    const ret = p => { const x = now(p); return x == null ? null : p.side * (x / p.entry - 1) * 100; };
+    const open = P.filter(p => p.exit == null), closed = P.filter(p => p.exit != null);
+    const eur = xs => xs.reduce((t, p) => t + (ret(p) ?? 0) / 100 * PR_SIZE, 0);
+    const longs = open.filter(p => p.side > 0).length, wins = closed.filter(p => ret(p) > 0).length;
+    const by = {}; P.forEach(p => { const k = p.s; (by[k] = by[k] || { n: 0, e: 0 }); by[k].n++; by[k].e += (ret(p) ?? 0) / 100 * PR_SIZE; });
+    let body = `<div class="kpis"><div><small>Open P&amp;L</small><b class="${eur(open) >= 0 ? "up" : "down"}">${eurSigned(eur(open))}</b></div><div><small>Closed P&amp;L</small><b class="${eur(closed) >= 0 ? "up" : "down"}">${eurSigned(eur(closed))}</b></div>
+      <div><small>Invested</small><b>${eurS(open.length * PR_SIZE)}</b></div><div><small>Long / short</small><b>${longs} / ${open.length - longs}</b></div><div><small>Won</small><b>${closed.length ? Math.round(wins / closed.length * 100) + "%" : "–"}</b></div></div>`;
+    body += `<p class="sub2">By strategy</p>${Object.entries(by).sort((a, b) => b[1].e - a[1].e).map(([s, v]) => `<div class="tr hf"><span>${esc(stratName(s))} <span class="dim">· ${v.n}</span></span><span class="r ${v.e >= 0 ? "up" : "down"}">${eurSigned(v.e)}</span><span></span></div>`).join("")}`;
+    if (open.length) body += `<p class="sub2">Open</p>${open.slice().reverse().slice(0, 15).map(p => `<button type="button" class="tr lt" ${p.m === S.market ? `data-tmsel="${esc(p.t)}"` : ""}><span class="tk">${esc(sym(p.t))}</span><span>${p.side < 0 ? `<span class="side-s">short</span> ` : ""}${esc(stratName(p.s))}</span><span class="r dim">${money(p.entry)}</span><span class="r">${tmPct(ret(p), 2)}</span></button>`).join("")}`;
+    return tmPanel("p-port", "PORT", "Practice portfolio", ["#practice", "Portfolio"], body, `<small>${eurS(PR_SIZE)} a trade</small>`);
+  };
+
+  // ------------------------------------------------ price alerts (PXA)
+  function pxTopic() {
+    let t = pref("pxTopic", "");
+    if (!t) { const a = new Uint8Array(12); crypto.getRandomValues(a); t = "ics-px-" + [...a].map(b => (b % 36).toString(36)).join(""); setPref("pxTopic", t); }
+    return t;
+  }
+  async function pxList(force) {
+    if (S.pxList !== undefined && !force) return;
+    S.pxList = null;
+    try { const r = await fetch(`${trendApi()}/?px=list&topic=${pxTopic()}`), d = await r.json(); S.pxList = r.ok && d.alerts ? d.alerts : { error: d.error || r.status, code: r.status }; }
+    catch { S.pxList = { error: "offline" }; }
+    tmRefresh("pxa");
+  }
+  TM_R.pxa = () => {
+    if (S.pxList === undefined) pxList();
+    const tp = pxTopic(), t = S.tmFor && S.stockBy[S.tmFor] ? S.tmFor : S.tmSel, px = tmPx(t), L1 = S.pxList;
+    const ok = Array.isArray(L1), down = L1 && !ok;
+    let body = isComm() ? `<p class="empty2">Price alerts work for stocks and crypto. Switch market to set one.</p>` :
+      `<form class="pxf" id="tmpxform" autocomplete="off"><input name="sym" value="${esc(t ? sym(t) : "")}" list="tmlist" aria-label="Ticker" spellcheck="false" autocapitalize="characters" required>
+        <select name="dir" aria-label="Direction"><option value="above">rises above</option><option value="below">falls below</option></select>
+        <input name="level" type="number" step="any" inputmode="decimal" value="${px ? +(+px).toPrecision(5) : ""}" aria-label="Price level" required>
+        <input name="note" placeholder="Note (optional)" maxlength="80" aria-label="Note"><button class="b" type="submit"${down ? " disabled" : ""}>Add alert</button></form><p class="tmmsg" id="pxmsg" role="status"></p>`;
+    body += `<p class="sub2">Your alerts</p>` + (!L1 ? `<p class="empty2">Loading…</p>` : down ? `<p class="empty2">${L1.code === 501 ? "Price alerts are being switched on and will work soon." : "The alert server couldn't be reached. Try again in a moment."}</p>`
+      : L1.length ? L1.map(a => `<div class="tr pxr"><span class="tk">${esc(a.sym.replace(/-USD$/, ""))}</span><span>${a.dir === "above" ? "▲ above" : "▼ below"} <b>${tmNum(a.level, a.level < 10 ? 4 : 2)}</b>${a.note ? ` <span class="dim">· ${esc(a.note)}</span>` : ""}</span><span class="r dim" data-lp="${esc(a.sym)}">${money(tmPx(a.sym))}</span><button type="button" class="x" data-tmpxdel="${esc(a.id)}" aria-label="Delete alert">×</button></div>`).join("") : `<p class="empty2">None yet. Alerts fire once, then disappear.</p>`);
+    body += `<p class="sub2">Get them on your phone</p><p class="hint2" style="margin-top:2px">Install the free <b>ntfy</b> app, tap +, and subscribe to this channel (server ntfy.sh). It's private to this device: anyone with the name could read it, so don't share it.</p>
+      <div class="code2"><span><code>${esc(tp)}</code></span><button type="button" data-copy="${esc(tp)}">Copy</button></div>
+      <p class="fine2">Prices are checked every 5 minutes. Stocks: real-time IEX trades during US hours. Crypto: around the clock.</p>`;
+    return tmPanel("p-pxa", "PXA", "Price alerts", ["#notify", "Strategy alerts"], body);
+  };
+
+  // ------------------------------------------------ the page
   function tmClock() {
     const now = new Date(), f = tz => now.toLocaleTimeString("en-GB", { timeZone: tz, hour: "2-digit", minute: "2-digit" });
     const ny = new Date(now.toLocaleString("en-US", { timeZone: "America/New_York" })), mins = ny.getHours() * 60 + ny.getMinutes(), wd = ny.getDay();
@@ -7240,58 +7873,52 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
     const st = isCrypto() ? "24/7" : open ? "US open" : wd > 0 && wd < 6 && mins >= 240 && mins < 570 ? "Pre-market" : wd > 0 && wd < 6 && mins >= 960 && mins < 1200 ? "After hours" : "US closed";
     return `<span>MIL <b>${f("Europe/Rome")}</b></span><span>NY <b>${f("America/New_York")}</b></span><span class="${open ? "open" : "closed"}">● ${st}</span>`;
   }
-
   function tmHelp() {
-    return `<div class="help" id="tmhelp"><p>Type in the command line and press Enter. A ticker on its own loads it here. Add a code after a ticker to jump straight to that tool, e.g. <b style="min-width:0">NVDA TL</b>. Press <b style="min-width:0">/</b> or just start typing to focus the command line.</p>
-      ${TM_FN.map(([c, , l]) => `<div><b>${c}</b><span>${esc(l)}</span></div>`).join("")}
-      <div><b>STOCKS</b><span>Switch to stocks</span></div><div><b>CRYPTO</b><span>Switch to crypto</span></div><div><b>COMM</b><span>Switch to commodities</span></div>
-      <div><b>&lt;T&gt; DES</b><span>Full stock page</span></div><div><b>&lt;T&gt; BT</b><span>Backtest it in the Lab</span></div><div><b>&lt;T&gt; TL</b><span>Trendlines</span></div><div><b>&lt;T&gt; ERN</b><span>After earnings</span></div><div><b>&lt;T&gt; VP</b><span>Volume profile</span></div><div><b>&lt;T&gt; MXP</b><span>Max pain</span></div></div>`;
+    const pc = [["EQS", "Screener"], ["MOST", "Most active"], ["WEI", "World indices"], ["FUT", "US index futures"], ["FX", "Currencies"], ["VOL", "VIX curve"], ["GC", "US yield curve"], ["WIRP", "Fed & ECB odds"], ["EU", "BTP–Bund spread"],
+      ["CTM", "Futures curves"], ["COT", "Positioning (CFTC)"], ["GIP", "Multi-chart"], ["PORT", "Practice portfolio"], ["PXA", "Price alerts"], ["WL", "Watchlists"], ["LAYOUT", "Rearrange panels"]];
+    return `<div class="help" id="tmhelp"><p>Type in the command line and press Enter. A ticker on its own loads it. Add a code after a ticker to open a tab or a tool, e.g. <b style="min-width:0">NVDA FA</b> or <b style="min-width:0">AAPL TL</b>. Press <b style="min-width:0">/</b> or just start typing to focus the command line.</p>
+      <p style="margin-top:4px"><b style="min-width:0">Panels on this screen</b></p>${pc.map(([c, l]) => `<div><b>${c}</b><span>${esc(l)}</span></div>`).join("")}
+      <p style="margin-top:8px"><b style="min-width:0">After a ticker</b></p>${TM_SEC.map(([c, l]) => `<div><b>&lt;T&gt; ${c}</b><span>${esc(l)}</span></div>`).join("")}<div><b>&lt;T&gt; GP</b><span>Full stock page</span></div><div><b>&lt;T&gt; BT</b><span>Backtest in the Lab</span></div><div><b>&lt;T&gt; TL</b><span>Trendlines</span></div><div><b>&lt;T&gt; ERN</b><span>After earnings</span></div><div><b>&lt;T&gt; VP</b><span>Volume profile</span></div><div><b>&lt;T&gt; MXP</b><span>Max pain</span></div><div><b>&lt;T&gt; PXA</b><span>Price alert on it</span></div><div><b>&lt;T&gt; GIP</b><span>Add to multi-chart</span></div>
+      <p style="margin-top:8px"><b style="min-width:0">Other pages</b></p>${TM_FN.map(([c, , l]) => `<div><b>${c}</b><span>${esc(l)}</span></div>`).join("")}
+      <div><b>STOCKS</b><span>Switch to stocks</span></div><div><b>CRYPTO</b><span>Switch to crypto</span></div><div><b>COMM</b><span>Switch to commodities</span></div></div>`;
   }
-
   function viewTerminal(arg = "") {
     S.firstSel = null;
     const want = decodeURIComponent(arg.replace(/^-/, ""));
     const t = S.stockBy[want] ? want : S.stockBy[S.tmSel] ? S.tmSel : S.stockBy[pref("tmSel." + S.market)] ? pref("tmSel." + S.market) : (S.stocks?.stocks || []).slice().sort((a, b) => Math.abs(b.chg1d ?? 0) - Math.abs(a.chg1d ?? 0))[0]?.ticker;
     S.tmSel = t;
-    const rows = S.stocks?.stocks || [];
-    const tape = rows.map(r => `<button type="button" data-tmsel="${esc(r.ticker)}"><b>${esc(disp(r.ticker).slice(0, 10))}</b>${money(r.price)} ${tmPct(r.chg1d, 2)}</button>`).join("");
-    const opts = rows.map(r => `<option value="${esc(sym(r.ticker))}">${esc(r.name || "")}</option>`).join("") + TM_FN.map(([c, , l]) => `<option value="${c}">${esc(l)}</option>`).join("");
+    const rows = S.stocks?.stocks || [], LY = tmLayout();
+    const tape = rows.map(r => `<button type="button" data-tmsel="${esc(r.ticker)}"><b>${esc(disp(r.ticker).slice(0, 10))}</b><span data-lp="${esc(r.ticker)}">${money(r.price)}</span> <span data-lc="${esc(r.ticker)}" data-dp="2">${tmPct(r.chg1d, 2)}</span></button>`).join("");
+    const codes = [...TM_FN.map(([c, , l]) => [c, l]), ...Object.keys(TM_JUMP).map(c => [c, "Terminal panel"]), ...TM_SEC.map(([c, l]) => [c, l]), ["LAYOUT", "Rearrange panels"], ["HELP", "Every code"]];
+    const opts = rows.map(r => `<option value="${esc(sym(r.ticker))}">${esc(r.name || "")}</option>`).join("") + codes.map(([c, l]) => `<option value="${c}">${esc(l)}</option>`).join("");
+    const keys = [...[["EQS", "eqs", "Screener"], ["MOST", "most", "Most active"], ["WEI", "wei", "World"], ["GC", "gc", "Rates"], ["CTM", "ctm", "Futures"], ["GIP", "gip", "Charts"], ["PXA", "pxa", "Price alerts"]].map(([c, id, l]) => `<a href="#terminal" data-tmjump="${c}"><b>${c}</b>${l}</a>`),
+      ...TM_FN.filter(([c]) => S.market === "crypto" || c !== "CRYP").map(([c, href, l]) => `<a href="${href}"><b>${c}</b>${esc(l)}</a>`)].join("");
+    const ed = S.tmEdit;
     let h = `<div class="tm">
       <div class="tmbar"><span class="tmlogo">IC<i>/</i>TERMINAL</span>
-        <form class="tmcmd" id="tmform" role="search" autocomplete="off"><span aria-hidden="true">&gt;</span><input id="tmcmd" list="tmlist" spellcheck="false" autocapitalize="characters" placeholder="Ticker or code — try AAPL, NVDA TL, LAB, HELP" aria-label="Command line: type a ticker or a function code"><kbd>/</kbd><datalist id="tmlist">${opts}</datalist></form>
+        <form class="tmcmd" id="tmform" role="search" autocomplete="off"><span aria-hidden="true">&gt;</span><input id="tmcmd" list="tmlist" spellcheck="false" autocapitalize="characters" placeholder="Ticker or code — try AAPL, NVDA FA, EQS, HELP" aria-label="Command line: type a ticker or a function code"><kbd>/</kbd><datalist id="tmlist">${opts}</datalist></form>
         <span class="tmmk">${[["stocks", "STK"], ["crypto", "CRYP"], ["commodities", "COMM"]].map(([m, c]) => `<button type="button" data-market="${m}" aria-pressed="${S.market === m}">${c}</button>`).join("")}</span>
-        <span class="tmclock" id="tmclock">${tmClock()}</span>
+        <span class="tmclock"><span id="tmclock">${tmClock()}</span><span class="tml" id="tmlive"></span></span>
+        <button type="button" class="tmedit" data-tmedit aria-pressed="${!!ed}">${ed ? "Done" : "Layout"}</button>
       </div>
       <p class="tmmsg" id="tmmsg" role="status"></p>
       ${S.tmHelp ? tmHelp() : ""}
-      <nav class="tmkeys" aria-label="Function codes">${TM_FN.filter(([c]) => S.market === "crypto" || c !== "CRYP").map(([c, href, l]) => `<a href="${href}"><b>${c}</b>${esc(l)}</a>`).join("")}<a href="#terminal" data-tmhelp><b>HELP</b>All codes</a></nav>
+      ${ed ? `<div class="tmed"><span>Move panels with ◀ ▶, ⤢ for full width, ✕ to hide.</span>${LY.hidden.map(id => `<button type="button" data-tmshow="${id}">+ ${TM_P[id][1]}</button>`).join("")}<button type="button" class="r" data-tmreset>Reset layout</button></div>` : ""}
+      <nav class="tmkeys" aria-label="Function codes">${keys}<a href="#terminal" data-tmhelp><b>HELP</b>All codes</a></nav>
       ${rows.length ? `<div class="tape" aria-label="Prices"><div class="run">${tape}${tape.replace(/<button /g, '<button tabindex="-1" aria-hidden="true" ')}</div></div>` : ""}
       ${demoNote()}
-      <div class="tmgrid">
-        ${tmMonitor()}
-        ${tmPanel("p-sec", "DES", "Security", t ? [`#stock-${encodeURIComponent(t)}`, "Full page"] : null, `<div id="tmsec">${tmSecHtml(t)}</div>`, `<small>${esc(t ? disp(t) : "")}</small>`)}
-        ${tmAlerts()}
-        ${tmLive()}
-        ${tmNews()}
-        ${tmCal()}
-        ${tmGrades()}
-        ${tmBreadth()}
-      </div>
-      <p class="fine2">Prices are from the last scan (${S.stocks?.as_of ? esc(fmtDate(S.stocks.as_of, { day: "numeric", month: "short", year: "numeric" })) : "–"}), not live quotes. Live trades are paper (simulated). For information only, not investment advice.</p>
+      <div class="tmgrid">${LY.order.filter(id => !LY.hidden.includes(id)).map(id => TM_R[id]()).join("")}</div>
+      <p class="fine2">Prices are the last close unless marked LIVE (stocks: IEX real-time trades; coins: Binance). Company data, market boards and positioning from Yahoo Finance, FRED and the CFTC. Live trades and the practice portfolio are pretend. For information only, not investment advice.</p>
     </div>`;
     return { html: h, after: () => {
       if (t && S.stockBy[t] && arg !== "-" + t && location.hash !== "#terminal-" + encodeURIComponent(t)) history.replaceState(null, "", "#terminal-" + encodeURIComponent(t));
-      tmSecAfter(t);
+      if (!LY.hidden.includes("sec") && (S.market !== "stocks" || tmTab("sec", "DES") === "DES")) tmSecAfter(t);
+      if (!LY.hidden.includes("gip")) tmGipDraw();
+      tmLiveApply(); tmLiveLoad();
       clearInterval(S.tmTimer);
-      S.tmTimer = setInterval(() => { const c = document.getElementById("tmclock"); if (c) c.innerHTML = tmClock(); else clearInterval(S.tmTimer); }, 15000);
+      S.tmTimer = setInterval(() => { const c = document.getElementById("tmclock"); if (!c) { clearInterval(S.tmTimer); return; } c.innerHTML = tmClock(); tmLiveLoad(); }, 20000);
       const sel = document.querySelector(".tm .mon[aria-current='true']");
       if (sel) { const b = sel.closest(".pnb"); b.scrollTop = sel.offsetTop - b.clientHeight / 2; }
-      const f = document.getElementById("tmfilter");
-      f?.addEventListener("input", () => {
-        S.tmQ = f.value; const q = f.value.toLowerCase();
-        document.querySelectorAll(".tm .mon[data-q]").forEach(b => b.hidden = !!q && !b.dataset.q.includes(q));
-      });
-      document.getElementById("tmform")?.addEventListener("submit", e => { e.preventDefault(); tmRun(document.getElementById("tmcmd").value); });
       if (WIDE.matches && !S.tmFocused) { S.tmFocused = true; document.getElementById("tmcmd")?.focus({ preventScroll: true }); }
     } };
   }
@@ -7302,36 +7929,97 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
     const parts = raw.trim().toUpperCase().split(/\s+/).filter(Boolean);
     if (!parts.length) return;
     const go = href => { inp.value = ""; if (href.startsWith("#")) location.hash = href; else location.href = href; };
+    const done = () => { inp.value = ""; say(""); };
     const [a, b] = parts;
     if (a === "HELP" || a === "?") { S.tmHelp = !S.tmHelp; inp.value = ""; rerender(); return; }
+    if (a === "LAYOUT" || a === "LP") { S.tmEdit = !S.tmEdit; inp.value = ""; rerender(); return; }
     if (TM_MK[a] && !b) { inp.value = ""; switchMarket(TM_MK[a]); return; }
+    if (!b && TM_JUMP[a]) { done(); tmOpen(...TM_JUMP[a]); return; }
+    if (!b && TM_SEC.some(([c]) => c === a) && S.market === "stocks") { done(); setPref("tmTab.sec", a); tmOpen("sec"); tmSecRender(); return; }
     const t = tmFind(b ? a : parts.join(" "));
-    if (t && !b) { inp.value = ""; say(""); tmSelect(t, true); return; }
+    if (t && !b) { done(); tmSelect(t, true); return; }
     if (t && b) {
-      const f = tmTickerFn(t).find(([c]) => c === b || (b === "GP" && c === "DES") || (b === "LAB" && c === "BT"));
+      if (TM_SEC.some(([c]) => c === b) && S.market === "stocks") { done(); setPref("tmTab.sec", b); if (!tmSelect(t, true)) tmSecRender(); tmOpen("sec"); return; }
+      if (b === "PXA") { done(); S.tmFor = t; tmOpen("pxa"); return; }
+      if (b === "GIP") { done(); gipAdd(t); return; }
+      const f = tmTickerFn(t).find(([c]) => c === b || (b === "LAB" && c === "BT") || (b === "DES" && c === "GP"));
       if (f) return go(f[1]);
-      return say(`${b} isn't available for ${disp(t)}. Try: ${tmTickerFn(t).map(x => x[0]).join(", ")}.`, true);
+      return say(`${b} isn't available for ${disp(t)}. Try: ${[...TM_SEC.map(x => x[0]), ...tmTickerFn(t).map(x => x[0]), "PXA", "GIP"].join(", ")}.`, true);
     }
     const fn = TM_FN.find(([c]) => c === a) || TM_FN.find(([, , l]) => l.toUpperCase() === parts.join(" "));
     if (fn) return go(fn[1]);
     const t2 = tmFind(a);
-    if (t2) { inp.value = ""; tmSelect(t2, true); return; }
+    if (t2) { done(); tmSelect(t2, true); return; }
     say(`"${raw.trim()}" isn't a ${L().one} on this market or a code. Type HELP for the list.`, true);
+  }
+  function gipAdd(t) {
+    const sl = gipSlots().filter(x => x.t !== t), n = pref("tmGipN", 4);
+    sl.unshift({ t, tf: sl[0]?.tf || "D" });
+    setPref("tmGip." + S.market, sl.slice(0, n)); tmOpen("gip");
   }
 
   function tmClick(e) {
     if (!e.target.closest(".tm")) return false;
-    const hp = e.target.closest("[data-tmhelp]");
-    if (hp) { e.preventDefault(); S.tmHelp = !S.tmHelp; rerender(); return true; }
-    const so = e.target.closest("[data-tmsort]");
-    if (so) { setPref("tmSort", so.dataset.tmsort); const p = document.querySelector(".tm .p-mon"), top = p.querySelector(".pnb").scrollTop; p.outerHTML = tmMonitor(); const np = document.querySelector(".tm .p-mon");
-      np.querySelector(".pnb").scrollTop = top; const f = np.querySelector("#tmfilter"); f.addEventListener("input", () => { S.tmQ = f.value; const q = f.value.toLowerCase(); np.querySelectorAll(".mon[data-q]").forEach(b => b.hidden = !!q && !b.dataset.q.includes(q)); }); return true; }
-    const fl = e.target.closest("[data-tmfilter]");
-    if (fl) { const f = document.getElementById("tmfilter"); if (f) { f.value = S.tmQ === fl.dataset.tmfilter ? "" : fl.dataset.tmfilter; f.dispatchEvent(new Event("input")); f.closest(".pn").scrollIntoView({ block: "nearest" }); } return true; }
-    const s = e.target.closest("[data-tmsel]");
-    if (s) { e.preventDefault(); tmSelect(s.dataset.tmsel, true); return true; }
+    const D = sel => e.target.closest(sel);
+    let x;
+    if ((x = D("[data-tmhelp]"))) { e.preventDefault(); S.tmHelp = !S.tmHelp; rerender(); return true; }
+    if ((x = D("[data-tmjump]"))) { e.preventDefault(); tmOpen(...TM_JUMP[x.dataset.tmjump]); return true; }
+    if ((x = D("[data-tmedit]"))) { S.tmEdit = !S.tmEdit; rerender(); return true; }
+    if ((x = D("[data-tmmove]"))) { const [id, d] = x.dataset.tmmove.split(":"), L0 = tmLayout(), vis = L0.order.filter(k => !L0.hidden.includes(k)), i = vis.indexOf(id), j = i + +d;
+      if (j >= 0 && j < vis.length) { const a = L0.order.indexOf(vis[i]), b = L0.order.indexOf(vis[j]); [L0.order[a], L0.order[b]] = [L0.order[b], L0.order[a]]; tmSetLayout(L0); rerender(); } return true; }
+    if ((x = D("[data-tmwide]"))) { const L0 = tmLayout(), id = x.dataset.tmwide; L0.wide = L0.wide.includes(id) ? L0.wide.filter(k => k !== id) : [...L0.wide, id]; tmSetLayout(L0); rerender(); return true; }
+    if ((x = D("[data-tmhide]"))) { const L0 = tmLayout(); L0.hidden = [...new Set([...L0.hidden, x.dataset.tmhide])]; tmSetLayout(L0); rerender(); return true; }
+    if ((x = D("[data-tmshow]"))) { const L0 = tmLayout(); L0.hidden = L0.hidden.filter(k => k !== x.dataset.tmshow); tmSetLayout(L0); rerender(); return true; }
+    if ((x = D("[data-tmreset]"))) { setPref("tmLayout", null); rerender(); return true; }
+    if ((x = D("[data-tmtab]"))) { const [id, tb] = x.dataset.tmtab.split(":"); setPref("tmTab." + id, tb); id === "sec" ? tmSecRender() : tmRefresh(id); return true; }
+    if ((x = D("[data-tmsort]"))) { setPref("tmSort", x.dataset.tmsort); tmRefresh("mon"); return true; }
+    if ((x = D("[data-tmwl]"))) { const W = wlGet(); W.cur = x.dataset.tmwl; wlSet(W); tmRefresh("mon"); tmSecRender(); return true; }
+    if ((x = D("[data-tmwlnew]"))) { const n = (prompt("Name of the new watchlist") || "").trim().slice(0, 24); if (n) { const W = wlGet(); W.lists[n] = W.lists[n] || []; W.cur = n; wlSet(W); tmRefresh("mon"); tmSecRender(); } return true; }
+    if ((x = D("[data-tmwlren]"))) { const W = wlGet(), o = W.cur, n = (prompt("New name", o) || "").trim().slice(0, 24); if (n && n !== o && !W.lists[n]) { W.lists[n] = W.lists[o]; delete W.lists[o]; W.cur = n; wlSet(W); tmRefresh("mon"); } return true; }
+    if ((x = D("[data-tmwldel]"))) { const W = wlGet(); if (confirm(`Delete the list “${W.cur}”?`)) { delete W.lists[W.cur]; if (!Object.keys(W.lists).length) W.lists["My list"] = []; W.cur = "All"; wlSet(W); tmRefresh("mon"); tmSecRender(); } return true; }
+    if ((x = D("[data-tmstar]"))) { const W = wlGet(), k = wlTarget(W), t = x.dataset.tmstar, l = W.lists[k] = W.lists[k] || []; const i = l.indexOf(t); i >= 0 ? l.splice(i, 1) : l.push(t); wlSet(W); tmRefresh("mon"); tmSecRender(); return true; }
+    if ((x = D("[data-tmfilter]"))) { const f = document.getElementById("tmfilter"); if (f) { f.value = S.tmQ === x.dataset.tmfilter ? "" : x.dataset.tmfilter; f.dispatchEvent(new Event("input", { bubbles: true })); f.closest(".pn").scrollIntoView({ block: "nearest" }); } return true; }
+    if ((x = D("[data-tmctm]"))) { setPref("tmCtmRoot", x.dataset.tmctm); tmRefresh("ctm"); return true; }
+    if ((x = D("[data-tmcot]"))) { S.tmCot = S.tmCot === x.dataset.tmcot ? null : x.dataset.tmcot; tmRefresh("ctm"); return true; }
+    if ((x = D("[data-tmscrpre]"))) { const p = EQ_PRE[+x.dataset.tmscrpre]; eqSave(p[1].map(c => [...c])); tmRefresh("eqs"); return true; }
+    if ((x = D("[data-tmscradd]"))) { const c = eqConds(); c.push([eqFields().find(f => !c.some(k => k[0] === f[0]))?.[0] || "rsi", ">", 0]); eqSave(c); tmRefresh("eqs"); return true; }
+    if ((x = D("[data-tmscrrm]"))) { const c = eqConds(); c.splice(+x.dataset.tmscrrm, 1); eqSave(c); tmRefresh("eqs"); return true; }
+    if ((x = D("[data-tmscrsave]"))) { const n = (prompt("Name this screen") || "").trim().slice(0, 30); if (n) { const sv = (pref("tmScreens", []) || []).filter(s => !(s.n === n && s.m === S.market)); sv.push({ n, m: S.market, c: eqConds(), sec: pref("tmScrSec", "") }); setPref("tmScreens", sv); tmRefresh("eqs"); } return true; }
+    if ((x = D("[data-tmscrload]"))) { const s = (pref("tmScreens", []) || []).find(s => s.n === x.dataset.tmscrload && s.m === S.market); if (s) { eqSave(s.c); setPref("tmScrSec", s.sec || ""); tmRefresh("eqs"); } return true; }
+    if ((x = D("[data-tmscrdel]"))) { setPref("tmScreens", (pref("tmScreens", []) || []).filter(s => !(s.n === x.dataset.tmscrdel && s.m === S.market))); tmRefresh("eqs"); return true; }
+    if ((x = D("[data-tmscrsort]"))) { const k = x.dataset.tmscrsort === "tk" ? "price" : x.dataset.tmscrsort, [sk, sd] = pref("tmScrSort", ["chg1d", -1]); setPref("tmScrSort", [k, sk === k ? -sd : -1]); const r = document.getElementById("tmscrres"); if (r) r.innerHTML = eqResults(); tmLiveApply(); return true; }
+    if ((x = D("[data-tmgipn]"))) { setPref("tmGipN", +x.dataset.tmgipn); tmRefresh("gip"); return true; }
+    if ((x = D("[data-tmgiptf]"))) { const [i, tf] = x.dataset.tmgiptf.split(":"), sl = gipSlots(); if (sl[+i]) sl[+i].tf = tf; setPref("tmGip." + S.market, sl); tmRefresh("gip"); return true; }
+    if ((x = D("[data-tmgipadd]"))) { e.preventDefault(); gipAdd(x.dataset.tmgipadd); return true; }
+    if ((x = D("[data-tmpxfor]"))) { e.preventDefault(); S.tmFor = x.dataset.tmpxfor; tmOpen("pxa"); return true; }
+    if ((x = D("[data-tmpxdel]"))) { const id = x.dataset.tmpxdel; fetch(`${trendApi()}/?px=del`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ topic: pxTopic(), id }) }).finally(() => pxList(true)); x.disabled = true; return true; }
+    if ((x = D("[data-tmsel]")) && !D("input, select")) { e.preventDefault(); tmSelect(x.dataset.tmsel, true); return true; }
     return false;
   }
+  // inputs inside the Terminal (one listener for every panel, so panels can redraw freely)
+  document.addEventListener("input", e => {
+    const el = e.target; if (!el.closest?.(".tm")) return;
+    if (el.id === "tmfilter") { S.tmQ = el.value; const q = el.value.toLowerCase(); document.querySelectorAll(".tm .mon[data-q]").forEach(b => b.hidden = !!q && !b.dataset.q.includes(q)); return; }
+    if (el.dataset.tmscr && el.dataset.tmscr.endsWith(":v")) { const c = eqConds(), i = +el.dataset.tmscr.split(":")[0]; if (c[i]) { c[i][2] = el.value === "" ? 0 : +el.value; eqSave(c); clearTimeout(S.eqT); S.eqT = setTimeout(() => { const r = document.getElementById("tmscrres"); if (r) { r.innerHTML = eqResults(); tmLiveApply(); } }, 200); } }
+  });
+  document.addEventListener("change", e => {
+    const el = e.target; if (!el.closest?.(".tm")) return;
+    if (el.dataset.tmscr) { const [i, k] = el.dataset.tmscr.split(":"), c = eqConds(); if (!c[+i]) return; if (k === "f") c[+i][0] = el.value; if (k === "op") c[+i][1] = el.value; if (k === "v") return; eqSave(c); tmRefresh("eqs"); return; }
+    if (el.matches("[data-tmscrsec]")) { setPref("tmScrSec", el.value); const r = document.getElementById("tmscrres"); if (r) r.innerHTML = eqResults(); return; }
+    if (el.dataset.tmgipt != null) { const t = tmFind(el.value), i = +el.dataset.tmgipt, sl = gipSlots(); if (t && sl[i]) { sl[i].t = t; setPref("tmGip." + S.market, sl); tmRefresh("gip"); } else el.value = sl[i] ? sym(sl[i].t) : ""; }
+  });
+  document.addEventListener("submit", e => {
+    const f = e.target;
+    if (f.id === "tmform") { e.preventDefault(); tmRun(f.querySelector("#tmcmd").value); return; }
+    if (f.id === "tmpxform") {
+      e.preventDefault();
+      const m = document.getElementById("pxmsg"), t = tmFind(f.sym.value) || f.sym.value.toUpperCase();
+      const btn = f.querySelector("button[type=submit]"); btn.disabled = true;
+      fetch(`${trendApi()}/?px=add`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ topic: pxTopic(), sym: t, dir: f.dir.value, level: +f.level.value, note: f.note.value }) })
+        .then(r => r.json()).then(d => { if (d.error) throw new Error(d.error); if (m) { m.textContent = `Added: ${sym(t)} ${f.dir.value} ${f.level.value}.`; m.classList.remove("err"); } pxList(true); })
+        .catch(err => { if (m) { m.textContent = `Couldn't add it: ${err.message}`; m.classList.add("err"); } btn.disabled = false; });
+    }
+  });
   // Bloomberg habit: start typing anywhere and it goes to the command line
   addEventListener("keydown", e => {
     const inp = document.getElementById("tmcmd");
@@ -7339,6 +8027,8 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
     if (e.key === "/") { e.preventDefault(); inp.focus(); return; }
     if (e.key.length === 1 && /[a-z0-9]/i.test(e.key)) inp.focus();
   });
+  document.addEventListener("visibilitychange", () => { if (!document.hidden && document.getElementById("tmcmd")) tmLiveLoad(); });
+  let tmRz; addEventListener("resize", () => { clearTimeout(tmRz); tmRz = setTimeout(() => { if (document.querySelector(".tm canvas[data-gipc]")) tmGipDraw(); }, 200); });
 
   function route() {
     if (!location.hash) history.replaceState(null, "", "#home");
