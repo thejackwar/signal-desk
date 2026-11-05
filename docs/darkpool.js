@@ -47,6 +47,16 @@ function lines(dates, series, { h = 260, fmtL = x => x, fmtR = x => x } = {}) {
     g += `<text x="${X(i)}" y="${H - 6}" text-anchor="${k === 0 ? "start" : k === ticks ? "end" : "middle"}" font-size="11" fill="var(--c-txt)">${new Date(dates[i] + "T12:00:00Z").toLocaleDateString("en-GB", { month: "short", year: "2-digit" })}</text>`;
   }
   for (const s of series) {
+    if (s.candles) {   // a price as candles: every `s.candles` closes make one (open = the close before)
+      const m = s.candles, sw = (X(1) - X(0)) * m, bw = Math.max(1, Math.min(9, sw * .62)), a = s.axis || "l";
+      for (let a0 = 0; a0 < s.v.length; a0 += m) {
+        const grp = s.v.slice(a0, a0 + m).filter(Number.isFinite); if (!grp.length) continue;
+        const op = a0 && Number.isFinite(s.v[a0 - 1]) ? s.v[a0 - 1] : grp[0], cl = grp[grp.length - 1], hh = Math.max(op, ...grp), ll = Math.min(op, ...grp);
+        const cx = X(a0 + (Math.min(m, s.v.length - a0) - 1) / 2), col = cl >= op ? "var(--up-line)" : "var(--down-line)";
+        g += `<line x1="${cx.toFixed(1)}" x2="${cx.toFixed(1)}" y1="${Y(hh, a).toFixed(1)}" y2="${Y(ll, a).toFixed(1)}" stroke="${col}" stroke-opacity=".7"/><rect x="${(cx - bw / 2).toFixed(1)}" y="${Y(Math.max(op, cl), a).toFixed(1)}" width="${bw.toFixed(1)}" height="${Math.max(1, Math.abs(Y(op, a) - Y(cl, a))).toFixed(1)}" fill="${col}" fill-opacity=".7"/>`;
+      }
+      continue;
+    }
     let d = "", pen = false;
     s.v.forEach((x, i) => { if (!Number.isFinite(x)) { pen = false; return; } d += `${pen ? "L" : "M"}${X(i).toFixed(1)},${Y(x, s.axis || "l").toFixed(1)}`; pen = true; });
     g += `<path d="${d}" fill="none" stroke="${s.color}" stroke-width="${s.wd || 2}" ${s.dash ? 'stroke-dasharray="5 4"' : ""}/>`;
@@ -129,7 +139,7 @@ function renderPressure() {
     <div class="panel"><h2>S&amp;P 100 dark index</h2>
       <p class="lead">The share of off-exchange volume that was short sales, for all the stocks together, weighted by dollars traded. On ${fmtDate(D.date)} it was ${pct(I.value)}, ${read}.</p>
       <dl class="stats"><div><dt>Dark index</dt><dd>${pct(I.value)}</dd></div><div><dt>vs last ${D.z_win} days</dt><dd class="${cls(I.z)}">${sgn(I.z)} σ</dd></div><div><dt>Higher than</dt><dd>${I.pct_1y == null ? "–" : I.pct_1y + "% of the year"}</dd></div></dl>
-      ${lines(I.dates, [{ name: "Dark index (%)", v: I.v.map(x => x ?? NaN), color: "#38bdf8" }, ...(spyN ? [{ name: "SPY (right axis)", v: spyN, color: "var(--faint)", dash: true, axis: "r", wd: 1.5 }] : [])], { fmtL: x => x.toFixed(1), fmtR: x => x.toFixed(0) })}
+      ${lines(I.dates, [...(spyN ? [{ name: "SPY weekly candles (right axis)", v: spyN, candles: 5, color: "var(--up-line)", axis: "r" }] : []), { name: "Dark index (%)", v: I.v.map(x => x ?? NaN), color: "#38bdf8" }], { fmtL: x => x.toFixed(1), fmtR: x => x.toFixed(0) })}
     </div>
     <div class="panel"><h2>Stock by stock</h2>
       <p class="cardnote">Short ratio = short volume ÷ off-exchange volume. Compared with each stock's own last ${D.z_win} days: past ±${D.z_hot}σ is unusual. High = <span class="pos">buying</span> (market makers sell short to fill buyers), low = <span class="neg">selling</span>, on the popular reading the backtest checks.</p>

@@ -84,6 +84,30 @@ def _decode_lab(path: Path) -> pd.DataFrame:
     return pd.DataFrame(cols).sort_index()
 
 
+def lab_ohl_ratios() -> dict[str, pd.DataFrame] | None:
+    """Each day's open, high and low as a ratio of its close, from the Lab price files (the recent
+    one wins on shared days), so the page can draw the pair's prices as candles."""
+    data = ENGINE.parent / "docs" / "data"
+    out = {k: {} for k in ("o", "h", "l")}
+    for path in (data / "lab.json", data / "lab_recent.json"):
+        if not path.exists():
+            continue
+        d = json.loads(path.read_text())
+        dates = pd.to_datetime(d["dates"])
+        for t in d["tickers"]:
+            if not all(len(t.get(k) or []) == len(t["c"]) for k in out):
+                continue
+            miss = set(t.get("miss", []))
+            ix = [i for i in range(t["s"], t["s"] + len(t["c"]) + len(miss)) if i not in miss][:len(t["c"])]
+            for k in out:
+                s = pd.Series(np.exp(np.asarray(t[k], dtype=float) / 1e4), index=dates[ix])
+                old = out[k].get(t["t"])
+                out[k][t["t"]] = s if old is None else s.combine_first(old)
+    if not out["o"]:
+        return None
+    return {k: pd.DataFrame(v) for k, v in out.items()}
+
+
 def fetch_lab() -> pd.DataFrame | None:
     """15 years from docs/data/lab.json (weekly), topped up with docs/data/lab_recent.json
     (rewritten after every daily scan). No download needed."""
@@ -325,7 +349,7 @@ def signal_for(z_now: float, rules=RULES) -> str:
     return "none"
 
 
-def today(prices: pd.DataFrame, sectors: dict[str, str], rules=RULES) -> list[dict]:
+def today(prices: pd.DataFrame, sectors: dict[str, str], rules=RULES, ohl: dict | None = None) -> list[dict]:
     logp = np.log(prices)
     F, W = rules["formation_days"], rules["z_window"]
     form = logp.iloc[-F:].dropna(axis=1)
@@ -345,11 +369,25 @@ def today(prices: pd.DataFrame, sectors: dict[str, str], rules=RULES) -> list[di
             "dates": [str(d.date()) for d in tail.index],
             "pa": [round(float(x), 2) for x in tail[a].values],
             "pb": [round(float(x), 2) for x in tail[b].values],
+            **candles(tail, a, b, ohl),
         })
     return out
 
 
 # ------------------------------------------------------------------ paper trades
+def candles(tail: pd.DataFrame, a: str, b: str, ohl: dict | None) -> dict:
+    """Opens, highs and lows for both legs, same units as pa/pb ("oa", "ha", "la", "ob", ...).
+    A day with no Lab bar gets a flat candle at its close."""
+    if not ohl or any(t not in ohl["o"] for t in (a, b)):
+        return {}
+    out = {}
+    for t, s in ((a, "a"), (b, "b")):
+        for k in ("o", "h", "l"):
+            r = ohl[k][t].reindex(tail.index).fillna(1.0)
+            out[k + s] = [round(float(x), 2) for x in (tail[t] * r).values]
+    return out
+
+
 def update_live(prices: pd.DataFrame, pairs: list[dict], rules=RULES) -> dict:
     """Open/close paper trades on the latest session. Closed trades stay exactly as written."""
     path = OUT / "live.json"
@@ -438,7 +476,7 @@ def main(demo: bool = False, grid: bool = False) -> None:
     OUT.mkdir(parents=True, exist_ok=True)
 
     wf = walk_forward(prices, sectors)
-    pairs = today(prices, sectors)
+    pairs = today(prices, sectors, ohl=None if demo else lab_ohl_ratios())
     data = {
         "updated": str(date.today()), "last_day": str(prices.index[-1].date()),
         "demo": demo, "rules": RULES, "pairs": pairs, "walk_forward": wf,

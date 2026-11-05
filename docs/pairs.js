@@ -110,6 +110,52 @@ function lineChart(el, { x, series, refs = [], height = 220, fmt = v => v.toFixe
   svg.addEventListener("pointerleave", () => { tip.hidden = true; cur.setAttribute("visibility", "hidden"); });
 }
 
+// Weekly candles from daily bars (Monday-to-Friday weeks). Old files without opens/highs/lows
+// open each day at the day before's close.
+function weekly(dates, c, o, h, l) {
+  const out = [];
+  for (let i = 0; i < c.length; i++) {
+    const d = new Date(dates[i] + "T12:00:00"), wk = new Date(d); wk.setDate(d.getDate() - ((d.getDay() + 6) % 7));
+    const key = wk.toISOString().slice(0, 10);
+    const oo = o ? o[i] : (i ? c[i - 1] : c[i]), hh = h ? h[i] : Math.max(oo, c[i]), ll = l ? l[i] : Math.min(oo, c[i]);
+    const cur = out[out.length - 1];
+    if (!cur || cur.key !== key) out.push({ key, date: dates[i], o: oo, h: hh, l: ll, c: c[i] });
+    else { cur.h = Math.max(cur.h, hh); cur.l = Math.min(cur.l, ll); cur.c = c[i]; cur.end = dates[i]; }
+  }
+  return out;
+}
+
+// One stock as candles, rebased so its first close is 100. Trade marks sit on the candle of their day.
+function candleChart(el, { bars, name, color, height = 170, fmt = v => v.toFixed(0), xfmt = d => d, marks = [] }) {
+  const W = Math.max(300, Math.min(760, el.clientWidth || 760)), H = height, L = 46, R = 10, T = 12, B = 22;
+  const k = 100 / bars[0].c, n = bars.length;
+  let lo = Infinity, hi = -Infinity;
+  for (const b of bars) { lo = Math.min(lo, b.l * k); hi = Math.max(hi, b.h * k); }
+  const pad = (hi - lo) * 0.06 || 1; lo -= pad; hi += pad;
+  const sp = (W - L - R) / n, px = i => L + sp * (i + .5), py = v => T + (H - T - B) * (1 - (v - lo) / (hi - lo)), bw = Math.max(1, Math.min(9, sp * .62));
+  let g = "";
+  for (let q = 0; q <= 4; q++) {
+    const v = lo + (hi - lo) * q / 4;
+    g += `<line x1="${L}" x2="${W - R}" y1="${py(v)}" y2="${py(v)}" stroke="var(--c-grid)"/><text x="${L - 6}" y="${py(v) + 4}" text-anchor="end" font-size="11" fill="var(--c-txt)">${esc(fmt(v))}</text>`;
+  }
+  bars.forEach((b, i) => {
+    const col = b.c >= b.o ? "var(--up-line)" : "var(--down-line)", top = py(Math.max(b.o, b.c) * k), bh = Math.max(1, Math.abs(py(b.o * k) - py(b.c * k)));
+    g += `<line x1="${px(i).toFixed(1)}" x2="${px(i).toFixed(1)}" y1="${py(b.h * k).toFixed(1)}" y2="${py(b.l * k).toFixed(1)}" stroke="${col}"/><rect x="${(px(i) - bw / 2).toFixed(1)}" y="${top.toFixed(1)}" width="${bw.toFixed(1)}" height="${bh.toFixed(1)}" fill="${col}"/>`;
+  });
+  for (const m of marks) g += `<circle cx="${px(m.i).toFixed(1)}" cy="${(T + 6).toFixed(1)}" r="3.5" fill="${m.color}" stroke="var(--c-bg)" stroke-width="1.2"/>`;
+  g += `<text x="${L + 4}" y="${T + 12}" font-size="12" font-weight="600" fill="${color}">${esc(name)}</text>`;
+  g += [0, Math.floor(n / 2), n - 1].map(i => `<text x="${px(i)}" y="${H - 4}" text-anchor="${i === 0 ? "start" : i === n - 1 ? "end" : "middle"}" font-size="11" fill="var(--c-txt)">${esc(xfmt(bars[i].date))}</text>`).join("");
+  el.innerHTML = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(name)} weekly candles, rebased to 100">${g}<line class="cur" y1="${T}" y2="${H - B}" stroke="var(--hair)" visibility="hidden"/></svg><div class="tip" hidden></div>`;
+  const svg = el.querySelector("svg"), tip = el.querySelector(".tip"), cur = svg.querySelector(".cur");
+  svg.addEventListener("pointermove", e => {
+    const r = svg.getBoundingClientRect(), i = Math.max(0, Math.min(n - 1, Math.floor((((e.clientX - r.left) / r.width) * W - L) / sp))), b = bars[i];
+    cur.setAttribute("x1", px(i)); cur.setAttribute("x2", px(i)); cur.setAttribute("visibility", "visible");
+    tip.hidden = false;
+    tip.innerHTML = `Week of ${esc(xfmt(b.key))} · O ${fmt(b.o * k)} H ${fmt(b.h * k)} L ${fmt(b.l * k)} C <b>${fmt(b.c * k)}</b>`;
+  });
+  svg.addEventListener("pointerleave", () => { tip.hidden = true; cur.setAttribute("visibility", "hidden"); });
+}
+
 // ------------------------------------------------------------------ state
 let DATA = null, LIVE = null, GRID = null, sel = 0, rules = null;
 const views = ["today", "learn", "backtest", "live"];
@@ -175,9 +221,9 @@ function renderPair() {
     <div class="panel">
       <h2>${esc(p.a)} / ${esc(p.b)}</h2>
       <p class="lead">${esc(p.sector)} · for every €1 of ${esc(p.a)}, the hedge is €${p.beta.toFixed(2)} of ${esc(p.b)} · cointegration p-value ${p.p.toFixed(3)}</p>
-      <h4>Both prices, rebased to 100</h4>
+      <h4>Both prices, weekly candles rebased to 100</h4>
       <div class="chartbox" id="c-px"></div>
-      <div class="legend"><span><i style="border-color:var(--accent)"></i>${esc(p.a)}</span><span><i style="border-color:var(--res)"></i>${esc(p.b)}</span></div>
+      <div class="chartbox" id="c-pxb"></div>
       <h4>The gap (z-score)</h4>
       <div class="chartbox" id="c-z"></div>
       <div class="legend"><span><i class="dash" style="border-color:var(--up-line)"></i>open a trade (±${R.entry_z})</span><span><i class="dash" style="border-color:var(--faint)"></i>close (±${R.exit_z})</span><span><i class="dash" style="border-color:var(--down-line)"></i>stop (±${R.stop_z})</span></div>
@@ -204,10 +250,10 @@ function renderPair() {
       </tbody></table></div>` : ""}
     </div>`;
 
-  const base = (arr) => arr.map(v => v / arr[0] * 100);
   const short = d => new Date(d + "T12:00:00").toLocaleDateString("en-GB", { month: "short", year: "2-digit" });
-  lineChart($("#c-px"), { x: p.dates, xfmt: short, fmt: v => v.toFixed(0), height: 200,
-    series: [{ name: p.a, y: base(p.pa), color: "var(--accent)" }, { name: p.b, y: base(p.pb), color: "var(--res)" }] });
+  const wa = weekly(p.dates, p.pa, p.oa, p.ha, p.la), wb = weekly(p.dates, p.pb, p.ob, p.hb, p.lb);
+  candleChart($("#c-px"), { bars: wa, name: p.a, color: "var(--accent)", xfmt: short });
+  candleChart($("#c-pxb"), { bars: wb, name: p.b, color: "var(--res)", xfmt: short });
   const idx = Object.fromEntries(p.dates.map((d, i) => [d, i]));
   lineChart($("#c-z"), { x: p.dates, xfmt: short, fmt: v => v.toFixed(1), height: 200,
     refs: [R.entry_z, -R.entry_z].map(y => ({ y, color: "var(--up-line)", dash: true }))

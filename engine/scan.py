@@ -397,6 +397,8 @@ def stock_files(data: dict[str, pd.DataFrame], alerts: list[dict], names: dict) 
             "hi52": rp(hi52), "lo52": rp(lo52),
             "pos52": round((last - lo52) / (hi52 - lo52) * 100, 1) if hi52 > lo52 else None,
             "spark": [rp(float(v)) for v in c.iloc[-60:]],
+            # the list's mini candles: opens, highs and lows for the same 60 days as "spark" (the closes)
+            "spark_ohl": [[rp(float(v)) for v in df[k].iloc[-60:]] for k in ("open", "high", "low")],
             "bull": sum(a["side"] == "bullish" for a in mine),
             "bear": sum(a["side"] == "bearish" for a in mine),
             "latest": mine[0]["date"] if mine else None,
