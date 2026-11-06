@@ -176,8 +176,21 @@ def load_tickers() -> list[str]:
     return ["SPY"] + [t for t in tickers if t != "SPY"]
 
 
+CACHE = Path(os.environ.get("TOPDOWN_CACHE", ROOT / ".cache" / "topdown"))   # kept between runs (actions/cache)
+
+
+def _load_cache(tf: str) -> dict:
+    f = CACHE / f"{tf}.json"
+    try:
+        return json.loads(f.read_text())
+    except Exception:
+        return {}
+
+
 def fetch_alpaca(tickers: list[str], end: dt.datetime) -> dict[str, dict[str, pd.DataFrame]]:
-    """ticker -> Alpaca timeframe -> DataFrame. Many symbols per request, paged."""
+    """ticker -> Alpaca timeframe -> DataFrame. Many symbols per request, paged.
+    Bars already downloaded by earlier runs are kept in CACHE, so a run only fetches what's new (a full
+    download of months of 5/15/30-minute bars for 100 stocks takes longer than the 30 minutes between runs)."""
     key, secret = os.environ.get("ALPACA_KEY_ID"), os.environ.get("ALPACA_SECRET_KEY")
     if not key or not secret:
         sys.exit("ALPACA_KEY_ID and ALPACA_SECRET_KEY must be set (GitHub: Settings -> Secrets -> Actions).")
@@ -185,28 +198,50 @@ def fetch_alpaca(tickers: list[str], end: dt.datetime) -> dict[str, dict[str, pd
     by_alp = {alpaca_symbol(t): t for t in tickers}
     rows: dict[str, dict[str, list]] = {t: {tf: [] for tf in SERIES} for t in tickers}
     fmt = lambda d: d.strftime("%Y-%m-%dT%H:%M:%SZ")
+    CACHE.mkdir(parents=True, exist_ok=True)
+    t0, pages = time.time(), 0
     for tf, days in SERIES.items():
-        syms = list(by_alp)
-        for k in range(0, len(syms), 25):
-            params = {"symbols": ",".join(syms[k:k + 25]), "timeframe": tf, "start": fmt(end - dt.timedelta(days=days)),
-                      "end": fmt(end), "limit": "10000", "adjustment": "all", "feed": "sip"}
-            while True:
-                url = ALPACA + "?" + urllib.parse.urlencode(params)
-                for attempt in range(5):
-                    try:
-                        with urllib.request.urlopen(urllib.request.Request(url, headers=headers), timeout=60) as r:
-                            js = json.load(r)
+        cache = _load_cache(tf)
+        first = fmt(end - dt.timedelta(days=days))
+        # what each ticker already has; refetch the last 2 days so a bar that was still forming gets its final values
+        have = {t: v[-1]["t"] for t, v in cache.items() if v and v[0]["t"] <= (end - dt.timedelta(days=days - 10)).strftime("%Y-%m-%dT%H:%M:%SZ")}
+        groups: dict[str, list[str]] = {}
+        for a_sym, t in by_alp.items():
+            if t in have:
+                st = fmt(pd.Timestamp(have[t]).to_pydatetime() - dt.timedelta(days=2))
+            else:
+                st, cache[t] = first, []
+            groups.setdefault(st, []).append(a_sym)
+        fresh: dict[str, list] = {}
+        for st, syms in groups.items():
+            for k in range(0, len(syms), 25):
+                params = {"symbols": ",".join(syms[k:k + 25]), "timeframe": tf, "start": st,
+                          "end": fmt(end), "limit": "10000", "adjustment": "all", "feed": "sip"}
+                while True:
+                    url = ALPACA + "?" + urllib.parse.urlencode(params)
+                    for attempt in range(5):
+                        try:
+                            with urllib.request.urlopen(urllib.request.Request(url, headers=headers), timeout=60) as r:
+                                js = json.load(r)
+                            break
+                        except urllib.error.HTTPError as e:
+                            if e.code == 429 and attempt < 4:
+                                time.sleep(3 * (attempt + 1))
+                                continue
+                            raise
+                    pages += 1
+                    for sym, bars in (js.get("bars") or {}).items():
+                        fresh.setdefault(by_alp[sym], []).extend({"t": b["t"], "o": b["o"], "h": b["h"], "l": b["l"], "c": b["c"]} for b in bars)
+                    if not js.get("next_page_token"):
                         break
-                    except urllib.error.HTTPError as e:
-                        if e.code == 429 and attempt < 4:
-                            time.sleep(3 * (attempt + 1))
-                            continue
-                        raise
-                for sym, bars in (js.get("bars") or {}).items():
-                    rows[by_alp[sym]][tf].extend(bars)
-                if not js.get("next_page_token"):
-                    break
-                params["page_token"] = js["next_page_token"]
+                    params["page_token"] = js["next_page_token"]
+        for t in by_alp.values():
+            merged = {b["t"]: b for b in cache.get(t, [])}
+            merged.update({b["t"]: b for b in fresh.get(t, [])})
+            cache[t] = [merged[k] for k in sorted(merged) if k >= first]
+            rows[t][tf] = cache[t]
+        (CACHE / f"{tf}.json").write_text(json.dumps({t: cache[t] for t in by_alp.values()}, separators=(",", ":")))
+        print(f"  {tf}: {len(have)} from cache, {len(by_alp) - len(have)} downloaded in full · {pages} requests so far, {time.time() - t0:.0f}s", flush=True)
     out = {}
     for t, per in rows.items():
         series = {}
