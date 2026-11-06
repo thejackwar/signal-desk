@@ -438,16 +438,19 @@ def fetch_okx(tickers: list[str]) -> dict[str, dict[str, pd.DataFrame]]:
     return out
 
 
+CRYPTO_ONLY = ["BTC-USD"]                            # crypto Top-Down alerts: Bitcoin only (6 Nov 2026)
+
+
 def main_crypto(args, now: dt.datetime):
     global ET
     ET = ZoneInfo("UTC")                                 # crypto candles and alert times are in UTC
-    tickers = args.tickers.split(",") if args.tickers else crypto_tickers()
+    tickers = args.tickers.split(",") if args.tickers else CRYPTO_ONLY   # Bitcoin only (crypto_tickers() for all coins)
     out = Path(args.out if args.out != str(OUT) else ROOT / "docs" / "data" / "crypto" / "topdown.json")
     print(f"Fetching {len(tickers)} coins from OKX…")
     data = fetch_okx(tickers)
     old = json.loads(out.read_text()) if out.exists() else {"alerts": []}
     cutoff = (now.date() - dt.timedelta(days=KEEP_DAYS)).isoformat()
-    alerts = [a for a in old.get("alerts", []) if a["date"] >= cutoff]
+    alerts = [a for a in old.get("alerts", []) if a["date"] >= cutoff and a["ticker"] in tickers]
     known = {a["id"]: a for a in alerts}
     new = []
     for t, frames in data.items():
