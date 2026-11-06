@@ -1896,6 +1896,11 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
 .tm .why { list-style: none; margin: 4px 0 6px; padding: 0; display: grid; gap: 3px; }
 .tm .why li { display: grid; grid-template-columns: 34px 1fr; gap: 6px; font-size: 12.5px; line-height: 1.35; }
 .tm .why b { font: 700 12px var(--font-code); text-align: right; }
+.tm .tk3 { grid-template-columns: minmax(96px, 1fr) 104px 84px 56px 74px 66px; }
+.tm .tk3.dim2 > span:first-child { color: var(--muted); }
+.tm .verd { margin: 10px 0 0; padding: 8px 10px; border: 1px solid var(--line); border-radius: 8px; background: var(--bg); font-size: 12.5px; }
+.tm .verd p { margin: 2px 0; }
+@media (max-width: 560px) { .tm .tk3 { grid-template-columns: minmax(84px, 1fr) 76px 70px 46px; } .tm .tk3 > :nth-child(5), .tm .tk3 > :nth-child(6) { display: none; } }
 .tm .fnote { color: var(--faint); font-size: 11.5px; margin: 2px 0 6px; }
 @media (max-width: 560px) { .tm .foc .fr { grid-template-columns: 34px 62px 48px minmax(0, 1fr); } .tm .foc .fr > .r { display: none; } }
 
@@ -7305,22 +7310,22 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
   ];
   // panels of the Terminal: id -> [code, title]
   const TM_P = {
-    focus: ["FOCUS", "Focus alerts"], mood: ["MOOD", "Market mood &amp; flow"],
+    focus: ["FOCUS", "Focus alerts"], trk: ["TRK", "Does Focus work?"], mood: ["MOOD", "Market mood &amp; flow"],
     mon: ["MON", "Monitor"], sec: ["DES", "Security"], alrt: ["ALRT", "Alerts"], wei: ["WEI", "World markets"], most: ["MOST", "Most active"],
     live: ["LIVE", "Live paper trades"], news: ["NEWS", "Headlines"], cal: ["CAL", "Calendar"], gc: ["GC", "Rates &amp; Fed"], eqs: ["EQS", "Screener"],
     ctm: ["CTM", "Futures &amp; positioning"], gip: ["GIP", "Multi-chart"], grd: ["GRD", "Strategy grades"], brd: ["BRD", "Breadth &amp; movers"],
     port: ["PORT", "Practice portfolio"], pxa: ["PXA", "Price alerts"],
   };
-  const TM_ORDER = Object.keys(TM_P), TM_WIDE = ["eqs", "gip", "mood", "focus"];
+  const TM_ORDER = Object.keys(TM_P), TM_WIDE = ["eqs", "gip", "mood", "focus", "trk"];
   // workspaces: the Terminal shows one group of panels at a time, so things are easy to find
   const TM_WS = { market: ["mood", "brd", "news", "cal", "wei", "gc", "ctm"], ticker: ["mon", "sec"],
-    signals: ["focus", "alrt", "live", "grd", "pxa"], tools: ["eqs", "most", "gip", "port"] };
+    signals: ["focus", "trk", "alrt", "live", "grd", "pxa"], tools: ["eqs", "most", "gip", "port"] };
   const TM_WSL = [["market", "Market", "Mood, flow, breadth, news"], ["ticker", "Ticker", "Everything on one stock"], ["signals", "Signals", "Focus alerts, live trades"], ["tools", "Tools", "Screener, charts, portfolio"], ["all", "All", "Every panel"]];
   const tmWs = () => { const w = pref("tmWs", "market"); return w === "all" || TM_WS[w] ? w : "market"; };
   const tmWsOf = id => Object.keys(TM_WS).find(k => TM_WS[k].includes(id)) || "all";
   // codes that open a panel (and the tab inside it)
   const TM_JUMP = { MON: ["mon"], WL: ["mon"], WEI: ["wei", "idx"], FUT: ["wei", "fut"], FX: ["wei", "fx"], VOL: ["wei", "vol"], GC: ["gc", "curve"], WIRP: ["gc", "fed"],
-    ECB: ["gc", "fed"], EU: ["gc", "eu"], CTM: ["ctm", "curve"], COT: ["ctm", "cot"], MOST: ["most"], EQS: ["eqs"], GIP: ["gip"], PORT: ["port"], PXA: ["pxa"], GRD: ["grd"], BRD: ["brd"], MOOD: ["mood"], FOCUS: ["focus"], FOC: ["focus"] };
+    ECB: ["gc", "fed"], EU: ["gc", "eu"], CTM: ["ctm", "curve"], COT: ["ctm", "cot"], MOST: ["most"], EQS: ["eqs"], GIP: ["gip"], PORT: ["port"], PXA: ["pxa"], GRD: ["grd"], BRD: ["brd"], MOOD: ["mood"], FOCUS: ["focus"], TRK: ["trk"], FOC: ["focus"] };
   // tabs of the security panel (company data: stocks only)
   const TM_SEC = [["DES", "Overview"], ["FLOW", "Buy / sell flow"], ["OMON", "Options"], ["CN", "News"], ["SIG", "Signals"], ["FA", "Financials"], ["ANR", "Analysts"], ["EE", "Estimates"], ["RV", "Comparables"], ["HDS", "Holders"], ["DVD", "Dividends"]];
   // ticker + code, e.g. "NVDA TL"
@@ -7358,7 +7363,7 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
     const L0 = pref("tmLayout", null) || {};
     const order = (L0.order || []).filter(id => TM_P[id]);
     TM_ORDER.forEach(id => { if (!order.includes(id)) order.splice(Math.min(TM_ORDER.indexOf(id), order.length), 0, id); });
-    const wide = L0.wide ? (L0.v2 ? L0.wide : [...new Set([...L0.wide, "mood", "focus"])]) : TM_WIDE;
+    const wide = L0.wide ? (L0.v2 ? L0.wide : [...new Set([...L0.wide, "mood", "focus", "trk"])]) : TM_WIDE;
     return { order, hidden: (L0.hidden || []).filter(id => TM_P[id]), wide };
   }
   const tmSetLayout = L0 => setPref("tmLayout", { ...L0, v2: true });
@@ -7754,7 +7759,7 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
       const changed = first || d?.generated_at !== S.fl?.generated_at;
       S.fl = d || false;
       if (!changed) return;
-      ["mood", "focus"].forEach(tmRefresh); tmPulse();
+      ["mood", "focus", "trk"].forEach(tmRefresh); tmPulse();
       if (S.tmSel && document.getElementById("tmsec") && (first || tmTab("sec", "DES") !== "DES")) tmSecRender();
       else { const h = document.querySelector("#tmsec .glance"); if (h && S.tmSel) h.outerHTML = tmGlance(S.tmSel); }
     });
@@ -7837,6 +7842,23 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
     }).join("") : `<p class="empty2">${show === "focus" ? "Nothing scores high enough right now. No trade is a fine trade; tap “+ Watch” for the next best." : "No alerts match."}</p>`;
     body += `<p class="fine2">Score out of 100: the backtest grade and live record of the strategies behind it, how many different ideas agree, the trend, the market mood, volume, options, dark pool and news, the distance to the “wrong if” level, and earnings risk. The top ${X.max || 8} scoring ${X.min}+ are Focus${pref("tmFocShow", "watch") !== "focus" ? `, the next ${X.counts.watch} Watch` : ""}. It sorts setups to look at; it doesn't predict them. New Focus alerts also go to the ntfy channel ending in <b>-focus</b>. ${esc(tmUpd(F))}.</p>`;
     return tmPanel("p-focus", "FOCUS", "Focus alerts", ["#alerts", "All alerts"], body, `<small>${X.counts.focus} focus · ${X.counts.watch} watch</small>`);
+  };
+
+  // TRK: every Focus/Watch/filtered setup logged when first seen, graded later against the S&P 500
+  TM_R.trk = () => {
+    const F = S.market === "stocks" ? tmLoadFlow() : null, K = F?.track;
+    if (!K) return tmPanel("p-trk", "TRK", "Does Focus work?", null, `<p class="empty2">${S.market !== "stocks" ? "Focus tracking is for stocks." : F === false || F?.generated_at ? "The log starts with the next update." : "Loading…"}</p>`);
+    const h = pref("tmTrkH", "5"), G = K.groups, n = x => x?.["n" + h] ?? 0;
+    const cell = (g, k) => g?.[k + h] == null ? `<span class="dim">–</span>` : k === "avg" || k === "worst" ? tmPct(g[k + h], 2) : g[k + h] + "%";
+    const row = (lbl, g, cls = "") => `<div class="tr tk3 ${cls}"><span>${lbl}</span><span class="r">${g?.n ?? 0}<small class="dim"> / ${n(g)}</small></span><span class="r">${cell(g, "avg")}</span><span class="r">${cell(g, "hit")}</span><span class="r">${cell(g, "worst")}</span><span class="r">${cell(g, "stop")}</span></div>`;
+    const V = v => !v ? "" : v.v === "early" ? `<b class="dim">Too early</b>: needs ${v.need} more graded Focus setups.` : v.v === "helping" ? `<b class="up">Helping</b>: Focus beats by ${tmPct(v.diff, 2)} (t = ${v.t}).` : v.v === "hurting" ? `<b class="down">Hurting</b>: Focus trails by ${tmPct(v.diff, 2)} (t = ${v.t}).` : `<b>No clear difference yet</b> (${tmPct(v.diff, 2)}, t = ${v.t}).`;
+    let body = `<div class="fopts" style="margin-top:8px"><div class="seg2" role="group" aria-label="Horizon">${[["1", "1 day"], ["5", "5 days"], ["20", "20 days"]].map(([v, l]) => `<button type="button" data-tmtrk="${v}" aria-pressed="${h === v}">${l}</button>`).join("")}</div></div>
+      <div class="tr tk3 th"><span>Group</span><span class="r" title="Logged / graded so far">Seen / graded</span><span class="r">Avg vs S&amp;P</span><span class="r">Right</span><span class="r">Worst</span><span class="r">Stop hit</span></div>
+      ${row(`<b class="t-focus">Focus</b>`, G.focus)}${row(`<b class="t-watch">Watch</b>`, G.watch)}${row("Filtered out", G.noise, "dim2")}${row("All alerts", G.all)}
+      <p class="sub2">By score · if the score works, this should be a staircase</p>${K.by_score.map(b => row(b.label, b)).join("")}
+      <div class="verd"><p>vs all alerts (5 days): ${V(K.vs_all)}</p><p>vs filtered out (5 days): ${V(K.vs_noise)}</p></div>
+      <p class="fine2">Each setup is logged the first time the Terminal scores it, with its tier, score and price frozen at that moment (the same stock and side within a week counts once). Results are the move in the setup's direction minus the S&amp;P 500 over the same days, so a falling market doesn't make every short look smart. “Stop hit” = its “wrong if” level was touched within that many sessions. ${K.rows} setups logged since ${esc(fmtDate(K.since, { day: "numeric", month: "short", year: "numeric" }))}. All from one market so far: check again after conditions change.</p>`;
+    return tmPanel("p-trk", "TRK", "Does Focus work?", null, body, `<small>${K.rows} logged</small>`);
   };
 
   // ticker tabs: FLOW (who's buying), OMON (options), CN (every headline), SIG (every signal)
@@ -8224,7 +8246,7 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
     return `<span>MIL <b>${f("Europe/Rome")}</b></span><span>NY <b>${f("America/New_York")}</b></span><span class="${open ? "open" : "closed"}">● ${st}</span>`;
   }
   function tmHelp() {
-    const pc = [["MOOD", "Market mood & flow"], ["FOCUS", "Focus alerts"], ["MARKET", "Market section"], ["TICKER", "Ticker section"], ["SIGNALS", "Signals section"], ["TOOLS", "Tools section"], ["EQS", "Screener"], ["MOST", "Most active"], ["WEI", "World indices"], ["FUT", "US index futures"], ["FX", "Currencies"], ["VOL", "VIX curve"], ["GC", "US yield curve"], ["WIRP", "Fed & ECB odds"], ["EU", "BTP–Bund spread"],
+    const pc = [["MOOD", "Market mood & flow"], ["FOCUS", "Focus alerts"], ["TRK", "Does Focus work?"], ["MARKET", "Market section"], ["TICKER", "Ticker section"], ["SIGNALS", "Signals section"], ["TOOLS", "Tools section"], ["EQS", "Screener"], ["MOST", "Most active"], ["WEI", "World indices"], ["FUT", "US index futures"], ["FX", "Currencies"], ["VOL", "VIX curve"], ["GC", "US yield curve"], ["WIRP", "Fed & ECB odds"], ["EU", "BTP–Bund spread"],
       ["CTM", "Futures curves"], ["COT", "Positioning (CFTC)"], ["GIP", "Multi-chart"], ["PORT", "Practice portfolio"], ["PXA", "Price alerts"], ["WL", "Watchlists"], ["LAYOUT", "Rearrange panels"]];
     return `<div class="help" id="tmhelp"><p>Type in the command line and press Enter. A ticker on its own loads it. Add a code after a ticker to open a tab or a tool, e.g. <b style="min-width:0">NVDA FA</b> or <b style="min-width:0">AAPL TL</b>. Press <b style="min-width:0">/</b> or just start typing to focus the command line.</p>
       <p style="margin-top:4px"><b style="min-width:0">Panels on this screen</b></p>${pc.map(([c, l]) => `<div><b>${c}</b><span>${esc(l)}</span></div>`).join("")}
@@ -8324,6 +8346,7 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
     let x;
     if ((x = D("[data-tmws]"))) { setPref("tmWs", x.dataset.tmws); history.replaceState(null, "", x.dataset.tmws === "ticker" && S.tmSel ? "#terminal-" + encodeURIComponent(S.tmSel) : "#terminal"); rerender(); scrollTo(0, 0); return true; }
     if ((x = D("[data-tmpages]"))) { S.tmPages = !S.tmPages; rerender(); return true; }
+    if ((x = D("[data-tmtrk]"))) { setPref("tmTrkH", x.dataset.tmtrk); tmRefresh("trk"); return true; }
     if ((x = D("[data-tmfoc]"))) { S.tmFocOpen = S.tmFocOpen === x.dataset.tmfoc ? null : x.dataset.tmfoc; tmRefresh("focus"); return true; }
     if ((x = D("[data-tmfopt]"))) { const [k, v] = x.dataset.tmfopt.split(":"); setPref(k === "side" ? "tmFocSide" : "tmFocShow", v); tmRefresh("focus"); return true; }
     if ((x = D("[data-tmcn]"))) { setPref("tmCnTone", x.dataset.tmcn); tmSecRender(); return true; }

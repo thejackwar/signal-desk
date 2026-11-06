@@ -484,6 +484,104 @@ def build_focus(ctx: dict, alerts: dict, live: dict) -> list[dict]:
     return out
 
 
+# ====================================================================== does Focus work?
+# Every scored setup is logged the FIRST time it appears (frozen: tier, score and price at that moment), then
+# graded like the alert track record: the move 1, 5 and 20 sessions later in the setup's direction, minus the
+# S&P 500 (SPY) over the same time, and how many sessions until its "wrong if" level was touched.
+# Rows: [date, ticker, side, score, tier, price, spy, stop, live, n_strats, x1, x5, x20, stop_days]
+HORIZONS = (1, 5, 20)
+TIERS = ("focus", "watch", "noise")
+
+
+def log_focus(focus: list[dict], log: dict, today: str, spy_px: float | None, px_of) -> int:
+    rows = log.setdefault("rows", [])
+    recent = {(x[1], x[2]): x[0] for x in rows}
+    cut = (date.fromisoformat(today) - timedelta(days=7)).isoformat()   # the same setup within a week = same trade
+    added = 0
+    for g in focus:
+        k = (g["t"], g["side"])
+        if k in recent and recent[k] >= cut:
+            continue
+        px = px_of(g["t"])
+        if not px or not spy_px:
+            continue
+        rows.append([today, g["t"], g["side"], g["score"], g["tier"], r(px), r(spy_px), g.get("stop"),
+                     1 if g["live"] else 0, len(g["strats"]), None, None, None, None])
+        recent[k] = today
+        added += 1
+    log.setdefault("since", today)
+    return added
+
+
+def grade_log(log: dict, daily: dict, spy) -> None:
+    if spy is None:
+        return
+    sc = spy["close"].dropna()
+    sidx = {d.strftime("%Y-%m-%d"): i for i, d in enumerate(sc.index)}
+    for x in log.get("rows", []):
+        df = daily.get(x[1])
+        if df is None or x[0] not in sidx:
+            continue
+        d = df.dropna(subset=["close"])
+        di = {k.strftime("%Y-%m-%d"): i for i, k in enumerate(d.index)}
+        i = di.get(x[0])
+        if i is None:
+            continue
+        c, j = d["close"].values, sidx[x[0]]
+        for k, h in enumerate(HORIZONS):
+            if x[10 + k] is None and i + h < len(c) and j + h < len(sc):
+                stock = (c[i + h] / x[5] - 1) * 100
+                mkt = (sc.iloc[j + h] / x[6] - 1) * 100
+                x[10 + k] = r(x[2] * (stock - mkt), 2)
+        if x[13] is None and x[7]:
+            hi, lo = d["high"].values, d["low"].values
+            for m in range(i + 1, min(i + 21, len(c))):
+                if (x[2] > 0 and lo[m] <= x[7]) or (x[2] < 0 and hi[m] >= x[7]):
+                    x[13] = m - i
+                    break
+
+
+def summarize_log(log: dict) -> dict:
+    rows = log.get("rows", [])
+
+    def stats(rs):
+        out = {"n": len(rs)}
+        for k, h in enumerate(HORIZONS):
+            v = [x[10 + k] for x in rs if x[10 + k] is not None]
+            out[f"n{h}"] = len(v)
+            if v:
+                m = sum(v) / len(v)
+                sd = (sum((a - m) ** 2 for a in v) / (len(v) - 1)) ** .5 if len(v) > 1 else None
+                out[f"avg{h}"], out[f"hit{h}"], out[f"worst{h}"] = r(m), r(sum(a > 0 for a in v) / len(v) * 100, 0), r(min(v))
+                out[f"_m{h}"], out[f"_sd{h}"] = m, sd
+            graded = [x for x in rs if x[10 + k] is not None and x[7]]
+            if graded:
+                out[f"stop{h}"] = r(sum(1 for x in graded if x[13] is not None and x[13] <= h) / len(graded) * 100, 0)
+        return out
+
+    groups = {t: stats([x for x in rows if x[4] == t]) for t in TIERS}
+    groups["all"] = stats(rows)
+    buckets = [("90+", 90, 101), ("75–89", 75, 90), ("60–74", 60, 75), ("under 60", -1, 60)]
+    by_score = [{"label": l, **stats([x for x in rows if lo <= x[3] < hi])} for l, lo, hi in buckets]
+
+    def verdict(a, b, h=5, min_n=30):
+        """Focus vs another group at h sessions: Welch's t on the excess returns."""
+        na, nb = a.get(f"n{h}", 0), b.get(f"n{h}", 0)
+        if na < min_n or nb < min_n or a.get(f"_sd{h}") is None or b.get(f"_sd{h}") is None:
+            return {"v": "early", "need": max(min_n - na, 0)}
+        diff = a[f"_m{h}"] - b[f"_m{h}"]
+        se = (a[f"_sd{h}"] ** 2 / na + b[f"_sd{h}"] ** 2 / nb) ** .5 or 1e-9
+        t = diff / se
+        return {"v": "helping" if t >= 2 else "hurting" if t <= -2 else "unclear", "diff": r(diff), "t": r(t, 1)}
+
+    res = {"since": log.get("since"), "rows": len(rows), "groups": groups, "by_score": by_score,
+           "vs_all": verdict(groups["focus"], groups["all"]), "vs_noise": verdict(groups["focus"], groups["noise"])}
+    for g in [*groups.values(), *by_score]:
+        for k in [k for k in g if k.startswith("_")]:
+            del g[k]
+    return res
+
+
 def notify_focus(focus: list[dict], names: dict, today: str) -> None:
     prefix = os.environ.get("NTFY_PREFIX", "").strip()
     path = DATA / "terminal" / "focus_sent.json"
@@ -663,13 +761,22 @@ def main() -> None:
     raw_n = sum(len(g["ids"]) for g in focus)
     if not args.demo:
         notify_focus(focus, C["names"], today.isoformat())
+    track = None
+    if True:
+        lp = out_dir / "focus_log.json"
+        log = load(lp, {}) or {}
+        spy_px = last(idx.get("SPY"))
+        log_focus(focus, log, today.isoformat(), spy_px, lambda t: (flow.get(t) or {}).get("px"))
+        grade_log(log, daily, idx.get("SPY"))
+        write_json(lp, log)
+        track = summarize_log(log)
     keep = [g for g in focus if g["tier"] != "noise"][:40] + [g for g in focus if g["tier"] == "noise"][:60]
     for g in keep:
         g.pop("ids", None)
 
     res = {"generated_at": now.strftime("%Y-%m-%dT%H:%MZ"), "session": today.isoformat(), "progress": r(prog, 2),
            "demo": bool(args.demo), "mood": mood, "flow": flow, "options": opts, "options_at": options_at,
-           "focus": {"min": FOCUS_MIN, "max": FOCUS_MAX, "watch": WATCH_MIN, "counts": counts, "alerts_in": raw_n,
+           "track": track, "focus": {"min": FOCUS_MIN, "max": FOCUS_MAX, "watch": WATCH_MIN, "counts": counts, "alerts_in": raw_n,
                      "sessions": LOOKBACK, "items": keep}}
     write_json(out_dir / "flow.json", res)
     write_json(out_dir / "flow_hist.json", hist)
