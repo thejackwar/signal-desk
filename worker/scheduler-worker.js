@@ -17,6 +17,8 @@ const SCHEDULE = [
   ["maxpain.yml",          "20 13 * * 1-5",        "Max pain (backup, in case the gamma levels didn't run)"],
   ["gamma-setup.yml",      "1-59/5 13-21 * * 1-5", "Gamma rejection setup: every 5 min while the US market is open", { job: "live" }],
   ["session-momentum.yml", "2-59/5 13-21 * * 1-5", "Session Momentum (QQQ first 5-min candle): every 5 min while the US market is open", { job: "live" }],
+  ["choch.yml",            "37 17,18 * * 1-5",     "4H CHoCH stocks: after the 09:30-13:30 candle", { job: "stocks" }],
+  ["choch.yml",            "7 20,21 * * 1-5",      "4H CHoCH stocks: after the 13:30-16:00 candle", { job: "stocks" }],
   ["topdown.yml",          "2,32 13-21 * * 1-5",   "Top-Down alerts: every 30 min while the US market is open"],
   ["live-stocks.yml",      "5,35 13-20 * * 1-5",   "Live stock scan (provisional): every 30 min while the US market is open"],
   ["darkpool-blocks.yml",  "6,36 13-21 * * 1-5",   "Dark pool block prints: every 30 min while the US market is open"],
@@ -32,6 +34,7 @@ const SCHEDULE = [
   ["crypto.yml",           "20 0 * * *",           "Daily crypto scan"],
   ["live-crypto.yml",      "25 3-23/4 * * *",      "Live crypto scan (provisional): every 4 hours"],
   ["topdown-crypto.yml",   "7,37 * * * *",         "Top-Down crypto alerts: every 30 min, every day"],
+  ["choch.yml",            "7 */4 * * *",          "4H CHoCH bitcoin: after every 4H candle", { job: "btc" }],
   ["btc-dip-forward.yml",  "7 * * * *",            "BTC dip forward test: every hour"],
   ["liquidations.yml",     "40 */4 * * *",         "BTC liquidation heatmap: every 4 hours"],
   // news and calendar
@@ -48,6 +51,7 @@ const SCHEDULE = [
   ["pairs.yml",            "45 6 * * 6",           "Pairs trading (Saturday)"],
   ["gamma-setup.yml",      "15 7 * * 6",           "Gamma setup backtest (Saturday)", { job: "backtest" }],
   ["session-momentum.yml", "35 7 * * 6",           "Session Momentum backtest (Saturday)", { job: "backtest" }],
+  ["choch.yml",            "55 7 * * 6",           "4H CHoCH backtest (Saturday)", { job: "backtest" }],
   ["research.yml",         "30 7 1 * *",           "Research engine (first day of each month)"],
 ];
 

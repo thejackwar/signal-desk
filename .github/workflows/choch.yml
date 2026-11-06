@@ -1,0 +1,70 @@
+name: 4H CHoCH
+
+# engine/choch.py
+#  - live stocks: after each 4H candle of the US session closes (13:30 and 16:00 New York; the wide hours
+#    cover summer and winter time, extra runs change nothing). Paper trades in docs/data/choch/live.json,
+#    phone alerts on the ntfy topic <NTFY_PREFIX>-choch.
+#  - live bitcoin: 7 minutes after every 4H candle (UTC), every day. ntfy topic <NTFY_PREFIX>-crypto-choch.
+#  - backtest: S&P 100 and bitcoin since 2021, every setting, every Saturday and when the engine changes.
+#    Started on time by the scheduler Worker (worker/README.md); GitHub's own timer is the backup.
+on:
+  schedule:
+    - cron: "37 17,18 * * 1-5"       # live stocks, after the 09:30-13:30 candle
+    - cron: "7 20,21 * * 1-5"        # live stocks, after the 13:30-16:00 candle
+    - cron: "7 */4 * * *"            # live bitcoin
+    - cron: "55 7 * * 6"             # backtest, Saturday 07:55 UTC
+  push:
+    branches: [main]
+    paths: ["engine/choch.py"]
+  workflow_dispatch:
+    inputs:
+      job:
+        description: "What to run"
+        type: choice
+        options: [backtest, stocks, btc]
+        default: backtest
+
+permissions:
+  contents: write
+
+concurrency:
+  group: choch
+  cancel-in-progress: false
+
+jobs:
+  run:
+    if: github.event_name != 'schedule' || vars.EXTERNAL_SCHEDULER != 'on'   # the scheduler Worker starts it on time instead (worker/README.md)
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Live stocks
+        if: github.event.schedule == '37 17,18 * * 1-5' || github.event.schedule == '7 20,21 * * 1-5' || (github.event_name == 'workflow_dispatch' && inputs.job == 'stocks')
+        env:
+          ALPACA_KEY_ID: ${{ secrets.ALPACA_KEY_ID }}
+          ALPACA_SECRET_KEY: ${{ secrets.ALPACA_SECRET_KEY }}
+          NTFY_PREFIX: ${{ vars.NTFY_PREFIX }}
+        run: python engine/choch.py --live stocks
+      - name: Live bitcoin
+        if: github.event.schedule == '7 */4 * * *' || (github.event_name == 'workflow_dispatch' && inputs.job == 'btc')
+        env:
+          NTFY_PREFIX: ${{ vars.NTFY_PREFIX }}
+        run: python engine/choch.py --live btc
+      - name: Backtest
+        if: github.event.schedule == '55 7 * * 6' || github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.job == 'backtest')
+        env:
+          ALPACA_KEY_ID: ${{ secrets.ALPACA_KEY_ID }}
+          ALPACA_SECRET_KEY: ${{ secrets.ALPACA_SECRET_KEY }}
+        run: python engine/choch.py --backtest
+      - name: Publish
+        run: |
+          git config user.name "signal-desk-bot"
+          git config user.email "signal-desk-bot@users.noreply.github.com"
+          mkdir -p docs/data/choch
+          git add docs/data/choch
+          git diff --cached --quiet && exit 0
+          git commit -m "4H CHoCH $(date -u +%F\ %H:%M)"
+          for i in 1 2 3; do git pull --rebase && git push && break; sleep 5; done

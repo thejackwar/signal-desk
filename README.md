@@ -63,6 +63,11 @@ docs/                    the website (served by GitHub Pages)
                          every session since 2020 as a green/red tile, each setting tested, live paper trades
   data/session/          backtest.json (Saturdays) and live.json (every 5 min in market hours), engine/session_momentum.py
                          (.github/workflows/session-momentum.yml); ntfy topic <NTFY_PREFIX>-session
+  choch.html             4H CHoCH (Smart Money change of character): a close through the last lower high on 4-hour candles,
+                         entry on the retest of the fair value gap / order block, stop under the low, 2R target. S&P 100
+                         and bitcoin since 2021, 216 settings each, in / out of sample (2024+), live paper trades from
+                         9 Nov 2026. engine/choch.py (.github/workflows/choch.yml), data/choch/; test: tests/choch/test_rules.py;
+                         ntfy topics <NTFY_PREFIX>-choch and <NTFY_PREFIX>-crypto-choch
 worker/                  Cloudflare Workers: trendlines data, counted broker links (see worker/README.md)
 engine/
   strategies.py          the strategy detectors (shared by scanner and examples)

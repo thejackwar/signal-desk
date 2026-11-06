@@ -1,0 +1,364 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0b0f14">
+<title>4H Change of Character</title>
+<meta name="description" content="4H Change of Character (CHoCH): a Smart Money Concepts reversal setup on 4-hour candles, backtested since 2021 on the S&amp;P 100 and bitcoin with every setting, in and out of sample, plus live paper trades. Free, information only.">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Investment Center Signals">
+<meta property="og:title" content="4H Change of Character, backtested and tracked live | Investment Center Signals">
+<meta property="og:description" content="A 4-hour CHoCH reversal setup tested on the S&amp;P 100 and bitcoin since 2021, every setting side by side, plus live paper trades.">
+<meta property="og:url" content="https://thejackwar.github.io/signal-desk/choch.html">
+<meta property="og:image" content="https://thejackwar.github.io/signal-desk/og-image.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="canonical" href="https://thejackwar.github.io/signal-desk/choch.html">
+<script>
+(() => {
+  const CF_ANALYTICS_TOKEN = "a2d6810a28f64b999832485d1635915a";
+  if (!CF_ANALYTICS_TOKEN || location.hostname === "localhost") return;
+  const s = document.createElement("script");
+  s.defer = true; s.src = "https://static.cloudflareinsights.com/beacon.min.js";
+  s.dataset.cfBeacon = JSON.stringify({ token: CF_ANALYTICS_TOKEN });
+  document.head.appendChild(s);
+})();
+</script>
+<script src="sections.js?v=1" defer></script>
+<link rel="icon" href="favicon.ico?v=2" sizes="any">
+<link rel="icon" type="image/svg+xml" href="logo.svg?v=2">
+<link rel="apple-touch-icon" href="icon-180.png?v=2">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+:root {
+  --bg: #0b0f14; --panel: #0e141c; --panel-2: #121a24; --line: #1e2834; --line-2: #2a3644;
+  --fg: #e8eef4; --muted: #9aa7b4; --faint: #6b7886;
+  --up: #2fd6a0; --up-2: #1c8f6b; --down: #f0566a; --down-2: #9c3443; --none: #18212c;
+  --blue: #6cb4ff; --blue-bg: rgba(108,180,255,.12);
+  --font: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body { background: radial-gradient(1200px 600px at 50% -200px, #132033 0%, var(--bg) 60%) no-repeat, var(--bg); color: var(--fg);
+  font: 16px/1.5 var(--font); -webkit-font-smoothing: antialiased; font-feature-settings: "tnum"; padding-bottom: calc(40px + env(safe-area-inset-bottom, 0px)); }
+a { color: var(--blue); text-decoration: none; }
+a:hover { text-decoration: underline; }
+.wrap { max-width: 920px; margin: 0 auto; padding: 0 22px; }
+@media (max-width: 560px) { .wrap { padding: 0 16px; } }
+
+.bar { position: sticky; top: 0; z-index: 20; background: rgba(11,15,20,.86); backdrop-filter: saturate(180%) blur(20px); -webkit-backdrop-filter: saturate(180%) blur(20px);
+  border-bottom: 1px solid var(--line); padding-top: env(safe-area-inset-top, 0px); }
+.bar-in { max-width: 920px; margin: 0 auto; padding: 0 22px; height: 48px; display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; }
+.back { font-size: 14px; }
+.bar-title { font-size: 15px; font-weight: 600; }
+
+.k { font: 500 11px/1.3 var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.k.blue { color: var(--blue); }
+.live-dot { display: inline-flex; align-items: center; gap: 6px; }
+.live-dot::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--blue); box-shadow: 0 0 0 0 rgba(108,180,255,.6); animation: pulse 2s infinite; }
+@keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(108,180,255,.55); } 70% { box-shadow: 0 0 0 7px rgba(108,180,255,0); } 100% { box-shadow: 0 0 0 0 rgba(108,180,255,0); } }
+@media (prefers-reduced-motion: reduce) { .live-dot::before { animation: none; } }
+
+.hero { padding: 44px 0 18px; }
+.hero h1 { font-size: clamp(36px, 7vw, 56px); line-height: 1.04; letter-spacing: -.035em; margin: 10px 0 12px; font-weight: 700; }
+.hero p.lede { color: var(--muted); font-size: 18px; max-width: 640px; margin: 0; }
+.big { display: flex; flex-wrap: wrap; gap: 10px 36px; align-items: flex-end; margin: 28px 0 6px; }
+.big .n { font: 600 clamp(48px, 11vw, 84px)/1 var(--font); letter-spacing: -.04em; }
+.big .n.up { color: var(--fg); } .big .n.down { color: var(--down); }
+.big .sub { display: grid; gap: 4px; padding-bottom: 8px; }
+.big .sub b { font: 500 15px var(--mono); }
+.fine { color: var(--faint); font-size: 13px; }
+
+.panel { background: linear-gradient(180deg, var(--panel-2), var(--panel)); border: 1px solid var(--line); border-radius: 4px; padding: 14px 16px 12px; margin: 14px 0; }
+.ph { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 10px; }
+.pf { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-top: 10px; flex-wrap: wrap; }
+
+/* chart */
+svg.chart { display: block; width: 100%; height: auto; }
+.tag { font: 600 9px var(--mono); letter-spacing: .06em; }
+
+/* the tile wall */
+.wall { display: grid; gap: 6px; }
+.yr { display: grid; grid-template-columns: 38px 1fr; gap: 8px; align-items: start; }
+.yr > span { font: 500 11px/10px var(--mono); color: var(--faint); padding-top: 1px; }
+.tiles { display: flex; flex-wrap: wrap; gap: 2px; }
+.t { width: 9px; height: 9px; border-radius: 1px; background: var(--none); border: 0; padding: 0; cursor: pointer; }
+.t.u { background: var(--up-2); } .t.u.s { background: var(--up); }
+.t.d { background: var(--down-2); } .t.d.s { background: var(--down); }
+.t.lv { outline: 1px solid var(--blue); outline-offset: 0; }
+.t.on { outline: 2px solid var(--fg); outline-offset: 1px; }
+@media (min-width: 700px) { .t { width: 11px; height: 11px; } .yr > span { line-height: 12px; } }
+.track { display: flex; gap: 2px; margin-top: 10px; overflow: hidden; }
+.track i { flex: 1; height: 3px; background: var(--line); }
+.track i.f { background: var(--blue); }
+.readout { min-height: 22px; margin-top: 10px; font: 500 12.5px var(--mono); color: var(--muted); }
+.readout b.up { color: var(--up); } .readout b.down { color: var(--down); }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 14px; font: 500 11px var(--mono); color: var(--faint); }
+.legend i { display: inline-block; width: 9px; height: 9px; border-radius: 1px; margin-right: 6px; vertical-align: -1px; }
+
+/* trade activity */
+.sess { display: flex; gap: 5px; flex-wrap: nowrap; overflow: hidden; }
+.sess i { flex: 1; min-width: 0; max-width: 22px; aspect-ratio: 1; border: 1px solid var(--line-2); border-radius: 2px; }
+.sess i.u { background: var(--up-2); border-color: var(--up-2); } .sess i.d { background: var(--down-2); border-color: var(--down-2); }
+.sess i.today { background: #1d4f86; border-color: var(--blue); }
+
+/* controls */
+.ctl { display: grid; gap: 10px; margin: 4px 0 12px; }
+.row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+.row > .k { min-width: 108px; }
+.seg { display: inline-flex; flex-wrap: wrap; gap: 2px; background: #0a1017; border: 1px solid var(--line); border-radius: 6px; padding: 2px; }
+.seg button { font: 500 12.5px var(--font); color: var(--muted); background: none; border: 0; border-radius: 4px; padding: 6px 10px; cursor: pointer; }
+.seg button[aria-pressed="true"] { background: var(--blue-bg); color: var(--fg); box-shadow: inset 0 0 0 1px rgba(108,180,255,.35); }
+
+/* steps */
+.steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 10px; margin: 10px 0; }
+.step { border: 1px solid var(--line); border-radius: 4px; padding: 14px; background: var(--panel); }
+.step h3 { margin: 6px 0 4px; font-size: 17px; letter-spacing: -.01em; }
+.step p { margin: 0; color: var(--muted); font-size: 14px; }
+.step h3 .g { color: var(--up); } .step h3 .r { color: var(--down); }
+
+h2 { font-size: 26px; letter-spacing: -.02em; margin: 44px 0 6px; }
+h2 + p { color: var(--muted); margin: 0 0 8px; }
+.tw { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+table { width: 100%; border-collapse: collapse; font-size: 14px; }
+th, td { padding: 8px 8px; text-align: right; border-bottom: 1px solid var(--line); white-space: nowrap; }
+th { font: 500 11px var(--mono); letter-spacing: .06em; text-transform: uppercase; color: var(--faint); }
+th:first-child, td:first-child { text-align: left; }
+td.up { color: var(--up); } td.down { color: var(--down); }
+.cmp { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; }
+.cmp > div { border: 1px solid var(--line); border-radius: 4px; padding: 14px; background: var(--panel); }
+.cmp b { display: block; font: 600 26px var(--font); letter-spacing: -.02em; margin-top: 4px; }
+.cmp small { color: var(--muted); }
+.note { border-left: 2px solid var(--blue); padding: 4px 0 4px 14px; color: var(--muted); margin: 16px 0; font-size: 15px; }
+.empty { padding: 26px 0; text-align: center; color: var(--muted); }
+footer { margin-top: 48px; border-top: 1px solid var(--line); padding-top: 16px; }
+.mkt { display: flex; gap: 8px; margin: 18px 0 0; }
+.zone-lg { display: inline-block; width: 12px; height: 9px; background: rgba(108,180,255,.18); border: 1px solid rgba(108,180,255,.5); vertical-align: -1px; margin-right: 6px; }
+td.sel, tr.sel td { background: var(--blue-bg); }
+.pill { font: 600 10px var(--mono); letter-spacing: .05em; padding: 2px 6px; border-radius: 3px; border: 1px solid var(--line-2); color: var(--muted); }
+.pill.oos { color: var(--blue); border-color: rgba(108,180,255,.4); }
+</style>
+</head>
+<body>
+<nav class="bar" aria-label="Page">
+  <div class="bar-in">
+    <a class="back" href="index.html#strategylab" aria-label="Back to the Strategy Lab">‹ Strategies</a>
+    <span class="bar-title">4H CHoCH</span>
+    <span></span>
+  </div>
+</nav>
+
+<main class="wrap">
+  <section class="hero">
+    <span class="k">S&amp;P 100 · Bitcoin · 4-hour · Smart Money Concepts</span>
+    <h1>When the trend changes character.</h1>
+    <p class="lede">In a downtrend, a 4-hour close above the last lower high is the first sign it may be turning. Wait for price to come back into the gap it left behind, buy there, stop under the low, aim for twice the risk.</p>
+    <div class="mkt" id="mkt"></div>
+    <div class="big" id="big"></div>
+    <p class="fine" id="bigfine"></p>
+  </section>
+
+  <div class="panel">
+    <div class="ph"><span class="k">Settings</span><span class="k" id="setk"></span></div>
+    <div class="ctl" id="ctl"></div>
+  </div>
+
+  <div class="panel">
+    <div class="ph"><span class="k" id="eq-title">Account, month by month</span><span class="k blue">Backtest</span></div>
+    <div id="eq"></div>
+    <div class="legend" style="margin-top:8px"><span><i style="background:var(--up)"></i>Month up</span><span><i style="background:var(--down)"></i>Month down</span><span><i style="background:none;border-top:1px dashed var(--muted);height:0;width:14px;border-radius:0"></i><span id="hold-lg">Holding</span></span></div>
+  </div>
+
+  <h2>In sample vs out of sample</h2>
+  <p>The rules were set before looking at 2024 onward. If a setting only works on 2021–2023, it was luck.</p>
+  <div class="tw"><table id="split"></table></div>
+
+  <h2>A recent trade</h2>
+  <p id="ex-p">The selected market's latest closed trade with the default settings.</p>
+  <div class="panel"><div id="ex"></div>
+    <div class="legend" style="margin-top:8px"><span><span class="zone-lg"></span>Entry zone (FVG or order block)</span><span><i style="background:none;border-top:1px dashed var(--blue);height:0;width:14px;border-radius:0"></i>Broken swing (CHoCH)</span><span><i style="background:none;border-top:1px dashed var(--down);height:0;width:14px;border-radius:0"></i>Stop</span><span><i style="background:none;border-top:1px dashed var(--up);height:0;width:14px;border-radius:0"></i>Target</span></div>
+    <div class="row" id="ex-nav" style="margin-top:10px"></div>
+  </div>
+
+  <h2>By year</h2>
+  <p>Average result per trade, in R (1R = what the stop risks). Above 0 = the year made money before tax.</p>
+  <div class="tw"><table id="yrs"></table></div>
+
+  <h2>Every setting we tested</h2>
+  <p id="vars-p">216 combinations per market. Sorted by the out-of-sample result; tap a row to load it.</p>
+  <div class="row" style="margin:6px 0 8px" id="vsort"></div>
+  <div class="tw"><table id="vars"></table></div>
+  <p class="note" id="vars-note"></p>
+
+  <h2>The rules</h2>
+  <p>Exactly what the engine does on every finished 4-hour candle.</p>
+  <div class="steps">
+    <div class="step"><span class="k">1 · Structure</span><h3>Find the swings</h3><p>A swing high is a 4H candle higher than the 3 before and after it (pivot length). Lower highs and lower lows = downtrend.</p></div>
+    <div class="step"><span class="k">2 · Change of character</span><h3>Close above the last lower high</h3><p>A body close, not a wick. A break with the trend (BOS) is ignored; only the first break against it counts.</p></div>
+    <div class="step"><span class="k">3 · Entry</span><h3>Buy the <span class="g">retest</span></h3><p>Limit order in the middle of the fair value gap the move left (or the last red candle at the low). Valid for 10 candles.</p></div>
+    <div class="step"><span class="k">4 · Exit</span><h3>Stop under the low, target 2R</h3><p>Stop just below the low before the break. Target twice the risk. Out after 60 candles at the latest.</p></div>
+  </div>
+
+  <h2>Live paper trades</h2>
+  <p id="live-p">From Monday 9 November 2026, default settings, €1,000 a trade. Closed trades are never changed.</p>
+  <div id="pend"></div>
+  <div class="tw"><table id="lt"></table></div>
+
+  <footer>
+    <p class="fine" id="foot">Stocks: today's S&amp;P 100 members (so the companies that dropped out are missing, which flatters any long strategy), 4H candles built from Alpaca 30-minute bars of the regular session: 09:30–13:30 and 13:30–16:00 New York, so the second candle is only 2.5 hours and overnight gaps fall between candles. Costs 0.05% a side. Account: €100,000, each trade risks 0.5% of it, at most 20% in one stock, no leverage. Bitcoin: OKX BTC-USDT 4H candles, round the clock, costs 0.10% a side, the whole account in each trade. Stops are assumed to fill at their price (or the open after a gap). No tax. Backtests are not a promise of future results. For information only. Not investment advice.</p>
+  </footer>
+</main>
+
+<script>
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const pc = (v, d = 1) => v == null ? "–" : (v > 0 ? "+" : v < 0 ? "−" : "") + Math.abs(v).toFixed(d) + "%";
+const rr = (v, d = 2) => v == null ? "–" : (v > 0 ? "+" : v < 0 ? "−" : "") + Math.abs(v).toFixed(d) + "R";
+const tone = v => v > 0 ? "up" : v < 0 ? "down" : "";
+const fmtD = (d, o = { day: "numeric", month: "short", year: "numeric" }) => new Date(d.slice(0, 10) + "T12:00:00Z").toLocaleDateString("en-GB", { timeZone: "UTC", ...o });
+const OPTS = {
+  pivot: [["2", "2"], ["3", "3"], ["5", "5"]],
+  entry: [["close", "CHoCH close"], ["retest", "Retest of the zone"], ["reject", "Retest + green close"]],
+  target: [["2r", "2R"], ["swing", "Next swing"], ["trail", "Trail swings"]],
+  side: [["long", "Long only"], ["both", "Long + short"]],
+  filter: [["none", "None"], ["trend", "200-day trend"], ["vol", "Volume"], ["trend+vol", "Both"]],
+};
+const LABEL = { pivot: "Pivot length", entry: "Entry", target: "Target", side: "Trades", filter: "Filter" };
+const WHY = { target: "target", stop: "stop", trail: "trailing stop", time: "60-candle time stop" };
+const MKT = { stocks: ["S&P 100", "SPY"], btc: ["Bitcoin", "bitcoin"] };
+let B = null, LV = null, EX = 0, SORT = "oos";
+const S = (() => { try { return JSON.parse(localStorage.getItem("choch4h") || "{}"); } catch { return {}; } })();
+S.m ||= "stocks";
+const save = () => { try { localStorage.setItem("choch4h", JSON.stringify(S)); } catch {} };
+const key = () => [S.pivot, S.entry, S.target, S.side, S.filter].join("|");
+const M = () => B.markets[S.m];
+async function load(p) { try { const r = await fetch(p + "?t=" + Date.now()); return r.ok ? r.json() : null; } catch { return null; } }
+const seg = (name, val, opts) => `<div class="seg" role="group">${opts.map(([v, l]) => `<button type="button" data-${name}="${v}" aria-pressed="${v === val}">${esc(l)}</button>`).join("")}</div>`;
+
+function controls() {
+  $("mkt").innerHTML = seg("m", S.m, [["stocks", "S&P 100 stocks"], ["btc", "Bitcoin"]]);
+  $("ctl").innerHTML = Object.keys(OPTS).map(k => `<div class="row"><span class="k">${LABEL[k]}</span>${seg(k, S[k], OPTS[k])}</div>`).join("");
+  $("setk").innerHTML = key() === B.default ? `<span class="pill">Default</span>` : `<a href="#" id="reset">Back to default</a>`;
+  const r = $("reset"); if (r) r.onclick = e => { e.preventDefault(); setKey(B.default); };
+}
+function setKey(k) { [S.pivot, S.entry, S.target, S.side, S.filter] = k.split("|"); save(); render(); }
+
+function headline() {
+  const V = M().variants[key()], A = V.account, all = V.all;
+  $("big").innerHTML = `<div class="n ${tone(A.total_pct)}">${pc(A.total_pct, 0)}</div>
+    <div class="sub"><span class="k">${esc(fmtD(M().from, { month: "short", year: "numeric" }))} – ${esc(fmtD(M().to, { month: "short", year: "numeric" }))} · ${esc(MKT[S.m][0])} · backtest</span>
+      <b>${all.trades ? `${all.trades.toLocaleString("en")} trades · ${Math.round(all.win_rate * 100)}% won · ${rr(all.avg_r)} a trade` : "no trades"} · max drop ${pc(A.max_dd_pct, 0)}</b>
+      <span class="k">${esc(MKT[S.m][1])} held: ${pc(M().hold_pct, 0)}${M().hold_same_pct != null ? ` · same stocks held: ${pc(M().hold_same_pct, 0)}` : ""}</span></div>`;
+  $("bigfine").textContent = `${S.m === "stocks" ? "€100,000 account, 0.5% risk a trade, no leverage" + (A.skipped_no_cash ? `; ${A.skipped_no_cash} signals skipped with the money already in use` : "") : "The whole account in each trade, no leverage"}. ${B.demo ? "DEMO DATA, not real prices." : ""}`;
+}
+
+// candles from a monthly account curve: open = last month's end, close = this month's end
+function equity() {
+  const V = M().variants[key()], cv = V.curve, hold = M().hold_curve || [];
+  if (!cv) { $("eq").innerHTML = `<div class="empty">The month-by-month curve is kept for the default settings only. <a href="#" onclick="setKey(B.default);return false">Show the default</a></div>`; $("eq-title").textContent = "Account, month by month"; return; }
+  $("eq-title").textContent = `Account, month by month · ${MKT[S.m][0]}`;
+  $("hold-lg").textContent = `Holding ${MKT[S.m][1]}`;
+  const months = [...new Set([...cv.map(p => p[0]), ...hold.map(p => p[0])])].sort();
+  const cm = Object.fromEntries(cv), hm = Object.fromEntries(hold);
+  let last = 1, lastH = null; const C = [], H = [];
+  for (const m of months) { const v = cm[m] ?? last; C.push([last, v]); last = v; lastH = hm[m] ?? lastH; H.push(lastH); }
+  const W = 720, Ht = 220, pl = 6, pr = 52, pt = 10, pb = 20, n = months.length;
+  const vals = [...C.flat(), ...H.filter(v => v != null)];
+  let lo = Math.min(...vals), hi = Math.max(...vals); const pad = (hi - lo) * .06 || .05; lo -= pad; hi += pad;
+  const x = i => pl + (i + .5) * (W - pl - pr) / n, y = v => pt + (hi - v) / (hi - lo) * (Ht - pt - pb), cw = Math.max(1.5, (W - pl - pr) / n * .7);
+  let g = `<line x1="${pl}" x2="${W - pr}" y1="${y(1)}" y2="${y(1)}" stroke="#2a3644" stroke-dasharray="2 3"/>`;
+  const hp = H.map((v, i) => v == null ? null : `${x(i)},${y(v)}`).filter(Boolean).join(" ");
+  if (hp) g += `<polyline points="${hp}" fill="none" stroke="var(--muted)" stroke-width="1" stroke-dasharray="3 3" opacity=".7"/>`;
+  C.forEach(([o, c], i) => { const col = c >= o ? "var(--up)" : "var(--down)"; g += `<rect x="${x(i) - cw / 2}" y="${y(Math.max(o, c))}" width="${cw}" height="${Math.max(1, Math.abs(y(o) - y(c)))}" fill="${col}"/>`; });
+  months.forEach((m, i) => { if (m.endsWith("-01")) g += `<text x="${x(i)}" y="${Ht - 5}" fill="#6b7886" font-size="10" font-family="var(--mono)" text-anchor="middle">${m.slice(0, 4)}</text>`; });
+  const lab = (v, t, c) => `<text x="${W - pr + 4}" y="${y(v) + 3}" fill="${c}" font-size="10" font-family="var(--mono)">${t}</text>`;
+  g += lab(C[C.length - 1][1], pc((C[C.length - 1][1] - 1) * 100, 0), "var(--fg)");
+  if (H[H.length - 1] != null) g += lab(H[H.length - 1], pc((H[H.length - 1] - 1) * 100, 0), "var(--muted)");
+  $("eq").innerHTML = `<svg class="chart" viewBox="0 0 ${W} ${Ht}" role="img" aria-label="Monthly account candles against holding">${g}</svg>`;
+}
+
+function split() {
+  const V = M().variants[key()], r = (lab, s, extra = "") => `<tr><td>${lab} ${extra}</td><td>${s.trades || 0}</td><td>${s.trades ? s.per_year : "–"}</td><td>${s.trades ? Math.round(s.win_rate * 100) + "%" : "–"}</td><td class="${tone(s.avg_r)}">${rr(s.avg_r)}</td><td class="${tone(s.total_r)}">${s.trades ? (s.total_r > 0 ? "+" : "") + s.total_r + "R" : "–"}</td><td>${s.profit_factor ?? "–"}</td><td>${s.trades ? s.avg_hold : "–"}</td></tr>`;
+  $("split").innerHTML = `<thead><tr><th>Period</th><th>Trades</th><th>A year</th><th>Won</th><th>Avg</th><th>Total</th><th>Profit factor</th><th>Candles held</th></tr></thead><tbody>` +
+    r(`2021–2023`, V.is) + r(`2024–${M().to.slice(0, 4)}`, V.oos, `<span class="pill oos">Out of sample</span>`) + r("All", V.all) + `</tbody>`;
+}
+
+function years() {
+  const V = M().variants[key()], hy = M().hold_by_year || {};
+  const ys = Object.keys(V.by_year);
+  $("yrs").innerHTML = `<thead><tr><th>Year</th><th>Avg a trade</th><th>${esc(MKT[S.m][1])} held</th></tr></thead><tbody>` +
+    ys.map(y => `<tr><td>${y}${y >= B.oos_from.slice(0, 4) ? ` <span class="pill oos">OOS</span>` : ""}</td><td class="${tone(V.by_year[y])}">${rr(V.by_year[y])}</td><td class="${tone(hy[y])}">${pc(hy[y])}</td></tr>`).join("") + `</tbody>`;
+}
+
+function variants() {
+  $("vsort").innerHTML = `<span class="k">Sort by</span>` + seg("sort", SORT, [["oos", "Out of sample"], ["all", "Whole period"], ["acc", "Account"]]);
+  const val = ([, v]) => SORT === "acc" ? v.account.total_pct : SORT === "all" ? (v.all.trades >= 20 ? v.all.avg_r : -9) : (v.oos.trades >= 10 ? v.oos.avg_r : -9);
+  const all = Object.entries(M().variants).filter(([k]) => k.split("|")[3] === S.side);
+  const rows = all.sort((a, b) => val(b) - val(a));
+  const top = rows.slice(0, 20); if (!top.find(([k]) => k === key())) top.push(rows.find(([k]) => k === key()));
+  const name = k => { const [p, e, t, , f] = k.split("|"); return `P${p} · ${OPTS.entry.find(o => o[0] === e)[1]} · ${OPTS.target.find(o => o[0] === t)[1]} · ${OPTS.filter.find(o => o[0] === f)[1]}`; };
+  $("vars").innerHTML = `<thead><tr><th>Setting (tap to load)</th><th>Trades</th><th>Won</th><th>Avg</th><th>2024+ avg</th><th>Account</th><th>Max drop</th></tr></thead><tbody>` +
+    top.filter(Boolean).map(([k, v]) => `<tr data-k="${k}" class="${k === key() ? "sel" : ""}" style="cursor:pointer${k === B.default ? ";font-weight:600" : ""}"><td>${esc(name(k))}${k === B.default ? " ★" : ""}</td><td>${v.all.trades || 0}</td><td>${v.all.trades ? Math.round(v.all.win_rate * 100) + "%" : "–"}</td><td class="${tone(v.all.avg_r)}">${rr(v.all.avg_r)}</td><td class="${tone(v.oos.avg_r)}">${rr(v.oos.avg_r)}</td><td class="${tone(v.account.total_pct)}">${pc(v.account.total_pct, 0)}</td><td>${pc(v.account.max_dd_pct, 0)}</td></tr>`).join("") + `</tbody>`;
+  $("vars").onclick = e => { const r = e.target.closest("tr[data-k]"); if (r) { setKey(r.dataset.k); scrollTo({ top: 0, behavior: "smooth" }); } };
+  const pos = rows.filter(([, v]) => v.oos.trades >= 10 && v.oos.avg_r > 0).length, tested = rows.filter(([, v]) => v.oos.trades >= 10).length;
+  const beat = rows.filter(([, v]) => v.account.total_pct > (M().hold_pct ?? 0)).length;
+  $("vars-note").innerHTML = `${pos} of ${tested} settings (${S.side === "long" ? "long only" : "long + short"}, with at least 10 trades) made money per trade out of sample; ${beat} of ${rows.length} grew the account more than holding ${esc(MKT[S.m][1])}. With this many settings some will look good by chance: trust a setting that is good in both periods and whose neighbours (one notch different) are good too, not the single best row. ★ = default, chosen before the test.`;
+}
+
+function exChart() {
+  const exs = M().examples || [];
+  if (!exs.length) { $("ex").innerHTML = `<div class="empty">No closed trade yet.</div>`; $("ex-nav").innerHTML = ""; return; }
+  EX = Math.min(EX, exs.length - 1);
+  const E = exs[EX], bars = E.bars, n = bars.length;
+  const W = 720, H = 260, pl = 6, pr = 64, pt = 12, pb = 20;
+  let lo = Infinity, hi = -Infinity;
+  for (const b of bars) { lo = Math.min(lo, b[3]); hi = Math.max(hi, b[2]); }
+  for (const v of [E.stop, E.tp, E.level, ...E.zone]) if (v != null) { lo = Math.min(lo, v); hi = Math.max(hi, v); }
+  const pad = (hi - lo) * .06; lo -= pad; hi += pad;
+  const x = i => pl + (i + .5) * (W - pl - pr) / n, y = v => pt + (hi - v) / (hi - lo) * (H - pt - pb), cw = Math.max(2, (W - pl - pr) / n * .62);
+  const end = E.out ?? n - 1;
+  let g = `<rect x="${x(E.choch)}" y="${y(E.zone[1])}" width="${x(end) - x(E.choch)}" height="${Math.max(1, y(E.zone[0]) - y(E.zone[1]))}" fill="rgba(108,180,255,.16)" stroke="rgba(108,180,255,.45)"/>`;
+  g += `<line x1="${x(Math.max(0, E.choch - 25))}" x2="${x(E.choch)}" y1="${y(E.level)}" y2="${y(E.level)}" stroke="var(--blue)" stroke-dasharray="4 3"/><text class="tag" x="${x(Math.max(0, E.choch - 25))}" y="${y(E.level) - 4}" fill="var(--blue)">CHoCH</text>`;
+  bars.forEach((b, i) => { const c = b[4] >= b[1] ? "var(--up)" : "var(--down)"; g += `<line x1="${x(i)}" x2="${x(i)}" y1="${y(b[2])}" y2="${y(b[3])}" stroke="${c}"/><rect x="${x(i) - cw / 2}" y="${y(Math.max(b[1], b[4]))}" width="${cw}" height="${Math.max(1, Math.abs(y(b[1]) - y(b[4])))}" fill="${c}"/>`; });
+  const line = (v, c) => `<line x1="${x(E.fill)}" x2="${x(end)}" y1="${y(v)}" y2="${y(v)}" stroke="${c}" stroke-dasharray="3 3"/>`;
+  g += line(E.stop, "var(--down)") + (E.tp ? line(E.tp, "var(--up)") : "") + line(E.entry, "#9aa7b4");
+  g += `<circle cx="${x(E.fill)}" cy="${y(E.entry)}" r="3.5" fill="var(--fg)"/>`;
+  if (E.out != null) g += `<circle cx="${x(E.out)}" cy="${y(E.exit)}" r="4" fill="none" stroke="var(--fg)" stroke-width="1.5"/>`;
+  const lab = (v, t, c) => `<rect x="${W - pr + 4}" y="${y(v) - 8}" width="${pr - 6}" height="16" rx="2" fill="#0b0f14" stroke="${c}"/><text class="tag" x="${W - pr + 4 + (pr - 6) / 2}" y="${y(v) + 3}" text-anchor="middle" fill="${c}">${t}</text>`;
+  g += lab(E.entry, "ENTRY", "#9aa7b4") + lab(E.stop, "STOP", "var(--down)") + (E.tp ? lab(E.tp, "TARGET", "var(--up)") : "");
+  $("ex").innerHTML = `<svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="4-hour candles of ${esc(E.symbol)} with the CHoCH, the entry zone, the stop and the target">${g}</svg>
+    <p class="fine" style="margin:6px 0 0"><b>${esc(E.symbol)}</b> · CHoCH ${esc(fmtD(bars[E.choch][0]))} · ${E.zone_kind === "fvg" ? "fair value gap" : E.zone_kind === "ob" ? "order block" : "lower half of the leg"} ${E.zone[0]}–${E.zone[1]} · in at ${E.entry}, stop ${E.stop}${E.tp ? `, target ${E.tp}` : ""} · ${E.exit != null ? `out at ${E.exit} (${WHY[E.why]}), <b class="${tone(E.r)}" style="color:var(--${E.r >= 0 ? "up" : "down"})">${rr(E.r)}</b>` : "still open"}</p>`;
+  $("ex-nav").innerHTML = exs.length > 1 ? seg("ex", String(EX), exs.map((e, i) => [String(i), e.symbol])) : "";
+}
+
+function live() {
+  const mk = LV?.markets?.[S.m], ts = (mk?.trades || []).slice().reverse(), pend = mk?.pending || [];
+  $("live-p").innerHTML = `From ${esc(fmtD(LV?.start || "2026-11-09", { weekday: "long", day: "numeric", month: "long", year: "numeric" }))}, default settings, €${LV?.stake || 1000} a trade, ${S.m === "btc" ? "checked after every 4-hour candle, round the clock" : "checked at 13:30 and 16:00 New York"}. Closed trades are never changed. Phone alerts: the ntfy channel ending in <b>${S.m === "btc" ? "-crypto-choch" : "-choch"}</b>.`;
+  $("pend").innerHTML = pend.length ? `<div class="panel"><div class="ph"><span class="k">Orders waiting for the retest</span><span class="k blue live-dot">Live</span></div><div class="tw"><table><thead><tr><th>Stock</th><th>CHoCH</th><th>Buy at</th><th>Zone</th><th>Stop</th><th>Candles left</th></tr></thead><tbody>${pend.map(p => `<tr><td>${esc(p.symbol)}</td><td>${esc(fmtD(p.signal, { day: "numeric", month: "short" }))}</td><td>${p.limit}</td><td>${p.zone[0]}–${p.zone[1]}</td><td>${p.stop}</td><td>${p.expires_after}</td></tr>`).join("")}</tbody></table></div></div>` : "";
+  if (!ts.length) { $("lt").innerHTML = `<tbody><tr><td class="fine" style="text-align:left;white-space:normal">No live trades yet${LV ? "" : ": the first check runs on the go-live day"}.</td></tr></tbody>`; return; }
+  $("lt").innerHTML = `<thead><tr><th>${S.m === "btc" ? "Market" : "Stock"}</th><th>In</th><th>Entry</th><th>Stop / target</th><th>Out</th><th>Result</th><th>€</th></tr></thead><tbody>` +
+    ts.map(t => `<tr><td>${esc(t.symbol)}</td><td>${esc(fmtD(t.in, { day: "numeric", month: "short" }))} ${esc(t.in.slice(11, 16))}</td><td>${t.entry}</td><td>${t.stop} / ${t.tp ?? "trail"}</td><td>${t.out ? `${t.exit} · ${WHY[t.why]}` : `open · now ${t.last}`}</td><td class="${tone(t.out ? t.r : t.open_pct)}">${t.out ? rr(t.r) : pc(t.open_pct, 2)}</td><td class="${tone(t.eur)}">${t.eur != null ? (t.eur >= 0 ? "+" : "−") + Math.abs(t.eur).toFixed(2) : "–"}</td></tr>`).join("") + `</tbody>`;
+}
+
+function render() { controls(); headline(); equity(); split(); years(); variants(); exChart(); live(); }
+
+document.addEventListener("click", e => {
+  const b = e.target.closest("[data-m],[data-pivot],[data-entry],[data-target],[data-side],[data-filter],[data-sort],[data-ex]"); if (!b) return;
+  const d = b.dataset;
+  if (d.m) { S.m = d.m; EX = 0; } for (const k of Object.keys(OPTS)) if (d[k]) S[k] = d[k];
+  if (d.sort) SORT = d.sort; if (d.ex != null) EX = +d.ex;
+  save(); render();
+});
+
+(async () => {
+  [B, LV] = await Promise.all([load("data/choch/backtest.json"), load("data/choch/live.json")]);
+  if (!B) { $("big").innerHTML = `<div class="empty" style="width:100%">The first backtest is running on GitHub. Check back in about half an hour.</div>`; return; }
+  if (!B.markets[S.m]) S.m = "stocks";
+  if (!S.pivot || !M().variants[key()]) setKey(B.default); else render();
+})();
+</script>
+</body>
+</html>
