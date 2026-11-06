@@ -8,7 +8,10 @@ Rules (set before looking at any result):
   entry   the open of the first 15-minute bar that starts after the alert was published (found_at): the price
           you could really have got when the notification arrived
   side    bullish break = long, bearish break = short
-  stop    "failed break": a bar of the alert's own timeframe closes back across the broken line's level
+  stop    "failed break": a bar of the alert's own timeframe closes back across the broken line's level by more than
+          half its average range (ATR 14 of that timeframe), so ordinary wiggles around the line don't count
+          (rules v2, 6 Nov 2026: v1 stopped on any close back across and was stopped out by noise within minutes;
+          its trades were discarded the same day)
   exit    otherwise after a holding time that grows with the timeframe (HOLD), at that 15-minute bar's close
   costs   COST per side (spread + fees), taken off every trade
   vs mkt  the same trade's result minus the benchmark (SPY / BTC) over the same minutes, in the trade's
@@ -25,7 +28,9 @@ from pathlib import Path
 
 import pandas as pd
 
-START = "2026-11-06"
+START = "2026-11-06T12:00"
+VERSION = 2
+STOP_ATR = 0.5
 HOLD = {"15m": dt.timedelta(days=1), "30m": dt.timedelta(days=2), "1H": dt.timedelta(days=3),
         "4H": dt.timedelta(days=7), "D": dt.timedelta(days=20), "W": dt.timedelta(days=60), "5m": dt.timedelta(hours=6)}
 COST = {"stocks": 0.05, "crypto": 0.10}            # % per side
@@ -89,8 +94,10 @@ def update(path: Path, alerts: list[dict], data: dict, now: dt.datetime, market:
     global TZ
     TZ = tz
     led = json.loads(path.read_text()) if path.exists() else {}
+    if led.get("version") != VERSION:                 # rules changed: start a clean record
+        led = {"version": VERSION, "start": START}
     led.setdefault("start", START)
-    led["rules"] = {"hold": {k: v.total_seconds() / 86400 for k, v in HOLD.items()}, "cost_per_side": COST[market],
+    led["rules"] = {"hold": {k: v.total_seconds() / 86400 for k, v in HOLD.items()}, "cost_per_side": COST[market], "stop_atr": STOP_ATR,
                     "bench": bench}
     closed: list[dict] = led.get("closed", [])
     opened: dict[str, dict] = {x["id"]: x for x in led.get("open", [])}
@@ -103,7 +110,7 @@ def update(path: Path, alerts: list[dict], data: dict, now: dt.datetime, market:
     for a in alerts:
         if a.get("strategy") != "topdown" or a["id"] in done or a["id"] in opened:
             continue
-        if not a.get("found_at") or a["found_at"][:10] < led["start"]:
+        if not a.get("found_at") or a["found_at"][:16] < led["start"]:
             continue
         opened[a["id"]] = {"id": a["id"], "t": a["ticker"], "tf": a["tf"], "side": 1 if a["side"] == "bullish" else -1,
                            "str": (a.get("strength") or {}).get("label"), "found": a["found_at"], "level": a.get("level"),
@@ -130,9 +137,18 @@ def update(path: Path, alerts: list[dict], data: dict, now: dt.datetime, market:
         own = fr.get(x["tf"])
         exit_px = exit_t = why = None
         if own is not None and x.get("level") is not None:
+            if x.get("stop") is None:
+                ow = _utc(own, TZ)
+                ow = ow[ow.index < t0].tail(15)
+                if len(ow) > 2:
+                    tr = pd.concat([ow["High"] - ow["Low"], (ow["High"] - ow["Close"].shift()).abs(),
+                                    (ow["Low"] - ow["Close"].shift()).abs()], axis=1).max(axis=1).iloc[1:]
+                    x["stop"] = _r(x["level"] - x["side"] * STOP_ATR * float(tr.mean()), 6)
+                else:
+                    x["stop"] = x["level"]
             o = _utc(own, TZ)
             o = o[(o.index >= t0) & (o.index < until)]
-            back = o[(o["Close"] < x["level"]) if x["side"] > 0 else (o["Close"] > x["level"])]
+            back = o[(o["Close"] < x["stop"]) if x["side"] > 0 else (o["Close"] > x["stop"])]
             if len(back):
                 # the own-timeframe bar is stamped at its start: the close is known one bar later
                 stamp = back.index[0]
