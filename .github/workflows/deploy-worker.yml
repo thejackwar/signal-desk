@@ -3,7 +3,8 @@
 #   CLOUDFLARE_API_TOKEN   a token from the "Edit Cloudflare Workers" template
 #   CLOUDFLARE_ACCOUNT_ID  the account ID shown on the Cloudflare dashboard (Workers & Pages, right side)
 # Keeps what was set up by hand: it reads the Worker's bindings, timers and compatibility date from
-# Cloudflare and deploys with exactly those (the Alpaca secrets survive deploys on their own).
+# Cloudflare and deploys with exactly those (the Alpaca secrets survive deploys on their own), adding
+# the price-alert storage (PX, a KV namespace titled px) and its 5-minute timer if they're missing.
 name: Deploy data Worker
 
 on:
@@ -43,6 +44,17 @@ jobs:
           echo "Bindings now:"; jq -r '.result.bindings[] | "  \(.type) \(.name)"' settings.json
           echo "Timers now:"; jq -r '.result.schedules[]?.cron | "  \(.)"' schedules.json
           DATE=$(jq -r '.result.compatibility_date // "2024-09-23"' settings.json)
+          # price alerts need a storage called PX and a 5-minute timer: create them if they aren't there yet
+          if ! jq -e '.result.bindings[] | select(.type == "kv_namespace" and .name == "PX")' settings.json > /dev/null; then
+            NS="https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/storage/kv/namespaces"
+            PXID=$(curl -fsS -H "$H" "$NS?per_page=100" | jq -r '.result[] | select(.title == "px") | .id' | head -1)
+            if [ -z "$PXID" ]; then
+              PXID=$(curl -fsS -X POST -H "$H" -H "Content-Type: application/json" -d '{"title":"px"}' "$NS" | jq -r '.result.id')
+              echo "Created the px storage for price alerts"
+            fi
+            jq --arg id "$PXID" '.result.bindings += [{"type":"kv_namespace","name":"PX","namespace_id":$id}]' settings.json > s2.json && mv s2.json settings.json
+          fi
+          jq '.result.schedules = ((.result.schedules // []) + [{"cron":"*/5 * * * *"}] | unique_by(.cron))' schedules.json > c2.json && mv c2.json schedules.json
           {
             echo 'name = "trendlines"'
             echo 'main = "worker/trendlines-worker.js"'
