@@ -20,6 +20,8 @@ def payload(df, res, start: int, end: int | None = None, only_marker: int | None
         "dates": [x.strftime("%Y-%m-%d") for x in d.index],
         "o": [_r(v) for v in d["open"]], "h": [_r(v) for v in d["high"]],
         "l": [_r(v) for v in d["low"]], "c": [_r(v) for v in d["close"]],
+        # daily volume (Yahoo: shares, coins or futures contracts), for the chart's volume tools
+        **({"v": [None if np.isnan(v) else int(round(float(v))) for v in d["volume"].astype(float)]} if "volume" in d else {}),
         "overlays": [{**o, "values": [_r(v) for v in o["values"][sl]]} for o in res.overlays],
         "markers": [],
         "shapes": [],
