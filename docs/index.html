@@ -2087,6 +2087,12 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
 .tm .trdclose:hover { border-color: var(--tc); }
 .tm .trdx h2 { font: 600 10.5px var(--font-body); text-transform: uppercase; letter-spacing: .07em; color: var(--faint); margin: 14px 0 4px; -webkit-text-fill-color: currentColor; background: none; }
 .tm .trdx .newslist { font-size: 13px; }
+.tm .trdchk.tight { gap: 2px; font-size: 12.5px; }
+.tm .trdchk li.dot::before { content: "•"; color: var(--faint); left: 4px; }
+.tm .bsw.sm { margin: 2px 0 6px; }
+.tm .trdlv { display: grid; gap: 3px; margin: 8px 0 4px; padding: 8px 10px; border: 1px solid var(--line); border-radius: 8px; font-size: 12.5px; }
+.tm .trdlv div { display: flex; gap: 6px; align-items: center; }
+.tm .trdlv i { width: 12px; height: 2px; border-radius: 1px; flex: none; }
 .tm .tr.al.on { background: color-mix(in srgb, var(--tc) 14%, transparent); }
 </style>
 </head>
@@ -7772,7 +7778,7 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
   }
   function tmSigSide(a) {
     const s = S.byId[a.strategy], st = a.strength, up = a.side === "bullish", now = tmPx(a.ticker) ?? a.price;
-    if (CACHE[S.market] && CACHE[S.market].trades === undefined) loadTrades().then(() => { if (S.tmSig === a.id) tmRefresh("trd"); });
+    if (CACHE[S.market] && CACHE[S.market].trades === undefined) loadTrades().then(() => { if (S.tmSig === a.id) tmTrdSide(); });
     const tr = tmTradeFor(a), move = now && a.price ? (now / a.price - 1) * 100 * (up ? 1 : -1) : null;
     const why = { sl: "its stop was hit", tp: "it hit its take profit", rule: "the strategy's own exit rule fired" };
     const T = CACHE[S.market]?.trades;
@@ -7789,6 +7795,7 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
       <p class="trdnote">${esc(a.note)}</p>
       <div class="kpis"><div><small>Signal</small><b>${money(a.price)}</b></div><div><small>Now</small><b data-lp="${esc(a.ticker)}">${money(now)}</b></div><div><small>Since</small><b>${tmPct(move, 2)}</b></div><div><small>Wrong if</small><b class="down">${a.stop != null ? money(a.stop) : "–"}</b></div></div>
       <h4>What it's doing</h4><p>${paper}</p>
+      ${tmTrdMarket(a.ticker, a.side === "bullish")}
       ${s ? `<h4>Why it fired</h4><p>${esc(up ? s.bullish : s.bearish)}</p>${s.why ? `<p class="dim">${esc(s.why)}</p>` : ""}` : ""}
       ${st ? `<h4>What backs it up <span class="dim">${esc(st.label)} · ${st.score}/4</span></h4><ul class="trdchk">${st.checks.map(c => `<li class="${c.ok ? "ok" : "no"}">${esc(c.text)}${c.ids ? ` <span class="dim">(${c.ids.map(stratName).map(esc).join(", ")})</span>` : ""}</li>`).join("")}</ul>` : ""}
       ${wrongIfCard(a)}${earnCard(a)}
@@ -7800,20 +7807,93 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
     const r = S.stockBy[t] || {}, A = (S.feed?.alerts || []).filter(a => a.ticker === t).slice(0, 8), now = tmPx(t) ?? r.price;
     return `<div class="trdhd"><b>${esc(disp(t))}</b><span>${esc(r.name || "")}</span></div>
       <div class="kpis"><div><small>Price</small><b data-lp="${esc(t)}">${money(now)}</b></div><div><small>Today</small><b>${tmPct(r.chg1d, 2)}</b></div><div><small>1 month</small><b>${tmPct(r.chg1m)}</b></div><div><small>vs 200-day</small><b>${tmPct(r.vs200)}</b></div></div>
+      ${tmTrdMarket(t)}
       <h4>Signals on ${esc(disp(t))}</h4>${A.length ? A.map(a => { const up = a.side === "bullish"; return `<button type="button" class="tr al${S.tmSig === a.id ? " on" : ""}" data-tmsig="${esc(a.id)}"><span class="dim">${esc(fmtDate(a.date, { day: "numeric", month: "short" }))}</span><span class="tk">${esc(disp(a.ticker).slice(0, 8))}</span><span class="${up ? "side-b" : "side-s"}">${up ? "▲" : "▼"}</span><span>${esc(stratName(a.strategy))}</span><span class="r dim">${esc(a.strength?.label || "")}</span></button>`; }).join("") : `<p class="empty2">No recent signals. Draw your own levels on the chart.</p>`}
       <p class="fine2">Tap any signal (here, in Alerts, Focus or Live trades) to see that trade on the chart: entry, “wrong if” level, the strategy's own lines and why it fired. Draw with the tools on the left of the chart; drawings are saved on this device.</p>
       ${newsFor(t, 3)}
       <div class="secacts"><a href="#terminal-${encodeURIComponent(t)}" data-tmseltab="${esc(t)}:DES"><b>DES</b>Everything on ${esc(disp(t))}</a><a href="#terminal-${encodeURIComponent(t)}" data-tmseltab="${esc(t)}:FLOW"><b>FLOW</b>Buying / selling</a>${S.market === "stocks" ? `<a href="#terminal-${encodeURIComponent(t)}" data-tmseltab="${esc(t)}:OMON"><b>OMON</b>Options</a>` : ""}<a href="#strategylab?s=${encodeURIComponent(t)}"><b>BT</b>Backtest</a></div>`;
+  }
+  // Flow and options in one glance, for the panel next to the chart (stocks: terminal/flow.json, dark pools, max pain).
+  // up = the signal's direction, so each reading can say whether it agrees with the trade.
+  function tmTrdMarket(t, up) {
+    if (S.market !== "stocks") return "";
+    const F = tmLoadFlow(), f = F?.flow?.[t], o = F?.options?.[t], DK = tmLoadDark(), mp = tmLoadMp(t);
+    const key = t.replace(/[-.]/g, ""), dk = DK?.by ? DK.by[t] || DK.by[key] : null;
+    const agree = (bull, txt) => up === undefined || bull == null ? txt : `${txt} <span class="${bull === up ? "up" : "down"}">${bull === up ? "· with the trade" : "· against it"}</span>`;
+    let h = `<h4>Buying &amp; selling <span class="dim">· estimate</span></h4>`;
+    if (!F) h += `<p class="dim">${F === false ? "Flow data isn't built yet." : "Loading…"}</p>`;
+    else if (!f) h += `<p class="dim">No volume data for ${esc(disp(t))} yet.</p>`;
+    else {
+      const bp = f.buy_pct;
+      if (bp != null) h += `<div class="bsw sm"><div class="bsl"><span class="up"><b>${bp.toFixed(0)}%</b> buying</span><span class="dim">${f.intra_date === F.session ? "today" : esc(fmtDate(f.intra_date, { weekday: "short", day: "numeric" }))}</span><span class="down">selling <b>${(100 - bp).toFixed(0)}%</b></span></div><div class="bsb" aria-hidden="true"><i style="width:${bp}%"></i></div></div>`;
+      const lines = [];
+      if (f.rel_vol != null) lines.push(`Volume <b class="${f.rel_vol >= 1.5 ? "hot" : ""}">${tmNum(f.rel_vol, 1)}×</b> usual${f.rel_vol >= 1.5 ? ": real interest behind the move" : f.rel_vol < 0.7 ? ": quiet, little conviction" : ""}`);
+      if (f.cmf20 != null) lines.push(agree(f.cmf20 >= .05 ? true : f.cmf20 <= -.05 ? false : null, `Money flow 20d <b class="${f.cmf20 >= .05 ? "up" : f.cmf20 <= -.05 ? "down" : ""}">${f.cmf20 > 0 ? "+" : ""}${tmNum(f.cmf20, 2)}</b>`));
+      if (dk?.sig && dk.sig !== "none") lines.push(agree(dk.sig === "buying" ? true : dk.sig === "selling" ? false : null, `Dark pools: <b class="${dk.sig === "buying" ? "up" : dk.sig === "selling" ? "down" : ""}">${esc(dk.sig)}</b> (short-volume ${tmNum(dk.ratio, 0)}% vs usual ${tmNum(dk.avg, 0)}%)`));
+      else if (dk) lines.push(`Dark pools: nothing unusual`);
+      if (bp != null) lines.unshift(agree(bp >= 55 ? true : bp <= 45 ? false : null, `${bp >= 55 ? "Buyers" : bp <= 45 ? "Sellers" : "Neither side"} in control${bp > 45 && bp < 55 ? "" : " today"}`));
+      h += `<ul class="trdchk tight">${lines.map(l => `<li class="dot">${l}</li>`).join("")}</ul>`;
+    }
+    h += `<h4>Options</h4>`;
+    if (!F) h += `<p class="dim">Loading…</p>`;
+    else if (!o && !mp?.expiries?.length) h += `<p class="dim">${mp === null ? "Loading…" : `No options data for ${esc(disp(t))}.`}</p>`;
+    else {
+      if (o) {
+        const tot = o.call_vol + o.put_vol, cs = tot ? o.call_vol / tot * 100 : 50;
+        h += `<div class="kpis"><div><small>Put/call</small><b class="${o.pc_vol >= 1.2 ? "down" : o.pc_vol <= .7 ? "up" : ""}">${tmNum(o.pc_vol, 2)}</b></div><div><small>Calls</small><b>${cs.toFixed(0)}%</b></div><div><small>Vol vs usual</small><b class="${o.vol_vs_usual >= 1.5 ? "hot" : ""}">${o.vol_vs_usual == null ? "–" : tmNum(o.vol_vs_usual, 1) + "×"}</b></div><div title="One standard deviation, from at-the-money implied volatility"><small>Move priced in</small><b>${o.exp_move == null ? "–" : "±" + o.exp_move + "%"}</b></div></div>`;
+        const lines = [agree(o.pc_vol <= .7 ? true : o.pc_vol >= 1.2 ? false : null, `${o.pc_vol <= .7 ? "Call-heavy" : o.pc_vol >= 1.2 ? "Put-heavy" : "Balanced"} options volume`)];
+        if (o.exp_move != null && o.atm_exp) {
+          const a = tmAlertById(S.tmSig), now = tmPx(t) ?? a?.price, dist = a?.stop && a.ticker === t && now ? Math.abs(a.stop / now - 1) * 100 : null;
+          lines.push(`Options price a ±${o.exp_move}% move by ${esc(fmtDate(o.atm_exp, { day: "numeric", month: "short" }))}` + (dist == null ? "" : dist < o.exp_move
+            ? `; the “wrong if” level is only ${dist.toFixed(1)}% away, <span class="down">inside that range</span>: a normal swing could reach it`
+            : `; the “wrong if” level is ${dist.toFixed(1)}% away, outside that range`));
+        }
+        if (o.unusual?.length) { const u = o.unusual[0]; lines.push(`Unusual: <b class="${/C$/.test(u[0]) ? "up" : "down"}">${esc(u[0].replace(/C$/, " call").replace(/P$/, " put"))}</b>, ${tmBig(u[1])} traded vs ${tmBig(u[2])} open (${tmNum(u[5], 1)}×)${o.unusual.length > 1 ? ` + ${o.unusual.length - 1} more` : ""}`); }
+        h += `<ul class="trdchk tight">${lines.map(l => `<li class="dot">${l}</li>`).join("")}</ul>`;
+      }
+      const e = tmMpExp(mp);
+      if (e) {
+        const now = tmPx(t) ?? mp.spot;
+        h += `<div class="trdlv"><span class="dim">${esc(fmtDate(e.expiry, { day: "numeric", month: "short" }))} expiry · on the chart</span>
+          <div><i style="background:#facc15"></i>Max pain <b>${money(e.max_pain)}</b> <span class="dim">${now ? tmPct((e.max_pain / now - 1) * 100) : ""}</span></div>
+          <div><i style="background:#4ade80"></i>Call wall <b>${money(e.call_wall)}</b> <span class="dim">${now ? tmPct((e.call_wall / now - 1) * 100) : ""}</span></div>
+          <div><i style="background:#f87171"></i>Put wall <b>${money(e.put_wall)}</b> <span class="dim">${now ? tmPct((e.put_wall / now - 1) * 100) : ""}</span></div></div>
+          <p class="dim" style="font-size:11.5px">Walls are the strikes with the most open interest: prices often stall there. Max pain is where most options expire worthless; it pulls hardest in the last days before expiry.</p>`;
+      }
+    }
+    return h + `<div class="secacts"><a href="#terminal-${encodeURIComponent(t)}" data-tmseltab="${esc(t)}:FLOW"><b>FLOW</b>Full flow</a><a href="#terminal-${encodeURIComponent(t)}" data-tmseltab="${esc(t)}:OMON"><b>OMON</b>All options</a></div>`;
+  }
+  // the expiry whose levels go on the chart: the next one at least a day out (0-day expiries are about to vanish)
+  const tmMpExp = mp => (mp?.expiries || []).find(e => e.dte >= 1) || mp?.expiries?.[0] || null;
+  // redraw only the side column (the chart frame stays, so its zoom and drawings aren't reloaded)
+  function tmTrdSide() {
+    const x = document.querySelector(".tm .p-trd .trdx");
+    if (!x) return;
+    const a = S.tmSig ? tmAlertById(S.tmSig) : null, t = a ? a.ticker : S.tmSel;
+    if (!t) return;
+    const top = x.scrollTop;
+    x.innerHTML = a ? tmSigSide(a) : tmTickerSide(t);
+    x.scrollTop = top;
+  }
+  // options levels as lines on the chart frame (chart.js listens for "ics-levels")
+  function tmTrdLevels() {
+    const fr = document.querySelector(".tm .p-trd .trdf");
+    if (!fr?.contentWindow) return;
+    const a = S.tmSig ? tmAlertById(S.tmSig) : null, t = a ? a.ticker : S.tmSel;
+    const e = S.market === "stocks" && t ? tmMpExp(S.mp?.[t]) : null, d = e ? fmtDate(e.expiry, { day: "numeric", month: "short" }) : "";
+    const levels = e ? [[e.max_pain, `Max pain ${d}`, "#facc15"], [e.call_wall, `Call wall ${d}`, "#4ade80"], [e.put_wall, `Put wall ${d}`, "#f87171"]].filter(l => l[0] != null) : [];
+    try { fr.contentWindow.postMessage({ type: "ics-levels", sym: t, levels }, location.origin); } catch {}
   }
   TM_R.trd = () => {
     const a = S.tmSig ? tmAlertById(S.tmSig) : null;
     if (S.tmSig && !a && S.feed) S.tmSig = null;
     const t = a ? a.ticker : S.tmSel;
     if (!t) return tmPanel("p-trd", "TRD", "Chart &amp; trade", null, `<p class="empty2">Loading…</p>`);
-    const body = `<div class="trdw"><iframe class="trdf" src="${esc(tmChartSrc(t, a))}" title="${esc(disp(t))} chart${a ? " with the signal" : ""}" allow="clipboard-write"></iframe><div class="trdx">${a ? tmSigSide(a) : tmTickerSide(t)}</div></div>`;
+    const body = `<div class="trdw"><iframe class="trdf" onload="window.tmTrdLevels && tmTrdLevels()" src="${esc(tmChartSrc(t, a))}" title="${esc(disp(t))} chart${a ? " with the signal" : ""}" allow="clipboard-write"></iframe><div class="trdx">${a ? tmSigSide(a) : tmTickerSide(t)}</div></div>`;
     const extra = `<small>${esc(disp(t))}${a ? " · " + esc(stratName(a.strategy)) : ""}</small>${a ? `<button type="button" class="trdclose" data-tmsigx title="Back to the plain chart">✕ Signal</button>` : ""}`;
     return tmPanel("p-trd", "TRD", a ? "Signal on the chart" : "Chart &amp; trade", [tmChartSrc(t, a, false), "Full screen"], body, extra);
   };
+  window.tmTrdLevels = tmTrdLevels;
   function tmOpenSig(id) {
     const a = tmAlertById(id); if (!a) return false;
     S.tmSig = id;
@@ -7917,7 +7997,7 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
       const changed = first || d?.generated_at !== S.fl?.generated_at;
       S.fl = d || false;
       if (!changed) return;
-      ["mood", "focus", "trk"].forEach(tmRefresh); tmPulse();
+      ["mood", "focus", "trk"].forEach(tmRefresh); tmPulse(); tmTrdSide();
       if (S.tmSel && document.getElementById("tmsec") && (first || tmTab("sec", "DES") !== "DES")) tmSecRender();
       else { const h = document.querySelector("#tmsec .glance"); if (h && S.tmSel) h.outerHTML = tmGlance(S.tmSel); }
     });
@@ -7929,6 +8009,7 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
     S.dkAt = Date.now();
     Promise.all([opt(UB() + "darkpool/daily.json"), opt(UB() + "darkpool/blocks.json")]).then(([d, b]) => {
       S.dk = { d, b, by: Object.fromEntries((d?.stocks || []).map(x => [x.t, x])) };
+      tmTrdSide();
       if (S.tmSel && tmTab("sec", "DES") === "FLOW") tmSecRender();
     });
     return S.dk;
@@ -7937,7 +8018,7 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
     S.mp = S.mp || {};
     if (S.mp[t] !== undefined) return S.mp[t];
     S.mp[t] = null;
-    opt(`${UB()}maxpain/${encodeURIComponent(t)}.json`).then(d => { S.mp[t] = d || false; if (S.tmSel === t && tmTab("sec", "DES") === "OMON") tmSecRender(); });
+    opt(`${UB()}maxpain/${encodeURIComponent(t)}.json`).then(d => { S.mp[t] = d || false; tmTrdSide(); tmTrdLevels(); if (S.tmSel === t && tmTab("sec", "DES") === "OMON") tmSecRender(); });
     return null;
   }
   const tmMoodC = g => g < 20 ? "xf" : g < 40 ? "f" : g < 60 ? "n" : g < 80 ? "g" : "xg";

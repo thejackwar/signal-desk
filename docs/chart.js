@@ -720,7 +720,7 @@ function render(keepRange) {
 
   // your own drawings (draw.js), plus the signal's trade when this is a signal view
   DRAWL = createDrawLayer({ chart: main, series: cs, host: mainEl, bars: c, step, store: { get: getDrawings, set: setDrawings },
-    getTool: () => S.tool, setTool, magnet: () => S.magnet, keep: () => S.keep, hidden: () => S.hideDr, extra: () => SIG ? sigShapes(c) : [] });
+    getTool: () => S.tool, setTool, magnet: () => S.magnet, keep: () => S.keep, hidden: () => S.hideDr, extra: () => [...(SIG ? sigShapes(c) : []), ...lvShapes()] });
   const layer = DRAWL;
   syncDrawButtons();
 
@@ -728,6 +728,17 @@ function render(keepRange) {
   drawReads(reads);
   $("note").textContent = `${DATA.source} ${c.length} candles. ${STEP[tf] < 86400 && DATA.kind === "stock" ? "Times are New York time." : DATA.kind === "crypto" && STEP[tf] < 86400 ? "Times are UTC." : ""}`;
 }
+
+// ------------------------------------------------------------------ levels from the Terminal
+// The Terminal sends the options levels of the stock it shows (max pain, call and put walls) with
+// postMessage({type: "ics-levels", sym, levels: [[price, label, colour], ...]}); drawn as dashed lines.
+let LEVELS = { sym: null, levels: [] };
+const lvShapes = () => LEVELS.sym === S.sym ? LEVELS.levels.map(([p, label, color]) => ({ type: "hline", pts: [{ t: 0, p }], color, w: 1, dash: 1, label })) : [];
+addEventListener("message", e => {
+  if (e.origin !== location.origin || e.data?.type !== "ics-levels") return;
+  LEVELS = { sym: e.data.sym, levels: (e.data.levels || []).filter(l => Array.isArray(l) && isFinite(l[0])) };
+  DRAWL?.redraw();
+});
 
 // ------------------------------------------------------------------ signal view
 const dayTime = d => Date.parse(d + "T00:00:00Z") / 1000;
