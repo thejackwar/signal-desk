@@ -204,6 +204,7 @@ async function load(sym) {
   const id = ++loadId;
   S.sym = sym;
   if (SIG && sym !== SIG.a.ticker) { SIG = null; drawSigCard(); }
+  liveStop();
   writeHash();
   $("sym").value = label(sym);
   $("status").className = "status";
@@ -215,6 +216,7 @@ async function load(sym) {
     if (!DATA.frames[S.tf]?.length) S.tf = "D";
     $("status").textContent = "";
     render(false);
+    liveStart();
   } catch (e) {
     if (id !== loadId) return;
     $("status").className = "status err";
@@ -312,7 +314,7 @@ function drawTfs() {
 $("tfs").addEventListener("click", e => {
   const b = e.target.closest("[data-tf]");
   if (!b || b.disabled || b.dataset.tf === S.tf) return;
-  S.tf = b.dataset.tf; writeHash(); render(false);
+  S.tf = b.dataset.tf; writeHash(); render(false); if (DATA?.kind === "crypto") liveStart();
 });
 
 function drawTitle() {
@@ -320,7 +322,7 @@ function drawTitle() {
   const ch = prev ? last.close / prev.close - 1 : null;
   const name = NAMES[DATA.sym] && NAMES[DATA.sym] !== label(DATA.sym) ? NAMES[DATA.sym] : { stock: "Stock", crypto: "Crypto", commodity: "Commodity" }[DATA.kind];
   $("title").innerHTML = `<small>${esc(name)} · ${TF_TXT[S.tf]}</small>${esc(label(DATA.sym))}<span class="px">${fmt(last.close)}</span>` +
-    (ch === null ? "" : `<span class="chg ${ch >= 0 ? "up" : "down"}">${pctTxt(ch)}</span>`);
+    (ch === null ? "" : `<span class="chg ${ch >= 0 ? "up" : "down"}">${pctTxt(ch)}</span>`) + liveBadge();
 }
 
 // ------------------------------------------------------------------ drawings (kept per market)
@@ -724,9 +726,104 @@ function render(keepRange) {
   const layer = DRAWL;
   syncDrawButtons();
 
-  VIEW = { main, showRecent, destroy() { ro.disconnect(); layer.destroy(); for (const a of charts) a.chart.remove(); } };
+  // live prices: redraw the candles in place (indicators catch up when a new candle opens)
+  const setCandles = () => cs.setData([...c.map(b => ({ time: b.time, open: b.open, high: b.high, low: b.low, close: b.close })), ...ws]);
+  VIEW = { main, showRecent, setCandles, destroy() { ro.disconnect(); layer.destroy(); for (const a of charts) a.chart.remove(); } };
   drawReads(reads);
   $("note").textContent = `${DATA.source} ${c.length} candles. ${STEP[tf] < 86400 && DATA.kind === "stock" ? "Times are New York time." : DATA.kind === "crypto" && STEP[tf] < 86400 ? "Times are UTC." : ""}`;
+}
+
+// ------------------------------------------------------------------ live prices
+// Crypto: Binance's live kline stream for the timeframe on screen (every trade). Stocks: the real-time
+// IEX price from the data server every 15 seconds in US hours, applied to the last candle of every
+// timeframe (a new candle opens when its period starts); the full delayed data is reloaded every
+// 5 minutes so intraday candles stay complete. Commodities: daily data only, nothing live.
+const KL = { W: "1w", D: "1d", "4H": "4h", "1H": "1h", "30m": "30m", "15m": "15m", "5m": "5m" };
+let LIVE = null;                 // {kind, stop(), at: last update ms}
+const nyNow = () => {
+  const p = {};
+  for (const { type, value } of new Intl.DateTimeFormat("en-US", { timeZone: "America/New_York", hourCycle: "h23", year: "numeric", month: "2-digit", day: "2-digit",
+    hour: "2-digit", minute: "2-digit", second: "2-digit" }).formatToParts(new Date())) p[type] = +value;
+  return Date.UTC(p.year, p.month - 1, p.day, p.hour, p.minute, p.second) / 1000;   // New York wall clock, "as if UTC" like the candles
+};
+const usOpen = ny => { const d = new Date(ny * 1000), m = d.getUTCHours() * 60 + d.getUTCMinutes(), wd = d.getUTCDay(); return wd > 0 && wd < 6 && m >= 570 && m < 960; };
+// start of the candle a New York wall time falls in (same anchors as chart-lib: sessions from 9:30, weeks from Monday)
+function periodStart(ny, tf) {
+  const day = Math.floor(ny / 86400) * 86400;
+  if (tf === "D") return day;
+  if (tf === "W") return day - ((new Date(day * 1000).getUTCDay() + 6) % 7) * 86400;
+  const mins = STEP[tf] / 60, m = Math.floor((ny - day) / 60);
+  return day + (570 + Math.floor((m - 570) / mins) * mins) * 60;
+}
+function liveBadge() {
+  if (!LIVE) return "";
+  const fresh = LIVE.at && Date.now() - LIVE.at < (LIVE.kind === "crypto" ? 30e3 : 60e3);
+  return `<span class="live${fresh ? "" : " idle"}" title="${esc(LIVE.kind === "crypto" ? "Live from Binance, every trade" : "Last candle follows the real-time IEX price every 15 seconds; the rest of the chart is Alpaca's full data, 15 minutes delayed")}">${fresh ? "LIVE" : LIVE.kind === "stock" && !usOpen(nyNow()) ? "Market closed" : "Connecting…"}</span>`;
+}
+let paintQ = false;
+function paint(newCandle) {
+  if (newCandle) { render(true); return; }
+  if (paintQ) return;
+  paintQ = true;
+  requestAnimationFrame(() => { paintQ = false; if (!VIEW || !DATA) return; try { VIEW.setCandles(); } catch {} drawTitle(); });
+}
+function liveStop() { LIVE?.stop(); LIVE = null; }
+function liveStart() {
+  liveStop();
+  if (!DATA) return;
+  const sym = DATA.sym;
+  if (DATA.kind === "crypto") {
+    const coin = sym.replace("-USD", "").toLowerCase(), tf = S.tf;
+    let ws, dead = false, retry;
+    const open = () => {
+      if (dead) return;
+      try { ws = new WebSocket(`wss://data-stream.binance.vision/ws/${coin}usdt@kline_${KL[tf]}`); } catch { return; }
+      ws.onmessage = e => {
+        const k = JSON.parse(e.data)?.k;
+        if (!k || !DATA || DATA.sym !== sym || S.tf !== tf) return;
+        const c = DATA.frames[tf], last = c[c.length - 1], t = Math.floor(k.t / 1000);
+        const bar = { time: t, open: +k.o, high: +k.h, low: +k.l, close: +k.c, volume: +k.v };
+        if (!last || t < last.time) return;
+        LIVE.at = Date.now();
+        if (t === last.time) { Object.assign(last, bar); paint(false); }
+        else { c.push(bar); paint(true); }
+      };
+      ws.onclose = () => { if (!dead) retry = setTimeout(open, 5000); };
+    };
+    LIVE = { kind: "crypto", at: 0, stop() { dead = true; clearTimeout(retry); try { ws?.close(); } catch {} } };
+    open();
+    return;
+  }
+  if (DATA.kind !== "stock") return;
+  const kindQ = SP100.has(sym) ? "stocks" : "sp500";
+  let timer, reload, dead = false;
+  const tick = async () => {
+    if (dead || document.hidden || !usOpen(nyNow())) { drawTitle(); return; }
+    try {
+      const r = await fetch(`${API.replace(/\/$/, "")}/?quotes=${kindQ}`);
+      const q = (await r.json())?.q?.[sym];
+      if (dead || !q || !DATA || DATA.sym !== sym) return;
+      const p = +q[0], ny = nyNow();
+      let fresh = false;
+      for (const [tf, c] of Object.entries(DATA.frames)) {
+        const last = c[c.length - 1]; if (!last) continue;
+        const t0 = periodStart(ny, tf);
+        if (t0 < last.time) continue;                       // the data is already past this point
+        if (t0 === last.time) { last.close = p; last.high = Math.max(last.high, p); last.low = Math.min(last.low, p); }
+        else { c.push({ time: t0, open: p, high: p, low: p, close: p, volume: last.volume == null ? null : 0 }); if (tf === S.tf) fresh = true; }
+      }
+      LIVE.at = Date.now();
+      paint(fresh);
+    } catch {}
+  };
+  // every 5 minutes in US hours: the full (15-minute delayed) candles, so the intraday ones fill in
+  const refresh = async () => {
+    if (dead || document.hidden || !usOpen(nyNow()) || STEP[S.tf] >= 86400) return;
+    try { const d = await getData(sym); if (!dead && DATA?.sym === sym && !d.fallback) { DATA = d; render(true); tick(); } } catch {}
+  };
+  LIVE = { kind: "stock", at: 0, stop() { dead = true; clearInterval(timer); clearInterval(reload); } };
+  timer = setInterval(tick, 15000); reload = setInterval(refresh, 300000);
+  tick();
 }
 
 // ------------------------------------------------------------------ levels from the Terminal
@@ -833,7 +930,7 @@ $("pick").addEventListener("submit", e => {
   $("sym").blur(); load(s);
 });
 let rzT; if (EMBED) addEventListener("resize", () => { clearTimeout(rzT); rzT = setTimeout(() => DATA && render(true), 150); });
-window.addEventListener("hashchange", () => { const old = S.sym, oldTf = S.tf; readHash(); if (S.sym !== old) load(S.sym); else if (S.tf !== oldTf && DATA) render(false); });
+window.addEventListener("hashchange", () => { const old = S.sym, oldTf = S.tf; readHash(); if (S.sym !== old) load(S.sym); else if (S.tf !== oldTf && DATA) { render(false); if (DATA.kind === "crypto") liveStart(); } });
 readHash();
 drawToolbar();
 drawPicker();

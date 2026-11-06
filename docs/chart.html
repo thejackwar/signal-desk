@@ -102,6 +102,11 @@ form.pick input:focus { outline: none; border-color: var(--accent); box-shadow: 
 .head .px { font-size: 22px; font-weight: 650; letter-spacing: -.02em; margin-left: 10px; }
 .head .chg { font-size: 15px; font-weight: 600; margin-left: 8px; }
 .up { color: var(--up-line); } .down { color: var(--down-line); } .dim { color: var(--faint); }
+.head .live { display: inline-flex; align-items: center; gap: 5px; margin-left: 10px; font: 700 11px var(--font); letter-spacing: .06em; color: var(--up-line); vertical-align: middle; }
+.head .live::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: currentColor; box-shadow: 0 0 0 3px color-mix(in srgb, currentColor 25%, transparent); animation: lv 1.6s ease-in-out infinite; }
+.head .live.idle { color: var(--faint); font-weight: 600; letter-spacing: 0; }
+.head .live.idle::before { animation: none; box-shadow: none; }
+@keyframes lv { 50% { opacity: .35; } }
 
 /* indicator picker */
 .picker { padding: 4px 20px 10px; border-top: 1px solid var(--hair-2); }
@@ -358,6 +363,6 @@ html.embed .status:empty { display: none; }
   </footer>
 </main>
 
-<script type="module" src="chart.js?v=5"></script>
+<script type="module" src="chart.js?v=6"></script>
 </body>
 </html>
