@@ -1,6 +1,6 @@
 """
 Company data for the Terminal: the "DES/FA/ANR/EE/RV/HDS/DVD/MOST" side of a Bloomberg terminal,
-for every S&P 100 stock, from Yahoo Finance (yfinance).
+for every S&P 100 stock (or S&P 500 with UNIVERSE=sp500, which also refreshes the S&P 100 summary), from Yahoo Finance.
 
 Writes
   docs/data/company.json        one row per stock for the screener (EQS), comparables (RV) and
@@ -36,8 +36,11 @@ import pandas as pd
 import yfinance as yf
 
 ROOT = Path(__file__).resolve().parent.parent
-DATA = ROOT / "docs" / "data"
-SUM = DATA / "company.json"
+sys.path.insert(0, str(Path(__file__).parent))
+from universe import U  # noqa: E402
+
+DATA = ROOT / "docs" / "data"          # company/<T>.json is shared: one file per stock, whichever list it's in
+SUM = U.path("company.json")           # the screener's summary: docs/data/ or docs/data/sp500/
 DIR = DATA / "company"
 
 
@@ -187,7 +190,8 @@ def activity(tickers: list[str]) -> dict:
 
 
 def main():
-    tickers = sys.argv[1:] or [x.strip() for x in (ROOT / "engine" / "tickers.txt").read_text().splitlines() if x.strip() and not x.startswith("#")]
+    # UNIVERSE=sp500 covers every S&P 100 stock too, and writes both summaries (see the end)
+    tickers = sys.argv[1:] or U.tickers()
     try:
         prev = json.loads(SUM.read_text())
     except Exception:
@@ -216,7 +220,12 @@ def main():
     keep = set(tickers) if not sys.argv[1:] else set(rows)
     out = {"generated_at": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%MZ"), "source": "Yahoo Finance",
            "stocks": {t: v for t, v in sorted(rows.items()) if t in keep}}
+    SUM.parent.mkdir(parents=True, exist_ok=True)
     SUM.write_text(json.dumps(out, separators=(",", ":")))
+    if U.is500 and not sys.argv[1:]:
+        small = set((ROOT / "engine" / "tickers.txt").read_text().split())
+        (DATA / "company.json").write_text(json.dumps({**out, "stocks": {t: v for t, v in out["stocks"].items() if t in small}},
+                                                      separators=(",", ":")))
     print(f"done: {ok} ok, {len(fail)} failed {fail}")
     if not ok and not sys.argv[1:]:
         sys.exit(1)

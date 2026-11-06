@@ -23,7 +23,7 @@ jobs:
   scan:
     if: github.event_name != 'schedule' || vars.EXTERNAL_SCHEDULER != 'on'   # the scheduler Worker starts it on time instead (worker/README.md)
     runs-on: ubuntu-latest
-    timeout-minutes: 45     # the first run downloads months of bars; later runs only fetch what's new
+    timeout-minutes: 90     # the first run downloads months of bars; later runs only fetch what's new
     steps:
       - uses: actions/checkout@v4
 
@@ -36,7 +36,9 @@ jobs:
       - name: Restore the bars from earlier runs
         uses: actions/cache@v4
         with:
-          path: .cache/topdown
+          path: |
+            .cache/topdown
+            .cache/topdown500
           key: topdown-bars-${{ github.run_id }}
           restore-keys: topdown-bars-
 
@@ -47,11 +49,22 @@ jobs:
           NTFY_PREFIX: ${{ vars.NTFY_PREFIX }}
         run: python -u engine/topdown.py ${{ inputs.force && '--force' || '' }}
 
+      - name: The same for the S&P 500
+        continue-on-error: true   # never hold back the S&P 100 alerts
+        timeout-minutes: 40
+        env:
+          UNIVERSE: sp500
+          ALPACA_KEY_ID: ${{ secrets.ALPACA_KEY_ID }}
+          ALPACA_SECRET_KEY: ${{ secrets.ALPACA_SECRET_KEY }}
+          NTFY_PREFIX: ${{ vars.NTFY_PREFIX }}
+        run: python -u engine/topdown.py ${{ inputs.force && '--force' || '' }}
+
       - name: Publish new alerts
         run: |
           git config user.name "signal-desk-bot"
           git config user.email "signal-desk-bot@users.noreply.github.com"
           git add docs/data/topdown
+          git add docs/data/sp500/topdown 2>/dev/null || true
           git diff --cached --quiet && exit 0
           git commit -m "Top-Down alerts $(date -u +%F\ %H:%M)"
           for i in 1 2 3; do git pull --rebase && git push && break; sleep 5; done

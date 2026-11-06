@@ -1,0 +1,35 @@
+name: S&P 500 list
+
+# engine/sp500_list.py: today's S&P 500 members with their names and sectors (Wikipedia), for the
+# site's S&P 500 option. Every S&P 500 workflow reads engine/tickers500.txt and engine/names500.json.
+# The first day of each month, and whenever the script changes.
+on:
+  schedule:
+    - cron: "13 5 1 * *"
+  push:
+    branches: [main]
+    paths: ["engine/sp500_list.py"]
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+jobs:
+  list:
+    if: github.event_name != 'schedule' || vars.EXTERNAL_SCHEDULER != 'on'   # the scheduler Worker starts it on time instead (worker/README.md)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: python engine/sp500_list.py
+      - name: Publish
+        run: |
+          git config user.name "signal-desk-bot"
+          git config user.email "signal-desk-bot@users.noreply.github.com"
+          git add engine/tickers500.txt engine/names500.json worker/trendlines-worker.js docs/data/universe.json
+          git diff --cached --quiet && exit 0
+          git commit -m "S&P 500 list $(date -u +%F)"
+          for i in 1 2 3; do git pull --rebase && git push && break; sleep 5; done

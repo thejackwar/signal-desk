@@ -25,7 +25,7 @@ jobs:
   maxpain:
     if: github.event_name != 'schedule' || vars.EXTERNAL_SCHEDULER != 'on'   # the scheduler Worker starts it on time instead (worker/README.md)
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 70
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -36,11 +36,19 @@ jobs:
           ALPACA_KEY_ID: ${{ secrets.ALPACA_KEY_ID }}
           ALPACA_SECRET_KEY: ${{ secrets.ALPACA_SECRET_KEY }}
         run: python engine/maxpain.py
+      - name: The same for the S&P 500
+        continue-on-error: true
+        env:
+          UNIVERSE: sp500
+          ALPACA_KEY_ID: ${{ secrets.ALPACA_KEY_ID }}
+          ALPACA_SECRET_KEY: ${{ secrets.ALPACA_SECRET_KEY }}
+        run: python engine/maxpain.py
       - name: Publish
         run: |
           git config user.name "signal-desk-bot"
           git config user.email "signal-desk-bot@users.noreply.github.com"
           git add docs/data/maxpain
+          git add docs/data/sp500/maxpain 2>/dev/null || true
           git diff --cached --quiet && exit 0
           git commit -m "Max pain $(date -u +%F)"
           for i in 1 2 3; do git pull --rebase && git push && break; sleep 5; done

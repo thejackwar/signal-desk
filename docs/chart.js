@@ -15,6 +15,7 @@ const TICKERS = ("SPY AAPL ABBV ABT ACN ADBE AIG AMD AMGN AMT AMZN AVGO AXP BA B
   "CHTR CL CMCSA COF COP COST CRM CSCO CVS CVX DE DHR DIS DUK EMR F FDX GD GE GILD GM GOOGL GS HD HON IBM INTC " +
   "INTU ISRG JNJ JPM KO LIN LLY LMT LOW MA MCD MDLZ MDT MET META MMM MO MRK MS MSFT NEE NFLX NKE NOW NVDA ORCL " +
   "PEP PFE PG PLTR PM PYPL QCOM RTX SBUX SCHW SO SPG T TGT TMO TMUS TSLA TXN UBER UNH UNP UPS USB V VZ WFC WMT XOM").split(" ");
+const SP100 = new Set(TICKERS);   // the S&P 100 + SPY; the rest of the S&P 500 is added from data/universe.json
 const COINS = "BTC ETH XRP BNB SOL DOGE TRX ADA LINK XLM BCH AVAX LTC HBAR DOT XMR ETC ATOM ALGO".split(" ");
 const COMMOD = { "GC=F": "Gold", "SI=F": "Silver", "PL=F": "Platinum", "PA=F": "Palladium", "HG=F": "Copper", "CL=F": "WTI crude oil",
   "BZ=F": "Brent crude oil", "NG=F": "Natural gas", "RB=F": "Gasoline", "HO=F": "Heating oil", "ZC=F": "Corn", "ZW=F": "Wheat",
@@ -144,7 +145,11 @@ const label = sym => COMMOD[sym] ? COMMOD[sym] : sym.endsWith("-USD") ? sym.repl
 
 async function loadNames() {
   const get = async u => { try { const r = await fetch(u); return r.ok ? (await r.json()).stocks || [] : []; } catch { return []; } };
-  const [st, cr] = await Promise.all([get("data/stocks.json"), get("data/crypto/stocks.json")]);
+  const [st, cr, uv] = await Promise.all([get("data/stocks.json"), get("data/crypto/stocks.json"),
+    fetch("data/universe.json").then(r => r.ok ? r.json() : null).catch(() => null)]);
+  // every S&P 500 stock can be charted (data/universe.json, engine/sp500_list.py)
+  for (const t of uv?.sp500 || []) if (!TICKERS.includes(t) && !SP100.has(t)) TICKERS.push(t);
+  Object.assign(NAMES, uv?.names || {});
   for (const x of [...st, ...cr]) NAMES[x.ticker] = x.name;
   Object.assign(NAMES, COMMOD);
   $("syms").innerHTML = [...TICKERS, ...COINS.map(c => `${c}-USD`), ...Object.keys(COMMOD)]
@@ -178,7 +183,8 @@ async function getData(sym) {
     const payload = await worker(sym);
     return { sym, kind, frames: L.buildFrames(payload), source: "Alpaca, all US exchanges, regular hours, at least 15 minutes old." };
   } catch (e) {
-    const js = await fetchJson(`data/stocks/${encodeURIComponent(sym)}.json`).catch(() => { throw new Error(`the data server didn't answer (${e.message})`); });
+    const folder = SP100.has(sym) ? "data/stocks/" : "data/sp500/stocks/";    // the rest of the S&P 500 has its own folder
+    const js = await fetchJson(`${folder}${encodeURIComponent(sym)}.json`).catch(() => { throw new Error(`the data server didn't answer (${e.message})`); });
     return { sym, kind, frames: L.framesFromDaily(js), fallback: true,
       source: `The live data server didn't answer (${e.message}), so this is the site's nightly daily data: daily and weekly only, no volume.` };
   }
@@ -712,7 +718,7 @@ $("quick").addEventListener("click", e => { const b = e.target.closest("[data-s]
 $("pick").addEventListener("submit", e => {
   e.preventDefault();
   const s = normSym($("sym").value);
-  if (!s) { $("status").className = "status err"; $("status").textContent = "Try an S&P 100 ticker or SPY, one of the site's 19 coins (BTC, ETH…) or a commodity (Gold, Oil, GC=F…)."; return; }
+  if (!s) { $("status").className = "status err"; $("status").textContent = "Try an S&P 500 ticker or SPY, one of the site's 19 coins (BTC, ETH…) or a commodity (Gold, Oil, GC=F…)."; return; }
   $("sym").blur(); load(s);
 });
 window.addEventListener("hashchange", () => { const old = S.sym, oldTf = S.tf; readHash(); if (S.sym !== old) load(S.sym); else if (S.tf !== oldTf && DATA) render(false); });

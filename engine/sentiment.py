@@ -1,5 +1,6 @@
 """
-News mood: is the latest news on each S&P 100 stock bullish or bearish?
+News mood: is the latest news on each S&P 100 stock bullish or bearish? (S&P 500 with UNIVERSE=sp500:
+half as often per stock, a sixth of the list each hour)
 
   python engine/sentiment.py                       # Google News (what the website shows)
   python engine/sentiment.py --demo                # made-up headlines and a simple stand-in scorer, no internet
@@ -39,7 +40,11 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 ENGINE = Path(__file__).parent
-OUT = ROOT / "docs" / "data" / "sentiment.json"
+sys.path.insert(0, str(ENGINE))
+from universe import U  # noqa: E402
+
+OUT = U.path("sentiment.json")     # UNIVERSE=sp500: docs/data/sp500/sentiment.json
+PARTS = 6 if U.is500 else 3        # each hourly run searches 1/PARTS of the stocks
 MODEL = "ProsusAI/finbert"
 
 WINDOW_DAYS = 7          # headlines older than this are dropped
@@ -104,11 +109,10 @@ def parse(s: str) -> datetime:
 
 
 def load_tickers() -> list[str]:
-    lines = (ENGINE / "tickers.txt").read_text().splitlines()
-    return [x.strip() for x in lines if x.strip() and not x.startswith("#")]
+    return U.tickers()
 
 
-NAMES = json.loads((ENGINE / "names.json").read_text())
+NAMES = json.loads(U.names_file.read_text())
 
 
 # ------------------------------------------------------------------ fetch
@@ -386,7 +390,7 @@ def main():
     items = dict(old)
     if src == "google":
         # first run: every stock over the whole window; then a third of the stocks each hour, last day
-        part = tickers if (args.all or not old) else [t for i, t in enumerate(tickers) if i % 3 == now.hour % 3]
+        part = tickers if (args.all or not old) else [t for i, t in enumerate(tickers) if i % PARTS == now.hour % PARTS]
         fetched = fetch_google(part, f"{WINDOW_DAYS}d" if not old else "1d")
         print(f"{len(fetched)} trusted headlines for {len(part)} stocks ({len(old)} already scored)")
         new = merge_google(items, [x for x in fetched if parse(x["t"]) >= window_start])

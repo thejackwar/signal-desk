@@ -24,6 +24,11 @@ jobs:
 
       - name: Backtest every strategy on 15 years of S&P 100 prices
         run: python engine/backtest.py
+      - name: Backtest every strategy on 10 years of S&P 500 prices
+        continue-on-error: true   # never hold back the S&P 100, crypto and commodity results
+        env:
+          UNIVERSE: sp500
+        run: python engine/backtest.py
       - name: Backtest every strategy on the full history of the top cryptocurrencies
         run: python engine/backtest.py --market crypto
       - name: Backtest every strategy on 15 years of commodity futures
@@ -37,6 +42,7 @@ jobs:
         continue-on-error: true
         run: |
           node engine/candle_study.mjs docs/data/lab.json docs/data/candles.json stocks
+          [ -f docs/data/sp500/lab.json ] && node engine/candle_study.mjs docs/data/sp500/lab.json docs/data/sp500/candles.json stocks
           node engine/candle_study.mjs docs/data/crypto/lab.json docs/data/crypto/candles.json crypto
           node engine/candle_study.mjs docs/data/commodities/lab.json docs/data/commodities/candles.json commodities
 

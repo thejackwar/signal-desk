@@ -32,7 +32,7 @@ jobs:
   pairs:
     if: (github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success') && (github.event_name != 'schedule' || vars.EXTERNAL_SCHEDULER != 'on')   # the scheduler Worker starts it on time instead (worker/README.md)
     runs-on: ubuntu-latest
-    timeout-minutes: 40
+    timeout-minutes: 120
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -47,11 +47,23 @@ jobs:
           else
             python engine/pairs.py
           fi
+      - name: Pairs, S&P 500
+        continue-on-error: true
+        env:
+          UNIVERSE: sp500
+        run: |
+          [ -f docs/data/sp500/lab.json ] || { echo "no S&P 500 price file yet (weekly backtest)"; exit 0; }
+          if [ "${{ github.event_name }}" = "schedule" ] || [ "${{ github.event_name }}" = "push" ] || [ "${{ inputs.grid }}" = "true" ] || [ ! -f docs/data/sp500/pairs/grid.json ]; then
+            python engine/pairs.py --grid
+          else
+            python engine/pairs.py
+          fi
       - name: Publish
         run: |
           git config user.name "signal-desk-bot"
           git config user.email "signal-desk-bot@users.noreply.github.com"
           git add docs/data/pairs
+          git add docs/data/sp500/pairs 2>/dev/null || true
           git diff --cached --quiet || git commit -m "Pairs $(date -u +%F)"
           git pull --rebase
           git push

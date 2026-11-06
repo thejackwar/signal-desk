@@ -24,7 +24,7 @@
   document.head.appendChild(s);
 })();
 </script>
-<script src="sections.js?v=1" defer></script>
+<script src="sections.js?v=2" defer></script>
 <link rel="icon" href="favicon.ico?v=2" sizes="any">
 <link rel="icon" type="image/svg+xml" href="logo.svg?v=2">
 <link rel="apple-touch-icon" href="icon-180.png?v=2">
@@ -228,18 +228,22 @@ const OPTS = {
 };
 const LABEL = { pivot: "Pivot length", entry: "Entry", target: "Target", side: "Trades", filter: "Filter" };
 const WHY = { target: "target", stop: "stop", trail: "trailing stop", time: "60-candle time stop" };
-const MKT = { stocks: ["S&P 100", "SPY"], btc: ["Bitcoin", "bitcoin"] };
+const MKT = { stocks: ["S&P 100", "SPY"], sp500: ["S&P 500", "SPY"], btc: ["Bitcoin", "bitcoin"] };
 let B = null, LV = null, EX = 0, SORT = "oos";
 const S = (() => { try { return JSON.parse(localStorage.getItem("choch4h") || "{}"); } catch { return {}; } })();
-S.m ||= "stocks";
+// first visit: the app's stock-list choice (S&P 100 or S&P 500)
+if (!S.m) { try { S.m = JSON.parse(localStorage.getItem("signaldesk.prefs") || "{}").universe === "sp500" ? "sp500" : "stocks"; } catch { S.m = "stocks"; } }
 const save = () => { try { localStorage.setItem("choch4h", JSON.stringify(S)); } catch {} };
 const key = () => [S.pivot, S.entry, S.target, S.side, S.filter].join("|");
-const M = () => B.markets[S.m];
+// "sp500": the stocks of data/sp500/choch/ (engine/choch.py with UNIVERSE=sp500)
+let B5 = null, LV5 = null;
+const M = () => S.m === "sp500" ? B5.markets.stocks : B.markets[S.m];
+const LVm = () => S.m === "sp500" ? LV5?.markets?.stocks : LV?.markets?.[S.m];
 async function load(p) { try { const r = await fetch(p + "?t=" + Date.now()); return r.ok ? r.json() : null; } catch { return null; } }
 const seg = (name, val, opts) => `<div class="seg" role="group">${opts.map(([v, l]) => `<button type="button" data-${name}="${v}" aria-pressed="${v === val}">${esc(l)}</button>`).join("")}</div>`;
 
 function controls() {
-  $("mkt").innerHTML = seg("m", S.m, [["stocks", "S&P 100 stocks"], ["btc", "Bitcoin"]]);
+  $("mkt").innerHTML = seg("m", S.m, [["stocks", "S&P 100"], ...(B5 ? [["sp500", "S&P 500"]] : []), ["btc", "Bitcoin"]]);
   $("ctl").innerHTML = Object.keys(OPTS).map(k => `<div class="row"><span class="k">${LABEL[k]}</span>${seg(k, S[k], OPTS[k])}</div>`).join("");
   $("setk").innerHTML = key() === B.default ? `<span class="pill">Default</span>` : `<a href="#" id="reset">Back to default</a>`;
   const r = $("reset"); if (r) r.onclick = e => { e.preventDefault(); setKey(B.default); };
@@ -252,7 +256,7 @@ function headline() {
     <div class="sub"><span class="k">${esc(fmtD(M().from, { month: "short", year: "numeric" }))} – ${esc(fmtD(M().to, { month: "short", year: "numeric" }))} · ${esc(MKT[S.m][0])} · backtest</span>
       <b>${all.trades ? `${all.trades.toLocaleString("en")} trades · ${Math.round(all.win_rate * 100)}% won · ${rr(all.avg_r)} a trade` : "no trades"} · max drop ${pc(A.max_dd_pct, 0)}</b>
       <span class="k">${esc(MKT[S.m][1])} held: ${pc(M().hold_pct, 0)}${M().hold_same_pct != null ? ` · same stocks held: ${pc(M().hold_same_pct, 0)}` : ""}</span></div>`;
-  $("bigfine").textContent = `${S.m === "stocks" ? "€100,000 account, 0.5% risk a trade, no leverage" + (A.skipped_no_cash ? `; ${A.skipped_no_cash} signals skipped with the money already in use` : "") : "The whole account in each trade, no leverage"}. ${B.demo ? "DEMO DATA, not real prices." : ""}`;
+  $("bigfine").textContent = `${S.m !== "btc" ? "€100,000 account, 0.5% risk a trade, no leverage" + (A.skipped_no_cash ? `; ${A.skipped_no_cash} signals skipped with the money already in use` : "") : "The whole account in each trade, no leverage"}. ${B.demo ? "DEMO DATA, not real prices." : ""}`;
 }
 
 // candles from a monthly account curve: open = last month's end, close = this month's end
@@ -335,8 +339,8 @@ function exChart() {
 }
 
 function live() {
-  const mk = LV?.markets?.[S.m], ts = (mk?.trades || []).slice().reverse(), pend = mk?.pending || [];
-  $("live-p").innerHTML = `From ${esc(fmtD(LV?.start || "2026-11-09", { weekday: "long", day: "numeric", month: "long", year: "numeric" }))}, default settings, €${LV?.stake || 1000} a trade, ${S.m === "btc" ? "checked after every 4-hour candle, round the clock" : "checked at 13:30 and 16:00 New York"}. Closed trades are never changed. Phone alerts: the ntfy channel ending in <b>${S.m === "btc" ? "-crypto-choch" : "-choch"}</b>.`;
+  const mk = LVm(), ts = (mk?.trades || []).slice().reverse(), pend = mk?.pending || [];
+  $("live-p").innerHTML = `From ${esc(fmtD(LV?.start || "2026-11-09", { weekday: "long", day: "numeric", month: "long", year: "numeric" }))}, default settings, €${LV?.stake || 1000} a trade, ${S.m === "btc" ? "checked after every 4-hour candle, round the clock" : "checked at 13:30 and 16:00 New York"}. Closed trades are never changed. Phone alerts: the ntfy channel ending in <b>${S.m === "btc" ? "-crypto-choch" : S.m === "sp500" ? "-sp500-choch" : "-choch"}</b>.`;
   $("pend").innerHTML = pend.length ? `<div class="panel"><div class="ph"><span class="k">Orders waiting for the retest</span><span class="k blue live-dot">Live</span></div><div class="tw"><table><thead><tr><th>Stock</th><th>CHoCH</th><th>Buy at</th><th>Zone</th><th>Stop</th><th>Candles left</th></tr></thead><tbody>${pend.map(p => `<tr><td>${esc(p.symbol)}</td><td>${esc(fmtD(p.signal, { day: "numeric", month: "short" }))}</td><td>${p.limit}</td><td>${p.zone[0]}–${p.zone[1]}</td><td>${p.stop}</td><td>${p.expires_after}</td></tr>`).join("")}</tbody></table></div></div>` : "";
   if (!ts.length) { $("lt").innerHTML = `<tbody><tr><td class="fine" style="text-align:left;white-space:normal">No live trades yet${LV ? "" : ": the first check runs on the go-live day"}.</td></tr></tbody>`; return; }
   $("lt").innerHTML = `<thead><tr><th>${S.m === "btc" ? "Market" : "Stock"}</th><th>In</th><th>Entry</th><th>Stop / target</th><th>Out</th><th>Result</th><th>€</th></tr></thead><tbody>` +
@@ -354,9 +358,10 @@ document.addEventListener("click", e => {
 });
 
 (async () => {
-  [B, LV] = await Promise.all([load("data/choch/backtest.json"), load("data/choch/live.json")]);
+  [B, LV, B5, LV5] = await Promise.all([load("data/choch/backtest.json"), load("data/choch/live.json"), load("data/sp500/choch/backtest.json"), load("data/sp500/choch/live.json")]);
+  if (!B5?.markets?.stocks) B5 = null;
   if (!B) { $("big").innerHTML = `<div class="empty" style="width:100%">The first backtest is running on GitHub. Check back in about half an hour.</div>`; return; }
-  if (!B.markets[S.m]) S.m = "stocks";
+  if (S.m === "sp500" ? !B5 : !B.markets[S.m]) S.m = "stocks";
   if (!S.pivot || !M().variants[key()]) setKey(B.default); else render();
 })();
 </script>

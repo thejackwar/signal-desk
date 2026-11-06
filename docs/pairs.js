@@ -1,4 +1,7 @@
 // Pairs Trading page (docs/pairs.html). Data: docs/data/pairs/ (engine/pairs.py).
+// S&P 100 / S&P 500 (the app's stock-list choice, docs/sections.js): this list's data folder and name
+const UD = p => globalThis.ICS ? ICS.udata(p) : "data/" + p;
+const UL = (globalThis.ICS?.uniName?.() || "S&P 100").replace("&", "&amp;");
 // simulate() and zscore() mirror engine/pairs.py; tests/pairs/test_parity.py checks they agree.
 
 const $ = (s, r = document) => r.querySelector(s);
@@ -311,7 +314,7 @@ function renderBacktest() {
     ? `Out of sample it earned ${pct(s.cagr)} a year against ${pct(b.cagr)} for holding SPY.`
     : good
       ? `It made money (${pct(s.cagr)} a year) with low ties to the market, but less than holding SPY (${pct(b.cagr)} a year).`
-      : `It didn't work: ${pct(s.cagr)} a year after costs, against ${pct(b.cagr)} for holding SPY. Over these years the gaps between S&P 100 pairs haven't closed reliably enough to pay four trading costs per trade.`;
+      : `It didn't work: ${pct(s.cagr)} a year after costs, against ${pct(b.cagr)} for holding SPY. Over these years the gaps between ${UL} pairs haven't closed reliably enough to pay four trading costs per trade.`;
   const short = d => new Date(d + "T12:00:00").toLocaleDateString("en-GB", { month: "short", year: "numeric" });
   const exits = Object.entries(W.exits || {}).map(([k, v]) => `${esc(k)} ${Math.round(v / W.trades * 100)}%`).join(" · ");
   $("#v-backtest").innerHTML = `
@@ -410,7 +413,7 @@ async function getJSON(u) {
 }
 
 async function boot() {
-  [DATA, LIVE, GRID] = await Promise.all([getJSON("data/pairs/pairs.json"), getJSON("data/pairs/live.json"), getJSON("data/pairs/grid.json")]);
+  [DATA, LIVE, GRID] = await Promise.all([getJSON(UD("pairs/pairs.json")), getJSON(UD("pairs/live.json")), getJSON(UD("pairs/grid.json"))]);
   if (!DATA) {
     $("#v-today").hidden = false;
     $("#v-today").innerHTML = `<div class="msg"><strong>No data yet</strong>The pairs scan runs after each daily scan.</div>`;
@@ -429,3 +432,6 @@ async function boot() {
 }
 
 if (typeof document !== "undefined") boot();
+
+// the S&P 100 / S&P 500 switch in the page's header (picking one reloads with that list)
+if (typeof document !== "undefined") { const el = document.getElementById("uniSw"); if (el && globalThis.ICS) el.innerHTML = ICS.uniSwitch(); }

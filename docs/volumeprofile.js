@@ -11,6 +11,7 @@ const TICKERS = ("SPY AAPL ABBV ABT ACN ADBE AIG AMD AMGN AMT AMZN AVGO AXP BA B
   "CHTR CL CMCSA COF COP COST CRM CSCO CVS CVX DE DHR DIS DUK EMR F FDX GD GE GILD GM GOOGL GS HD HON IBM INTC " +
   "INTU ISRG JNJ JPM KO LIN LLY LMT LOW MA MCD MDLZ MDT MET META MMM MO MRK MS MSFT NEE NFLX NKE NOW NVDA ORCL " +
   "PEP PFE PG PLTR PM PYPL QCOM RTX SBUX SCHW SO SPG T TGT TMO TMUS TSLA TXN UBER UNH UNP UPS USB V VZ WFC WMT XOM").split(" ");
+const SP100 = new Set(TICKERS);   // the S&P 100 + SPY; the rest of the S&P 500 is added from data/universe.json
 const COINS = "BTC ETH XRP BNB SOL DOGE TRX ADA LINK XLM BCH AVAX LTC HBAR DOT XMR ETC ATOM ALGO".split(" ");
 // chart candle length (minutes, or "D") for each period
 const CANDLE = { stock: { 1: 5, 5: 15, 20: 60, 60: 240, 250: "D" }, crypto: { 1: 15, 5: 60, 20: 240, 60: 720, 250: "D" } };
@@ -262,11 +263,16 @@ function drawChart(el, bars, p, sess, naked, crypto) {
 function init() {
   readColors();
   $("syms").innerHTML = [...TICKERS, ...COINS.map(c => `${c}-USD`)].map(s => `<option value="${s}">`).join("");
+  // every S&P 500 stock (data/universe.json, engine/sp500_list.py)
+  fetch("data/universe.json").then(r => r.ok ? r.json() : null).catch(() => null).then(u => {
+    for (const t of u?.sp500 || []) if (!TICKERS.includes(t)) TICKERS.push(t);
+    $("syms").innerHTML = [...TICKERS, ...COINS.map(c => `${c}-USD`)].map(s => `<option value="${s}">`).join("");
+  });
   readHash();
   $("pick").addEventListener("submit", ev => {
     ev.preventDefault();
     const s = normSym($("sym").value);
-    if (!s) { $("status").className = "status err"; $("status").textContent = "Pick SPY, an S&P 100 stock or one of the app's 19 coins (e.g. BTC)."; return; }
+    if (!s) { $("status").className = "status err"; $("status").textContent = "Pick SPY, an S&P 500 stock or one of the app's 19 coins (e.g. BTC)."; return; }
     S.sym = s; load();
   });
   document.querySelectorAll(".seg[data-k] button").forEach(b => b.addEventListener("click", () => {

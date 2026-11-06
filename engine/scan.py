@@ -27,6 +27,7 @@ import pandas as pd
 
 sys.path.insert(0, str(Path(__file__).parent))
 from chart import _r as rp, payload  # noqa: E402
+from universe import U  # noqa: E402
 from strategies import REGISTRY, StrategyResult, for_market, rsi, set_benchmark, stop_for  # noqa: E402
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -34,8 +35,9 @@ ENGINE = Path(__file__).parent
 
 # Each market has its own stock list and writes to its own data folder.
 MARKETS = {
-    "stocks": {"dir": ROOT / "docs" / "data", "tickers": "tickers.txt", "names": "names.json",
-               "universe": "S&P 100", "bt_universe": "Today's S&P 100", "topic": ""},
+    # the S&P 100, or the S&P 500 with UNIVERSE=sp500 (engine/universe.py: docs/data/sp500/, ntfy "sp500-")
+    "stocks": {"dir": U.data, "tickers": U.tickers_file.name, "names": U.names_file.name,
+               "universe": U.label, "bt_universe": f"Today's {U.label}", "topic": U.prefix},
     "crypto": {"dir": ROOT / "docs" / "data" / "crypto", "tickers": "crypto.txt", "names": "crypto_names.json",
                "universe": "Top crypto", "bt_universe": "Today's top cryptocurrencies", "topic": "crypto-"},
     "commodities": {"dir": ROOT / "docs" / "data" / "commodities", "tickers": "commodities.txt", "names": "commodities_names.json",
@@ -54,6 +56,7 @@ def configure(market: str):
     CHART_DIR = DATA / "charts"     # one small file per alert, loaded when tapped
     STOCK_DIR = DATA / "stocks"     # one chart file per stock / coin
     STOCKS_OUT = DATA / "stocks.json"
+    DATA.mkdir(parents=True, exist_ok=True)   # docs/data/sp500/ on the S&P 500's first run
 
 CHART_BARS = 120          # bars of history drawn with each alert
 STOCK_BARS = 260          # about one year on the stock page
@@ -356,8 +359,8 @@ def backdrop(data: dict[str, pd.DataFrame]) -> dict:
     c = idx["close"]
     m50, m200 = c.rolling(50).mean(), c.rolling(200).mean()
     cdl = idx.iloc[-150:]
-    return {"label": f"S&P 100 average of {len(frames)} stocks, last 12 months · with its 50- and 200-day averages",
-            "lines": [{"name": "S&P 100 average", "values": series(c.iloc[-bars:])},
+    return {"label": f"{U.label} average of {len(frames)} stocks, last 12 months · with its 50- and 200-day averages",
+            "lines": [{"name": f"{U.label} average", "values": series(c.iloc[-bars:])},
                       {"name": "50-day average", "values": series(m50.iloc[-bars:])},
                       {"name": "200-day average", "values": series(m200.iloc[-bars:])}],
             "candles": {k: series(cdl[k]) for k in ("open", "high", "low", "close")}}

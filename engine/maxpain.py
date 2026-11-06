@@ -38,8 +38,10 @@ from zoneinfo import ZoneInfo
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from gex import DATA, TRADING, _get, _pages, spot_prices  # noqa: E402  (same Alpaca helpers as the gamma levels)
 
+from universe import U  # noqa: E402
+
 ROOT = Path(__file__).resolve().parent.parent
-OUT = ROOT / "docs" / "data" / "maxpain"
+OUT = U.path("maxpain")    # UNIVERSE=sp500: docs/data/sp500/maxpain/
 NY = ZoneInfo("America/New_York")
 ETFS = ["SPY", "QQQ", "IWM"]
 DAYS_OUT = 60          # expiries up to this many days ahead
@@ -48,8 +50,7 @@ BAND = 0.5             # strikes within +-50% of the price (far strikes barely m
 
 
 def tickers() -> list[str]:
-    lines = (ROOT / "engine" / "tickers.txt").read_text().splitlines()
-    syms = [s.strip().upper() for s in lines if s.strip() and not s.startswith("#")]
+    syms = [s.upper() for s in U.tickers()]
     return ETFS + [s for s in syms if s not in ETFS and s != "GOOG"]
 
 

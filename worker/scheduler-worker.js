@@ -52,6 +52,7 @@ const SCHEDULE = [
   ["gamma-setup.yml",      "15 7 * * 6",           "Gamma setup backtest (Saturday)", { job: "backtest" }],
   ["session-momentum.yml", "35 7 * * 6",           "Session Momentum backtest (Saturday)", { job: "backtest" }],
   ["choch.yml",            "55 7 * * 6",           "4H CHoCH backtest (Saturday)", { job: "backtest" }],
+  ["sp500-list.yml",       "13 5 1 * *",           "S&P 500 list (first day of each month)"],
   ["research.yml",         "30 7 1 * *",           "Research engine (first day of each month)"],
 ];
 

@@ -35,7 +35,7 @@ jobs:
   run:
     if: github.event_name != 'schedule' || vars.EXTERNAL_SCHEDULER != 'on'   # the scheduler Worker starts it on time instead (worker/README.md)
     runs-on: ubuntu-latest
-    timeout-minutes: 90
+    timeout-minutes: 180
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -44,6 +44,15 @@ jobs:
       - name: Live stocks
         if: github.event.schedule == '37 17,18 * * 1-5' || github.event.schedule == '7 20,21 * * 1-5' || (github.event_name == 'workflow_dispatch' && inputs.job == 'stocks')
         env:
+          ALPACA_KEY_ID: ${{ secrets.ALPACA_KEY_ID }}
+          ALPACA_SECRET_KEY: ${{ secrets.ALPACA_SECRET_KEY }}
+          NTFY_PREFIX: ${{ vars.NTFY_PREFIX }}
+        run: python engine/choch.py --live stocks
+      - name: Live S&P 500 stocks
+        if: github.event.schedule == '37 17,18 * * 1-5' || github.event.schedule == '7 20,21 * * 1-5' || (github.event_name == 'workflow_dispatch' && inputs.job == 'stocks')
+        continue-on-error: true
+        env:
+          UNIVERSE: sp500
           ALPACA_KEY_ID: ${{ secrets.ALPACA_KEY_ID }}
           ALPACA_SECRET_KEY: ${{ secrets.ALPACA_SECRET_KEY }}
           NTFY_PREFIX: ${{ vars.NTFY_PREFIX }}
@@ -59,12 +68,21 @@ jobs:
           ALPACA_KEY_ID: ${{ secrets.ALPACA_KEY_ID }}
           ALPACA_SECRET_KEY: ${{ secrets.ALPACA_SECRET_KEY }}
         run: python engine/choch.py --backtest
+      - name: Backtest, S&P 500 stocks
+        if: github.event.schedule == '55 7 * * 6' || github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.job == 'backtest')
+        continue-on-error: true
+        env:
+          UNIVERSE: sp500
+          ALPACA_KEY_ID: ${{ secrets.ALPACA_KEY_ID }}
+          ALPACA_SECRET_KEY: ${{ secrets.ALPACA_SECRET_KEY }}
+        run: python engine/choch.py --backtest
       - name: Publish
         run: |
           git config user.name "signal-desk-bot"
           git config user.email "signal-desk-bot@users.noreply.github.com"
           mkdir -p docs/data/choch
           git add docs/data/choch
+          git add docs/data/sp500/choch 2>/dev/null || true
           git diff --cached --quiet && exit 0
           git commit -m "4H CHoCH $(date -u +%F\ %H:%M)"
           for i in 1 2 3; do git pull --rebase && git push && break; sleep 5; done

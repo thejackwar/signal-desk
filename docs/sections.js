@@ -57,7 +57,10 @@
 #app > .ics-sub{margin:0 -16px 6px;border-bottom:0}
 #app > .ics-sub .ics-sub-in{padding:4px 16px 8px}
 #app:has(> .ics-sub) .seg.nsw[aria-label="Alerts view"]{display:none}
-html:not([data-market="crypto"]) .ics-sub a.crypto-only{display:none}`;
+html:not([data-market="crypto"]) .ics-sub a.crypto-only{display:none}
+.ics-uni{display:inline-flex;gap:2px;padding:2px;border:1px solid var(--line,#1e2834);border-radius:8px;background:var(--fill,#0a1017)}
+.ics-uni button{font:600 12px/1 var(--font,inherit);color:var(--muted,#9aa7b4);background:none;border:0;border-radius:6px;padding:6px 10px;cursor:pointer}
+.ics-uni button[aria-pressed="true"]{background:rgba(108,180,255,.14);color:var(--fg,#e8eef4);box-shadow:inset 0 0 0 1px rgba(108,180,255,.35)}`;
   function addCss() {
     if (document.getElementById("ics-sub-css")) return;
     const st = document.createElement("style"); st.id = "ics-sub-css"; st.textContent = CSS; document.head.appendChild(st);
@@ -74,7 +77,24 @@ html:not([data-market="crypto"]) .ics-sub a.crypto-only{display:none}`;
     if (cur) cur.parentElement.scrollLeft = cur.offsetLeft - 60;
   }
 
-  window.ICS = { SECTIONS, where, subHtml, addCss, mountSub };
+  // S&P 100 / S&P 500: the app's stock-list choice (saved in its prefs), shared with the stand-alone pages.
+  // udata("x.json") is data/x.json for the S&P 100 and data/sp500/x.json for the S&P 500 (engine/universe.py).
+  const PREFS = "signaldesk.prefs";
+  const uni = () => { try { return JSON.parse(localStorage.getItem(PREFS) || "{}").universe === "sp500" ? "sp500" : "sp100"; } catch (e) { return "sp100"; } };
+  const setUni = u => { try { const p = JSON.parse(localStorage.getItem(PREFS) || "{}"); p.universe = u; localStorage.setItem(PREFS, JSON.stringify(p)); } catch (e) {} };
+  const udata = path => (uni() === "sp500" ? "data/sp500/" : "data/") + path;
+  const uniName = () => uni() === "sp500" ? "S&P 500" : "S&P 100";
+  // a small two-button switch; picking one saves it and reloads the page with that list's files
+  const uniSwitch = (cls = "") => `<span class="ics-uni ${cls}" role="group" aria-label="Stock list">${[["sp100", "S&amp;P 100"], ["sp500", "S&amp;P 500"]]
+    .map(([u, t]) => `<button type="button" data-ics-uni="${u}" aria-pressed="${uni() === u}">${t}</button>`).join("")}</span>`;
+  document.addEventListener("click", e => {
+    const b = e.target.closest("button[data-ics-uni]");
+    if (!b || inApp()) return;
+    e.preventDefault();
+    if (b.dataset.icsUni !== uni()) { setUni(b.dataset.icsUni); location.reload(); }
+  });
+
+  window.ICS = { SECTIONS, where, subHtml, addCss, mountSub, uni, setUni, udata, uniName, uniSwitch };
   addCss();
   if (!inApp()) {
     if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", mountSub); else mountSub();

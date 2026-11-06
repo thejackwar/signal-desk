@@ -50,7 +50,10 @@ from zoneinfo import ZoneInfo
 
 ROOT = Path(__file__).resolve().parent.parent
 ENGINE = ROOT / "engine"
-OUT = ROOT / "docs" / "data" / "darkpool"
+sys.path.insert(0, str(ENGINE))
+from universe import U  # noqa: E402
+
+OUT = U.path("darkpool")          # UNIVERSE=sp500: docs/data/sp500/darkpool/
 NY = ZoneInfo("America/New_York")
 ETFS = ["SPY", "QQQ", "IWM"]
 UA = {"User-Agent": "signal-desk/1.0 (github.com/thejackwar/signal-desk)"}
@@ -72,13 +75,12 @@ def key(sym: str) -> str:                           # BRK-B (Yahoo), BRK.B (Alpa
 
 
 def universe() -> list[str]:
-    lines = (ENGINE / "tickers.txt").read_text().splitlines()
-    return [x.strip() for x in lines if x.strip() and not x.startswith("#")] + ETFS
+    return U.tickers() + ETFS
 
 
 def names() -> dict:
     try:
-        return {k: v[0] for k, v in json.loads((ENGINE / "names.json").read_text()).items()}
+        return {k: v[0] for k, v in json.loads(U.names_file.read_text()).items()}
     except Exception:
         return {}
 
@@ -574,7 +576,7 @@ def notify(big: list[dict]) -> None:
     lines = [f"{p['t']}: ${p['v'] / 1e6:.1f}M ({p['sz']:,} sh @ {p['px']}) {lean[p['lean']]}".strip() for p in big[:8]]
     if len(big) > 8:
         lines.append(f"and {len(big) - 8} more")
-    req = urllib.request.Request(f"https://ntfy.sh/{prefix}-darkpool", data="\n".join(lines).encode(), method="POST",
+    req = urllib.request.Request(f"https://ntfy.sh/{prefix}-{U.topic('darkpool')}", data="\n".join(lines).encode(), method="POST",
                                  headers={"Title": f"Dark pool blocks: {', '.join(dict.fromkeys(p['t'] for p in big[:5]))}",
                                           "Tags": "waves"})
     try:
@@ -758,7 +760,7 @@ def main():
     import argparse
     ap = argparse.ArgumentParser()
     ap.add_argument("cmd", choices=["daily", "weekly", "blocks", "backfill", "backtest", "demo"])
-    ap.add_argument("--since", default="2019-01-02", help="first day of the FINRA history (backfill/backtest)")
+    ap.add_argument("--since", default="2025-06-02" if U.is500 else "2019-01-02", help="first day of the FINRA history (backfill/backtest)")
     ap.add_argument("--split", default="2023-01-01", help="out-of-sample starts here")
     ap.add_argument("--out", default="/tmp/darkpool-demo", help="demo / test output folder")
     ap.add_argument("--day", help="blocks: test on this past session (YYYY-MM-DD), written to --out")

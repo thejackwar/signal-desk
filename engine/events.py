@@ -180,7 +180,7 @@ def nasdaq_earnings(start: date, end: date) -> list[dict]:
 
 
 def sp100_dates(tickers: list[str], names: dict) -> dict[str, dict]:
-    """Each S&P 100 stock's next earnings date and the analysts' estimates, from its own Yahoo page."""
+    """Each S&P 500 stock's next earnings date and the analysts' estimates, from its own Yahoo page."""
     import yfinance as yf
     out = {}
     for t in tickers:
@@ -224,12 +224,13 @@ def earnings(start: date, end: date, tickers: list[str], names: dict) -> tuple[l
         old = by.get(k)
         if not old or (old["time"] == "tns" and r["time"] != "tns") or (old.get("eps") is None and r.get("eps") is not None):
             by[k] = {**(old or {}), **{k2: v for k2, v in r.items() if v is not None}}
-    sp = set(tickers)
+    sp5 = set(tickers)
+    sp = {ln.split("#")[0].strip() for ln in (ENGINE / "tickers.txt").read_text().splitlines()} - {""}
     try:
         own = sp100_dates(tickers, names)
         if own:
             srcs.append("Yahoo Finance stock pages")
-        log(f"S&P 100 own dates: {len(own)}")
+        log(f"S&P 500 own dates: {len(own)}")
     except Exception as ex:
         log("S&P 100 dates failed:", ex)
         own = {}
@@ -250,7 +251,8 @@ def earnings(start: date, end: date, tickers: list[str], names: dict) -> tuple[l
     out = []
     for e in by.values():
         e["sp100"] = e["ticker"] in sp
-        if e["sp100"]:
+        e["sp500"] = e["ticker"] in sp5
+        if e["sp500"]:
             e["name"] = names.get(e["ticker"], [e.get("name")])[0]
         e.pop("event", None)
         out.append({k: v for k, v in e.items() if v is not None})
@@ -461,9 +463,10 @@ def main():
     a = ap.parse_args()
     today = datetime.now(NY).date()
     start, end = today - timedelta(days=BACK_DAYS), today + timedelta(days=AHEAD_DAYS)
-    tickers = [ln.split("#")[0].strip() for ln in (ENGINE / "tickers.txt").read_text().splitlines()]
+    # the S&P 500 list (it holds every S&P 100 stock): each entry is marked sp100 / sp500 for the page's filter
+    tickers = [ln.split("#")[0].strip() for ln in (ENGINE / "tickers500.txt").read_text().splitlines()]
     tickers = [t for t in tickers if t]
-    names = json.loads((ENGINE / "names.json").read_text())
+    names = json.loads((ENGINE / "names500.json").read_text())
 
     if a.demo:
         data = demo(start, end, tickers, names)

@@ -38,7 +38,10 @@ import statsmodels.api as sm
 from statsmodels.tsa.stattools import coint
 
 ENGINE = Path(__file__).resolve().parent
-OUT = ENGINE.parent / "docs" / "data" / "pairs"
+sys.path.insert(0, str(ENGINE))
+from universe import U  # noqa: E402
+
+OUT = U.path("pairs")      # UNIVERSE=sp500: docs/data/sp500/pairs/, from that list's Strategy Lab price files
 
 # ---- rules (the page shows these, and lets visitors change the first five) ----
 RULES = {
@@ -62,9 +65,8 @@ HISTORY = "10y"
 
 # ------------------------------------------------------------------ data
 def load_universe() -> tuple[list[str], dict[str, str]]:
-    names = json.loads((ENGINE / "names.json").read_text())
-    tickers = [x.strip() for x in (ENGINE / "tickers.txt").read_text().splitlines()
-               if x.strip() and not x.startswith("#")]
+    names = json.loads(U.names_file.read_text())
+    tickers = U.tickers()
     sectors = {t: names.get(t, ["", "Other"])[1] for t in tickers}
     return tickers, sectors
 
@@ -87,7 +89,7 @@ def _decode_lab(path: Path) -> pd.DataFrame:
 def lab_ohl_ratios() -> dict[str, pd.DataFrame] | None:
     """Each day's open, high and low as a ratio of its close, from the Lab price files (the recent
     one wins on shared days), so the page can draw the pair's prices as candles."""
-    data = ENGINE.parent / "docs" / "data"
+    data = U.data
     out = {k: {} for k in ("o", "h", "l")}
     for path in (data / "lab.json", data / "lab_recent.json"):
         if not path.exists():
@@ -111,7 +113,7 @@ def lab_ohl_ratios() -> dict[str, pd.DataFrame] | None:
 def fetch_lab() -> pd.DataFrame | None:
     """15 years from docs/data/lab.json (weekly), topped up with docs/data/lab_recent.json
     (rewritten after every daily scan). No download needed."""
-    data = ENGINE.parent / "docs" / "data"
+    data = U.data
     if not (data / "lab.json").exists():
         return None
     long = _decode_lab(data / "lab.json")

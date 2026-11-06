@@ -38,6 +38,13 @@ const TICKERS = new Set(("SPY AAPL ABBV ABT ACN ADBE AIG AMD AMGN AMT AMZN AVGO 
   "INTU ISRG JNJ JPM KO LIN LLY LMT LOW MA MCD MDLZ MDT MET META MMM MO MRK MS MSFT NEE NFLX NKE NOW NVDA ORCL " +
   "PEP PFE PG PLTR PM PYPL QCOM RTX SBUX SCHW SO SPG T TGT TMO TMUS TSLA TXN UBER UNH UNP UPS USB V VZ WFC WMT XOM").split(" "));
 
+// The rest of the S&P 500 (the site's S&P 500 option), rewritten by engine/sp500_list.py each month.
+// After it changes, paste this Worker again (worker/README.md).
+// SP500-START
+const SP500 = new Set("A AAPL ABBV ABNB ABT ACGL ACN ADBE ADI ADM ADP ADSK AEE AEP AES AFL AIG AIZ AJG AKAM ALB ALGN ALL ALLE AMAT AMCR AMD AME AMGN AMP AMT AMZN ANET AON AOS APA APD APH APO APP APTV ARE ARES ATO AVGO AVY AWK AXON AXP AZO BA BAC BALL BAX BBY BDX BEN BF-B BG BIIB BK BKNG BKR BLDR BLK BMY BNY BR BRK-B BRO BSX BX BXP C CAH CARR CASY CAT CB CBOE CBRE CCI CCL CDNS CDW CEG CF CFG CHD CHRW CHTR CI CIEN CINF CL CLX CMCSA CME CMG CMI CMS CNC CNP COF COHR COIN COO COP COR COST CPAY CPRT CPT CRH CRL CRM CRWD CSCO CSGP CSX CTAS CTSH CTVA CVNA CVS CVX D DAL DASH DD DDOG DE DECK DELL DG DGX DHI DHR DIS DLR DLTR DOC DOV DOW DPZ DRI DTE DUK DVA DVN DXCM EBAY ECHO ECL ED EFX EG EIX EL ELV EME EMR EOG EQIX EQT ERIE ES ESS ETN ETR EVRG EW EXC EXE EXPD EXPE EXR F FANG FAST FCX FDS FDX FDXF FE FERG FFIV FICO FIS FISV FITB FIX FLEX FOX FOXA FRT FSLR FTNT FTV GD GDDY GE GEHC GEN GEV GILD GIS GL GLW GM GNRC GOOG GOOGL GPC GPN GRMN GS GWW HAL HAS HBAN HCA HD HIG HII HLT HON HONA HOOD HPE HPQ HRL HSIC HST HSY HUBB HUM HWM IBKR IBM ICE IDXX IEX IFF INCY INTC INTU INVH IP IQV IR IRM ISRG IT ITW IVZ J JBHT JBL JCI JKHY JNJ JPM KDP KEY KEYS KHC KIM KKR KLAC KMB KMI KO KR KVUE L LDOS LEN LH LHX LII LIN LITE LLY LMT LNT LOW LRCX LULU LUV LVS LYB LYV MA MAA MAR MAS MCD MCHP MCK MCO MDLZ MDT MET META MGM MKC MLM MMM MNST MO MOS MPC MPWR MRK MRNA MRSH MRVL MS MSCI MSFT MSI MTB MTD MU NCLH NDAQ NDSN NEE NEM NFLX NI NKE NOC NOW NRG NSC NTAP NTRS NUE NVDA NVR NWS NWSA NXPI O ODFL OKE OMC ON ORCL ORLY OTIS OXY PANW PAYX PCAR PCG PEG PEP PFE PFG PG PGR PH PHM PKG PLD PLTR PM PNC PNR PNW PODD PPG PPL PRU PSA PSKY PSX PTC PWR PYPL Q QCOM RCL RDDT REG REGN RF RJF RL RMD ROK ROL ROP ROST RSG RTX RVTY SBAC SBUX SCHW SHW SJM SLB SMCI SNA SNDK SNPS SO SOLV SPG SPGI SRE STE STLD STT STX STZ SW SWK SWKS SYF SYK SYY T TAP TDG TDY TECH TEL TER TFC TGT TJX TKO TMO TMUS TPL TPR TRGP TRMB TROW TRV TSCO TSLA TSN TT TTD TTWO TXN TXT TYL UAL UBER UDR UHS ULTA UNH UNP UPS URI USB V VEEV VICI VLO VLTO VMC VMRK VRSK VRSN VRT VRTX VST VTR VTRS VZ WAB WAT WBD WDAY WDC WEC WELL WFC WM WMB WMT WRB WSM WST WTW WY WYNN XEL XOM XYL XYZ YUM ZBH ZBRA ZTS".split(" "));
+// SP500-END
+const isStock = sym => TICKERS.has(sym) || SP500.has(sym);
+
 // The coins of engine/crypto.txt (Yahoo-style names, as in the rest of the app).
 const COINS = new Set(("BTC ETH XRP BNB SOL DOGE TRX ADA LINK XLM BCH AVAX LTC HBAR DOT XMR ETC ATOM ALGO").split(" "));
 
@@ -248,9 +255,9 @@ export default {
     if (url.searchParams.has("px")) return priceAlerts(request, url, env);
     let sym = (url.searchParams.get("symbol") || "").trim().toUpperCase().replace(/\./g, "-");
     if (["SPX", "^SPX", "^GSPC"].includes(sym)) sym = "SPY";       // index: no Alpaca data
-    const coin = TICKERS.has(sym) ? null : coinOf(sym);
+    const coin = isStock(sym) ? null : coinOf(sym);
     if (coin) return crypto(coin, ctx);
-    if (!TICKERS.has(sym)) return json({ error: `${sym || "No ticker"}: only S&P 100 stocks, SPY and the app's 19 coins are available.` }, 400);
+    if (!isStock(sym)) return json({ error: `${sym || "No ticker"}: only S&P 500 stocks, SPY and the app's 19 coins are available.` }, 400);
     if (!env.ALPACA_KEY_ID || !env.ALPACA_SECRET_KEY) return json({ error: "The Alpaca keys are not set on the Worker." }, 500);
 
     // same request within a minute: answer from the cache (older candles are cached separately for the day)
@@ -316,7 +323,7 @@ const iso = d => d.toISOString().slice(0, 10);
 async function options(raw, env, ctx) {
   let sym = (raw || "").trim().toUpperCase().replace(/\./g, "-");
   if (["SPX", "^SPX", "^GSPC"].includes(sym)) sym = "SPY";
-  if (!TICKERS.has(sym)) return json({ error: `${sym || "No ticker"}: options are available for S&P 100 stocks and SPY.` }, 400);
+  if (!isStock(sym)) return json({ error: `${sym || "No ticker"}: options are available for S&P 500 stocks and SPY.` }, 400);
   if (!env.ALPACA_KEY_ID || !env.ALPACA_SECRET_KEY) return json({ error: "The Alpaca keys are not set on the Worker." }, 500);
   const cache = typeof caches !== "undefined" ? caches.default : null;
   const key = new Request(`https://trendlines.cache/options/${sym}`);
@@ -385,8 +392,8 @@ async function volumeBars(q, env, ctx) {
   if (["SPX", "^SPX", "^GSPC"].includes(sym)) sym = "SPY";
   const range = VP_RANGES[q.get("range")] ? +q.get("range") : 5;
   const hours = q.get("hours") === "all" ? "all" : "rth";
-  const coin = TICKERS.has(sym) ? null : coinOf(sym);
-  if (!coin && !TICKERS.has(sym)) return json({ error: `${sym || "No ticker"}: only S&P 100 stocks, SPY and the app's 19 coins are available.` }, 400);
+  const coin = isStock(sym) ? null : coinOf(sym);
+  if (!coin && !isStock(sym)) return json({ error: `${sym || "No ticker"}: only S&P 500 stocks, SPY and the app's 19 coins are available.` }, 400);
   if (!coin && (!env.ALPACA_KEY_ID || !env.ALPACA_SECRET_KEY)) return json({ error: "The Alpaca keys are not set on the Worker." }, 500);
 
   const name = coin ? `${coin}-USD` : sym;
@@ -518,13 +525,13 @@ async function coinQuotes(coins) {
   return out;
 }
 async function quotes(kind, env, ctx) {
-  kind = kind === "crypto" ? "crypto" : "stocks";
+  kind = kind === "crypto" ? "crypto" : kind === "sp500" ? "sp500" : "stocks";   // ?quotes=sp500: every S&P 500 stock
   const cache = typeof caches !== "undefined" ? caches.default : null;
   const key = new Request(`https://trendlines.cache/quotes-${kind}`);
   if (cache) { const hit = await cache.match(key); if (hit) return hit; }
   try {
-    if (kind === "stocks" && (!env.ALPACA_KEY_ID || !env.ALPACA_SECRET_KEY)) return json({ error: "The Alpaca keys are not set on the Worker." }, 500);
-    const q = kind === "crypto" ? await coinQuotes([...COINS]) : await stockQuotes([...TICKERS], env);
+    if (kind !== "crypto" && (!env.ALPACA_KEY_ID || !env.ALPACA_SECRET_KEY)) return json({ error: "The Alpaca keys are not set on the Worker." }, 500);
+    const q = kind === "crypto" ? await coinQuotes([...COINS]) : await stockQuotes(kind === "sp500" ? [...new Set([...TICKERS, ...SP500])] : [...TICKERS], env);
     const res = json({ source: kind === "crypto" ? "Binance (Kraken for XMR)" : "Alpaca, IEX real-time trades", at: new Date().toISOString(), q }, 200, { "Cache-Control": "max-age=15" });
     if (cache) ctx?.waitUntil?.(cache.put(key, res.clone()));
     return res;
@@ -556,10 +563,10 @@ async function priceAlerts(request, url, env) {
   }
   if (op === "add") {
     let sym = String(b.sym || "").toUpperCase().replace(/\./g, "-");
-    const coin = TICKERS.has(sym) ? null : coinOf(sym);
+    const coin = isStock(sym) ? null : coinOf(sym);
     if (coin) sym = `${coin}-USD`;
     const level = +b.level;
-    if (!TICKERS.has(sym) && !coin) return json({ error: "Only S&P 100 stocks and the app's coins." }, 400);
+    if (!isStock(sym) && !coin) return json({ error: "Only S&P 500 stocks and the app's coins." }, 400);
     if (!(level > 0)) return json({ error: "bad level" }, 400);
     if (all.length >= PX_MAX) return json({ error: "Too many alerts on the server right now." }, 429);
     if (all.filter(a => a.topic === b.topic).length >= PX_PER_TOPIC) return json({ error: `Up to ${PX_PER_TOPIC} alerts per channel.` }, 429);

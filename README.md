@@ -117,6 +117,20 @@ Alerts always show in the app. To also get a push notification:
 3. Open the app's *Phone alerts* tab: it lists one channel per strategy you follow.
    Subscribe to them in ntfy.
 
+## S&P 500
+
+Stocks come in two lists: the S&P 100 (default) and the S&P 500. The app's switch (under Stocks in the
+menu, and SPX100 / SPX500 in the Terminal) is remembered on each device and shared with the stand-alone
+pages. Every stock script runs a second time with `UNIVERSE=sp500` (`engine/universe.py`): it reads
+`engine/tickers500.txt` / `engine/names500.json` and writes the same files under `docs/data/sp500/`.
+Shared per-stock files (company data, earnings reactions) stay in one folder for both lists. The S&P 500
+steps are `continue-on-error`, so they never hold back the S&P 100. Phone channels get an `sp500-` prefix
+(e.g. `<NTFY_PREFIX>-sp500-<strategy>`), so the bigger list never floods the S&P 100 ones.
+The list itself comes from Wikipedia on the 1st of each month (`engine/sp500_list.py`, *S&P 500 list*
+workflow), which also updates `docs/data/universe.json` and the data Worker's list: paste
+`worker/trendlines-worker.js` into Cloudflare again after it changes. The S&P 500 weekly backtest uses 10
+years (not 15) to keep its Strategy Lab price file small enough for a phone. Paper trades start 9 Nov 2026.
+
 ## Crypto
 
 The app has a Stocks / Crypto switch. Crypto uses the same strategies (plus its own 50-day rule variants) on the coins

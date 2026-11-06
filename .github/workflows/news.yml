@@ -40,6 +40,12 @@ jobs:
         run: python engine/sentiment.py
       # Bitcoin news days for the News Step-Aside strategy (engine/news_signal.py): only each day's
       # headline count and average tone are kept, read by the crypto scan at 00:20 UTC.
+      - name: News mood for each S&P 500 stock (a sixth of them each hour)
+        if: steps.finbert.outcome == 'success'
+        continue-on-error: true
+        env:
+          UNIVERSE: sp500
+        run: python engine/sentiment.py
       - name: Bitcoin news days (News Step-Aside strategy)
         if: steps.finbert.outcome == 'success'
         continue-on-error: true

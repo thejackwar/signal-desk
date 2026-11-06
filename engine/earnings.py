@@ -1,5 +1,5 @@
 """
-Earnings reactions: how each S&P 100 stock moved after its past earnings reports.
+Earnings reactions: how each S&P 100 (or, with UNIVERSE=sp500, S&P 500) stock moved after its past earnings reports.
 
 For every report since 2010 it records the analysts' EPS estimate, the reported EPS,
 the surprise, and how the stock moved:
@@ -17,6 +17,7 @@ Data: Yahoo Finance via yfinance. Run: python engine/earnings.py
 from __future__ import annotations
 
 import json
+import sys
 import time
 from datetime import datetime, timezone
 from pathlib import Path
@@ -26,7 +27,11 @@ import pandas as pd
 import yfinance as yf
 
 ENGINE = Path(__file__).resolve().parent
-OUT = ENGINE.parent / "docs" / "data" / "earnings"
+sys.path.insert(0, str(ENGINE))
+from universe import U  # noqa: E402
+
+OUT = ENGINE.parent / "docs" / "data" / "earnings"     # <TICKER>.json: shared by both lists
+# index.json: docs/data/earnings/ (S&P 100) and, with UNIVERSE=sp500, docs/data/sp500/earnings/ too
 START = "2009-06-01"           # first reports kept are from 2010
 FIRST_YEAR = 2010
 METRICS = ["m", "mx", "d1", "d5", "d20", "d20x"]
@@ -37,12 +42,11 @@ def log(*a):
 
 
 def load_tickers() -> list[str]:
-    lines = (ENGINE / "tickers.txt").read_text().splitlines()
-    return [x.strip() for x in lines if x.strip() and not x.startswith("#")]
+    return U.tickers()
 
 
 def load_names() -> dict:
-    p = ENGINE / "names.json"
+    p = U.names_file
     return json.loads(p.read_text()) if p.exists() else {}
 
 
@@ -157,6 +161,13 @@ def main():
     log(f"updated {fresh}, failed {len(failed)}: {' '.join(failed)}")
     print(f"::notice title=Earnings reactions::updated {fresh} stocks, failed {len(failed)}: {' '.join(failed)}", flush=True)
 
+    write_index(tickers, U.path("earnings", "index.json"))
+    if U.is500:                       # the S&P 100 index from the same files
+        small = [x.strip() for x in (ENGINE / "tickers.txt").read_text().splitlines() if x.strip() and not x.startswith("#")]
+        write_index(small, OUT / "index.json")
+
+
+def write_index(tickers: list[str], path: Path) -> None:
     # the index covers every stock with a file (this run's or an earlier one's)
     index, totals = [], {}          # totals[year][beat|miss|all][metric] = [n, ups, sum]
     for t in tickers:
@@ -178,11 +189,12 @@ def main():
                     a[0] += 1; a[1] += v > 0; a[2] = round(a[2] + v, 2)
     if not index:
         raise SystemExit("no earnings data at all")
-    (OUT / "index.json").write_text(json.dumps({
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps({
         "generated_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
         "source": "Yahoo Finance (EPS estimates and reported EPS, daily prices)",
         "stocks": index, "totals": dict(sorted(totals.items()))}, separators=(",", ":")))
-    log("index:", len(index), "stocks")
+    log(f"index {path.relative_to(ENGINE.parent)}:", len(index), "stocks")
 
 
 if __name__ == "__main__":

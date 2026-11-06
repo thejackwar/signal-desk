@@ -33,7 +33,7 @@ jobs:
   options:
     if: (github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success') && (github.event_name != 'schedule' || vars.EXTERNAL_SCHEDULER != 'on')   # the scheduler Worker starts it on time instead (worker/README.md)
     runs-on: ubuntu-latest
-    timeout-minutes: 40
+    timeout-minutes: 90
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -43,6 +43,12 @@ jobs:
       - run: pip install -r requirements.txt
       - name: Backtest
         if: github.event_name == 'schedule' || github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.job != 'live')
+        run: python engine/options_backtest.py
+      - name: Backtest, S&P 500 stocks
+        if: github.event_name == 'schedule' || github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.job != 'live')
+        continue-on-error: true
+        env:
+          UNIVERSE: sp500
         run: python engine/options_backtest.py
       - name: Paper trades
         if: github.event_name == 'workflow_run' || github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.job != 'backtest')
@@ -55,6 +61,7 @@ jobs:
           git config user.name "signal-desk-bot"
           git config user.email "signal-desk-bot@users.noreply.github.com"
           git add docs/data/options
+          git add docs/data/sp500/options 2>/dev/null || true
           git diff --cached --quiet || git commit -m "Options $(date -u +%F)"
           git pull --rebase
           git push

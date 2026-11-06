@@ -1,6 +1,9 @@
 // Dark Pools page: block prints (data/darkpool/blocks.json), daily pressure (daily.json),
 // dark pool venues (weekly.json), backtest (backtest.json). All built by engine/darkpool.py.
 const $ = s => document.querySelector(s);
+// S&P 100 / S&P 500 (the app's stock-list choice, docs/sections.js): this list's data folder and name
+const UD = p => globalThis.ICS ? ICS.udata(p) : "data/" + p;
+const UL = (globalThis.ICS?.uniName?.() || "S&P 100").replace("&", "&amp;");
 const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 const VIEWS = ["prints", "pressure", "venues", "backtest", "learn"];
 let B, D, W, T;
@@ -91,7 +94,7 @@ function renderPrints() {
       <div><dt>${live ? "Today so far" : "Session"}</dt><dd>${fmtDate(B.date)}</dd><small>${live ? `up to ${until} New York` : "full day"}</small></div>
       <div><dt>Block prints</dt><dd>${prints.length.toLocaleString("en-GB")}</dd><small>$${(B.min || 1e6) / 1e6}M or more each</small></div>
       <div><dt>Block value</dt><dd>${money(tot)}</dd><small>${tot ? `<span class="pos">${Math.round(100 * up / tot)}% above</span> · <span class="neg">${Math.round(100 * dn / tot)}% below</span> lit` : "&nbsp;"}</small></div>
-      <div><dt>Off-exchange share</dt><dd>${allTot ? pct(100 * allDark / allTot, 0) : "–"}</dd><small>of all S&amp;P 100 volume</small></div>
+      <div><dt>Off-exchange share</dt><dd>${allTot ? pct(100 * allDark / allTot, 0) : "–"}</dd><small>of all ${UL} volume</small></div>
     </dl>
     <div class="panel"><h2>Biggest dark money today</h2>
       <p class="cardnote">Stocks with the most block value. Green = printed above the last exchange trade (buyer paid up), red = below (seller gave way), grey = at the price.</p>
@@ -136,7 +139,7 @@ function renderPressure() {
   const nb = D.stocks.filter(s => s.sig === "buying").length, ns = D.stocks.filter(s => s.sig === "selling").length;
   const zdot = z => { if (z == null) return ""; const p = Math.max(0, Math.min(100, 50 + z * 12.5)); return `<span class="ztrack"><i class="${z >= D.z_hot ? "u" : z <= -D.z_hot ? "d" : ""}" style="left:${p}%"></i></span>`; };
   el.innerHTML = `
-    <div class="panel"><h2>S&amp;P 100 dark index</h2>
+    <div class="panel"><h2>${UL} dark index</h2>
       <p class="lead">The share of off-exchange volume that was short sales, for all the stocks together, weighted by dollars traded. On ${fmtDate(D.date)} it was ${pct(I.value)}, ${read}.</p>
       <dl class="stats"><div><dt>Dark index</dt><dd>${pct(I.value)}</dd></div><div><dt>vs last ${D.z_win} days</dt><dd class="${cls(I.z)}">${sgn(I.z)} σ</dd></div><div><dt>Higher than</dt><dd>${I.pct_1y == null ? "–" : I.pct_1y + "% of the year"}</dd></div></dl>
       ${lines(I.dates, [...(spyN ? [{ name: "SPY weekly candles (right axis)", v: spyN, candles: 5, color: "var(--up-line)", axis: "r" }] : []), { name: "Dark index (%)", v: I.v.map(x => x ?? NaN), color: "#38bdf8" }], { fmtL: x => x.toFixed(1), fmtR: x => x.toFixed(0) })}
@@ -161,7 +164,7 @@ function renderVenues() {
   el.innerHTML = `
     <div class="panel"><h2>Week of ${fmtDate(W.week)}</h2>
       <p class="lead">The latest week FINRA has published (about two weeks late for these stocks): shares traded inside each named dark pool, ${fmtDate(W.week)} to ${fmtDate(wkEnd(W.week))}.</p>
-      <dl class="stats"><div><dt>Dark pool shares, S&amp;P 100</dt><dd>${num(W.total.at(-1))}</dd></div><div><dt>vs previous week</dt><dd class="${cls(W.total.at(-1) - W.total.at(-2))}">${W.total.length > 1 ? sgn(100 * (W.total.at(-1) / W.total.at(-2) - 1), 1) + "%" : "–"}</dd></div><div><dt>Weeks shown</dt><dd>${W.weeks.length}</dd></div></dl>
+      <dl class="stats"><div><dt>Dark pool shares, ${UL}</dt><dd>${num(W.total.at(-1))}</dd></div><div><dt>vs previous week</dt><dd class="${cls(W.total.at(-1) - W.total.at(-2))}">${W.total.length > 1 ? sgn(100 * (W.total.at(-1) / W.total.at(-2) - 1), 1) + "%" : "–"}</dd></div><div><dt>Weeks shown</dt><dd>${W.weeks.length}</dd></div></dl>
       <h4>Biggest dark pools</h4>
       ${W.venues.map(v => `<div class="vbar"><span title="${esc(v.mpid)}">${esc(v.name)}</span><span class="tr"><i style="width:${100 * v.pct / top}%"></i></span><b>${pct(v.pct)}</b></div>`).join("")}
     </div>
@@ -174,7 +177,7 @@ function renderVenues() {
 }
 
 // ------------------------------------------------------------------ backtest
-const NAMES = { dark_buys: "Dark buying stocks", dark_index_spy: "SPY with dark index filter", spy: "Buy & hold SPY", equal_weight: "All S&P 100, equal weight" };
+const NAMES = { dark_buys: "Dark buying stocks", dark_index_spy: "SPY with dark index filter", spy: "Buy & hold SPY", equal_weight: `All ${UL.replace("&amp;", "&")}, equal weight` };
 function renderBacktest() {
   const el = $("#v-backtest");
   if (!T) { el.innerHTML = waiting("The backtest runs after the FINRA history has been downloaded (the first evening), then every Friday."); return; }
@@ -235,7 +238,7 @@ async function getJSON(u) {
 }
 
 async function boot() {
-  [B, D, W, T] = await Promise.all(["blocks", "daily", "weekly", "backtest"].map(k => getJSON(`data/darkpool/${k}.json`)));
+  [B, D, W, T] = await Promise.all(["blocks", "daily", "weekly", "backtest"].map(k => getJSON(UD(`darkpool/${k}.json`))));
   renderPrints(); renderPressure(); renderVenues(); renderBacktest(); renderLearn();
   document.querySelectorAll("#tabs button").forEach(b => b.addEventListener("click", () => show(b.dataset.v)));
   addEventListener("hashchange", () => show(location.hash.slice(1)));
@@ -245,3 +248,6 @@ async function boot() {
 }
 
 boot();
+
+// the S&P 100 / S&P 500 switch in the page's header (picking one reloads with that list)
+if (typeof document !== "undefined") { const el = document.getElementById("uniSw"); if (el && globalThis.ICS) el.innerHTML = ICS.uniSwitch(); }

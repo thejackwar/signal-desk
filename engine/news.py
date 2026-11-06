@@ -53,13 +53,23 @@ FEEDS = {
         ("CNBC", "https://www.cnbc.com/id/19836768/device/rss/rss.html"),          # energy
     ],
 }
-NAMES_FILE = {"stocks": "names.json", "crypto": "crypto_names.json", "commodities": "commodities_names.json"}
+# stock headlines are tagged with every S&P 500 company (the S&P 100 is part of it), so stock pages on
+# both lists have their news; the general feed is the same for both
+NAMES_FILE = {"stocks": "names500.json", "crypto": "crypto_names.json", "commodities": "commodities_names.json"}
 
 
 # Company names that are also everyday words: only tag them on the ticker itself
 # or with a company word next to them.
 AMBIGUOUS = {"Target", "Visa", "Southern Company", "Oracle", "Meta Platforms", "Linde", "Intuit", "Charter Communications",
-             "Booking Holdings", "Simon Property Group", "Ford Motor", "Merck", "Danaher", "Altria", "RTX", "UPS", "IBM", "3M"}
+             "Booking Holdings", "Simon Property Group", "Ford Motor", "Merck", "Danaher", "Altria", "RTX", "UPS", "IBM", "3M",
+             # S&P 500 names that are everyday words or places in a headline
+             "Ball", "Progressive", "Hartford", "Dover", "Waters", "Fox", "Pool", "Block", "Carnival", "Southern", "Cooper",
+             "Mosaic", "Arch Capital Group", "Equity Residential", "Public Storage", "Live Nation Entertainment", "Corning",
+             "Match Group", "Global Payments", "Expand Energy", "Constellation Energy", "Republic Services", "Universal Health Services"}
+# capital-letter tickers that are also everyday words in headlines
+WORD_TICKERS = {"CAT", "LOW", "ALL", "NOW", "ABT", "SO", "DE", "KEY", "TECH", "DAY", "WELL", "FAST", "POOL", "HAS", "TAP", "BEN",
+                "PEG", "MOS", "COST", "FOX", "BALL", "AIZ", "STE", "IT", "ON", "AN", "ARE", "BR", "CARR", "EG", "GEN", "HOLX",
+                "J", "K", "L", "O", "D", "A", "T", "V", "MAS", "NI", "ES", "EQT", "LII", "PODD", "TEL", "VST", "ICE", "AME", "PH"}
 EXTRA_ALIASES = {
     "GOOGL": ["Alphabet", "Google"], "META": ["Meta", "Facebook", "Instagram"], "BRK-B": ["Berkshire"],
     "JPM": ["JPMorgan", "JP Morgan"], "GS": ["Goldman"], "MS": ["Morgan Stanley"], "BAC": ["Bank of America", "BofA"],
@@ -96,7 +106,7 @@ def matchers(market: str) -> list[tuple[str, re.Pattern]]:
             aliases.add(name)
         if market == "stocks":
             aliases.add("$" + t)                       # cashtag
-            if len(t) >= 3 and t.isalpha() and t not in {"CAT", "LOW", "ALL", "NOW", "ABT", "SO", "DE"}:
+            if len(t) >= 3 and t.isalpha() and t not in WORD_TICKERS:
                 aliases.add(t)                         # e.g. "NVDA", "AAPL" written in a headline
         pats = [re.escape(a) for a in sorted(aliases, key=len, reverse=True)]
         if pats:

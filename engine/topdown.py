@@ -36,7 +36,10 @@ import numpy as np
 import pandas as pd
 
 ROOT = Path(__file__).resolve().parents[1]
-OUT = ROOT / "docs" / "data" / "topdown" / "alerts.json"
+sys.path.insert(0, str(ROOT / "engine"))
+from universe import U  # noqa: E402
+
+OUT = U.path("topdown", "alerts.json")              # UNIVERSE=sp500: docs/data/sp500/topdown/
 ET = ZoneInfo("America/New_York")
 ALPACA = "https://data.alpaca.markets/v2/stocks/bars"
 SWING, BREAK_BY = 5, "close"
@@ -170,13 +173,11 @@ def alpaca_symbol(t: str) -> str:
 
 
 def load_tickers() -> list[str]:
-    raw = (ROOT / "engine" / "tickers.txt").read_text().splitlines()
-    tickers = [x.strip() for x in raw if x.strip() and not x.startswith("#")]
-    tickers = [t for t in tickers if t != "GOOG"]    # GOOGL is kept, like the Trendlines page
+    tickers = U.tickers(drop=("GOOG",))             # GOOGL is kept, like the Trendlines page
     return ["SPY"] + [t for t in tickers if t != "SPY"]
 
 
-CACHE = Path(os.environ.get("TOPDOWN_CACHE", ROOT / ".cache" / "topdown"))   # kept between runs (actions/cache)
+CACHE = Path(os.environ.get("TOPDOWN_CACHE", ROOT / ".cache" / ("topdown500" if U.is500 else "topdown")))   # kept between runs (actions/cache)
 
 
 def _load_cache(tf: str) -> dict:
@@ -365,7 +366,7 @@ def update_since(alerts: list[dict], data: dict[str, dict[str, pd.DataFrame]]):
 def notify(alerts: list[dict], prefix: str):
     for a in alerts:
         arrow = "▲" if a["side"] == "bullish" else "▼"
-        req = urllib.request.Request(f"https://ntfy.sh/{prefix}-topdown-{a['tf'].lower()}",
+        req = urllib.request.Request(f"https://ntfy.sh/{prefix}-{U.topic('topdown')}-{a['tf'].lower()}",
                                      data=f"{arrow} {a['ticker']} {a['price']}: {a['note']}".encode(), method="POST",
                                      headers={"Title": f"Top-Down {a['tf']}: {a['ticker']}",
                                               "Tags": "chart_with_upwards_trend" if a["side"] == "bullish" else "chart_with_downwards_trend"})

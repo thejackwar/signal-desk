@@ -19,6 +19,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import re
 import sys
 import time
@@ -69,6 +70,8 @@ COMMODITY_QUERY = {
 }
 NAMES_FILE = {"stocks": "names.json", "crypto": "crypto_names.json", "commodities": "commodities_names.json"}
 OUT_FILE = {"stocks": "mentions.json", "crypto": "crypto/mentions.json", "commodities": "commodities/mentions.json"}
+if os.environ.get("UNIVERSE") == "sp500":      # the S&P 500 stocks (engine/universe.py): run with --market stocks
+    NAMES_FILE["stocks"], OUT_FILE["stocks"] = "names500.json", "sp500/mentions.json"
 
 
 def _get(url: str, timeout=30):

@@ -28,6 +28,13 @@ jobs:
           NTFY_PREFIX: ${{ vars.NTFY_PREFIX }}
         run: python engine/scan.py
 
+      - name: Scan the S&P 500 (the site's S&P 500 option, docs/data/sp500/)
+        continue-on-error: true   # never hold back the S&P 100 alerts
+        env:
+          UNIVERSE: sp500
+          NTFY_PREFIX: ${{ vars.NTFY_PREFIX }}
+        run: python engine/scan.py
+
       - name: Smaller Crashes (S&P 500 200-day filter)
         continue-on-error: true   # never hold back the alerts
         env:

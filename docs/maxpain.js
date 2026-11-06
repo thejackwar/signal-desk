@@ -2,6 +2,9 @@
 // Hash routes: #today, #learn, #test, #stock or #stock/AAPL (a stock), #stock/AAPL/2026-11-20 (and an expiry).
 
 const $ = (s, r = document) => r.querySelector(s);
+// S&P 100 / S&P 500 (the app's stock-list choice, docs/sections.js): this list's data folder and name
+const UD = p => globalThis.ICS ? ICS.udata(p) : "data/" + p;
+const UL = (globalThis.ICS?.uniName?.() || "S&P 100").replace("&", "&amp;");
 const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 const pct = (x, d = 1) => (x == null || !isFinite(x)) ? "–" : `${x > 0 ? "+" : ""}${(x * 100).toFixed(d)}%`;
 const pct0 = (x, d = 0) => (x == null || !isFinite(x)) ? "–" : `${(x * 100).toFixed(d)}%`;
@@ -74,11 +77,11 @@ async function renderStock() {
   $("#pick").addEventListener("submit", ev => {
     ev.preventDefault();
     const s = $("#sym").value.trim().toUpperCase().replace(/\./g, "-");
-    if (!syms.includes(s)) { $("#st").className = "status err"; $("#st").textContent = `${s || "That"}: max pain is available for SPY, QQQ, IWM and the S&P 100.`; return; }
+    if (!syms.includes(s)) { $("#st").className = "status err"; $("#st").textContent = `${s || "That"}: max pain is available for SPY, QQQ, IWM and the ${UL.replace("&amp;", "&")}.`; return; }
     location.hash = `stock/${s}`;
   });
   $("#st").textContent = "Loading…";
-  const d = cache[sym] || (cache[sym] = await getJSON(`data/maxpain/${sym}.json`));
+  const d = cache[sym] || (cache[sym] = await getJSON(UD(`maxpain/${sym}.json`)));
   if (!d) { $("#st").className = "status err"; $("#st").textContent = `No data for ${sym} today.`; return; }
   $("#st").textContent = "";
   const e = d.expiries.find(x => x.expiry === cur.exp) || d.expiries[0];
@@ -255,7 +258,7 @@ function route() {
 }
 
 async function boot() {
-  [INDEX, SCORE] = await Promise.all([getJSON("data/maxpain/index.json"), getJSON("data/maxpain/scorecard.json")]);
+  [INDEX, SCORE] = await Promise.all([getJSON(UD("maxpain/index.json")), getJSON(UD("maxpain/scorecard.json"))]);
   if (!INDEX) {
     $("#v-today").hidden = false;
     $("#v-today").innerHTML = `<div class="msg"><strong>No data yet</strong>Max pain is computed every weekday before the US open.</div>`;
@@ -276,3 +279,6 @@ async function boot() {
 }
 
 boot();
+
+// the S&P 100 / S&P 500 switch in the page's header (picking one reloads with that list)
+if (typeof document !== "undefined") { const el = document.getElementById("uniSw"); if (el && globalThis.ICS) el.innerHTML = ICS.uniSwitch(); }

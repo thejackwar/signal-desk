@@ -55,11 +55,19 @@ jobs:
         run: python engine/live_trades.py --market ${{ steps.m.outputs.market }}
       - name: Update the strategy board (one green/red tile per day per strategy)
         run: node engine/day_board.mjs ${{ steps.m.outputs.market }}
+      - name: The same for the S&P 500
+        if: steps.m.outputs.market == 'stocks'
+        continue-on-error: true   # never hold back the S&P 100 record
+        env:
+          UNIVERSE: sp500
+        run: |
+          python engine/live_trades.py --market stocks
+          node engine/day_board.mjs stocks
       - name: Publish
         run: |
           git config user.name "signal-desk-bot"
           git config user.email "signal-desk-bot@users.noreply.github.com"
-          for f in docs/data/live_trades.json docs/data/crypto/live_trades.json docs/data/commodities/live_trades.json docs/data/lab_recent.json docs/data/crypto/lab_recent.json docs/data/commodities/lab_recent.json docs/data/board.json docs/data/crypto/board.json docs/data/commodities/board.json; do
+          for f in docs/data/live_trades.json docs/data/crypto/live_trades.json docs/data/commodities/live_trades.json docs/data/lab_recent.json docs/data/crypto/lab_recent.json docs/data/commodities/lab_recent.json docs/data/board.json docs/data/crypto/board.json docs/data/commodities/board.json docs/data/sp500/live_trades.json docs/data/sp500/lab_recent.json docs/data/sp500/board.json; do
             [ -f "$f" ] && git add "$f"
           done
           git diff --cached --quiet || git commit -m "Live trades ${{ steps.m.outputs.market }} $(date -u +%F)"

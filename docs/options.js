@@ -9,6 +9,7 @@ const TICKERS = ("SPY AAPL ABBV ABT ACN ADBE AIG AMD AMGN AMT AMZN AVGO AXP BA B
   "CHTR CL CMCSA COF COP COST CRM CSCO CVS CVX DE DHR DIS DUK EMR F FDX GD GE GILD GM GOOGL GS HD HON IBM INTC " +
   "INTU ISRG JNJ JPM KO LIN LLY LMT LOW MA MCD MDLZ MDT MET META MMM MO MRK MS MSFT NEE NFLX NKE NOW NVDA ORCL " +
   "PEP PFE PG PLTR PM PYPL QCOM RTX SBUX SCHW SO SPG T TGT TMO TMUS TSLA TXN UBER UNH UNP UPS USB V VZ WFC WMT XOM").split(" ");
+const SP100 = new Set(TICKERS);   // the S&P 100 + SPY; the rest of the S&P 500 is added from data/universe.json
 const API = (() => {
   try { return (JSON.parse(localStorage.getItem("signaldesk.trendlines")) || {}).api || DEFAULT_API; } catch { return DEFAULT_API; }
 })();
@@ -245,7 +246,7 @@ async function modeledChain(sym) {
     if (!lv.spot) throw new Error("live quotes and SPY's last close are both unavailable right now");
     S = lv.spot.S; atm = L.ATM_VIX * lv.spot.vix / 100;
   } else {
-    const js = await fetchJson(`data/stocks/${encodeURIComponent(sym)}.json`, 15000);
+    const js = await fetchJson(`${SP100.has(sym) ? "data/stocks/" : "data/sp500/stocks/"}${encodeURIComponent(sym)}.json`, 15000);
     const c = js.c, r = c.slice(1).map((v, i) => Math.log(v / c[i]));
     const sd = a => { const m = a.reduce((s, x) => s + x, 0) / a.length; return Math.sqrt(a.reduce((s, x) => s + (x - m) ** 2, 0) / (a.length - 1)) * Math.sqrt(252); };
     S = c[c.length - 1];
@@ -336,7 +337,7 @@ async function builder(sym, sid) {
   $("bsym").value = sym; $("bsid").value = sid;
   if (sid !== B.sid) { B.over = {}; B.sid = sid; }
   document.title = `${sym} ${L.META[sid].name} · Options`;
-  if (!TICKERS.includes(sym)) { $("bstatus").textContent = `${sym} isn't available: pick SPY or an S&P 100 stock.`; $("bstatus").className = "note err"; return; }
+  if (!TICKERS.includes(sym)) { $("bstatus").textContent = `${sym} isn't available: pick SPY or an S&P 500 stock.`; $("bstatus").className = "note err"; return; }
   if (!B.chain || B.chain.sym !== sym) {
     B.sym = sym; B.over = {}; B.exp = null; B.days = 0;
     const seq = ++B.seq;
@@ -432,7 +433,8 @@ async function backtest(sid) {
 }
 function renderBacktest() {
   const d = T_.data, v = $("v-backtest");
-  const U = T_.uni === "spy" ? d.spy : d.sp100;
+  // "sp500": the same backtest on every S&P 500 stock (data/sp500/options/backtest.json, its stock group is also "sp100")
+  const U = T_.uni === "spy" ? d.spy : T_.uni === "sp500" && T_.data500?.sp100 ? T_.data500.sp100 : d.sp100;
   const st = d.strategies;
   const blockOf = sid => { const b = U.strat[sid]; return (T_.variant === "managed" && b?.managed) ? { b: b.managed, used: "managed" } : { b: b?.hold, used: "hold" }; };
   const sel = T_.sid, selB = blockOf(sel), m = L.META[sel];
@@ -469,7 +471,7 @@ function renderBacktest() {
   v.innerHTML = `${d.demo ? `<p class="note err">These are simulated test numbers, not real results.</p>` : ""}
   ${findings(d)}
   <div class="panel">
-    <div class="subrow"><div class="seg" id="tuni"><button type="button" data-v="spy" aria-pressed="${T_.uni === "spy"}">SPY</button><button type="button" data-v="sp100" aria-pressed="${T_.uni === "sp100"}">S&amp;P 100 stocks</button></div>
+    <div class="subrow"><div class="seg" id="tuni"><button type="button" data-v="spy" aria-pressed="${T_.uni === "spy"}">SPY</button><button type="button" data-v="sp100" aria-pressed="${T_.uni === "sp100"}">S&amp;P 100 stocks</button><button type="button" data-v="sp500" aria-pressed="${T_.uni === "sp500"}">S&amp;P 500 stocks</button></div>
       <div class="seg" id="tvar"><button type="button" data-v="hold" aria-pressed="${T_.variant === "hold"}">Hold to expiry</button><button type="button" data-v="managed" aria-pressed="${T_.variant === "managed"}">Take profit / stop</button></div></div>
     <p class="note">$${d.account.toLocaleString("en-US")} account from ${d.spy.dates[0].slice(0, 4)}, a new position every month on the monthly expiry. Strategies that own shares or hold cash for an assignment use the whole account; spreads, condors, straddles, strangles and calendars risk ${(d.risk * 100).toFixed(0)}% of it each month (their max loss). ${T_.uni === "sp100" ? `Average of ${U.count} stocks, each run on its own.` : ""} ${T_.variant === "managed" ? "Take profit / stop: credit trades close at 50% of the premium kept or a loss of twice the premium; debit trades at +100% or −50%. Strategies with shares are always held." : ""}</p>
     <div class="tbl"><table><thead><tr><th>Strategy</th><th>A year</th><th>After tax</th><th>Max drop</th><th>Wins</th><th>Months</th><th>Final</th></tr></thead><tbody>${rows}
@@ -495,7 +497,14 @@ function renderBacktest() {
     <li>Not modeled: earnings jumps in volatility, early assignment, dividends on the option side, currency (results are in % terms).</li>
     <li>Data up to ${shortDate(d.as_of)}. Rerun every Saturday.</li></ul></details>`;
   v.querySelectorAll("tr[data-s]").forEach(r => r.addEventListener("click", () => { location.hash = `backtest/${r.dataset.s}`; }));
-  $("tuni").addEventListener("click", e => { const b = e.target.closest("button"); if (!b) return; T_.uni = b.dataset.v; renderBacktest(); });
+  $("tuni").addEventListener("click", async e => {
+    const b = e.target.closest("button"); if (!b) return;
+    if (b.dataset.v === "sp500" && !T_.data500) {
+      try { T_.data500 = await fetchJson("data/sp500/options/backtest.json"); }
+      catch { b.textContent = "S&P 500: not ready yet"; return; }
+    }
+    T_.uni = b.dataset.v; renderBacktest();
+  });
   $("tvar").addEventListener("click", e => { const b = e.target.closest("button"); if (!b) return; T_.variant = b.dataset.v; renderBacktest(); });
 }
 
@@ -565,3 +574,10 @@ async function live() {
 }
 
 route();
+
+// every S&P 500 stock for the Builder (data/universe.json, engine/sp500_list.py)
+fetch("data/universe.json").then(r => r.ok ? r.json() : null).catch(() => null).then(u => {
+  for (const t of u?.sp500 || []) if (!TICKERS.includes(t)) TICKERS.push(t);
+  const dl = document.getElementById("btick");
+  if (dl) dl.innerHTML = TICKERS.map(t => `<option value="${t}">`).join("");
+});

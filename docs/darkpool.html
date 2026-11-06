@@ -29,7 +29,7 @@
   document.head.appendChild(s);
 })();
 </script>
-<script src="sections.js?v=1" defer></script>
+<script src="sections.js?v=2" defer></script>
 <link rel="icon" href="favicon.ico?v=2" sizes="any">
 <link rel="icon" type="image/svg+xml" href="logo.svg?v=2">
 <link rel="apple-touch-icon" href="icon-180.png?v=2">
@@ -326,6 +326,7 @@ svg.spark { width: 110px; height: 26px; display: block; }
       <button type="button" data-v="prints">Block prints</button><button type="button" data-v="pressure">Daily pressure</button><button type="button" data-v="venues">Dark pools</button><button type="button" data-v="backtest">Backtest</button><button type="button" data-v="learn">Learn</button>
     </div>
     <p class="warn">Dark pools report trades only after they happen, so nothing here shows orders before they trade. Off-exchange data also includes retail orders filled by wholesalers, not only dark pools. For information only. Not investment advice.</p>
+    <div id="uniSw" style="margin-top:16px"></div>
   </section>
 
   <section class="view" id="v-prints" hidden></section>
@@ -339,6 +340,6 @@ svg.spark { width: 110px; height: 26px; display: block; }
   </footer>
 </main>
 
-<script type="module" src="darkpool.js?v=1"></script>
+<script type="module" src="darkpool.js?v=2"></script>
 </body>
 </html>

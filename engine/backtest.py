@@ -38,6 +38,7 @@ import pandas as pd
 sys.path.insert(0, str(Path(__file__).parent))
 import scan  # noqa: E402
 from scan import MARKETS, fetch_demo, fetch_real, load_tickers  # noqa: E402
+from universe import U  # noqa: E402
 from strategies import BENCHMARK, DIP_HOLD, DIP_TP, REGISTRY, for_market  # noqa: E402
 from bot_strategies import BOT_MONEY, BOT_RULES  # noqa: E402
 
@@ -575,12 +576,14 @@ def main():
     args = ap.parse_args()
     scan.configure(args.market)
     out = scan.DATA / "backtest.json"
-    data = fetch_demo(bars=3000, seed=11) if args.demo else fetch_real(load_tickers(), period="max" if args.market == "crypto" else "15y")
+    # the S&P 500 keeps 10 years so its Strategy Lab price file stays small enough for a phone
+    years = "max" if args.market == "crypto" else "10y" if U.is500 and args.market == "stocks" else "15y"
+    data = fetch_demo(bars=3000, seed=11) if args.demo else fetch_real(load_tickers(), period=years)
     data = {t: df for t, df in data.items() if len(df) >= 300}
     if not data:
         sys.exit("No price data downloaded; leaving the previous backtest untouched.")
     print(f"Backtesting {len(data)} tickers")
-    scan.use_benchmark(data, args.demo, period="max" if args.market == "crypto" else "15y")
+    scan.use_benchmark(data, args.demo, period=years)
     strategies = run(data)
     weeks = strategies.pop("_weeks")
     start = min(df.index[0] for df in data.values())

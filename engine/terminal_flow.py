@@ -53,7 +53,11 @@ from pathlib import Path
 from zoneinfo import ZoneInfo
 
 ROOT = Path(__file__).resolve().parent.parent
-DATA = ROOT / "docs" / "data"
+sys.path.insert(0, str(ROOT / "engine"))
+from universe import U  # noqa: E402
+
+DATA = ROOT / "docs" / "data"      # files both lists share (lineup, strategies, calendar, gamma, market news)
+UDATA = U.data                     # this list's own files and output: docs/data/ or docs/data/sp500/ (UNIVERSE=sp500)
 NY = ZoneInfo("America/New_York")
 FOCUS_MIN, WATCH_MIN = 75, 60        # score tiers
 FOCUS_MAX, WATCH_MAX = 8, 15          # at most this many per tier: the point is less noise
@@ -85,8 +89,7 @@ def write_json(p: Path, obj) -> None:
 
 
 def tickers() -> list[str]:
-    lines = (ROOT / "engine" / "tickers.txt").read_text().splitlines()
-    return [s.strip().upper() for s in lines if s.strip() and not s.startswith("#")]
+    return [t.upper() for t in U.tickers()]
 
 
 def session_progress(now: datetime) -> float:
@@ -584,7 +587,7 @@ def summarize_log(log: dict) -> dict:
 
 def notify_focus(focus: list[dict], names: dict, today: str) -> None:
     prefix = os.environ.get("NTFY_PREFIX", "").strip()
-    path = DATA / "terminal" / "focus_sent.json"
+    path = UDATA / "terminal" / "focus_sent.json"
     sent = load(path, {}) or {}
     cut = (date.fromisoformat(today) - timedelta(days=30)).isoformat()
     sent = {k: v for k, v in sent.items() if v >= cut}
@@ -599,7 +602,7 @@ def notify_focus(focus: list[dict], names: dict, today: str) -> None:
                f"{', '.join(names.get(s, s) for s in g['strats'])}\n{top}"
                + (f"\nWrong if: {g['stop']}" if g.get("stop") else ""))
         try:
-            req = urllib.request.Request(f"https://ntfy.sh/{prefix}-focus", data=msg.encode(), method="POST",
+            req = urllib.request.Request(f"https://ntfy.sh/{prefix}-{U.topic('focus')}", data=msg.encode(), method="POST",
                                          headers={"Title": f"Focus: {side} {g['t']}", "Tags": "dart",
                                                   "Click": "https://thejackwar.github.io/signal-desk/#terminal-" + g["t"]})
             urllib.request.urlopen(req, timeout=20)
@@ -618,15 +621,15 @@ def context_files() -> dict:
             names[s["id"]] = s.get("name") or s["id"]
     return {
         "grades": grades, "names": names,
-        "records": strategy_records(load(DATA / "history.json", {}) or {}),
-        "alerts": load(DATA / "alerts.json", {}) or {}, "live": load(DATA / "live.json", {}) or {},
-        "dark": {s["t"]: s.get("sig") for s in ((load(DATA / "darkpool" / "daily.json", {}) or {}).get("stocks") or [])},
-        "darkidx": ((load(DATA / "darkpool" / "daily.json", {}) or {}).get("index") or {}),
-        "news": {k: v.get("mood") for k, v in ((load(DATA / "sentiment.json", {}) or {}).get("stocks") or {}).items()},
+        "records": strategy_records(load(UDATA / "history.json", {}) or {}),
+        "alerts": load(UDATA / "alerts.json", {}) or {}, "live": load(UDATA / "live.json", {}) or {},
+        "dark": {s["t"]: s.get("sig") for s in ((load(UDATA / "darkpool" / "daily.json", {}) or {}).get("stocks") or [])},
+        "darkidx": ((load(UDATA / "darkpool" / "daily.json", {}) or {}).get("index") or {}),
+        "news": {k: v.get("mood") for k, v in ((load(UDATA / "sentiment.json", {}) or {}).get("stocks") or {}).items()},
         "cal": load(DATA / "calendar.json", {}) or {},
         "gex": ((load(DATA / "gex" / "latest.json", {}) or {}).get("underlyings") or {}).get("SPY") or {},
         "newsmkt": (load(DATA / "news_market.json", {}) or {}).get("days") or {},
-        "stocksjson": load(DATA / "stocks.json", {}) or {},
+        "stocksjson": load(UDATA / "stocks.json", {}) or {},
     }
 
 
@@ -651,7 +654,7 @@ def main() -> None:
         out_dir = Path("/tmp/terminal-demo")
         daily, intra, chains, spots, idx = demo_data(syms, now)
     else:
-        out_dir = DATA / "terminal"
+        out_dir = UDATA / "terminal"
         print(f"Prices for {len(syms)} stocks + indices…")
         daily, intra = fetch_prices(syms + ["SPY", "^GSPC", "^VIX", "^VIX3M"])
         idx = {k: daily.pop(k, None) for k in ["SPY", "^GSPC", "^VIX", "^VIX3M"]}

@@ -13,8 +13,10 @@ import * as Lab from "../docs/lab.js";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const market = process.argv[2] || "stocks";
-const dir = join(ROOT, "docs", "data", market === "stocks" ? "" : market);
-const FROM = "2021-01-01", LIVE = "2026-11-02";
+// UNIVERSE=sp500: the S&P 500 stocks (docs/data/sp500/), see engine/universe.py
+const big = market === "stocks" && process.env.UNIVERSE === "sp500";
+const dir = join(ROOT, "docs", "data", market === "stocks" ? (big ? "sp500" : "") : market);
+const FROM = "2021-01-01", LIVE = big ? "2026-11-09" : "2026-11-02";
 const load = f => existsSync(join(dir, f)) ? Lab.decode(JSON.parse(readFileSync(join(dir, f), "utf8"))) : null;
 const hist = load("lab.json"), recent = load("lab_recent.json");
 if (!hist) { console.log(`no lab.json for ${market}`); process.exit(0); }

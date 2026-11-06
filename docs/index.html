@@ -38,7 +38,7 @@
 <link rel="icon" href="favicon.ico?v=2" sizes="any">
 <link rel="icon" type="image/svg+xml" href="logo.svg?v=2">
 <link rel="apple-touch-icon" href="icon-180.png?v=2">
-<script src="sections.js?v=1"></script>
+<script src="sections.js?v=2"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
 <style>
@@ -719,6 +719,14 @@ table.lcpick tbody tr.on td:first-child { box-shadow: inset 3px 0 0 var(--amber)
 .mswitch button:hover { color: var(--fg); }
 .mswitch button[aria-pressed="true"] { background: var(--surface-2); color: var(--fg); }
 .mswitch.inline { margin: 10px 0 2px; }
+/* S&P 100 / S&P 500 under the market switch (Stocks only) */
+.usw { display: flex; gap: 4px; margin: 0 4px 18px; }
+.usw button { flex: 1; padding: 5px 8px; border-radius: 8px; font-size: 12px; font-weight: 600; color: var(--muted); border: 1px solid var(--line); background: none; }
+.usw button:hover { color: var(--fg); }
+.usw button[aria-pressed="true"] { color: var(--fg); background: var(--surface-2); border-color: var(--line-2, var(--line)); }
+.usw.inline { margin: 8px 0 2px; max-width: 320px; }
+@media (min-width: 1000px) { .usw.inline { display: none; } }
+.tm .tmu { display: inline-flex; gap: 4px; margin-left: 6px; padding-left: 8px; border-left: 1px solid var(--line); }
 .side .mswitch { margin: 0 4px 18px; }
 .coin { flex: none; display: inline-grid; place-items: center; border-radius: 50%; font: 700 11px/1 var(--font-mono); color: #fff; letter-spacing: -.02em;
   background: radial-gradient(circle at 30% 25%, var(--c2), var(--c1) 70%); box-shadow: inset 0 -2px 4px rgba(0,0,0,.35), 0 0 0 1px color-mix(in srgb, var(--fg) 8%, transparent); text-shadow: 0 1px 2px rgba(0,0,0,.5); }
@@ -1680,7 +1688,7 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
 .tm .tmclock .open { color: var(--bull); } .tm .tmclock .closed { color: var(--faint); }
 .tm .tmmk { display: flex; gap: 4px; }
 .tm .tmmk button { font: 600 11px var(--font-code); letter-spacing: .05em; padding: 6px 8px; border-radius: 6px; color: var(--muted); border: 1px solid var(--line); }
-.tm .tmmk button[aria-pressed="true"] { color: var(--on-accent); background: var(--tc); border-color: var(--tc); }
+.tm .tmmk button[aria-pressed="true"], .tm .tmu button[aria-pressed="true"] { color: var(--on-accent); background: var(--tc); border-color: var(--tc); }
 .tm .tmmsg { margin: 6px 2px 0; font: 500 12px var(--font-code); color: var(--muted); min-height: 0; }
 .tm .tmmsg:empty { display: none; }
 .tm .tmmsg.err { color: var(--bear); }
@@ -1791,6 +1799,12 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
 .tm .help p { grid-column: 1 / -1; margin: 0 0 6px; color: var(--muted); }
 .tm .fine2 { color: var(--faint); font-size: 11.5px; margin: 12px 2px 0; }
 @media (max-width: 999px) { .tm .tmmk { display: none; } .tm .tmcmd kbd { display: none; } }
+/* phones: the Terminal's S&P 100 / S&P 500 switch gets its own row (the market buttons are in the menu) */
+.tm .tmuni { display: none; align-items: center; gap: 6px; margin: 8px 0 2px; }
+.tm .tmuni span { font: 600 10.5px var(--font-code); letter-spacing: .06em; text-transform: uppercase; color: var(--muted); margin-right: 2px; }
+.tm .tmuni button { font: 600 11px var(--font-code); letter-spacing: .04em; padding: 6px 10px; border-radius: 6px; color: var(--muted); border: 1px solid var(--line); }
+.tm .tmuni button[aria-pressed="true"] { color: var(--on-accent); background: var(--tc); border-color: var(--tc); }
+@media (max-width: 999px) { .tm .tmuni { display: flex; } }
 
 /* Terminal: panels the viewer can rearrange, tabs, boards, screener, multi-chart */
 .tm .tmgrid { grid-auto-flow: row dense; }
@@ -2048,6 +2062,7 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
 <aside class="side" aria-label="Sections">
   <a class="brand" href="#home" data-tab="home" aria-label="Home"><img src="logo.svg?v=2" alt=""><span>Investment Center<br><em>Signals</em></span></a>
   <div class="mswitch side-sw" role="group" aria-label="Market"></div>
+  <div class="side-usw"></div>
   <a class="nav" href="#home" data-tab="home"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 10.5 12 4l8.5 6.5"/><path d="M5.5 9v10.5h13V9"/><path d="M10 19.5v-5h4v5"/></svg>Home</a>
   <a class="nav" href="#terminal" data-tab="terminal"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="4" width="19" height="16" rx="2.5"/><path d="m6.5 9.5 3 2.5-3 2.5"/><path d="M12 15h5"/></svg>Terminal<span class="new">New</span></a>
   <details class="sgroup"><summary>Signals</summary>
@@ -2178,8 +2193,13 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
   const axisLbl = t => Math.abs(t) >= 1000 ? Math.round(t).toLocaleString("en-US") : Math.abs(t) >= 1 || t === 0 ? t.toFixed(t % 1 ? 1 : 0) : String(+t.toPrecision(3));
   const sym = t => String(t).replace(/-USD$|=F$/, "");
   const disp = t => isComm() && S.stockBy?.[t] ? S.stockBy[t].name.replace(/ \(.*\)$/, "") : sym(t);
+  // Stocks come in two lists: the S&P 100 (default) and the S&P 500 (docs/data/sp500/, the same files inside).
+  // The choice is remembered on this device (pref "universe"). engine/universe.py writes the S&P 500 side.
+  const uni = () => S.universe === "sp500" ? "sp500" : "sp100";
+  const UB = () => uni() === "sp500" ? "data/sp500/" : "data/";          // this list's own data folder
+  const UL = () => uni() === "sp500" ? "S&amp;P 500" : "S&amp;P 100";    // its name, HTML-escaped
   const MK = {
-    stocks: { noun: "stocks", one: "stock", Tab: "Stocks", index: "S&amp;P 100", base: "data/", search: "Search ticker or company", topic: "",
+    stocks: { noun: "stocks", one: "stock", Tab: "Stocks", get index() { return UL(); }, get base() { return UB(); }, search: "Search ticker or company", get topic() { return uni() === "sp500" ? "sp500-" : ""; },
               scan: "Live (provisional) signals every 30 minutes while the US market is open. The final scan runs after the close (around 23:15 Milan time)." },
     crypto: { noun: "coins", one: "coin", Tab: "Coins", index: "top crypto", base: "data/crypto/", search: "Search coin", topic: "crypto-",
               scan: "Live (provisional) signals every 4 hours. The final scan runs every day shortly after the daily candle closes (around 01:20 Milan time), weekends included." },
@@ -2553,7 +2573,9 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
   const PRICES = {};                                       // market -> {ticker: latest close}, as_of
   async function prPrices(m) {
     if (!PRICES[m]) {
-      const st = CACHE[m]?.stocks || await opt(MK[m].base + "stocks.json");
+      // stocks: the S&P 500 file covers both lists, so a position opened on either one keeps its price
+      const st = m === "stocks" ? (await opt("data/sp500/stocks.json")) || CACHE[m]?.stocks || await opt("data/stocks.json")
+                                : CACHE[m]?.stocks || await opt(MK[m].base + "stocks.json");
       PRICES[m] = { as_of: st?.as_of, px: Object.fromEntries((st?.stocks || []).map(r => [r.ticker, r.price])) };
     }
     return PRICES[m];
@@ -2997,10 +3019,10 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
         ["trendlines.html", "Trendlines", "Automatic trendlines and support/resistance on seven timeframes"],
         ["options.html", "Options", "How option strategies pay off, a live option chain builder and backtests"],
         ["volumeprofile.html", "Volume profile", "How much traded at each price: point of control, value area, thin and busy zones, naked POCs"],
-        ["maxpain.html", "Max pain", "Where the most options expire worthless, for every S&P 100 stock, and whether prices really pin there"],
+        ["maxpain.html", "Max pain", "Where the most options expire worthless, for every S&P 100 or S&P 500 stock, and whether prices really pin there"],
         ["board.html", "Strategy Board", "Every strategy, every day: a green or red tile per trading day, backtest and live"],
         ["session.html", "Session Momentum", "One Nasdaq 100 trade a day from the first 5-minute candle, every session as a green or red tile"],
-        ["choch.html", "4H CHoCH", "Smart Money change of character on 4-hour candles: S&P 100 and bitcoin since 2021, every setting, live paper trades"],
+        ["choch.html", "4H CHoCH", "Smart Money change of character on 4-hour candles: S&P 100, S&P 500 and bitcoin since 2021, every setting, live paper trades"],
         ["pairs.html", "Pairs trading", "Two stocks that move together, traded when their gap stretches"],
         ["research.html", "Strategy research", "87 strategies tested against holding: what worked and why most didn't"],
         ["darkpool.html", "Dark pools", "Big off-exchange block prints, daily dark buying/selling pressure and which dark pools trade each stock"],
@@ -3516,7 +3538,7 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
     h += `<p class="tag">${esc(s.tagline)}</p>`;
     h += `<div class="lede"><span class="badge">${esc(s.category)}</span><span class="badge">${esc(s.level)}</span><span class="badge">7 timeframes</span>
       <span style="flex:1"></span><button class="btn ${on ? "on" : ""}" data-follow="${id}">${on ? "✓ Following" : "Follow"}</button></div>`;
-    if (!forMarket(s)) h += `<div class="card"><p style="margin:0">Top-Down alerts cover the S&amp;P 100 stocks and SPY, and the top coins around the clock. Switch to <b>Stocks</b> or <b>Crypto</b> at the top to see them.</p></div>`;
+    if (!forMarket(s)) h += `<div class="card"><p style="margin:0">Top-Down alerts cover the S&amp;P 100 and S&amp;P 500 stocks and SPY, and the top coins around the clock. Switch to <b>Stocks</b> or <b>Crypto</b> at the top to see them.</p></div>`;
     h += `<div class="prose">${s.how.map(p => `<p>${esc(p)}</p>`).join("")}</div>`;
     h += `<h2>Timeframes that alert</h2><div class="tfpick" role="group" aria-label="Timeframes that alert">${TD_TFS.map(tf =>
       `<button data-tdtf="${tf}" aria-pressed="${picked.includes(tf)}"><b>${tf}</b><small>${TD_LABEL[tf]}</small></button>`).join("")}</div>
@@ -4948,7 +4970,7 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
         R.A.map((v, i) => `<tr><th>${esc(labTxt(labSet(R.cells[0].cfg, R.ax[0][0], v), R.ax[0][0]))}</th>${R.B.map((_, j) => cell(R.cells.find(c => c.i === i && c.j === j))).join("")}</tr>`).join("") + `</tbody>`
       : `<thead><tr><th>${lbl(R.ax[0][0])}</th><th>vs holding</th></tr></thead><tbody>` + R.cells.map(c => `<tr><th>${esc(labTxt(c.cfg, R.ax[0][0]))}</th>${cell(c)}</tr>`).join("") + `</tbody>`;
     h += `</table></div>`;
-    h += `<p class="hint" style="margin-top:14px">Still to keep in mind: the ${L().noun} are ${S.market === "stocks" || !S.market ? "today's S&amp;P 100, tested on the past, so the companies that later fell out of the index are missing. That's why holding them all beat " + bn + ", and why it's the bar to clear" : "today's list, tested on the past, so ones that failed or were dropped are missing. That's why holding them all is the bar to clear"}. Past results don't promise future ones.</p>`;
+    h += `<p class="hint" style="margin-top:14px">Still to keep in mind: the ${L().noun} are ${S.market === "stocks" || !S.market ? "today's ${UL()}, tested on the past, so the companies that later fell out of the index are missing. That's why holding them all beat " + bn + ", and why it's the bar to clear" : "today's list, tested on the past, so ones that failed or were dropped are missing. That's why holding them all is the bar to clear"}. Past results don't promise future ones.</p>`;
     el.innerHTML = h;
     if (R.wf.from >= 0) {
       const f = R.wf.from, re = eq => eq.map(v => v / eq[f] * 100000);
@@ -6449,7 +6471,7 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
     if (quiet) return h + `<p class="hint" style="margin:10px 0 0">${m.n ? `Only ${plural(m.n, "headline")} named` : "No headlines named"} ${esc(disp(t))} in the last ${S.sent.window_days} days, too few to read a mood.</p></div>`;
     h += `<div class="mgauge" role="img" aria-label="Tone ${Math.round(V.score * 100)} on a scale from −100 bearish to +100 bullish"><b class="${V.score >= .1 ? "up" : V.score <= -.1 ? "down" : ""}" style="left:${pos}%"></b></div>
       <div class="mscale"><span>Bearish</span><span>${moodRel() ? "Usual" : "Neutral"}</span><span>Bullish</span></div>
-      ${moodRel() ? `<p class="hint" style="margin:8px 0 0">Tone ${sgn2(m.score)} against ${sgn2(S.sent.baseline)} for S&amp;P 100 news overall this week.</p>` : ""}
+      ${moodRel() ? `<p class="hint" style="margin:8px 0 0">Tone ${sgn2(m.score)} against ${sgn2(S.sent.baseline)} for ${UL()} news overall this week.</p>` : ""}
       <div class="mcount"><span><b class="up">${m.bull}</b> bullish</span><span><b class="down">${m.bear}</b> bearish</span><span><b>${m.neu}</b> neutral</span><span>${plural(m.n, "headline")} in ${S.sent.window_days} days${m.n48 ? ` · ${m.n48} in the last 48h` : ""}</span></div>`;
     const top = m.top.map(id => by[id]).filter(Boolean);
     if (top.length) h += `<ul class="mdrivers">${top.map(x => `<li><a href="${esc(x.url || "#")}" target="_blank" rel="noopener noreferrer"><i class="${toneOf(x.s)}"></i><span>${esc(x.title)}</span><small>${esc(x.src)}${x.also?.length ? ` · also ${esc(x.also.slice(0, 2).join(", "))}${x.also.length > 2 ? ` +${x.also.length - 2}` : ""}` : ""} · ${esc(ago(x.t))}</small></a></li>`).join("")}</ul>`;
@@ -6468,7 +6490,7 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
     live.forEach(r => { const V = moodOf(r); r.mood = V.mood; r.score = V.score; });
     const up = live.filter(r => r.mood.endsWith("bullish")), dn = live.filter(r => r.mood.endsWith("bearish"));
     h += `<p class="tag" style="font-size:14px;margin:6px 0 12px">${moodRel()
-      ? `How the last ${M.window_days} days of headlines about each ${L().one} compare with the usual tone of S&amp;P 100 news (${sgn2(M.baseline)} this week, since company news is mostly upbeat).`
+      ? `How the last ${M.window_days} days of headlines about each ${L().one} compare with the usual tone of ${UL()} news (${sgn2(M.baseline)} this week, since company news is mostly upbeat).`
       : `Whether the last ${M.window_days} days of headlines about each ${L().one} sound bullish or bearish, newest counting most.`}</p>`;
     if (M.demo) h += `<div class="demo">Demo data: made-up headlines, so you can see how this page works.</div>`;
     h += `<div class="moodsum"><div><span>Bullish</span><b class="up">${up.length}</b></div><div><span>Neutral</span><b>${live.length - up.length - dn.length}</b></div><div><span>Bearish</span><b class="down">${dn.length}</b></div></div>`;
@@ -6521,8 +6543,9 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
   const ECO_SHORT = { "Fed rate decision": "Fed", "CPI inflation": "CPI", "PCE inflation": "PCE", "Jobs report": "Jobs", "Unemployment rate": "Jobless",
                       "Retail sales": "Retail", "ISM manufacturing": "ISM mfg", "ISM services": "ISM svc", "Job openings": "JOLTS", "Consumer sentiment": "Sentiment" };
   const TIMES = { bmo: "before the open", amc: "after the close", tns: "time not announced" };
-  const SCOPES = [["sp100", "S&amp;P 100"], ["large", "$10B+"], ["all", "All $2B+"]];
-  const inScope = (e, sc) => sc === "all" || e.sp100 || (sc === "large" && (e.mcap || 0) >= 1e10);
+  const SCOPES = [["sp100", "S&amp;P 100"], ["sp500", "S&amp;P 500"], ["large", "$10B+"], ["all", "All $2B+"]];
+  // the S&P 100 always shows; the S&P 500 scope adds the rest of the index (e.sp500, engine/events.py)
+  const inScope = (e, sc) => sc === "all" || e.sp100 || (sc === "sp500" && e.sp500) || (sc === "large" && ((e.mcap || 0) >= 1e10 || e.sp500));
 
   function calEvents(type, sc) {
     const C = S.cal || {}, by = {};
@@ -6570,7 +6593,7 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
     const q = x.eps != null
       ? `${eps(x.eps)}<small>EPS${x.eps_est != null ? ` vs ${eps(x.eps_est)} est.` : ""}</small>${x.surprise != null ? `<span class="surp ${x.surprise >= 0 ? "up" : "down"}">${x.surprise >= 0 ? "Beat +" : "Miss "}${x.surprise.toFixed(1)}%</span>` : ""}`
       : `${eps(x.eps_est)}<small>EPS est.${x.rev_est ? ` · rev ${bigUsd(x.rev_est)}` : ""}</small>`;
-    const inner = `<span style="min-width:0"><span class="tk">${esc(x.ticker)}</span>${x.sp100 && sc !== "sp100" ? `<span class="sp">S&amp;P 100</span>` : ""}
+    const inner = `<span style="min-width:0"><span class="tk">${esc(x.ticker)}</span>${x.sp100 && sc !== "sp100" ? `<span class="sp">S&amp;P 100</span>` : x.sp500 && sc !== "sp500" && sc !== "sp100" ? `<span class="sp">S&amp;P 500</span>` : ""}
         <span class="nm">${esc(x.name || "")}</span>${meta ? `<span class="meta">${meta}</span>` : ""}</span><span class="q">${q}</span>`;
     return linked ? `<a class="row cev" href="#stock-${esc(x.ticker)}">${inner}</a>` : `<div class="row cev">${inner}</div>`;
   }
@@ -6596,7 +6619,7 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
   const ERN_MET = [["m", "On earnings day"], ["d1", "The next day"], ["d5", "5 days later"], ["d20", "20 days later"], ["d20x", "Beat the S&P 500 (20 days)"]];
   function ernLoad(t) {
     const E = S.ern || (S.ern = { files: {} });
-    if (E.index === undefined) { E.index = null; opt("data/earnings/index.json").then(x => { E.index = x || false; rerender(); }); }
+    if (E.index === undefined) { E.index = null; opt(UB() + "earnings/index.json").then(x => { E.index = x || false; rerender(); }); }
     if (t && E.files[t] === undefined) { E.files[t] = null; opt(`data/earnings/${encodeURIComponent(t)}.json`).then(x => { E.files[t] = x || false; rerender(); }); }
   }
   function ernStats(evs, k) {
@@ -6619,8 +6642,8 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
       if (!s) return "";
       const w = Math.round(s.up);
       return `<div class="ernrow"><span class="l">${lbl}</span><span class="v"><b class="${s.up >= 50 ? "up" : "down"}">${w}%</b> ${k === "d20x" ? "of the time" : "went up"}</span>
-        <span class="bar" aria-hidden="true"><i style="width:${w}%"></i>${b ? `<u style="left:${b.up.toFixed(1)}%" title="S&amp;P 100: ${Math.round(b.up)}%"></u>` : ""}</span>
-        <span class="s">avg ${ernPct(s.avg)}${b ? ` · S&amp;P 100 ${Math.round(b.up)}%, ${ernPct(b.avg)}` : ""}</span></div>`;
+        <span class="bar" aria-hidden="true"><i style="width:${w}%"></i>${b ? `<u style="left:${b.up.toFixed(1)}%" title="${UL()}: ${Math.round(b.up)}%"></u>` : ""}</span>
+        <span class="s">avg ${ernPct(s.avg)}${b ? ` · ${UL()} ${Math.round(b.up)}%, ${ernPct(b.avg)}` : ""}</span></div>`;
     }).join("");
     return `<div class="ernbox"><h3 class="${cls}">${title}<span>${evs.length} report${evs.length === 1 ? "" : "s"}</span></h3>${evs.length < 8 ? `<p class="ernfew">Only ${evs.length}: too few to rely on these percentages.</p>` : ""}${rows}</div>`;
   }
@@ -6639,8 +6662,8 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
       <div class="ticks">${ticks}</div><p class="hint" style="margin:6px 0 0">Tallest bars: ${ernPct(mx)} / ${ernPct(-mx)}. Hover a bar to see its date and surprise.</p></div>`;
   }
   function viewEarnings(arg) {
-    let h = header("Earnings reactions", null, S.ern?.index ? `<div class="stamp">S&amp;P 100<br>updated ${esc(ago(S.ern.index.generated_at))}</div>` : "") + newsSwitch("earnings");
-    if (S.market !== "stocks") return h + `<div class="empty"><strong>Stocks only</strong>Earnings reactions are for S&amp;P 100 stocks. Switch the market to Stocks.</div>`;
+    let h = header("Earnings reactions", null, S.ern?.index ? `<div class="stamp">${UL()}<br>updated ${esc(ago(S.ern.index.generated_at))}</div>` : "") + newsSwitch("earnings");
+    if (S.market !== "stocks") return h + `<div class="empty"><strong>Stocks only</strong>Earnings reactions are for S&amp;P 100 and S&amp;P 500 stocks. Switch the market to Stocks.</div>`;
     const t = (arg || "").toUpperCase();
     ernLoad(t);
     const I = S.ern.index;
@@ -6660,14 +6683,14 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
     if (!t) {
       h += `<div class="chips" role="group" aria-label="Popular stocks" style="margin:2px 0 16px">${quick.map(x => `<a class="chip" href="#earnings-${x}">${x}</a>`).join("")}</div>`;
       const n = ernBase("all", "m", from, to)?.n || 0, nb = ernBase("beat", "m", from, to)?.n || 0;
-      h += `<h2>All S&amp;P 100 stocks, ${from === to ? from : `${from}–${to}`}</h2><p class="tag" style="font-size:14px;margin:0 0 10px">${n.toLocaleString("en-US")} reports · ${n ? Math.round(nb / n * 100) : 0}% beat the estimate. Pick a stock above to compare it with these numbers.</p>`;
+      h += `<h2>All ${UL()} stocks, ${from === to ? from : `${from}–${to}`}</h2><p class="tag" style="font-size:14px;margin:0 0 10px">${n.toLocaleString("en-US")} reports · ${n ? Math.round(nb / n * 100) : 0}% beat the estimate. Pick a stock above to compare it with these numbers.</p>`;
       h += `<div class="erngrid">${["beat", "miss"].map(g => {
         const rows = ERN_MET.map(([k, lbl]) => { const b = ernBase(g, k, from, to); return b ? `<div class="ernrow"><span class="l">${lbl}</span><span class="v"><b class="${b.up >= 50 ? "up" : "down"}">${Math.round(b.up)}%</b> ${k === "d20x" ? "of the time" : "went up"}</span><span class="bar" aria-hidden="true"><i style="width:${Math.round(b.up)}%"></i></span><span class="s">avg ${ernPct(b.avg)}</span></div>` : ""; }).join("");
         return `<div class="ernbox"><h3 class="${g === "beat" ? "up" : "down"}">After a ${g}<span>${(ernBase(g, "m", from, to)?.n || 0).toLocaleString("en-US")} reports</span></h3>${rows}</div>`;
       }).join("")}</div>`;
       return h + ernFine();
     }
-    if (!have.has(t)) return h + `<div class="empty"><strong>${esc(t)} isn't covered</strong>Earnings reactions are available for the ${I.stocks.length} S&amp;P 100 stocks. Try one of: ${quick.map(x => `<a href="#earnings-${x}">${x}</a>`).join(", ")}.</div>`;
+    if (!have.has(t)) return h + `<div class="empty"><strong>${esc(t)} isn't covered</strong>Earnings reactions are available for the ${I.stocks.length} ${UL()} stocks${uni() === "sp100" ? " (switch to the S&amp;P 500 for more)" : ""}. Try one of: ${quick.map(x => `<a href="#earnings-${x}">${x}</a>`).join(", ")}.</div>`;
     const F = S.ern.files[t];
     if (F === null) return h + `<p class="loading">Loading ${esc(sym(t))}…</p>`;
     if (!F) return h + `<div class="empty"><strong>Couldn't load ${esc(sym(t))}</strong>Try again in a moment.</div>`;
@@ -7101,7 +7124,7 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
         <p>Volatility is how much a price swings. A utility stock might move 1% on a normal day, a small tech stock 4%, bitcoin even more. Bollinger Bands widen and narrow with volatility, which is why the same 2σ rule fits both calm and wild stocks.</p>
         <p>Volatility also tells you how big a normal move is: a 3% drop is news for one asset and an ordinary Tuesday for another.</p></div></details>
       <details class="lq"><summary>Stocks, crypto and commodities: what changes</summary><div class="prose">
-        <p><strong>Stocks:</strong> the app scans the S&amp;P 100, the largest US companies. They trade Monday to Friday, and the scan runs after the US close.</p>
+        <p><strong>Stocks:</strong> the app scans the S&amp;P 100, the largest US companies, or, with the S&amp;P 500 switch, the whole S&amp;P 500. They trade Monday to Friday, and the scan runs after the US close.</p>
         <p><strong>Crypto</strong> trades around the clock, every day. The “daily close” is the candle that ends at midnight UTC, and prices swing far more than large stocks, so signals fire more often and moves after them are bigger both ways.</p>
         <p><strong>Commodities</strong> here are futures contracts (gold, oil, wheat…). Their prices react to supply, weather, inventories and the dollar as well as to trends, and each contract eventually expires and is replaced by the next one.</p>
         <p>The rules of each strategy are the same in all three markets; how well they work isn't. The backtest on each strategy page is shown for the market you have selected.</p></div></details>
@@ -7160,7 +7183,7 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
       <div class="card"><h3>Against buy-and-hold</h3><p>The honest test: would a €100k account following the strategy have beaten simply buying the index and doing nothing? Over long bull markets, few do. Some earn their place by falling less in crashes instead.</p></div></div>`;
     h += `<h3 class="h3">Why past results can mislead</h3><ul class="watch">
       <li><strong>Overfitting.</strong> In the Strategy Lab you can tune settings until the past looks perfect. Settings tuned to the past usually do worse in the future. Prefer settings that work reasonably across many values, not one magic number.</li>
-      <li><strong>Survivorship.</strong> The backtest uses today's S&amp;P 100 members. Companies that shrank or failed and dropped out of the index aren't in it, which flatters the results somewhat.</li>
+      <li><strong>Survivorship.</strong> The backtest uses today's S&amp;P 100 (or S&amp;P 500) members. Companies that shrank or failed and dropped out of the index aren't in it, which flatters the results somewhat.</li>
       <li><strong>No costs.</strong> No commissions, spreads, slippage or taxes are deducted.</li>
       <li><strong>One period.</strong> 15 years were mostly a rising market for US large caps. A different decade might rank the strategies differently.</li></ul>`;
 
@@ -7423,7 +7446,7 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
   function tmLoadCo() {
     if (S.coSum !== undefined) return S.coSum;
     S.coSum = null;
-    opt("data/company.json").then(d => { S.coSum = d || false; ["eqs", "most"].forEach(tmRefresh); if (pref("tmTab.sec", "DES") === "RV") tmSecRender(); });
+    opt(UB() + "company.json").then(d => { S.coSum = d || false; ["eqs", "most"].forEach(tmRefresh); if (pref("tmTab.sec", "DES") === "RV") tmSecRender(); });
     return S.coSum;
   }
   function tmCoDet(t) {
@@ -7441,7 +7464,7 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
     if (!force && cur && Date.now() - cur.tried < (cur.fail ? 5 * 6e4 : 18e3)) return;
     S.lq[m] = { ...(cur || {}), tried: Date.now() };
     try {
-      const r = await fetch(`${trendApi()}/?quotes=${m === "crypto" ? "crypto" : "stocks"}`);
+      const r = await fetch(`${trendApi()}/?quotes=${m === "crypto" ? "crypto" : uni() === "sp500" ? "sp500" : "stocks"}`);
       const d = await r.json();
       if (!r.ok || d.error || !d.q) throw new Error(d.error || r.status);
       S.lq[m] = { q: d.q, at: d.at, src: d.source, tried: Date.now() };
@@ -7611,7 +7634,7 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
     if (!peers.length) return `<p class="empty2">No peers found.</p>`;
     const cols = [["mcap", "Mkt cap", tmBig], ["pe", "P/E", v => tmNum(v, 1)], ["fpe", "Fwd P/E", v => tmNum(v, 1)], ["ev_ebitda", "EV/EBITDA", v => tmNum(v, 1)], ["margin", "Margin", tmFr], ["roe", "ROE", tmFr], ["rev_g", "Rev. gr.", tmFr], ["div_y", "Div. yield", v => v == null ? "–" : v.toFixed(2) + "%"], ["upside", "Upside", v => tmPct(v)]];
     const med = k => { const v = peers.map(([, x]) => x[k]).filter(x => x != null).sort((a, b) => a - b); return v.length ? v[Math.floor(v.length / 2)] : null; };
-    return `<p class="sub2">${esc(sec || "")} · ${peers.length} stocks in the S&amp;P 100</p><div class="tw"><table class="tt rv"><thead><tr><th>Stock</th><th>1 year</th>${cols.map(c => `<th>${c[1]}</th>`).join("")}</tr></thead><tbody>
+    return `<p class="sub2">${esc(sec || "")} · ${peers.length} stocks in the ${UL()}</p><div class="tw"><table class="tt rv"><thead><tr><th>Stock</th><th>1 year</th>${cols.map(c => `<th>${c[1]}</th>`).join("")}</tr></thead><tbody>
       ${peers.map(([k, v]) => `<tr class="${k === t ? "me" : ""}" data-tmsel="${esc(k)}"><td><b>${esc(disp(k))}</b></td><td>${tmPct(S.stockBy[k]?.chg1y)}</td>${cols.map(([c, , f]) => `<td>${f(v[c])}</td>`).join("")}</tr>`).join("")}
       <tr class="med"><td>Median</td><td></td>${cols.map(([c, , f]) => `<td>${f(med(c))}</td>`).join("")}</tr></tbody></table></div><p class="fine2">Tap a row to load that stock. Valuation from Yahoo Finance.</p>`;
   }
@@ -7720,8 +7743,8 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
     else {
       const tm = { bmo: "pre", amc: "post", tns: "–" };
       if (S.market === "stocks") {
-        const E = (C.earnings || []).filter(e => e.date >= today && e.sp100).slice(0, 14);
-        body += `<p class="sub2">Earnings · S&amp;P 100</p>` + (E.length ? E.map(e => `<button type="button" class="tr cl" data-tmsel="${esc(e.ticker)}"><span class="dim">${esc(fmtDate(e.date, { day: "numeric", month: "short" }))}</span><span class="tk">${esc(e.ticker)}</span><span>${esc(e.name || "")}</span><span class="r dim">${esc(tm[e.time] || e.time || "")}${e.eps_est != null ? " · " + e.eps_est : ""}</span></button>`).join("") : `<p class="empty2">None in the next few weeks.</p>`);
+        const E = (C.earnings || []).filter(e => e.date >= today && (uni() === "sp500" ? e.sp500 || e.sp100 : e.sp100)).slice(0, 14);
+        body += `<p class="sub2">Earnings · ${UL()}</p>` + (E.length ? E.map(e => `<button type="button" class="tr cl" data-tmsel="${esc(e.ticker)}"><span class="dim">${esc(fmtDate(e.date, { day: "numeric", month: "short" }))}</span><span class="tk">${esc(e.ticker)}</span><span>${esc(e.name || "")}</span><span class="r dim">${esc(tm[e.time] || e.time || "")}${e.eps_est != null ? " · " + e.eps_est : ""}</span></button>`).join("") : `<p class="empty2">None in the next few weeks.</p>`);
       }
       const X = (C.economy || []).filter(e => e.date >= today).slice(0, 10);
       body += `<p class="sub2">Economy · US</p>` + (X.length ? X.map(e => `<a class="tr cl" href="#calendar-${esc(e.date)}" title="${esc(e.why || "")}"><span class="dim">${esc(fmtDate(e.date, { day: "numeric", month: "short" }))}</span><span class="dim">${esc(e.time || "")}</span><span>${esc(e.kind || e.name)}${e.period ? ` <span class="dim">${esc(e.period)}</span>` : ""}</span><span class="r dim">${e.last != null ? "prev " + e.last : ""}</span></a>`).join("") : `<p class="empty2">Nothing scheduled.</p>`);
@@ -7769,7 +7792,7 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
     if (S.fl !== undefined && Date.now() - (S.flAt || 0) < 2 * 6e4) return S.fl;
     const first = S.fl === undefined; if (first) S.fl = null;
     S.flAt = Date.now();
-    opt("data/terminal/flow.json").then(d => {
+    opt(UB() + "terminal/flow.json").then(d => {
       if (!d && !first) return;
       const changed = first || d?.generated_at !== S.fl?.generated_at;
       S.fl = d || false;
@@ -7784,7 +7807,7 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
     if (S.dk !== undefined && Date.now() - (S.dkAt || 0) < 10 * 6e4) return S.dk;
     if (S.dk === undefined) S.dk = null;
     S.dkAt = Date.now();
-    Promise.all([opt("data/darkpool/daily.json"), opt("data/darkpool/blocks.json")]).then(([d, b]) => {
+    Promise.all([opt(UB() + "darkpool/daily.json"), opt(UB() + "darkpool/blocks.json")]).then(([d, b]) => {
       S.dk = { d, b, by: Object.fromEntries((d?.stocks || []).map(x => [x.t, x])) };
       if (S.tmSel && tmTab("sec", "DES") === "FLOW") tmSecRender();
     });
@@ -7794,7 +7817,7 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
     S.mp = S.mp || {};
     if (S.mp[t] !== undefined) return S.mp[t];
     S.mp[t] = null;
-    opt(`data/maxpain/${encodeURIComponent(t)}.json`).then(d => { S.mp[t] = d || false; if (S.tmSel === t && tmTab("sec", "DES") === "OMON") tmSecRender(); });
+    opt(`${UB()}maxpain/${encodeURIComponent(t)}.json`).then(d => { S.mp[t] = d || false; if (S.tmSel === t && tmTab("sec", "DES") === "OMON") tmSecRender(); });
     return null;
   }
   const tmMoodC = g => g < 20 ? "xf" : g < 40 ? "f" : g < 60 ? "n" : g < 80 ? "g" : "xg";
@@ -7883,7 +7906,7 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
     if (S.tdt[m] !== undefined && Date.now() - (S.tdtAt?.[m] || 0) < 5 * 6e4) return S.tdt[m];
     if (S.tdt[m] === undefined) S.tdt[m] = null;
     (S.tdtAt = S.tdtAt || {})[m] = Date.now();
-    opt(m === "crypto" ? "data/crypto/topdown_trades.json" : "data/topdown/trades.json").then(d => { S.tdt[m] = d || false; tmRefresh("tdt"); });
+    opt(m === "crypto" ? "data/crypto/topdown_trades.json" : UB() + "topdown/trades.json").then(d => { S.tdt[m] = d || false; tmRefresh("tdt"); });
     return S.tdt[m];
   }
   TM_R.tdt = () => {
@@ -8317,10 +8340,11 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
     let h = `<div class="tm">
       <div class="tmbar"><span class="tmlogo">IC<i>/</i>TERMINAL</span>
         <form class="tmcmd" id="tmform" role="search" autocomplete="off"><span aria-hidden="true">&gt;</span><input id="tmcmd" type="text" list="tmlist" spellcheck="false" autocomplete="off" autocorrect="off" autocapitalize="characters" enterkeyhint="go" placeholder="Ticker or code — try NVDA, TSLA OPT, AAPL FLOW, HELP" aria-label="Command line: type a ticker or a function code"><kbd>/</kbd><button type="submit" class="tmgo" aria-label="Go">Go</button><datalist id="tmlist">${opts}</datalist></form>
-        <span class="tmmk">${[["stocks", "STK"], ["crypto", "CRYP"], ["commodities", "COMM"]].map(([m, c]) => `<button type="button" data-market="${m}" aria-pressed="${S.market === m}">${c}</button>`).join("")}</span>
+        <span class="tmmk">${[["stocks", "STK"], ["crypto", "CRYP"], ["commodities", "COMM"]].map(([m, c]) => `<button type="button" data-market="${m}" aria-pressed="${S.market === m}">${c}</button>`).join("")}${S.market === "stocks" ? `<span class="tmu" role="group" aria-label="Stock list">${[["sp100", "SPX100"], ["sp500", "SPX500"]].map(([u, c]) => `<button type="button" data-universe="${u}" aria-pressed="${uni() === u}" title="${u === "sp500" ? "S&amp;P 500" : "S&amp;P 100"}">${c}</button>`).join("")}</span>` : ""}</span>
         <span class="tmclock"><span id="tmclock">${tmClock()}</span><span class="tml" id="tmlive"></span></span>
         <button type="button" class="tmedit" data-tmedit aria-pressed="${!!ed}">${ed ? "Done" : "Layout"}</button>
       </div>
+      ${S.market === "stocks" ? `<div class="tmuni" role="group" aria-label="Stock list"><span>List</span>${[["sp100", "S&amp;P 100"], ["sp500", "S&amp;P 500"]].map(([u, c]) => `<button type="button" data-universe="${u}" aria-pressed="${uni() === u}">${c}</button>`).join("")}</div>` : ""}
       <p class="tmmsg" id="tmmsg" role="status"></p>
       ${S.market === "stocks" ? `<div class="tmpulse" id="tmpulse">${tmPulseHtml()}</div>` : ""}
       ${wsNav}
@@ -8492,7 +8516,7 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
     } else {
       app.className = tab === "terminal" ? "term" : (WIDE.matches ? "single" : "") + (tab === "home" ? " homex" : "");
       const V = norm(detail ? detail() : list());
-      app.innerHTML = (detail || WIDE.matches || tab === "terminal" ? "" : `<div class="mswitch inline" role="group" aria-label="Market">${switchHtml()}</div>`) + V.html;
+      app.innerHTML = (detail || WIDE.matches || tab === "terminal" ? "" : `<div class="mswitch inline" role="group" aria-label="Market">${switchHtml()}</div>${uniHtml().replace('class="usw"', 'class="usw inline"')}`) + V.html;
       V.after?.();
     }
     S.lastTab = tab; S.lastSel = sel;
@@ -8938,7 +8962,7 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
   async function loadMarket(m) {
     if (!CACHE[m]) {
       const b = MK[m].base;
-      const [feed, bt, stocks, liq, news, mentions, td, sent, live] = await Promise.all([opt(b + "alerts.json"), opt(b + "backtest.json"), opt(b + "stocks.json"), m === "crypto" ? opt(b + "liquidations.json") : null, opt(b + "news.json"), opt(b + "mentions.json"), m === "stocks" ? opt("data/topdown/alerts.json") : m === "crypto" ? opt(b + "topdown.json") : null, m === "stocks" ? opt("data/sentiment.json") : null, opt(b + "live.json")]);
+      const [feed, bt, stocks, liq, news, mentions, td, sent, live] = await Promise.all([opt(b + "alerts.json"), opt(b + "backtest.json"), opt(b + "stocks.json"), m === "crypto" ? opt(b + "liquidations.json") : null, opt(m === "stocks" ? "data/news.json" : b + "news.json"), opt(b + "mentions.json"), m === "stocks" ? opt(UB() + "topdown/alerts.json") : m === "crypto" ? opt(b + "topdown.json") : null, m === "stocks" ? opt(UB() + "sentiment.json") : null, opt(b + "live.json")]);
       CACHE[m] = { feed, bt, stocks, liq, news, mentions, td, sent, live, stockData: {} };
     }
     const c = CACHE[m];
@@ -8950,11 +8974,31 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
     drawBackdrop();
     document.querySelectorAll('[data-l="tab"]').forEach(el => el.textContent = MK[m].Tab);
     document.querySelectorAll(".side-sw").forEach(el => el.innerHTML = switchHtml());
+    document.querySelectorAll(".side-usw").forEach(el => el.innerHTML = uniHtml());
     const fd = c.feed;
     document.getElementById("sidefoot").innerHTML = (fd ? `<b>${esc(fd.universe)}</b> · ${fd.tickers} ${MK[m].noun}<br>Close of ${fmtDate(fd.as_of, { day: "numeric", month: "short", year: "numeric" })}` : "");
   }
   const switchHtml = () => [["stocks", "📈", "Stocks"], ["crypto", "🪙", "Crypto"], ["commodities", "🛢️", "Commodities"]].map(([m, ic, t]) =>
     `<button data-market="${m}" aria-pressed="${S.market === m}"><span aria-hidden="true">${ic}</span>${t}</button>`).join("");
+  // S&P 100 / S&P 500, shown under the market switch while Stocks is picked
+  const uniHtml = () => S.market !== "stocks" ? "" : `<div class="usw" role="group" aria-label="Stock list">${[["sp100", "S&amp;P 100"], ["sp500", "S&amp;P 500"]].map(([u, t]) =>
+    `<button type="button" data-universe="${u}" aria-pressed="${uni() === u}">${t}</button>`).join("")}</div>`;
+  async function switchUniverse(u) {
+    if (u === uni()) return;
+    S.universe = u; setPref("universe", u);
+    // forget everything that belongs to the other list; it reloads from its own folder
+    delete CACHE.stocks; delete PRICES.stocks;
+    if (LAB.data) delete LAB.data.stocks;
+    if (LAB.recent) delete LAB.recent.stocks;
+    delete LC.data.stocks;
+    S.coSum = undefined; S.fl = undefined; S.dk = undefined; S.mp = {}; S.ern = null;
+    if (S.tdt) delete S.tdt.stocks;
+    if (S.lq) delete S.lq.stocks;
+    if (S.market === "stocks") await loadMarket("stocks");
+    S.lastSel = null; S.lastTab = null;
+    if (S.tmSel && !S.stockBy[S.tmSel]) S.tmSel = null;
+    route();
+  }
   async function switchMarket(m) {
     if (m === S.market) return;
     setPref("market", m);
@@ -8968,6 +9012,8 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
   document.addEventListener("click", e => {
     const b = e.target.closest("button[data-market]");
     if (b) { e.preventDefault(); switchMarket(b.dataset.market); }
+    const u = e.target.closest("button[data-universe]");
+    if (u) { e.preventDefault(); switchUniverse(u.dataset.universe); }
   });
 
   // ----------------------------------------------------------------- boot
@@ -8980,6 +9026,7 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
     } catch (e) {}
     S.follow = new Set(load(STORE, DEFAULT_FOLLOW));
     S.prefs = load(PREFS, {}) || {};
+    S.universe = pref("universe", "sp100") === "sp500" ? "sp500" : "sp100";
     try {
       opt("data/brokers.json").then(b => { S.brokers = b; if (S.routed && location.hash.startsWith("#brokers")) rerender(); });
       opt("data/ucits.json").then(u => { S.ucits = u; if (u && S.routed && /^#(brokers|stock-|strateg)/.test(location.hash)) rerender(); });

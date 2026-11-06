@@ -31,7 +31,10 @@ sys.path.insert(0, str(Path(__file__).parent))
 import options_model as M  # noqa: E402
 
 ENGINE = Path(__file__).parent
-OUT = ENGINE.parent / "docs" / "data" / "options" / "backtest.json"
+sys.path.insert(0, str(ENGINE))
+from universe import U  # noqa: E402
+
+OUT = U.path("options", "backtest.json")   # UNIVERSE=sp500: each S&P 500 stock, docs/data/sp500/options/
 START = "2010-01-01"
 RISK = 0.05               # share of the account at risk each month for the defined-risk strategies
 ACCOUNT = 10_000
@@ -304,7 +307,7 @@ def bench(close: pd.Series, dates: list[str]) -> list[float]:
 
 # ------------------------------------------------------------------ main
 def main(demo: bool = False, out: Path = OUT) -> None:
-    tickers = [x.strip() for x in (ENGINE / "tickers.txt").read_text().splitlines() if x.strip() and not x.startswith("#")]
+    tickers = U.tickers()
     closes, vix = load_demo() if demo else load_real(tickers)
     spy = closes["SPY"]
     start = pd.Timestamp(START)

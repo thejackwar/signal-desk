@@ -24,7 +24,7 @@ concurrency:
 jobs:
   flow:
     runs-on: ubuntu-latest
-    timeout-minutes: 32
+    timeout-minutes: 50
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -44,7 +44,10 @@ jobs:
           for n in $(seq 1 "$LOOP"); do
             git pull --rebase -q || true                     # newest alerts, live scan and dark pool files
             if [ "$n" = 1 ]; then python engine/terminal_flow.py; else python engine/terminal_flow.py --fast; fi
+            # the S&P 500 version (docs/data/sp500/terminal/); a failure never stops the S&P 100 one
+            if [ "$n" = 1 ]; then UNIVERSE=sp500 python engine/terminal_flow.py || true; else UNIVERSE=sp500 python engine/terminal_flow.py --fast || true; fi
             git add docs/data/terminal
+            git add docs/data/sp500/terminal 2>/dev/null || true
             if ! git diff --cached --quiet; then
               git commit -q -m "Terminal flow $(date -u +%FT%H:%M)"
               for i in 1 2 3 4; do git pull --rebase -q && git push -q && break; sleep 7; done

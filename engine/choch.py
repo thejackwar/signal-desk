@@ -63,7 +63,10 @@ from pathlib import Path
 from zoneinfo import ZoneInfo
 
 ROOT = Path(__file__).resolve().parent.parent
-DATA_DIR = ROOT / "docs" / "data" / "choch"
+sys.path.insert(0, str(ROOT / "engine"))
+from universe import U  # noqa: E402
+
+DATA_DIR = U.path("choch")       # UNIVERSE=sp500: docs/data/sp500/choch/ (stocks only; bitcoin stays in docs/data/choch/)
 NY = ZoneInfo("America/New_York")
 BARS_URL = "https://data.alpaca.markets/v2/stocks/bars"
 
@@ -479,8 +482,7 @@ def demo_series(n_bars: int, seed: int, px: float, step_h: int, start: str) -> d
 
 
 def load_tickers() -> list[str]:
-    raw = (ROOT / "engine" / "tickers.txt").read_text().splitlines()
-    return [x.strip() for x in raw if x.strip() and not x.startswith("#") and x.strip() != "GOOG"]
+    return U.tickers(drop=("GOOG",))
 
 
 # ===================================================================== backtest
@@ -638,12 +640,13 @@ def run_backtest(demo: bool, now: datetime) -> dict:
         stocks = {f"DEMO{i}": demo_series(6 * 252 * 2, 10 + i, 100.0 + 10 * i, 12, WARMUP_FROM + "T09:30") for i in range(6)}
         spy = demo_series(6 * 252 * 2, 99, 300.0, 12, WARMUP_FROM + "T09:30")
     else:
-        btc = fetch_btc("2020-05-01")
+        btc = None if U.is500 else fetch_btc("2020-05-01")
         tick = load_tickers()
         start = datetime.fromisoformat(WARMUP_FROM).replace(tzinfo=NY)
         stocks = fetch_stocks(tick + ["SPY"], start, now - timedelta(minutes=16))
         spy = stocks.pop("SPY", None)
-    res["markets"]["btc"] = backtest_market("btc", {"BTC-USD": btc}, ny_day, None)
+    if not U.is500:
+        res["markets"]["btc"] = backtest_market("btc", {"BTC-USD": btc}, ny_day, None)
     res["markets"]["stocks"] = backtest_market("stocks", stocks, ny_day, spy)
     return res
 
@@ -680,7 +683,7 @@ def run_live(market: str, demo: bool, now: datetime) -> None:
     before = json.dumps(book, sort_keys=True)
     n, entry, target, side, filt = DEFAULT
     cost = COST[market]
-    topic = "crypto-choch" if market == "btc" else "choch"
+    topic = "crypto-choch" if market == "btc" else U.topic("choch")
     if demo:
         data = {"BTC-USD": demo_series(1600, int(now.timestamp()) // 14400, 60000.0, 4, "2026-03-01T00:00")} if market == "btc" else \
                {f"DEMO{i}": demo_series(700, 40 + i, 100.0 + 5 * i, 12, "2025-12-01T09:30") for i in range(4)}
@@ -765,6 +768,8 @@ def main() -> None:
     ap.add_argument("--live", choices=["stocks", "btc"])
     ap.add_argument("--demo", action="store_true")
     a = ap.parse_args()
+    if U.is500 and a.live == "btc":
+        ap.error("bitcoin runs with the S&P 100 (no UNIVERSE=sp500)")
     now = datetime.now(timezone.utc)
     needs_alpaca = a.backtest or a.live == "stocks"
     if needs_alpaca and not a.demo and not os.environ.get("ALPACA_KEY_ID"):
@@ -778,7 +783,7 @@ def main() -> None:
         out.parent.mkdir(parents=True, exist_ok=True)
         out.write_text(json.dumps(res, separators=(",", ":")))
         d = res["markets"]
-        for m in ("btc", "stocks"):
+        for m in d:
             v = d[m]["variants"][res["default"]]
             print(f"{m}: default {v['all']} account {v['account']} hold {d[m].get('hold_pct')}%")
         print(f"-> {out} ({out.stat().st_size // 1024} KB)")

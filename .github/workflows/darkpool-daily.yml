@@ -24,7 +24,7 @@ jobs:
   daily:
     if: github.event_name != 'schedule' || vars.EXTERNAL_SCHEDULER != 'on'   # the scheduler Worker starts it on time instead (worker/README.md)
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    timeout-minutes: 90
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -46,11 +46,26 @@ jobs:
           if [ "$(date -u +%u)" = 5 ] || [ ! -f docs/data/darkpool/backtest.json ] || [ "$GITHUB_EVENT_NAME" != schedule ]; then
             python engine/darkpool.py backtest
           fi
+      - name: The same for the S&P 500 (docs/data/sp500/darkpool/)
+        continue-on-error: true   # never hold back the S&P 100 pages
+        timeout-minutes: 30
+        env:
+          UNIVERSE: sp500
+          NTFY_PREFIX: ${{ vars.NTFY_PREFIX }}
+          FINRA_API_CLIENT: ${{ secrets.FINRA_API_CLIENT }}
+          FINRA_API_SECRET: ${{ secrets.FINRA_API_SECRET }}
+        run: |
+          python engine/darkpool.py daily
+          python engine/darkpool.py weekly || echo "::warning::FINRA ATS data not available this run (S&P 500)"
+          if [ "$(date -u +%u)" = 5 ] || [ ! -f docs/data/sp500/darkpool/backtest.json ] || [ "$GITHUB_EVENT_NAME" != schedule ]; then
+            python engine/darkpool.py backtest
+          fi
       - name: Publish
         run: |
           git config user.name "signal-desk-bot"
           git config user.email "signal-desk-bot@users.noreply.github.com"
           git add -A docs/data/darkpool
+          git add -A docs/data/sp500/darkpool 2>/dev/null || true
           git diff --cached --quiet && exit 0
           git commit -m "Dark pool daily $(date -u +%F)"
           ok=0; for i in 1 2 3 4; do git pull --rebase && git push && { ok=1; break; }; sleep 15; done; [ $ok = 1 ]

@@ -1,0 +1,2018 @@
+{
+ "A": [
+  "A",
+  "Other"
+ ],
+ "AAPL": [
+  "Apple",
+  "Technology"
+ ],
+ "ABBV": [
+  "AbbVie",
+  "Health Care"
+ ],
+ "ABNB": [
+  "ABNB",
+  "Other"
+ ],
+ "ABT": [
+  "Abbott Laboratories",
+  "Health Care"
+ ],
+ "ACGL": [
+  "ACGL",
+  "Other"
+ ],
+ "ACN": [
+  "Accenture",
+  "Technology"
+ ],
+ "ADBE": [
+  "Adobe",
+  "Technology"
+ ],
+ "ADI": [
+  "ADI",
+  "Other"
+ ],
+ "ADM": [
+  "ADM",
+  "Other"
+ ],
+ "ADP": [
+  "ADP",
+  "Other"
+ ],
+ "ADSK": [
+  "ADSK",
+  "Other"
+ ],
+ "AEE": [
+  "AEE",
+  "Other"
+ ],
+ "AEP": [
+  "AEP",
+  "Other"
+ ],
+ "AES": [
+  "AES",
+  "Other"
+ ],
+ "AFL": [
+  "AFL",
+  "Other"
+ ],
+ "AIG": [
+  "American International Group",
+  "Financials"
+ ],
+ "AIZ": [
+  "AIZ",
+  "Other"
+ ],
+ "AJG": [
+  "AJG",
+  "Other"
+ ],
+ "AKAM": [
+  "AKAM",
+  "Other"
+ ],
+ "ALB": [
+  "ALB",
+  "Other"
+ ],
+ "ALGN": [
+  "ALGN",
+  "Other"
+ ],
+ "ALL": [
+  "ALL",
+  "Other"
+ ],
+ "ALLE": [
+  "ALLE",
+  "Other"
+ ],
+ "AMAT": [
+  "AMAT",
+  "Other"
+ ],
+ "AMCR": [
+  "AMCR",
+  "Other"
+ ],
+ "AMD": [
+  "Advanced Micro Devices",
+  "Technology"
+ ],
+ "AME": [
+  "AME",
+  "Other"
+ ],
+ "AMGN": [
+  "Amgen",
+  "Health Care"
+ ],
+ "AMP": [
+  "AMP",
+  "Other"
+ ],
+ "AMT": [
+  "American Tower",
+  "Real Estate"
+ ],
+ "AMZN": [
+  "Amazon",
+  "Consumer Discretionary"
+ ],
+ "ANET": [
+  "ANET",
+  "Other"
+ ],
+ "AON": [
+  "AON",
+  "Other"
+ ],
+ "AOS": [
+  "AOS",
+  "Other"
+ ],
+ "APA": [
+  "APA",
+  "Other"
+ ],
+ "APD": [
+  "APD",
+  "Other"
+ ],
+ "APH": [
+  "APH",
+  "Other"
+ ],
+ "APO": [
+  "APO",
+  "Other"
+ ],
+ "APP": [
+  "APP",
+  "Other"
+ ],
+ "APTV": [
+  "APTV",
+  "Other"
+ ],
+ "ARE": [
+  "ARE",
+  "Other"
+ ],
+ "ARES": [
+  "ARES",
+  "Other"
+ ],
+ "ATO": [
+  "ATO",
+  "Other"
+ ],
+ "AVGO": [
+  "Broadcom",
+  "Technology"
+ ],
+ "AVY": [
+  "AVY",
+  "Other"
+ ],
+ "AWK": [
+  "AWK",
+  "Other"
+ ],
+ "AXON": [
+  "AXON",
+  "Other"
+ ],
+ "AXP": [
+  "American Express",
+  "Financials"
+ ],
+ "AZO": [
+  "AZO",
+  "Other"
+ ],
+ "BA": [
+  "Boeing",
+  "Industrials"
+ ],
+ "BAC": [
+  "Bank of America",
+  "Financials"
+ ],
+ "BALL": [
+  "BALL",
+  "Other"
+ ],
+ "BAX": [
+  "BAX",
+  "Other"
+ ],
+ "BBY": [
+  "BBY",
+  "Other"
+ ],
+ "BDX": [
+  "BDX",
+  "Other"
+ ],
+ "BEN": [
+  "BEN",
+  "Other"
+ ],
+ "BF-B": [
+  "BF.B",
+  "Other"
+ ],
+ "BG": [
+  "BG",
+  "Other"
+ ],
+ "BIIB": [
+  "BIIB",
+  "Other"
+ ],
+ "BK": [
+  "BNY Mellon",
+  "Financials"
+ ],
+ "BKNG": [
+  "Booking Holdings",
+  "Consumer Discretionary"
+ ],
+ "BKR": [
+  "BKR",
+  "Other"
+ ],
+ "BLDR": [
+  "BLDR",
+  "Other"
+ ],
+ "BLK": [
+  "BlackRock",
+  "Financials"
+ ],
+ "BMY": [
+  "Bristol-Myers Squibb",
+  "Health Care"
+ ],
+ "BNY": [
+  "BNY",
+  "Other"
+ ],
+ "BR": [
+  "BR",
+  "Other"
+ ],
+ "BRK-B": [
+  "Berkshire Hathaway",
+  "Financials"
+ ],
+ "BRO": [
+  "BRO",
+  "Other"
+ ],
+ "BSX": [
+  "BSX",
+  "Other"
+ ],
+ "BX": [
+  "BX",
+  "Other"
+ ],
+ "BXP": [
+  "BXP",
+  "Other"
+ ],
+ "C": [
+  "Citigroup",
+  "Financials"
+ ],
+ "CAH": [
+  "CAH",
+  "Other"
+ ],
+ "CARR": [
+  "CARR",
+  "Other"
+ ],
+ "CASY": [
+  "CASY",
+  "Other"
+ ],
+ "CAT": [
+  "Caterpillar",
+  "Industrials"
+ ],
+ "CB": [
+  "CB",
+  "Other"
+ ],
+ "CBOE": [
+  "CBOE",
+  "Other"
+ ],
+ "CBRE": [
+  "CBRE",
+  "Other"
+ ],
+ "CCI": [
+  "CCI",
+  "Other"
+ ],
+ "CCL": [
+  "CCL",
+  "Other"
+ ],
+ "CDNS": [
+  "CDNS",
+  "Other"
+ ],
+ "CDW": [
+  "CDW",
+  "Other"
+ ],
+ "CEG": [
+  "CEG",
+  "Other"
+ ],
+ "CF": [
+  "CF",
+  "Other"
+ ],
+ "CFG": [
+  "CFG",
+  "Other"
+ ],
+ "CHD": [
+  "CHD",
+  "Other"
+ ],
+ "CHRW": [
+  "CHRW",
+  "Other"
+ ],
+ "CHTR": [
+  "Charter Communications",
+  "Communication"
+ ],
+ "CI": [
+  "CI",
+  "Other"
+ ],
+ "CIEN": [
+  "CIEN",
+  "Other"
+ ],
+ "CINF": [
+  "CINF",
+  "Other"
+ ],
+ "CL": [
+  "Colgate-Palmolive",
+  "Consumer Staples"
+ ],
+ "CLX": [
+  "CLX",
+  "Other"
+ ],
+ "CMCSA": [
+  "Comcast",
+  "Communication"
+ ],
+ "CME": [
+  "CME",
+  "Other"
+ ],
+ "CMG": [
+  "CMG",
+  "Other"
+ ],
+ "CMI": [
+  "CMI",
+  "Other"
+ ],
+ "CMS": [
+  "CMS",
+  "Other"
+ ],
+ "CNC": [
+  "CNC",
+  "Other"
+ ],
+ "CNP": [
+  "CNP",
+  "Other"
+ ],
+ "COF": [
+  "Capital One",
+  "Financials"
+ ],
+ "COHR": [
+  "COHR",
+  "Other"
+ ],
+ "COIN": [
+  "COIN",
+  "Other"
+ ],
+ "COO": [
+  "COO",
+  "Other"
+ ],
+ "COP": [
+  "ConocoPhillips",
+  "Energy"
+ ],
+ "COR": [
+  "COR",
+  "Other"
+ ],
+ "COST": [
+  "Costco",
+  "Consumer Staples"
+ ],
+ "CPAY": [
+  "CPAY",
+  "Other"
+ ],
+ "CPRT": [
+  "CPRT",
+  "Other"
+ ],
+ "CPT": [
+  "CPT",
+  "Other"
+ ],
+ "CRH": [
+  "CRH",
+  "Other"
+ ],
+ "CRL": [
+  "CRL",
+  "Other"
+ ],
+ "CRM": [
+  "Salesforce",
+  "Technology"
+ ],
+ "CRWD": [
+  "CRWD",
+  "Other"
+ ],
+ "CSCO": [
+  "Cisco",
+  "Technology"
+ ],
+ "CSGP": [
+  "CSGP",
+  "Other"
+ ],
+ "CSX": [
+  "CSX",
+  "Other"
+ ],
+ "CTAS": [
+  "CTAS",
+  "Other"
+ ],
+ "CTSH": [
+  "CTSH",
+  "Other"
+ ],
+ "CTVA": [
+  "CTVA",
+  "Other"
+ ],
+ "CVNA": [
+  "CVNA",
+  "Other"
+ ],
+ "CVS": [
+  "CVS Health",
+  "Health Care"
+ ],
+ "CVX": [
+  "Chevron",
+  "Energy"
+ ],
+ "D": [
+  "D",
+  "Other"
+ ],
+ "DAL": [
+  "DAL",
+  "Other"
+ ],
+ "DASH": [
+  "DASH",
+  "Other"
+ ],
+ "DD": [
+  "DD",
+  "Other"
+ ],
+ "DDOG": [
+  "DDOG",
+  "Other"
+ ],
+ "DE": [
+  "Deere & Company",
+  "Industrials"
+ ],
+ "DECK": [
+  "DECK",
+  "Other"
+ ],
+ "DELL": [
+  "DELL",
+  "Other"
+ ],
+ "DG": [
+  "DG",
+  "Other"
+ ],
+ "DGX": [
+  "DGX",
+  "Other"
+ ],
+ "DHI": [
+  "DHI",
+  "Other"
+ ],
+ "DHR": [
+  "Danaher",
+  "Health Care"
+ ],
+ "DIS": [
+  "Walt Disney",
+  "Communication"
+ ],
+ "DLR": [
+  "DLR",
+  "Other"
+ ],
+ "DLTR": [
+  "DLTR",
+  "Other"
+ ],
+ "DOC": [
+  "DOC",
+  "Other"
+ ],
+ "DOV": [
+  "DOV",
+  "Other"
+ ],
+ "DOW": [
+  "DOW",
+  "Other"
+ ],
+ "DPZ": [
+  "DPZ",
+  "Other"
+ ],
+ "DRI": [
+  "DRI",
+  "Other"
+ ],
+ "DTE": [
+  "DTE",
+  "Other"
+ ],
+ "DUK": [
+  "Duke Energy",
+  "Utilities"
+ ],
+ "DVA": [
+  "DVA",
+  "Other"
+ ],
+ "DVN": [
+  "DVN",
+  "Other"
+ ],
+ "DXCM": [
+  "DXCM",
+  "Other"
+ ],
+ "EBAY": [
+  "EBAY",
+  "Other"
+ ],
+ "ECHO": [
+  "ECHO",
+  "Other"
+ ],
+ "ECL": [
+  "ECL",
+  "Other"
+ ],
+ "ED": [
+  "ED",
+  "Other"
+ ],
+ "EFX": [
+  "EFX",
+  "Other"
+ ],
+ "EG": [
+  "EG",
+  "Other"
+ ],
+ "EIX": [
+  "EIX",
+  "Other"
+ ],
+ "EL": [
+  "EL",
+  "Other"
+ ],
+ "ELV": [
+  "ELV",
+  "Other"
+ ],
+ "EME": [
+  "EME",
+  "Other"
+ ],
+ "EMR": [
+  "Emerson Electric",
+  "Industrials"
+ ],
+ "EOG": [
+  "EOG",
+  "Other"
+ ],
+ "EQIX": [
+  "EQIX",
+  "Other"
+ ],
+ "EQT": [
+  "EQT",
+  "Other"
+ ],
+ "ERIE": [
+  "ERIE",
+  "Other"
+ ],
+ "ES": [
+  "ES",
+  "Other"
+ ],
+ "ESS": [
+  "ESS",
+  "Other"
+ ],
+ "ETN": [
+  "ETN",
+  "Other"
+ ],
+ "ETR": [
+  "ETR",
+  "Other"
+ ],
+ "EVRG": [
+  "EVRG",
+  "Other"
+ ],
+ "EW": [
+  "EW",
+  "Other"
+ ],
+ "EXC": [
+  "EXC",
+  "Other"
+ ],
+ "EXE": [
+  "EXE",
+  "Other"
+ ],
+ "EXPD": [
+  "EXPD",
+  "Other"
+ ],
+ "EXPE": [
+  "EXPE",
+  "Other"
+ ],
+ "EXR": [
+  "EXR",
+  "Other"
+ ],
+ "F": [
+  "Ford Motor",
+  "Consumer Discretionary"
+ ],
+ "FANG": [
+  "FANG",
+  "Other"
+ ],
+ "FAST": [
+  "FAST",
+  "Other"
+ ],
+ "FCX": [
+  "FCX",
+  "Other"
+ ],
+ "FDS": [
+  "FDS",
+  "Other"
+ ],
+ "FDX": [
+  "FedEx",
+  "Industrials"
+ ],
+ "FDXF": [
+  "FDXF",
+  "Other"
+ ],
+ "FE": [
+  "FE",
+  "Other"
+ ],
+ "FERG": [
+  "FERG",
+  "Other"
+ ],
+ "FFIV": [
+  "FFIV",
+  "Other"
+ ],
+ "FICO": [
+  "FICO",
+  "Other"
+ ],
+ "FIS": [
+  "FIS",
+  "Other"
+ ],
+ "FISV": [
+  "FISV",
+  "Other"
+ ],
+ "FITB": [
+  "FITB",
+  "Other"
+ ],
+ "FIX": [
+  "FIX",
+  "Other"
+ ],
+ "FLEX": [
+  "FLEX",
+  "Other"
+ ],
+ "FOX": [
+  "FOX",
+  "Other"
+ ],
+ "FOXA": [
+  "FOXA",
+  "Other"
+ ],
+ "FRT": [
+  "FRT",
+  "Other"
+ ],
+ "FSLR": [
+  "FSLR",
+  "Other"
+ ],
+ "FTNT": [
+  "FTNT",
+  "Other"
+ ],
+ "FTV": [
+  "FTV",
+  "Other"
+ ],
+ "GD": [
+  "General Dynamics",
+  "Industrials"
+ ],
+ "GDDY": [
+  "GDDY",
+  "Other"
+ ],
+ "GE": [
+  "GE Aerospace",
+  "Industrials"
+ ],
+ "GEHC": [
+  "GEHC",
+  "Other"
+ ],
+ "GEN": [
+  "GEN",
+  "Other"
+ ],
+ "GEV": [
+  "GEV",
+  "Other"
+ ],
+ "GILD": [
+  "Gilead Sciences",
+  "Health Care"
+ ],
+ "GIS": [
+  "GIS",
+  "Other"
+ ],
+ "GL": [
+  "GL",
+  "Other"
+ ],
+ "GLW": [
+  "GLW",
+  "Other"
+ ],
+ "GM": [
+  "General Motors",
+  "Consumer Discretionary"
+ ],
+ "GNRC": [
+  "GNRC",
+  "Other"
+ ],
+ "GOOG": [
+  "Alphabet (Class C)",
+  "Communication"
+ ],
+ "GOOGL": [
+  "Alphabet (Class A)",
+  "Communication"
+ ],
+ "GPC": [
+  "GPC",
+  "Other"
+ ],
+ "GPN": [
+  "GPN",
+  "Other"
+ ],
+ "GRMN": [
+  "GRMN",
+  "Other"
+ ],
+ "GS": [
+  "Goldman Sachs",
+  "Financials"
+ ],
+ "GWW": [
+  "GWW",
+  "Other"
+ ],
+ "HAL": [
+  "HAL",
+  "Other"
+ ],
+ "HAS": [
+  "HAS",
+  "Other"
+ ],
+ "HBAN": [
+  "HBAN",
+  "Other"
+ ],
+ "HCA": [
+  "HCA",
+  "Other"
+ ],
+ "HD": [
+  "Home Depot",
+  "Consumer Discretionary"
+ ],
+ "HIG": [
+  "HIG",
+  "Other"
+ ],
+ "HII": [
+  "HII",
+  "Other"
+ ],
+ "HLT": [
+  "HLT",
+  "Other"
+ ],
+ "HON": [
+  "Honeywell",
+  "Industrials"
+ ],
+ "HONA": [
+  "HONA",
+  "Other"
+ ],
+ "HOOD": [
+  "HOOD",
+  "Other"
+ ],
+ "HPE": [
+  "HPE",
+  "Other"
+ ],
+ "HPQ": [
+  "HPQ",
+  "Other"
+ ],
+ "HRL": [
+  "HRL",
+  "Other"
+ ],
+ "HSIC": [
+  "HSIC",
+  "Other"
+ ],
+ "HST": [
+  "HST",
+  "Other"
+ ],
+ "HSY": [
+  "HSY",
+  "Other"
+ ],
+ "HUBB": [
+  "HUBB",
+  "Other"
+ ],
+ "HUM": [
+  "HUM",
+  "Other"
+ ],
+ "HWM": [
+  "HWM",
+  "Other"
+ ],
+ "IBKR": [
+  "IBKR",
+  "Other"
+ ],
+ "IBM": [
+  "IBM",
+  "Technology"
+ ],
+ "ICE": [
+  "ICE",
+  "Other"
+ ],
+ "IDXX": [
+  "IDXX",
+  "Other"
+ ],
+ "IEX": [
+  "IEX",
+  "Other"
+ ],
+ "IFF": [
+  "IFF",
+  "Other"
+ ],
+ "INCY": [
+  "INCY",
+  "Other"
+ ],
+ "INTC": [
+  "Intel",
+  "Technology"
+ ],
+ "INTU": [
+  "Intuit",
+  "Technology"
+ ],
+ "INVH": [
+  "INVH",
+  "Other"
+ ],
+ "IP": [
+  "IP",
+  "Other"
+ ],
+ "IQV": [
+  "IQV",
+  "Other"
+ ],
+ "IR": [
+  "IR",
+  "Other"
+ ],
+ "IRM": [
+  "IRM",
+  "Other"
+ ],
+ "ISRG": [
+  "Intuitive Surgical",
+  "Health Care"
+ ],
+ "IT": [
+  "IT",
+  "Other"
+ ],
+ "ITW": [
+  "ITW",
+  "Other"
+ ],
+ "IVZ": [
+  "IVZ",
+  "Other"
+ ],
+ "J": [
+  "J",
+  "Other"
+ ],
+ "JBHT": [
+  "JBHT",
+  "Other"
+ ],
+ "JBL": [
+  "JBL",
+  "Other"
+ ],
+ "JCI": [
+  "JCI",
+  "Other"
+ ],
+ "JKHY": [
+  "JKHY",
+  "Other"
+ ],
+ "JNJ": [
+  "Johnson & Johnson",
+  "Health Care"
+ ],
+ "JPM": [
+  "JPMorgan Chase",
+  "Financials"
+ ],
+ "KDP": [
+  "KDP",
+  "Other"
+ ],
+ "KEY": [
+  "KEY",
+  "Other"
+ ],
+ "KEYS": [
+  "KEYS",
+  "Other"
+ ],
+ "KHC": [
+  "KHC",
+  "Other"
+ ],
+ "KIM": [
+  "KIM",
+  "Other"
+ ],
+ "KKR": [
+  "KKR",
+  "Other"
+ ],
+ "KLAC": [
+  "KLAC",
+  "Other"
+ ],
+ "KMB": [
+  "KMB",
+  "Other"
+ ],
+ "KMI": [
+  "KMI",
+  "Other"
+ ],
+ "KO": [
+  "Coca-Cola",
+  "Consumer Staples"
+ ],
+ "KR": [
+  "KR",
+  "Other"
+ ],
+ "KVUE": [
+  "KVUE",
+  "Other"
+ ],
+ "L": [
+  "L",
+  "Other"
+ ],
+ "LDOS": [
+  "LDOS",
+  "Other"
+ ],
+ "LEN": [
+  "LEN",
+  "Other"
+ ],
+ "LH": [
+  "LH",
+  "Other"
+ ],
+ "LHX": [
+  "LHX",
+  "Other"
+ ],
+ "LII": [
+  "LII",
+  "Other"
+ ],
+ "LIN": [
+  "Linde",
+  "Materials"
+ ],
+ "LITE": [
+  "LITE",
+  "Other"
+ ],
+ "LLY": [
+  "Eli Lilly",
+  "Health Care"
+ ],
+ "LMT": [
+  "Lockheed Martin",
+  "Industrials"
+ ],
+ "LNT": [
+  "LNT",
+  "Other"
+ ],
+ "LOW": [
+  "Lowe's",
+  "Consumer Discretionary"
+ ],
+ "LRCX": [
+  "LRCX",
+  "Other"
+ ],
+ "LULU": [
+  "LULU",
+  "Other"
+ ],
+ "LUV": [
+  "LUV",
+  "Other"
+ ],
+ "LVS": [
+  "LVS",
+  "Other"
+ ],
+ "LYB": [
+  "LYB",
+  "Other"
+ ],
+ "LYV": [
+  "LYV",
+  "Other"
+ ],
+ "MA": [
+  "Mastercard",
+  "Financials"
+ ],
+ "MAA": [
+  "MAA",
+  "Other"
+ ],
+ "MAR": [
+  "MAR",
+  "Other"
+ ],
+ "MAS": [
+  "MAS",
+  "Other"
+ ],
+ "MCD": [
+  "McDonald's",
+  "Consumer Discretionary"
+ ],
+ "MCHP": [
+  "MCHP",
+  "Other"
+ ],
+ "MCK": [
+  "MCK",
+  "Other"
+ ],
+ "MCO": [
+  "MCO",
+  "Other"
+ ],
+ "MDLZ": [
+  "Mondelez",
+  "Consumer Staples"
+ ],
+ "MDT": [
+  "Medtronic",
+  "Health Care"
+ ],
+ "MET": [
+  "MetLife",
+  "Financials"
+ ],
+ "META": [
+  "Meta Platforms",
+  "Communication"
+ ],
+ "MGM": [
+  "MGM",
+  "Other"
+ ],
+ "MKC": [
+  "MKC",
+  "Other"
+ ],
+ "MLM": [
+  "MLM",
+  "Other"
+ ],
+ "MMM": [
+  "3M",
+  "Industrials"
+ ],
+ "MNST": [
+  "MNST",
+  "Other"
+ ],
+ "MO": [
+  "Altria",
+  "Consumer Staples"
+ ],
+ "MOS": [
+  "MOS",
+  "Other"
+ ],
+ "MPC": [
+  "MPC",
+  "Other"
+ ],
+ "MPWR": [
+  "MPWR",
+  "Other"
+ ],
+ "MRK": [
+  "Merck",
+  "Health Care"
+ ],
+ "MRNA": [
+  "MRNA",
+  "Other"
+ ],
+ "MRSH": [
+  "MRSH",
+  "Other"
+ ],
+ "MRVL": [
+  "MRVL",
+  "Other"
+ ],
+ "MS": [
+  "Morgan Stanley",
+  "Financials"
+ ],
+ "MSCI": [
+  "MSCI",
+  "Other"
+ ],
+ "MSFT": [
+  "Microsoft",
+  "Technology"
+ ],
+ "MSI": [
+  "MSI",
+  "Other"
+ ],
+ "MTB": [
+  "MTB",
+  "Other"
+ ],
+ "MTD": [
+  "MTD",
+  "Other"
+ ],
+ "MU": [
+  "MU",
+  "Other"
+ ],
+ "NCLH": [
+  "NCLH",
+  "Other"
+ ],
+ "NDAQ": [
+  "NDAQ",
+  "Other"
+ ],
+ "NDSN": [
+  "NDSN",
+  "Other"
+ ],
+ "NEE": [
+  "NextEra Energy",
+  "Utilities"
+ ],
+ "NEM": [
+  "NEM",
+  "Other"
+ ],
+ "NFLX": [
+  "Netflix",
+  "Communication"
+ ],
+ "NI": [
+  "NI",
+  "Other"
+ ],
+ "NKE": [
+  "Nike",
+  "Consumer Discretionary"
+ ],
+ "NOC": [
+  "NOC",
+  "Other"
+ ],
+ "NOW": [
+  "ServiceNow",
+  "Technology"
+ ],
+ "NRG": [
+  "NRG",
+  "Other"
+ ],
+ "NSC": [
+  "NSC",
+  "Other"
+ ],
+ "NTAP": [
+  "NTAP",
+  "Other"
+ ],
+ "NTRS": [
+  "NTRS",
+  "Other"
+ ],
+ "NUE": [
+  "NUE",
+  "Other"
+ ],
+ "NVDA": [
+  "Nvidia",
+  "Technology"
+ ],
+ "NVR": [
+  "NVR",
+  "Other"
+ ],
+ "NWS": [
+  "NWS",
+  "Other"
+ ],
+ "NWSA": [
+  "NWSA",
+  "Other"
+ ],
+ "NXPI": [
+  "NXPI",
+  "Other"
+ ],
+ "O": [
+  "O",
+  "Other"
+ ],
+ "ODFL": [
+  "ODFL",
+  "Other"
+ ],
+ "OKE": [
+  "OKE",
+  "Other"
+ ],
+ "OMC": [
+  "OMC",
+  "Other"
+ ],
+ "ON": [
+  "ON",
+  "Other"
+ ],
+ "ORCL": [
+  "Oracle",
+  "Technology"
+ ],
+ "ORLY": [
+  "ORLY",
+  "Other"
+ ],
+ "OTIS": [
+  "OTIS",
+  "Other"
+ ],
+ "OXY": [
+  "OXY",
+  "Other"
+ ],
+ "PANW": [
+  "PANW",
+  "Other"
+ ],
+ "PAYX": [
+  "PAYX",
+  "Other"
+ ],
+ "PCAR": [
+  "PCAR",
+  "Other"
+ ],
+ "PCG": [
+  "PCG",
+  "Other"
+ ],
+ "PEG": [
+  "PEG",
+  "Other"
+ ],
+ "PEP": [
+  "PepsiCo",
+  "Consumer Staples"
+ ],
+ "PFE": [
+  "Pfizer",
+  "Health Care"
+ ],
+ "PFG": [
+  "PFG",
+  "Other"
+ ],
+ "PG": [
+  "Procter & Gamble",
+  "Consumer Staples"
+ ],
+ "PGR": [
+  "PGR",
+  "Other"
+ ],
+ "PH": [
+  "PH",
+  "Other"
+ ],
+ "PHM": [
+  "PHM",
+  "Other"
+ ],
+ "PKG": [
+  "PKG",
+  "Other"
+ ],
+ "PLD": [
+  "PLD",
+  "Other"
+ ],
+ "PLTR": [
+  "Palantir",
+  "Technology"
+ ],
+ "PM": [
+  "Philip Morris",
+  "Consumer Staples"
+ ],
+ "PNC": [
+  "PNC",
+  "Other"
+ ],
+ "PNR": [
+  "PNR",
+  "Other"
+ ],
+ "PNW": [
+  "PNW",
+  "Other"
+ ],
+ "PODD": [
+  "PODD",
+  "Other"
+ ],
+ "PPG": [
+  "PPG",
+  "Other"
+ ],
+ "PPL": [
+  "PPL",
+  "Other"
+ ],
+ "PRU": [
+  "PRU",
+  "Other"
+ ],
+ "PSA": [
+  "PSA",
+  "Other"
+ ],
+ "PSKY": [
+  "PSKY",
+  "Other"
+ ],
+ "PSX": [
+  "PSX",
+  "Other"
+ ],
+ "PTC": [
+  "PTC",
+  "Other"
+ ],
+ "PWR": [
+  "PWR",
+  "Other"
+ ],
+ "PYPL": [
+  "PayPal",
+  "Financials"
+ ],
+ "Q": [
+  "Q",
+  "Other"
+ ],
+ "QCOM": [
+  "Qualcomm",
+  "Technology"
+ ],
+ "RCL": [
+  "RCL",
+  "Other"
+ ],
+ "RDDT": [
+  "RDDT",
+  "Other"
+ ],
+ "REG": [
+  "REG",
+  "Other"
+ ],
+ "REGN": [
+  "REGN",
+  "Other"
+ ],
+ "RF": [
+  "RF",
+  "Other"
+ ],
+ "RJF": [
+  "RJF",
+  "Other"
+ ],
+ "RL": [
+  "RL",
+  "Other"
+ ],
+ "RMD": [
+  "RMD",
+  "Other"
+ ],
+ "ROK": [
+  "ROK",
+  "Other"
+ ],
+ "ROL": [
+  "ROL",
+  "Other"
+ ],
+ "ROP": [
+  "ROP",
+  "Other"
+ ],
+ "ROST": [
+  "ROST",
+  "Other"
+ ],
+ "RSG": [
+  "RSG",
+  "Other"
+ ],
+ "RTX": [
+  "RTX",
+  "Industrials"
+ ],
+ "RVTY": [
+  "RVTY",
+  "Other"
+ ],
+ "SBAC": [
+  "SBAC",
+  "Other"
+ ],
+ "SBUX": [
+  "Starbucks",
+  "Consumer Discretionary"
+ ],
+ "SCHW": [
+  "Charles Schwab",
+  "Financials"
+ ],
+ "SHW": [
+  "SHW",
+  "Other"
+ ],
+ "SJM": [
+  "SJM",
+  "Other"
+ ],
+ "SLB": [
+  "SLB",
+  "Other"
+ ],
+ "SMCI": [
+  "SMCI",
+  "Other"
+ ],
+ "SNA": [
+  "SNA",
+  "Other"
+ ],
+ "SNDK": [
+  "SNDK",
+  "Other"
+ ],
+ "SNPS": [
+  "SNPS",
+  "Other"
+ ],
+ "SO": [
+  "Southern Company",
+  "Utilities"
+ ],
+ "SOLV": [
+  "SOLV",
+  "Other"
+ ],
+ "SPG": [
+  "Simon Property Group",
+  "Real Estate"
+ ],
+ "SPGI": [
+  "SPGI",
+  "Other"
+ ],
+ "SRE": [
+  "SRE",
+  "Other"
+ ],
+ "STE": [
+  "STE",
+  "Other"
+ ],
+ "STLD": [
+  "STLD",
+  "Other"
+ ],
+ "STT": [
+  "STT",
+  "Other"
+ ],
+ "STX": [
+  "STX",
+  "Other"
+ ],
+ "STZ": [
+  "STZ",
+  "Other"
+ ],
+ "SW": [
+  "SW",
+  "Other"
+ ],
+ "SWK": [
+  "SWK",
+  "Other"
+ ],
+ "SWKS": [
+  "SWKS",
+  "Other"
+ ],
+ "SYF": [
+  "SYF",
+  "Other"
+ ],
+ "SYK": [
+  "SYK",
+  "Other"
+ ],
+ "SYY": [
+  "SYY",
+  "Other"
+ ],
+ "T": [
+  "AT&T",
+  "Communication"
+ ],
+ "TAP": [
+  "TAP",
+  "Other"
+ ],
+ "TDG": [
+  "TDG",
+  "Other"
+ ],
+ "TDY": [
+  "TDY",
+  "Other"
+ ],
+ "TECH": [
+  "TECH",
+  "Other"
+ ],
+ "TEL": [
+  "TEL",
+  "Other"
+ ],
+ "TER": [
+  "TER",
+  "Other"
+ ],
+ "TFC": [
+  "TFC",
+  "Other"
+ ],
+ "TGT": [
+  "Target",
+  "Consumer Staples"
+ ],
+ "TJX": [
+  "TJX",
+  "Other"
+ ],
+ "TKO": [
+  "TKO",
+  "Other"
+ ],
+ "TMO": [
+  "Thermo Fisher Scientific",
+  "Health Care"
+ ],
+ "TMUS": [
+  "T-Mobile US",
+  "Communication"
+ ],
+ "TPL": [
+  "TPL",
+  "Other"
+ ],
+ "TPR": [
+  "TPR",
+  "Other"
+ ],
+ "TRGP": [
+  "TRGP",
+  "Other"
+ ],
+ "TRMB": [
+  "TRMB",
+  "Other"
+ ],
+ "TROW": [
+  "TROW",
+  "Other"
+ ],
+ "TRV": [
+  "TRV",
+  "Other"
+ ],
+ "TSCO": [
+  "TSCO",
+  "Other"
+ ],
+ "TSLA": [
+  "Tesla",
+  "Consumer Discretionary"
+ ],
+ "TSN": [
+  "TSN",
+  "Other"
+ ],
+ "TT": [
+  "TT",
+  "Other"
+ ],
+ "TTD": [
+  "TTD",
+  "Other"
+ ],
+ "TTWO": [
+  "TTWO",
+  "Other"
+ ],
+ "TXN": [
+  "Texas Instruments",
+  "Technology"
+ ],
+ "TXT": [
+  "TXT",
+  "Other"
+ ],
+ "TYL": [
+  "TYL",
+  "Other"
+ ],
+ "UAL": [
+  "UAL",
+  "Other"
+ ],
+ "UBER": [
+  "Uber",
+  "Industrials"
+ ],
+ "UDR": [
+  "UDR",
+  "Other"
+ ],
+ "UHS": [
+  "UHS",
+  "Other"
+ ],
+ "ULTA": [
+  "ULTA",
+  "Other"
+ ],
+ "UNH": [
+  "UnitedHealth",
+  "Health Care"
+ ],
+ "UNP": [
+  "Union Pacific",
+  "Industrials"
+ ],
+ "UPS": [
+  "UPS",
+  "Industrials"
+ ],
+ "URI": [
+  "URI",
+  "Other"
+ ],
+ "USB": [
+  "U.S. Bancorp",
+  "Financials"
+ ],
+ "V": [
+  "Visa",
+  "Financials"
+ ],
+ "VEEV": [
+  "VEEV",
+  "Other"
+ ],
+ "VICI": [
+  "VICI",
+  "Other"
+ ],
+ "VLO": [
+  "VLO",
+  "Other"
+ ],
+ "VLTO": [
+  "VLTO",
+  "Other"
+ ],
+ "VMC": [
+  "VMC",
+  "Other"
+ ],
+ "VMRK": [
+  "VMRK",
+  "Other"
+ ],
+ "VRSK": [
+  "VRSK",
+  "Other"
+ ],
+ "VRSN": [
+  "VRSN",
+  "Other"
+ ],
+ "VRT": [
+  "VRT",
+  "Other"
+ ],
+ "VRTX": [
+  "VRTX",
+  "Other"
+ ],
+ "VST": [
+  "VST",
+  "Other"
+ ],
+ "VTR": [
+  "VTR",
+  "Other"
+ ],
+ "VTRS": [
+  "VTRS",
+  "Other"
+ ],
+ "VZ": [
+  "Verizon",
+  "Communication"
+ ],
+ "WAB": [
+  "WAB",
+  "Other"
+ ],
+ "WAT": [
+  "WAT",
+  "Other"
+ ],
+ "WBD": [
+  "WBD",
+  "Other"
+ ],
+ "WDAY": [
+  "WDAY",
+  "Other"
+ ],
+ "WDC": [
+  "WDC",
+  "Other"
+ ],
+ "WEC": [
+  "WEC",
+  "Other"
+ ],
+ "WELL": [
+  "WELL",
+  "Other"
+ ],
+ "WFC": [
+  "Wells Fargo",
+  "Financials"
+ ],
+ "WM": [
+  "WM",
+  "Other"
+ ],
+ "WMB": [
+  "WMB",
+  "Other"
+ ],
+ "WMT": [
+  "Walmart",
+  "Consumer Staples"
+ ],
+ "WRB": [
+  "WRB",
+  "Other"
+ ],
+ "WSM": [
+  "WSM",
+  "Other"
+ ],
+ "WST": [
+  "WST",
+  "Other"
+ ],
+ "WTW": [
+  "WTW",
+  "Other"
+ ],
+ "WY": [
+  "WY",
+  "Other"
+ ],
+ "WYNN": [
+  "WYNN",
+  "Other"
+ ],
+ "XEL": [
+  "XEL",
+  "Other"
+ ],
+ "XOM": [
+  "Exxon Mobil",
+  "Energy"
+ ],
+ "XYL": [
+  "XYL",
+  "Other"
+ ],
+ "XYZ": [
+  "XYZ",
+  "Other"
+ ],
+ "YUM": [
+  "YUM",
+  "Other"
+ ],
+ "ZBH": [
+  "ZBH",
+  "Other"
+ ],
+ "ZBRA": [
+  "ZBRA",
+  "Other"
+ ],
+ "ZTS": [
+  "ZTS",
+  "Other"
+ ]
+}

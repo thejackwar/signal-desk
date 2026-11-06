@@ -31,9 +31,11 @@ import backtest  # noqa: E402
 import scan  # noqa: E402
 from scan import MARKETS, fetch_demo, fetch_real, load_tickers  # noqa: E402
 from strategies import REGISTRY, for_market  # noqa: E402
+from universe import U  # noqa: E402
 
 ENGINE = Path(__file__).parent
 START = "2026-11-02"      # go-live day: the first alerts that count are from this session's close
+START_500 = "2026-11-09"  # the S&P 500 (UNIVERSE=sp500) starts its own record a week later
 PERIOD = "2y"             # enough history for the 200-day averages and the chart patterns
 
 
@@ -62,10 +64,12 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--market", choices=list(MARKETS), default="stocks")
     ap.add_argument("--demo", action="store_true")
-    ap.add_argument("--start", default=START, help="go-live day (YYYY-MM-DD)")
+    ap.add_argument("--start", default=None, help="go-live day (YYYY-MM-DD)")
     ap.add_argument("--out", help="ledger file (default: the market's data folder)")
     args = ap.parse_args()
     scan.configure(args.market)
+    if args.start is None:
+        args.start = START_500 if U.is500 and args.market == "stocks" else START
     out = Path(args.out) if args.out else scan.DATA / "live_trades.json"
 
     data = fetch_demo(bars=520, seed=11) if args.demo else fetch_real(load_tickers(), period=PERIOD)

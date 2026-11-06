@@ -24,7 +24,7 @@
   document.head.appendChild(s);
 })();
 </script>
-<script src="sections.js?v=1" defer></script>
+<script src="sections.js?v=2" defer></script>
 <link rel="icon" href="favicon.ico?v=2" sizes="any">
 <link rel="icon" type="image/svg+xml" href="logo.svg?v=2">
 <link rel="apple-touch-icon" href="icon-180.png?v=2">
@@ -128,12 +128,16 @@ const PER = [["21", "1 month"], ["63", "3 months"], ["252", "1 year"], ["all", "
 const S = (() => { try { return JSON.parse(localStorage.getItem("board") || "{}"); } catch { return {}; } })();
 S.m ||= "stocks"; S.p ||= "63"; S.show ||= "core"; S.sort ||= "ret";
 const save = () => { try { localStorage.setItem("board", JSON.stringify(S)); } catch {} };
+// stocks: the S&P 100 or the S&P 500, the same choice as in the app (its prefs, "universe")
+const PK = "signaldesk.prefs";
+const getU = () => { try { return JSON.parse(localStorage.getItem(PK) || "{}").universe === "sp500" ? "sp500" : "sp100"; } catch { return "sp100"; } };
+const setU = u => { try { const p = JSON.parse(localStorage.getItem(PK) || "{}"); p.universe = u; localStorage.setItem(PK, JSON.stringify(p)); } catch {} };
 const cache = {};
 async function get(p) { if (p in cache) return cache[p]; try { const r = await fetch(p + "?t=" + Math.floor(Date.now() / 6e5)); cache[p] = r.ok ? await r.json() : null; } catch { cache[p] = null; } return cache[p]; }
 const seg = (k, v, o) => `<div class="seg" role="group">${o.map(([a, l]) => `<button type="button" data-${k}="${a}" aria-pressed="${a === v}">${esc(l)}</button>`).join("")}</div>`;
 
 function controls() {
-  $("ctl").innerHTML = seg("m", S.m, MK) + seg("p", S.p, PER) + seg("show", S.show, [["core", "Main strategies"], ["all", "All, incl. vault"]]) + seg("sort", S.sort, [["ret", "Best first"], ["name", "A–Z"]]);
+  $("ctl").innerHTML = seg("m", S.m, MK) + (S.m === "stocks" ? seg("u", getU(), [["sp100", "S&P 100"], ["sp500", "S&P 500"]]) : "") + seg("p", S.p, PER) + seg("show", S.show, [["core", "Main strategies"], ["all", "All, incl. vault"]]) + seg("sort", S.sort, [["ret", "Best first"], ["name", "A–Z"]]);
 }
 
 // one tile list for a row: the period's days (or weeks, for "since 2021", so it stays readable)
@@ -164,7 +168,7 @@ const labLink = (m, ind) => "index.html#strategylab?c=" + btoa(JSON.stringify({ 
 
 async function render() {
   controls();
-  const B = await get(S.m === "stocks" ? "data/board.json" : `data/${S.m}/board.json`);
+  const B = await get(S.m === "stocks" ? (getU() === "sp500" ? "data/sp500/board.json" : "data/board.json") : `data/${S.m}/board.json`);
   if (!B) { $("board").innerHTML = `<div class="empty">The board for ${esc(S.m)} is being built after the next daily scan.</div>`; $("asof").textContent = ""; return; }
   const rows = B.strategies.filter(s => s.id !== "custom" && (S.show === "all" || s.core)).map(s => ({ ...s, dates: B.dates }));
   if (S.m === "stocks") {     // the day trade from its own page
@@ -177,7 +181,7 @@ async function render() {
   if (S.sort === "ret") out.sort((a, b) => b.T.ret - a.T.ret); else out.sort((a, b) => a.r.name.localeCompare(b.r.name));
   const H = tiles(B.dates, B.hold.days, B.live_from);
   const per = PER.find(p => p[0] === S.p)[1];
-  const holdName = S.m === "stocks" ? "Holding the S&P 100" : S.m === "crypto" ? "Holding the coins" : "Holding the commodities";
+  const holdName = S.m === "stocks" ? `Holding the ${getU() === "sp500" ? "S&P 500" : "S&P 100"}` : S.m === "crypto" ? "Holding the coins" : "Holding the commodities";
   let h = `<div class="head"><span class="k">Strategy · ${esc(per)}${S.p === "all" ? " · 1 tile = 1 week" : " · 1 tile = 1 day"}</span><span class="k">Return</span><span class="k">Up days</span></div>`;
   h += `<div class="row hold" style="--ts:${ts}"><div class="nm"><b>${holdName}<small>benchmark</small></b><span class="${H.ret >= 0 ? "up" : "down"}">${pc(H.ret)}</span><span>${H.upPct == null ? "–" : Math.round(H.upPct) + "%"}</span></div><div class="tiles">${H.html}</div></div>`;
   h += out.map(({ r, T }) => `<div class="row" data-id="${esc(r.id)}" style="--ts:${ts}" tabindex="0" role="button" aria-expanded="false">
@@ -199,8 +203,8 @@ async function render() {
 }
 
 document.addEventListener("click", e => {
-  const b = e.target.closest("[data-m], [data-p], [data-show], [data-sort]"); if (!b) return;
-  const d = b.dataset; if (d.m) S.m = d.m; if (d.p) S.p = d.p; if (d.show) S.show = d.show; if (d.sort) S.sort = d.sort;
+  const b = e.target.closest("[data-m], [data-u], [data-p], [data-show], [data-sort]"); if (!b) return;
+  const d = b.dataset; if (d.u) setU(d.u); if (d.m) S.m = d.m; if (d.p) S.p = d.p; if (d.show) S.show = d.show; if (d.sort) S.sort = d.sort;
   save(); render();
 });
 document.addEventListener("keydown", e => { if ((e.key === "Enter" || e.key === " ") && e.target.matches(".row[data-id]")) { e.preventDefault(); e.target.click(); } });
