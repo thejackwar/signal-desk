@@ -1,26 +1,26 @@
 {
- "updated": "2026-11-05",
+ "updated": "2026-11-06",
  "results": [
   {
    "formation": 252,
    "trading": 63,
    "entry": 1.5,
-   "cagr": -0.0203,
+   "cagr": -0.0202,
    "sharpe": -0.53,
    "max_dd": -0.2934,
    "trades": 1094,
-   "win": 0.562,
+   "win": 0.563,
    "corr": 0.1
   },
   {
    "formation": 252,
    "trading": 63,
    "entry": 2.0,
-   "cagr": -0.0163,
+   "cagr": -0.0162,
    "sharpe": -0.5,
    "max_dd": -0.2395,
    "trades": 740,
-   "win": 0.527,
+   "win": 0.528,
    "corr": 0.11
   },
   {
@@ -38,30 +38,30 @@
    "formation": 252,
    "trading": 126,
    "entry": 1.5,
-   "cagr": -0.0381,
+   "cagr": -0.0379,
    "sharpe": -0.88,
    "max_dd": -0.4635,
    "trades": 1041,
-   "win": 0.552,
-   "corr": 0.25
+   "win": 0.553,
+   "corr": 0.24
   },
   {
    "formation": 252,
    "trading": 126,
    "entry": 2.0,
-   "cagr": -0.0291,
-   "sharpe": -0.75,
+   "cagr": -0.0289,
+   "sharpe": -0.74,
    "max_dd": -0.3782,
    "trades": 710,
    "win": 0.525,
-   "corr": 0.28
+   "corr": 0.27
   },
   {
    "formation": 252,
    "trading": 126,
    "entry": 2.5,
-   "cagr": -0.0224,
-   "sharpe": -0.65,
+   "cagr": -0.0223,
+   "sharpe": -0.64,
    "max_dd": -0.3074,
    "trades": 437,
    "win": 0.519,
@@ -74,15 +74,15 @@
    "cagr": -0.0253,
    "sharpe": -0.65,
    "max_dd": -0.3163,
-   "trades": 1044,
-   "win": 0.57,
+   "trades": 1045,
+   "win": 0.569,
    "corr": 0.18
   },
   {
    "formation": 504,
    "trading": 63,
    "entry": 2.0,
-   "cagr": -0.0166,
+   "cagr": -0.0165,
    "sharpe": -0.5,
    "max_dd": -0.235,
    "trades": 676,
@@ -104,34 +104,34 @@
    "formation": 504,
    "trading": 126,
    "entry": 1.5,
-   "cagr": -0.0225,
-   "sharpe": -0.56,
+   "cagr": -0.0222,
+   "sharpe": -0.55,
    "max_dd": -0.2977,
    "trades": 967,
    "win": 0.568,
-   "corr": 0.2
+   "corr": 0.19
   },
   {
    "formation": 504,
    "trading": 126,
    "entry": 2.0,
-   "cagr": -0.0171,
-   "sharpe": -0.52,
+   "cagr": -0.0168,
+   "sharpe": -0.51,
    "max_dd": -0.2293,
    "trades": 632,
-   "win": 0.549,
-   "corr": 0.22
+   "win": 0.551,
+   "corr": 0.21
   },
   {
    "formation": 504,
    "trading": 126,
    "entry": 2.5,
-   "cagr": -0.0086,
-   "sharpe": -0.3,
+   "cagr": -0.0083,
+   "sharpe": -0.29,
    "max_dd": -0.145,
    "trades": 389,
-   "win": 0.522,
-   "corr": 0.26
+   "win": 0.524,
+   "corr": 0.25
   }
  ]
 }
