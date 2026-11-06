@@ -197,6 +197,82 @@ form.pick input:focus { outline: none; border-color: var(--accent); box-shadow: 
 .fine { color: var(--faint); font-size: 12px; line-height: 1.5; margin: 0; }
 footer.foot { border-top: 1px solid var(--hair); margin-top: 48px; padding-top: 18px; }
 .loading { text-align: center; color: var(--muted); padding: 120px 0; font-size: 15px; }
+
+/* drawing tools (draw.js): a TradingView-style column of tools left of the chart */
+.cbody { display: grid; grid-template-columns: 44px 1fr; border-top: 1px solid var(--hair-2); }
+.dtools { display: flex; flex-direction: column; gap: 2px; padding: 6px 4px; border-right: 1px solid var(--hair-2); background: var(--fill-2); }
+.dtools button { appearance: none; border: 0; background: none; color: var(--muted); width: 36px; height: 34px; border-radius: 8px; display: grid; place-items: center; cursor: pointer; }
+.dtools button svg { width: 19px; height: 19px; }
+.dtools button:hover { color: var(--fg); background: var(--fill); }
+.dtools button[aria-pressed="true"] { color: var(--on-accent); background: var(--accent); }
+.dtools .tsep { height: 1px; background: var(--hair); margin: 3px 6px; flex: none; }
+@media (max-width: 640px) {
+  .cbody { grid-template-columns: 1fr; }
+  .dtools { flex-direction: row; overflow-x: auto; border-right: 0; border-bottom: 1px solid var(--hair-2); scrollbar-width: none; }
+  .dtools::-webkit-scrollbar { display: none; }
+  .dtools button { flex: none; }
+  .dtools .tsep { width: 1px; height: auto; margin: 6px 3px; }
+}
+.draw button[aria-pressed="true"], .draw button[aria-expanded="true"] { color: var(--fg); background: color-mix(in srgb, var(--accent) 22%, transparent); border-color: color-mix(in srgb, var(--accent) 60%, transparent); }
+.dlayer { position: absolute; left: 0; top: 0; z-index: 3; pointer-events: none; overflow: visible; touch-action: none; }
+.dlayer.drawing { pointer-events: all; cursor: crosshair; }
+.dlayer .dr:not(.sys) .hit { stroke: transparent; stroke-width: 14; fill: none; pointer-events: stroke; cursor: move; }
+.dlayer .dr:not(.sys) .hitf { pointer-events: visiblePainted; cursor: move; }
+.dlayer.drawing .dr * { pointer-events: none !important; }
+.dlayer .hd { fill: #0b0f14; stroke: var(--accent); stroke-width: 2; pointer-events: all; cursor: grab; }
+.dlayer text { font: 600 11px var(--font); letter-spacing: 0; }
+.dlayer text.fl { font-weight: 500; font-size: 10.5px; }
+.dlayer text.tx { font-size: 12.5px; font-weight: 600; }
+.dlayer .tag { pointer-events: none; }
+.dsel { position: absolute; z-index: 6; left: 50%; top: 8px; transform: translateX(-50%); display: flex; align-items: center; gap: 4px; flex-wrap: wrap; justify-content: center;
+  background: rgba(18,24,32,.96); border: 1px solid var(--hair); border-radius: 12px; padding: 5px 8px; box-shadow: 0 8px 24px rgba(0,0,0,.4); max-width: calc(100% - 100px); }
+.dsel[hidden] { display: none; }
+.dsel b { font-size: 12px; font-weight: 600; color: var(--muted); margin-right: 4px; }
+.dsel button { appearance: none; border: 1px solid transparent; background: none; color: var(--fg); border-radius: 7px; height: 26px; min-width: 26px; padding: 0 7px; font: 500 12px var(--font); cursor: pointer; display: inline-grid; place-items: center; }
+.dsel button:hover { background: var(--fill); }
+.dsel button[aria-pressed="true"] { border-color: var(--accent); }
+.dsel .sw { width: 20px; min-width: 20px; height: 20px; padding: 0; border-radius: 50%; background: var(--c); }
+.dsel .sw[aria-pressed="true"] { box-shadow: 0 0 0 2px #0b0f14, 0 0 0 4px var(--c); }
+.dsel button i { display: block; width: 16px; background: var(--fg); border-radius: 2px; }
+.dsel .sep { width: 1px; height: 18px; background: var(--hair); margin: 0 3px; }
+.dsel .del { color: var(--down-line); }
+
+/* signal view: the trade explained under the chart */
+.sigcard { background: var(--card); border: 1px solid var(--hair-2); border-radius: 22px; padding: 20px 22px; margin-top: 16px; }
+.sigcard[hidden] { display: none; }
+.sghd { display: flex; flex-wrap: wrap; gap: 6px 12px; align-items: center; }
+.sghd h2 { margin: 0; font-size: 22px; letter-spacing: -.02em; }
+.sgnote { font-size: 17px; font-weight: 600; margin: 10px 0 14px; }
+.sggrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 10px; }
+.sggrid > div { background: var(--fill-2); border-radius: 12px; padding: 10px 12px; display: flex; flex-direction: column; gap: 2px; }
+.sggrid span { font-size: 12px; color: var(--faint); }
+.sggrid b { font-size: 18px; }
+.sggrid small { font-size: 12px; color: var(--muted); line-height: 1.35; }
+.sigcard h3 { font-size: 13px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); margin: 18px 0 6px; }
+.sigcard p { margin: 0 0 6px; font-size: 15px; line-height: 1.5; }
+.sgchk { list-style: none; padding: 0; margin: 0; display: grid; gap: 4px; font-size: 14px; }
+.sgchk li { padding-left: 22px; position: relative; }
+.sgchk li::before { position: absolute; left: 0; font-weight: 700; }
+.sgchk li.ok::before { content: "✓"; color: var(--up-line); }
+.sgchk li.no::before { content: "✕"; color: var(--faint); }
+.sgchk li.warn::before { content: "!"; color: var(--pill-sq-fg); left: 4px; }
+.sgfoot { font-size: 13px; margin-top: 14px !important; }
+
+/* embed=1: just the chart, filling the frame (the Terminal's trade panel) */
+html.embed body { padding: 0; background: var(--c-bg); }
+html.embed .bar, html.embed .ics-sub, html.embed .hero, html.embed .sec, html.embed .sub, html.embed .tally, html.embed .reads, html.embed .panel, html.embed footer.foot, html.embed .foot-note { display: none !important; }
+html.embed .wrap { max-width: none; padding: 0; }
+html.embed .card { margin: 0; border: 0; border-radius: 0; background: var(--c-bg); }
+html.embed .head { padding: 8px 10px 6px; }
+html.embed .head h2 { font-size: 18px; }
+html.embed .head .px { font-size: 16px; }
+html.embed .tools { padding: 6px 10px; }
+html.embed .draw button { padding: 4px 8px; font-size: 12px; }
+html.embed .picker { padding: 0 10px 6px; }
+html.embed .pane { height: var(--pane-h, 110px); }
+html.embed .status { margin: 0; min-height: 0; }
+html.embed .status:empty { display: none; }
+.picker[hidden] { display: none; }
 </style>
 </head>
 <body>
@@ -239,17 +315,25 @@ footer.foot { border-top: 1px solid var(--hair); margin-top: 48px; padding-top: 
     </div>
     <div class="tools">
       <div class="draw" id="draw">
-        <button type="button" data-mode="h" aria-pressed="false" title="Tap the chart to place a horizontal level"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 12h18"/></svg>Level</button>
-        <button type="button" data-mode="l" aria-pressed="false" title="Tap two points to draw a line"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 19 20 5"/><circle cx="4" cy="19" r="1.6"/><circle cx="20" cy="5" r="1.6"/></svg>Line</button>
-        <button type="button" data-act="undo" title="Remove the last drawing">Undo</button>
+        <button type="button" data-act="ind" aria-expanded="true" title="Show or hide the indicator list"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 17l5-6 4 4 8-9"/></svg>Indicators</button>
+        <button type="button" data-act="magnet" aria-pressed="true" title="Magnet: points snap to the candle's open, high, low or close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 4v8a6 6 0 0 0 12 0V4"/><path d="M6 8h4M14 8h4"/></svg>Magnet</button>
+        <button type="button" data-act="keep" aria-pressed="false" title="Keep the tool after drawing, to draw several in a row"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>Stay</button>
+        <button type="button" data-act="hide" aria-pressed="false" title="Hide your drawings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>Hide</button>
+        <button type="button" data-act="undo" title="Undo (Ctrl/Cmd+Z)">Undo</button>
         <button type="button" data-act="clear" title="Remove every drawing on this market">Clear</button>
+        <button type="button" data-act="fit" title="Show the whole history">Fit</button>
+        <button type="button" data-act="recent" title="Back to the latest candles (or the signal)">Latest</button>
         <span class="hint" id="hint"></span>
       </div>
-      <div class="draw"><button type="button" data-act="fit" title="Show the whole history">Fit</button><button type="button" data-act="recent" title="Back to the latest candles">Latest</button></div>
     </div>
-    <div class="stage" id="stage"><div class="loading">Loading…</div></div>
+    <div class="cbody">
+      <div class="dtools" id="dtools" role="toolbar" aria-label="Drawing tools"></div>
+      <div class="stage" id="stage"><div class="loading">Loading…</div></div>
+    </div>
     <p class="foot-note" id="note"></p>
   </section>
+
+  <section class="sigcard" id="sigcard" hidden></section>
 
   <h2 class="sec">What the chart says</h2>
   <p class="sub" id="readsub">One line per tool you've added, read on the latest candle.</p>
@@ -265,7 +349,7 @@ footer.foot { border-top: 1px solid var(--hair); margin-top: 48px; padding-top: 
       <div><b>Volatility: how wild?</b><p>Bollinger and Keltner bands, Donchian channels and ATR. Narrow bands often come before a big move; ATR helps size a stop loss.</p></div>
       <div><b>Levels: where might it stop?</b><p>Trendlines, support and resistance, Fibonacci, pivot points and the previous high/low. Prices often react near them; a clean break is a signal in itself.</p></div>
       <div><b>Volume: is anyone behind it?</b><p>Volume, VWAP and OBV. A breakout on heavy volume is more convincing than one on light volume.</p></div>
-      <div><b>Your own lines</b><p>Tap <strong>Level</strong> or <strong>Line</strong>, then the chart. Your drawings are kept on this device for each market and show on every timeframe.</p></div>
+      <div><b>Draw like TradingView</b><p>Pick a tool on the left: trend lines, rays, horizontal and vertical lines, channels, rectangles, Fibonacci, long and short positions, measure and notes. Drag to draw; tap a drawing to move it, recolour it or delete it. Drawings are kept on this device for each market and show on every timeframe.</p></div>
     </div>
   </section>
 
@@ -274,6 +358,6 @@ footer.foot { border-top: 1px solid var(--hair); margin-top: 48px; padding-top: 
   </footer>
 </main>
 
-<script type="module" src="chart.js?v=2"></script>
+<script type="module" src="chart.js?v=3"></script>
 </body>
 </html>

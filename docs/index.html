@@ -2056,6 +2056,38 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
 /* phone menu: 9 sections, 3 × 3 */
 .mgrid { grid-template-columns: repeat(3, 1fr); }
 .mgrid a { padding: 18px 6px 16px; font-size: 13.5px; }
+
+/* TRD: chart you can draw on + the signal explained */
+.tm .p-trd .pnb { padding: 0; overflow: hidden; }
+.tm .trdw { display: grid; grid-template-columns: minmax(0, 1fr); }
+.tm .trdf { display: block; width: 100%; height: min(72vh, 620px); min-height: 460px; border: 0; background: #121820; }
+.tm .trdx { padding: 10px 12px 12px; border-top: 1px solid var(--line); overflow-y: auto; font-size: 13px; line-height: 1.45; }
+@media (min-width: 1100px) {
+  .tm .trdw { grid-template-columns: minmax(0, 1fr) 360px; }
+  .tm .trdf { height: min(calc(100vh - 210px), 760px); min-height: 520px; }
+  .tm .trdx { border-top: 0; border-left: 1px solid var(--line); max-height: min(calc(100vh - 210px), 760px); min-height: 520px; }
+}
+.tm .trdhd { display: flex; flex-wrap: wrap; gap: 4px 8px; align-items: center; margin-bottom: 4px; }
+.tm .trdhd b { font: 700 16px var(--font-code); }
+.tm .trdhd .pill { font-size: 11px; }
+.tm .trdnote { font-weight: 600; font-size: 14px; margin: 4px 0 6px; }
+.tm .trdx h4 { font: 600 10.5px var(--font-body); text-transform: uppercase; letter-spacing: .07em; color: var(--faint); margin: 12px 0 4px; }
+.tm .trdx p { margin: 0 0 6px; }
+.tm .trdx .card { margin: 10px 0 0; padding: 10px 12px; border-radius: 8px; font-size: 12.5px; }
+.tm .trdx .card h3 { font-size: 13px; margin: 0 0 4px; }
+.tm .trdx .card p { font-size: 12.5px; line-height: 1.45; margin: 0 0 4px; }
+.tm .trdx .card .hd b { font-size: 16px; }
+.tm .trdchk { list-style: none; margin: 0; padding: 0; display: grid; gap: 3px; }
+.tm .trdchk li { padding-left: 18px; position: relative; }
+.tm .trdchk li::before { position: absolute; left: 0; font-weight: 700; }
+.tm .trdchk li.ok::before { content: "✓"; color: var(--bull); }
+.tm .trdchk li.no::before { content: "✕"; color: var(--faint); }
+.tm .trdchk li.warn::before { content: "!"; color: #ff9f0a; left: 4px; }
+.tm .trdclose { appearance: none; border: 1px solid var(--line); background: var(--bg); color: var(--fg); border-radius: 6px; font: 600 11px var(--font-code); padding: 3px 8px; cursor: pointer; margin-left: 6px; }
+.tm .trdclose:hover { border-color: var(--tc); }
+.tm .trdx h2 { font: 600 10.5px var(--font-body); text-transform: uppercase; letter-spacing: .07em; color: var(--faint); margin: 14px 0 4px; -webkit-text-fill-color: currentColor; background: none; }
+.tm .trdx .newslist { font-size: 13px; }
+.tm .tr.al.on { background: color-mix(in srgb, var(--tc) 14%, transparent); }
 </style>
 </head>
 <body>
@@ -2063,8 +2095,8 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
   <a class="brand" href="#home" data-tab="home" aria-label="Home"><img src="logo.svg?v=2" alt=""><span>Investment Center<br><em>Signals</em></span></a>
   <div class="mswitch side-sw" role="group" aria-label="Market"></div>
   <div class="side-usw"></div>
-  <a class="nav" href="#home" data-tab="home"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 10.5 12 4l8.5 6.5"/><path d="M5.5 9v10.5h13V9"/><path d="M10 19.5v-5h4v5"/></svg>Home</a>
   <a class="nav" href="#terminal" data-tab="terminal"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="4" width="19" height="16" rx="2.5"/><path d="m6.5 9.5 3 2.5-3 2.5"/><path d="M12 15h5"/></svg>Terminal<span class="new">New</span></a>
+  <a class="nav" href="#home" data-tab="home"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 10.5 12 4l8.5 6.5"/><path d="M5.5 9v10.5h13V9"/><path d="M10 19.5v-5h4v5"/></svg>Home</a>
   <details class="sgroup"><summary>Signals</summary>
     <a class="nav" href="#alerts" data-tab="alerts"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9a6 6 0 1 1 12 0c0 6 2.5 7.5 2.5 7.5h-17S6 15 6 9Z"/><path d="M10 20a2 2 0 0 0 4 0"/></svg>Alerts<span class="count" hidden></span></a>
     <a class="nav" href="#winners" data-tab="winners"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 4h8v5a4 4 0 0 1-8 0Z"/><path d="M8 6H5a3 3 0 0 0 3 4"/><path d="M16 6h3a3 3 0 0 1-3 4"/><path d="M12 13v4"/><path d="M8.5 20.5h7"/><path d="M10 17h4"/></svg>Best trades</a>
@@ -2115,7 +2147,7 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
 
 <div class="tabs">
   <nav aria-label="Sections">
-    <a href="#home" data-tab="home"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 10.5 12 4l8.5 6.5"/><path d="M5.5 9v10.5h13V9"/><path d="M10 19.5v-5h4v5"/></svg>Home</a>
+    <a href="#terminal" data-tab="terminal"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="4" width="19" height="16" rx="2.5"/><path d="m6.5 9.5 3 2.5-3 2.5"/><path d="M12 15h5"/></svg>Terminal</a>
     <a href="#alerts" data-tab="alerts"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9a6 6 0 1 1 12 0c0 6 2.5 7.5 2.5 7.5h-17S6 15 6 9Z"/><path d="M10 20a2 2 0 0 0 4 0"/></svg>Alerts<span class="count" hidden></span></a>
     <a href="#stocks" data-tab="stocks"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="m7 15 4-4 3 3 6-7"/></svg><span data-l="tab">Stocks</span></a>
     <a href="#strategies" data-tab="strategies"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 20h18"/><path d="M6 16V9"/><path d="M4.5 9h3"/><path d="M12 16V5"/><path d="M10.5 5h3"/><path d="M18 16v-5"/><path d="M16.5 11h3"/></svg>Strategies</a>
@@ -2129,8 +2161,8 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
   <div class="panel" role="dialog" aria-modal="true" aria-label="Menu">
     <div class="grab" aria-hidden="true"></div>
     <nav class="mgrid" aria-label="All sections">
-      <a href="#home" data-sec="home"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 10.5 12 4l8.5 6.5"/><path d="M5.5 9v10.5h13V9"/><path d="M10 19.5v-5h4v5"/></svg><span>Home</span></a>
       <a href="#terminal" data-sec="terminal"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="4" width="19" height="16" rx="2.5"/><path d="m6.5 9.5 3 2.5-3 2.5"/><path d="M12 15h5"/></svg><span>Terminal</span></a>
+      <a href="#home" data-sec="home"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 10.5 12 4l8.5 6.5"/><path d="M5.5 9v10.5h13V9"/><path d="M10 19.5v-5h4v5"/></svg><span>Home</span></a>
       <a href="#alerts" data-sec="signals"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9a6 6 0 1 1 12 0c0 6 2.5 7.5 2.5 7.5h-17S6 15 6 9Z"/><path d="M10 20a2 2 0 0 0 4 0"/></svg><span>Signals</span></a>
       <a href="#stocks" data-sec="markets"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="m7 15 4-4 3 3 6-7"/></svg><span>Markets</span></a>
       <a href="chart.html" data-sec="charts"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 8v7"/><rect x="5.8" y="10" width="2.4" height="3.5" rx=".5"/><path d="M12 6v9"/><rect x="10.8" y="8" width="2.4" height="5" rx=".5"/><path d="M17 9v7"/><rect x="15.8" y="10.5" width="2.4" height="3.5" rx=".5"/><path d="M4.5 17c4-1 9-6 15-9" stroke-opacity=".6"/></svg><span>Charts</span></a>
@@ -3190,6 +3222,7 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
       <p style="margin:10px 0 0"><a class="btn ghost" href="trendlines.html#${encodeURIComponent(a.ticker)}">See ${esc(disp(a.ticker))}'s lines on every timeframe ›</a></p>`;
     else h += `<div class="chartbox" id="achart"><p class="loading">Loading chart…</p></div>`;
     h += `<p class="caption"><strong>${esc(a.note)}</strong></p>`;
+    h += `<p style="margin:8px 0 0;display:flex;gap:8px;flex-wrap:wrap"><a class="btn sm" href="#terminal" data-sigterm="${esc(a.id)}">See the trade in the Terminal</a><a class="btn ghost sm" href="${esc(tmChartSrc(a.ticker, a, false))}">Open on the drawing chart</a></p>`;
     if (a.since_days > 0) {
       const good = (a.side === "bullish") === (a.since >= 0);
       h += `<div class="card since-card"><div><h3>Since the alert</h3><p>${a.since_days} session${a.since_days > 1 ? "s" : ""} later, the price is ${a.since >= 0 ? "up" : "down"}${good ? ", the way the alert pointed" : ", against the alert"}.</p></div><b class="${a.since >= 0 ? "up" : "down"}">${a.since > 0 ? "+" : ""}${a.since.toFixed(1)}%</b></div>`;
@@ -7348,21 +7381,26 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
   ];
   // panels of the Terminal: id -> [code, title]
   const TM_P = {
+    trd: ["TRD", "Chart &amp; trade"],
     focus: ["FOCUS", "Focus alerts"], trk: ["TRK", "Does Focus work?"], tdt: ["TDT", "Top-Down paper trades"], mood: ["MOOD", "Market mood &amp; flow"],
     mon: ["MON", "Monitor"], sec: ["DES", "Security"], alrt: ["ALRT", "Alerts"], wei: ["WEI", "World markets"], most: ["MOST", "Most active"],
     live: ["LIVE", "Live paper trades"], news: ["NEWS", "Headlines"], cal: ["CAL", "Calendar"], gc: ["GC", "Rates &amp; Fed"], eqs: ["EQS", "Screener"],
     ctm: ["CTM", "Futures &amp; positioning"], gip: ["GIP", "Multi-chart"], grd: ["GRD", "Strategy grades"], brd: ["BRD", "Breadth &amp; movers"],
     port: ["PORT", "Practice portfolio"], pxa: ["PXA", "Price alerts"],
   };
-  const TM_ORDER = Object.keys(TM_P), TM_WIDE = ["eqs", "gip", "mood", "focus", "trk"];
+  const TM_ORDER = Object.keys(TM_P), TM_WIDE = ["trd", "eqs", "gip", "mood", "focus", "trk"];
   // workspaces: the Terminal shows one group of panels at a time, so things are easy to find
-  const TM_WS = { market: ["mood", "brd", "news", "cal", "wei", "gc", "ctm"], ticker: ["mon", "sec"],
-    signals: ["focus", "trk", "tdt", "alrt", "live", "grd", "pxa"], tools: ["eqs", "most", "gip", "port"] };
-  const TM_WSL = [["market", "Market", "Mood, flow, breadth, news"], ["ticker", "Ticker", "Everything on one stock"], ["signals", "Signals", "Focus alerts, live trades"], ["tools", "Tools", "Screener, charts, portfolio"], ["all", "All", "Every panel"]];
-  const tmWs = () => { const w = pref("tmWs", "market"); return w === "all" || TM_WS[w] ? w : "market"; };
+  // Desk: the one-screen view (chart you can draw on + the signal explained, mood, signals, news, world markets)
+  const TM_WS = { desk: ["trd", "mood", "focus", "alrt", "news", "live", "wei", "cal"], market: ["mood", "brd", "news", "cal", "wei", "gc", "ctm"], ticker: ["trd", "mon", "sec"],
+    signals: ["trd", "focus", "trk", "tdt", "alrt", "live", "grd", "pxa"], tools: ["eqs", "most", "gip", "port"] };
+  const TM_WSL = [["desk", "Desk", "Chart, signals, mood and news on one screen"], ["market", "Market", "Mood, flow, breadth, news"], ["ticker", "Ticker", "Everything on one stock"], ["signals", "Signals", "Focus alerts, live trades"], ["tools", "Tools", "Screener, charts, portfolio"], ["all", "All", "Every panel"]];
+  const tmWs = () => {
+    if (!pref("tmWsV3", 0)) { setPref("tmWsV3", 1); setPref("tmWs", "desk"); }   // the Desk is the new start, once for everyone
+    const w = pref("tmWs", "desk"); return w === "all" || TM_WS[w] ? w : "desk";
+  };
   const tmWsOf = id => Object.keys(TM_WS).find(k => TM_WS[k].includes(id)) || "all";
   // codes that open a panel (and the tab inside it)
-  const TM_JUMP = { MON: ["mon"], WL: ["mon"], WEI: ["wei", "idx"], FUT: ["wei", "fut"], FX: ["wei", "fx"], VOL: ["wei", "vol"], GC: ["gc", "curve"], WIRP: ["gc", "fed"],
+  const TM_JUMP = { TRD: ["trd"], CHART: ["trd"], DESK: ["trd"], MON: ["mon"], WL: ["mon"], WEI: ["wei", "idx"], FUT: ["wei", "fut"], FX: ["wei", "fx"], VOL: ["wei", "vol"], GC: ["gc", "curve"], WIRP: ["gc", "fed"],
     ECB: ["gc", "fed"], EU: ["gc", "eu"], CTM: ["ctm", "curve"], COT: ["ctm", "cot"], MOST: ["most"], EQS: ["eqs"], GIP: ["gip"], PORT: ["port"], PXA: ["pxa"], GRD: ["grd"], BRD: ["brd"], MOOD: ["mood"], FOCUS: ["focus"], TRK: ["trk"], TDT: ["tdt"], TOPDOWN: ["tdt"], FOC: ["focus"] };
   // tabs of the security panel (company data: stocks only)
   const TM_SEC = [["DES", "Overview"], ["FLOW", "Buy / sell flow"], ["OMON", "Options"], ["CN", "News"], ["SIG", "Signals"], ["FA", "Financials"], ["ANR", "Analysts"], ["EE", "Estimates"], ["RV", "Comparables"], ["HDS", "Holders"], ["DVD", "Dividends"]];
@@ -7401,10 +7439,11 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
     const L0 = pref("tmLayout", null) || {};
     const order = (L0.order || []).filter(id => TM_P[id]);
     TM_ORDER.forEach(id => { if (!order.includes(id)) order.splice(Math.min(TM_ORDER.indexOf(id), order.length), 0, id); });
-    const wide = L0.wide ? (L0.v2 ? L0.wide : [...new Set([...L0.wide, "mood", "focus", "trk"])]) : TM_WIDE;
+    let wide = L0.wide ? (L0.v2 ? L0.wide : [...new Set([...L0.wide, "mood", "focus", "trk"])]) : TM_WIDE;
+    if (L0.wide && !L0.v3) wide = [...new Set([...wide, "trd"])];
     return { order, hidden: (L0.hidden || []).filter(id => TM_P[id]), wide };
   }
-  const tmSetLayout = L0 => setPref("tmLayout", { ...L0, v2: true });
+  const tmSetLayout = L0 => setPref("tmLayout", { ...L0, v2: true, v3: true });
   const tmPanel = (cls, code, title, go, body, extra = "") => {
     const id = cls.replace(/^p-/, ""), L0 = tmLayout(), ed = S.tmEdit;
     const ctl = ed ? `<span class="pctl"><button type="button" data-tmmove="${id}:-1" aria-label="Move earlier">◀</button><button type="button" data-tmmove="${id}:1" aria-label="Move later">▶</button><button type="button" data-tmwide="${id}" aria-pressed="${L0.wide.includes(id)}" aria-label="Full width">⤢</button><button type="button" data-tmhide="${id}" aria-label="Hide">✕</button></span>` : "";
@@ -7689,6 +7728,13 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
     if (!S.stockBy[t]) return false;
     S.tmSel = t; setPref("tmSel." + S.market, t);
     history[push ? "pushState" : "replaceState"](null, "", "#terminal-" + encodeURIComponent(t));
+    const trd = document.querySelector(".tm [data-p='trd']");
+    if (trd) { S.tmSig = null; tmRefresh("trd"); }
+    if (trd && !document.getElementById("tmsec")) {   // the Desk: the chart panel follows the ticker, no need to switch section
+      document.querySelectorAll(".tm .mon[data-tmsel]").forEach(b => b.setAttribute("aria-current", b.dataset.tmsel === t));
+      document.querySelector(".tm [data-p='trd']")?.scrollIntoView({ behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "start" });
+      return true;
+    }
     if (document.querySelector(".tm") && !document.getElementById("tmsec")) {
       const ws = tmWs(); if (ws !== "all" && ws !== "ticker") setPref("tmWs", "ticker");
       const L0 = tmLayout(); if (L0.hidden.includes("sec")) { L0.hidden = L0.hidden.filter(x => x !== "sec"); tmSetLayout(L0); }
@@ -7703,11 +7749,85 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
   }
 
   // ------------------------------------------------ alerts, live trades, news, calendar, grades, breadth
+  // ------------------------------------------------ TRD: a chart you can draw on (chart.html, embedded) and, for a
+  // signal, everything about that one trade: what fired, the plan, the paper trade, what backs it up and the risks.
+  const tmAlertById = id => (S.feed?.alerts || []).find(a => a.id === id);
+  // the alert behind a ticker/side/strategy (Focus groups, live trades): the most recent one, on or before d0
+  function tmAlertFor(t, side, strats, d0) {
+    const up = side === 1 || side === "bullish";
+    return (S.feed?.alerts || []).filter(a => a.ticker === t && (a.side === "bullish") === up && (!strats || strats.includes(a.strategy)) && (!d0 || a.date <= d0))
+      .sort((x, y) => y.date.localeCompare(x.date))[0] || null;
+  }
+  function tmTradeFor(a) {
+    const T = CACHE[S.market]?.trades;
+    if (!T) return null;
+    const side = a.side === "bullish" ? 1 : -1, d0 = Date.parse(a.date);
+    return [...(T.open || []), ...(T.closed || [])].filter(x => x.t === a.ticker && x.s === a.strategy && x.side === side && Date.parse(x.d0) >= d0 && Date.parse(x.d0) - d0 <= 5 * 864e5)
+      .sort((x, y) => x.d0.localeCompare(y.d0))[0] || null;
+  }
+  function tmChartSrc(t, a, embed = true) {
+    const tf = a?.tf && ["W", "D", "4H", "1H"].includes(a.tf) ? a.tf : "D";
+    const q = [embed ? "embed=1" : "", a ? `sig=${encodeURIComponent(a.id)}&m=${S.market}${S.market === "stocks" && uni() === "sp500" ? "&u=sp500" : ""}` : ""].filter(Boolean).join("&");
+    return `chart.html${q ? "?" + q : ""}#${encodeURIComponent(t)}/${tf}`;
+  }
+  function tmSigSide(a) {
+    const s = S.byId[a.strategy], st = a.strength, up = a.side === "bullish", now = tmPx(a.ticker) ?? a.price;
+    if (CACHE[S.market] && CACHE[S.market].trades === undefined) loadTrades().then(() => { if (S.tmSig === a.id) tmRefresh("trd"); });
+    const tr = tmTradeFor(a), move = now && a.price ? (now / a.price - 1) * 100 * (up ? 1 : -1) : null;
+    const why = { sl: "its stop was hit", tp: "it hit its take profit", rule: "the strategy's own exit rule fired" };
+    const T = CACHE[S.market]?.trades;
+    const paper = tr ? (tr.d1
+      ? `Paper trade ${tr.side < 0 ? "short" : "bought"} at ${money(tr.p0)} on ${esc(fmtDate(tr.d0, { day: "numeric", month: "short" }))}, closed at ${money(tr.p1)} on ${esc(fmtDate(tr.d1, { day: "numeric", month: "short" }))} because ${why[tr.why] || "it closed"}: <b class="${tr.ret >= 0 ? "up" : "down"}">${tr.ret > 0 ? "+" : ""}${(+tr.ret).toFixed(2)}%</b> after ${tr.days} day${tr.days === 1 ? "" : "s"}.`
+      : `Paper trade open: ${tr.side < 0 ? "short" : "bought"} at ${money(tr.p0)} on ${esc(fmtDate(tr.d0, { day: "numeric", month: "short" }))}${tr.buys > 1 ? ` (${tr.buys} buys)` : ""}, now <b class="${tr.ret >= 0 ? "up" : "down"}">${tr.ret > 0 ? "+" : ""}${(+tr.ret || 0).toFixed(2)}%</b> after ${tr.days} day${tr.days === 1 ? "" : "s"}. It closes on the strategy's exit rule or its stop.`)
+      : T === undefined || T === null ? "Loading the paper trade…"
+      : a.exit ? "This alert closes a trade rather than opening one."
+      : T && a.date < T.start ? `From before the live paper record started (${esc(fmtDate(T.start, { day: "numeric", month: "short" }))}).`
+      : a.vault ? "Not paper traded: this strategy is in the vault (it didn't hold up in the tests), shown so you can follow it."
+      : "No paper trade matched this alert yet (it opens on the next run).";
+    const idx = S.feed.alerts.indexOf(a);
+    return `<div class="trdhd"><span class="pill ${a.side}">${up ? "▲ Buy" : "▼ Sell"}${a.exit ? " · exit" : ""}</span><b>${esc(disp(a.ticker))}</b><span>${esc(stratName(a.strategy))}${a.tf ? ` · ${esc(a.tf)}` : ""}</span><span class="dim">${esc(fmtDate(a.date, { day: "numeric", month: "short" }))}${foundTime(a)}</span></div>
+      <p class="trdnote">${esc(a.note)}</p>
+      <div class="kpis"><div><small>Signal</small><b>${money(a.price)}</b></div><div><small>Now</small><b data-lp="${esc(a.ticker)}">${money(now)}</b></div><div><small>Since</small><b>${tmPct(move, 2)}</b></div><div><small>Wrong if</small><b class="down">${a.stop != null ? money(a.stop) : "–"}</b></div></div>
+      <h4>What it's doing</h4><p>${paper}</p>
+      ${s ? `<h4>Why it fired</h4><p>${esc(up ? s.bullish : s.bearish)}</p>${s.why ? `<p class="dim">${esc(s.why)}</p>` : ""}` : ""}
+      ${st ? `<h4>What backs it up <span class="dim">${esc(st.label)} · ${st.score}/4</span></h4><ul class="trdchk">${st.checks.map(c => `<li class="${c.ok ? "ok" : "no"}">${esc(c.text)}${c.ids ? ` <span class="dim">(${c.ids.map(stratName).map(esc).join(", ")})</span>` : ""}</li>`).join("")}</ul>` : ""}
+      ${wrongIfCard(a)}${earnCard(a)}
+      ${s?.watch_out?.length ? `<h4>Watch out</h4><ul class="trdchk">${s.watch_out.slice(0, 2).map(w => `<li class="warn">${esc(w)}</li>`).join("")}</ul>` : ""}
+      ${newsFor(a.ticker, 3)}
+      <div class="secacts"><a href="#alert-${idx}" data-tmnosig><b>ALRT</b>Alert page</a><a href="#terminal-${encodeURIComponent(a.ticker)}" data-tmseltab="${esc(a.ticker)}:DES"><b>DES</b>Everything on ${esc(disp(a.ticker))}</a>${LAB_IND[a.strategy] ? `<a href="#strategylab-${LAB_IND[a.strategy]}"><b>BT</b>Backtest the strategy</a>` : ""}<a href="#strategy-${slug(a.strategy)}"><b>HOW</b>How it works</a><a href="#terminal" data-tmpxfor="${esc(a.ticker)}"><b>PXA</b>Price alert</a></div>`;
+  }
+  function tmTickerSide(t) {
+    const r = S.stockBy[t] || {}, A = (S.feed?.alerts || []).filter(a => a.ticker === t).slice(0, 8), now = tmPx(t) ?? r.price;
+    return `<div class="trdhd"><b>${esc(disp(t))}</b><span>${esc(r.name || "")}</span></div>
+      <div class="kpis"><div><small>Price</small><b data-lp="${esc(t)}">${money(now)}</b></div><div><small>Today</small><b>${tmPct(r.chg1d, 2)}</b></div><div><small>1 month</small><b>${tmPct(r.chg1m)}</b></div><div><small>vs 200-day</small><b>${tmPct(r.vs200)}</b></div></div>
+      <h4>Signals on ${esc(disp(t))}</h4>${A.length ? A.map(a => { const up = a.side === "bullish"; return `<button type="button" class="tr al${S.tmSig === a.id ? " on" : ""}" data-tmsig="${esc(a.id)}"><span class="dim">${esc(fmtDate(a.date, { day: "numeric", month: "short" }))}</span><span class="tk">${esc(disp(a.ticker).slice(0, 8))}</span><span class="${up ? "side-b" : "side-s"}">${up ? "▲" : "▼"}</span><span>${esc(stratName(a.strategy))}</span><span class="r dim">${esc(a.strength?.label || "")}</span></button>`; }).join("") : `<p class="empty2">No recent signals. Draw your own levels on the chart.</p>`}
+      <p class="fine2">Tap any signal (here, in Alerts, Focus or Live trades) to see that trade on the chart: entry, “wrong if” level, the strategy's own lines and why it fired. Draw with the tools on the left of the chart; drawings are saved on this device.</p>
+      ${newsFor(t, 3)}
+      <div class="secacts"><a href="#terminal-${encodeURIComponent(t)}" data-tmseltab="${esc(t)}:DES"><b>DES</b>Everything on ${esc(disp(t))}</a><a href="#terminal-${encodeURIComponent(t)}" data-tmseltab="${esc(t)}:FLOW"><b>FLOW</b>Buying / selling</a>${S.market === "stocks" ? `<a href="#terminal-${encodeURIComponent(t)}" data-tmseltab="${esc(t)}:OMON"><b>OMON</b>Options</a>` : ""}<a href="#strategylab?s=${encodeURIComponent(t)}"><b>BT</b>Backtest</a></div>`;
+  }
+  TM_R.trd = () => {
+    const a = S.tmSig ? tmAlertById(S.tmSig) : null;
+    if (S.tmSig && !a && S.feed) S.tmSig = null;
+    const t = a ? a.ticker : S.tmSel;
+    if (!t) return tmPanel("p-trd", "TRD", "Chart &amp; trade", null, `<p class="empty2">Loading…</p>`);
+    const body = `<div class="trdw"><iframe class="trdf" src="${esc(tmChartSrc(t, a))}" title="${esc(disp(t))} chart${a ? " with the signal" : ""}" allow="clipboard-write"></iframe><div class="trdx">${a ? tmSigSide(a) : tmTickerSide(t)}</div></div>`;
+    const extra = `<small>${esc(disp(t))}${a ? " · " + esc(stratName(a.strategy)) : ""}</small>${a ? `<button type="button" class="trdclose" data-tmsigx title="Back to the plain chart">✕ Signal</button>` : ""}`;
+    return tmPanel("p-trd", "TRD", a ? "Signal on the chart" : "Chart &amp; trade", [tmChartSrc(t, a, false), "Full screen"], body, extra);
+  };
+  function tmOpenSig(id) {
+    const a = tmAlertById(id); if (!a) return false;
+    S.tmSig = id;
+    if (S.stockBy[a.ticker]) { S.tmSel = a.ticker; setPref("tmSel." + S.market, a.ticker); }
+    tmOpen("trd");
+    document.querySelectorAll(".tm [data-tmsig]").forEach(b => b.classList.toggle("on", b.dataset.tmsig === id));
+    return true;
+  }
+
   TM_R.alrt = () => {
     const A = (S.feed?.alerts || []).slice(0, 60);
     const body = !S.feed ? `<p class="empty2">Loading…</p>` : !A.length ? `<p class="empty2">No alerts yet.</p>` : A.map(a => {
       const up = a.side === "bullish";
-      return `<button type="button" class="tr al" data-tmsel="${esc(a.ticker)}" title="${esc(a.note || "")}"><span class="dim">${esc(a.date === S.feed.as_of && a.found_at ? foundTime(a).trim() : fmtDate(a.date, { day: "numeric", month: "short" }))}</span><span class="tk">${esc(disp(a.ticker).slice(0, 8))}</span><span class="${up ? "side-b" : "side-s"}">${up ? "▲" : "▼"}</span><span>${esc(stratName(a.strategy))}${a.tf ? ` <span class="dim">${esc(a.tf)}</span>` : ""}</span><span class="r dim">${esc(a.strength?.label || "")}</span></button>`;
+      return `<button type="button" class="tr al${S.tmSig === a.id ? " on" : ""}" data-tmsig="${esc(a.id)}" title="${esc(a.note || "")} · tap to see the trade on the chart"><span class="dim">${esc(a.date === S.feed.as_of && a.found_at ? foundTime(a).trim() : fmtDate(a.date, { day: "numeric", month: "short" }))}</span><span class="tk">${esc(disp(a.ticker).slice(0, 8))}</span><span class="${up ? "side-b" : "side-s"}">${up ? "▲" : "▼"}</span><span>${esc(stratName(a.strategy))}${a.tf ? ` <span class="dim">${esc(a.tf)}</span>` : ""}</span><span class="r dim">${esc(a.strength?.label || "")}</span></button>`;
     }).join("");
     const today = S.feed ? S.feed.alerts.filter(a => a.date === S.feed.as_of) : [], bu = today.filter(a => a.side === "bullish").length;
     return tmPanel("p-alrt", "ALRT", "Alerts", ["#alerts", "All alerts"], body, S.feed ? `<small>${bu}▲ ${today.length - bu}▼ last close</small>` : "");
@@ -7722,7 +7842,7 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
       const wins = C.filter(x => x.ret > 0).length, avg = C.length ? C.reduce((s, x) => s + x.ret, 0) / C.length : null;
       const openRet = O.length ? O.reduce((s, x) => s + (x.ret || 0), 0) / O.length : null;
       body = `<div class="kpis"><div><small>Open</small><b>${O.length}</b></div><div><small>Avg open</small><b>${tmPct(openRet, 2)}</b></div><div><small>Closed</small><b>${C.length}</b></div><div><small>Won</small><b>${C.length ? Math.round(wins / C.length * 100) + "%" : "–"}</b></div><div><small>Avg closed</small><b>${tmPct(avg, 2)}</b></div></div>`;
-      const row = (x, open) => `<button type="button" class="tr lt" data-tmsel="${esc(x.t)}"><span class="tk">${esc(disp(x.t).slice(0, 8))}</span><span>${x.side < 0 ? `<span class="side-s">short</span> ` : ""}${esc(nm(x.s))}</span><span class="r dim">${open ? "open" : esc(fmtDate(x.d1, { day: "numeric", month: "short" }))}</span><span class="r">${tmPct(x.ret, 2)}</span></button>`;
+      const row = (x, open) => { const al = tmAlertFor(x.t, x.side, [x.s], x.d0); return `<button type="button" class="tr lt" ${al ? `data-tmsig="${esc(al.id)}"` : `data-tmsel="${esc(x.t)}"`}><span class="tk">${esc(disp(x.t).slice(0, 8))}</span><span>${x.side < 0 ? `<span class="side-s">short</span> ` : ""}${esc(nm(x.s))}</span><span class="r dim">${open ? "open" : esc(fmtDate(x.d1, { day: "numeric", month: "short" }))}</span><span class="r">${tmPct(x.ret, 2)}</span></button>`; };
       const bigOpen = O.slice().sort((a, b) => Math.abs(b.ret || 0) - Math.abs(a.ret || 0)).slice(0, 12);
       const lastClosed = C.slice().sort((a, b) => (b.d1 || "").localeCompare(a.d1 || "")).slice(0, 15);
       body += (bigOpen.length ? `<p class="sub2">Open · biggest moves</p>${bigOpen.map(x => row(x, true)).join("")}` : "")
@@ -7876,7 +7996,7 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
         ${open ? `<div class="fd"><ul class="why">${g.why.map(([p, w]) => `<li><b class="${p > 0 ? "up" : p < 0 ? "down" : "dim"}">${p > 0 ? "+" : ""}${p}</b><span>${esc(w)}</span></li>`).join("")}</ul>
           <div class="kpis"><div><small>Price at alert</small><b>${money(g.price)}</b></div><div><small>Now</small><b data-lp="${esc(g.t)}">${money(now)}</b></div><div><small>Wrong if</small><b>${g.stop != null ? money(g.stop) : "–"}</b></div><div><small>Distance</small><b>${g.stop != null && now ? (Math.abs(g.stop / now - 1) * 100).toFixed(1) + "%" : "–"}</b></div></div>
           ${g.notes?.some(Boolean) ? `<p class="fnote">${g.notes.filter(Boolean).map(esc).join(" · ")}</p>` : ""}
-          <div class="secacts"><a href="#terminal-${encodeURIComponent(g.t)}" data-tmseltab="${esc(g.t)}:DES"><b>DES</b>Everything on ${esc(disp(g.t))}</a><a href="#terminal-${encodeURIComponent(g.t)}" data-tmseltab="${esc(g.t)}:FLOW"><b>FLOW</b>Buying / selling</a><a href="#terminal-${encodeURIComponent(g.t)}" data-tmseltab="${esc(g.t)}:OMON"><b>OMON</b>Options</a><a href="#terminal-${encodeURIComponent(g.t)}" data-tmseltab="${esc(g.t)}:CN"><b>CN</b>News</a><a href="chart.html#${encodeURIComponent(g.t)}/D"><b>CHRT</b>Chart</a><a href="#terminal" data-tmpxfor="${esc(g.t)}"><b>PXA</b>Price alert</a></div></div>` : ""}</div>`;
+          <div class="secacts">${(al => al ? `<a href="#terminal" data-tmsig="${esc(al.id)}"><b>TRD</b>See the trade on the chart</a>` : "")(tmAlertFor(g.t, g.side, g.strats))}<a href="#terminal-${encodeURIComponent(g.t)}" data-tmseltab="${esc(g.t)}:DES"><b>DES</b>Everything on ${esc(disp(g.t))}</a><a href="#terminal-${encodeURIComponent(g.t)}" data-tmseltab="${esc(g.t)}:FLOW"><b>FLOW</b>Buying / selling</a><a href="#terminal-${encodeURIComponent(g.t)}" data-tmseltab="${esc(g.t)}:OMON"><b>OMON</b>Options</a><a href="#terminal-${encodeURIComponent(g.t)}" data-tmseltab="${esc(g.t)}:CN"><b>CN</b>News</a><a href="chart.html#${encodeURIComponent(g.t)}/D"><b>CHRT</b>Chart</a><a href="#terminal" data-tmpxfor="${esc(g.t)}"><b>PXA</b>Price alert</a></div></div>` : ""}</div>`;
     }).join("") : `<p class="empty2">${show === "focus" ? "Nothing scores high enough right now. No trade is a fine trade; tap “+ Watch” for the next best." : "No alerts match."}</p>`;
     body += `<p class="fine2">Score out of 100: the backtest grade and live record of the strategies behind it, how many different ideas agree, the trend, the market mood, volume, options, dark pool and news, the distance to the “wrong if” level, and earnings risk. The top ${X.max || 8} scoring ${X.min}+ are Focus${pref("tmFocShow", "watch") !== "focus" ? `, the next ${X.counts.watch} Watch` : ""}. It sorts setups to look at; it doesn't predict them. New Focus alerts also go to the ntfy channel ending in <b>-focus</b>. ${esc(tmUpd(F))}.</p>`;
     return tmPanel("p-focus", "FOCUS", "Focus alerts", ["#alerts", "All alerts"], body, `<small>${X.counts.focus} focus · ${X.counts.watch} watch</small>`);
@@ -8327,7 +8447,7 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
     const want = decodeURIComponent(arg.replace(/^-/, ""));
     const t = S.stockBy[want] ? want : S.stockBy[S.tmSel] ? S.tmSel : S.stockBy[pref("tmSel." + S.market)] ? pref("tmSel." + S.market) : (S.stocks?.stocks || []).slice().sort((a, b) => Math.abs(b.chg1d ?? 0) - Math.abs(a.chg1d ?? 0))[0]?.ticker;
     S.tmSel = t;
-    if (want && S.stockBy[want] && tmWs() !== "all") setPref("tmWs", "ticker");
+    if (want && S.stockBy[want] && tmWs() !== "all" && tmWs() !== "desk") setPref("tmWs", "ticker");
     const rows = S.stocks?.stocks || [], LY = tmLayout(), WS = tmWs();
     const tape = rows.map(r => `<button type="button" data-tmsel="${esc(r.ticker)}"><b>${esc(disp(r.ticker).slice(0, 10))}</b><span data-lp="${esc(r.ticker)}">${money(r.price)}</span> <span data-lc="${esc(r.ticker)}" data-dp="2">${tmPct(r.chg1d, 2)}</span></button>`).join("");
     const codes = [...TM_FN.map(([c, , l]) => [c, l]), ...Object.keys(TM_JUMP).map(c => [c, "Terminal panel"]), ...TM_SEC.map(([c, l]) => [c, l]), ["LAYOUT", "Rearrange panels"], ["HELP", "Every code"]];
@@ -8358,7 +8478,7 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
     </div>`;
     return { html: h, after: () => {
       if (WS === "ticker" && t && S.stockBy[t] && arg !== "-" + t && location.hash !== "#terminal-" + encodeURIComponent(t)) history.replaceState(null, "", "#terminal-" + encodeURIComponent(t));
-      if (WS !== "ticker" && WS !== "all" && location.hash !== "#terminal") history.replaceState(null, "", "#terminal");
+      if (WS !== "ticker" && WS !== "all" && WS !== "desk" && location.hash !== "#terminal") history.replaceState(null, "", "#terminal");
       if (shown.includes("sec") && (S.market !== "stocks" || tmTab("sec", "DES") === "DES")) tmSecAfter(t);
       if (shown.includes("gip")) tmGipDraw();
       tmLoadFlow();
@@ -8451,6 +8571,9 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
     if ((x = D("[data-tmgipadd]"))) { e.preventDefault(); gipAdd(x.dataset.tmgipadd); return true; }
     if ((x = D("[data-tmpxfor]"))) { e.preventDefault(); S.tmFor = x.dataset.tmpxfor; tmOpen("pxa"); return true; }
     if ((x = D("[data-tmpxdel]"))) { const id = x.dataset.tmpxdel; fetch(`${trendApi()}/?px=del`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ topic: pxTopic(), id }) }).finally(() => pxList(true)); x.disabled = true; return true; }
+    if ((x = D("[data-tmsigx]"))) { S.tmSig = null; tmRefresh("trd"); return true; }
+    if ((x = D("[data-tmsig]"))) { e.preventDefault(); tmOpenSig(x.dataset.tmsig); return true; }
+    if ((x = D('a[href^="#alert-"]:not([data-tmnosig])'))) { const a = S.feed?.alerts?.[+x.getAttribute("href").slice(7)]; if (a) { e.preventDefault(); tmOpenSig(a.id); return true; } }
     if ((x = D("[data-tmsel]")) && !D("input, select")) { e.preventDefault(); tmSelect(x.dataset.tmsel, true); return true; }
     return false;
   }
@@ -8493,8 +8616,8 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
   let tmRz; addEventListener("resize", () => { clearTimeout(tmRz); tmRz = setTimeout(() => { if (document.querySelector(".tm canvas[data-gipc]")) tmGipDraw(); }, 200); });
 
   function route() {
-    if (!location.hash) history.replaceState(null, "", "#home");
-    const r = (location.hash || "#home").slice(1);
+    if (!location.hash) history.replaceState(null, "", "#terminal");
+    const r = (location.hash || "#terminal").slice(1);
     const tab = r.startsWith("terminal") ? "terminal" : r === "news" || r === "buzz" || r === "mood" || r === "earnings" || r.startsWith("earnings-") ? "news" : r.startsWith("calendar") ? "calendar" : r === "crypto" || r.startsWith("crypto-") ? "cryptohub" : r.startsWith("strategylab") ? "lab" : r.startsWith("strateg") ? "strategies" : r.startsWith("stock") || r === "heatmap" ? "stocks" : r === "notify" ? "notify" : r.startsWith("brokers") ? "brokers" : r.startsWith("learn") ? "learn" : r === "practice" ? "practice" : r === "crashes" ? "crashes" : r === "vix" ? "vix" : r === "home" ? "home" : r === "about" ? "about" : "alerts";
     if (r === "winners" || r === "record" || r === "trades") S.alView = r; else if (tab === "alerts" && !r.startsWith("alert-")) S.alView = "alerts";
     const list = { alerts: S.alView === "winners" ? viewWinners : S.alView === "record" ? viewRecord : S.alView === "trades" ? viewTrades : viewAlerts, stocks: viewStocks, home: viewHome, strategies: viewStrategies, notify: viewNotify, brokers: viewBrokers, learn: viewLearn, practice: viewPractice, crashes: viewCrashes, vix: viewVix, about: viewAbout, terminal: () => viewTerminal(r.slice(8)), lab: () => viewLab(r.slice(11)), cryptohub: () => viewCrypto(r), news: r === "buzz" ? viewBuzz : r === "mood" ? viewMood : r === "earnings" || r.startsWith("earnings-") ? () => viewEarnings(r.slice(9)) : viewNews, calendar: () => viewCalendar(r.slice(9)) }[tab];
@@ -8535,7 +8658,7 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
     if (nsearch) { nsearch.addEventListener("input", () => { S.nq = nsearch.value; filterNews(); }); filterNews(); }
     // the phone tab bar has no Calendar button: it lives under News there
     // phone bar: pages without their own button light up Menu
-    const inBar = { terminal: "menu", news: "menu", calendar: "menu", brokers: "menu", notify: "menu", learn: "menu", practice: "menu", crashes: "menu", vix: "menu", cryptohub: "menu", about: "menu" }[tab] || tab;
+    const inBar = { home: "menu", news: "menu", calendar: "menu", brokers: "menu", notify: "menu", learn: "menu", practice: "menu", crashes: "menu", vix: "menu", cryptohub: "menu", about: "menu" }[tab] || tab;
     const navTab = tab === "alerts" && (S.alView === "winners" || S.alView === "record" || S.alView === "trades") ? S.alView : tab;
     document.querySelectorAll("[data-tab]").forEach(a => a.setAttribute("aria-current", (a.closest(".tabs") ? a.dataset.tab === inBar : a.dataset.tab === navTab) ? "page" : "false"));
     document.querySelectorAll(".side .sgroup").forEach(g => { if (g.querySelector('[aria-current="page"]')) g.open = true; });
@@ -9010,6 +9133,8 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
     scrollTo(0, 0);
   }
   document.addEventListener("click", e => {
+    const g = e.target.closest("[data-sigterm]");
+    if (g) { e.preventDefault(); S.tmSig = g.dataset.sigterm; const a = tmAlertById(S.tmSig); if (a && S.stockBy[a.ticker]) S.tmSel = a.ticker; if (!TM_WS[tmWs()]?.includes("trd") && tmWs() !== "all") setPref("tmWs", "desk"); location.hash = "terminal"; return; }
     const b = e.target.closest("button[data-market]");
     if (b) { e.preventDefault(); switchMarket(b.dataset.market); }
     const u = e.target.closest("button[data-universe]");
@@ -9021,7 +9146,7 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
     try {
       if (!sessionStorage.getItem("ics.visit")) {
         sessionStorage.setItem("ics.visit", "1");
-        if (!/^#(terminal|stock-|alert-|strategy-|earnings-.|calendar-.|learn-|strategylab[-?]|about$)/.test(location.hash)) history.replaceState(null, "", "#home");
+        if (!/^#(terminal|stock-|alert-|strategy-|earnings-.|calendar-.|learn-|strategylab[-?]|about$|home$)/.test(location.hash)) history.replaceState(null, "", "#terminal");
       }
     } catch (e) {}
     S.follow = new Set(load(STORE, DEFAULT_FOLLOW));

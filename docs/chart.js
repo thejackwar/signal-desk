@@ -5,6 +5,7 @@
 // Hash: #AAPL/D. Choices are remembered on the device (localStorage "signaldesk.chart").
 import * as L from "./chart-lib.js?v=1";
 import { TFS, analyze, srLevels, segments, binanceCrypto } from "./trendlines.js?v=3";
+import { createDrawLayer, TOOLS, TOOL } from "./draw.js?v=1";
 
 const LW = window.LightweightCharts;
 const DEFAULT_API = "https://trendlines.guerragiacomo00.workers.dev";
@@ -114,8 +115,17 @@ const PRESETS = [
 // ------------------------------------------------------------------ state
 function loadPrefs() { try { return JSON.parse(localStorage.getItem(PREF_KEY)) || {}; } catch { return {}; } }
 const saved = loadPrefs();
-const S = { sym: "SPY", tf: "D", on: Array.isArray(saved.on) ? saved.on.filter(id => DEF[id]) : ["ma2", "ma3", "vol", "rsi"], params: saved.params || {}, open: null, mode: null, pending: null };
-const savePrefs = () => { try { localStorage.setItem(PREF_KEY, JSON.stringify({ on: S.on, params: S.params })); } catch {} };
+const S = { sym: "SPY", tf: "D", on: Array.isArray(saved.on) ? saved.on.filter(id => DEF[id]) : ["ma2", "ma3", "vol", "rsi"], params: saved.params || {}, open: null,
+  tool: "cursor", magnet: saved.magnet !== false, keep: false, hideDr: false };
+const savePrefs = () => { try { localStorage.setItem(PREF_KEY, JSON.stringify({ on: S.on, params: S.params, magnet: S.magnet })); } catch {} };
+// Signal view: chart.html?sig=<alert id>&m=<market>[&u=sp500]#TICKER/D draws one alert's trade on the chart.
+// embed=1: chart only (the Terminal shows it in a panel next to its own explanation).
+const Q = new URLSearchParams(location.search);
+const SIG_ID = Q.get("sig"), EMBED = Q.get("embed") === "1", SIG_M = ["stocks", "crypto", "commodities"].includes(Q.get("m")) ? Q.get("m") : "stocks";
+const SIG_BASE = SIG_M === "crypto" ? "data/crypto/" : SIG_M === "commodities" ? "data/commodities/" : Q.get("u") === "sp500" ? "data/sp500/" : "data/";
+let SIG = null;                  // {a: the alert, chart: its chart file, trade: its paper trade, strat: the strategy text}
+let DRAWL = null;                // the drawing layer on the price chart
+if (EMBED) document.documentElement.classList.add("embed");
 const params = id => {
   const out = {};
   for (const [k, , def] of DEF[id].p) out[k] = S.params[id]?.[k] ?? def;
@@ -192,7 +202,8 @@ async function getData(sym) {
 
 async function load(sym) {
   const id = ++loadId;
-  S.sym = sym; S.pending = null;
+  S.sym = sym;
+  if (SIG && sym !== SIG.a.ticker) { SIG = null; drawSigCard(); }
   writeHash();
   $("sym").value = label(sym);
   $("status").className = "status";
@@ -301,7 +312,7 @@ function drawTfs() {
 $("tfs").addEventListener("click", e => {
   const b = e.target.closest("[data-tf]");
   if (!b || b.disabled || b.dataset.tf === S.tf) return;
-  S.tf = b.dataset.tf; S.pending = null; writeHash(); render(false);
+  S.tf = b.dataset.tf; writeHash(); render(false);
 });
 
 function drawTitle() {
@@ -313,27 +324,44 @@ function drawTitle() {
 }
 
 // ------------------------------------------------------------------ drawings (kept per market)
+// The tools themselves live in draw.js; this is the toolbar around them.
 const drawKey = () => `signaldesk.chart.draw.${S.sym}`;
 const getDrawings = () => { try { return JSON.parse(localStorage.getItem(drawKey())) || []; } catch { return []; } };
 const setDrawings = list => { try { localStorage.setItem(drawKey(), JSON.stringify(list)); } catch {} };
-const hintText = () => S.mode === "h" ? "Tap the chart where you want the level." : S.mode === "l" ? (S.pending ? "Now tap the second point." : "Tap the first point of the line.") : "";
+const hintText = () => {
+  const t = TOOL[S.tool];
+  if (!t || t.id === "cursor") return "";
+  return t.n === 1 ? `${t.name}: tap the chart.` : t.n === 3 ? `${t.name}: tap two points for the line, then a third for the width.` : `${t.name}: drag on the chart, or tap the start and then the end.`;
+};
+function drawToolbar() {
+  let grp = "";
+  $("dtools").innerHTML = TOOLS.map(([id, name, , g, icon]) => {
+    const sep = g !== grp && grp ? `<span class="tsep"></span>` : ""; grp = g;
+    return `${sep}<button type="button" data-tool="${id}" aria-pressed="${S.tool === id}" title="${esc(name)}" aria-label="${esc(name)}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">${icon}</svg></button>`;
+  }).join("");
+}
+function setTool(t) { S.tool = TOOL[t] ? t : "cursor"; DRAWL?.cancel(); syncDrawButtons(); }
+$("dtools").addEventListener("click", e => { const b = e.target.closest("[data-tool]"); if (b) setTool(S.tool === b.dataset.tool && b.dataset.tool !== "cursor" ? "cursor" : b.dataset.tool); });
 $("draw").addEventListener("click", e => {
   const b = e.target.closest("button");
   if (!b) return;
-  if (b.dataset.mode) { S.mode = S.mode === b.dataset.mode ? null : b.dataset.mode; S.pending = null; }
-  else if (b.dataset.act === "undo") { const l = getDrawings(); l.pop(); setDrawings(l); render(true); }
-  else if (b.dataset.act === "clear") { if (getDrawings().length && confirm(`Remove all your drawings on ${label(S.sym)}?`)) { setDrawings([]); render(true); } }
+  const a = b.dataset.act;
+  if (a === "magnet") { S.magnet = !S.magnet; savePrefs(); }
+  else if (a === "keep") S.keep = !S.keep;
+  else if (a === "hide") { S.hideDr = !S.hideDr; DRAWL?.redraw(); }
+  else if (a === "undo") DRAWL?.undo();
+  else if (a === "clear") { if (getDrawings().length && confirm(`Remove all your drawings on ${label(S.sym)}?`)) DRAWL?.clear(); }
+  else if (a === "ind") { const p = document.querySelector(".picker"); p.hidden = !p.hidden; b.setAttribute("aria-expanded", String(!p.hidden)); if (EMBED) render(true); }
+  else if (a === "fit" && VIEW) VIEW.main.timeScale().fitContent();
+  else if (a === "recent" && VIEW) VIEW.showRecent();
   syncDrawButtons();
 });
-document.querySelector(".tools .draw:last-child").addEventListener("click", e => {
-  const b = e.target.closest("button");
-  if (!b || !VIEW) return;
-  if (b.dataset.act === "fit") VIEW.main.timeScale().fitContent();
-  if (b.dataset.act === "recent") VIEW.showRecent();
-});
 function syncDrawButtons() {
-  document.querySelectorAll("#draw [data-mode]").forEach(b => b.setAttribute("aria-pressed", String(S.mode === b.dataset.mode)));
+  document.querySelectorAll("#dtools [data-tool]").forEach(b => b.setAttribute("aria-pressed", String(S.tool === b.dataset.tool)));
+  const set = (a, v) => document.querySelector(`#draw [data-act="${a}"]`)?.setAttribute("aria-pressed", String(v));
+  set("magnet", S.magnet); set("keep", S.keep); set("hide", S.hideDr);
   $("hint").textContent = hintText();
+  DRAWL?.redraw();
 }
 
 // ------------------------------------------------------------------ drawing the chart
@@ -352,7 +380,7 @@ function baseOptions(showTime, logo = false) {
 
 function render(keepRange) {
   if (!DATA) return;
-  drawTfs(); drawTitle(); drawPicker(); syncDrawButtons();
+  drawTfs(); drawTitle(); drawPicker();
   const prevRange = keepRange && VIEW ? VIEW.main.timeScale().getVisibleLogicalRange() : null;
   if (VIEW) VIEW.destroy();
   VIEW = null;
@@ -381,6 +409,11 @@ function render(keepRange) {
   stage.innerHTML = "";
   const panesOn = active.filter(id => DEF[id].kind === "pane");
   const mainEl = document.createElement("div"); mainEl.className = "main"; stage.appendChild(mainEl);
+  if (EMBED) {   // fill the frame: price chart gets what the indicator panes leave
+    const top = stage.getBoundingClientRect().top + scrollY, paneH = 110;
+    mainEl.style.height = Math.max(240, innerHeight - top - panesOn.length * paneH - 2) + "px";
+    document.documentElement.style.setProperty("--pane-h", paneH + "px");
+  }
   const mainLg = document.createElement("div"); mainLg.className = "lg"; mainEl.appendChild(mainLg);
   const main = LW.createChart(mainEl, baseOptions(!panesOn.length, true));   // TradingView credit once, on the price chart
   main.priceScale("right").applyOptions({ scaleMargins: { top: 0.06, bottom: active.includes("vol") ? 0.2 : 0.06 } });
@@ -530,26 +563,28 @@ function render(keepRange) {
     }
     while (legendIds.length < legend.length) legendIds.push(id);
   }
-  if (markers.length) cs.setMarkers(markers.sort((a, b) => a.time - b.time));
-
-  // your own drawings
-  const times = c.map(b => b.time);
-  const idxOf = t => {
-    if (t > lastT) return Math.min(last + fut, last + Math.round((t - lastT) / step));
-    let lo = 0, hi = last;
-    while (lo < hi) { const m = (lo + hi) >> 1; if (times[m] < t) lo = m + 1; else hi = m; }
-    return lo > 0 && t - times[lo - 1] < times[lo] - t ? lo - 1 : lo;
-  };
-  for (const dr of getDrawings()) {
-    if (dr.type === "h") cs.createPriceLine({ price: dr.p, color: COL.sky, lineWidth: 1.5, lineStyle: LW.LineStyle.Solid, axisLabelVisible: true, title: "Level" });
-    else if (dr.type === "l") {
-      const a = idxOf(dr.a.t), b = idxOf(dr.b.t);
-      if (a === b) continue;
-      const [A, B] = a < b ? [{ i: a, p: dr.a.p }, { i: b, p: dr.b.p }] : [{ i: b, p: dr.b.p }, { i: a, p: dr.a.p }];
-      main.addLineSeries(lineOpts(COL.sky, { lineWidth: 2, ...noScale })).setData([{ time: T(A.i), value: A.p }, { time: T(B.i), value: B.p }]);
+  // the signal's own lines (its indicators on the daily chart) and markers
+  if (SIG) {
+    const sc = SIG.chart, a = SIG.a, near = sigIndex(c);
+    if (sc && tf === "D") {
+      const map = sc.dates.map(d => near(dayTime(d)));
+      sc.overlays.forEach((ov, k) => {
+        const col = [COL.amber, COL.violet, COL.teal, COL.pink, COL.blue][k % 5], arr = new Array(n).fill(null);
+        ov.values.forEach((v, i) => { const j = map[i]; if (j != null && v != null) arr[j] = v; });
+        main.addLineSeries(lineOpts(col, { lineWidth: 1.5, lineStyle: ov.dash ? LW.LineStyle.Dashed : LW.LineStyle.Solid })).setData(line(arr));
+        legend.push(i => `<b style="color:${col}">${esc(ov.name)}</b> ${fmt(at(arr, i))}`); legendIds.push("sig");
+      });
     }
+    const ai = near(sigTime(a));
+    if (ai != null) markers.push({ time: c[ai].time, position: a.side === "bullish" ? "belowBar" : "aboveBar", shape: a.side === "bullish" ? "arrowUp" : "arrowDown",
+      color: a.side === "bullish" ? COL.green : COL.red, text: `${a.side === "bullish" ? "Buy" : "Sell"} signal` });
+    (sc?.markers || []).forEach(m => {
+      const j = sc.dates[m.i] ? near(dayTime(sc.dates[m.i])) : null;
+      if (j != null && j !== ai) markers.push({ time: c[j].time, position: m.side > 0 ? "belowBar" : "aboveBar", shape: "circle", color: m.side > 0 ? COL.green : COL.red, text: "" });
+    });
+    if (SIG.trade?.d1) { const j = near(dayTime(SIG.trade.d1)); if (j != null) markers.push({ time: c[j].time, position: "aboveBar", shape: "square", color: COL.white, text: `Closed ${SIG.trade.ret > 0 ? "+" : ""}${(+SIG.trade.ret).toFixed(1)}%` }); }
   }
-  if (S.pending) marks.push({ i: idxOf(S.pending.t), p: S.pending.p, text: "●", cls: "", col: COL.sky });
+  if (markers.length) cs.setMarkers(markers.sort((a, b) => a.time - b.time));
 
   // ---------------- panes
   const charts = [{ chart: main, series: cs, data: null }];
@@ -630,7 +665,7 @@ function render(keepRange) {
     const ch = i > 0 ? b.close / c[Math.min(i, last) - 1].close - 1 : 0;
     return `<div class="o"><span>O ${fmt(b.open)}</span><span>H ${fmt(b.high)}</span><span>L ${fmt(b.low)}</span><span>C <b class="${b.close >= b.open ? "up" : "down"}">${fmt(b.close)}</b></span><span class="${ch >= 0 ? "up" : "down"}">${pctTxt(ch)}</span></div>`;
   };
-  const xBtn = id => `<span class="x" data-x="${id}" title="Remove">×</span>`;
+  const xBtn = id => id === "sig" ? "" : `<span class="x" data-x="${id}" title="Remove">×</span>`;
   const updateLegends = i => {
     i = Math.max(0, Math.min(last, i ?? last));
     mainLg.innerHTML = ohlc(i) + legend.map((f, k) => `<div>${f(i)}${xBtn(legendIds[k])}</div>`).join("");
@@ -663,20 +698,6 @@ function render(keepRange) {
     });
   }
 
-  // drawing clicks
-  main.subscribeClick(prm => {
-    if (!S.mode || !prm.point || prm.logical === undefined) return;
-    const i = Math.max(0, Math.min(last + fut, Math.round(prm.logical)));
-    const price = cs.coordinateToPrice(prm.point.y);
-    if (price === null) return;
-    const pt = { t: T(i), p: +price.toPrecision(8) };
-    const list = getDrawings();
-    if (S.mode === "h") { list.push({ type: "h", p: pt.p }); setDrawings(list); S.mode = null; }
-    else if (!S.pending) { S.pending = pt; }
-    else { list.push({ type: "l", a: S.pending, b: pt }); setDrawings(list); S.pending = null; S.mode = null; }
-    render(true);
-  });
-
   // text marks (trendline breaks, first point of a line being drawn)
   const mk = document.createElement("div"); mk.className = "marks"; mainEl.appendChild(mk);
   mk.innerHTML = marks.map(m => `<span class="${m.cls}" style="color:${m.col}">${esc(m.text)}</span>`).join("");
@@ -690,13 +711,92 @@ function render(keepRange) {
   }
   const ro = new ResizeObserver(() => requestAnimationFrame(placeMarks)); ro.observe(mainEl);
 
-  const showRecent = () => main.timeScale().setVisibleLogicalRange({ from: Math.max(0, n - SHOW[tf]), to: last + fut });
+  const sigAt = SIG ? sigIndex(c)(sigTime(SIG.a)) : null;
+  const showRecent = () => sigAt != null && !keepRange
+    ? main.timeScale().setVisibleLogicalRange({ from: Math.max(0, Math.min(sigAt - SHOW[tf] * 0.7, n - SHOW[tf])), to: Math.max(last, sigAt + SHOW[tf] * 0.3) + fut })
+    : main.timeScale().setVisibleLogicalRange({ from: Math.max(0, n - SHOW[tf]), to: last + fut });
   if (prevRange) main.timeScale().setVisibleLogicalRange(prevRange); else showRecent();
   requestAnimationFrame(placeMarks);
 
-  VIEW = { main, showRecent, destroy() { ro.disconnect(); for (const a of charts) a.chart.remove(); } };
+  // your own drawings (draw.js), plus the signal's trade when this is a signal view
+  DRAWL = createDrawLayer({ chart: main, series: cs, host: mainEl, bars: c, step, store: { get: getDrawings, set: setDrawings },
+    getTool: () => S.tool, setTool, magnet: () => S.magnet, keep: () => S.keep, hidden: () => S.hideDr, extra: () => SIG ? sigShapes(c) : [] });
+  const layer = DRAWL;
+  syncDrawButtons();
+
+  VIEW = { main, showRecent, destroy() { ro.disconnect(); layer.destroy(); for (const a of charts) a.chart.remove(); } };
   drawReads(reads);
   $("note").textContent = `${DATA.source} ${c.length} candles. ${STEP[tf] < 86400 && DATA.kind === "stock" ? "Times are New York time." : DATA.kind === "crypto" && STEP[tf] < 86400 ? "Times are UTC." : ""}`;
+}
+
+// ------------------------------------------------------------------ signal view
+const dayTime = d => Date.parse(d + "T00:00:00Z") / 1000;
+const sigTime = a => a.found_at && a.tf && a.tf !== "D" && a.tf !== "W" ? Date.parse(a.found_at.replace(/\+00:00$/, "Z")) / 1000 : dayTime(a.date);
+// candles -> "which candle holds this time" (same UTC day for daily candles, else the candle the time falls in)
+function sigIndex(c) {
+  const daily = STEP[S.tf] >= 86400;
+  return t => {
+    if (!c.length || t == null || isNaN(t)) return null;
+    let lo = 0, hi = c.length - 1;
+    while (lo < hi) { const m = (lo + hi + 1) >> 1; if (c[m].time <= t + (daily ? 86399 : 0)) lo = m; else hi = m - 1; }
+    if (c[lo].time > t + (daily ? 86399 : 0)) return null;
+    if (S.tf === "D" && new Date(c[lo].time * 1000).toISOString().slice(0, 10) !== new Date(t * 1000).toISOString().slice(0, 10)) return t - c[lo].time < 4 * 86400 ? lo : null;
+    return lo;
+  };
+}
+// the trade drawn as a TradingView long/short box: entry at the alert, the "wrong if" stop, a 2R mark and the result so far
+function sigShapes(c) {
+  const a = SIG.a, out = [], t0 = sigTime(a), long = a.side === "bullish", step = STEP[S.tf];
+  const last = c[c.length - 1], tr = SIG.trade;
+  const nowP = tr?.p1 ?? tr?.px ?? last.close, nowT = tr?.d1 ? dayTime(tr.d1) : last.time;
+  const tEnd = Math.max(nowT, t0) + step * 12;
+  if (a.stop && !a.exit && (long ? a.stop < a.price : a.stop > a.price)) {
+    const risk = Math.abs(a.price - a.stop);
+    const ret = (nowP / a.price - 1) * 100 * (long ? 1 : -1);
+    out.push({ type: long ? "long" : "short", pts: [{ t: t0, p: a.price }, { t: tEnd, p: a.price + (long ? 2 : -2) * risk }, { t: tEnd, p: a.stop }],
+      tpLabel: "2R mark", slLabel: "Wrong if", now: { t: nowT, p: nowP }, nowLabel: `${tr?.d1 ? "closed" : "now"} ${ret >= 0 ? "+" : "−"}${Math.abs(ret).toFixed(2)}%` });
+  } else {
+    out.push({ type: "hray", pts: [{ t: t0, p: a.price }], color: long ? COL.green : COL.red, w: 1.5, dash: 1, label: a.exit ? "Exit signal" : "Signal price" });
+    if (a.stop) out.push({ type: "hray", pts: [{ t: t0, p: a.stop }], color: COL.red, w: 1.5, dash: 1, label: "Wrong if" });
+  }
+  if (a.level) out.push({ type: "hline", pts: [{ t: t0, p: a.level }], color: COL.amber, w: 1.5, dash: 0, label: "Line" });
+  out.push({ type: "vline", pts: [{ t: t0, p: a.price }], color: alpha(COL.white, .35), w: 1, dash: 2, label: a.date });
+  for (const sh of SIG.chart?.shapes || []) {
+    const P = sh.points.map(([i, p]) => ({ t: SIG.chart.dates[i] ? dayTime(SIG.chart.dates[i]) : null, p })).filter(q => q.t);
+    for (let k = 0; k + 1 < P.length; k++) out.push({ type: "trend", pts: [P[k], P[k + 1]], color: COL.amber, w: 2, dash: sh.dash ? 1 : 0, label: k === 0 ? sh.name : "" });
+  }
+  return out;
+}
+async function loadSignal() {
+  const opt = u => fetch(u).then(r => r.ok ? r.json() : null).catch(() => null);
+  const [al, lv, st] = await Promise.all([opt(SIG_BASE + "alerts.json"), opt(SIG_BASE + "live.json"), opt("data/strategies.json")]);
+  const a = (al?.alerts || []).find(x => x.id === SIG_ID) || (lv?.alerts || []).find(x => x.id === SIG_ID);
+  if (!a) return null;
+  const [chart, lt] = await Promise.all([a.chart ? a.chart : a.file ? opt(SIG_BASE + "charts/" + a.file) : null, opt(SIG_BASE + "live_trades.json")]);
+  const side = a.side === "bullish" ? 1 : -1, d0 = dayTime(a.date);
+  const trade = [...(lt?.open || []), ...(lt?.closed || [])].filter(x => x.t === a.ticker && x.s === a.strategy && x.side === side && dayTime(x.d0) >= d0 && dayTime(x.d0) - d0 <= 5 * 86400)
+    .sort((x, y) => x.d0.localeCompare(y.d0))[0] || null;
+  return { a, chart, trade, strat: (st?.strategies || []).find(x => x.id === a.strategy) || null, liveStart: lt?.start };
+}
+function drawSigCard() {
+  const box = $("sigcard");
+  if (!box) return;
+  if (!SIG || EMBED) { box.hidden = true; return; }
+  const { a, trade, strat } = SIG, long = a.side === "bullish", st = a.strength;
+  const risk = a.stop ? Math.abs(a.price / a.stop - 1) * 100 : null;
+  const why = { sl: "its stop was hit", tp: "it reached its take profit", rule: "the strategy's exit rule fired" };
+  box.hidden = false;
+  box.innerHTML = `<div class="sghd"><span class="pill ${long ? "bull" : "bear"}">${long ? "▲ Buy" : "▼ Sell"}${a.exit ? " (exit)" : ""}</span><h2>${esc(label(a.ticker))} · ${esc(strat?.name || a.strategy)}</h2><span class="dim">${esc(a.date)}${a.tf ? " · " + esc(a.tf) + " chart" : ""}</span></div>
+    <p class="sgnote">${esc(a.note)}</p>
+    <div class="sggrid">
+      <div><span>Signal price</span><b>${fmt(a.price)}</b></div>
+      <div><span>Wrong if</span><b class="down">${a.stop ? fmt(a.stop) : "–"}</b><small>${esc(a.stop_why || "")}</small></div>
+      <div><span>Risk to the stop</span><b>${risk != null ? risk.toFixed(2) + "%" : "–"}</b></div>
+      <div><span>Paper trade</span>${trade ? `<b class="${trade.ret >= 0 ? "up" : "down"}">${trade.ret > 0 ? "+" : ""}${(+trade.ret).toFixed(2)}%</b><small>${trade.d1 ? `closed ${esc(trade.d1)}: ${why[trade.why] || "closed"}` : `open since ${esc(trade.d0)}, ${trade.days} day${trade.days === 1 ? "" : "s"}`}</small>` : `<b class="dim">–</b><small>${SIG.liveStart && a.date < SIG.liveStart ? "before the live record started" : "not traded (vaulted or filtered)"}</small>`}</div>
+    </div>
+    ${st ? `<h3>Why it fired, and what backs it up · ${esc(st.label)} ${st.score}/4</h3><ul class="sgchk">${st.checks.map(k => `<li class="${k.ok ? "ok" : "no"}">${esc(k.text)}</li>`).join("")}</ul>` : ""}
+    ${strat ? `<h3>The rule</h3><p>${esc(long ? strat.bullish : strat.bearish)}</p>${strat.why ? `<p class="dim">${esc(strat.why)}</p>` : ""}${strat.watch_out?.length ? `<h3>Watch out</h3><ul class="sgchk">${strat.watch_out.slice(0, 2).map(w => `<li class="warn">${esc(w)}</li>`).join("")}</ul>` : ""}` : ""}
+    <p class="dim sgfoot">On the chart: the shaded box is the trade (green above/below the entry towards a 2× risk mark, red down to the “wrong if” level), the arrow is the signal candle, and the strategy's own lines are drawn on the daily chart. Draw on it with the tools on the left. <a href="index.html#terminal">Open the Terminal ›</a></p>`;
 }
 
 // ------------------------------------------------------------------ readings
@@ -721,9 +821,20 @@ $("pick").addEventListener("submit", e => {
   if (!s) { $("status").className = "status err"; $("status").textContent = "Try an S&P 500 ticker or SPY, one of the site's 19 coins (BTC, ETH…) or a commodity (Gold, Oil, GC=F…)."; return; }
   $("sym").blur(); load(s);
 });
+let rzT; if (EMBED) addEventListener("resize", () => { clearTimeout(rzT); rzT = setTimeout(() => DATA && render(true), 150); });
 window.addEventListener("hashchange", () => { const old = S.sym, oldTf = S.tf; readHash(); if (S.sym !== old) load(S.sym); else if (S.tf !== oldTf && DATA) render(false); });
-document.addEventListener("keydown", e => { if (e.key === "Escape" && S.mode) { S.mode = null; S.pending = null; syncDrawButtons(); if (DATA) render(true); } });
 readHash();
+drawToolbar();
 drawPicker();
 loadNames();
-load(S.sym);
+if (EMBED) document.querySelector(".picker").hidden = true;
+if (SIG_ID) {
+  $("status").textContent = "Loading the signal…";
+  loadSignal().then(sg => {
+    SIG = sg;
+    if (!sg) { $("status").className = "status err"; $("status").textContent = "That signal isn't in today's list any more."; load(S.sym); return; }
+    if (sg.a.tf && TF_LIST.includes(sg.a.tf) && !location.hash.includes("/")) S.tf = sg.a.tf;
+    drawSigCard();
+    load(sg.a.ticker);
+  });
+} else load(S.sym);
