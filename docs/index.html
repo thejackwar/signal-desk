@@ -1900,6 +1900,9 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
 .tm .why li { display: grid; grid-template-columns: 34px 1fr; gap: 6px; font-size: 12.5px; line-height: 1.35; }
 .tm .why b { font: 700 12px var(--font-code); text-align: right; }
 .tm .tk3 { grid-template-columns: minmax(96px, 1fr) 104px 84px 56px 74px 66px; }
+.tm .tdr { grid-template-columns: minmax(70px, 1fr) 56px 50px 64px 64px 60px; }
+.tm .tdo { grid-template-columns: 58px 66px minmax(0, 1fr) 62px; width: 100%; text-align: left; }
+@media (max-width: 560px) { .tm .tdr { grid-template-columns: minmax(60px, 1fr) 46px 42px 58px 58px; } .tm .tdr > :nth-child(6) { display: none; } }
 .tm .tk3.dim2 > span:first-child { color: var(--muted); }
 .tm .verd { margin: 10px 0 0; padding: 8px 10px; border: 1px solid var(--line); border-radius: 8px; background: var(--bg); font-size: 12.5px; }
 .tm .verd p { margin: 2px 0; }
@@ -7313,7 +7316,7 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
   ];
   // panels of the Terminal: id -> [code, title]
   const TM_P = {
-    focus: ["FOCUS", "Focus alerts"], trk: ["TRK", "Does Focus work?"], mood: ["MOOD", "Market mood &amp; flow"],
+    focus: ["FOCUS", "Focus alerts"], trk: ["TRK", "Does Focus work?"], tdt: ["TDT", "Top-Down paper trades"], mood: ["MOOD", "Market mood &amp; flow"],
     mon: ["MON", "Monitor"], sec: ["DES", "Security"], alrt: ["ALRT", "Alerts"], wei: ["WEI", "World markets"], most: ["MOST", "Most active"],
     live: ["LIVE", "Live paper trades"], news: ["NEWS", "Headlines"], cal: ["CAL", "Calendar"], gc: ["GC", "Rates &amp; Fed"], eqs: ["EQS", "Screener"],
     ctm: ["CTM", "Futures &amp; positioning"], gip: ["GIP", "Multi-chart"], grd: ["GRD", "Strategy grades"], brd: ["BRD", "Breadth &amp; movers"],
@@ -7322,13 +7325,13 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
   const TM_ORDER = Object.keys(TM_P), TM_WIDE = ["eqs", "gip", "mood", "focus", "trk"];
   // workspaces: the Terminal shows one group of panels at a time, so things are easy to find
   const TM_WS = { market: ["mood", "brd", "news", "cal", "wei", "gc", "ctm"], ticker: ["mon", "sec"],
-    signals: ["focus", "trk", "alrt", "live", "grd", "pxa"], tools: ["eqs", "most", "gip", "port"] };
+    signals: ["focus", "trk", "tdt", "alrt", "live", "grd", "pxa"], tools: ["eqs", "most", "gip", "port"] };
   const TM_WSL = [["market", "Market", "Mood, flow, breadth, news"], ["ticker", "Ticker", "Everything on one stock"], ["signals", "Signals", "Focus alerts, live trades"], ["tools", "Tools", "Screener, charts, portfolio"], ["all", "All", "Every panel"]];
   const tmWs = () => { const w = pref("tmWs", "market"); return w === "all" || TM_WS[w] ? w : "market"; };
   const tmWsOf = id => Object.keys(TM_WS).find(k => TM_WS[k].includes(id)) || "all";
   // codes that open a panel (and the tab inside it)
   const TM_JUMP = { MON: ["mon"], WL: ["mon"], WEI: ["wei", "idx"], FUT: ["wei", "fut"], FX: ["wei", "fx"], VOL: ["wei", "vol"], GC: ["gc", "curve"], WIRP: ["gc", "fed"],
-    ECB: ["gc", "fed"], EU: ["gc", "eu"], CTM: ["ctm", "curve"], COT: ["ctm", "cot"], MOST: ["most"], EQS: ["eqs"], GIP: ["gip"], PORT: ["port"], PXA: ["pxa"], GRD: ["grd"], BRD: ["brd"], MOOD: ["mood"], FOCUS: ["focus"], TRK: ["trk"], FOC: ["focus"] };
+    ECB: ["gc", "fed"], EU: ["gc", "eu"], CTM: ["ctm", "curve"], COT: ["ctm", "cot"], MOST: ["most"], EQS: ["eqs"], GIP: ["gip"], PORT: ["port"], PXA: ["pxa"], GRD: ["grd"], BRD: ["brd"], MOOD: ["mood"], FOCUS: ["focus"], TRK: ["trk"], TDT: ["tdt"], TOPDOWN: ["tdt"], FOC: ["focus"] };
   // tabs of the security panel (company data: stocks only)
   const TM_SEC = [["DES", "Overview"], ["FLOW", "Buy / sell flow"], ["OMON", "Options"], ["CN", "News"], ["SIG", "Signals"], ["FA", "Financials"], ["ANR", "Analysts"], ["EE", "Estimates"], ["RV", "Comparables"], ["HDS", "Holders"], ["DVD", "Dividends"]];
   // ticker + code, e.g. "NVDA TL"
@@ -7864,6 +7867,36 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
     return tmPanel("p-trk", "TRK", "Does Focus work?", null, body, `<small>${K.rows} logged</small>`);
   };
 
+  // TDT: the Top-Down (trendline) alerts traded on paper with fixed rules (engine/topdown_trades.py)
+  function tmLoadTdt() {
+    const m = S.market; if (m === "commodities") return null;
+    S.tdt = S.tdt || {};
+    if (S.tdt[m] !== undefined && Date.now() - (S.tdtAt?.[m] || 0) < 5 * 6e4) return S.tdt[m];
+    if (S.tdt[m] === undefined) S.tdt[m] = null;
+    (S.tdtAt = S.tdtAt || {})[m] = Date.now();
+    opt(m === "crypto" ? "data/crypto/topdown_trades.json" : "data/topdown/trades.json").then(d => { S.tdt[m] = d || false; tmRefresh("tdt"); });
+    return S.tdt[m];
+  }
+  TM_R.tdt = () => {
+    if (S.market === "commodities") return tmPanel("p-tdt", "TDT", "Top-Down paper trades", null, `<p class="empty2">Top-Down runs on stocks and crypto.</p>`);
+    const D = tmLoadTdt();
+    if (!D) return tmPanel("p-tdt", "TDT", "Top-Down paper trades", ["trendlines.html", "Trendlines"], `<p class="empty2">${D === false ? "The first trades are recorded with the next Top-Down alerts." : "Loading…"}</p>`);
+    const Sm = D.summary || {}, A = Sm.all || { n: 0 }, tfl = { "15m": "15-min", "30m": "30-min", "1H": "1-hour", "4H": "4-hour", D: "Daily", W: "Weekly" };
+    const bn = D.rules?.bench === "BTC-USD" ? "BTC" : "SPY";
+    const row = (lbl, x) => `<div class="tr tdr"><span>${lbl}</span><span class="r">${x.n}</span><span class="r">${x.n ? x.win + "%" : "–"}</span><span class="r">${x.n ? tmPct(x.avg, 2) : "–"}</span><span class="r">${x.vs == null ? "–" : tmPct(x.vs, 2)}</span><span class="r">${x.n ? x.stopped + "%" : "–"}</span></div>`;
+    const hd = `<div class="tr tdr th"><span></span><span class="r">Trades</span><span class="r">Won</span><span class="r">Avg</span><span class="r">vs ${bn}</span><span class="r">Stopped</span></div>`;
+    let body = `<div class="kpis"><div><small>Open</small><b>${(D.open || []).length}</b></div><div><small>Closed</small><b>${A.n}</b></div><div><small>Won</small><b>${A.n ? A.win + "%" : "–"}</b></div><div><small>Avg after costs</small><b>${A.n ? tmPct(A.avg, 2) : "–"}</b></div><div><small>vs ${bn}</small><b>${A.vs == null ? "–" : tmPct(A.vs, 2)}</b></div><div><small>Profit factor</small><b>${A.pf ?? "–"}</b></div></div>`;
+    if (A.n) body += `<p class="sub2">By timeframe · which lines are worth trading?</p>${hd}${Object.entries(Sm.by_tf || {}).map(([k, x]) => row(tfl[k] || k, x)).join("")}
+      <p class="sub2">By the scanner's strength rating, and by side</p>${hd}${Object.entries(Sm.by_strength || {}).map(([k, x]) => row(k, x)).join("")}${Object.entries(Sm.by_side || {}).map(([k, x]) => row(+k > 0 ? "Longs" : "Shorts", x)).join("")}`;
+    else body += `<p class="empty2">No closed trades yet. Each trade closes on a failed break or after its holding time (15-min: 1 day … weekly: 60 days), so the short timeframes report first.</p>`;
+    const op = (D.open || []).filter(x => x.entry != null).slice(0, 12);
+    if (op.length) body += `<p class="sub2">Open now</p>${op.map(x => `<button type="button" class="tr tdo" data-tmsel="${esc(x.t)}"><span class="tk">${esc(disp(x.t))}</span><span class="${x.side > 0 ? "side-b" : "side-s"}">${x.side > 0 ? "▲ long" : "▼ short"}</span><span class="dim">${esc(tfl[x.tf] || x.tf)}${x.str ? " · " + esc(x.str) : ""}</span><span class="r">${tmPct(x.ret, 2)}</span></button>`).join("")}`;
+    const cl = (D.closed || []).slice(0, 10);
+    if (cl.length) body += `<p class="sub2">Just closed</p>${cl.map(x => `<button type="button" class="tr tdo" data-tmsel="${esc(x.t)}"><span class="tk">${esc(disp(x.t))}</span><span class="${x.side > 0 ? "side-b" : "side-s"}">${x.side > 0 ? "▲ long" : "▼ short"}</span><span class="dim">${esc(tfl[x.tf] || x.tf)} · ${x.why === "stop" ? "failed break" : "time"}</span><span class="r">${tmPct(x.ret, 2)}</span></button>`).join("")}`;
+    body += `<p class="fine2">Paper trades from ${esc(fmtDate(D.start, { day: "numeric", month: "short", year: "numeric" }))}, nothing backfilled. Entry at the first 15-minute bar after the alert was sent; out if a candle of the alert's own timeframe closes back across the line, otherwise after a holding time set by the timeframe. ${D.rules?.cost_per_side}% costs per side included. “vs ${bn}” takes off what ${D.rules?.bench === "BTC-USD" ? "Bitcoin" : "the S&amp;P 500"} did over the same minutes. ${esc(tmUpd(D))}.</p>`;
+    return tmPanel("p-tdt", "TDT", "Top-Down paper trades", ["trendlines.html", "Trendlines"], body, `<small>${(D.open || []).length} open · ${A.n} closed</small>`);
+  };
+
   // ticker tabs: FLOW (who's buying), OMON (options), CN (every headline), SIG (every signal)
   function tmFLOW(t) {
     const F = tmLoadFlow(), f = F?.flow?.[t], DK = tmLoadDark();
@@ -8249,7 +8282,7 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
     return `<span>MIL <b>${f("Europe/Rome")}</b></span><span>NY <b>${f("America/New_York")}</b></span><span class="${open ? "open" : "closed"}">● ${st}</span>`;
   }
   function tmHelp() {
-    const pc = [["MOOD", "Market mood & flow"], ["FOCUS", "Focus alerts"], ["TRK", "Does Focus work?"], ["MARKET", "Market section"], ["TICKER", "Ticker section"], ["SIGNALS", "Signals section"], ["TOOLS", "Tools section"], ["EQS", "Screener"], ["MOST", "Most active"], ["WEI", "World indices"], ["FUT", "US index futures"], ["FX", "Currencies"], ["VOL", "VIX curve"], ["GC", "US yield curve"], ["WIRP", "Fed & ECB odds"], ["EU", "BTP–Bund spread"],
+    const pc = [["MOOD", "Market mood & flow"], ["FOCUS", "Focus alerts"], ["TRK", "Does Focus work?"], ["TDT", "Top-Down paper trades"], ["MARKET", "Market section"], ["TICKER", "Ticker section"], ["SIGNALS", "Signals section"], ["TOOLS", "Tools section"], ["EQS", "Screener"], ["MOST", "Most active"], ["WEI", "World indices"], ["FUT", "US index futures"], ["FX", "Currencies"], ["VOL", "VIX curve"], ["GC", "US yield curve"], ["WIRP", "Fed & ECB odds"], ["EU", "BTP–Bund spread"],
       ["CTM", "Futures curves"], ["COT", "Positioning (CFTC)"], ["GIP", "Multi-chart"], ["PORT", "Practice portfolio"], ["PXA", "Price alerts"], ["WL", "Watchlists"], ["LAYOUT", "Rearrange panels"]];
     return `<div class="help" id="tmhelp"><p>Type in the command line and press Enter. A ticker on its own loads it. Add a code after a ticker to open a tab or a tool, e.g. <b style="min-width:0">NVDA FA</b> or <b style="min-width:0">AAPL TL</b>. Press <b style="min-width:0">/</b> or just start typing to focus the command line.</p>
       <p style="margin-top:4px"><b style="min-width:0">Panels on this screen</b></p>${pc.map(([c, l]) => `<div><b>${c}</b><span>${esc(l)}</span></div>`).join("")}

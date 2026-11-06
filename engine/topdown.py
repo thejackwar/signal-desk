@@ -464,6 +464,8 @@ def main_crypto(args, now: dt.datetime):
     alerts = new + alerts
     update_since(alerts, {t: {"1Day": f["D"]} for t, f in data.items()})
     alerts.sort(key=lambda a: (a["date"], a.get("found_at", "")), reverse=True)
+    import topdown_trades                              # paper trades on the alerts (engine/topdown_trades.py)
+    topdown_trades.update(out.parent / "topdown_trades.json", alerts, data, now, "crypto", "BTC-USD")
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(json.dumps({"generated_at": now.strftime("%Y-%m-%dT%H:%M+00:00"), "as_of": now.date().isoformat(),
                                "demo": False, "market": "crypto", "alerts": alerts}, separators=(",", ":")))
@@ -505,10 +507,10 @@ def main():
     known = {a["id"]: a for a in alerts}
     data_end = pd.Timestamp(end).tz_convert(ET)
 
-    new = []
+    new, all_frames = [], {}
     for t in tickers:
         if t in data:
-            frames = frames_from(data[t])
+            frames = all_frames[t] = frames_from(data[t])
             found = scan_ticker(t, frames, data_end, known)
             for a in found:
                 a["found_at"] = now.strftime("%Y-%m-%dT%H:%M+00:00")
@@ -523,6 +525,9 @@ def main():
     if after_close or args.demo:
         update_since(alerts, data)
     alerts.sort(key=lambda a: (a["date"], a.get("found_at", "")), reverse=True)
+    if not args.demo or args.out != str(OUT):          # paper trades on the alerts (engine/topdown_trades.py)
+        import topdown_trades
+        topdown_trades.update(out.parent / "trades.json", alerts, all_frames, now, "stocks", "SPY", tz=ET)
 
     if not new and not after_close and out.exists() and not args.demo:
         print("No change: file left as it is (no commit needed).")
