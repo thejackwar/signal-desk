@@ -377,14 +377,15 @@ def score_group(g: dict, ctx: dict) -> tuple[int, list]:
             add(-5, "Against the long-term trend (200-day)")
     mood = ctx.get("mood", {}).get("score")
     if mood is not None:
-        if long_ and mood < 25:
-            add(-6, "Market in extreme fear: longs fight the tide")
-        elif not long_ and mood < 40:
-            add(6, "Market mood is fearful: shorts go with it")
-        elif long_ and mood >= 55:
-            add(5, "Market mood supports longs")
-        elif not long_ and mood >= 60:
-            add(-6, "Market mood is greedy: shorts fight the tide")
+        if mood < 25:
+            add(-6 if long_ else -3, "Market in extreme fear: longs fight the tide" if long_
+                else "Market in extreme fear: late to short, bounces are violent")
+        elif mood < 40:
+            add(-3 if long_ else 5, "Fearful market: longs fight the tide" if long_ else "Fearful market: shorts go with it")
+        elif mood >= 75:
+            add(2 if long_ else -6, "Greedy market: longs go with it" if long_ else "Greedy market: shorts fight the tide")
+        elif mood >= 55:
+            add(5 if long_ else -3, "Market mood supports longs" if long_ else "Market mood supports longs, not shorts")
     f = ctx["flow"].get(g["t"], {})
     cmf = f.get("cmf20")
     if cmf is not None and abs(cmf) >= 0.05:
@@ -408,6 +409,15 @@ def score_group(g: dict, ctx: dict) -> tuple[int, list]:
     nm = ctx["news"].get(g["t"])
     if nm in ("bullish", "bearish"):
         add(3 if (nm == "bullish") == long_ else -3, f"News mood {nm}")
+    px = (ctx["flow"].get(g["t"]) or {}).get("px") or g.get("price")
+    if g.get("stop") and px:
+        risk = abs(g["stop"] / px - 1) * 100
+        if (g["stop"] > px) != (not long_):
+            add(-20, "Price is already past the “wrong if” level")
+        elif risk > 10:
+            add(-6, f"“Wrong if” level is {risk:.0f}% away: a lot of risk per share")
+        elif risk < 3:
+            add(3, f"Tight “wrong if” level, {risk:.1f}% away")
     ed = ctx["earn"].get(g["t"])
     if ed is not None and 0 <= ed <= 3:
         add(-15, f"Earnings in {ed} day{'s' if ed != 1 else ''}: a gap can blow through any stop")
@@ -418,7 +428,7 @@ def score_group(g: dict, ctx: dict) -> tuple[int, list]:
         add(5, "Fresh: fired at the last close")
     elif age >= 2:
         add(-5, f"Fired {age} sessions ago")
-    raw = 30 + sum(p for p, _ in why)
+    raw = 25 + sum(p for p, _ in why)
     return max(0, min(100, round(raw))), why
 
 
