@@ -48,6 +48,7 @@ Phone alerts: ntfy topics <NTFY_PREFIX>-choch (stocks) and <NTFY_PREFIX>-crypto-
 from __future__ import annotations
 
 import argparse
+import gzip
 import json
 import math
 import os
@@ -58,6 +59,7 @@ import urllib.error
 import urllib.parse
 import urllib.request
 from bisect import bisect_right
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 from zoneinfo import ZoneInfo
@@ -394,29 +396,80 @@ def to_4h(rows: list[tuple]) -> dict:
     return b
 
 
-def fetch_stocks(symbols: list[str], start: datetime, end: datetime, feed: str = "sip") -> dict[str, dict]:
+def _fetch_batch(batch: list[str], start: datetime, end: datetime, feed: str) -> dict[str, dict]:
     fmt = lambda d: d.astimezone(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+    raw: dict[str, list] = {s: [] for s in batch}
+    params = {"symbols": ",".join(s.replace("-", ".") for s in batch), "timeframe": "30Min", "start": fmt(start),
+              "end": fmt(end), "limit": "10000", "adjustment": "all", "feed": feed}
+    while True:
+        js = _get(BARS_URL, params)
+        for s, bars in (js.get("bars") or {}).items():
+            s = s.replace(".", "-")
+            rows = raw.setdefault(s, [])
+            for x in bars:
+                t = datetime.fromisoformat(x["t"].replace("Z", "+00:00")).astimezone(NY).isoformat(timespec="minutes")
+                if "09:30" <= t[11:16] < "16:00":             # regular hours only (the feed has 04:00-20:00)
+                    rows.append((t, x["o"], x["h"], x["l"], x["c"], x["v"]))
+        if not js.get("next_page_token"):
+            break
+        params["page_token"] = js["next_page_token"]
+    return {s: to_4h(sorted(rows)) for s, rows in raw.items() if rows}
+
+
+CACHE_DIR = ROOT / ".cache" / "choch"      # 4H candles kept between runs (actions/cache in choch.yml)
+
+
+def _load_cache() -> dict[str, dict]:
+    f = CACHE_DIR / f"{U.key}.json.gz"
+    try:
+        return json.loads(gzip.decompress(f.read_bytes()))
+    except Exception:
+        return {}
+
+
+def _save_cache(data: dict[str, dict]) -> None:
+    CACHE_DIR.mkdir(parents=True, exist_ok=True)
+    (CACHE_DIR / f"{U.key}.json.gz").write_bytes(gzip.compress(json.dumps(data, separators=(",", ":")).encode(), 6))
+
+
+def fetch_stocks(symbols: list[str], start: datetime, end: datetime, feed: str = "sip") -> dict[str, dict]:
+    """4H candles since `start`. Candles from earlier runs come from the cache; only the last few days (and any
+    stock not cached yet) are downloaded, 5 stocks per request, 4 requests at a time."""
+    cache = _load_cache()
+    jobs: dict[str, list[str]] = {}                 # first day to download -> stocks
+    for s in symbols:
+        b = cache.get(s)
+        if b and b["t"] and b["t"][0][:10] <= start.astimezone(NY).strftime("%Y-%m-%d"):
+            since = (date.fromisoformat(b["t"][-1][:10]) - timedelta(days=4)).isoformat()   # redo the last days
+        else:
+            since = start.astimezone(NY).strftime("%Y-%m-%d")
+            cache.pop(s, None)
+        jobs.setdefault(since, []).append(s)
+    batches = [(since, syms[i:i + 5]) for since, syms in jobs.items() for i in range(0, len(syms), 5)]
+    print(f"  stocks: {len(symbols)} ({sum(len(v) for k, v in jobs.items() if k > '2025')} from the cache), {len(batches)} downloads", flush=True)
+    done = 0
+    with ThreadPoolExecutor(4) as ex:
+        futs = {ex.submit(_fetch_batch, b, datetime.fromisoformat(since).replace(tzinfo=NY), end, feed): (since, b) for since, b in batches}
+        for fu in as_completed(futs):
+            since, b = futs[fu]
+            for s, new in fu.result().items():
+                old = cache.get(s)
+                if old:
+                    keep = sum(1 for t in old["t"] if t[:10] < since)
+                    cache[s] = {f: old[f][:keep] + new[f] for f in "tohlcv"}
+                else:
+                    cache[s] = new
+            done += 1
+            if done % 10 == 0 or done == len(batches):
+                print(f"  downloads {done}/{len(batches)}", flush=True)
+    _save_cache(cache)
+    lo = start.astimezone(NY).strftime("%Y-%m-%d")
     out = {}
-    for i in range(0, len(symbols), 10):
-        batch = symbols[i:i + 10]
-        raw: dict[str, list] = {s: [] for s in batch}
-        params = {"symbols": ",".join(s.replace("-", ".") for s in batch), "timeframe": "30Min", "start": fmt(start),
-                  "end": fmt(end), "limit": "10000", "adjustment": "all", "feed": feed}
-        while True:
-            js = _get(BARS_URL, params)
-            for s, bars in (js.get("bars") or {}).items():
-                s = s.replace(".", "-")
-                for x in bars:
-                    t = datetime.fromisoformat(x["t"].replace("Z", "+00:00")).astimezone(NY).isoformat(timespec="minutes")
-                    raw.setdefault(s, []).append((t, x["o"], x["h"], x["l"], x["c"], x["v"]))
-            if not js.get("next_page_token"):
-                break
-            params["page_token"] = js["next_page_token"]
-        for s, rows in raw.items():
-            rows.sort()
-            if rows:
-                out[s] = to_4h(rows)
-        print(f"  stocks {i + len(batch)}/{len(symbols)}", flush=True)
+    for s in symbols:
+        b = cache.get(s)
+        if b and b["t"]:
+            i = next((k for k, t in enumerate(b["t"]) if t[:10] >= lo), len(b["t"]))
+            out[s] = {f: b[f][i:] for f in "tohlcv"}
     return out
 
 

@@ -41,6 +41,12 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
+      - name: Restore the 4H candles from earlier runs (only new days are downloaded)
+        uses: actions/cache@v4
+        with:
+          path: .cache/choch
+          key: choch-bars-${{ github.run_id }}
+          restore-keys: choch-bars-
       - name: Live stocks
         if: github.event.schedule == '37 17,18 * * 1-5' || github.event.schedule == '7 20,21 * * 1-5' || (github.event_name == 'workflow_dispatch' && inputs.job == 'stocks')
         env:
