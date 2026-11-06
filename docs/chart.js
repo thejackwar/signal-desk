@@ -25,10 +25,10 @@ const COMMOD_ALIAS = { GOLD: "GC=F", XAU: "GC=F", XAUUSD: "GC=F", SILVER: "SI=F"
   BRENT: "BZ=F", GAS: "NG=F", NATGAS: "NG=F", COPPER: "HG=F", PLATINUM: "PL=F", PALLADIUM: "PA=F", CORN: "ZC=F", WHEAT: "ZW=F",
   SOY: "ZS=F", SOYBEANS: "ZS=F", COFFEE: "KC=F", COCOA: "CC=F", SUGAR: "SB=F", COTTON: "CT=F", GASOLINE: "RB=F" };
 const QUICK = ["SPY", "AAPL", "NVDA", "TSLA", "BTC-USD", "ETH-USD", "GC=F", "CL=F"];
-const TF_LIST = ["W", "D", "4H", "1H", "30m", "15m", "5m"];
-const TF_TXT = { W: "Weekly", D: "Daily", "4H": "4 hours", "1H": "1 hour", "30m": "30 min", "15m": "15 min", "5m": "5 min" };
-const STEP = { W: 7 * 86400, D: 86400, "4H": 14400, "1H": 3600, "30m": 1800, "15m": 900, "5m": 300 };
-const SHOW = { W: 160, D: 180, "4H": 180, "1H": 200, "30m": 200, "15m": 200, "5m": 220 };
+const TF_LIST = ["W", "D", "4H", "1H", "30m", "15m", "5m", "1m"];
+const TF_TXT = { W: "Weekly", D: "Daily", "4H": "4 hours", "1H": "1 hour", "30m": "30 min", "15m": "15 min", "5m": "5 min", "1m": "1 min" };
+const STEP = { W: 7 * 86400, D: 86400, "4H": 14400, "1H": 3600, "30m": 1800, "15m": 900, "5m": 300, "1m": 60 };
+const SHOW = { W: 160, D: 180, "4H": 180, "1H": 200, "30m": 200, "15m": 200, "5m": 220, "1m": 240 };
 const PREF_KEY = "signaldesk.chart";
 
 const $ = id => document.getElementById(id);
@@ -200,6 +200,31 @@ async function getData(sym) {
   }
 }
 
+// 1-minute candles, fetched only when the 1m timeframe is picked: stocks from the data server's
+// volume-profile endpoint (Alpaca SIP 1-minute bars, the last 5 sessions, regular hours, 15+ minutes old),
+// coins straight from Binance (the last 1,500 minutes).
+async function load1m(d) {
+  if (!d || d.frames["1m"]?.length || d.kind === "commodity" || d.fallback) return d;
+  if (d.kind === "crypto") {
+    const coin = d.sym.replace("-USD", ""), rows = [];
+    let end = null;
+    while (rows.length < 1500) {
+      const q = new URLSearchParams({ symbol: `${coin}USDT`, interval: "1m", limit: "1000" });
+      if (end) q.set("endTime", String(end));
+      const js = await fetchJson(`https://data-api.binance.vision/api/v3/klines?${q}`);
+      if (!Array.isArray(js) || !js.length) break;
+      rows.unshift(...js); end = js[0][0] - 1;
+      if (js.length < 1000) break;
+    }
+    d.frames["1m"] = rows.map(k => ({ time: Math.floor(k[0] / 1000), open: +k[1], high: +k[2], low: +k[3], close: +k[4], volume: +k[5] }));
+  } else {
+    const js = await fetchJson(`${API.replace(/\/$/, "")}/?vp=${encodeURIComponent(d.sym)}&range=5&hours=rth`);
+    d.frames["1m"] = L.toCandles(js.bars || []);
+  }
+  return d;
+}
+const can1m = d => d && (d.kind === "crypto" || (d.kind === "stock" && !d.fallback));
+
 async function load(sym) {
   const id = ++loadId;
   S.sym = sym;
@@ -213,6 +238,7 @@ async function load(sym) {
     const d = await getData(sym);
     if (id !== loadId) return;
     DATA = d;
+    if (S.tf === "1m" && can1m(DATA)) { try { await load1m(DATA); } catch {} if (id !== loadId) return; }
     if (!DATA.frames[S.tf]?.length) S.tf = "D";
     $("status").textContent = "";
     render(false);
@@ -307,13 +333,19 @@ $("settings").addEventListener("click", e => {
 
 function drawTfs() {
   $("tfs").innerHTML = TF_LIST.map(t => {
-    const ok = DATA && DATA.frames[t]?.length;
+    const ok = DATA && (DATA.frames[t]?.length || (t === "1m" && can1m(DATA)));
     return `<button type="button" data-tf="${t}" aria-pressed="${t === S.tf}"${ok ? "" : " disabled"} title="${TF_TXT[t]}">${t}</button>`;
   }).join("");
 }
 $("tfs").addEventListener("click", e => {
   const b = e.target.closest("[data-tf]");
   if (!b || b.disabled || b.dataset.tf === S.tf) return;
+  if (b.dataset.tf === "1m" && !DATA.frames["1m"]?.length) {
+    const d = DATA; b.disabled = true; $("hint").textContent = "Loading 1-minute candles…";
+    load1m(d).then(() => { if (DATA !== d) return; $("hint").textContent = ""; S.tf = "1m"; writeHash(); render(false); liveStart(); })
+      .catch(err => { $("hint").textContent = `1-minute candles didn't load: ${err.message || err}`; b.disabled = false; });
+    return;
+  }
   S.tf = b.dataset.tf; writeHash(); render(false); if (DATA?.kind === "crypto") liveStart();
 });
 
@@ -738,7 +770,7 @@ function render(keepRange) {
 // IEX price from the data server every 15 seconds in US hours, applied to the last candle of every
 // timeframe (a new candle opens when its period starts); the full delayed data is reloaded every
 // 5 minutes so intraday candles stay complete. Commodities: daily data only, nothing live.
-const KL = { W: "1w", D: "1d", "4H": "4h", "1H": "1h", "30m": "30m", "15m": "15m", "5m": "5m" };
+const KL = { W: "1w", D: "1d", "4H": "4h", "1H": "1h", "30m": "30m", "15m": "15m", "5m": "5m", "1m": "1m" };
 let LIVE = null;                 // {kind, stop(), at: last update ms}
 const nyNow = () => {
   const p = {};
@@ -819,7 +851,11 @@ function liveStart() {
   // every 5 minutes in US hours: the full (15-minute delayed) candles, so the intraday ones fill in
   const refresh = async () => {
     if (dead || document.hidden || !usOpen(nyNow()) || STEP[S.tf] >= 86400) return;
-    try { const d = await getData(sym); if (!dead && DATA?.sym === sym && !d.fallback) { DATA = d; render(true); tick(); } } catch {}
+    try {
+      const d = await getData(sym);
+      if (S.tf === "1m") await load1m(d).catch(() => { d.frames["1m"] = DATA?.frames["1m"]; });
+      if (!dead && DATA?.sym === sym && !d.fallback) { DATA = d; render(true); tick(); }
+    } catch {}
   };
   LIVE = { kind: "stock", at: 0, stop() { dead = true; clearInterval(timer); clearInterval(reload); } };
   timer = setInterval(tick, 15000); reload = setInterval(refresh, 300000);
@@ -930,7 +966,9 @@ $("pick").addEventListener("submit", e => {
   $("sym").blur(); load(s);
 });
 let rzT; if (EMBED) addEventListener("resize", () => { clearTimeout(rzT); rzT = setTimeout(() => DATA && render(true), 150); });
-window.addEventListener("hashchange", () => { const old = S.sym, oldTf = S.tf; readHash(); if (S.sym !== old) load(S.sym); else if (S.tf !== oldTf && DATA) { render(false); if (DATA.kind === "crypto") liveStart(); } });
+window.addEventListener("hashchange", () => { const old = S.sym, oldTf = S.tf; readHash(); if (S.sym !== old) load(S.sym); else if (S.tf !== oldTf && DATA) {
+  if (S.tf === "1m" && !DATA.frames["1m"]?.length) { if (!can1m(DATA)) { S.tf = oldTf; writeHash(); return; } load1m(DATA).then(() => { render(false); liveStart(); }).catch(() => { S.tf = oldTf; writeHash(); }); return; }
+  render(false); if (DATA.kind === "crypto") liveStart(); } });
 readHash();
 drawToolbar();
 drawPicker();
