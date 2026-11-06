@@ -7746,7 +7746,7 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
   // evening scan. Stocks only. Dark pool files come from engine/darkpool.py, max pain from engine/maxpain.py.
   function tmLoadFlow() {
     if (S.market !== "stocks") return null;
-    if (S.fl !== undefined && Date.now() - (S.flAt || 0) < 4 * 6e4) return S.fl;
+    if (S.fl !== undefined && Date.now() - (S.flAt || 0) < 2 * 6e4) return S.fl;
     const first = S.fl === undefined; if (first) S.fl = null;
     S.flAt = Date.now();
     opt("data/terminal/flow.json").then(d => {

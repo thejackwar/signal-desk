@@ -542,6 +542,8 @@ def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--demo", action="store_true")
     ap.add_argument("--no-options", action="store_true")
+    ap.add_argument("--fast", action="store_true",
+                    help="skip the options download and keep the last options figures (quick refresh between full runs)")
     args = ap.parse_args()
     global DATA
     now = datetime.now(timezone.utc)
@@ -559,7 +561,7 @@ def main() -> None:
             intra.pop(k, None)
         spots = {s: float(df["close"].dropna().iloc[-1]) for s, df in daily.items() if df is not None and len(df.dropna())}
         chains = {}
-        if not args.no_options and os.environ.get("ALPACA_KEY_ID"):
+        if not args.no_options and not args.fast and os.environ.get("ALPACA_KEY_ID"):
             print("Options…")
             chains = fetch_options(syms, spots, now.astimezone(NY).date())
     today = now.astimezone(NY).date()
@@ -567,6 +569,7 @@ def main() -> None:
 
     # ---------------------------------------------------------------- per stock
     hist = load(out_dir / "flow_hist.json", {}) or {}
+    prev = load(out_dir / "flow.json", {}) or {}
     flow, opts, stocks_ctx = {}, {}, {}
     ups = downs = 0
     for s in syms:
@@ -593,6 +596,10 @@ def main() -> None:
             hist[s] = h[-40:]
             # a running daily series for the page: [date, calls, puts]
             o["days"] = hist[s][-10:]
+
+    options_at = now.strftime("%Y-%m-%dT%H:%MZ") if opts else None
+    if not opts and prev.get("options"):          # quick run: keep the last full run's options
+        opts, options_at = prev["options"], prev.get("options_at") or prev.get("generated_at")
 
     # ---------------------------------------------------------------- market mood
     def last_chg(df):
@@ -661,7 +668,7 @@ def main() -> None:
         g.pop("ids", None)
 
     res = {"generated_at": now.strftime("%Y-%m-%dT%H:%MZ"), "session": today.isoformat(), "progress": r(prog, 2),
-           "demo": bool(args.demo), "mood": mood, "flow": flow, "options": opts,
+           "demo": bool(args.demo), "mood": mood, "flow": flow, "options": opts, "options_at": options_at,
            "focus": {"min": FOCUS_MIN, "max": FOCUS_MAX, "watch": WATCH_MIN, "counts": counts, "alerts_in": raw_n,
                      "sessions": LOOKBACK, "items": keep}}
     write_json(out_dir / "flow.json", res)
