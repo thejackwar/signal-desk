@@ -7475,7 +7475,7 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
   const tmPx = t => tmLiveQ(t)?.[0] ?? S.stockBy[t]?.price;
   function tmLiveApply() {
     const L1 = S.lq?.[S.market], b = document.getElementById("tmlive");
-    if (b) b.innerHTML = L1?.q ? `<span class="on">● LIVE</span> ${esc(new Date(L1.at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }))}` : `<span>Last close ${S.stocks?.as_of ? esc(fmtDate(S.stocks.as_of, { day: "numeric", month: "short" })) : ""}</span>`;
+    if (b) b.innerHTML = L1?.q ? `<span class="on">● LIVE</span> ${esc(new Date(L1.at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }))}` : `<span>${isCrypto() ? "Last candle" : "Last close"} ${S.stocks?.as_of ? esc(fmtDate(S.stocks.as_of, { day: "numeric", month: "short" })) : ""}</span>`;
     if (!L1?.q) return;
     document.querySelectorAll(".tm [data-lp]").forEach(el => { const q = L1.q[el.dataset.lp]; if (q) el.textContent = money(q[0]); });
     document.querySelectorAll(".tm [data-lc]").forEach(el => { const q = L1.q[el.dataset.lc]; if (q && q[2] != null) el.innerHTML = tmPct(q[2], +el.dataset.dp || 1); });

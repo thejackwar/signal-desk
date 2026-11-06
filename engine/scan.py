@@ -78,6 +78,24 @@ def load_tickers() -> list[str]:
     return [x.strip() for x in lines if x.strip() and not x.startswith("#")]
 
 
+def wait_for_yesterday(tickers: list[str], data: dict, tries: int = 6, pause: int = 600) -> dict:
+    """Crypto: the daily scan runs just after midnight UTC, when Yahoo may not have yesterday's
+    candle in yet. Wait and download again (up to an hour) rather than scan a day behind."""
+    import time
+    want = (pd.Timestamp.now(tz="UTC").normalize() - pd.Timedelta(days=1)).strftime("%Y-%m-%d")
+    last = lambda d: max(f"{df.index[-1]:%Y-%m-%d}" for df in d.values()) if d else ""
+    for i in range(tries):
+        if last(data) >= want:
+            break
+        print(f"Latest crypto candle is {last(data) or 'none'}, waiting for {want} ({i + 1}/{tries})")
+        time.sleep(pause)
+        data = fetch_real(tickers) or data
+    else:
+        if last(data) < want:
+            print(f"::warning::Crypto data still ends on {last(data)}, not {want}; scanning what there is")
+    return data
+
+
 def fetch_real(tickers: list[str], period: str = "2y", keep_open_candle: bool = False) -> dict[str, pd.DataFrame]:
     import yfinance as yf
     raw = yf.download(tickers, period=period, interval="1d", group_by="ticker",
@@ -85,7 +103,11 @@ def fetch_real(tickers: list[str], period: str = "2y", keep_open_candle: bool = 
     data = {}
     for t in tickers:
         try:
-            df = raw[t].rename(columns=str.lower)[["open", "high", "low", "close", "volume"]].dropna()
+            df = raw[t].rename(columns=str.lower)[["open", "high", "low", "close", "volume"]]
+            # only a missing price drops a day: Yahoo often leaves the volume of a just-closed
+            # crypto candle blank for a while after midnight, and that used to cost a whole day
+            df = df.dropna(subset=["open", "high", "low", "close"])
+            df["volume"] = df["volume"].fillna(0)
         except KeyError:
             continue
         if MARKET == "crypto" and not keep_open_candle:
@@ -525,6 +547,8 @@ def main():
 
     tickers = load_tickers()
     data = fetch_demo() if args.demo else fetch_real(tickers)
+    if MARKET == "crypto" and not args.demo:
+        data = wait_for_yesterday(tickers, data)
     print(f"Loaded {len(data)} tickers")
     if not data:
         sys.exit("No price data downloaded; leaving the previous alerts untouched.")
