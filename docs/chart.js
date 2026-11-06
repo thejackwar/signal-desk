@@ -218,7 +218,8 @@ async function load1m(d) {
     }
     d.frames["1m"] = rows.map(k => ({ time: Math.floor(k[0] / 1000), open: +k[1], high: +k[2], low: +k[3], close: +k[4], volume: +k[5] }));
   } else {
-    const js = await fetchJson(`${API.replace(/\/$/, "")}/?vp=${encodeURIComponent(d.sym)}&range=5&hours=rth`);
+    const js = await fetchJson(`${API.replace(/\/$/, "")}/?vp=${encodeURIComponent(d.sym)}&range=5&hours=rth`)
+      .catch(e => { throw /No ticker/.test(e.message) ? new Error("the data server needs updating (paste worker/trendlines-worker.js into Cloudflare again)") : e; });
     d.frames["1m"] = L.toCandles(js.bars || []);
   }
   return d;
