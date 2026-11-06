@@ -242,6 +242,33 @@
       "settings": "Dip: a close at least 5% below the highest close of the last 20 sessions (today included). Exit: +10% take profit, checked against each day's high, or after 60 sessions. New dips in a stock already held are ignored. Try other values in the Strategy Lab."
     },
     {
+      "id": "trend_pullback",
+      "name": "Trend Pullback",
+      "category": "Mean reversion",
+      "level": "Intermediate",
+      "buys_only": true,
+      "markets": [
+        "stocks"
+      ],
+      "long_only": true,
+      "tagline": "Buys a short, sharp pullback in a stock that is still in an uptrend, and sells the bounce a few days later.",
+      "how": [
+        "Mean reversion is the idea that a price stretched far from its average tends to drift back. This rule only uses it where it has worked best: short pullbacks inside a long uptrend. It looks at two things every close: whether the stock is above its 200-day average (the trend is up), and the 2-day RSI, a very fast oscillator that drops near zero after two or three down days.",
+        "When the stock is above its 200-day average and the 2-day RSI closes below 10, it alerts a buy. It then sells on the first of three things: a close above the 5-day average (the bounce has come), the 2-day RSI closing above 70, or 10 sessions after the buy (the bounce didn't come). The sell is an alert of its own; it never opens a short. While it holds a stock it ignores new buy signals in it."
+      ],
+      "bullish": "Buy: the stock closes above its 200-day average and its 2-day RSI closes below 10.",
+      "bearish": "Sell: the first close above the 5-day average, a 2-day RSI above 70, or 10 sessions after the buy.",
+      "why": "Over a few days, big stocks tend to give back part of a sharp move: forced sellers, overreactions to news and short-term traders taking profits push the price below where longer-term buyers step in. Requiring an uptrend keeps it out of stocks in real trouble, where a pullback is often the start of a bigger fall. Trades are short, so the money is free most of the time and the win rate is usually high.",
+      "watch_out": [
+        "Wins are small and frequent, losses are rarer but bigger. A pullback that turns into a crash (2020, a bad earnings report) can take back weeks of wins, and the rule has no stop loss before the 10-day limit.",
+        "It trades a lot. Costs and taxes matter much more than for a slow trend rule: look at the after-cost and after-tax results in the Strategy Lab.",
+        "Strong trending markets give few pullbacks to buy, and in a bear market the 200-day filter keeps it mostly in cash, so it can lag simply holding for long stretches.",
+        "The test uses today's S&P 100, so companies that fell and left the index are missing, which flatters any dip-buying rule."
+      ],
+      "settings": "RSI 2 (Wilder smoothing) below 10, close above the 200-day simple average. Exit: close above the 5-day simple average, RSI 2 above 70, or 10 sessions after the buy, whichever first. Daily closes, buy and sell at the close of the alert day. Try other values in the Strategy Lab.",
+      "exit_text": "Each trade is bought at the buy alert's close and sold at its own sell alert: a close above the 5-day average, a 2-day RSI above 70, or 10 sessions after the buy."
+    },
+    {
       "id": "double_top_bottom",
       "name": "Double Top / Bottom",
       "category": "Chart pattern",

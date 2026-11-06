@@ -60,7 +60,7 @@ FOCUS_MAX, WATCH_MAX = 8, 15          # at most this many per tier: the point is
 # strategies that are variants of one idea count once when they agree
 FAMILY = {"deck_live": "deck", "deck_ma50": "deck", "deck_v6": "deck", "deck_v8": "deck",
           "donchian": "breakout", "breakout_bot": "breakout", "volume_breakout": "breakout", "value_breakout": "breakout",
-          "back_to_value": "value", "buy_the_dip": "dip", "rsi": "meanrev", "bollinger": "meanrev"}
+          "back_to_value": "value", "buy_the_dip": "dip", "trend_pullback": "meanrev", "rsi": "meanrev", "bollinger": "meanrev"}
 LOOKBACK = 3                          # sessions of confirmed alerts considered
 BAND = 0.25                           # option strikes within +-25% of the price
 

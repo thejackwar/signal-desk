@@ -46,6 +46,10 @@ OUT = ROOT / "docs" / "data" / "backtest.json"
 HORIZONS = (5, 20, 60)
 HOLD_DAYS = 20
 TREND = {"ma200", "golden_cross", "donchian", "supertrend", "relative_strength"}   # hold until the opposite alert
+# buys only, with sell alerts of their own (StrategyResult.exits): a bearish alert closes the buy and
+# opens no short, so they hold until it like the trend strategies, and long + short is the long account
+SELL_ALERTS = {"trend_pullback"}
+TREND = TREND | SELL_ALERTS
 # strategies with their own exit: a take profit (checked on each day's high, like the Strategy Lab's
 # riskHit) and a time limit instead of HOLD_DAYS
 EXITS = {"buy_the_dip": {"tp": DIP_TP, "hold": DIP_HOLD}}
@@ -354,6 +358,8 @@ def run(data: dict[str, pd.DataFrame]) -> dict:
                 held_own, taken, fills = own_exit_positions(sig, c, hi, lo, hold, tp)
             for i in np.flatnonzero(sig):
                 side = int(sig[i])
+                if sid in SELL_ALERTS and side < 0:
+                    continue                  # a sell: it closed the buy before it, it isn't a trade or a call
                 # every alert is a trade: in at the alert's close, out on the opposite alert
                 # (trend strategies) or after HOLD_DAYS sessions / an opposite alert (the rest)
                 opp = np.flatnonzero(sig[i + 1:] == -side)
@@ -401,13 +407,15 @@ def run(data: dict[str, pd.DataFrame]) -> dict:
                     side, exit_at = int(sig[i]), (n if sid in TREND else i + hold)
                 if i < exit_at:
                     held_ls[i] = side
-            if tp:
+            if tp or sid in SELL_ALERTS:
                 held_ls = held   # strategies with their own exit only buy, so long + short is the long account
             pos_ls.loc[df.index, t] = held_ls
 
         sig_df = pd.DataFrame(rows)
         result = {"rule": BOT_RULES[sid] if own is not None else (f"Buy on an alert, sell at +{tp * 100:.0f}% or after {hold} sessions, whichever comes first"
                            if tp else
+                           "Buy on a buy alert, sell on the strategy's own sell alert"
+                           if sid in SELL_ALERTS else
                            "Buy on a bullish alert, sell on the next bearish alert"
                            if sid in TREND else
                            f"Buy on a bullish alert, sell after {HOLD_DAYS} sessions or on a bearish alert")}

@@ -2822,6 +2822,7 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
     if (!a.stop_why) return "";
     const bull = a.side === "bullish", now = S.stockBy[a.ticker]?.price;
     if (a.stop == null && a.strategy === "buy_the_dip") return `<div class="card wrongif"><h3>Wrong if</h3><p>No price level: this strategy has no stop loss. It sells at +10% or after 60 sessions, whichever comes first, so a dip that keeps falling is only sold at the time limit.</p></div>`;
+    if (a.stop == null && a.strategy === "trend_pullback" && !a.exit) return `<div class="card wrongif"><h3>Wrong if</h3><p>No price level: this strategy has no stop loss. It sells on the first close above the 5-day average, a 2-day RSI above 70 or after 10 sessions, so a pullback that keeps falling is only sold at the 10-day limit.</p></div>`;
     if (a.exit) return `<div class="card wrongif"><h3>No “wrong if” level</h3><p>This alert closes a trade: ${a.side === "bearish" ? "it sells, it doesn't open a short" : "it covers a short, it doesn't open a long"}. The next ${a.side === "bearish" ? "buy" : "short"} needs a new alert.</p></div>`;
     if (a.stop == null && S.byId[a.strategy]?.own_trades) return `<div class="card wrongif"><h3>Wrong if</h3><p>No price level: ${esc(a.stop_why)}.</p></div>`;
     if (a.stop == null) return `<div class="card wrongif"><h3>Wrong if</h3><p>The alert is cancelled ${esc(a.stop_why)}. It has no single price level, because it compares the price with the market.</p></div>`;
@@ -4004,7 +4005,7 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
   // and stops, filters, which stocks, the account, costs, taxes and the period. Results, every trade,
   // a per-stock view, an optimizer with an out-of-sample check, and saved setups to compare.
   const LAB = { mod: null, data: {}, sub: {}, timer: 0, opt: null, optRun: 0, rob: null, robRun: 0 };
-  const LAB_IND = { ma200: "ma", golden_cross: "cross", bollinger: "bollinger", rsi: "rsi", macd: "macd", donchian: "donchian", supertrend: "supertrend", buy_the_dip: "dip" };
+  const LAB_IND = { ma200: "ma", golden_cross: "cross", bollinger: "bollinger", rsi: "rsi", macd: "macd", donchian: "donchian", supertrend: "supertrend", buy_the_dip: "dip", trend_pullback: "pullback" };
   // every other strategy has the same id in the Lab (docs/lab.js)
   ["volume_breakout", "back_to_value", "value_breakout", "relative_strength", "double_top_bottom", "head_shoulders", "triangle", "deck_live", "deck_v6", "deck_ma50", "deck_v8",
    "pattern_trader", "breakout_bot", "btc50_f1", "btc50_touch_f1", "btc50_touch_f2", "btc50_touch", "btc50_ma", "btc50_maonly", "btc50_lhonly",
@@ -6936,6 +6937,11 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
       <polyline class="lv" points="10,80 30,80 30,72 50,72 50,64 80,64 80,57 100,57 100,52 230,52"/>
       <polyline class="p" points="10,70 30,62 50,52 65,48 80,42 100,28 115,34 128,42 140,49 150,58 162,62 175,54 190,44 205,38 218,32 230,28"/>
       <circle class="mk" cx="150" cy="58" r="5"/>` },
+    trend_pullback: { legend: [["p", "Price"], ["i1", "200-day average"], ["i2", "5-day average"]], svg: `
+      <polyline class="i1" points="10,84 230,56"/>
+      <polyline class="i2" points="10,72 30,66 50,60 70,54 90,48 110,43 122,44 134,49 144,55 156,55 170,50 190,42 210,37 230,33"/>
+      <polyline class="p" points="10,70 30,62 50,58 70,50 90,44 110,40 122,48 134,56 144,60 156,50 170,44 190,38 210,34 230,30"/>
+      <circle class="mk" cx="144" cy="60" r="5"/><circle class="mk" cx="156" cy="50" r="4"/>` },
     back_to_value: { legend: [["p", "Price"], ["lv", "Value area (high / low)"], ["i1", "Point of control"]], svg: `
       <line class="lv" x1="10" y1="34" x2="230" y2="34"/><line class="lv" x1="10" y1="80" x2="230" y2="80"/>
       <line class="i1" x1="10" y1="56" x2="230" y2="56"/>
@@ -6991,6 +6997,7 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
     value_breakout: { likes: "The start of a move to a new price range", hates: "Sideways markets, where price keeps falling back into value", speed: "Medium", pair: "Like Donchian, but the line is the edge of where most volume traded, not the highest high." },
     volume_breakout: { likes: "Breakouts that big buyers are behind", hates: "Earnings and index-rebalancing days, when volume is high for other reasons", speed: "Medium", pair: "A stricter Donchian: if both alert on the same day, the volume check passed." },
     buy_the_dip: { likes: "Rising markets with short, sharp pullbacks in big companies", hates: "Real declines, where the first 5% drop is only the start", speed: "Medium", pair: "The classic version only buys dips in stocks still above their 200-day average; dips in stocks already in a downtrend fail more often." },
+    trend_pullback: { likes: "Steady uptrends with short, sharp 2–3 day pullbacks", hates: "Crashes, where an oversold stock keeps falling past the 10-day limit", speed: "Fast", pair: "A faster, stricter Buy the dip: only in an uptrend, and out within days. The Strategy Lab's VIX filter is worth a try: pullbacks bought when fear is high have often bounced harder." },
     relative_strength: { likes: "Markets with clear leaders, like a sector rotation", hates: "Sudden reversals in what's leading (the laggards bounce hardest)", speed: "Slow", pair: "Leaders above their 200-day average are the classic combination; a stock that only leads because it falls less than a falling market is weaker." },
     double_top_bottom: { likes: "Turning points after a long move", hates: "Breaks that slip straight back through the neckline", speed: "Medium", pair: "Traders often look for heavier volume on the neckline break as extra confirmation." },
     head_shoulders: { likes: "Tops after a long uptrend (and bottoms after a downtrend, inverted)", hates: "Messy charts: many look-alike shapes never complete", speed: "Slow", pair: "Only counts once the neckline breaks; before that it's just three peaks." },

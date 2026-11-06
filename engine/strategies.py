@@ -371,6 +371,47 @@ def buy_the_dip(df: pd.DataFrame, drop: float = 0.05, n: int = 20) -> StrategyRe
     ])
 
 
+def trend_pullback(df: pd.DataFrame, n: int = 2, low: float = 10, ma: int = 200, exit_ma: int = 5,
+                   high: float = 70, max_days: int = 10) -> StrategyResult:
+    """Mean reversion inside an uptrend. Buys when the n-day RSI closes below `low` while the price is
+    above its `ma`-day average (ma=0: no trend filter). Sells at the first close above the `exit_ma`-day
+    average, an RSI close above `high`, or `max_days` sessions after the buy, whichever comes first.
+    Buys only: the sell is an alert of its own (in `exits`), it closes the buy and opens no short.
+    Same loop as the "pullback" indicator in docs/lab.js."""
+    c = df["close"]
+    r = rsi(c, n).values
+    m = sma(c, ma).values if ma else None
+    x = sma(c, exit_ma).values
+    cv = c.values
+    sig = np.zeros(len(c), dtype=int)
+    notes, stops, exits = {}, {}, set()
+    entry = -1
+    for i in range(len(c)):
+        if entry < 0:
+            if r[i] < low and (m is None or cv[i] > m[i]):
+                sig[i], entry = 1, i
+                trend = f", above its {ma}-day average ({P(m[i])})" if m is not None else ""
+                notes[i] = f"RSI({n}) closed at {r[i]:.1f}, below {low:g}{trend}"
+                stops[i] = (None, f"no price level: it sells on the first close above the {exit_ma}-day average, "
+                                  f"an RSI({n}) above {high:g} or after {max_days} sessions")
+        elif cv[i] > x[i] or r[i] > high or i - entry >= max_days:
+            sig[i] = -1
+            exits.add(i)
+            why = (f"closed above the {exit_ma}-day average ({P(x[i])})" if cv[i] > x[i]
+                   else f"RSI({n}) closed at {r[i]:.1f}, above {high:g}" if r[i] > high
+                   else f"{max_days} sessions after the buy")
+            notes[i] = f"Sell: {why} ({(cv[i] / cv[entry] - 1) * 100:+.1f}% from the buy)"
+            stops[i] = (None, "a sell alert: it closes the trade, it doesn't open one")
+            entry = -1
+    s = pd.Series(sig, index=df.index)
+    overlays = [{"name": f"{exit_ma}-day average", "values": _vals(pd.Series(x)), "style": "muted"}]
+    if m is not None:
+        overlays.insert(0, {"name": f"{ma}-day average", "values": _vals(pd.Series(m)), "style": "accent"})
+    panel = {"name": f"RSI({n})", "lines": [{"name": f"RSI({n})", "values": _vals(pd.Series(r)), "style": "accent"}],
+             "levels": [low, high], "min": 0, "max": 100}
+    return StrategyResult(s, notes, overlays, panel, stops=stops, exits=exits)
+
+
 # ----------------------------------------------------------- volume profile
 # A rolling volume profile from daily bars: each day's volume is spread evenly over its high-low range,
 # on `rows` equal price rows between the window's lowest low and highest high. Same loops as
@@ -670,6 +711,7 @@ REGISTRY = {
     "volume_breakout": volume_breakout,
     "relative_strength": relative_strength,
     "buy_the_dip": buy_the_dip,
+    "trend_pullback": trend_pullback,
     "back_to_value": back_to_value,
     "value_breakout": value_breakout,
     "double_top_bottom": double_top_bottom,
@@ -682,6 +724,7 @@ from bot_strategies import BOT_MARKETS, BOT_REGISTRY  # noqa: E402  (imports fro
 
 REGISTRY.update(BOT_REGISTRY)
 MARKETS_OF = dict(BOT_MARKETS)   # strategy id -> the markets it runs in (missing = every market)
+MARKETS_OF["trend_pullback"] = ("stocks",)
 
 
 def for_market(sid: str, market: str) -> bool:

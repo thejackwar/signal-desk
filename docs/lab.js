@@ -61,6 +61,17 @@ export const INDICATORS = {
     params: [{ k: "drop", label: "Buy after a drop of", min: 1, max: 30, step: 0.5, def: 5, unit: "%" },
              { k: "n", label: "From the highest close of the last", min: 5, max: 120, step: 1, def: 20, unit: "days" }],
   },
+  pullback: {
+    name: "Trend pullback", base: "trend_pullback", exit: "opposite", buysOnly: true,
+    about: "Mean reversion inside an uptrend: buys a stock above its long average when a short RSI says it's oversold, and sells on the bounce: the first close above a short average, the RSI back above a level, or after a set number of days. It never sells on a loss by itself before that day limit; add a stop loss if you want one.",
+    exitLabels: { opposite: "On its sell signal", hold: "After a time limit" },
+    params: [{ k: "n", label: "RSI length", min: 2, max: 10, step: 1, def: 2, unit: "days" },
+             { k: "low", label: "Buy when RSI is below", min: 1, max: 40, step: 1, def: 10, unit: "" },
+             { k: "ma", label: "Only above the average of (0 = off)", min: 0, max: 300, step: 10, def: 200, unit: "days" },
+             { k: "xma", label: "Sell on a close above the average of", min: 2, max: 50, step: 1, def: 5, unit: "days" },
+             { k: "high", label: "or when RSI is above", min: 50, max: 99, step: 1, def: 70, unit: "" },
+             { k: "days", label: "or after", min: 1, max: 60, step: 1, def: 10, unit: "days" }],
+  },
   avg_down: {
     name: "Average down", base: "avg_down", exit: "opposite", hold: 60, tp: 10, buysOnly: true, avg: true,
     about: "Buys a first slice when a stock closes a set % below its highest close of the last N days, buys another equal slice every time it falls a further step below the last buy (up to a maximum number of buys), and sells everything at the take profit above the average cost. Each position gets the same money, split into equal slices. It never sells on a loss by itself, so losing positions wait until they recover: add a stop loss or a time limit to free that money.",
@@ -152,7 +163,7 @@ const IND_CAT = {
   volume_breakout: "Volume", back_to_value: "Volume", value_breakout: "Volume",
   bollinger: "Volatility",
   donchian: "Support & resistance",
-  dip: "Dip buying", avg_down: "Dip buying",
+  dip: "Dip buying", avg_down: "Dip buying", pullback: "Dip buying",
 };
 for (const [k, I] of Object.entries(INDICATORS)) { if (!I.base) I.base = k; I.group = IND_CAT[k] || I.group || "Trend"; }
 export const GROUPS = ["Build your own", "Trend", "Momentum", "Volume", "Volatility", "Support & resistance", "Dip buying", "Chart patterns", "Trading-bot strategies", "50-day rule (crypto)", "News"];
@@ -457,6 +468,15 @@ export function signals(T, cfg) {
       const now = c[i] / top[i] - 1 <= -d + eps, before = i > 0 && c[i - 1] / top[i - 1] - 1 <= -d + eps;
       if (now && !before) sig[i] = 1;
     }
+  } else if (cfg.ind === "pullback") {
+    // same loop as trend_pullback() in engine/strategies.py: buy on RSI < low above the trend average,
+    // sell (-1, closes the buy, opens nothing) on a close above the short average, RSI > high or after `days`
+    const r = rsi(c, p.n), m = p.ma ? sma(c, p.ma) : null, x = sma(c, p.xma);
+    let e = -1;
+    for (let i = 0; i < n; i++) {
+      if (e < 0) { if (r[i] < p.low && (!m || c[i] > m[i])) { sig[i] = 1; e = i; } }
+      else if (c[i] > x[i] || r[i] > p.high || i - e >= p.days) { sig[i] = -1; e = -1; }
+    }
   } else if (cfg.ind === "volume_breakout") {
     // volume_breakout() in engine/strategies.py: a Donchian breakout on volume >= mult x its n-day average
     const v = T.v; if (!v) return sig;
@@ -691,7 +711,8 @@ export function run(data, cfg, fromIdx = 0) {
       if (once && s === 1 && heldL && !stoppedL && i < exitL) s = 0;   // already holding it
       if (once && s === 1) taken[i] = 1;
       if (s) {
-        if (ok) { side = s; exitLS = trend ? n : i + H; }
+        if (once && s < 0) { if (side > 0 && i < exitLS) exitLS = i; }   // a buy-only strategy's sell alert: closes, opens no short
+        else if (ok) { side = s; exitLS = trend ? n : i + H; }
         else if (side === -s && i < exitLS) exitLS = i;
       }
       if (s === -1) exitL = -1; else if (s === 1 && ok) exitL = trend ? n : i + H;

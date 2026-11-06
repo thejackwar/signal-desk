@@ -65,7 +65,7 @@ SHAPES[("golden_cross", -1)] = flip(SHAPES[("golden_cross", 1)])
 SHAPES[("triangle", -1)] = [(0, 114), (12, 100), (24, 112), (36, 100), (48, 108), (60, 100),
                             (71, 105), (82, 100), (92, 102.5), (100, 95), (118, 90)]
 
-WINDOW = {"ma200": 150, "golden_cross": 150}  # bars of history before the signal
+WINDOW = {"ma200": 150, "golden_cross": 150, "trend_pullback": 80}  # bars of history before the signal
 
 
 def with_volume(df, seed):
@@ -107,6 +107,8 @@ def find_example(sid, side, max_tries=4000, entries_only=False):
             start = max(0, i - back)
             end = min(len(df), i + AFTER + 1)
             others = np.count_nonzero(sig[start:end]) - 1
+            if sid == "trend_pullback":            # its sell alerts belong to the example, they aren't other calls
+                others -= sum(1 for k in res.exits if start <= k < end)
             move = df["close"].iloc[i + AFTER] / df["close"].iloc[i] - 1
             if shaped:
                 good = others == 0 and side * move > 0.02
