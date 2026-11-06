@@ -1671,6 +1671,9 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
 .tm .tmcmd span { font: 700 13px var(--font-code); color: var(--tc); }
 .tm .tmcmd input { flex: 1; min-width: 0; background: none; border: 0; outline: 0; color: var(--fg); font: 500 14px var(--font-code); padding: 9px 0; text-transform: uppercase; }
 .tm .tmcmd input::placeholder { text-transform: none; color: var(--faint); }
+.tm .tmgo { flex: none; font: 700 12px var(--font-code); letter-spacing: .04em; color: var(--on-accent); background: var(--tc); border-radius: 6px; padding: 6px 12px; margin-right: -4px; }
+@media (min-width: 1000px) { .tm .tmgo { display: none; } }
+@media (max-width: 999px) { .tm .tmcmd input { font-size: 16px; } }   /* under 16px iOS zooms the page on focus */
 .tm .tmcmd kbd { font: 600 11px var(--font-code); color: var(--faint); border: 1px solid var(--line); border-radius: 5px; padding: 2px 6px; }
 .tm .tmclock { display: flex; gap: 14px; font: 500 12px var(--font-code); color: var(--muted); white-space: nowrap; }
 .tm .tmclock b { color: var(--fg); font-weight: 600; }
@@ -8271,7 +8274,7 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
     const ed = S.tmEdit;
     let h = `<div class="tm">
       <div class="tmbar"><span class="tmlogo">IC<i>/</i>TERMINAL</span>
-        <form class="tmcmd" id="tmform" role="search" autocomplete="off"><span aria-hidden="true">&gt;</span><input id="tmcmd" list="tmlist" spellcheck="false" autocapitalize="characters" placeholder="Ticker or code — try NVDA, TSLA OPT, AAPL FLOW, HELP" aria-label="Command line: type a ticker or a function code"><kbd>/</kbd><datalist id="tmlist">${opts}</datalist></form>
+        <form class="tmcmd" id="tmform" role="search" autocomplete="off"><span aria-hidden="true">&gt;</span><input id="tmcmd" type="text" list="tmlist" spellcheck="false" autocomplete="off" autocorrect="off" autocapitalize="characters" enterkeyhint="go" placeholder="Ticker or code — try NVDA, TSLA OPT, AAPL FLOW, HELP" aria-label="Command line: type a ticker or a function code"><kbd>/</kbd><button type="submit" class="tmgo" aria-label="Go">Go</button><datalist id="tmlist">${opts}</datalist></form>
         <span class="tmmk">${[["stocks", "STK"], ["crypto", "CRYP"], ["commodities", "COMM"]].map(([m, c]) => `<button type="button" data-market="${m}" aria-pressed="${S.market === m}">${c}</button>`).join("")}</span>
         <span class="tmclock"><span id="tmclock">${tmClock()}</span><span class="tml" id="tmlive"></span></span>
         <button type="button" class="tmedit" data-tmedit aria-pressed="${!!ed}">${ed ? "Done" : "Layout"}</button>
@@ -8399,7 +8402,7 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
   });
   document.addEventListener("submit", e => {
     const f = e.target;
-    if (f.id === "tmform") { e.preventDefault(); tmRun(f.querySelector("#tmcmd").value); return; }
+    if (f.id === "tmform") { e.preventDefault(); const i = f.querySelector("#tmcmd"); tmRun(i.value); i.blur(); return; }
     if (f.id === "tmpxform") {
       e.preventDefault();
       const m = document.getElementById("pxmsg"), t = tmFind(f.sym.value) || f.sym.value.toUpperCase();
@@ -8408,6 +8411,10 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
         .then(r => r.json()).then(d => { if (d.error) throw new Error(d.error); if (m) { m.textContent = `Added: ${sym(t)} ${f.dir.value} ${f.level.value}.`; m.classList.remove("err"); } pxList(true); })
         .catch(err => { if (m) { m.textContent = `Couldn't add it: ${err.message}`; m.classList.add("err"); } btn.disabled = false; });
     }
+  });
+  document.addEventListener("keydown", e => {
+    if (e.target?.id !== "tmcmd" || (e.key !== "Enter" && e.keyCode !== 13) || e.isComposing) return;
+    e.preventDefault(); tmRun(e.target.value); e.target.blur();
   });
   // Bloomberg habit: start typing anywhere and it goes to the command line
   addEventListener("keydown", e => {
