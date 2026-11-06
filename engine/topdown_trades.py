@@ -90,7 +90,9 @@ def _summary(closed: list[dict]) -> dict:
             "by_side": {s: st([x for x in closed if x["side"] == s]) for s in (1, -1) if any(x["side"] == s for x in closed)}}
 
 
-def update(path: Path, alerts: list[dict], data: dict, now: dt.datetime, market: str, bench: str, tz="UTC") -> dict:
+def update(path: Path, alerts: list[dict], data: dict, now: dt.datetime, market: str, bench: str, tz="UTC",
+           only: set[str] | None = None) -> dict:
+    """only: trade just these tickers (crypto: Bitcoin only); None = every ticker."""
     global TZ
     TZ = tz
     led = json.loads(path.read_text()) if path.exists() else {}
@@ -99,8 +101,10 @@ def update(path: Path, alerts: list[dict], data: dict, now: dt.datetime, market:
     led.setdefault("start", START)
     led["rules"] = {"hold": {k: v.total_seconds() / 86400 for k, v in HOLD.items()}, "cost_per_side": COST[market], "stop_atr": STOP_ATR,
                     "bench": bench}
-    closed: list[dict] = led.get("closed", [])
-    opened: dict[str, dict] = {x["id"]: x for x in led.get("open", [])}
+    led["only"] = sorted(only) if only else None
+    keep = (lambda t: t in only) if only else (lambda t: True)
+    closed: list[dict] = [x for x in led.get("closed", []) if keep(x["t"])]
+    opened: dict[str, dict] = {x["id"]: x for x in led.get("open", []) if keep(x["t"])}
     done = {x["id"] for x in closed}
     now_u = _ts(now)
     cost = COST[market]
@@ -108,7 +112,7 @@ def update(path: Path, alerts: list[dict], data: dict, now: dt.datetime, market:
 
     # 1. new alerts since the start become open trades (entry filled below once a bar exists)
     for a in alerts:
-        if a.get("strategy") != "topdown" or a["id"] in done or a["id"] in opened:
+        if a.get("strategy") != "topdown" or a["id"] in done or a["id"] in opened or not keep(a["ticker"]):
             continue
         if not a.get("found_at") or a["found_at"][:16] < led["start"]:
             continue

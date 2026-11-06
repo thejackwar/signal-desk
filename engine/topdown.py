@@ -465,7 +465,8 @@ def main_crypto(args, now: dt.datetime):
     update_since(alerts, {t: {"1Day": f["D"]} for t, f in data.items()})
     alerts.sort(key=lambda a: (a["date"], a.get("found_at", "")), reverse=True)
     import topdown_trades                              # paper trades on the alerts (engine/topdown_trades.py)
-    topdown_trades.update(out.parent / "topdown_trades.json", alerts, data, now, "crypto", "BTC-USD")
+    topdown_trades.update(out.parent / "topdown_trades.json", alerts, data, now, "crypto", "BTC-USD",
+                          only={"BTC-USD"})            # crypto: Bitcoin only
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(json.dumps({"generated_at": now.strftime("%Y-%m-%dT%H:%M+00:00"), "as_of": now.date().isoformat(),
                                "demo": False, "market": "crypto", "alerts": alerts}, separators=(",", ":")))
