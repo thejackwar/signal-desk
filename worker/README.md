@@ -133,3 +133,17 @@ A new scheduled workflow needs a line in `SCHEDULE` too (and the `EXTERNAL_SCHED
 under its job), otherwise only GitHub's late timer starts it.
 When the token expires, the page in step 5 says "not working": make a new token (step 1) and
 replace the secret (step 3). Each start shows up in the Worker's **Logs** as `started <file>`.
+
+## Automatic deploys of the data Worker
+
+`.github/workflows/deploy-worker.yml` deploys `trendlines-worker.js` to the `trendlines` Worker on every
+change, so it never has to be pasted by hand. One-time setup:
+
+1. Cloudflare: **My Profile → API Tokens → Create Token → "Edit Cloudflare Workers" template**
+   (account: yours, zone: all zones) → Create, and copy the token.
+2. Cloudflare: copy your **Account ID** (Workers & Pages overview, right-hand side).
+3. GitHub: repository **Settings → Secrets and variables → Actions → New repository secret**, twice:
+   `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID`.
+4. GitHub: **Actions → Deploy data Worker → Run workflow** for the first deploy.
+
+The Alpaca secrets, the `PX` storage and the 5-minute timer set up above are kept.

@@ -1,0 +1,60 @@
+# Deploys worker/trendlines-worker.js to Cloudflare (the "trendlines" data Worker) whenever it changes,
+# so nobody has to paste it into the dashboard. Needs two repository secrets:
+#   CLOUDFLARE_API_TOKEN   a token from the "Edit Cloudflare Workers" template
+#   CLOUDFLARE_ACCOUNT_ID  the account ID shown on the Cloudflare dashboard (Workers & Pages, right side)
+# Keeps what was set up by hand: the Alpaca secrets (secrets survive deploys, --keep-vars keeps the rest),
+# the PX storage (looked up by its name "px") and the every-5-minutes timer for price alerts.
+name: Deploy data Worker
+
+on:
+  push:
+    branches: [main]
+    paths: [worker/trendlines-worker.js, .github/workflows/deploy-worker.yml]
+  workflow_dispatch:
+
+concurrency: deploy-worker
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+    steps:
+      - name: Check the secrets are set
+        run: |
+          if [ -z "$CLOUDFLARE_API_TOKEN" ] || [ -z "$CLOUDFLARE_ACCOUNT_ID" ]; then
+            echo "::warning::CLOUDFLARE_API_TOKEN / CLOUDFLARE_ACCOUNT_ID are not set yet: nothing deployed (see worker/README.md)."
+            echo "SKIP=1" >> "$GITHUB_ENV"
+          fi
+      - uses: actions/checkout@v4
+        if: env.SKIP != '1'
+      - uses: actions/setup-node@v4
+        if: env.SKIP != '1'
+        with: { node-version: 20 }
+      - name: Find the price-alert storage
+        if: env.SKIP != '1'
+        run: |
+          ID=$(curl -fsS -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
+            "https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/storage/kv/namespaces?per_page=100" \
+            | jq -r '.result[] | select(.title == "px" or (.title | endswith("-px"))) | .id' | head -1)
+          if [ -z "$ID" ]; then echo "::error::No KV namespace named px: deploying would cut off the price alerts, so stopping."; exit 1; fi
+          echo "PX_ID=$ID" >> "$GITHUB_ENV"
+      - name: Deploy
+        if: env.SKIP != '1'
+        run: |
+          cat > wrangler.toml <<EOF
+          name = "trendlines"
+          main = "worker/trendlines-worker.js"
+          compatibility_date = "2024-09-23"
+          workers_dev = true
+
+          [[kv_namespaces]]
+          binding = "PX"
+          id = "$PX_ID"
+
+          [triggers]
+          crons = ["*/5 * * * *"]
+          EOF
+          npx --yes wrangler@3 deploy --keep-vars
