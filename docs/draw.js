@@ -2,11 +2,15 @@
 // Lightweight Charts price pane. Every point is stored as {t: unix seconds, p: price}, so a drawing
 // stays in the same place on every timeframe. The page keeps the list per market on the device.
 //
+// Fixed range volume profile: pick two candles; the volume traded in between is spread over price rows
+// (maths shared with the Volume Profile page, vp-lib.js), with the point of control and the value area.
+//
 //   const layer = createDrawLayer({ chart, series, host, bars, step, store, getTool, setTool, ... })
 //   layer.redraw(); layer.destroy();
 //
 // Pure helpers (time <-> candle index, fib levels, position maths) are exported for the tests:
 // node tests/chart/test_draw.mjs
+import { buildProfile } from "./vp-lib.js?v=1";
 
 // ------------------------------------------------------------------ the tools
 // [id, name, points needed, group, svg path for the button]
@@ -25,6 +29,7 @@ export const TOOLS = [
   ["long", "Long position", 2, "Trades", '<rect x="4" y="4" width="16" height="9" rx="1"/><path d="M4 13h16v7H4z" opacity=".55"/>'],
   ["short", "Short position", 2, "Trades", '<path d="M4 4h16v7H4z" opacity=".55"/><rect x="4" y="11" width="16" height="9" rx="1"/>'],
   ["measure", "Measure", 2, "Trades", '<path d="M4 20 20 4"/><path d="M4 14v6h6M14 4h6v6"/>'],
+  ["frvp", "Fixed range volume profile", 2, "Volume", '<path d="M4 3v18"/><path d="M4 6h7M4 9h11M4 12h16M4 15h9M4 18h5"/>'],
   ["text", "Text note", 1, "Notes", '<path d="M5 6V4h14v2M12 4v16M9 20h6"/>'],
 ];
 export const TOOL = Object.fromEntries(TOOLS.map(t => [t[0], { id: t[0], name: t[1], n: t[2], grp: t[3], icon: t[4] }]));
@@ -64,6 +69,19 @@ export function positionStats(side, entry, target, stop) {
   return { reward, risk, rr: risk > 0 ? reward / risk : null, tpPct: (target / entry - 1) * 100 * dir, slPct: (stop / entry - 1) * 100 * dir };
 }
 
+// Fixed range volume profile over candles [from..to] (inclusive, any order): buildProfile plus the
+// buying share of each row (volume of candles that closed up). null when the range has no volume.
+export function rangeProfile(bars, from, to, rows = 24, va = 0.7) {
+  const a = Math.max(0, Math.ceil(Math.min(from, to))), b = Math.min(bars.length - 1, Math.floor(Math.max(from, to)));
+  if (b < a) return null;
+  const rowsOf = sel => bars.slice(a, b + 1).filter(sel).map(x => [x.time, x.open, x.high, x.low, x.close, x.volume]);
+  const all = rowsOf(() => true);
+  const p = buildProfile(all, { rows, va });
+  if (!p) return null;
+  const up = buildProfile(rowsOf(x => x.close >= x.open), { rows, va, lo: p.lo, hi: p.hi });
+  return { ...p, buy: up ? up.vol : new Array(rows).fill(0), from: a, to: b };
+}
+
 // old drawings ({type:"h", p} and {type:"l", a, b}) -> the current format
 export function upgrade(list) {
   return (Array.isArray(list) ? list : []).map((d, k) => {
@@ -100,6 +118,7 @@ export function createDrawLayer(o) {
 
   let list = upgrade(store.get());
   let sel = null, build = null, drag = null, sig = "", raf = 0, dead = false;
+  const vpCache = new WeakMap();   // drawing -> its profile, rebuilt only when its range or rows change
   const undo = [];
   const save = () => { store.set(list); o.onChange?.(list); };
   const snapshot = () => { undo.push(JSON.stringify(list)); if (undo.length > 60) undo.shift(); };
@@ -254,6 +273,41 @@ export function createDrawLayer(o) {
         handles = [0, 1];
         break;
       }
+      case "frvp": {
+        const la = tToL(a.t), lb = tToL(b.t), x1 = Math.min(a.x, b.x), x2 = Math.max(a.x, b.x);
+        const key = `${la.toFixed(3)}|${lb.toFixed(3)}|${d.rows || 24}`;
+        let pr = vpCache.get(d);
+        if (!pr || pr.key !== key) { pr = { key, p: rangeProfile(bars, la, lb, d.rows || 24) }; vpCache.set(d, pr); }
+        const p = pr.p, rw = Math.max(1, x2 - x1);
+        if (!p) {
+          g += `<rect class="${sys ? "" : "hitf"}" x="${x1.toFixed(1)}" y="0" width="${rw.toFixed(1)}" height="${H}" fill="#8b98a5" fill-opacity=".06" stroke="#8b98a5" stroke-dasharray="4 4"/>` + tag((x1 + x2) / 2, 30, "No volume data on this chart", "#8b98a5", "middle", true);
+          handles = [0, 1];
+          break;
+        }
+        const yTop = Y(p.hi), yBot = Y(p.lo);
+        if (yTop == null || yBot == null) return "";
+        const maxV = Math.max(...p.vol) || 1, maxW = Math.max(40, Math.min(rw, Math.max(rw * 0.45, 70)));
+        g += `<rect class="${sys ? "" : "hitf"}" x="${x1.toFixed(1)}" y="${yTop.toFixed(1)}" width="${rw.toFixed(1)}" height="${(yBot - yTop).toFixed(1)}" fill="#38bdf8" fill-opacity=".04" stroke="#38bdf8" stroke-opacity=".25"/>`;
+        const yVah = Y(p.vah), yVal = Y(p.val);
+        if (yVah != null && yVal != null) g += `<rect x="${x1.toFixed(1)}" y="${yVah.toFixed(1)}" width="${rw.toFixed(1)}" height="${(yVal - yVah).toFixed(1)}" fill="#38bdf8" fill-opacity=".07"/>`;
+        for (let i = 0; i < p.rows; i++) {
+          if (!p.vol[i]) continue;
+          const yt = Y(p.lo + (i + 1) * p.step), yb = Y(p.lo + i * p.step);
+          if (yt == null || yb == null) continue;
+          const h = Math.max(1, yb - yt - 1), w0 = p.vol[i] / maxV * maxW, wb = w0 * Math.min(1, (p.buy[i] || 0) / p.vol[i]);
+          const inVa = i >= p.vaRows[0] && i <= p.vaRows[1], op = inVa ? .75 : .35;
+          g += `<rect x="${x1.toFixed(1)}" y="${(yt + .5).toFixed(1)}" width="${wb.toFixed(1)}" height="${h.toFixed(1)}" fill="#2dd4bf" fill-opacity="${op}"/>`;
+          g += `<rect x="${(x1 + wb).toFixed(1)}" y="${(yt + .5).toFixed(1)}" width="${(w0 - wb).toFixed(1)}" height="${h.toFixed(1)}" fill="#fb923c" fill-opacity="${op}"/>`;
+        }
+        const yPoc = Y(p.poc);
+        if (yPoc != null) g += `<path d="M${x1.toFixed(1)} ${yPoc.toFixed(1)}H${x2.toFixed(1)}" stroke="#f87171" stroke-width="2"/>` + tag(x2 + 4, yPoc, `POC ${fmt(p.poc)}`, "#f87171");
+        if (yVah != null) g += `<path d="M${x1.toFixed(1)} ${yVah.toFixed(1)}H${x2.toFixed(1)}" stroke="#38bdf8" stroke-width="1" stroke-dasharray="5 4"/>` + tag(x2 + 4, yVah - (Math.abs(yVah - (yPoc ?? -99)) < 18 ? 10 : 0), `VAH ${fmt(p.vah)}`, "#38bdf8", "start", true);
+        if (yVal != null) g += `<path d="M${x1.toFixed(1)} ${yVal.toFixed(1)}H${x2.toFixed(1)}" stroke="#38bdf8" stroke-width="1" stroke-dasharray="5 4"/>` + tag(x2 + 4, yVal + (Math.abs(yVal - (yPoc ?? -99)) < 18 ? 10 : 0), `VAL ${fmt(p.val)}`, "#38bdf8", "start", true);
+        const buyShare = p.buy.reduce((s0, v) => s0 + v, 0) / p.total;
+        g += tag((x1 + x2) / 2, Math.max(12, yTop - 12), `${p.to - p.from + 1} bars · ${Math.round(buyShare * 100)}% on up candles`, "#8b98a5", "middle", true);
+        handles = [0, 1];
+        break;
+      }
       case "text": {
         const t = d.text || "Note", tw = t.length * 7.2 + 14;
         g += `<rect class="${sys ? "" : "hitf"}" x="${a.x.toFixed(1)}" y="${(a.y - 12).toFixed(1)}" width="${tw.toFixed(1)}" height="22" rx="5" fill="#0b0f14" fill-opacity=".85" stroke="${c}"/><text class="tx" x="${(a.x + 7).toFixed(1)}" y="${(a.y + 3).toFixed(1)}" fill="${c}">${esc(t)}</text>`;
@@ -291,11 +345,12 @@ export function createDrawLayer(o) {
     const d = list.find(x => x.id === sel);
     if (!d || build) { bar.hidden = true; return; }
     bar.hidden = false;
-    const isPos = d.type === "long" || d.type === "short" || d.type === "measure" || d.type === "fib";
+    const isPos = d.type === "long" || d.type === "short" || d.type === "measure" || d.type === "fib" || d.type === "frvp";
     bar.innerHTML = `<b>${esc(TOOL[d.type].name)}</b>` +
       (isPos ? "" : COLORS.map(c => `<button type="button" class="sw" data-col="${c}" style="--c:${c}" aria-pressed="${d.color === c}" aria-label="Colour"></button>`).join("") +
         `<span class="sep"></span>` + [1, 2, 3].map(w => `<button type="button" data-w="${w}" aria-pressed="${Math.round(d.w || 2) === w}" title="Thickness ${w}"><i style="height:${w}px"></i></button>`).join("") +
         `<button type="button" data-dash title="Line style">${["Solid", "Dashed", "Dotted"][d.dash || 0]}</button>`) +
+      (d.type === "frvp" ? `<span class="sep"></span><b>Rows</b>${[12, 24, 48, 96].map(r => `<button type="button" data-rows="${r}" aria-pressed="${(d.rows || 24) === r}">${r}</button>`).join("")}` : "") +
       (d.type === "text" ? `<button type="button" data-edit>Edit text</button>` : d.type === "long" || d.type === "short" ? `<button type="button" data-flip>Flip to ${d.type === "long" ? "short" : "long"}</button>` : "") +
       `<button type="button" data-clone title="Copy">Copy</button><button type="button" class="del" data-del title="Delete (Del key)">Delete</button>`;
   }
@@ -306,6 +361,7 @@ export function createDrawLayer(o) {
     snapshot();
     if (b.dataset.col) d.color = b.dataset.col;
     else if (b.dataset.w) d.w = +b.dataset.w;
+    else if (b.dataset.rows) d.rows = +b.dataset.rows;
     else if (b.dataset.dash !== undefined) d.dash = ((d.dash || 0) + 1) % 3;
     else if (b.dataset.edit !== undefined) { const t = prompt("Text", d.text || ""); if (t !== null) d.text = t.slice(0, 80); }
     else if (b.dataset.flip !== undefined) {

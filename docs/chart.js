@@ -5,7 +5,7 @@
 // Hash: #AAPL/D. Choices are remembered on the device (localStorage "signaldesk.chart").
 import * as L from "./chart-lib.js?v=1";
 import { TFS, analyze, srLevels, segments, binanceCrypto } from "./trendlines.js?v=3";
-import { createDrawLayer, TOOLS, TOOL } from "./draw.js?v=1";
+import { createDrawLayer, TOOLS, TOOL } from "./draw.js?v=2";
 
 const LW = window.LightweightCharts;
 const DEFAULT_API = "https://trendlines.guerragiacomo00.workers.dev";
