@@ -1,7 +1,7 @@
 {
  "A": [
-  "A",
-  "Other"
+  "Agilent Technologies",
+  "Health Care"
  ],
  "AAPL": [
   "Apple",
@@ -12,16 +12,16 @@
   "Health Care"
  ],
  "ABNB": [
-  "ABNB",
-  "Other"
+  "Airbnb",
+  "Consumer Discretionary"
  ],
  "ABT": [
   "Abbott Laboratories",
   "Health Care"
  ],
  "ACGL": [
-  "ACGL",
-  "Other"
+  "Arch Capital Group",
+  "Financials"
  ],
  "ACN": [
   "Accenture",
@@ -32,92 +32,92 @@
   "Technology"
  ],
  "ADI": [
-  "ADI",
-  "Other"
+  "Analog Devices",
+  "Technology"
  ],
  "ADM": [
-  "ADM",
-  "Other"
+  "Archer Daniels Midland",
+  "Consumer Staples"
  ],
  "ADP": [
-  "ADP",
-  "Other"
+  "Automatic Data Processing",
+  "Industrials"
  ],
  "ADSK": [
-  "ADSK",
-  "Other"
+  "Autodesk",
+  "Technology"
  ],
  "AEE": [
-  "AEE",
-  "Other"
+  "Ameren",
+  "Utilities"
  ],
  "AEP": [
-  "AEP",
-  "Other"
+  "American Electric Power",
+  "Utilities"
  ],
  "AES": [
   "AES",
-  "Other"
+  "Utilities"
  ],
  "AFL": [
-  "AFL",
-  "Other"
+  "Aflac",
+  "Financials"
  ],
  "AIG": [
   "American International Group",
   "Financials"
  ],
  "AIZ": [
-  "AIZ",
-  "Other"
+  "Assurant",
+  "Financials"
  ],
  "AJG": [
-  "AJG",
-  "Other"
+  "Arthur J. Gallagher &",
+  "Financials"
  ],
  "AKAM": [
-  "AKAM",
-  "Other"
+  "Akamai Technologies",
+  "Technology"
  ],
  "ALB": [
-  "ALB",
-  "Other"
+  "Albemarle",
+  "Materials"
  ],
  "ALGN": [
-  "ALGN",
-  "Other"
+  "Align Technology",
+  "Health Care"
  ],
  "ALL": [
-  "ALL",
-  "Other"
+  "Allstate",
+  "Financials"
  ],
  "ALLE": [
-  "ALLE",
-  "Other"
+  "Allegion",
+  "Industrials"
  ],
  "AMAT": [
-  "AMAT",
-  "Other"
+  "Applied Materials",
+  "Technology"
  ],
  "AMCR": [
-  "AMCR",
-  "Other"
+  "Amcor",
+  "Materials"
  ],
  "AMD": [
   "Advanced Micro Devices",
   "Technology"
  ],
  "AME": [
-  "AME",
-  "Other"
+  "Ametek",
+  "Industrials"
  ],
  "AMGN": [
   "Amgen",
   "Health Care"
  ],
  "AMP": [
-  "AMP",
-  "Other"
+  "Ameriprise Financial",
+  "Financials"
  ],
  "AMT": [
   "American Tower",
@@ -128,76 +128,76 @@
   "Consumer Discretionary"
  ],
  "ANET": [
-  "ANET",
-  "Other"
+  "Arista Networks",
+  "Technology"
  ],
  "AON": [
-  "AON",
-  "Other"
+  "Aon",
+  "Financials"
  ],
  "AOS": [
-  "AOS",
-  "Other"
+  "A. O. Smith",
+  "Industrials"
  ],
  "APA": [
   "APA",
-  "Other"
+  "Energy"
  ],
  "APD": [
-  "APD",
-  "Other"
+  "Air Products",
+  "Materials"
  ],
  "APH": [
-  "APH",
-  "Other"
+  "Amphenol",
+  "Technology"
  ],
  "APO": [
-  "APO",
-  "Other"
+  "Apollo Global Management",
+  "Financials"
  ],
  "APP": [
-  "APP",
-  "Other"
+  "AppLovin",
+  "Communication"
  ],
  "APTV": [
-  "APTV",
-  "Other"
+  "Aptiv",
+  "Consumer Discretionary"
  ],
  "ARE": [
-  "ARE",
-  "Other"
+  "Alexandria Real Estate Equities",
+  "Real Estate"
  ],
  "ARES": [
-  "ARES",
-  "Other"
+  "Ares Management",
+  "Financials"
  ],
  "ATO": [
-  "ATO",
-  "Other"
+  "Atmos Energy",
+  "Utilities"
  ],
  "AVGO": [
   "Broadcom",
   "Technology"
  ],
  "AVY": [
-  "AVY",
-  "Other"
+  "Avery Dennison",
+  "Materials"
  ],
  "AWK": [
-  "AWK",
-  "Other"
+  "American Water Works",
+  "Utilities"
  ],
  "AXON": [
-  "AXON",
-  "Other"
+  "Axon Enterprise",
+  "Industrials"
  ],
  "AXP": [
   "American Express",
   "Financials"
  ],
  "AZO": [
-  "AZO",
-  "Other"
+  "AutoZone",
+  "Consumer Discretionary"
  ],
  "BA": [
   "Boeing",
@@ -208,36 +208,40 @@
   "Financials"
  ],
  "BALL": [
-  "BALL",
-  "Other"
+  "Ball",
+  "Materials"
  ],
  "BAX": [
-  "BAX",
-  "Other"
+  "Baxter International",
+  "Health Care"
  ],
  "BBY": [
-  "BBY",
-  "Other"
+  "Best Buy",
+  "Consumer Discretionary"
  ],
  "BDX": [
-  "BDX",
-  "Other"
+  "Becton Dickinson",
+  "Health Care"
+ ],
+ "BE": [
+  "Bloom Energy",
+  "Industrials"
  ],
  "BEN": [
-  "BEN",
-  "Other"
+  "Franklin Resources",
+  "Financials"
  ],
  "BF-B": [
-  "BF.B",
-  "Other"
+  "Brown\u2013Forman",
+  "Consumer Staples"
  ],
  "BG": [
-  "BG",
-  "Other"
+  "Bunge Global",
+  "Consumer Staples"
  ],
  "BIIB": [
-  "BIIB",
-  "Other"
+  "Biogen",
+  "Health Care"
  ],
  "BK": [
   "BNY Mellon",
@@ -248,12 +252,8 @@
   "Consumer Discretionary"
  ],
  "BKR": [
-  "BKR",
-  "Other"
- ],
- "BLDR": [
-  "BLDR",
-  "Other"
+  "Baker Hughes",
+  "Energy"
  ],
  "BLK": [
   "BlackRock",
@@ -264,236 +264,232 @@
   "Health Care"
  ],
  "BNY": [
-  "BNY",
-  "Other"
+  "BNY Mellon",
+  "Financials"
  ],
  "BR": [
-  "BR",
-  "Other"
+  "Broadridge Financial Solutions",
+  "Industrials"
  ],
  "BRK-B": [
   "Berkshire Hathaway",
   "Financials"
  ],
  "BRO": [
-  "BRO",
-  "Other"
+  "Brown & Brown",
+  "Financials"
  ],
  "BSX": [
-  "BSX",
-  "Other"
+  "Boston Scientific",
+  "Health Care"
  ],
  "BX": [
-  "BX",
-  "Other"
+  "Blackstone",
+  "Financials"
  ],
  "BXP": [
   "BXP",
-  "Other"
+  "Real Estate"
  ],
  "C": [
   "Citigroup",
   "Financials"
  ],
  "CAH": [
-  "CAH",
-  "Other"
+  "Cardinal Health",
+  "Health Care"
  ],
  "CARR": [
-  "CARR",
-  "Other"
+  "Carrier Global",
+  "Industrials"
  ],
  "CASY": [
-  "CASY",
-  "Other"
+  "Casey's",
+  "Consumer Staples"
  ],
  "CAT": [
   "Caterpillar",
   "Industrials"
  ],
  "CB": [
-  "CB",
-  "Other"
+  "Chubb Limited",
+  "Financials"
  ],
  "CBOE": [
-  "CBOE",
-  "Other"
+  "Cboe Global Markets",
+  "Financials"
  ],
  "CBRE": [
-  "CBRE",
-  "Other"
+  "CBRE Group",
+  "Real Estate"
  ],
  "CCI": [
-  "CCI",
-  "Other"
+  "Crown Castle",
+  "Real Estate"
  ],
  "CCL": [
-  "CCL",
-  "Other"
+  "Carnival",
+  "Consumer Discretionary"
  ],
  "CDNS": [
-  "CDNS",
-  "Other"
+  "Cadence Design Systems",
+  "Technology"
  ],
  "CDW": [
   "CDW",
-  "Other"
+  "Technology"
  ],
  "CEG": [
-  "CEG",
-  "Other"
+  "Constellation Energy",
+  "Utilities"
  ],
  "CF": [
-  "CF",
-  "Other"
+  "CF Industries",
+  "Materials"
  ],
  "CFG": [
-  "CFG",
-  "Other"
+  "Citizens Financial Group",
+  "Financials"
  ],
  "CHD": [
-  "CHD",
-  "Other"
+  "Church & Dwight",
+  "Consumer Staples"
  ],
  "CHRW": [
-  "CHRW",
-  "Other"
+  "C.H. Robinson",
+  "Industrials"
  ],
  "CHTR": [
   "Charter Communications",
   "Communication"
  ],
  "CI": [
-  "CI",
-  "Other"
+  "Cigna",
+  "Health Care"
  ],
  "CIEN": [
-  "CIEN",
-  "Other"
+  "Ciena",
+  "Technology"
  ],
  "CINF": [
-  "CINF",
-  "Other"
+  "Cincinnati Financial",
+  "Financials"
  ],
  "CL": [
   "Colgate-Palmolive",
   "Consumer Staples"
  ],
  "CLX": [
-  "CLX",
-  "Other"
+  "Clorox",
+  "Consumer Staples"
  ],
  "CMCSA": [
   "Comcast",
   "Communication"
  ],
  "CME": [
-  "CME",
-  "Other"
+  "CME Group",
+  "Financials"
  ],
  "CMG": [
-  "CMG",
-  "Other"
+  "Chipotle Mexican Grill",
+  "Consumer Discretionary"
  ],
  "CMI": [
-  "CMI",
-  "Other"
+  "Cummins",
+  "Industrials"
  ],
  "CMS": [
-  "CMS",
-  "Other"
+  "CMS Energy",
+  "Utilities"
  ],
  "CNC": [
-  "CNC",
-  "Other"
+  "Centene",
+  "Health Care"
  ],
  "CNP": [
-  "CNP",
-  "Other"
+  "CenterPoint Energy",
+  "Utilities"
  ],
  "COF": [
   "Capital One",
   "Financials"
  ],
  "COHR": [
-  "COHR",
-  "Other"
+  "Coherent",
+  "Technology"
  ],
  "COIN": [
-  "COIN",
-  "Other"
+  "Coinbase",
+  "Financials"
  ],
  "COO": [
-  "COO",
-  "Other"
+  "Cooper Companies (The)",
+  "Health Care"
  ],
  "COP": [
   "ConocoPhillips",
   "Energy"
  ],
  "COR": [
-  "COR",
-  "Other"
+  "Cencora",
+  "Health Care"
  ],
  "COST": [
   "Costco",
   "Consumer Staples"
  ],
  "CPAY": [
-  "CPAY",
-  "Other"
+  "Corpay",
+  "Financials"
  ],
  "CPRT": [
-  "CPRT",
-  "Other"
+  "Copart",
+  "Industrials"
  ],
  "CPT": [
-  "CPT",
-  "Other"
+  "Camden Property Trust",
+  "Real Estate"
  ],
  "CRH": [
   "CRH",
-  "Other"
+  "Materials"
  ],
  "CRL": [
-  "CRL",
-  "Other"
+  "Charles River Laboratories",
+  "Health Care"
  ],
  "CRM": [
   "Salesforce",
   "Technology"
  ],
  "CRWD": [
-  "CRWD",
-  "Other"
+  "CrowdStrike",
+  "Technology"
  ],
  "CSCO": [
   "Cisco",
   "Technology"
  ],
  "CSGP": [
-  "CSGP",
-  "Other"
+  "CoStar Group",
+  "Real Estate"
  ],
  "CSX": [
   "CSX",
-  "Other"
+  "Industrials"
  ],
  "CTAS": [
-  "CTAS",
-  "Other"
+  "Cintas",
+  "Industrials"
  ],
  "CTSH": [
-  "CTSH",
-  "Other"
- ],
- "CTVA": [
-  "CTVA",
-  "Other"
+  "Cognizant",
+  "Technology"
  ],
  "CVNA": [
-  "CVNA",
-  "Other"
+  "Carvana",
+  "Consumer Discretionary"
  ],
  "CVS": [
   "CVS Health",
@@ -504,48 +500,48 @@
   "Energy"
  ],
  "D": [
-  "D",
-  "Other"
+  "Dominion Energy",
+  "Utilities"
  ],
  "DAL": [
-  "DAL",
-  "Other"
+  "Delta Air Lines",
+  "Industrials"
  ],
  "DASH": [
-  "DASH",
-  "Other"
+  "DoorDash",
+  "Consumer Discretionary"
  ],
  "DD": [
-  "DD",
-  "Other"
+  "DuPont",
+  "Industrials"
  ],
  "DDOG": [
-  "DDOG",
-  "Other"
+  "Datadog",
+  "Technology"
  ],
  "DE": [
   "Deere & Company",
   "Industrials"
  ],
  "DECK": [
-  "DECK",
-  "Other"
+  "Deckers Brands",
+  "Consumer Discretionary"
  ],
  "DELL": [
-  "DELL",
-  "Other"
+  "Dell Technologies",
+  "Technology"
  ],
  "DG": [
-  "DG",
-  "Other"
+  "Dollar General",
+  "Consumer Staples"
  ],
  "DGX": [
-  "DGX",
-  "Other"
+  "Quest Diagnostics",
+  "Health Care"
  ],
  "DHI": [
-  "DHI",
-  "Other"
+  "D. R. Horton",
+  "Consumer Discretionary"
  ],
  "DHR": [
   "Danaher",
@@ -556,292 +552,292 @@
   "Communication"
  ],
  "DLR": [
-  "DLR",
-  "Other"
+  "Digital Realty",
+  "Real Estate"
  ],
  "DLTR": [
-  "DLTR",
-  "Other"
+  "Dollar Tree",
+  "Consumer Staples"
  ],
  "DOC": [
-  "DOC",
-  "Other"
+  "Healthpeak Properties",
+  "Real Estate"
  ],
  "DOV": [
-  "DOV",
-  "Other"
+  "Dover",
+  "Industrials"
  ],
  "DOW": [
-  "DOW",
-  "Other"
+  "Dow",
+  "Materials"
  ],
  "DPZ": [
-  "DPZ",
-  "Other"
+  "Domino's",
+  "Consumer Discretionary"
  ],
  "DRI": [
-  "DRI",
-  "Other"
+  "Darden Restaurants",
+  "Consumer Discretionary"
  ],
  "DTE": [
-  "DTE",
-  "Other"
+  "DTE Energy",
+  "Utilities"
  ],
  "DUK": [
   "Duke Energy",
   "Utilities"
  ],
  "DVA": [
-  "DVA",
-  "Other"
+  "DaVita",
+  "Health Care"
  ],
  "DVN": [
-  "DVN",
-  "Other"
+  "Devon Energy",
+  "Energy"
  ],
  "DXCM": [
-  "DXCM",
-  "Other"
+  "Dexcom",
+  "Health Care"
  ],
  "EBAY": [
-  "EBAY",
-  "Other"
+  "eBay",
+  "Consumer Discretionary"
  ],
  "ECHO": [
-  "ECHO",
-  "Other"
+  "EchoStar",
+  "Communication"
  ],
  "ECL": [
-  "ECL",
-  "Other"
+  "Ecolab",
+  "Materials"
  ],
  "ED": [
-  "ED",
-  "Other"
+  "Consolidated Edison",
+  "Utilities"
  ],
  "EFX": [
-  "EFX",
-  "Other"
+  "Equifax",
+  "Industrials"
  ],
  "EG": [
-  "EG",
-  "Other"
+  "Everest Group",
+  "Financials"
  ],
  "EIX": [
-  "EIX",
-  "Other"
+  "Edison International",
+  "Utilities"
  ],
  "EL": [
-  "EL",
-  "Other"
+  "Est\u00e9e Lauder Companies (The)",
+  "Consumer Staples"
  ],
  "ELV": [
-  "ELV",
-  "Other"
+  "Elevance Health",
+  "Health Care"
  ],
  "EME": [
-  "EME",
-  "Other"
+  "Emcor",
+  "Industrials"
  ],
  "EMR": [
   "Emerson Electric",
   "Industrials"
  ],
  "EOG": [
-  "EOG",
-  "Other"
+  "EOG Resources",
+  "Energy"
  ],
  "EQIX": [
-  "EQIX",
-  "Other"
+  "Equinix",
+  "Real Estate"
  ],
  "EQT": [
   "EQT",
-  "Other"
+  "Energy"
  ],
  "ERIE": [
-  "ERIE",
-  "Other"
+  "Erie Indemnity",
+  "Financials"
  ],
  "ES": [
-  "ES",
-  "Other"
+  "Eversource Energy",
+  "Utilities"
  ],
  "ESS": [
-  "ESS",
-  "Other"
+  "Essex Property Trust",
+  "Real Estate"
  ],
  "ETN": [
-  "ETN",
-  "Other"
+  "Eaton",
+  "Industrials"
  ],
  "ETR": [
-  "ETR",
-  "Other"
+  "Entergy",
+  "Utilities"
  ],
  "EVRG": [
-  "EVRG",
-  "Other"
+  "Evergy",
+  "Utilities"
  ],
  "EW": [
-  "EW",
-  "Other"
+  "Edwards Lifesciences",
+  "Health Care"
  ],
  "EXC": [
-  "EXC",
-  "Other"
+  "Exelon",
+  "Utilities"
  ],
  "EXE": [
-  "EXE",
-  "Other"
+  "Expand Energy",
+  "Energy"
  ],
  "EXPD": [
-  "EXPD",
-  "Other"
+  "Expeditors International",
+  "Industrials"
  ],
  "EXPE": [
-  "EXPE",
-  "Other"
+  "Expedia Group",
+  "Consumer Discretionary"
  ],
  "EXR": [
-  "EXR",
-  "Other"
+  "Extra Space Storage",
+  "Real Estate"
  ],
  "F": [
   "Ford Motor",
   "Consumer Discretionary"
  ],
  "FANG": [
-  "FANG",
-  "Other"
+  "Diamondback Energy",
+  "Energy"
  ],
  "FAST": [
-  "FAST",
-  "Other"
+  "Fastenal",
+  "Industrials"
  ],
  "FCX": [
-  "FCX",
-  "Other"
+  "Freeport-McMoRan",
+  "Materials"
  ],
  "FDS": [
-  "FDS",
-  "Other"
+  "FactSet",
+  "Financials"
  ],
  "FDX": [
   "FedEx",
   "Industrials"
  ],
  "FDXF": [
-  "FDXF",
-  "Other"
+  "FedEx Freight",
+  "Industrials"
  ],
  "FE": [
-  "FE",
-  "Other"
+  "FirstEnergy",
+  "Utilities"
  ],
  "FERG": [
-  "FERG",
-  "Other"
+  "Ferguson Enterprises",
+  "Industrials"
  ],
  "FFIV": [
-  "FFIV",
-  "Other"
+  "F5",
+  "Technology"
  ],
  "FICO": [
-  "FICO",
-  "Other"
+  "Fair Isaac",
+  "Technology"
  ],
  "FIS": [
-  "FIS",
-  "Other"
+  "Fidelity National Information Services",
+  "Financials"
  ],
  "FISV": [
-  "FISV",
-  "Other"
+  "Fiserv",
+  "Financials"
  ],
  "FITB": [
-  "FITB",
-  "Other"
+  "Fifth Third Bancorp",
+  "Financials"
  ],
  "FIX": [
-  "FIX",
-  "Other"
+  "Comfort Systems USA",
+  "Industrials"
  ],
  "FLEX": [
-  "FLEX",
-  "Other"
+  "Flex",
+  "Technology"
  ],
  "FOX": [
-  "FOX",
-  "Other"
+  "Fox Corporation (Class B)",
+  "Communication"
  ],
  "FOXA": [
-  "FOXA",
-  "Other"
+  "Fox Corporation (Class A)",
+  "Communication"
  ],
  "FRT": [
-  "FRT",
-  "Other"
+  "Federal Realty Investment Trust",
+  "Real Estate"
  ],
  "FSLR": [
-  "FSLR",
-  "Other"
+  "First Solar",
+  "Technology"
  ],
  "FTNT": [
-  "FTNT",
-  "Other"
+  "Fortinet",
+  "Technology"
  ],
  "FTV": [
-  "FTV",
-  "Other"
+  "Fortive",
+  "Industrials"
  ],
  "GD": [
   "General Dynamics",
   "Industrials"
  ],
  "GDDY": [
-  "GDDY",
-  "Other"
+  "GoDaddy",
+  "Technology"
  ],
  "GE": [
   "GE Aerospace",
   "Industrials"
  ],
  "GEHC": [
-  "GEHC",
-  "Other"
+  "GE HealthCare",
+  "Health Care"
  ],
  "GEN": [
-  "GEN",
-  "Other"
+  "Gen Digital",
+  "Technology"
  ],
  "GEV": [
-  "GEV",
-  "Other"
+  "GE Vernova",
+  "Industrials"
  ],
  "GILD": [
   "Gilead Sciences",
   "Health Care"
  ],
  "GIS": [
-  "GIS",
-  "Other"
+  "General Mills",
+  "Consumer Staples"
  ],
  "GL": [
-  "GL",
-  "Other"
+  "Globe Life",
+  "Financials"
  ],
  "GLW": [
-  "GLW",
-  "Other"
+  "Corning",
+  "Technology"
  ],
  "GM": [
   "General Motors",
   "Consumer Discretionary"
  ],
  "GNRC": [
-  "GNRC",
-  "Other"
+  "Generac",
+  "Industrials"
  ],
  "GOOG": [
   "Alphabet (Class C)",
@@ -852,132 +848,136 @@
   "Communication"
  ],
  "GPC": [
-  "GPC",
-  "Other"
+  "Genuine Parts Company",
+  "Consumer Discretionary"
  ],
  "GPN": [
-  "GPN",
-  "Other"
+  "Global Payments",
+  "Financials"
  ],
  "GRMN": [
-  "GRMN",
-  "Other"
+  "Garmin",
+  "Consumer Discretionary"
  ],
  "GS": [
   "Goldman Sachs",
   "Financials"
  ],
  "GWW": [
-  "GWW",
-  "Other"
+  "W. W. Grainger",
+  "Industrials"
  ],
  "HAL": [
-  "HAL",
-  "Other"
+  "Halliburton",
+  "Energy"
  ],
  "HAS": [
-  "HAS",
-  "Other"
+  "Hasbro",
+  "Consumer Discretionary"
  ],
  "HBAN": [
-  "HBAN",
-  "Other"
+  "Huntington Bancshares",
+  "Financials"
  ],
  "HCA": [
-  "HCA",
-  "Other"
+  "HCA Healthcare",
+  "Health Care"
  ],
  "HD": [
   "Home Depot",
   "Consumer Discretionary"
  ],
  "HIG": [
-  "HIG",
-  "Other"
+  "Hartford (The)",
+  "Financials"
  ],
  "HII": [
-  "HII",
-  "Other"
+  "Huntington Ingalls Industries",
+  "Industrials"
  ],
  "HLT": [
-  "HLT",
-  "Other"
+  "Hilton Worldwide",
+  "Consumer Discretionary"
  ],
  "HON": [
   "Honeywell",
   "Industrials"
  ],
  "HONA": [
-  "HONA",
-  "Other"
+  "Honeywell Aerospace",
+  "Industrials"
  ],
  "HOOD": [
-  "HOOD",
-  "Other"
+  "Robinhood Markets",
+  "Financials"
  ],
  "HPE": [
-  "HPE",
-  "Other"
+  "Hewlett Packard Enterprise",
+  "Technology"
  ],
  "HPQ": [
-  "HPQ",
-  "Other"
+  "HP",
+  "Technology"
  ],
  "HRL": [
-  "HRL",
-  "Other"
+  "Hormel Foods",
+  "Consumer Staples"
  ],
  "HSIC": [
-  "HSIC",
-  "Other"
+  "Henry Schein",
+  "Health Care"
  ],
  "HST": [
-  "HST",
-  "Other"
+  "Host Hotels & Resorts",
+  "Real Estate"
  ],
  "HSY": [
-  "HSY",
-  "Other"
+  "Hershey Company (The)",
+  "Consumer Staples"
  ],
  "HUBB": [
-  "HUBB",
-  "Other"
+  "Hubbell",
+  "Industrials"
  ],
  "HUM": [
-  "HUM",
-  "Other"
+  "Humana",
+  "Health Care"
  ],
  "HWM": [
-  "HWM",
-  "Other"
+  "Howmet Aerospace",
+  "Industrials"
  ],
  "IBKR": [
-  "IBKR",
-  "Other"
+  "Interactive Brokers",
+  "Financials"
  ],
  "IBM": [
   "IBM",
   "Technology"
  ],
  "ICE": [
-  "ICE",
-  "Other"
+  "Intercontinental Exchange",
+  "Financials"
  ],
  "IDXX": [
-  "IDXX",
-  "Other"
+  "Idexx Laboratories",
+  "Health Care"
  ],
  "IEX": [
-  "IEX",
-  "Other"
+  "IDEX",
+  "Industrials"
  ],
  "IFF": [
-  "IFF",
-  "Other"
+  "International Flavors & Fragrances",
+  "Materials"
+ ],
+ "ILMN": [
+  "Illumina",
+  "Health Care"
  ],
  "INCY": [
-  "INCY",
-  "Other"
+  "Incyte",
+  "Health Care"
  ],
  "INTC": [
   "Intel",
@@ -988,60 +988,60 @@
   "Technology"
  ],
  "INVH": [
-  "INVH",
-  "Other"
+  "Invitation Homes",
+  "Real Estate"
  ],
  "IP": [
-  "IP",
-  "Other"
+  "International Paper",
+  "Materials"
  ],
  "IQV": [
-  "IQV",
-  "Other"
+  "IQVIA",
+  "Health Care"
  ],
  "IR": [
-  "IR",
-  "Other"
+  "Ingersoll Rand",
+  "Industrials"
  ],
  "IRM": [
-  "IRM",
-  "Other"
+  "Iron Mountain",
+  "Real Estate"
  ],
  "ISRG": [
   "Intuitive Surgical",
   "Health Care"
  ],
  "IT": [
-  "IT",
-  "Other"
+  "Gartner",
+  "Technology"
  ],
  "ITW": [
-  "ITW",
-  "Other"
+  "Illinois Tool Works",
+  "Industrials"
  ],
  "IVZ": [
-  "IVZ",
-  "Other"
+  "Invesco",
+  "Financials"
  ],
  "J": [
-  "J",
-  "Other"
+  "Jacobs Solutions",
+  "Industrials"
  ],
  "JBHT": [
-  "JBHT",
-  "Other"
+  "J.B. Hunt",
+  "Industrials"
  ],
  "JBL": [
-  "JBL",
-  "Other"
+  "Jabil",
+  "Technology"
  ],
  "JCI": [
-  "JCI",
-  "Other"
+  "Johnson Controls",
+  "Industrials"
  ],
  "JKHY": [
-  "JKHY",
-  "Other"
+  "Jack Henry & Associates",
+  "Financials"
  ],
  "JNJ": [
   "Johnson & Johnson",
@@ -1052,84 +1052,80 @@
   "Financials"
  ],
  "KDP": [
-  "KDP",
-  "Other"
+  "Keurig Dr Pepper",
+  "Consumer Staples"
  ],
  "KEY": [
-  "KEY",
-  "Other"
+  "KeyCorp",
+  "Financials"
  ],
  "KEYS": [
-  "KEYS",
-  "Other"
+  "Keysight Technologies",
+  "Technology"
  ],
  "KHC": [
-  "KHC",
-  "Other"
+  "Kraft Heinz",
+  "Consumer Staples"
  ],
  "KIM": [
-  "KIM",
-  "Other"
+  "Kimco Realty",
+  "Real Estate"
  ],
  "KKR": [
-  "KKR",
-  "Other"
+  "KKR &",
+  "Financials"
  ],
  "KLAC": [
-  "KLAC",
-  "Other"
+  "KLA",
+  "Technology"
  ],
  "KMB": [
-  "KMB",
-  "Other"
+  "Kimberly-Clark",
+  "Consumer Staples"
  ],
  "KMI": [
-  "KMI",
-  "Other"
+  "Kinder Morgan",
+  "Energy"
  ],
  "KO": [
   "Coca-Cola",
   "Consumer Staples"
  ],
  "KR": [
-  "KR",
-  "Other"
- ],
- "KVUE": [
-  "KVUE",
-  "Other"
+  "Kroger",
+  "Consumer Staples"
  ],
  "L": [
-  "L",
-  "Other"
+  "Loews",
+  "Financials"
  ],
  "LDOS": [
-  "LDOS",
-  "Other"
+  "Leidos",
+  "Industrials"
  ],
  "LEN": [
-  "LEN",
-  "Other"
+  "Lennar",
+  "Consumer Discretionary"
  ],
  "LH": [
-  "LH",
-  "Other"
+  "Labcorp",
+  "Health Care"
  ],
  "LHX": [
-  "LHX",
-  "Other"
+  "L3Harris",
+  "Industrials"
  ],
  "LII": [
-  "LII",
-  "Other"
+  "Lennox International",
+  "Industrials"
  ],
  "LIN": [
   "Linde",
   "Materials"
  ],
  "LITE": [
-  "LITE",
-  "Other"
+  "Lumentum",
+  "Technology"
  ],
  "LLY": [
   "Eli Lilly",
@@ -1140,68 +1136,68 @@
   "Industrials"
  ],
  "LNT": [
-  "LNT",
-  "Other"
+  "Alliant Energy",
+  "Utilities"
  ],
  "LOW": [
   "Lowe's",
   "Consumer Discretionary"
  ],
  "LRCX": [
-  "LRCX",
-  "Other"
+  "Lam Research",
+  "Technology"
  ],
  "LULU": [
-  "LULU",
-  "Other"
+  "Lululemon Athletica",
+  "Consumer Discretionary"
  ],
  "LUV": [
-  "LUV",
-  "Other"
+  "Southwest Airlines",
+  "Industrials"
  ],
  "LVS": [
-  "LVS",
-  "Other"
+  "Las Vegas Sands",
+  "Consumer Discretionary"
  ],
  "LYB": [
-  "LYB",
-  "Other"
+  "LyondellBasell",
+  "Materials"
  ],
  "LYV": [
-  "LYV",
-  "Other"
+  "Live Nation Entertainment",
+  "Communication"
  ],
  "MA": [
   "Mastercard",
   "Financials"
  ],
  "MAA": [
-  "MAA",
-  "Other"
+  "Mid-America Apartment Communities",
+  "Real Estate"
  ],
  "MAR": [
-  "MAR",
-  "Other"
+  "Marriott International",
+  "Consumer Discretionary"
  ],
  "MAS": [
-  "MAS",
-  "Other"
+  "Masco",
+  "Industrials"
  ],
  "MCD": [
   "McDonald's",
   "Consumer Discretionary"
  ],
  "MCHP": [
-  "MCHP",
-  "Other"
+  "Microchip Technology",
+  "Technology"
  ],
  "MCK": [
-  "MCK",
-  "Other"
+  "McKesson",
+  "Health Care"
  ],
  "MCO": [
-  "MCO",
-  "Other"
+  "Moody's",
+  "Financials"
  ],
  "MDLZ": [
   "Mondelez",
@@ -1220,56 +1216,56 @@
   "Communication"
  ],
  "MGM": [
-  "MGM",
-  "Other"
+  "MGM Resorts",
+  "Consumer Discretionary"
  ],
  "MKC": [
-  "MKC",
-  "Other"
+  "McCormick & Company",
+  "Consumer Staples"
  ],
  "MLM": [
-  "MLM",
-  "Other"
+  "Martin Marietta Materials",
+  "Materials"
  ],
  "MMM": [
   "3M",
   "Industrials"
  ],
  "MNST": [
-  "MNST",
-  "Other"
+  "Monster Beverage",
+  "Consumer Staples"
  ],
  "MO": [
   "Altria",
   "Consumer Staples"
  ],
  "MOS": [
-  "MOS",
-  "Other"
+  "Mosaic Company (The)",
+  "Materials"
  ],
  "MPC": [
-  "MPC",
-  "Other"
+  "Marathon Petroleum",
+  "Energy"
  ],
  "MPWR": [
-  "MPWR",
-  "Other"
+  "Monolithic Power Systems",
+  "Technology"
  ],
  "MRK": [
   "Merck",
   "Health Care"
  ],
  "MRNA": [
-  "MRNA",
-  "Other"
+  "Moderna",
+  "Health Care"
  ],
  "MRSH": [
-  "MRSH",
-  "Other"
+  "Marsh McLennan",
+  "Financials"
  ],
  "MRVL": [
-  "MRVL",
-  "Other"
+  "Marvell Technology",
+  "Technology"
  ],
  "MS": [
   "Morgan Stanley",
@@ -1277,87 +1273,87 @@
  ],
  "MSCI": [
   "MSCI",
-  "Other"
+  "Financials"
  ],
  "MSFT": [
   "Microsoft",
   "Technology"
  ],
  "MSI": [
-  "MSI",
-  "Other"
+  "Motorola Solutions",
+  "Technology"
  ],
  "MTB": [
-  "MTB",
-  "Other"
+  "M&T Bank",
+  "Financials"
  ],
  "MTD": [
-  "MTD",
-  "Other"
+  "Mettler Toledo",
+  "Health Care"
  ],
  "MU": [
-  "MU",
-  "Other"
+  "Micron Technology",
+  "Technology"
  ],
  "NCLH": [
-  "NCLH",
-  "Other"
+  "Norwegian Cruise Line Holdings",
+  "Consumer Discretionary"
  ],
  "NDAQ": [
-  "NDAQ",
-  "Other"
+  "Nasdaq",
+  "Financials"
  ],
  "NDSN": [
-  "NDSN",
-  "Other"
+  "Nordson",
+  "Industrials"
  ],
  "NEE": [
   "NextEra Energy",
   "Utilities"
  ],
  "NEM": [
-  "NEM",
-  "Other"
+  "Newmont",
+  "Materials"
  ],
  "NFLX": [
   "Netflix",
   "Communication"
  ],
  "NI": [
-  "NI",
-  "Other"
+  "NiSource",
+  "Utilities"
  ],
  "NKE": [
   "Nike",
   "Consumer Discretionary"
  ],
  "NOC": [
-  "NOC",
-  "Other"
+  "Northrop Grumman",
+  "Industrials"
  ],
  "NOW": [
   "ServiceNow",
   "Technology"
  ],
  "NRG": [
-  "NRG",
-  "Other"
+  "NRG Energy",
+  "Utilities"
  ],
  "NSC": [
-  "NSC",
-  "Other"
+  "Norfolk Southern",
+  "Industrials"
  ],
  "NTAP": [
-  "NTAP",
-  "Other"
+  "NetApp",
+  "Technology"
  ],
  "NTRS": [
-  "NTRS",
-  "Other"
+  "Northern Trust",
+  "Financials"
  ],
  "NUE": [
-  "NUE",
-  "Other"
+  "Nucor",
+  "Materials"
  ],
  "NVDA": [
   "Nvidia",
@@ -1365,75 +1361,83 @@
  ],
  "NVR": [
   "NVR",
-  "Other"
+  "Consumer Discretionary"
  ],
  "NWS": [
-  "NWS",
-  "Other"
+  "News Corp (Class B)",
+  "Communication"
  ],
  "NWSA": [
-  "NWSA",
-  "Other"
+  "News Corp (Class A)",
+  "Communication"
  ],
  "NXPI": [
-  "NXPI",
-  "Other"
+  "NXP Semiconductors",
+  "Technology"
  ],
  "O": [
-  "O",
-  "Other"
+  "Realty Income",
+  "Real Estate"
  ],
  "ODFL": [
-  "ODFL",
-  "Other"
+  "Old Dominion",
+  "Industrials"
  ],
  "OKE": [
-  "OKE",
-  "Other"
+  "Oneok",
+  "Energy"
+ ],
+ "OKTA": [
+  "Okta",
+  "Technology"
  ],
  "OMC": [
-  "OMC",
-  "Other"
+  "Omnicom Group",
+  "Communication"
  ],
  "ON": [
-  "ON",
-  "Other"
+  "ON Semiconductor",
+  "Technology"
  ],
  "ORCL": [
   "Oracle",
   "Technology"
  ],
  "ORLY": [
-  "ORLY",
-  "Other"
+  "O'Reilly Automotive",
+  "Consumer Discretionary"
  ],
  "OTIS": [
-  "OTIS",
-  "Other"
+  "Otis Worldwide",
+  "Industrials"
  ],
  "OXY": [
-  "OXY",
-  "Other"
+  "Occidental Petroleum",
+  "Energy"
+ ],
+ "P": [
+  "Everpure",
+  "Technology"
  ],
  "PANW": [
-  "PANW",
-  "Other"
+  "Palo Alto Networks",
+  "Technology"
  ],
  "PAYX": [
-  "PAYX",
-  "Other"
+  "Paychex",
+  "Industrials"
  ],
  "PCAR": [
-  "PCAR",
-  "Other"
+  "Paccar",
+  "Industrials"
  ],
  "PCG": [
-  "PCG",
-  "Other"
+  "PG&E",
+  "Utilities"
  ],
  "PEG": [
-  "PEG",
-  "Other"
+  "Public Service Enterprise Group",
+  "Utilities"
  ],
  "PEP": [
   "PepsiCo",
@@ -1444,32 +1448,32 @@
   "Health Care"
  ],
  "PFG": [
-  "PFG",
-  "Other"
+  "Principal Financial Group",
+  "Financials"
  ],
  "PG": [
   "Procter & Gamble",
   "Consumer Staples"
  ],
  "PGR": [
-  "PGR",
-  "Other"
+  "Progressive",
+  "Financials"
  ],
  "PH": [
-  "PH",
-  "Other"
+  "Parker Hannifin",
+  "Industrials"
  ],
  "PHM": [
-  "PHM",
-  "Other"
+  "PulteGroup",
+  "Consumer Discretionary"
  ],
  "PKG": [
-  "PKG",
-  "Other"
+  "Packaging Corporation of America",
+  "Materials"
  ],
  "PLD": [
-  "PLD",
-  "Other"
+  "Prologis",
+  "Real Estate"
  ],
  "PLTR": [
   "Palantir",
@@ -1480,128 +1484,124 @@
   "Consumer Staples"
  ],
  "PNC": [
-  "PNC",
-  "Other"
+  "PNC Financial Services",
+  "Financials"
  ],
  "PNR": [
-  "PNR",
-  "Other"
+  "Pentair",
+  "Industrials"
  ],
  "PNW": [
-  "PNW",
-  "Other"
+  "Pinnacle West Capital",
+  "Utilities"
  ],
  "PODD": [
-  "PODD",
-  "Other"
+  "Insulet",
+  "Health Care"
  ],
  "PPG": [
-  "PPG",
-  "Other"
+  "PPG Industries",
+  "Materials"
  ],
  "PPL": [
   "PPL",
-  "Other"
+  "Utilities"
  ],
  "PRU": [
-  "PRU",
-  "Other"
+  "Prudential Financial",
+  "Financials"
  ],
  "PSA": [
-  "PSA",
-  "Other"
- ],
- "PSKY": [
-  "PSKY",
-  "Other"
+  "Public Storage",
+  "Real Estate"
  ],
  "PSX": [
-  "PSX",
-  "Other"
+  "Phillips 66",
+  "Energy"
  ],
  "PTC": [
   "PTC",
-  "Other"
+  "Technology"
  ],
  "PWR": [
-  "PWR",
-  "Other"
+  "Quanta Services",
+  "Industrials"
  ],
  "PYPL": [
   "PayPal",
   "Financials"
  ],
  "Q": [
-  "Q",
-  "Other"
+  "Qnity Electronics",
+  "Technology"
  ],
  "QCOM": [
   "Qualcomm",
   "Technology"
  ],
  "RCL": [
-  "RCL",
-  "Other"
+  "Royal Caribbean Group",
+  "Consumer Discretionary"
  ],
  "RDDT": [
-  "RDDT",
-  "Other"
+  "Reddit",
+  "Communication"
  ],
  "REG": [
-  "REG",
-  "Other"
+  "Regency Centers",
+  "Real Estate"
  ],
  "REGN": [
-  "REGN",
-  "Other"
+  "Regeneron Pharmaceuticals",
+  "Health Care"
  ],
  "RF": [
-  "RF",
-  "Other"
+  "Regions Financial",
+  "Financials"
  ],
  "RJF": [
-  "RJF",
-  "Other"
+  "Raymond James Financial",
+  "Financials"
  ],
  "RL": [
-  "RL",
-  "Other"
+  "Ralph Lauren",
+  "Consumer Discretionary"
  ],
  "RMD": [
-  "RMD",
-  "Other"
+  "ResMed",
+  "Health Care"
  ],
  "ROK": [
-  "ROK",
-  "Other"
+  "Rockwell Automation",
+  "Industrials"
  ],
  "ROL": [
-  "ROL",
-  "Other"
+  "Rollins",
+  "Industrials"
  ],
  "ROP": [
-  "ROP",
-  "Other"
+  "Roper Technologies",
+  "Technology"
  ],
  "ROST": [
-  "ROST",
-  "Other"
+  "Ross Stores",
+  "Consumer Discretionary"
  ],
  "RSG": [
-  "RSG",
-  "Other"
+  "Republic Services",
+  "Industrials"
  ],
  "RTX": [
   "RTX",
   "Industrials"
  ],
  "RVTY": [
-  "RVTY",
-  "Other"
+  "Revvity",
+  "Health Care"
  ],
  "SBAC": [
-  "SBAC",
-  "Other"
+  "SBA Communications",
+  "Real Estate"
  ],
  "SBUX": [
   "Starbucks",
@@ -1612,140 +1612,140 @@
   "Financials"
  ],
  "SHW": [
-  "SHW",
-  "Other"
+  "Sherwin-Williams",
+  "Materials"
  ],
  "SJM": [
-  "SJM",
-  "Other"
+  "J.M. Smucker Company (The)",
+  "Consumer Staples"
+ ],
+ "SKYD": [
+  "Skydance",
+  "Communication"
  ],
  "SLB": [
-  "SLB",
-  "Other"
+  "Schlumberger",
+  "Energy"
  ],
  "SMCI": [
-  "SMCI",
-  "Other"
+  "Supermicro",
+  "Technology"
  ],
  "SNA": [
-  "SNA",
-  "Other"
+  "Snap-on",
+  "Industrials"
  ],
  "SNDK": [
-  "SNDK",
-  "Other"
+  "Sandisk",
+  "Technology"
  ],
  "SNPS": [
-  "SNPS",
-  "Other"
+  "Synopsys",
+  "Technology"
  ],
  "SO": [
   "Southern Company",
   "Utilities"
  ],
  "SOLV": [
-  "SOLV",
-  "Other"
+  "Solventum",
+  "Health Care"
  ],
  "SPG": [
   "Simon Property Group",
   "Real Estate"
  ],
  "SPGI": [
-  "SPGI",
-  "Other"
+  "S&P Global",
+  "Financials"
  ],
  "SRE": [
-  "SRE",
-  "Other"
+  "Sempra",
+  "Utilities"
  ],
  "STE": [
-  "STE",
-  "Other"
+  "Steris",
+  "Health Care"
  ],
  "STLD": [
-  "STLD",
-  "Other"
+  "Steel Dynamics",
+  "Materials"
  ],
  "STT": [
-  "STT",
-  "Other"
+  "State Street",
+  "Financials"
  ],
  "STX": [
-  "STX",
-  "Other"
+  "Seagate Technology",
+  "Technology"
  ],
  "STZ": [
-  "STZ",
-  "Other"
+  "Constellation Brands",
+  "Consumer Staples"
  ],
  "SW": [
-  "SW",
-  "Other"
+  "Smurfit Westrock",
+  "Materials"
  ],
  "SWK": [
-  "SWK",
-  "Other"
+  "Stanley Black & Decker",
+  "Industrials"
  ],
  "SWKS": [
-  "SWKS",
-  "Other"
+  "Skyworks Solutions",
+  "Technology"
  ],
  "SYF": [
-  "SYF",
-  "Other"
+  "Synchrony Financial",
+  "Financials"
  ],
  "SYK": [
-  "SYK",
-  "Other"
+  "Stryker",
+  "Health Care"
  ],
  "SYY": [
-  "SYY",
-  "Other"
+  "Sysco",
+  "Consumer Staples"
  ],
  "T": [
   "AT&T",
   "Communication"
  ],
- "TAP": [
-  "TAP",
-  "Other"
- ],
  "TDG": [
-  "TDG",
-  "Other"
+  "TransDigm Group",
+  "Industrials"
  ],
  "TDY": [
-  "TDY",
-  "Other"
+  "Teledyne Technologies",
+  "Technology"
  ],
  "TECH": [
-  "TECH",
-  "Other"
+  "Bio-Techne",
+  "Health Care"
  ],
  "TEL": [
-  "TEL",
-  "Other"
+  "TE Connectivity",
+  "Technology"
  ],
  "TER": [
-  "TER",
-  "Other"
+  "Teradyne",
+  "Technology"
  ],
  "TFC": [
-  "TFC",
-  "Other"
+  "Truist Financial",
+  "Financials"
  ],
  "TGT": [
   "Target",
   "Consumer Staples"
  ],
  "TJX": [
-  "TJX",
-  "Other"
+  "TJX Companies",
+  "Consumer Discretionary"
  ],
  "TKO": [
-  "TKO",
-  "Other"
+  "TKO Group Holdings",
+  "Communication"
  ],
  "TMO": [
   "Thermo Fisher Scientific",
@@ -1756,68 +1756,68 @@
   "Communication"
  ],
  "TPL": [
-  "TPL",
-  "Other"
+  "Texas Pacific Land",
+  "Energy"
  ],
  "TPR": [
-  "TPR",
-  "Other"
+  "Tapestry",
+  "Consumer Discretionary"
  ],
  "TRGP": [
-  "TRGP",
-  "Other"
+  "Targa Resources",
+  "Energy"
  ],
  "TRMB": [
-  "TRMB",
-  "Other"
+  "Trimble",
+  "Technology"
  ],
  "TROW": [
-  "TROW",
-  "Other"
+  "T. Rowe Price",
+  "Financials"
  ],
  "TRV": [
-  "TRV",
-  "Other"
+  "Travelers Companies (The)",
+  "Financials"
  ],
  "TSCO": [
-  "TSCO",
-  "Other"
+  "Tractor Supply",
+  "Consumer Discretionary"
  ],
  "TSLA": [
   "Tesla",
   "Consumer Discretionary"
  ],
  "TSN": [
-  "TSN",
-  "Other"
+  "Tyson Foods",
+  "Consumer Staples"
  ],
  "TT": [
-  "TT",
-  "Other"
- ],
- "TTD": [
-  "TTD",
-  "Other"
+  "Trane Technologies",
+  "Industrials"
  ],
  "TTWO": [
-  "TTWO",
-  "Other"
+  "Take-Two Interactive",
+  "Communication"
+ ],
+ "TWLO": [
+  "Twilio",
+  "Technology"
  ],
  "TXN": [
   "Texas Instruments",
   "Technology"
  ],
  "TXT": [
-  "TXT",
-  "Other"
+  "Textron",
+  "Industrials"
  ],
  "TYL": [
-  "TYL",
-  "Other"
+  "Tyler Technologies",
+  "Technology"
  ],
  "UAL": [
-  "UAL",
-  "Other"
+  "United Airlines Holdings",
+  "Industrials"
  ],
  "UBER": [
   "Uber",
@@ -1825,15 +1825,15 @@
  ],
  "UDR": [
   "UDR",
-  "Other"
+  "Real Estate"
  ],
  "UHS": [
-  "UHS",
-  "Other"
+  "Universal Health Services",
+  "Health Care"
  ],
  "ULTA": [
-  "ULTA",
-  "Other"
+  "Ulta Beauty",
+  "Consumer Discretionary"
  ],
  "UNH": [
   "UnitedHealth",
@@ -1848,8 +1848,8 @@
   "Industrials"
  ],
  "URI": [
-  "URI",
-  "Other"
+  "United Rentals",
+  "Industrials"
  ],
  "USB": [
   "U.S. Bancorp",
@@ -1860,159 +1860,159 @@
   "Financials"
  ],
  "VEEV": [
-  "VEEV",
-  "Other"
+  "Veeva Systems",
+  "Health Care"
  ],
  "VICI": [
-  "VICI",
-  "Other"
+  "Vici Properties",
+  "Real Estate"
  ],
  "VLO": [
-  "VLO",
-  "Other"
+  "Valero Energy",
+  "Energy"
  ],
  "VLTO": [
-  "VLTO",
-  "Other"
+  "Veralto",
+  "Industrials"
  ],
  "VMC": [
-  "VMC",
-  "Other"
+  "Vulcan Materials Company",
+  "Materials"
  ],
  "VMRK": [
-  "VMRK",
-  "Other"
+  "Vivmark Residential",
+  "Real Estate"
  ],
  "VRSK": [
-  "VRSK",
-  "Other"
+  "Verisk Analytics",
+  "Industrials"
  ],
  "VRSN": [
-  "VRSN",
-  "Other"
+  "Verisign",
+  "Technology"
  ],
  "VRT": [
-  "VRT",
-  "Other"
+  "Vertiv",
+  "Industrials"
  ],
  "VRTX": [
-  "VRTX",
-  "Other"
+  "Vertex Pharmaceuticals",
+  "Health Care"
  ],
  "VST": [
-  "VST",
-  "Other"
+  "Vistra",
+  "Utilities"
  ],
  "VTR": [
-  "VTR",
-  "Other"
+  "Ventas",
+  "Real Estate"
  ],
  "VTRS": [
-  "VTRS",
-  "Other"
+  "Viatris",
+  "Health Care"
+ ],
+ "VYLR": [
+  "Vylor",
+  "Consumer Staples"
  ],
  "VZ": [
   "Verizon",
   "Communication"
  ],
  "WAB": [
-  "WAB",
-  "Other"
+  "Wabtec",
+  "Industrials"
  ],
  "WAT": [
-  "WAT",
-  "Other"
- ],
- "WBD": [
-  "WBD",
-  "Other"
+  "Waters",
+  "Health Care"
  ],
  "WDAY": [
-  "WDAY",
-  "Other"
+  "Workday",
+  "Technology"
  ],
  "WDC": [
-  "WDC",
-  "Other"
+  "Western Digital",
+  "Technology"
  ],
  "WEC": [
-  "WEC",
-  "Other"
+  "WEC Energy Group",
+  "Utilities"
  ],
  "WELL": [
-  "WELL",
-  "Other"
+  "Welltower",
+  "Real Estate"
  ],
  "WFC": [
   "Wells Fargo",
   "Financials"
  ],
  "WM": [
-  "WM",
-  "Other"
+  "Waste Management",
+  "Industrials"
  ],
  "WMB": [
-  "WMB",
-  "Other"
+  "Williams Companies",
+  "Energy"
  ],
  "WMT": [
   "Walmart",
   "Consumer Staples"
  ],
  "WRB": [
-  "WRB",
-  "Other"
+  "W. R. Berkley",
+  "Financials"
  ],
  "WSM": [
-  "WSM",
-  "Other"
+  "Williams-Sonoma",
+  "Consumer Discretionary"
  ],
  "WST": [
-  "WST",
-  "Other"
+  "West Pharmaceutical Services",
+  "Health Care"
  ],
  "WTW": [
-  "WTW",
-  "Other"
+  "Willis Towers Watson",
+  "Financials"
  ],
  "WY": [
-  "WY",
-  "Other"
+  "Weyerhaeuser",
+  "Real Estate"
  ],
  "WYNN": [
-  "WYNN",
-  "Other"
+  "Wynn Resorts",
+  "Consumer Discretionary"
  ],
  "XEL": [
-  "XEL",
-  "Other"
+  "Xcel Energy",
+  "Utilities"
  ],
  "XOM": [
   "Exxon Mobil",
   "Energy"
  ],
  "XYL": [
-  "XYL",
-  "Other"
+  "Xylem",
+  "Industrials"
  ],
  "XYZ": [
-  "XYZ",
-  "Other"
+  "Block",
+  "Financials"
  ],
  "YUM": [
-  "YUM",
-  "Other"
+  "Yum! Brands",
+  "Consumer Discretionary"
  ],
  "ZBH": [
-  "ZBH",
-  "Other"
+  "Zimmer Biomet",
+  "Health Care"
  ],
  "ZBRA": [
-  "ZBRA",
-  "Other"
+  "Zebra Technologies",
+  "Technology"
  ],
  "ZTS": [
-  "ZTS",
-  "Other"
+  "Zoetis",
+  "Health Care"
  ]
 }
