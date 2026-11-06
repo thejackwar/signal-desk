@@ -29,7 +29,7 @@ permissions:
 
 concurrency:
   group: choch
-  cancel-in-progress: true   # TEMPORARY: replaces a stuck first backtest; set back to false in the next commit
+  cancel-in-progress: false
 
 jobs:
   run:
