@@ -1,10 +1,10 @@
 {
   "start": "2026-10-31T10:00:00+00:00",
-  "updated": "2026-11-06T00:00:00+00:00",
-  "last_candle": "2026-11-05T23:00:00+00:00",
+  "updated": "2026-11-06T01:00:00+00:00",
+  "last_candle": "2026-11-06T00:00:00+00:00",
   "source": "Binance BTCUSDT",
-  "btc_price": 76088.01,
-  "btc_since_start": -0.017880489619193973,
+  "btc_price": 76332.56,
+  "btc_since_start": -0.014723917036159828,
   "variants": [
     {
       "dip": 0.05,
@@ -32,7 +32,7 @@
         "entry_time": "2026-11-05T15:00:00+00:00",
         "entry": 77136.2095,
         "exit_due": "2026-11-06T03:00:00+00:00",
-        "unrealised": -0.015588942298234152
+        "unrealised": -0.012418576505240362
       }
     },
     {
@@ -49,7 +49,7 @@
         "entry_time": "2026-11-05T15:00:00+00:00",
         "entry": 77136.2095,
         "exit_due": "2026-11-06T15:00:00+00:00",
-        "unrealised": -0.015588942298234152
+        "unrealised": -0.012418576505240362
       }
     },
     {
@@ -66,7 +66,7 @@
         "entry_time": "2026-11-05T15:00:00+00:00",
         "entry": 77136.2095,
         "exit_due": "2026-11-07T03:00:00+00:00",
-        "unrealised": -0.015588942298234152
+        "unrealised": -0.012418576505240362
       }
     },
     {
@@ -83,7 +83,7 @@
         "entry_time": "2026-11-05T15:00:00+00:00",
         "entry": 77136.2095,
         "exit_due": "2026-11-07T15:00:00+00:00",
-        "unrealised": -0.015588942298234152
+        "unrealised": -0.012418576505240362
       }
     },
     {
@@ -100,68 +100,110 @@
         "entry_time": "2026-11-05T15:00:00+00:00",
         "entry": 77136.2095,
         "exit_due": "2026-11-08T15:00:00+00:00",
-        "unrealised": -0.015588942298234152
+        "unrealised": -0.012418576505240362
       }
     },
     {
       "dip": 0.07,
       "hold": 4,
-      "trades": 0,
-      "open": null,
+      "trades": 1,
       "closed": 0,
       "total": 0.0,
+      "total_2x": 0.0,
+      "total_3x": 0.0,
       "win": null,
-      "avg": null
+      "avg": null,
+      "open": {
+        "entry_time": "2026-11-05T23:00:00+00:00",
+        "entry": 75253.7493,
+        "exit_due": "2026-11-06T03:00:00+00:00",
+        "unrealised": 0.012335640549938633
+      }
     },
     {
       "dip": 0.07,
       "hold": 12,
-      "trades": 0,
-      "open": null,
+      "trades": 1,
       "closed": 0,
       "total": 0.0,
+      "total_2x": 0.0,
+      "total_3x": 0.0,
       "win": null,
-      "avg": null
+      "avg": null,
+      "open": {
+        "entry_time": "2026-11-05T23:00:00+00:00",
+        "entry": 75253.7493,
+        "exit_due": "2026-11-06T11:00:00+00:00",
+        "unrealised": 0.012335640549938633
+      }
     },
     {
       "dip": 0.07,
       "hold": 24,
-      "trades": 0,
-      "open": null,
+      "trades": 1,
       "closed": 0,
       "total": 0.0,
+      "total_2x": 0.0,
+      "total_3x": 0.0,
       "win": null,
-      "avg": null
+      "avg": null,
+      "open": {
+        "entry_time": "2026-11-05T23:00:00+00:00",
+        "entry": 75253.7493,
+        "exit_due": "2026-11-06T23:00:00+00:00",
+        "unrealised": 0.012335640549938633
+      }
     },
     {
       "dip": 0.07,
       "hold": 36,
-      "trades": 0,
-      "open": null,
+      "trades": 1,
       "closed": 0,
       "total": 0.0,
+      "total_2x": 0.0,
+      "total_3x": 0.0,
       "win": null,
-      "avg": null
+      "avg": null,
+      "open": {
+        "entry_time": "2026-11-05T23:00:00+00:00",
+        "entry": 75253.7493,
+        "exit_due": "2026-11-07T11:00:00+00:00",
+        "unrealised": 0.012335640549938633
+      }
     },
     {
       "dip": 0.07,
       "hold": 48,
-      "trades": 0,
-      "open": null,
+      "trades": 1,
       "closed": 0,
       "total": 0.0,
+      "total_2x": 0.0,
+      "total_3x": 0.0,
       "win": null,
-      "avg": null
+      "avg": null,
+      "open": {
+        "entry_time": "2026-11-05T23:00:00+00:00",
+        "entry": 75253.7493,
+        "exit_due": "2026-11-07T23:00:00+00:00",
+        "unrealised": 0.012335640549938633
+      }
     },
     {
       "dip": 0.07,
       "hold": 72,
-      "trades": 0,
-      "open": null,
+      "trades": 1,
       "closed": 0,
       "total": 0.0,
+      "total_2x": 0.0,
+      "total_3x": 0.0,
       "win": null,
-      "avg": null
+      "avg": null,
+      "open": {
+        "entry_time": "2026-11-05T23:00:00+00:00",
+        "entry": 75253.7493,
+        "exit_due": "2026-11-08T23:00:00+00:00",
+        "unrealised": 0.012335640549938633
+      }
     }
   ]
 }
