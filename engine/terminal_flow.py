@@ -662,7 +662,13 @@ def main() -> None:
             intra.pop(k, None)
         spots = {s: float(df["close"].dropna().iloc[-1]) for s, df in daily.items() if df is not None and len(df.dropna())}
         chains = {}
-        if not args.no_options and not args.fast and os.environ.get("ALPACA_KEY_ID"):
+        # the S&P 500 run doesn't download 500 option chains (the Alpaca key is shared with every live
+        # workflow): it reuses the S&P 100 run's options figures for the stocks both lists have
+        if U.is500:
+            small = (load(DATA / "terminal" / "flow.json", {}) or {}).get("options") or {}
+            if small:
+                print(f"Options: {len(small)} stocks from the S&P 100 run")
+        if not U.is500 and not args.no_options and not args.fast and os.environ.get("ALPACA_KEY_ID"):
             print("Options…")
             chains = fetch_options(syms, spots, now.astimezone(NY).date())
     today = now.astimezone(NY).date()
@@ -698,6 +704,8 @@ def main() -> None:
             # a running daily series for the page: [date, calls, puts]
             o["days"] = hist[s][-10:]
 
+    if U.is500 and not args.demo:
+        opts = {s: o for s, o in ((load(DATA / "terminal" / "flow.json", {}) or {}).get("options") or {}).items() if s in flow}
     options_at = now.strftime("%Y-%m-%dT%H:%MZ") if opts else None
     if not opts and prev.get("options"):          # quick run: keep the last full run's options
         opts, options_at = prev["options"], prev.get("options_at") or prev.get("generated_at")

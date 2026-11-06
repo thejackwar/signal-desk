@@ -54,7 +54,10 @@ jobs:
           ALPACA_KEY_ID: ${{ secrets.ALPACA_KEY_ID }}
           ALPACA_SECRET_KEY: ${{ secrets.ALPACA_SECRET_KEY }}
           NTFY_PREFIX: ${{ vars.NTFY_PREFIX }}
-        run: python engine/darkpool.py blocks
+        run: |
+          # once an hour (the Alpaca key is shared with every live workflow)
+          [ "$(date -u +%M)" -lt 30 ] || { echo "S&P 500 blocks run in the first half of each hour"; exit 0; }
+          python engine/darkpool.py blocks
       - name: Publish
         if: inputs.test_day == ''
         run: |

@@ -446,13 +446,22 @@ def fetch_stocks(symbols: list[str], start: datetime, end: datetime, feed: str =
             cache.pop(s, None)
         jobs.setdefault(since, []).append(s)
     batches = [(since, syms[i:i + 5]) for since, syms in jobs.items() for i in range(0, len(syms), 5)]
+    # The Alpaca key is shared with the live workflows: while the US market is open, one request at a time
+    ny = datetime.now(NY)
+    busy = ny.weekday() < 5 and 9 * 60 <= ny.hour * 60 + ny.minute <= 16 * 60 + 30
+    workers = 1 if busy else 4
     print(f"  stocks: {len(symbols)} ({sum(len(v) for k, v in jobs.items() if k > '2025')} from the cache), {len(batches)} downloads", flush=True)
     done = 0
-    with ThreadPoolExecutor(4) as ex:
+    with ThreadPoolExecutor(workers) as ex:
         futs = {ex.submit(_fetch_batch, b, datetime.fromisoformat(since).replace(tzinfo=NY), end, feed): (since, b) for since, b in batches}
         for fu in as_completed(futs):
             since, b = futs[fu]
-            for s, new in fu.result().items():
+            try:
+                got = fu.result()
+            except Exception as e:                     # one failed download never sinks the rest
+                print(f"  ! {','.join(b)}: {e}", flush=True)
+                continue
+            for s, new in got.items():
                 old = cache.get(s)
                 if old:
                     keep = sum(1 for t in old["t"] if t[:10] < since)
@@ -462,6 +471,7 @@ def fetch_stocks(symbols: list[str], start: datetime, end: datetime, feed: str =
             done += 1
             if done % 10 == 0 or done == len(batches):
                 print(f"  downloads {done}/{len(batches)}", flush=True)
+                _save_cache(cache)                     # a run cut short keeps what it downloaded
     _save_cache(cache)
     lo = start.astimezone(NY).strftime("%Y-%m-%d")
     out = {}
