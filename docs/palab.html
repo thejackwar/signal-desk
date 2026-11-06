@@ -1,0 +1,247 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0b0f14">
+<title>Price Action Lab</title>
+<meta name="description" content="Ten price action setups (levels, breakouts, flip zones, trend lines, break of structure, change of character, sweeps, supply and demand zones, fair value gaps) turned into exact rules and tested on QQQ and SPY 1-minute data, with two sealed years opened once. Free, information only.">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Investment Center Signals">
+<meta property="og:title" content="Price Action Lab: do the rules actually work? | Investment Center Signals">
+<meta property="og:description" content="Every price action rule as exact dials, over a hundred thousand versions, a strict funnel and two sealed years opened once.">
+<meta property="og:url" content="https://thejackwar.github.io/signal-desk/palab.html">
+<meta property="og:image" content="https://thejackwar.github.io/signal-desk/og-image.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="canonical" href="https://thejackwar.github.io/signal-desk/palab.html">
+<script>
+(() => {
+  const CF_ANALYTICS_TOKEN = "a2d6810a28f64b999832485d1635915a";
+  if (!CF_ANALYTICS_TOKEN || location.hostname === "localhost") return;
+  const s = document.createElement("script");
+  s.defer = true; s.src = "https://static.cloudflareinsights.com/beacon.min.js";
+  s.dataset.cfBeacon = JSON.stringify({ token: CF_ANALYTICS_TOKEN });
+  document.head.appendChild(s);
+})();
+</script>
+<script src="sections.js?v=2" defer></script>
+<link rel="icon" href="favicon.ico?v=2" sizes="any">
+<link rel="icon" type="image/svg+xml" href="logo.svg?v=2">
+<link rel="apple-touch-icon" href="icon-180.png?v=2">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+:root {
+  --bg: #0b0f14; --panel: #0e141c; --panel-2: #121a24; --line: #1e2834; --line-2: #2a3644;
+  --fg: #e8eef4; --muted: #9aa7b4; --faint: #6b7886;
+  --up: #2fd6a0; --up-2: #1c8f6b; --down: #f0566a; --down-2: #9c3443;
+  --blue: #6cb4ff; --blue-bg: rgba(108,180,255,.12); --amber: #f5b84a; --amber-bg: rgba(245,184,74,.12);
+  --font: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body { background: radial-gradient(1200px 600px at 50% -200px, #132033 0%, var(--bg) 60%) no-repeat, var(--bg); color: var(--fg);
+  font: 16px/1.5 var(--font); -webkit-font-smoothing: antialiased; font-feature-settings: "tnum"; padding-bottom: calc(40px + env(safe-area-inset-bottom, 0px)); }
+a { color: var(--blue); text-decoration: none; }
+a:hover { text-decoration: underline; }
+.wrap { max-width: 920px; margin: 0 auto; padding: 0 22px; }
+@media (max-width: 560px) { .wrap { padding: 0 16px; } }
+.bar { position: sticky; top: 0; z-index: 20; background: rgba(11,15,20,.86); backdrop-filter: saturate(180%) blur(20px); -webkit-backdrop-filter: saturate(180%) blur(20px);
+  border-bottom: 1px solid var(--line); padding-top: env(safe-area-inset-top, 0px); }
+.bar-in { max-width: 920px; margin: 0 auto; padding: 0 22px; height: 48px; display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; }
+.back { font-size: 14px; }
+.bar-title { font-size: 15px; font-weight: 600; }
+.k { font: 500 11px/1.3 var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.k.amber { color: var(--amber); }
+.hero { padding: 44px 0 10px; }
+.hero h1 { font-size: clamp(34px, 7vw, 54px); line-height: 1.04; letter-spacing: -.035em; margin: 10px 0 12px; font-weight: 700; }
+.hero p.lede { color: var(--muted); font-size: 18px; max-width: 660px; margin: 0; }
+.fine { color: var(--faint); font-size: 13px; }
+.status { display: flex; gap: 8px; flex-wrap: wrap; margin: 22px 0 6px; }
+.status span { font: 500 11.5px var(--mono); padding: 5px 10px; border-radius: 980px; background: #0a1017; border: 1px solid var(--line); color: var(--faint); }
+.status span.done { color: var(--fg); border-color: var(--line-2); }
+.status span.now { color: var(--amber); border-color: rgba(245,184,74,.4); background: var(--amber-bg); }
+
+.toc { display: flex; gap: 6px; flex-wrap: wrap; margin: 18px 0 4px; }
+.toc a { font-size: 13px; color: var(--muted); padding: 5px 11px; border-radius: 980px; background: #121a24; }
+.toc a:hover { color: var(--fg); text-decoration: none; }
+
+.card { background: linear-gradient(180deg, var(--panel-2), var(--panel)); border: 1px solid var(--line); border-radius: 10px; padding: 20px 20px 16px; margin: 18px 0; scroll-margin-top: 110px; }
+@media (max-width: 560px) { .card { padding: 16px 14px 14px; } }
+.card h2 { font-size: clamp(22px, 4.6vw, 28px); letter-spacing: -.02em; margin: 8px 0 4px; line-height: 1.15; }
+.card .sub { color: var(--muted); margin: 0 0 14px; font-size: 15px; }
+.stats { display: flex; gap: 14px 34px; flex-wrap: wrap; margin: 16px 0 6px; }
+.stats b { display: block; font: 600 clamp(30px, 7vw, 44px)/1 var(--font); letter-spacing: -.03em; color: var(--blue); }
+.stats small { color: var(--muted); font-size: 13px; }
+.concl { display: flex; gap: 10px; align-items: flex-start; border-top: 1px solid var(--line); margin-top: 14px; padding-top: 12px; color: var(--muted); font-size: 14.5px; }
+.badge { flex: none; font: 600 10.5px/1 var(--mono); letter-spacing: .06em; text-transform: uppercase; padding: 5px 8px; border-radius: 980px; white-space: nowrap; }
+.badge.survived { background: rgba(47,214,160,.14); color: var(--up); }
+.badge.split { background: var(--amber-bg); color: var(--amber); }
+.badge.didnt { background: rgba(240,86,106,.13); color: var(--down); }
+
+/* charts */
+.rows { display: grid; gap: 7px; }
+.r { display: grid; grid-template-columns: minmax(120px, 34%) 1fr auto; gap: 10px; align-items: center; font-size: 13.5px; }
+@media (max-width: 560px) { .r { grid-template-columns: 1fr auto; } .r .track { grid-column: 1 / -1; } }
+.r .lab { color: var(--fg); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.r .lab small { display: block; color: var(--faint); font-size: 11.5px; white-space: normal; }
+.r .val { font: 500 12.5px var(--mono); color: var(--muted); text-align: right; white-space: nowrap; }
+.track { position: relative; height: 18px; }
+.track .zero { position: absolute; top: -2px; bottom: -2px; width: 1px; background: var(--line-2); }
+.track .fill { position: absolute; top: 4px; height: 10px; border-radius: 2px; transition: width .7s cubic-bezier(.2,.7,.2,1), left .7s cubic-bezier(.2,.7,.2,1); }
+.track .fill.pos { background: var(--up-2); } .track .fill.neg { background: var(--down-2); }
+.track .fill.pos.ok { background: var(--up); }
+.track .ci { position: absolute; top: 8px; height: 2px; background: var(--muted); transition: opacity .6s; }
+.track .dot { position: absolute; top: 4px; width: 10px; height: 10px; margin-left: -5px; border-radius: 50%; transition: left .7s cubic-bezier(.2,.7,.2,1); }
+.funnel .track .fill { left: 0; background: linear-gradient(90deg, #2a7fd4, var(--blue)); }
+.funnel .track .fill.last { background: linear-gradient(90deg, var(--up-2), var(--up)); }
+.steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; }
+.steps div { border: 1px solid var(--line); border-radius: 8px; padding: 12px; background: #0b1118; }
+.steps i { display: inline-grid; place-items: center; width: 22px; height: 22px; border-radius: 50%; background: var(--amber-bg); color: var(--amber); font: 600 11px var(--mono); font-style: normal; }
+.steps b { display: block; margin-top: 8px; font-size: 15px; }
+.steps span { color: var(--muted); font-size: 13px; }
+svg.sc { display: block; width: 100%; height: auto; }
+.tw { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+th, td { padding: 8px 8px; text-align: right; border-bottom: 1px solid var(--line); white-space: nowrap; }
+th { font: 500 10.5px var(--mono); letter-spacing: .06em; text-transform: uppercase; color: var(--faint); }
+th:first-child, td:first-child, th:nth-child(2), td:nth-child(2) { text-align: left; }
+td.up { color: var(--up); } td.down { color: var(--down); }
+.legend { display: flex; gap: 14px; flex-wrap: wrap; font: 500 11px var(--mono); color: var(--faint); margin-top: 10px; }
+.legend i { display: inline-block; width: 10px; height: 3px; vertical-align: middle; margin-right: 6px; }
+.empty { padding: 40px 0; text-align: center; color: var(--muted); }
+.note { border-left: 2px solid var(--blue); padding: 4px 0 4px 14px; color: var(--muted); margin: 16px 0; font-size: 15px; }
+footer { margin-top: 48px; border-top: 1px solid var(--line); padding-top: 16px; }
+@media (prefers-reduced-motion: reduce) { .track .fill, .track .dot { transition: none; } }
+</style>
+</head>
+<body>
+<nav class="bar" aria-label="Page">
+  <div class="bar-in">
+    <a class="back" href="index.html#strategylab" aria-label="Back to Strategy Lab">‹ Strategies</a>
+    <span class="bar-title">Price Action Lab</span>
+    <span></span>
+  </div>
+</nav>
+
+<main class="wrap">
+  <section class="hero">
+    <span class="k amber">Research · QQQ and SPY · 1-minute data</span>
+    <h1>Does price action actually work?</h1>
+    <p class="lede">Levels, breakouts, flip zones, trend lines, break of structure, change of character, sweeps, supply and demand zones and fair value gaps, each turned into exact rules a computer can test. Rules are found on 2022 to July 2024. The last two years stay sealed until everything is chosen, then open once.</p>
+    <div class="status" id="status"></div>
+    <nav class="toc" id="toc" aria-label="Findings"></nav>
+  </section>
+
+  <div id="findings"><p class="empty">Loading the lab…</p></div>
+
+  <div class="note">How to read a verdict: <b>survived</b> means the effect points the claimed way with an interval that excludes zero on QQQ, SPY agrees and both eras agree (or, in the final test, it held on both markets). <b>Split</b> means only part of that holds. With many tests, a few will pass by luck; that is why the last two years stay sealed.</div>
+
+  <footer>
+    <p class="fine">Data: Alpaca 1-minute bars of QQQ and SPY (all US exchanges, split- and dividend-adjusted), regular hours 09:30 to 16:00 New York. QQQ stands in for Nasdaq 100 futures and SPY for S&amp;P 500 futures. Every trade is 100 shares, pays $1 commission per round trip and 1 cent of slippage on market orders and stops; limits fill only when price trades a cent through them, and a candle that hits both the stop and the target counts as a loss. News days are CPI, jobs reports and FOMC statements from the BLS and Federal Reserve calendars. Code and every saved result: <a href="https://github.com/thejackwar/signal-desk/tree/main/research/pa_lab">research/pa_lab</a>. Backtests are not a promise of future results. For information only. Not investment advice.</p>
+  </footer>
+</main>
+
+<script>
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const VCLASS = { "survived": "survived", "split": "split", "didn't survive": "didnt" };
+const badge = v => v ? `<span class="badge ${VCLASS[v] || "split"}">${esc(v)}</span>` : "";
+async function load(p) { try { const r = await fetch(p + "?t=" + Date.now()); return r.ok ? r.json() : null; } catch { return null; } }
+
+const STAGES = [["setup", "Dials and data"], ["behaviour", "Behaviour tests"], ["funnel", "Funnel"], ["final", "Sealed test"]];
+function status(s) {
+  const at = STAGES.findIndex(x => x[0] === s);
+  $("status").innerHTML = STAGES.map(([id, label], i) =>
+    `<span class="${i < at || s === "final" ? "done" : i === at + 1 ? "now" : ""}">${i <= at ? "✓ " : ""}${esc(label)}</span>`).join("");
+}
+
+// signed horizontal bar on a shared scale; returns the html for one track
+function bar(v, max, ok, ci) {
+  const z = 50, w = Math.min(50, Math.abs(v) / (max || 1) * 50);
+  const left = v >= 0 ? z : z - w;
+  let h = `<div class="track"><div class="zero" style="left:${z}%"></div>`;
+  if (ci) {
+    const a = z + Math.max(-50, Math.min(50, ci[0] / max * 50)), b = z + Math.max(-50, Math.min(50, ci[1] / max * 50));
+    h += `<div class="ci" style="left:${a}%;width:${Math.max(0.5, b - a)}%"></div>`;
+    h += `<div class="dot" data-left="${z + Math.max(-50, Math.min(50, v / max * 50))}%" style="left:${z}%;background:${ok ? "var(--up)" : v >= 0 ? "var(--muted)" : "var(--down)"}"></div>`;
+  } else {
+    h += `<div class="fill ${v >= 0 ? "pos" : "neg"}${ok ? " ok" : ""}" data-left="${left}%" data-w="${w}%" style="left:${z}%;width:0"></div>`;
+  }
+  return h + "</div>";
+}
+
+function chart(c) {
+  if (!c || c.type === "none") return "";
+  if (c.type === "steps") {
+    const txt = { "Dials": "Every rule as fixed values", "Behaviour": "Do levels beat random lines?", "Funnel": "Versions through five stages", "Sealed test": "Two unseen years, opened once" };
+    return `<div class="steps">${c.items.map((t, i) => `<div><i>${i + 1}</i><b>${esc(t)}</b><span>${esc(txt[t] || "")}</span></div>`).join("")}</div>`;
+  }
+  if (c.type === "forest") {
+    const max = Math.max(...c.rows.map(r => Math.max(Math.abs(r.lo), Math.abs(r.hi), Math.abs(r.effect)))) * 1.05;
+    return `<div class="rows">${c.rows.map(r => {
+      const signed = r.effect * r.claim;
+      return `<div class="r"><span class="lab">${esc(r.title)}<small>${esc(r.measure)}</small></span>${bar(r.effect, max, r.verdict === "survived", [r.lo, r.hi])}<span class="val">${r.effect >= 0 ? "+" : "−"}${Math.abs(r.effect).toFixed(3)} ${badge(r.verdict)}</span></div>`;
+    }).join("")}</div><div class="legend"><span><i style="background:var(--muted)"></i>95% interval, 2,000 resamples of whole sessions</span><span>claimed direction: right of the line, except shrinking bounces (left)</span></div>`;
+  }
+  if (c.type === "funnel") {
+    const max = c.values[0] || 1;
+    return `<div class="rows funnel">${c.labels.map((l, i) => `<div class="r"><span class="lab">${esc(l)}</span><div class="track"><div class="fill${i === c.labels.length - 1 ? " last" : ""}" data-left="0%" data-w="${Math.max(0.4, c.values[i] / max * 100)}%" style="left:0;width:0"></div></div><span class="val">${c.values[i].toLocaleString("en-US")}</span></div>`).join("")}</div>`;
+  }
+  if (c.type === "bars") {
+    const max = Math.max(...c.rows.map(r => Math.abs(r.value)), 1e-9) * 1.05;
+    return `<div class="rows">${c.rows.map(r => `<div class="r"><span class="lab">${esc(r.label)}${r.note ? `<small>${esc(r.note)}</small>` : ""}</span>${bar(r.value, max, r.ok)}<span class="val">${r.value >= 0 ? "+" : "−"}${Math.abs(r.value).toFixed(2)}${c.verdicts ? " " + badge(r.verdict) : ""}</span></div>`).join("")}</div><div class="legend"><span>${esc(c.unit)}</span></div>`;
+  }
+  if (c.type === "scatter") {
+    const W = 640, H = 300, P = 36;
+    const xs = c.points.map(p => p[0]), ys = c.points.map(p => p[1]);
+    const yLo = Math.min(...ys), yHi = Math.max(...ys);
+    const ylim = Math.max(Math.abs(yLo), Math.abs(yHi)) || 1;
+    const X = v => P + v * (W - 2 * P), Y = v => H / 2 - v / ylim * (H / 2 - 16);
+    let s = `<svg class="sc" viewBox="0 0 ${W} ${H}" role="img" aria-label="Win rate against dollars per year"><line x1="${P}" x2="${W - P}" y1="${H / 2}" y2="${H / 2}" stroke="var(--line-2)"/>`;
+    for (const t of [0, .25, .5, .75, 1]) s += `<text x="${X(t)}" y="${H - 4}" fill="var(--faint)" font-size="10" font-family="var(--mono)" text-anchor="middle">${Math.round(t * 100)}%</text>`;
+    s += c.points.map(p => `<circle cx="${X(p[0]).toFixed(1)}" cy="${Y(p[1]).toFixed(1)}" r="2" fill="${p[1] >= 0 ? "var(--up)" : "var(--down)"}" opacity=".55"/>`).join("");
+    s += `<text x="${P}" y="12" fill="var(--faint)" font-size="10" font-family="var(--mono)">profit above the line, loss below</text></svg>`;
+    return s + `<div class="legend"><span>across: win rate</span><span>up: dollars per year</span></div>`;
+  }
+  if (c.type === "table") {
+    const cls = v => /^[+]/.test(v) ? "up" : /^-/.test(v) ? "down" : "";
+    return `<div class="tw"><table><thead><tr>${c.cols.map(h => `<th>${esc(h)}</th>`).join("")}</tr></thead><tbody>${c.rows.map((r, i) => `<tr>${r.map((v, j) => `<td class="${j >= 2 ? cls(v) : ""}">${esc(v)}${j === 0 && c.flags && c.flags[i] ? " " + badge("survived") : ""}</td>`).join("")}</tr>`).join("")}</tbody></table></div>`;
+  }
+  return "";
+}
+
+function card(f) {
+  const stats = (f.stats || []).slice(0, 2).map(s => `<div><b>${esc(s.value)}</b><small>${esc(s.label)}</small></div>`).join("");
+  const eng = f.engine ? `<p class="fine" style="margin:12px 0 0">Engine checks: random entries won ${esc(f.engine.random_win)} of trades and lost about their costs; a strategy that peeks one bar ahead won ${esc(f.engine.cheat_win)}. The engine would expose look-ahead.</p>` : "";
+  return `<section class="card" id="f-${esc(f.id)}"><span class="k amber">${esc(f.section)}</span><h2>${esc(f.title)}</h2><p class="sub">${esc(f.subtitle)}</p>
+    ${chart(f.chart)}${stats ? `<div class="stats">${stats}</div>` : ""}${eng}
+    <div class="concl">${f.verdict ? badge(f.verdict) : ""}<span>${esc(f.conclusion)}</span></div></section>`;
+}
+
+// charts build in when a card scrolls into view
+function animate(el) {
+  el.querySelectorAll("[data-left]").forEach(n => {
+    if (n.classList.contains("dot")) n.style.left = n.dataset.left;
+    else { n.style.left = n.dataset.left; n.style.width = n.dataset.w; }
+  });
+}
+
+(async () => {
+  const doc = await load("data/palab/findings.json");
+  if (!doc) {
+    status("setup");
+    $("findings").innerHTML = `<p class="empty">The lab is downloading data and building its rules. Results appear here as each stage finishes.</p>`;
+    return;
+  }
+  status(doc.status);
+  $("findings").innerHTML = doc.findings.map(card).join("");
+  $("toc").innerHTML = doc.findings.map(f => `<a href="#f-${esc(f.id)}">${esc(f.title)}</a>`).join("");
+  const io = "IntersectionObserver" in window ? new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { animate(e.target); io.unobserve(e.target); } }), { threshold: .2 }) : null;
+  document.querySelectorAll(".card").forEach(c => io ? io.observe(c) : animate(c));
+})();
+</script>
+</body>
+</html>

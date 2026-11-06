@@ -1,3 +1,6 @@
 __pycache__/
 preview/
 .cache/
+research/pa_lab/data/
+research/pa_lab/results/final/*.npz
+research/pa_lab/results/final/*.npy

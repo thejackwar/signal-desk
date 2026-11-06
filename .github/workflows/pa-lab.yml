@@ -1,0 +1,166 @@
+name: Price Action Lab
+
+# research/pa_lab: price action rules tested on QQQ/SPY 1-minute bars (README there).
+#  - discovery (run by hand): download + audit + seal, behaviour tests, draw every version (hashed), the funnel
+#    split by setup across parallel jobs, merge, then publish the results page data.
+#  - final (run by hand, ONCE, only when discovery is done): rehearsal with the seal closed, then the one
+#    unlock of the sealed two years. The script refuses to run if final results already exist.
+on:
+  workflow_dispatch:
+    inputs:
+      stage:
+        description: "What to run"
+        type: choice
+        options: [discovery, final]
+        default: discovery
+
+permissions:
+  contents: write
+
+concurrency:
+  group: pa-lab
+  cancel-in-progress: false
+
+env:
+  PYTHONPATH: ${{ github.workspace }}
+  PA_LAB_DATA: ${{ github.workspace }}/research/pa_lab/data
+
+jobs:
+  prepare:
+    if: inputs.stage == 'discovery'
+    runs-on: ubuntu-latest
+    timeout-minutes: 300
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12", cache: pip }
+      - run: pip install -r requirements.txt numba pyarrow pytest
+      - uses: actions/cache/restore@v4
+        with:
+          path: research/pa_lab/data
+          key: pa-lab-data-${{ github.run_id }}
+          restore-keys: pa-lab-data-
+      - name: Download, audit and seal
+        env:
+          ALPACA_KEY_ID: ${{ secrets.ALPACA_KEY_ID }}
+          ALPACA_SECRET_KEY: ${{ secrets.ALPACA_SECRET_KEY }}
+        run: python -m research.pa_lab.data
+      - name: Rulebook and tests (seal, no look-ahead, fills)
+        run: |
+          python -m research.pa_lab.dials
+          python -m pytest research/pa_lab/tests -q
+      - name: Behaviour tests
+        run: python -m research.pa_lab.behavior
+      - name: Draw every version (saved and hashed before any run)
+        run: python -m research.pa_lab.funnel plan
+      - uses: actions/cache/save@v4
+        with:
+          path: research/pa_lab/data
+          key: pa-lab-data-${{ github.run_id }}
+      - uses: actions/upload-artifact@v4
+        with: { name: pa-lab-results-plan, path: research/pa_lab/results, retention-days: 30 }
+
+  funnel:
+    needs: prepare
+    runs-on: ubuntu-latest
+    timeout-minutes: 340
+    strategy:
+      fail-fast: false
+      matrix:
+        setup: [level_bounce, breakout, flip_zone, trend_pullback, trend_line, bos_continuation, choch_reversal, sweep_reclaim, sd_zone, fvg]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12", cache: pip }
+      - run: pip install -r requirements.txt numba pyarrow
+      - uses: actions/cache/restore@v4
+        with:
+          path: research/pa_lab/data
+          key: pa-lab-data-${{ github.run_id }}
+          fail-on-cache-miss: true
+      - uses: actions/download-artifact@v4
+        with: { name: pa-lab-results-plan, path: research/pa_lab/results }
+      - run: python -m research.pa_lab.funnel run --setup ${{ matrix.setup }}
+      - uses: actions/upload-artifact@v4
+        with:
+          name: pa-lab-funnel-${{ matrix.setup }}
+          retention-days: 30
+          path: |
+            research/pa_lab/results/funnel/metrics_${{ matrix.setup }}.csv.gz
+            research/pa_lab/data/funnel_daily/${{ matrix.setup }}_*.npy
+
+  merge:
+    needs: funnel
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12", cache: pip }
+      - run: pip install -r requirements.txt numba pyarrow
+      - uses: actions/cache/restore@v4
+        with:
+          path: research/pa_lab/data
+          key: pa-lab-data-${{ github.run_id }}
+          fail-on-cache-miss: true
+      - uses: actions/download-artifact@v4
+        with: { name: pa-lab-results-plan, path: research/pa_lab/results }
+      - uses: actions/download-artifact@v4
+        with: { pattern: pa-lab-funnel-*, path: dl, merge-multiple: true }
+      - name: Put the per-setup files in place
+        run: |
+          mkdir -p research/pa_lab/results/funnel research/pa_lab/data/funnel_daily
+          find dl -name 'metrics_*.csv.gz' -exec cp {} research/pa_lab/results/funnel/ \;
+          find dl -name '*.npy' -exec cp {} research/pa_lab/data/funnel_daily/ \;
+      - run: python -m research.pa_lab.funnel merge
+      - run: python -m research.pa_lab.export
+      - uses: actions/cache/save@v4
+        with:
+          path: research/pa_lab/data
+          key: pa-lab-data-${{ github.run_id }}-merged
+      - uses: actions/upload-artifact@v4
+        with: { name: pa-lab-data-backup, path: research/pa_lab/data, retention-days: 90 }
+      - name: Publish
+        run: |
+          git config user.name "signal-desk-bot"
+          git config user.email "signal-desk-bot@users.noreply.github.com"
+          git add research/pa_lab/results docs/data/palab
+          git diff --cached --quiet && exit 0
+          git commit -m "Price Action Lab: discovery results"
+          for i in 1 2 3; do git pull --rebase && git push && break; sleep 5; done
+
+  final:
+    if: inputs.stage == 'final'
+    runs-on: ubuntu-latest
+    timeout-minutes: 340
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12", cache: pip }
+      - run: pip install -r requirements.txt numba pyarrow
+      - uses: actions/cache/restore@v4
+        with:
+          path: research/pa_lab/data
+          key: pa-lab-data-none
+          restore-keys: pa-lab-data-
+          fail-on-cache-miss: true
+      - name: Rehearse with the seal closed
+        run: python -m research.pa_lab.final rehearse
+      - name: The final test (one unlock, logged)
+        env:
+          PA_LAB_UNLOCK: final_test
+        run: python -m research.pa_lab.final run
+      - run: python -m research.pa_lab.export
+      - name: Publish results and attach the daily P&L files to a release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          git config user.name "signal-desk-bot"
+          git config user.email "signal-desk-bot@users.noreply.github.com"
+          mkdir -p rel && cp research/pa_lab/results/final/daily_*.npz rel/
+          git rm -q --cached research/pa_lab/results/final/daily_*.npz 2>/dev/null || true
+          git add research/pa_lab/results docs/data/palab
+          git reset -q research/pa_lab/results/final/daily_*.npz research/pa_lab/results/final/*.npy || true
+          git commit -m "Price Action Lab: final test results"
+          for i in 1 2 3; do git pull --rebase && git push && break; sleep 5; done
+          gh release create pa-lab-final rel/* --title "Price Action Lab final daily P&L" --notes "Daily P&L of every version over the sealed window (decisions.md D-13)." || true
