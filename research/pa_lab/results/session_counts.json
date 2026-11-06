@@ -1,0 +1,18 @@
+{
+ "QQQ": {
+  "warmup": 64,
+  "discovery": 646,
+  "era1": 251,
+  "era2": 395,
+  "final": 569,
+  "final_last_session": "2026-11-05"
+ },
+ "SPY": {
+  "warmup": 64,
+  "discovery": 647,
+  "era1": 251,
+  "era2": 396,
+  "final": 569,
+  "final_last_session": "2026-11-05"
+ }
+}

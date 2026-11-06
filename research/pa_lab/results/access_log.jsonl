@@ -1,0 +1,4 @@
+{"t": "2026-11-06T17:34:49+00:00", "event": "unlock_refused", "step": "final_test", "demo": false, "note": ""}
+{"t": "2026-11-06T17:34:49+00:00", "event": "unlock_refused", "step": "something_else", "demo": false, "note": ""}
+{"t": "2026-11-06T17:34:49+00:00", "event": "unlock", "step": "final_test", "demo": false, "note": "guard test"}
+{"t": "2026-11-06T17:34:49+00:00", "event": "relock", "step": "final_test", "demo": false, "note": "guard test"}

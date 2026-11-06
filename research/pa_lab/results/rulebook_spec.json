@@ -1,0 +1,269 @@
+{
+ "setups": [
+  "level_bounce",
+  "breakout",
+  "flip_zone",
+  "trend_pullback",
+  "trend_line",
+  "bos_continuation",
+  "choch_reversal",
+  "sweep_reclaim",
+  "sd_zone",
+  "fvg"
+ ],
+ "names": {
+  "level_bounce": "Level bounce",
+  "breakout": "Breakout",
+  "flip_zone": "Flip zone",
+  "trend_pullback": "Trend pullback",
+  "trend_line": "Trend line",
+  "bos_continuation": "Break of structure",
+  "choch_reversal": "Change of character",
+  "sweep_reclaim": "Sweep and reclaim",
+  "sd_zone": "Supply and demand zone",
+  "fvg": "Fair value gap"
+ },
+ "charts": [
+  "1m",
+  "5m",
+  "15m",
+  "1h",
+  "4h",
+  "1d"
+ ],
+ "triggers": {
+  "1m": [
+   "1m"
+  ],
+  "5m": [
+   "5m",
+   "1m"
+  ],
+  "15m": [
+   "15m",
+   "5m",
+   "1m"
+  ],
+  "1h": [
+   "1h",
+   "15m",
+   "5m"
+  ],
+  "4h": [
+   "4h",
+   "1h",
+   "15m"
+  ],
+  "1d": [
+   "1h"
+  ]
+ },
+ "shared": {
+  "direction": [
+   "long",
+   "short",
+   "both"
+  ],
+  "swing": [
+   2,
+   3,
+   5,
+   8
+  ],
+  "trigger": [
+   "same",
+   "down1",
+   "down2"
+  ],
+  "confirm": [
+   "none",
+   "close_back",
+   "rejection",
+   "engulfing",
+   "either",
+   "lower_bos"
+  ],
+  "entry": [
+   "close",
+   "limit"
+  ],
+  "stop_type": [
+   "hard",
+   "close"
+  ],
+  "stop_ref": [
+   "level",
+   "wick",
+   "swing",
+   "gap_mid"
+  ],
+  "stop_buf": [
+   0.0,
+   0.1,
+   0.25
+  ],
+  "target": [
+   "1R",
+   "1.5R",
+   "2R",
+   "3R",
+   "4R",
+   "5R",
+   "swing"
+  ],
+  "manage": [
+   "hold",
+   "choch_exit"
+  ],
+  "time_exit": [
+   "none",
+   "flat_1600",
+   "24",
+   "96"
+  ]
+ },
+ "filters": {
+  "f_trend": [
+   "off",
+   "setup",
+   "up1",
+   "daily"
+  ],
+  "f_choppy": [
+   "off",
+   "on"
+  ],
+  "f_run": [
+   "off",
+   "3",
+   "5"
+  ],
+  "f_fresh": [
+   "off",
+   "on"
+  ],
+  "f_news": [
+   "trade",
+   "skip",
+   "half"
+  ],
+  "f_session": [
+   "all",
+   "open",
+   "afternoon"
+  ],
+  "f_pullback": [
+   "off",
+   "0.382",
+   "0.5"
+  ],
+  "f_gap": [
+   "off",
+   "on"
+  ]
+ },
+ "level": {
+  "lvl_tol": [
+   0.1,
+   0.25,
+   0.5
+  ],
+  "lvl_touches": [
+   1,
+   2,
+   3,
+   4
+  ],
+  "lvl_shape": [
+   "line",
+   "box"
+  ]
+ },
+ "own": {
+  "level_bounce": {},
+  "breakout": {
+   "bo_margin": [
+    0.0,
+    0.1
+   ]
+  },
+  "flip_zone": {
+   "flip_window": [
+    5,
+    10,
+    20
+   ]
+  },
+  "trend_pullback": {
+   "pb_level": [
+    0.382,
+    0.5,
+    0.618
+   ]
+  },
+  "trend_line": {
+   "tl_tol": [
+    0.1,
+    0.25
+   ]
+  },
+  "bos_continuation": {
+   "retest": [
+    "no",
+    "yes"
+   ]
+  },
+  "choch_reversal": {
+   "retest": [
+    "no",
+    "yes"
+   ]
+  },
+  "sweep_reclaim": {
+   "sweep_depth": [
+    0.05,
+    0.1,
+    0.25
+   ],
+   "reclaim_bars": [
+    1,
+    2,
+    3
+   ]
+  },
+  "sd_zone": {
+   "zone_first": [
+    "yes",
+    "no"
+   ],
+   "zone_age": [
+    50,
+    200
+   ]
+  },
+  "fvg": {
+   "gap_min": [
+    0.0,
+    0.1,
+    0.25
+   ],
+   "gap_first": [
+    "yes",
+    "no"
+   ]
+  }
+ },
+ "valid_versions": {
+  "level_bounce": 48063891456,
+  "breakout": 192255565824,
+  "flip_zone": 288383348736,
+  "trend_pullback": 6007986432,
+  "trend_line": 4005324288,
+  "bos_continuation": 6675540480,
+  "choch_reversal": 6675540480,
+  "sweep_reclaim": 18023959296,
+  "sd_zone": 8010648576,
+  "fvg": 8010648576
+ },
+ "valid_total": 586112454144
+}
