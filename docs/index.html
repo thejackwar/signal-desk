@@ -1814,6 +1814,15 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
 .tm .few { color: var(--amber, #f2c66d); font: 600 10px var(--font-code); text-transform: uppercase; }
 .tm .patmore { margin: 8px 0 0; }
 .tm .patrule { font-size: 12.5px; margin: 8px 0 0; color: var(--muted); }
+.tm .tr.lpr { width: 100%; text-align: left; font: inherit; color: inherit; background: none; border-left: 0; border-right: 0; border-top: 0; cursor: pointer; grid-template-columns: 88px 58px minmax(0, 1fr) 30px 32px 72px 86px; }
+.tm .tr.lpr.on { background: var(--hover); box-shadow: inset 2px 0 0 var(--accent); }
+.tm .lpst { font: 600 9.5px var(--font-code); text-transform: uppercase; letter-spacing: .05em; padding: 1px 5px; border-radius: 4px; white-space: nowrap; }
+.tm .tr .lpst.forming, .tm .lpst.forming { color: #f2c66d; background: rgba(242, 198, 109, .14); }
+.tm .tr .lpst.confirmed, .tm .lpst.confirmed { color: var(--tc); background: color-mix(in srgb, var(--tc) 14%, transparent); }
+.tm .lptf button[aria-pressed="true"] { color: var(--on-accent); background: var(--tc); border-color: var(--tc); }
+.tm .pill.forming { color: #f2c66d; background: rgba(242, 198, 109, .14); }
+.tm .lpside { border-top: 1px solid var(--line); padding-top: 6px; margin-top: 6px; }
+@media (max-width: 560px) { .tm .tr.lpr { grid-template-columns: 54px minmax(0, 1fr) 26px 30px 42px; } .tm .tr.lpr > :nth-child(1), .tm .tr.lpr > :nth-child(7) { display: none; } .tm .tr.lpr > :nth-child(3) { white-space: normal; line-height: 1.25; } .tm .tr.lpr > :nth-child(6) small { display: none; } .tm .lpst { font-size: 8.5px; } }
 @media (max-width: 560px) { .tm .tr.patr { grid-template-columns: 82px minmax(0, 1fr) 18px 62px; } .tm .tr.patr > :nth-child(4), .tm .tr.patr > :nth-child(5) { display: none; } .tm .tr.pats { grid-template-columns: minmax(0, 1fr) 54px 40px 70px; } .tm .tr.pats > :nth-child(2), .tm .tr.pats > :nth-child(5) { display: none; } }
 @media (max-width: 999px) { .tm .tmmk { display: none; } .tm .tmcmd kbd { display: none; } }
 /* phones: the Terminal's S&P 100 / S&P 500 switch gets its own row (the market buttons are in the menu) */
@@ -7409,14 +7418,14 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
     mon: ["MON", "Monitor"], sec: ["DES", "Security"], alrt: ["ALRT", "Alerts"], wei: ["WEI", "World markets"], most: ["MOST", "Most active"],
     live: ["LIVE", "Live paper trades"], news: ["NEWS", "Headlines"], cal: ["CAL", "Calendar"], gc: ["GC", "Rates &amp; Fed"], eqs: ["EQS", "Screener"],
     ctm: ["CTM", "Futures &amp; positioning"], gip: ["GIP", "Multi-chart"], grd: ["GRD", "Strategy grades"], brd: ["BRD", "Breadth &amp; movers"],
-    port: ["PORT", "Practice portfolio"], pxa: ["PXA", "Price alerts"], pat: ["PAT", "BTC chart patterns"],
+    port: ["PORT", "Practice portfolio"], pxa: ["PXA", "Price alerts"], pat: ["PAT", "BTC chart patterns"], lpat: ["LPAT", "Live chart patterns"],
   };
-  const TM_ORDER = Object.keys(TM_P), TM_WIDE = ["trd", "eqs", "gip", "mood", "focus", "trk", "pat"];
+  const TM_ORDER = Object.keys(TM_P), TM_WIDE = ["trd", "eqs", "gip", "mood", "focus", "trk", "pat", "lpat"];
   // workspaces: the Terminal shows one group of panels at a time, so things are easy to find
   // Desk: the one-screen view (chart you can draw on + the signal explained, mood, signals, news, world markets)
   const TM_WS = { desk: ["trd", "mood", "focus", "alrt", "news", "live", "wei", "cal"], market: ["mood", "brd", "news", "cal", "wei", "gc", "ctm"], ticker: ["trd", "mon", "sec"],
-    signals: ["trd", "focus", "trk", "tdt", "alrt", "live", "grd", "pxa"], tools: ["eqs", "most", "gip", "port"], patterns: ["trd", "pat"] };
-  const TM_WSL = [["desk", "Desk", "Chart, signals, mood and news on one screen"], ["market", "Market", "Mood, flow, breadth, news"], ["ticker", "Ticker", "Everything on one stock"], ["signals", "Signals", "Focus alerts, live trades"], ["tools", "Tools", "Screener, charts, portfolio"], ["patterns", "Patterns", "Every BTC chart pattern since 2021, on the chart"], ["all", "All", "Every panel"]];
+    signals: ["trd", "focus", "trk", "tdt", "alrt", "live", "grd", "pxa"], tools: ["eqs", "most", "gip", "port"], patterns: ["trd", "pat"], scanner: ["trd", "lpat"] };
+  const TM_WSL = [["desk", "Desk", "Chart, signals, mood and news on one screen"], ["market", "Market", "Mood, flow, breadth, news"], ["ticker", "Ticker", "Everything on one stock"], ["signals", "Signals", "Focus alerts, live trades"], ["scanner", "Live patterns", "Chart patterns forming now on every stock"], ["tools", "Tools", "Screener, charts, portfolio"], ["patterns", "Patterns", "Every BTC chart pattern since 2021, on the chart"], ["all", "All", "Every panel"]];
   const tmWs = () => {
     if (!pref("tmWsV3", 0)) { setPref("tmWsV3", 1); setPref("tmWs", "desk"); }   // the Desk is the new start, once for everyone
     const w = pref("tmWs", "desk"); return w === "all" || TM_WS[w] ? w : "desk";
@@ -7424,7 +7433,7 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
   const tmWsOf = id => Object.keys(TM_WS).find(k => TM_WS[k].includes(id)) || "all";
   // codes that open a panel (and the tab inside it)
   const TM_JUMP = { TRD: ["trd"], CHART: ["trd"], DESK: ["trd"], MON: ["mon"], WL: ["mon"], WEI: ["wei", "idx"], FUT: ["wei", "fut"], FX: ["wei", "fx"], VOL: ["wei", "vol"], GC: ["gc", "curve"], WIRP: ["gc", "fed"],
-    ECB: ["gc", "fed"], EU: ["gc", "eu"], CTM: ["ctm", "curve"], COT: ["ctm", "cot"], MOST: ["most"], EQS: ["eqs"], GIP: ["gip"], PORT: ["port"], PXA: ["pxa"], GRD: ["grd"], BRD: ["brd"], MOOD: ["mood"], FOCUS: ["focus"], TRK: ["trk"], TDT: ["tdt"], TOPDOWN: ["tdt"], FOC: ["focus"], PAT: ["pat"], PATTERNS: ["pat"] };
+    ECB: ["gc", "fed"], EU: ["gc", "eu"], CTM: ["ctm", "curve"], COT: ["ctm", "cot"], MOST: ["most"], EQS: ["eqs"], GIP: ["gip"], PORT: ["port"], PXA: ["pxa"], GRD: ["grd"], BRD: ["brd"], MOOD: ["mood"], FOCUS: ["focus"], TRK: ["trk"], TDT: ["tdt"], TOPDOWN: ["tdt"], FOC: ["focus"], PAT: ["pat"], PATTERNS: ["pat"], LPAT: ["lpat"], SCAN: ["lpat"], LIVEPAT: ["lpat"] };
   // tabs of the security panel (company data: stocks only)
   const TM_SEC = [["DES", "Overview"], ["FLOW", "Buy / sell flow"], ["OMON", "Options"], ["CN", "News"], ["SIG", "Signals"], ["FA", "Financials"], ["ANR", "Analysts"], ["EE", "Estimates"], ["RV", "Comparables"], ["HDS", "Holders"], ["DVD", "Dividends"]];
   // ticker + code, e.g. "NVDA TL"
@@ -7465,9 +7474,10 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
     let wide = L0.wide ? (L0.v2 ? L0.wide : [...new Set([...L0.wide, "mood", "focus", "trk"])]) : TM_WIDE;
     if (L0.wide && !L0.v3) wide = [...new Set([...wide, "trd"])];
     if (L0.wide && !L0.v4) wide = [...new Set([...wide, "pat"])];
+    if (L0.wide && !L0.v5) wide = [...new Set([...wide, "lpat"])];
     return { order, hidden: (L0.hidden || []).filter(id => TM_P[id]), wide };
   }
-  const tmSetLayout = L0 => setPref("tmLayout", { ...L0, v2: true, v3: true, v4: true });
+  const tmSetLayout = L0 => setPref("tmLayout", { ...L0, v2: true, v3: true, v4: true, v5: true });
   const tmPanel = (cls, code, title, go, body, extra = "") => {
     const id = cls.replace(/^p-/, ""), L0 = tmLayout(), ed = S.tmEdit;
     const ctl = ed ? `<span class="pctl"><button type="button" data-tmmove="${id}:-1" aria-label="Move earlier">◀</button><button type="button" data-tmmove="${id}:1" aria-label="Move later">▶</button><button type="button" data-tmwide="${id}" aria-pressed="${L0.wide.includes(id)}" aria-label="Full width">⤢</button><button type="button" data-tmhide="${id}" aria-label="Hide">✕</button></span>` : "";
@@ -7789,7 +7799,7 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
     return [...(T.open || []), ...(T.closed || [])].filter(x => x.t === a.ticker && x.s === a.strategy && x.side === side && Date.parse(x.d0) >= d0 && Date.parse(x.d0) - d0 <= 5 * 864e5)
       .sort((x, y) => x.d0.localeCompare(y.d0))[0] || null;
   }
-  const CHART_V = 19;   // bump with chart.js?v= in chart.html, so the Terminal's chart frame never shows a cached old page
+  const CHART_V = 21;   // bump with chart.js?v= in chart.html, so the Terminal's chart frame never shows a cached old page
   function tmChartSrc(t, a, embed = true) {
     const tf = a?.tf && ["W", "D", "4H", "1H"].includes(a.tf) ? a.tf : "D";
     const q = ["v=" + CHART_V, embed ? "embed=1" : "", a ? `sig=${encodeURIComponent(a.id)}&m=${S.market}${S.market === "stocks" && uni() === "sp500" ? "&u=sp500" : ""}` : ""].filter(Boolean).join("&");
@@ -7904,6 +7914,14 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
     try { fr.contentWindow.postMessage({ type: "ics-levels", sym: t, levels }, location.origin); } catch {}
   }
   TM_R.trd = () => {
+    const X = S.tmLp && S.market === "stocks" ? tmLpById(S.tmLp) : null;
+    if (S.tmLp && !X && S.lp?.[uni()]) S.tmLp = null;
+    if (X) {
+      const src = tmLpSrc(X);
+      const body = `<div class="trdw"><iframe class="trdf" src="${esc(src)}" title="${esc(disp(X.t))} chart with the ${esc(X.name)} pattern" allow="clipboard-write; fullscreen" allowfullscreen></iframe><div class="trdx">${tmLpSide(X)}</div></div>`;
+      const extra = `<small>${esc(disp(X.t))} · ${esc(X.name)} · ${esc(X.tf)}</small><button type="button" class="trdclose" data-tmsigx title="Back to the plain chart">✕ Pattern</button>`;
+      return tmPanel("p-trd", "TRD", "Pattern on the chart", [tmLpSrc(X, false), "Full screen"], body, extra);
+    }
     const P = S.tmPat ? tmPatById(S.tmPat) : null;
     if (P) {
       const src = `chart.html?v=${CHART_V}&embed=1&pat=${encodeURIComponent(P.id)}#BTC-USD/${P.tf}`;
@@ -7922,7 +7940,7 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
   window.tmTrdLevels = tmTrdLevels;
   function tmOpenSig(id) {
     const a = tmAlertById(id); if (!a) return false;
-    S.tmSig = id; S.tmPat = null;
+    S.tmSig = id; S.tmPat = null; S.tmLp = null;
     if (S.stockBy[a.ticker]) { S.tmSel = a.ticker; setPref("tmSel." + S.market, a.ticker); }
     tmOpen("trd");
     document.querySelectorAll(".tm [data-tmsig]").forEach(b => b.classList.toggle("on", b.dataset.tmsig === id));
@@ -8183,7 +8201,7 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
   const tmEur = v => v == null ? "–" : `<span class="${v >= 0 ? "up" : "down"}">${v > 0 ? "+" : v < 0 ? "−" : ""}€${Math.abs(Math.round(v)).toLocaleString("en-US")}</span>`;
   function tmOpenPat(id) {
     if (!tmPatById(id)) return;
-    S.tmPat = id; S.tmSig = null;
+    S.tmPat = id; S.tmSig = null; S.tmLp = null;
     if (tmWs() !== "patterns" && tmWs() !== "all") { setPref("tmWs", "patterns"); history.replaceState(null, "", "#terminal"); rerender(); }
     else { tmRefresh("trd"); document.querySelectorAll(".tm [data-tmpat]").forEach(b => b.classList.toggle("on", b.dataset.tmpat === id)); }
     requestAnimationFrame(() => document.querySelector(".tm [data-p='trd']")?.scrollIntoView({ behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "start" }));
@@ -8241,6 +8259,116 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
     }
     body += `<p class="fine2">Every pattern the site's detectors found on BTC/USDT ${TF_PAT[F.tf]} candles since ${esc(fmtDate(D0.start, { day: "numeric", month: "short", year: "numeric" }))}, each traded once: in at the next candle's open, out at the pattern's own stop loss or take profit (2× the risk when the pattern has no target), or after ${D0.hold?.[F.tf]} candles. ${D0.fee_pct}% fees each way, no leverage. Built ${esc(tmAgo(D0.as_of))} ago from ${esc(D0.source)}. Past results, not advice.</p>`;
     return tmPanel("p-pat", "PAT", "BTC chart patterns", null, body, `<small>${St.n} trades · ${TF_PAT[F.tf]}</small>`);
+  };
+
+  // ------------------------------------------------ LPAT: chart patterns forming / confirming now on every stock
+  // (engine/live_patterns.py, docs/data/[sp500/]live_patterns.json every 30 minutes while the US market is open;
+  // win rates from docs/data/live_patterns_stats.json, the weekly S&P 100 backtest). Tapping one draws it in the
+  // chart panel (chart.html?lp=<id>).
+  const TF_LP = [["15m", "15m", "15-minute"], ["1H", "1H", "1-hour"], ["4H", "4H", "4-hour"], ["D", "D", "Daily"]];
+  const TF_LPN = Object.fromEntries(TF_LP.map(([k, , l]) => [k, l]));
+  function tmLoadLp() {
+    if (S.market !== "stocks") return null;
+    const u = uni();
+    S.lp = S.lp || {}; S.lpAt = S.lpAt || {};
+    if (S.lpSt === undefined) { S.lpSt = null; opt("data/live_patterns_stats.json").then(d => { S.lpSt = d || false; tmRefresh("lpat"); }); }
+    if (S.lp[u] !== undefined && Date.now() - (S.lpAt[u] || 0) < 2 * 6e4) return S.lp[u];
+    const first = S.lp[u] === undefined; if (first) S.lp[u] = null;
+    S.lpAt[u] = Date.now();
+    opt(UB() + "live_patterns.json").then(d => {
+      if (!d && !first) return;
+      const changed = first || d?.as_of !== S.lp[u]?.as_of;
+      S.lp[u] = d || false;
+      if (changed && uni() === u) { tmRefresh("lpat"); if (S.tmLp) tmRefresh("trd"); }
+    });
+    return S.lp[u];
+  }
+  const tmLpAll = () => { const d = S.lp?.[uni()]; return d ? [...(d.forming || []).map(x => ({ ...x, stage: "forming" })), ...(d.confirmed || []).map(x => ({ ...x, stage: "confirmed" }))] : []; };
+  const tmLpById = id => (tmLoadLp(), tmLpAll().find(x => x.id === id) || null);
+  const tmLpF = () => ({ tfs: ["15m", "1H", "4H", "D"], stage: "", dir: "", edge: "", sort: "new", ...(pref("tmLpF", null) || {}) });
+  function tmLpSet(o) { setPref("tmLpF", { ...tmLpF(), ...o }); tmRefresh("lpat"); }
+  // the pattern's record in the S&P 100 backtest, for one direction: {n, win, avg} (or null)
+  function tmLpEdge(x, dir) {
+    const r = S.lpSt?.stats?.[x.tf]?.[`${x.fam}|${x.name}|${dir}`];
+    return r ? { n: r[0], win: r[1], avg: r[2] } : null;
+  }
+  // forming patterns that can break either way: the better of the two sides
+  function tmLpBest(x) {
+    if (x.stage === "confirmed") return tmLpEdge(x, x.dir);
+    const ds = x.dir === "BOTH" ? Object.keys(x.sides || {}).map(k => k === "up" ? "LONG" : "SHORT") : [x.dir];
+    return ds.map(d => tmLpEdge(x, d)).filter(Boolean).sort((a, b) => b.avg - a.avg)[0] || null;
+  }
+  const tmLpWhen = x => { const d = new Date(x.ts * 1000).toISOString(); return x.tf === "D" ? d.slice(5, 10) : d.slice(5, 16).replace("T", " "); };
+  const tmLpDir = d => d === "LONG" ? `<span class="side-b">▲</span>` : d === "SHORT" ? `<span class="side-s">▼</span>` : `<span class="dim">▲▼</span>`;
+  const tmLpWin = e => !e ? `<span class="dim">–</span>` : `<span class="${e.n < 20 ? "dim" : e.avg > 0 && e.win >= 50 ? "up" : e.avg < 0 ? "down" : ""}" title="${e.n} breakouts on S&amp;P 100 stocks: ${e.win}% won, ${e.avg > 0 ? "+" : ""}${e.avg}% average after costs">${Math.round(e.win)}%<small class="dim"> ${e.n}</small></span>`;
+  function tmLpState(x) {
+    if (x.stage === "forming") {
+      const s = x.sides || {}, near = [s.up && ["above", s.up.level], s.down && ["below", s.down.level]].filter(Boolean)
+        .map(([w, l]) => [w, l, Math.abs(l / x.px - 1) * 100]).sort((a, b) => a[2] - b[2])[0];
+      return near ? `<span class="dim" title="Confirms on a close ${near[0]} ${money(near[1])}">${near[2].toFixed(1)}% to go</span>` : `<span class="dim">forming</span>`;
+    }
+    if (x.why === "target") return `<span class="up">take profit</span>`;
+    if (x.why === "stop") return `<span class="down">stop loss</span>`;
+    if (x.why === "time") return `<span class="dim">time · ${tmPct(x.ret, 1)}</span>`;
+    return tmPct(x.ret, 1);
+  }
+  function tmOpenLp(id) {
+    if (!tmLpById(id)) return;
+    S.tmLp = id; S.tmSig = null; S.tmPat = null;
+    if (tmWs() !== "scanner" && tmWs() !== "all") { setPref("tmWs", "scanner"); history.replaceState(null, "", "#terminal"); rerender(); }
+    else { tmRefresh("trd"); document.querySelectorAll(".tm [data-tmlp]").forEach(b => b.classList.toggle("on", b.dataset.tmlp === id)); }
+    requestAnimationFrame(() => document.querySelector(".tm [data-p='trd']")?.scrollIntoView({ behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "start" }));
+  }
+  const tmLpSrc = (x, embed = true) => `chart.html?v=${CHART_V}${embed ? "&embed=1" : ""}&lp=${encodeURIComponent(x.id)}${uni() === "sp500" ? "&u=sp500" : ""}#${encodeURIComponent(x.t)}/${x.tf}`;
+  function tmLpSide(x) {
+    const D0 = S.lp?.[uni()], R = D0?.rules?.[`${x.fam}|${x.name}`] || {}, form = x.stage === "forming";
+    const lvl = (k, s) => { const up = k === "up", e = tmLpEdge(x, up ? "LONG" : "SHORT");
+      return `<div class="lpside"><p><b class="${up ? "up" : "down"}">${up ? "▲ Breaks out above" : "▼ Breaks down below"} ${money(s.level)}</b> <span class="dim">${tmPct((s.level / x.px - 1) * 100)} from ${money(x.px)}</span></p>
+        <div class="kpis"><div><small>Stop loss</small><b class="down">${s.stop == null ? "–" : money(s.stop)}</b></div><div><small>Take profit</small><b class="up">${s.target == null ? "2R" : money(s.target)}</b></div><div><small>Won in tests</small><b>${e ? Math.round(e.win) + "%" : "–"}</b></div><div><small>Avg trade</small><b>${e ? tmPct(e.avg, 2) : "–"}</b></div></div></div>`; };
+    let h = `<div class="trdhd"><span class="pill ${form ? "forming" : x.dir === "LONG" ? "bullish" : "bearish"}">${form ? "Forming" : x.dir === "LONG" ? "▲ Confirmed" : "▼ Confirmed"}</span><b>${esc(disp(x.t))}</b><span>${esc(x.name)} · ${esc(TF_LPN[x.tf] || x.tf)}</span><span class="dim">${esc(tmLpWhen(x))} NY</span></div>
+      <p class="trdnote">${esc(PAT_FAM[x.fam] || "")} pattern. ${form ? "Not confirmed yet: it only counts once a candle closes through the trigger line." : `Confirmed by the ${esc(TF_LPN[x.tf] || x.tf)} candle of ${esc(tmLpWhen(x))} (New York time). ${esc(R.trigger || "")}.`}</p>`;
+    if (form) {
+      h += Object.entries(x.sides || {}).map(([k, s]) => lvl(k, s)).join("");
+      h += `<p class="fine2">Stop loss: ${esc(R.stop || "the pattern's own stop")}. Take profit: ${esc(R.target || "the pattern's target")}.</p>`;
+    } else {
+      const e = tmLpEdge(x, x.dir), risk = Math.abs(x.entry / x.stop - 1) * 100, rew = Math.abs(x.target / x.entry - 1) * 100;
+      const why = { stop: "The stop loss was hit", target: "The take profit was hit", time: `Neither was hit in ${D0?.tfs?.[x.tf]?.hold || "–"} candles`, open: "Still open" };
+      h += `<div class="kpis"><div><small>Breakout close</small><b>${money(x.entry)}</b></div><div><small>Stop loss</small><b class="down">${money(x.stop)}</b></div><div><small>Take profit</small><b class="up">${money(x.target)}</b></div><div><small>Since</small><b>${tmPct(x.ret, 2)}</b></div></div>
+        <p><b>Stop loss:</b> ${esc(R.stop || "the pattern's stop")} (${risk.toFixed(1)}% away). <b>Take profit:</b> ${esc(R.target || "the pattern's target")}${x.tr === "2R" ? " (2× the risk)" : ""} (${rew.toFixed(1)}% away, ${(rew / (risk || 1)).toFixed(1)}× the risk).</p>
+        <p>${why[x.why] || why.open}${x.why && x.why !== "open" ? ` at ${money(x.exit)}` : `, last ${money(x.px)}`}: <b>${tmPct(x.ret, 2)}</b> from the breakout close.</p>
+        ${e ? `<h4>Every ${esc(x.name)} ${x.dir === "LONG" ? "long" : "short"} in the test (${esc(TF_LPN[x.tf])}, S&amp;P 100)</h4><div class="kpis"><div><small>Trades</small><b>${e.n}</b></div><div><small>Won</small><b>${Math.round(e.win)}%</b></div><div><small>Avg after costs</small><b>${tmPct(e.avg, 2)}</b></div></div>${e.n < 20 ? `<p class="fine2">Under 20 trades: mostly luck.</p>` : ""}` : ""}`;
+    }
+    return h + `<div class="secacts"><a href="#terminal-${encodeURIComponent(x.t)}" data-tmsel="${esc(x.t)}"><b>${esc(disp(x.t))}</b>Everything on it</a><a href="${esc(tmLpSrc(x, false))}"><b>CHART</b>Full screen</a></div>
+      <p class="fine2">On the chart: the amber shape is what the detector saw, the dashed lines are its boundaries${form ? ", the green / red rays are the trigger lines with the stop loss and take profit for each side" : ", the box is the trade from the breakout close (green to the take profit, red to the stop loss)"}. Not advice.</p>`;
+  }
+  TM_R.lpat = () => {
+    if (S.market !== "stocks") return tmPanel("p-lpat", "LPAT", "Live chart patterns", null, `<p class="empty2">The live pattern scanner runs on stocks. For Bitcoin, see <a href="#terminal" data-tmws="patterns">Patterns</a>.</p>`);
+    const D0 = tmLoadLp(), F = tmLpF();
+    if (!D0) return tmPanel("p-lpat", "LPAT", "Live chart patterns", null, `<p class="empty2">${D0 === false ? "The first scan runs with the next 30-minute check while the US market is open." : "Loading…"}</p>`);
+    const all = tmLpAll(), tfOk = x => F.tfs.includes(x.tf);
+    const L = all.filter(x => tfOk(x) && (!F.stage || x.stage === F.stage)
+      && (!F.dir || (x.stage === "forming" ? (F.dir === "LONG" ? x.sides?.up : x.sides?.down) : x.dir === F.dir))
+      && (!F.edge || (() => { const e = tmLpBest(x); return e && e.n >= 20 && e.avg > 0; })()));
+    const key = x => F.sort === "win" ? -((tmLpBest(x)?.n >= 20 ? tmLpBest(x).avg : -99)) : F.sort === "tk" ? 0 : -x.ts;
+    L.sort((a, b) => F.sort === "tk" ? a.t.localeCompare(b.t) || a.tf.localeCompare(b.tf) : key(a) - key(b) || a.t.localeCompare(b.t));
+    const nf = L.filter(x => x.stage === "forming").length, nc = L.length - nf;
+    const tfb = TF_LP.map(([k, l, nm]) => `<button type="button" data-tmlpf="tf=${k}" aria-pressed="${F.tfs.includes(k)}" title="${nm} candles (${all.filter(x => x.tf === k).length} now)">${l}</button>`).join("");
+    const sel = (k, opts) => `<select data-tmlpsel="${k}">${opts.map(([v, l]) => `<option value="${v}"${F[k] === v ? " selected" : ""}>${l}</option>`).join("")}</select>`;
+    let body = `<div class="patbar"><div class="seg sm lptf" role="group" aria-label="Timeframes">${tfb}</div>
+      <div class="ptabs" role="tablist">${[["", "All"], ["forming", "Forming"], ["confirmed", "Confirmed"]].map(([v, l]) => `<button type="button" role="tab" data-tmlpf="stage=${v}" aria-selected="${F.stage === v}">${l}</button>`).join("")}</div>
+      <label>Side ${sel("dir", [["", "Long &amp; short"], ["LONG", "Long"], ["SHORT", "Short"]])}</label>
+      <label>Show ${sel("edge", [["", "Every pattern"], ["pos", "Only ones that made money in tests"]])}</label>
+      <label>Sort ${sel("sort", [["new", "Newest"], ["win", "Best in tests"], ["tk", "Ticker"]])}</label></div>
+      <div class="kpis"><div><small>Forming</small><b>${nf}</b></div><div><small>Confirmed</small><b>${nc}</b></div><div><small>Stocks</small><b>${new Set(L.map(x => x.t)).size}</b></div><div><small>Scanned</small><b>${esc(tmAgo(D0.as_of))} ago</b></div></div>`;
+    const N = S.tmLpN || 150, show = L.slice(0, N);
+    if (!S.tmLp && !S.tmSig && !S.tmPat && show.length && tmWs() === "scanner") { S.tmLp = show[0].id; setTimeout(() => tmRefresh("trd"), 0); }
+    body += show.length ? `<div class="tr lpr th"><span>When (NY)</span><span>Stock</span><span>Pattern</span><span></span><span>TF</span><span class="r" title="Won in the S&amp;P 100 backtest (number of trades)">Won</span><span class="r">Now</span></div>`
+      + show.map(x => `<button type="button" class="tr lpr${S.tmLp === x.id ? " on" : ""}" data-tmlp="${esc(x.id)}" title="Tap to see it on the chart"><span class="dim">${esc(tmLpWhen(x))}</span><span class="tk">${esc(disp(x.t))}</span><span><b>${esc(x.name)}</b> <small class="lpst ${x.stage}">${x.stage === "forming" ? "forming" : "confirmed"}</small></span>${tmLpDir(x.dir)}<span class="dim">${esc(x.tf)}</span><span class="r">${tmLpWin(tmLpBest(x))}</span><span class="r">${tmLpState(x)}</span></button>`).join("")
+      + (L.length > N ? `<button type="button" class="btn ghost sm patmore" data-tmlpmore>Show ${Math.min(200, L.length - N)} more (${L.length - N} left)</button>` : "")
+      : `<p class="empty2">No patterns match these filters right now.</p>`;
+    const St = S.lpSt;
+    body += `<p class="fine2">Every ${UL()} stock, checked every 30 minutes while the US market is open on 15-minute, 1-hour, 4-hour and daily candles (finished candles only, data ${esc(D0.data_end || "")}). <b>Forming</b>: the shape is complete and price is still inside it. <b>Confirmed</b>: a candle closed through the trigger line; listed for a few days with how it went since. “Won” is that pattern's record on that timeframe in the ${St ? `S&amp;P 100 backtest (daily and 4-hour since ${esc(St.from?.D?.slice(0, 4) || "2021")}, 1-hour since ${esc(St.from?.["1H"]?.slice(0, 4) || "2023")}, 15-minute since ${esc(fmtDate(St.from?.["15m"] || "2025-05-01", { month: "short", year: "numeric" }))}; in at the next open, out at its stop loss, take profit or after a set time, ${St.fee_pct}% costs each way)` : "weekly backtest (not built yet)"}; grey = under 20 trades. Candlestick patterns, inside bars and NR4 candles are only listed once confirmed. Not advice.</p>`;
+    return tmPanel("p-lpat", "LPAT", "Live chart patterns", null, body, `<small>${nf} forming · ${nc} confirmed</small>`);
   };
 
   // ticker tabs: FLOW (who's buying), OMON (options), CN (every headline), SIG (every signal)
@@ -8628,7 +8756,7 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
     return `<span>MIL <b>${f("Europe/Rome")}</b></span><span>NY <b>${f("America/New_York")}</b></span><span class="${open ? "open" : "closed"}">● ${st}</span>`;
   }
   function tmHelp() {
-    const pc = [["MOOD", "Market mood & flow"], ["FOCUS", "Focus alerts"], ["TRK", "Does Focus work?"], ["TDT", "Top-Down paper trades"], ["MARKET", "Market section"], ["TICKER", "Ticker section"], ["SIGNALS", "Signals section"], ["TOOLS", "Tools section"], ["EQS", "Screener"], ["MOST", "Most active"], ["WEI", "World indices"], ["FUT", "US index futures"], ["FX", "Currencies"], ["VOL", "VIX curve"], ["GC", "US yield curve"], ["WIRP", "Fed & ECB odds"], ["EU", "BTP–Bund spread"],
+    const pc = [["MOOD", "Market mood & flow"], ["FOCUS", "Focus alerts"], ["TRK", "Does Focus work?"], ["TDT", "Top-Down paper trades"], ["LPAT", "Live chart patterns (stocks)"], ["MARKET", "Market section"], ["TICKER", "Ticker section"], ["SIGNALS", "Signals section"], ["TOOLS", "Tools section"], ["EQS", "Screener"], ["MOST", "Most active"], ["WEI", "World indices"], ["FUT", "US index futures"], ["FX", "Currencies"], ["VOL", "VIX curve"], ["GC", "US yield curve"], ["WIRP", "Fed & ECB odds"], ["EU", "BTP–Bund spread"],
       ["CTM", "Futures curves"], ["COT", "Positioning (CFTC)"], ["GIP", "Multi-chart"], ["PORT", "Practice portfolio"], ["PXA", "Price alerts"], ["WL", "Watchlists"], ["LAYOUT", "Rearrange panels"]];
     return `<div class="help" id="tmhelp"><p>Type in the command line and press Enter. A ticker on its own loads it. Add a code after a ticker to open a tab or a tool, e.g. <b style="min-width:0">NVDA FA</b> or <b style="min-width:0">AAPL TL</b>. Press <b style="min-width:0">/</b> or just start typing to focus the command line.</p>
       <p style="margin-top:4px"><b style="min-width:0">Panels on this screen</b></p>${pc.map(([c, l]) => `<div><b>${c}</b><span>${esc(l)}</span></div>`).join("")}
@@ -8678,7 +8806,7 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
       tmLoadFlow();
       tmLiveApply(); tmLiveLoad();
       clearInterval(S.tmTimer);
-      S.tmTimer = setInterval(() => { const c = document.getElementById("tmclock"); if (!c) { clearInterval(S.tmTimer); return; } c.innerHTML = tmClock(); tmLiveLoad(); tmLoadFlow(); }, 20000);
+      S.tmTimer = setInterval(() => { const c = document.getElementById("tmclock"); if (!c) { clearInterval(S.tmTimer); return; } c.innerHTML = tmClock(); tmLiveLoad(); tmLoadFlow(); tmLoadLp(); }, 20000);
       const sel = document.querySelector(".tm .mon[aria-current='true']");
       if (sel) { const b = sel.closest(".pnb"); b.scrollTop = sel.offsetTop - b.clientHeight / 2; }
       if (WIDE.matches && !S.tmFocused) { S.tmFocused = true; document.getElementById("tmcmd")?.focus({ preventScroll: true }); }
@@ -8765,7 +8893,11 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
     if ((x = D("[data-tmgipadd]"))) { e.preventDefault(); gipAdd(x.dataset.tmgipadd); return true; }
     if ((x = D("[data-tmpxfor]"))) { e.preventDefault(); S.tmFor = x.dataset.tmpxfor; tmOpen("pxa"); return true; }
     if ((x = D("[data-tmpxdel]"))) { const id = x.dataset.tmpxdel; fetch(`${trendApi()}/?px=del`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ topic: pxTopic(), id }) }).finally(() => pxList(true)); x.disabled = true; return true; }
-    if ((x = D("[data-tmsigx]"))) { S.tmSig = null; S.tmPat = null; tmRefresh("trd"); tmRefresh("pat"); return true; }
+    if ((x = D("[data-tmsigx]"))) { S.tmSig = null; S.tmPat = null; S.tmLp = null; tmRefresh("trd"); tmRefresh("pat"); tmRefresh("lpat"); return true; }
+    if ((x = D("[data-tmlp]"))) { e.preventDefault(); tmOpenLp(x.dataset.tmlp); return true; }
+    if ((x = D("[data-tmlpf]"))) { const [k, v] = x.dataset.tmlpf.split("="); if (k === "tf") { const F = tmLpF(), on = F.tfs.includes(v) ? F.tfs.filter(t => t !== v) : [...F.tfs, v]; tmLpSet({ tfs: on.length ? on : [v] }); } else tmLpSet({ [k]: v }); S.tmLpN = 150; return true; }
+    if ((x = D("[data-tmlpmore]"))) { S.tmLpN = (S.tmLpN || 150) + 200; tmRefresh("lpat"); return true; }
+    if ((x = D("[data-tmws]")) && x.closest(".p-lpat")) { e.preventDefault(); setPref("tmWs", x.dataset.tmws); rerender(); return true; }
     if ((x = D("[data-tmpat]"))) { e.preventDefault(); tmOpenPat(x.dataset.tmpat); return true; }
     if ((x = D("[data-tmpatf]"))) { const [k, v] = x.dataset.tmpatf.split("="); tmPatSet({ [k]: v, ...(k === "name" ? { view: "trades" } : {}) }); return true; }
     if ((x = D("[data-tmpatmore]"))) { S.tmPatN = (S.tmPatN || 120) + 200; tmRefresh("pat"); return true; }
@@ -8784,6 +8916,7 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
     const el = e.target; if (!el.closest?.(".tm")) return;
     if (el.dataset.tmscr) { const [i, k] = el.dataset.tmscr.split(":"), c = eqConds(); if (!c[+i]) return; if (k === "f") c[+i][0] = el.value; if (k === "op") c[+i][1] = el.value; if (k === "v") return; eqSave(c); tmRefresh("eqs"); return; }
     if (el.dataset.tmpatsel) { tmPatSet({ [el.dataset.tmpatsel]: el.value }); return; }
+    if (el.dataset.tmlpsel) { S.tmLpN = 150; tmLpSet({ [el.dataset.tmlpsel]: el.value }); return; }
     if (el.matches("[data-tmscrsec]")) { setPref("tmScrSec", el.value); const r = document.getElementById("tmscrres"); if (r) r.innerHTML = eqResults(); return; }
     if (el.dataset.tmgipt != null) { const t = tmFind(el.value), i = +el.dataset.tmgipt, sl = gipSlots(); if (t && sl[i]) { sl[i].t = t; setPref("tmGip." + S.market, sl); tmRefresh("gip"); } else el.value = sl[i] ? sym(sl[i].t) : ""; }
   });

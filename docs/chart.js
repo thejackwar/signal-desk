@@ -136,9 +136,12 @@ const Q = new URLSearchParams(location.search);
 // Pattern view: chart.html?pat=<trade id>#BTC-USD/D draws one trade from the BTC pattern backtest
 // (docs/data/crypto/btc_patterns.json, engine/btc_patterns.py): the pattern's shape, its stop, its target and how it ended.
 const PAT_ID = Q.get("pat");
+// Live pattern view: chart.html?lp=<id>[&u=sp500]#TICKER/TF draws one pattern from the live stock scanner
+// (docs/data/[sp500/]live_patterns.json, engine/live_patterns.py): forming (its trigger lines) or confirmed (the trade since).
+const LP_ID = PAT_ID ? null : Q.get("lp");
 // Strategy trade view: chart.html?st=<Lab strategy>&m=<market>&t=<ticker>&side=1|-1&d0=&d1=&p0=&p1=&why=&r=&n=<name>#TICKER/D draws one
 // trade from Strategy Trades (trades.html, the Strategy Lab's rules on lab.json): entry, exit and the result, as editable drawings.
-const ST_ID = PAT_ID ? null : Q.get("st");
+const ST_ID = PAT_ID || LP_ID ? null : Q.get("st");
 const SIG_ID = Q.get("sig"), EMBED = Q.get("embed") === "1", SIG_M = ["stocks", "crypto", "commodities"].includes(Q.get("m")) ? Q.get("m") : "stocks";
 const SIG_BASE = SIG_M === "crypto" ? "data/crypto/" : SIG_M === "commodities" ? "data/commodities/" : Q.get("u") === "sp500" ? "data/sp500/" : "data/";
 let SIG = null;                  // {a: the alert, chart: its chart file, trade: its paper trade, strat: the strategy text}
@@ -323,7 +326,7 @@ function writeHash() { history.replaceState(null, "", `#${encodeURIComponent(S.s
 
 // ------------------------------------------------------------------ picker UI
 function availability(d, c) {
-  if (d.id === "tlv" && (!SIG?.pat || SIG.pat.st)) return "Only on a pattern trade's chart (open one from Chart Patterns).";
+  if (d.id === "tlv" && (!SIG?.pat || SIG.pat.st || SIG.pat.lv)) return "Only on a pattern trade's chart (open one from Chart Patterns).";
   if (d.intra && STEP[S.tf] >= 86400) return "Intraday charts only (VWAP restarts every day).";
   if (d.vol && c && !L.hasVolume(c)) return DATA?.kind === "commodity" ? "No volume data for commodities yet." : "No volume data for this chart yet.";
   return null;
@@ -331,7 +334,7 @@ function availability(d, c) {
 
 function drawPicker() {
   const c = DATA?.frames[S.tf];
-  $("groups").innerHTML = GROUPS.map(g => `<div class="grp"><em>${g}</em><div class="chips">${DEFS.filter(d => d.grp === g && (d.id !== "tlv" || (SIG?.pat && !SIG.pat.st))).map(d => {
+  $("groups").innerHTML = GROUPS.map(g => `<div class="grp"><em>${g}</em><div class="chips">${DEFS.filter(d => d.grp === g && (d.id !== "tlv" || (SIG?.pat && !SIG.pat.st && !SIG.pat.lv))).map(d => {
     const on = S.on.includes(d.id), why = availability(d, c), p = params(d.id);
     const cls = `chip${on && !why ? " on" : ""}${why ? " off" : ""}`;
     return `<span class="${cls}" style="--c:${d.c}"><button type="button" data-id="${d.id}" ${why ? `title="${esc(why)}"` : `title="${esc(d.info)}"`} aria-pressed="${on}"><i></i>${esc(d.name(p))}</button>${on && !why && d.p.length ? `<button type="button" class="gear" data-gear="${d.id}" aria-label="Settings for ${esc(d.name(p))}">⚙</button>` : ""}</span>`;
@@ -434,7 +437,7 @@ const getDrawings = () => {
     // the levels at the trade join the pattern's drawings once (also for trades opened before they existed)
     const lvKey = drawKey() + ".lv", hasLv = (() => { try { return localStorage.getItem(lvKey) === "1"; } catch { return false; } })();
     if (v == null) v = patDrawings();
-    if (!hasLv && DATA?.frames && !SIG.pat.st) { try { v = [...v, ...levelDrawings()]; } catch {} try { localStorage.setItem(lvKey, "1"); } catch {} }
+    if (!hasLv && DATA?.frames && !SIG.pat.st && !SIG.pat.lv) { try { v = [...v, ...levelDrawings()]; } catch {} try { localStorage.setItem(lvKey, "1"); } catch {} }
     setDrawings(v);
   }
   return v || [];
@@ -810,7 +813,7 @@ function render(keepRange) {
       legend.push(() => all.length ? `<b style="color:${COL.violet}">Patterns</b> ${all.map(chip).join("")}${sel ? `<span class="pchip back" data-pat="">Show all</span>` : ""}`
         : `<b style="color:${COL.violet}">Patterns</b> <span class="dim">none forming</span>`);
     } else if (id === "tlv") {
-      if (!SIG?.pat || SIG.pat.st) continue;
+      if (!SIG?.pat || SIG.pat.st || SIG.pat.lv) continue;
       const P = SIG.pat, long = P.dir === "LONG", near = sigIndex(c);
       const ie = near(P.te) ?? near(P.ts), ix = near(P.tx) ?? ie;
       if (ie == null) { addRead(d, "The trade is outside the candles on this chart.", "neu"); continue; }
@@ -908,7 +911,7 @@ function render(keepRange) {
       });
     }
     const ai = near(sigTime(a));
-    if (ai != null) markers.push({ time: c[ai].time, position: a.side === "bullish" ? "belowBar" : "aboveBar", shape: a.side === "bullish" ? "arrowUp" : "arrowDown",
+    if (ai != null && !SIG.pat?.forming) markers.push({ time: c[ai].time, position: a.side === "bullish" ? "belowBar" : "aboveBar", shape: a.side === "bullish" ? "arrowUp" : "arrowDown",
       color: a.side === "bullish" ? COL.green : COL.red, text: SIG.pat ? `${SIG.pat.name} · ${a.side === "bullish" ? "buy" : "sell"}` : `${a.side === "bullish" ? "Buy" : "Sell"} signal` });
     (sc?.markers || []).forEach(m => {
       const j = sc.dates[m.i] ? near(dayTime(sc.dates[m.i])) : null;
@@ -1209,6 +1212,20 @@ function patShapes(c) {
     return out;
   }
   const sh = T.shape || {};
+  if (T.forming) {     // a live pattern still forming: its shape, then each side's trigger line, stop and take profit
+    if (sh.box) out.push({ type: "rect", pts: [{ t: sh.box[0], p: sh.box[3] }, { t: sh.box[1] + step, p: sh.box[2] }], color: amber, w: 1.5, dash: 0, label: T.name });
+    const fp = (sh.pts || []).map(([t, p, lb]) => ({ t, p, lb })).sort((x, y) => x.t - y.t);
+    for (let k = 0; k + 1 < fp.length; k++) out.push({ type: "trend", pts: [fp[k], fp[k + 1]], color: amber, w: 2, dash: 0, label: k === 0 && !sh.box ? T.name : "" });
+    for (const q of fp) if (q.lb) out.push({ type: "text", pts: [{ t: q.t, p: q.p }], color: amber, text: q.lb });
+    for (const [t1, p1, t2, p2] of sh.lines || []) out.push({ type: "trend", pts: [{ t: t1, p: p1 }, { t: t2, p: p2 }], color: alpha(COL.white, .7), w: 1.5, dash: 1, label: "" });
+    for (const [k, sd] of Object.entries(T.sides || {})) {
+      const up = k === "up", col = up ? COL.green : COL.red;
+      out.push({ type: "hray", pts: [{ t: T.ts, p: sd.level }], color: col, w: 2, dash: 0, label: up ? "Confirms above" : "Confirms below" });
+      if (sd.target != null) out.push({ type: "hray", pts: [{ t: T.ts, p: sd.target }], color: alpha(col, .7), w: 1, dash: 2, label: `Take profit (${up ? "up" : "down"})` });
+      if (sd.stop != null) out.push({ type: "hray", pts: [{ t: T.ts, p: sd.stop }], color: alpha(COL.grey, .9), w: 1, dash: 2, label: `Stop loss (${up ? "up" : "down"})` });
+    }
+    return out;
+  }
   if (sh.box) out.push({ type: "rect", pts: [{ t: sh.box[0], p: sh.box[3] }, { t: sh.box[1] + step, p: sh.box[2] }], color: amber, w: 1.5, dash: 0, label: T.name });
   const pts = (sh.pts || []).map(([t, p, lb]) => ({ t, p, lb })).sort((x, y) => x.t - y.t);
   for (let k = 0; k + 1 < pts.length; k++) out.push({ type: "trend", pts: [pts[k], pts[k + 1]], color: amber, w: 2, dash: 0, label: k === 0 && !sh.box ? T.name : "" });
@@ -1218,7 +1235,7 @@ function patShapes(c) {
   out.push({ type: long ? "long" : "short", pts: [{ t: T.te, p: T.entry }, { t: tEnd, p: T.target }, { t: tEnd, p: T.stop }],
     tpLabel: T.tr === "2R" ? "Take profit (2R)" : "Take profit", slLabel: "Stop loss", now: { t: T.tx, p: T.exit },
     nowLabel: `${T.why === "open" ? "now" : { stop: "stopped", target: "target hit", time: "time exit" }[T.why]} ${T.ret >= 0 ? "+" : "−"}${Math.abs(T.ret).toFixed(2)}%` });
-  out.push({ type: "vline", pts: [{ t: T.ts, p: T.entry }], color: alpha(COL.white, .35), w: 1, dash: 2, label: "Breakout" });
+  out.push({ type: "vline", pts: [{ t: T.ts, p: T.entry }], color: alpha(COL.white, .35), w: 1, dash: 2, label: T.lv ? "Confirmed" : "Breakout" });
   return out;
 }
 const ST_WHY = { rule: "Exit signal", tp: "Take profit", sl: "Stop loss", trail: "Trailing stop", be: "Break-even stop", time: "Time exit" };
@@ -1291,6 +1308,26 @@ function drawSigCard() {
   const box = $("sigcard");
   if (!box) return;
   if (!SIG || EMBED) { box.hidden = true; return; }
+  if (SIG.pat?.lv) {
+    const T = SIG.pat, R = SIG.rules || {}, tfn = { "15m": "15-minute", "1H": "1-hour", "4H": "4-hour", D: "daily" }[T.tf] || T.tf;
+    const when = new Date(T.ts * 1000).toISOString().slice(0, T.tf === "D" ? 10 : 16).replace("T", " ");
+    const edge = d => { const r = SIG.stats?.[T.tf]?.[`${T.fam}|${T.name}|${d}`]; return r ? `${Math.round(r[1])}% won in ${r[0]} tests, ${r[2] > 0 ? "+" : ""}${r[2]}% avg` : "no backtest record yet"; };
+    box.hidden = false;
+    if (T.forming) {
+      box.innerHTML = `<div class="sghd"><span class="pill" style="color:#f2c66d;background:rgba(242,198,109,.14)">Forming</span><h2>${esc(label(SIG.a.ticker))} · ${esc(T.name)}</h2><span class="dim">${esc(when)} New York · ${tfn} chart</span></div>
+        <div class="sggrid">${Object.entries(T.sides || {}).map(([k, sd]) => `<div><span>${k === "up" ? "Confirms above" : "Confirms below"}</span><b class="${k === "up" ? "up" : "down"}">${fmt(sd.level)}</b><small>stop ${sd.stop == null ? "outside the breakout candle" : fmt(sd.stop)} · target ${sd.target == null ? "2R" : fmt(sd.target)} · ${esc(edge(k === "up" ? "LONG" : "SHORT"))}</small></div>`).join("")}
+        <div><span>Last close</span><b>${fmt(T.exit)}</b><small>when the scan ran</small></div></div>
+        <p class="dim sgfoot">Not confirmed yet: it counts once a ${tfn} candle closes through a trigger line. Stop loss: ${esc(R.stop || "the pattern's own")}. Take profit: ${esc(R.target || "the pattern's target")}. The shape and lines are ordinary drawings you can move or delete. <button type="button" class="btn ghost sm" id="patReset">↺ Reset</button></p>`;
+    } else {
+      const long = T.dir === "LONG", why = { stop: "stop loss hit", target: "take profit hit", time: "out of time", open: "still open" };
+      box.innerHTML = `<div class="sghd"><span class="pill ${long ? "bull" : "bear"}">${long ? "▲ Long" : "▼ Short"}</span><h2>${esc(label(SIG.a.ticker))} · ${esc(T.name)}</h2><span class="dim">confirmed ${esc(when)} New York · ${tfn} chart</span></div>
+        <div class="sggrid"><div><span>Breakout close</span><b>${fmt(T.entry)}</b><small>the candle that confirmed it</small></div><div><span>Stop loss</span><b class="down">${fmt(T.stop)}</b><small>${esc(R.stop || "")}</small></div><div><span>Take profit</span><b class="up">${fmt(T.target)}</b><small>${esc(R.target || "")}${T.tr === "2R" ? " (2R)" : ""}</small></div>
+        <div><span>Since</span><b class="${T.ret >= 0 ? "up" : "down"}">${T.ret > 0 ? "+" : ""}${T.ret.toFixed(2)}%</b><small>${why[T.why] || why.open} · ${esc(edge(T.dir))}</small></div></div>
+        <p class="dim sgfoot">From the live pattern scanner (every 30 minutes while the US market is open). The pattern and the trade are ordinary drawings you can move or delete. <button type="button" class="btn ghost sm" id="patReset">↺ Reset</button></p>`;
+    }
+    $("patReset").onclick = resetPat;
+    return;
+  }
   if (SIG.pat && !SIG.st) {
     const T = SIG.pat, long = T.dir === "LONG", R = SIG.rules || {}, why = { stop: "stop loss hit", target: "take profit hit", time: "closed after the holding time", open: "still open" };
     box.hidden = false;
@@ -1383,8 +1420,8 @@ function openTrade(sym, backHref, backText, backLabel) {
   }
   const bk = document.querySelector("nav.bar .back");
   if (bk && !EMBED) { bk.href = backHref; bk.textContent = backText; bk.setAttribute("aria-label", backLabel); }
-  S.on = S.on.filter(id => id !== "sr" && id !== "cpat");    // today's levels and forming patterns would only clutter an old trade (not saved)
-  if (!SIG.pat.st && !S.on.includes("tlv")) S.on.push("tlv"); // a pattern trade: the support/resistance as it stood when it opened
+  S.on = S.on.filter(id => (id !== "sr" || SIG.pat.lv) && id !== "cpat");    // today's levels and forming patterns would only clutter an old trade (not saved); a live pattern keeps today's levels
+  if (!SIG.pat.st && !SIG.pat.lv && !S.on.includes("tlv")) S.on.push("tlv"); // a pattern trade: the support/resistance as it stood when it opened
   drawSigCard();
   load(sym);
 }
@@ -1403,6 +1440,22 @@ if (ST_ID) {
       pat: T, st: true, back: `trades.html#${mk}`, chart: null, trade: null, strat: null };
     openTrade(sym, `trades.html#${mk}`, "‹ Strategy trades", `Back to ${name} on Strategy Trades`);
   }
+} else if (LP_ID) {
+  $("status").textContent = "Loading the pattern…";
+  const get = u => fetch(u, { cache: "no-cache" }).then(r => r.ok ? r.json() : null).catch(() => null);
+  Promise.all([get(`${Q.get("u") === "sp500" ? "data/sp500/" : "data/"}live_patterns.json`), get("data/live_patterns_stats.json")]).then(([js, st]) => {
+    const f = (js?.forming || []).find(x => x.id === LP_ID), c = f ? null : (js?.confirmed || []).find(x => x.id === LP_ID), X = f || c;
+    if (!X) { $("status").className = "status err"; $("status").textContent = "That pattern isn't in the live list any more (it stopped forming or its few days are up)."; load(S.sym); return; }
+    const sides = X.sides || {}, main = f ? (X.dir === "SHORT" ? sides.down : sides.up) || sides.up || sides.down : null;
+    const T = f
+      ? { lv: true, forming: true, id: X.id, tf: X.tf, name: X.name, fam: X.fam, dir: X.dir, ts: X.ts, te: X.ts, tx: X.ts, sides,
+          entry: main?.level, stop: main?.stop, target: main?.target, exit: X.px, why: "open", ret: 0, shape: X.shape || {} }
+      : { lv: true, id: X.id, tf: X.tf, name: X.name, fam: X.fam, dir: X.dir, ts: X.ts, te: X.ts, tx: X.tx ?? X.ts, entry: X.entry, stop: X.stop,
+          target: X.target, tr: X.tr, exit: X.exit ?? X.px ?? X.entry, why: X.why || "open", ret: X.ret ?? 0, shape: X.shape || {} };
+    SIG = { a: { id: T.id, ticker: X.t, side: X.dir === "SHORT" ? "bearish" : "bullish", price: T.entry ?? X.px, stop: T.stop, date: new Date(T.ts * 1000).toISOString().slice(0, 10), tf: T.tf, t: T.ts, note: T.name },
+      pat: T, lp: true, rules: js.rules?.[`${T.fam}|${T.name}`], stats: st?.stats, chart: null, trade: null, strat: null };
+    openTrade(X.t, "index.html#terminal", "‹ Terminal", "Back to the Terminal");
+  });
 } else if (PAT_ID) {
   $("status").textContent = "Loading the pattern…";
   const get = u => fetch(u).then(r => r.ok ? r.json() : null).catch(() => null);
