@@ -167,6 +167,13 @@ form.pick input:focus { outline: none; border-color: var(--accent); box-shadow: 
 .lg b { font-weight: 600; }
 .lg .x { pointer-events: auto; cursor: pointer; color: var(--faint); margin-left: 6px; font-size: 13px; }
 .lg .x:hover { color: var(--down-line); }
+.lg div:has(.pchip) { white-space: normal; display: flex; flex-wrap: wrap; align-items: center; gap: 4px; }
+.lg .pchip { pointer-events: auto; cursor: pointer; display: inline-block; padding: 1px 8px; border-radius: 999px; font-size: 11.5px; line-height: 1.5;
+  color: var(--pc, var(--muted)); border: 1px solid color-mix(in srgb, var(--pc, #8b98a5) 45%, transparent); background: color-mix(in srgb, var(--c-bg) 80%, transparent); opacity: .7; }
+.lg .pchip.shown { opacity: 1; }
+.lg .pchip.on { opacity: 1; color: var(--c-bg); background: var(--pc); border-color: var(--pc); font-weight: 600; }
+.lg .pchip:hover { opacity: 1; border-color: var(--pc); }
+.lg .pchip.back { --pc: #8b98a5; opacity: 1; }
 .lg .o { color: var(--muted); }
 .lg .o span { margin-right: 8px; }
 .marks { position: absolute; inset: 0; pointer-events: none; z-index: 4; overflow: hidden; }
@@ -368,6 +375,6 @@ html.embed .status:empty { display: none; }
   </footer>
 </main>
 
-<script type="module" src="chart.js?v=9"></script>
+<script type="module" src="chart.js?v=10"></script>
 </body>
 </html>

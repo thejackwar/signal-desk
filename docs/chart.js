@@ -6,7 +6,7 @@
 import * as L from "./chart-lib.js?v=1";
 import { TFS, analyze, srLevels, segments, binanceCrypto } from "./trendlines.js?v=3";
 import { createDrawLayer, TOOLS, TOOL } from "./draw.js?v=2";
-import { chartPatterns, majorLevels } from "./chart-patterns.js?v=1";
+import { chartPatterns, majorLevels } from "./chart-patterns.js?v=2";
 
 const LW = window.LightweightCharts;
 const DEFAULT_API = "https://trendlines.guerragiacomo00.workers.dev";
@@ -79,7 +79,7 @@ const DEFS = [
     info: "Major only: the strongest levels, found on this timeframe and the bigger ones above it (weekly and daily levels outrank hourly ones) and ranked by touches, timeframes and how recently price respected them. All: every level on this timeframe; the label shows the touches." },
   { id: "cpat", grp: "Levels", name: () => "Chart patterns", kind: "levels", c: COL.violet,
     p: [["max", "Patterns shown", 2, { min: 1, max: 3 }], ["sw", "Swing size", 4, { min: 2, max: 12 }]],
-    info: "Double tops/bottoms, head & shoulders, triangles and wedges that are forming now (or broke out in the last few candles). Only big, recent, still-valid ones are drawn, best first. The dashed line is the trigger: a pattern only counts once price closes through it." },
+    info: "Double tops/bottoms, head & shoulders, triangles, wedges and bull/bear flags that are forming now (or broke out in the last few candles). Only big, recent, still-valid ones are drawn, best first. Tap a pattern's name in the chart legend to show just that one, zoomed in. The dashed line is the trigger: a pattern only counts once price closes through it." },
   { id: "fib", grp: "Levels", name: p => `Fibonacci ${p.n}`, kind: "levels", c: COL.gold, p: [["n", "Look back (candles)", 120, { min: 20, max: 1000 }]],
     info: "Retracement levels of the biggest swing in the window. Pullbacks often pause at 38.2%, 50% or 61.8% before the trend resumes." },
   { id: "piv", grp: "Levels", name: () => "Pivot points", kind: "levels", c: COL.violet, p: [],
@@ -236,7 +236,7 @@ const can1m = d => d && (d.kind === "crypto" || (d.kind === "stock" && !d.fallba
 
 async function load(sym) {
   const id = ++loadId;
-  S.sym = sym;
+  S.sym = sym; S.patSel = null;
   if (SIG && sym !== SIG.a.ticker) { SIG = null; drawSigCard(); }
   liveStop();
   writeHash();
@@ -355,7 +355,7 @@ $("tfs").addEventListener("click", e => {
       .catch(err => { $("hint").textContent = `1-minute candles didn't load: ${err.message || err}`; b.disabled = false; });
     return;
   }
-  S.tf = b.dataset.tf; writeHash(); render(false); if (DATA?.kind === "crypto") liveStart();
+  S.tf = b.dataset.tf; S.patSel = null; writeHash(); render(false); if (DATA?.kind === "crypto") liveStart();
 });
 
 function drawTitle() {
@@ -425,6 +425,7 @@ function render(keepRange) {
   if (!DATA) return;
   drawTfs(); drawTitle(); drawPicker();
   const prevRange = keepRange && VIEW ? VIEW.main.timeScale().getVisibleLogicalRange() : null;
+  let patFocus = null;     // set when a tapped pattern should be zoomed to
   if (VIEW) VIEW.destroy();
   VIEW = null;
 
@@ -571,17 +572,26 @@ function render(keepRange) {
       const desc = l => major ? `${fmt(l.price)} (${rel(l.price, close)}, ${l.tfs.join(" + ")} level, ${l.touches} touches)` : `${fmt(l.price)} (${rel(l.price, close)}, ${l.touches} touches)`;
       addRead(d, `${major ? "Major support" : "Nearest support"} ${s1 ? desc(s1) : "none found"}; ${major ? "major resistance" : "nearest resistance"} ${r1 ? desc(r1) : "none found"}.`, "neu");
     } else if (id === "cpat") {
-      const pats = chartPatterns(c, { swing: p.sw, lookback: TFS[tf]?.lookback || 300, max: p.max });
+      // every pattern found (up to 6, non-overlapping); the best p.max are drawn. Tap one in the legend to show
+      // only that one, zoomed in; tap it again to go back.
+      const all = chartPatterns(c, { swing: p.sw, lookback: TFS[tf]?.lookback || 300, max: 6 });
+      const key = pt => `${pt.kind}@${pt.start}`;
+      const sel = all.find(pt => key(pt) === S.patSel) || null;
+      if (!sel) S.patSel = null;
+      const pats = sel ? [sel] : all.slice(0, p.max);
+      if (sel && S.patFocus) patFocus = { from: Math.max(0, sel.start - 15), to: last + fut };
+      const pcol = pt => pt.bull === true ? COL.green : pt.bull === false ? COL.red : COL.violet;
       for (const pt of pats) {
-        const col = pt.bull === true ? COL.green : pt.bull === false ? COL.red : COL.violet;
-        const seg = (pts, o = {}) => main.addLineSeries(lineOpts(o.c || alpha(col, .85), { lineWidth: o.w || 2, lineStyle: o.style ?? LW.LineStyle.Solid, ...noScale }))
+        const col = pcol(pt), w = sel ? 3 : 2;
+        const seg = (pts, o = {}) => main.addLineSeries(lineOpts(o.c || alpha(col, .85), { lineWidth: o.w || w, lineStyle: o.style ?? LW.LineStyle.Solid, ...noScale }))
           .setData(pts.map(q => ({ time: T(q.index), value: q.price })));
         const end = last + Math.min(fut, 8);
         if (pt.neck) {
           seg([...pt.points].sort((a, b) => a.index - b.index), { c: alpha(col, .7) });                // the shape itself
           const [a, b] = pt.neck, slope = (b.price - a.price) / (b.index - a.index);
-          seg([a, { index: end, price: a.price + slope * (end - a.index) }], { w: 1, style: LW.LineStyle.Dashed });   // neckline = trigger
+          seg([a, { index: end, price: a.price + slope * (end - a.index) }], { w: sel ? 2 : 1, style: LW.LineStyle.Dashed });   // neckline = trigger
         } else {
+          if (pt.pole) seg(pt.pole, { c: alpha(col, .55) });                     // a flag's pole
           const stop = Math.min(end, pt.brokeAt ?? end, Math.floor(pt.apex));   // lines stop at the break, never past where they meet
           for (const [a, b] of [pt.upper, pt.lower]) {
             const slope = (b.price - a.price) / (b.index - a.index);
@@ -591,9 +601,9 @@ function render(keepRange) {
         seg([{ index: last, price: pt.target }, { index: end, price: pt.target }], { c: alpha(col, .6), w: 1, style: LW.LineStyle.Dotted });
         const topP = Math.max(...pt.points.map(q => q.price)), botP = Math.min(...pt.points.map(q => q.price));
         const mid = Math.round((pt.start + pt.end) / 2);
-        const word = pt.status === "forming" ? "forming" : pt.status;
-        marks.push({ i: mid, p: pt.bull === false ? topP : botP, text: `${pt.name} · ${word}`, cls: pt.bull === false ? "pt up" : "pt dn", col });
+        marks.push({ i: mid, p: pt.bull === false ? topP : botP, text: `${pt.name} · ${pt.status}`, cls: pt.bull === false ? "pt up" : "pt dn", col });
         marks.push({ i: end, p: pt.target, text: "target", cls: "pt sm", col: alpha(col, .8) });
+        if (sel && pt.invalid != null) cs.createPriceLine({ price: pt.invalid, color: alpha(COL.grey, .8), lineWidth: 1, lineStyle: LW.LineStyle.SparseDotted, axisLabelVisible: true, title: "cancelled past" });
         if (pt.brokeAt != null) markers.push({ time: c[pt.brokeAt].time, position: pt.status === "breakout" ? "belowBar" : "aboveBar", color: col,
           shape: pt.status === "breakout" ? "arrowUp" : "arrowDown", text: pt.status === "breakout" ? "Breakout" : "Breakdown" });
       }
@@ -603,9 +613,10 @@ function render(keepRange) {
         return `${pt.name}: ${pt.status} ${last - pt.brokeAt === 0 ? "on the latest candle" : `${last - pt.brokeAt} candle${last - pt.brokeAt > 1 ? "s" : ""} ago`}, target about ${fmt(pt.target)} (${rel(pt.target, close)}).`;
       };
       const tone = pt => pt.status === "breakout" ? "bull" : pt.status === "breakdown" ? "bear" : "warn";
-      if (!pats.length) addRead(d, "No clear pattern forming right now.", "neu");
+      if (!all.length) addRead(d, "No clear pattern forming right now.", "neu");
       for (const pt of pats) addRead(d, tx(pt), tone(pt));
-      legend.push(() => pats.length ? pats.map(pt => `<b style="color:${pt.bull === true ? COL.green : pt.bull === false ? COL.red : COL.violet}">${esc(pt.name)}</b> ${pt.status}${pt.status === "forming" ? ` · trigger ${fmt(pt.trigger)}` : ""} · target ${fmt(pt.target)}`).join(" &nbsp; ")
+      const chip = pt => `<span class="pchip${sel === pt ? " on" : !sel && pats.includes(pt) ? " shown" : ""}" data-pat="${esc(key(pt))}" style="--pc:${pcol(pt)}" title="${esc(tx(pt))}">${esc(pt.name)} · ${pt.status}</span>`;
+      legend.push(() => all.length ? `<b style="color:${COL.violet}">Patterns</b> ${all.map(chip).join("")}${sel ? `<span class="pchip back" data-pat="">Show all</span>` : ""}`
         : `<b style="color:${COL.violet}">Patterns</b> <span class="dim">none forming</span>`);
     } else if (id === "fib") {
       const f = L.fibonacci(c, p.n);
@@ -799,7 +810,8 @@ function render(keepRange) {
   const showRecent = () => sigAt != null && !keepRange
     ? main.timeScale().setVisibleLogicalRange({ from: Math.max(0, Math.min(sigAt - SHOW[tf] * 0.7, n - SHOW[tf])), to: Math.max(last, sigAt + SHOW[tf] * 0.3) + fut })
     : main.timeScale().setVisibleLogicalRange({ from: Math.max(0, n - SHOW[tf]), to: last + fut });
-  if (prevRange) main.timeScale().setVisibleLogicalRange(prevRange); else showRecent();
+  if (patFocus) main.timeScale().setVisibleLogicalRange(patFocus); else if (prevRange) main.timeScale().setVisibleLogicalRange(prevRange); else showRecent();
+  S.patFocus = false;
   requestAnimationFrame(placeMarks);
 
   // your own drawings (draw.js), plus the signal's trade when this is a signal view
@@ -1006,7 +1018,15 @@ function drawReads(reads) {
 }
 
 // ------------------------------------------------------------------ start
-$("stage").addEventListener("click", e => { const x = e.target.closest("[data-x]"); if (x) toggle(x.dataset.x, false); });
+$("stage").addEventListener("click", e => {
+  const pc = e.target.closest("[data-pat]");
+  if (pc) {   // a pattern in the legend: show just that one, zoomed to it (tap again, or "Show all", to go back)
+    const k = pc.dataset.pat;
+    S.patSel = k && S.patSel !== k ? k : null; S.patFocus = !!S.patSel;
+    render(true); return;
+  }
+  const x = e.target.closest("[data-x]"); if (x) toggle(x.dataset.x, false);
+});
 $("quick").innerHTML = QUICK.map(s => `<button type="button" data-s="${s}">${esc(label(s))}</button>`).join("");
 $("quick").addEventListener("click", e => { const b = e.target.closest("[data-s]"); if (b) load(b.dataset.s); });
 $("pick").addEventListener("submit", e => {

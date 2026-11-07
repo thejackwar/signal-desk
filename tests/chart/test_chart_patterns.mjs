@@ -74,3 +74,21 @@ for (let end = 300; end <= btc.D.length; end += 5) {
 }
 console.log("days with a pattern (every 5th day checked):", found, "of", Math.floor((btc.D.length - 300) / 5) + 1);
 console.log("chart patterns OK");
+
+// bull flag: pole 100 -> 130 in 8 candles, then a gentle drift down to 124 (forming)
+const bf = path([[0, 95], [40, 100], [48, 130], [51, 127], [53, 128.5], [56, 125.5], [58, 127], [61, 124.5]], 0.5);
+assert.ok(kinds(bf).includes("bflag:forming"), kinds(bf).join());
+const f0 = chartPatterns(bf).find(p => p.kind === "bflag");
+assert.ok(f0.trigger > 124 && f0.trigger < 131 && f0.target > 140, `${f0.trigger} ${f0.target}`);
+// ... breaking out of the top of the flag
+const bfo = path([[0, 95], [40, 100], [48, 130], [51, 127], [53, 128.5], [56, 125.5], [58, 127], [61, 124.5], [64, 131]], 0.5);
+assert.ok(kinds(bfo).includes("bflag:breakout"), kinds(bfo).join());
+// ... and failing: falls back most of the pole
+const bff = path([[0, 95], [40, 100], [48, 130], [51, 127], [53, 128.5], [56, 125.5], [58, 127], [61, 124.5], [67, 108]], 0.5);
+assert.ok(!kinds(bff).some(k => k.startsWith("bflag")), kinds(bff).join());
+// bear flag (mirror image)
+const sf = path([[0, 205], [40, 200], [48, 170], [51, 173], [53, 171.5], [56, 174.5], [58, 173], [61, 175.5]], 0.5);
+assert.ok(kinds(sf).includes("sflag:forming"), kinds(sf).join());
+const s0 = chartPatterns(sf).find(p => p.kind === "sflag");
+assert.ok(s0.trigger < 176 && s0.trigger > 169 && s0.target < 160 && s0.bull === false, `${s0.trigger} ${s0.target}`);
+console.log("flags OK");

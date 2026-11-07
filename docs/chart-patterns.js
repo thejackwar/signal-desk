@@ -151,6 +151,9 @@ export function chartPatterns(c, { swing = 4, lookback = 250, recent = 0.2, fres
     }
   }
 
+  // --- flags: a sharp pole, then a short tight channel drifting against it
+  for (const f of [flag(c, atr, false, fresh), flag(c, atr, true, fresh)]) if (f) out.push(f);
+
   // best first; drop overlapping weaker ones (one pattern per stretch of chart)
   const keep = [];
   for (const p of out.filter(alive).sort((a, b) => b.score - a.score)) {
@@ -159,6 +162,76 @@ export function chartPatterns(c, { swing = 4, lookback = 250, recent = 0.2, fres
     if (keep.length >= max) break;
   }
   return keep;
+}
+
+// Bull flag (or bear flag with bear = true, found by mirroring the candles upside down).
+// Pole: at least 4 ATR in at most 15 candles, steep (>= 0.5 ATR a candle), ending at the flag's top.
+// Flag: 3 to 25 candles after it, giving back at most half the pole, flat or drifting against the pole,
+// held between two parallel lines (regression of the flag's highs and lows, pushed out to the extremes).
+// Breakout = a close past the flag's outer line; it fails if price gives back more than 62% of the pole.
+function flag(c0, atr, bear, fresh = 6) {
+  const mir = v => bear ? -v : v;
+  const c = bear ? c0.map(b => ({ high: -b.low, low: -b.high, close: -b.close })) : c0;
+  const n = c.length, last = n - 1;
+  let best = null;
+  for (let p1 = last - 3; p1 >= Math.max(16, last - 40); p1--) {
+    // p1 = the pole's top: the highest high from 15 candles before it up to the flag's end
+    let p0 = p1;
+    for (let i = p1 - 1; i >= p1 - 15; i--) if (c[i].low < c[p0].low) p0 = i;
+    if (p0 === p1) continue;
+    // the pole starts where the climb starts: the latest candle still near the bottom
+    const floor = c[p0].low + 0.1 * (c[p1].high - c[p0].low);
+    for (let i = p0 + 1; i < p1; i++) if (c[i].low <= floor) p0 = i;
+    let topOk = true;
+    for (let i = p1 - 15; i < p1 && topOk; i++) if (c[i].high > c[p1].high) topOk = false;
+    if (!topOk) continue;
+    const pole = c[p1].high - c[p0].low, len = p1 - p0;
+    if (pole < 4 * atr || pole / len < 0.5 * atr) continue;
+    // the flag: candles after the top until a close above its top line (or the latest candle)
+    const fit = (a, b, get) => {         // least squares through get(i), i = a..b
+      const m = b - a + 1; let sx = 0, sy = 0, sxx = 0, sxy = 0;
+      for (let i = a; i <= b; i++) { const x = i - a, y = get(i); sx += x; sy += y; sxx += x * x; sxy += x * y; }
+      const slope = (m * sxy - sx * sy) / (m * sxx - sx * sx || 1);
+      return { slope, icpt: (sy - slope * sx) / m };
+    };
+    let e = last, brokeAt = null;
+    // grow the flag one candle at a time; stop when a close breaks above the channel built so far
+    for (let i = p1 + 4; i <= last; i++) {
+      const f = fit(p1 + 1, i - 1, k => (c[k].high + c[k].low) / 2);
+      let up = -Infinity;
+      for (let k = p1; k < i; k++) up = Math.max(up, c[k].high - (f.icpt + f.slope * (k - p1 - 1)));
+      if (c[i].close > f.icpt + Math.min(0, f.slope) * (i - p1 - 1) + up + 0.2 * atr) { brokeAt = i; e = i - 1; break; }   // a clear close above the top line
+    }
+    if (brokeAt != null && last - brokeAt > fresh) continue;   // an old breakout: not this flag
+    const fl = e - p1;
+    if (fl < 3 || fl > Math.max(25, 3 * len)) continue;
+    let lo = Infinity, hi = -Infinity;
+    for (let i = p1 + 1; i <= e; i++) { lo = Math.min(lo, c[i].low); hi = Math.max(hi, c[i].high); }
+    if (c[p1].high - lo > 0.5 * pole) continue;                 // gave back too much: not a flag
+    if (hi > c[p1].high) continue;
+    const f = fit(p1 + 1, e, k => (c[k].high + c[k].low) / 2);
+    if (f.slope > 0.15 * atr) continue;                         // a flag drifts flat or against the pole
+    let upOff = -Infinity, loOff = Infinity;
+    for (let i = p1; i <= e; i++) { const m = f.icpt + f.slope * (i - p1 - 1); upOff = Math.max(upOff, c[i].high - m); if (i > p1) loOff = Math.min(loOff, c[i].low - m); }
+    const L = i => f.icpt + f.slope * (i - p1 - 1);
+    const width = upOff - loOff;
+    if (width > 0.6 * pole) continue;
+    // failed: closed back down more than 62% into the pole
+    let dead = false;
+    for (let i = p1 + 1; i <= last; i++) if (c[i].close < c[p1].high - 0.62 * pole) { dead = true; break; }
+    const score = pole / atr + 2 - width / pole * 3 + (brokeAt == null ? 1 : 0);
+    if (best && best.score >= score) continue;
+    const pt = (i, v) => ({ index: i, price: mir(v) });
+    const upEnd = L(last) + upOff, loEnd = L(last) + loOff;
+    best = { kind: bear ? "sflag" : "bflag", name: bear ? "Bear flag" : "Bull flag", bull: !bear,
+      points: [pt(p0, c[p0].low), pt(p1, c[p1].high)], neck: null, pole: [pt(p0, c[p0].low), pt(p1, c[p1].high)],
+      upper: bear ? [pt(p1, L(p1) + loOff), pt(last, loEnd)] : [pt(p1, L(p1) + upOff), pt(last, upEnd)],
+      lower: bear ? [pt(p1, L(p1) + upOff), pt(last, upEnd)] : [pt(p1, L(p1) + loOff), pt(last, loEnd)],
+      trigger: mir(upEnd), triggerLo: Math.min(mir(upEnd), mir(loEnd)), triggerHi: Math.max(mir(upEnd), mir(loEnd)),
+      target: mir((brokeAt != null ? L(brokeAt) + upOff : upEnd) + pole), invalid: mir(c[p1].high - 0.62 * pole),
+      apex: Infinity, start: p0, end: e, status: brokeAt == null ? "forming" : bear ? "breakdown" : "breakout", brokeAt, dead, score };
+  }
+  return best;
 }
 
 // ------------------------------------------------------------------ major support / resistance
