@@ -327,7 +327,7 @@ export function tradeLevels(frames, tf, tEntry, { entry, stop, target, swing = 5
       const t1 = cc[A.index].time, slope = (B.price - A.price) / ((cc[B.index].time - t1) || st);   // price per second
       const now = A.price + slope * (tEntry - t1);
       if (!inPath(now)) continue;
-      out.lines.push({ t1, p1: A.price, slope, tf: t, kind, dir, side: dir === "up" ? "support" : "resistance", price: now });
+      out.lines.push({ t1, p1: A.price, slope, tf: t, kind, dir, side: side(now), price: now });
     }
   }
   return out;

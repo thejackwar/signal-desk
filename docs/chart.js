@@ -6,7 +6,7 @@
 import * as L from "./chart-lib.js?v=1";
 import { TFS, analyze, srLevels, segments, binanceCrypto } from "./trendlines.js?v=3";
 import { createDrawLayer, TOOLS, TOOL } from "./draw.js?v=2";
-import { chartPatterns, majorLevels, tradeLevels } from "./chart-patterns.js?v=3";
+import { chartPatterns, majorLevels, tradeLevels } from "./chart-patterns.js?v=4";
 
 const LW = window.LightweightCharts;
 const DEFAULT_API = "https://trendlines.guerragiacomo00.workers.dev";
@@ -800,7 +800,7 @@ function render(keepRange) {
         main.addLineSeries(lineOpts(maj ? col : alpha(col, .75), { lineWidth: maj ? 2 : 1.5, lineStyle: maj ? LW.LineStyle.Solid : LW.LineStyle.Dashed, ...noScale }))
           .setData([{ time: T(a), value: val(a) }, { time: T(i1), value: val(i1) }]);
         marks.push({ i: i1, p: val(i1), text: `${maj ? "Major" : "Local"} ${ln.dir} line · ${ln.tf}`, cls: "pt sm", col });
-        items.push({ nm: `${maj ? "Major" : "Local"} ${ln.dir === "up" ? "up trendline (support)" : "down trendline (resistance)"} on the ${{ W: "weekly", D: "daily", "4H": "4-hour", "1H": "1-hour" }[ln.tf] || ln.tf} chart, at ${fmt(ln.price)} on entry`, at: i => val(i), line: true });
+        items.push({ nm: `${maj ? "Major" : "Local"} ${ln.dir} trendline (${ln.side}) on the ${{ W: "weekly", D: "daily", "4H": "4-hour", "1H": "1-hour" }[ln.tf] || ln.tf} chart, at ${fmt(ln.price)} on entry`, at: i => val(i), line: true });
       }
       legend.push(() => `<b style="color:${COL.sky}">At the trade</b> ${r.major.length} major · ${p.which === "major" ? "" : `${r.local.length} local · `}${p.lines === "no" ? "" : `${r.lines.length} trendline${r.lines.length === 1 ? "" : "s"}`}`);
       if (!items.length) { addRead(d, "No support or resistance in the trade's path when it opened: clear air between the stop and the take profit.", "bull"); continue; }
