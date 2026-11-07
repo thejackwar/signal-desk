@@ -6,6 +6,7 @@
 import * as L from "./chart-lib.js?v=1";
 import { TFS, analyze, srLevels, segments, binanceCrypto } from "./trendlines.js?v=3";
 import { createDrawLayer, TOOLS, TOOL } from "./draw.js?v=2";
+import { chartPatterns, majorLevels } from "./chart-patterns.js?v=1";
 
 const LW = window.LightweightCharts;
 const DEFAULT_API = "https://trendlines.guerragiacomo00.workers.dev";
@@ -73,8 +74,12 @@ const DEFS = [
 
   { id: "tl", grp: "Levels", name: () => "Trendlines", kind: "levels", c: COL.green, p: [["sw", "Swing size", 5, { min: 2, max: 20 }]],
     info: "Drawn automatically from the absolute high and low with the Trendlines page's rules: the up line under the lows, the down line over the highs. ✕ marks a break." },
-  { id: "sr", grp: "Levels", name: p => `Support/resistance ${p.k}`, kind: "levels", c: COL.blue, p: [["k", "Levels each side", 3, { min: 1, max: 6 }], ["sw", "Swing size", 5, { min: 2, max: 20 }]],
-    info: "Prices where several swing highs and lows bunched together. The number of touches is shown on the label: more touches, stronger level." },
+  { id: "sr", grp: "Levels", name: p => p.mode === "all" ? `Support/resistance ${p.k}` : "Major support/resistance", kind: "levels", c: COL.blue,
+    p: [["mode", "Which levels", "major", [["major", "Major only"], ["all", "All on this timeframe"]]], ["k", "Levels each side", 2, { min: 1, max: 6 }], ["sw", "Swing size", 5, { min: 2, max: 20 }]],
+    info: "Major only: the strongest levels, found on this timeframe and the bigger ones above it (weekly and daily levels outrank hourly ones) and ranked by touches, timeframes and how recently price respected them. All: every level on this timeframe; the label shows the touches." },
+  { id: "cpat", grp: "Levels", name: () => "Chart patterns", kind: "levels", c: COL.violet,
+    p: [["max", "Patterns shown", 2, { min: 1, max: 3 }], ["sw", "Swing size", 4, { min: 2, max: 12 }]],
+    info: "Double tops/bottoms, head & shoulders, triangles and wedges that are forming now (or broke out in the last few candles). Only big, recent, still-valid ones are drawn, best first. The dashed line is the trigger: a pattern only counts once price closes through it." },
   { id: "fib", grp: "Levels", name: p => `Fibonacci ${p.n}`, kind: "levels", c: COL.gold, p: [["n", "Look back (candles)", 120, { min: 20, max: 1000 }]],
     info: "Retracement levels of the biggest swing in the window. Pullbacks often pause at 38.2%, 50% or 61.8% before the trend resumes." },
   { id: "piv", grp: "Levels", name: () => "Pivot points", kind: "levels", c: COL.violet, p: [],
@@ -109,15 +114,18 @@ const PRESETS = [
   ["Trend", ["ma2", "ma3", "st", "vol"]],
   ["Momentum", ["ma1", "rsi", "macd", "vol"]],
   ["Swing trader", ["ma1", "ma2", "bb", "rsi", "vol"]],
-  ["Levels", ["tl", "sr", "fib", "prev"]],
+  ["Levels", ["tl", "sr", "cpat", "fib", "prev"]],
 ];
 
 // ------------------------------------------------------------------ state
 function loadPrefs() { try { return JSON.parse(localStorage.getItem(PREF_KEY)) || {}; } catch { return {}; } }
 const saved = loadPrefs();
-const S = { sym: "SPY", tf: "D", on: Array.isArray(saved.on) ? saved.on.filter(id => DEF[id]) : ["ma2", "ma3", "vol", "rsi"], params: saved.params || {}, open: null,
+const S = { sym: "SPY", tf: "D", on: Array.isArray(saved.on) ? saved.on.filter(id => DEF[id]) : ["ma2", "ma3", "vol", "rsi", "sr", "cpat"], params: saved.params || {}, open: null,
   tool: "cursor", magnet: saved.magnet !== false, keep: false, hideDr: false };
-const savePrefs = () => { try { localStorage.setItem(PREF_KEY, JSON.stringify({ on: S.on, params: S.params, magnet: S.magnet })); } catch {} };
+// prefs v2 (Nov 2026): chart patterns and major support/resistance are on by default, also for people who saved choices before
+if (Array.isArray(saved.on) && (saved.pv || 1) < 2) for (const id of ["sr", "cpat"]) if (!S.on.includes(id)) S.on.push(id);
+const savePrefs = () => { try { localStorage.setItem(PREF_KEY, JSON.stringify({ on: S.on, params: S.params, magnet: S.magnet, pv: 2 })); } catch {} };
+if ((saved.pv || 1) < 2) savePrefs();
 // Signal view: chart.html?sig=<alert id>&m=<market>[&u=sp500]#TICKER/D draws one alert's trade on the chart.
 // embed=1: chart only (the Terminal shows it in a panel next to its own explanation).
 const Q = new URLSearchParams(location.search);
@@ -552,12 +560,53 @@ function render(keepRange) {
         r.bias === "Squeeze" ? `Squeezed between the up line (${fmt(r.up.level)}) and the down line (${fmt(r.down.level)}): a break of either is the signal.` : "Both lines are broken: no clear trend line.",
         r.bias === "Up" ? "bull" : r.bias === "Down" ? "bear" : r.bias === "Squeeze" ? "warn" : "neu");
     } else if (id === "sr") {
-      const r = srLevels(c, TFS[tf].lookback, p.sw);
+      const major = p.mode !== "all";
+      const r = major ? majorLevels(DATA.frames, tf, { k: p.k, swing: p.sw }) : srLevels(c, TFS[tf].lookback, p.sw);
+      const tfTxt = l => l.tfs ? l.tfs.join("+") : `${l.touches}×`;
       for (const [list, tag, col] of [[r.support, "S", COL.blue], [r.resistance, "R", COL.amber]])
-        list.slice(0, p.k).forEach((l, k) => cs.createPriceLine({ price: l.price, color: col, lineWidth: l.touches >= 4 ? 2 : 1, lineStyle: LW.LineStyle.Dashed, axisLabelVisible: true, title: `${tag}${k + 1} · ${l.touches}×` }));
+        list.slice(0, p.k).forEach((l, k) => cs.createPriceLine({ price: l.price, color: major ? col : alpha(col, .85), lineWidth: major ? (l.tfs.length > 1 ? 3 : 2) : l.touches >= 4 ? 2 : 1,
+          lineStyle: major ? LW.LineStyle.Solid : LW.LineStyle.Dashed, axisLabelVisible: true, title: major ? `${tag}${k + 1} · ${tfTxt(l)}` : `${tag}${k + 1} · ${l.touches}×` }));
       const s1 = r.support[0], r1 = r.resistance[0];
-      legend.push(() => `<b style="color:${COL.blue}">S1</b> ${s1 ? fmt(s1.price) : "–"} · <b style="color:${COL.amber}">R1</b> ${r1 ? fmt(r1.price) : "–"}`);
-      addRead(d, `Nearest support ${s1 ? `${fmt(s1.price)} (${rel(s1.price, close)}, ${s1.touches} touches)` : "none found"}; nearest resistance ${r1 ? `${fmt(r1.price)} (${rel(r1.price, close)}, ${r1.touches} touches)` : "none found"}.`, "neu");
+      legend.push(() => `<b style="color:${COL.blue}">S1</b> ${s1 ? fmt(s1.price) : "–"} · <b style="color:${COL.amber}">R1</b> ${r1 ? fmt(r1.price) : "–"}${major ? ' <span class="dim">major</span>' : ""}`);
+      const desc = l => major ? `${fmt(l.price)} (${rel(l.price, close)}, ${l.tfs.join(" + ")} level, ${l.touches} touches)` : `${fmt(l.price)} (${rel(l.price, close)}, ${l.touches} touches)`;
+      addRead(d, `${major ? "Major support" : "Nearest support"} ${s1 ? desc(s1) : "none found"}; ${major ? "major resistance" : "nearest resistance"} ${r1 ? desc(r1) : "none found"}.`, "neu");
+    } else if (id === "cpat") {
+      const pats = chartPatterns(c, { swing: p.sw, lookback: TFS[tf]?.lookback || 300, max: p.max });
+      for (const pt of pats) {
+        const col = pt.bull === true ? COL.green : pt.bull === false ? COL.red : COL.violet;
+        const seg = (pts, o = {}) => main.addLineSeries(lineOpts(o.c || alpha(col, .85), { lineWidth: o.w || 2, lineStyle: o.style ?? LW.LineStyle.Solid, ...noScale }))
+          .setData(pts.map(q => ({ time: T(q.index), value: q.price })));
+        const end = last + Math.min(fut, 8);
+        if (pt.neck) {
+          seg([...pt.points].sort((a, b) => a.index - b.index), { c: alpha(col, .7) });                // the shape itself
+          const [a, b] = pt.neck, slope = (b.price - a.price) / (b.index - a.index);
+          seg([a, { index: end, price: a.price + slope * (end - a.index) }], { w: 1, style: LW.LineStyle.Dashed });   // neckline = trigger
+        } else {
+          const stop = Math.min(end, pt.brokeAt ?? end, Math.floor(pt.apex));   // lines stop at the break, never past where they meet
+          for (const [a, b] of [pt.upper, pt.lower]) {
+            const slope = (b.price - a.price) / (b.index - a.index);
+            seg([a, { index: stop, price: a.price + slope * (stop - a.index) }]);
+          }
+        }
+        seg([{ index: last, price: pt.target }, { index: end, price: pt.target }], { c: alpha(col, .6), w: 1, style: LW.LineStyle.Dotted });
+        const topP = Math.max(...pt.points.map(q => q.price)), botP = Math.min(...pt.points.map(q => q.price));
+        const mid = Math.round((pt.start + pt.end) / 2);
+        const word = pt.status === "forming" ? "forming" : pt.status;
+        marks.push({ i: mid, p: pt.bull === false ? topP : botP, text: `${pt.name} · ${word}`, cls: pt.bull === false ? "pt up" : "pt dn", col });
+        marks.push({ i: end, p: pt.target, text: "target", cls: "pt sm", col: alpha(col, .8) });
+        if (pt.brokeAt != null) markers.push({ time: c[pt.brokeAt].time, position: pt.status === "breakout" ? "belowBar" : "aboveBar", color: col,
+          shape: pt.status === "breakout" ? "arrowUp" : "arrowDown", text: pt.status === "breakout" ? "Breakout" : "Breakdown" });
+      }
+      const tx = pt => {
+        const watch = pt.neck ? `neckline ${fmt(pt.trigger)}` : `lines ${fmt(pt.triggerLo)}–${fmt(pt.triggerHi)}`;
+        if (pt.status === "forming") return `${pt.name} forming: confirms on a close ${pt.bull === false ? "below" : pt.bull ? "above" : "out of the"} ${watch}${pt.neck ? ` (${rel(pt.trigger, close)})` : ""}, target about ${fmt(pt.target)}${pt.invalid != null ? `, cancelled past ${fmt(pt.invalid)}` : ""}.`;
+        return `${pt.name}: ${pt.status} ${last - pt.brokeAt === 0 ? "on the latest candle" : `${last - pt.brokeAt} candle${last - pt.brokeAt > 1 ? "s" : ""} ago`}, target about ${fmt(pt.target)} (${rel(pt.target, close)}).`;
+      };
+      const tone = pt => pt.status === "breakout" ? "bull" : pt.status === "breakdown" ? "bear" : "warn";
+      if (!pats.length) addRead(d, "No clear pattern forming right now.", "neu");
+      for (const pt of pats) addRead(d, tx(pt), tone(pt));
+      legend.push(() => pats.length ? pats.map(pt => `<b style="color:${pt.bull === true ? COL.green : pt.bull === false ? COL.red : COL.violet}">${esc(pt.name)}</b> ${pt.status}${pt.status === "forming" ? ` · trigger ${fmt(pt.trigger)}` : ""} · target ${fmt(pt.target)}`).join(" &nbsp; ")
+        : `<b style="color:${COL.violet}">Patterns</b> <span class="dim">none forming</span>`);
     } else if (id === "fib") {
       const f = L.fibonacci(c, p.n);
       if (!f) continue;

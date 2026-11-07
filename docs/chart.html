@@ -172,6 +172,10 @@ form.pick input:focus { outline: none; border-color: var(--accent); box-shadow: 
 .marks { position: absolute; inset: 0; pointer-events: none; z-index: 4; overflow: hidden; }
 .marks span { position: absolute; transform: translate(-50%, -50%); font: 600 11px var(--font); white-space: nowrap; }
 .marks span.x { font-size: 15px; }
+.marks span.pt { font-size: 11px; padding: 1px 6px; border-radius: 6px; background: color-mix(in srgb, var(--c-bg) 78%, transparent); border: 1px solid currentColor; }
+.marks span.pt.up { transform: translate(-50%, -165%); }
+.marks span.pt.dn { transform: translate(-50%, 65%); }
+.marks span.pt.sm { font-size: 10px; font-weight: 500; padding: 0 4px; border: 0; transform: translate(-100%, -120%); opacity: .9; }
 .foot-note { padding: 8px 20px 14px; font-size: 12px; color: var(--faint); border-top: 1px solid var(--hair-2); }
 
 /* readings */
@@ -364,6 +368,6 @@ html.embed .status:empty { display: none; }
   </footer>
 </main>
 
-<script type="module" src="chart.js?v=8"></script>
+<script type="module" src="chart.js?v=9"></script>
 </body>
 </html>
