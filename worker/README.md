@@ -147,3 +147,30 @@ change, so it never has to be pasted by hand. One-time setup:
 4. GitHub: **Actions → Deploy data Worker → Run workflow** for the first deploy.
 
 The Alpaca secrets, the `PX` storage and the 5-minute timer set up above are kept.
+
+## Accounts (docs/account.js, Supabase)
+
+Log-in is email + password, invite-only; what the site saves on a device (drawings, layouts, watchlists,
+price-alert topic, practice portfolio, page settings) is copied to the account and shows on every device.
+
+1. supabase.com → new project (region Central EU / Frankfurt, Free plan).
+2. Authentication → Sign In / Providers: Email on; **Allow new users to sign up: off**.
+3. Authentication → URL Configuration: Site URL `https://thejackwar.github.io/signal-desk/`.
+4. SQL Editor → run:
+
+```sql
+create table public.user_data (
+  user_id uuid not null default auth.uid() references auth.users(id) on delete cascade,
+  key text not null,
+  value text,
+  updated_at timestamptz not null default now(),
+  primary key (user_id, key)
+);
+alter table public.user_data enable row level security;
+create policy "own rows only" on public.user_data for all to authenticated
+  using (user_id = (select auth.uid())) with check (user_id = (select auth.uid()));
+```
+
+5. Project Settings → API: put the Project URL and the anon/publishable key in `docs/account.js`
+   (both public by design; the service_role key never goes on the site).
+6. Invite people: Authentication → Users → Add user → Send invitation. The link lets them set a password.
