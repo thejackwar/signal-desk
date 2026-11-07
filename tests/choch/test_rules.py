@@ -47,3 +47,11 @@ rows = [(f"2024-03-01T{h:02d}:{m:02d}-05:00", 1, 2, 0.5, 1.5, 10) for h in range
 four = C.to_4h(rows)
 assert four["t"] == ["2024-03-01T09:30", "2024-03-01T13:30"] and four["v"] == [80, 50], four
 print("choch rules: ok")
+
+# account: a trade that opens and closes in the same candle must free its money again
+acc_b = {"t": ["2024-01-02T09:30", "2024-01-02T13:30", "2024-01-03T09:30"]}
+same = {"fill": 0, "out": 0, "risk": 0.01, "pct": -0.01}
+later = [{"fill": 1, "out": 2, "risk": 0.01, "pct": 0.02} for _ in range(5)]
+pts, info = C.stock_account([("X", same)] + [("X", t) for t in later], {"X": acc_b})
+assert info["taken"] == 6 and info["skipped_no_cash"] == 0, info
+print("choch account: ok")

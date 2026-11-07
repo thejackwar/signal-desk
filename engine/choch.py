@@ -54,6 +54,7 @@ import math
 import os
 import random
 import sys
+import threading
 import time
 import urllib.error
 import urllib.parse
@@ -420,16 +421,27 @@ CACHE_DIR = ROOT / ".cache" / "choch"      # 4H candles kept between runs (actio
 
 
 def _load_cache() -> dict[str, dict]:
-    f = CACHE_DIR / f"{U.key}.json.gz"
-    try:
-        return json.loads(gzip.decompress(f.read_bytes()))
-    except Exception:
-        return {}
+    """One cache for both lists (the S&P 100 is part of the S&P 500), so no stock is downloaded twice."""
+    out: dict[str, dict] = {}
+    for name in ("sp500.json.gz", "sp100.json.gz", "stocks.json.gz"):      # the first two: older runs' files
+        try:
+            got = json.loads(gzip.decompress((CACHE_DIR / name).read_bytes()))
+        except Exception:
+            continue
+        for sym, b in got.items():
+            o = out.get(sym)
+            if not o or (b["t"] and (b["t"][0] <= o["t"][0] and b["t"][-1] >= o["t"][-1])):
+                out[sym] = b
+    return out
 
 
 def _save_cache(data: dict[str, dict]) -> None:
     CACHE_DIR.mkdir(parents=True, exist_ok=True)
-    (CACHE_DIR / f"{U.key}.json.gz").write_bytes(gzip.compress(json.dumps(data, separators=(",", ":")).encode(), 6))
+    tmp = CACHE_DIR / "stocks.json.gz.tmp"
+    tmp.write_bytes(gzip.compress(json.dumps(data, separators=(",", ":")).encode(), 6))
+    tmp.replace(CACHE_DIR / "stocks.json.gz")
+    for name in ("sp500.json.gz", "sp100.json.gz"):
+        (CACHE_DIR / name).unlink(missing_ok=True)
 
 
 def fetch_stocks(symbols: list[str], start: datetime, end: datetime, feed: str = "sip") -> dict[str, dict]:
@@ -446,14 +458,23 @@ def fetch_stocks(symbols: list[str], start: datetime, end: datetime, feed: str =
             cache.pop(s, None)
         jobs.setdefault(since, []).append(s)
     batches = [(since, syms[i:i + 5]) for since, syms in jobs.items() for i in range(0, len(syms), 5)]
-    # The Alpaca key is shared with the live workflows: while the US market is open, one request at a time
-    ny = datetime.now(NY)
-    busy = ny.weekday() < 5 and 9 * 60 <= ny.hour * 60 + ny.minute <= 16 * 60 + 30
-    workers = 1 if busy else 4
+    # The Alpaca key is shared with the live workflows: while the US market is open only 2 requests at a time,
+    # otherwise 6. Checked again for every download, so a run that starts at 15:00 New York speeds up at the close.
+    def market_open() -> bool:
+        ny = datetime.now(NY)
+        return ny.weekday() < 5 and 9 * 60 <= ny.hour * 60 + ny.minute <= 16 * 60 + 30
+
+    def one(since, b):
+        if market_open():
+            with slow:
+                return _fetch_batch(b, datetime.fromisoformat(since).replace(tzinfo=NY), end, feed)
+        return _fetch_batch(b, datetime.fromisoformat(since).replace(tzinfo=NY), end, feed)
+    slow = threading.Semaphore(2)
+    workers = 6
     print(f"  stocks: {len(symbols)} ({sum(len(v) for k, v in jobs.items() if k > '2025')} from the cache), {len(batches)} downloads", flush=True)
     done = 0
     with ThreadPoolExecutor(workers) as ex:
-        futs = {ex.submit(_fetch_batch, b, datetime.fromisoformat(since).replace(tzinfo=NY), end, feed): (since, b) for since, b in batches}
+        futs = {ex.submit(one, since, b): (since, b) for since, b in batches}
         for fu in as_completed(futs):
             since, b = futs[fu]
             try:
@@ -571,12 +592,14 @@ def stock_account(trades: list[tuple[str, dict]], data: dict[str, dict]) -> tupl
             continue
         tt = data[sym]["t"]
         evs.append((tt[t["fill"]], 1, sym, t))
-        evs.append((tt[t["out"]], 0, sym, t))
+        # an exit frees the money before that candle's new entries, except a trade that opens and closes in the
+        # same candle: its exit must come after its own entry (2), or the position would never be closed
+        evs.append((tt[t["out"]], 2 if t["out"] == t["fill"] else 0, sym, t))
     evs.sort(key=lambda e: (e[0], e[1]))
     cash_eq, used, open_, pts, taken, skipped, peak_n = 100000.0, 0.0, {}, [], 0, 0, 0
     for when, kind, sym, t in evs:
         tid = id(t)
-        if kind == 0:
+        if kind != 1:
             if tid in open_:
                 size = open_.pop(tid)
                 used -= size
