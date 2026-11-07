@@ -425,6 +425,10 @@ $("draw").addEventListener("click", e => {
   else if (a === "ind") { const p = document.querySelector(".picker"); p.hidden = !p.hidden; b.setAttribute("aria-expanded", String(!p.hidden)); if (EMBED) render(true); }
   else if (a === "fit" && VIEW) VIEW.main.timeScale().fitContent();
   else if (a === "recent" && VIEW) VIEW.showRecent();
+  else if (a === "patreset" && SIG?.pat) {     // tap twice: the first tap asks, so a stray tap doesn't wipe your edits
+    if (b.dataset.armed) resetPat();
+    else { b.dataset.armed = "1"; b.textContent = "Tap again to reset"; setTimeout(() => { delete b.dataset.armed; b.textContent = "↺ Reset trade"; }, 3000); }
+  }
   syncDrawButtons();
 });
 function syncDrawButtons() {
@@ -1007,8 +1011,11 @@ function patShapes(c) {
 function patDrawings() {
   return patShapes().map((d, k) => ({ id: "p" + k, w: 2, dash: 0, ...d, ...(d.type === "long" || d.type === "short" ? { color: COL.green } : {}) }));
 }
+// back to the trade as it first opened: the original drawings, the pattern's timeframe, zoomed on the trade and
+// your usual indicators (indicator changes on a pattern chart aren't saved, so a fresh load restores them)
 function resetPat() {
   try { localStorage.removeItem(`signaldesk.chart.draw.pat.${SIG.pat.id}`); } catch {}
+  history.replaceState(null, "", `${location.pathname}${location.search}#BTC-USD/${SIG.pat.tf}`);
   location.reload();
 }
 function sigShapes(c) {
@@ -1055,7 +1062,7 @@ function drawSigCard() {
     box.innerHTML = `<div class="sghd"><span class="pill ${long ? "bull" : "bear"}">${long ? "▲ Long" : "▼ Short"}</span><h2>BTC · ${esc(T.name)}</h2><span class="dim">${esc(new Date(T.ts * 1000).toISOString().slice(0, T.tf === "D" ? 10 : 16).replace("T", " "))} UTC · ${{ D: "daily", "4H": "4-hour", "1H": "1-hour" }[T.tf]} chart</span></div>
       <div class="sggrid"><div><span>Entry</span><b>${fmt(T.entry)}</b><small>next candle's open</small></div><div><span>Stop loss</span><b class="down">${fmt(T.stop)}</b><small>${esc(R.stop || "")}</small></div><div><span>Take profit</span><b class="up">${fmt(T.target)}</b><small>${esc(R.target || "")}</small></div>
       <div><span>Result</span><b class="${T.ret >= 0 ? "up" : "down"}">${T.ret > 0 ? "+" : ""}${T.ret.toFixed(2)}%</b><small>${why[T.why]} at ${fmt(T.exit)}, after fees</small></div></div>
-      <p class="dim sgfoot">The pattern and the trade are ordinary drawings: tap one to move it, drag its handles, recolour or delete it. Your changes stay on this device for this trade. <button type="button" class="btn ghost sm" id="patReset">Redraw the original pattern</button></p>
+      <p class="dim sgfoot">The pattern and the trade are ordinary drawings: tap one to move it, drag its handles, recolour or delete it. Your changes stay on this device for this trade. <button type="button" class="btn ghost sm" id="patReset">↺ Reset the trade</button></p>
       <p class="dim sgfoot">From the BTC pattern backtest (every pattern the site detects, since 2021). <a href="patterns.html#${esc(new URLSearchParams({ tf: T.tf, p: `${T.fam}|${T.name}|${T.dir}` }).toString())}">Every ${esc(T.name)} trade ›</a></p>`;
     $("patReset").onclick = resetPat;
     return;
@@ -1125,6 +1132,7 @@ if (PAT_ID) {
     SIG = { a: { id: T.id, ticker: "BTC-USD", side: T.dir === "LONG" ? "bullish" : "bearish", price: T.entry, stop: T.stop, date: new Date(T.ts * 1000).toISOString().slice(0, 10), tf: T.tf, t: T.te, note: T.name },
       pat: T, rules: js.rules?.[`${T.fam}|${T.name}`], chart: null, trade: null, strat: null };
     S.tf = T.tf; writeHash();
+    if ($("patResetBar")) $("patResetBar").hidden = false;
     if (!EMBED) {     // the trade first: no page intro, the pattern's card right above the chart
       document.querySelectorAll(".hero > :not(#status)").forEach(el => { el.style.display = "none"; });
       const sc = $("sigcard"), cd = $("card");

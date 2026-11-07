@@ -339,7 +339,7 @@ html.embed .status:empty { display: none; }
         <button type="button" data-act="undo" title="Undo (Ctrl/Cmd+Z)">Undo</button>
         <button type="button" data-act="clear" title="Remove every drawing on this market">Clear</button>
         <button type="button" data-act="fit" title="Show the whole history">Fit</button>
-        <button type="button" data-act="recent" title="Back to the latest candles (or the signal)">Latest</button>
+        <button type="button" data-act="recent" title="Back to the latest candles (or the signal)">Latest</button><button type="button" data-act="patreset" id="patResetBar" hidden title="Put back the trade as the backtest drew it: drawings, timeframe, zoom and indicators">↺ Reset trade</button>
         <span class="hint" id="hint"></span>
       </div>
     </div>
@@ -375,6 +375,6 @@ html.embed .status:empty { display: none; }
   </footer>
 </main>
 
-<script type="module" src="chart.js?v=13"></script>
+<script type="module" src="chart.js?v=14"></script>
 </body>
 </html>
