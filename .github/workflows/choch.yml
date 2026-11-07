@@ -94,4 +94,5 @@ jobs:
           git add docs/data/sp500/choch 2>/dev/null || true
           git diff --cached --quiet && exit 0
           git commit -m "4H CHoCH $(date -u +%F\ %H:%M)"
-          for i in 1 2 3; do git pull --rebase && git push && break; sleep 5; done
+          # a run checks out its own commit: if an earlier run published since, this run (newer) wins
+          for i in 1 2 3; do git pull --rebase -X theirs && git push && break; git rebase --abort 2>/dev/null; sleep 5; done
