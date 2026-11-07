@@ -1039,7 +1039,7 @@ function drawSigCard() {
     box.innerHTML = `<div class="sghd"><span class="pill ${long ? "bull" : "bear"}">${long ? "▲ Long" : "▼ Short"}</span><h2>BTC · ${esc(T.name)}</h2><span class="dim">${esc(new Date(T.ts * 1000).toISOString().slice(0, T.tf === "D" ? 10 : 16).replace("T", " "))} UTC · ${{ D: "daily", "4H": "4-hour", "1H": "1-hour" }[T.tf]} chart</span></div>
       <div class="sggrid"><div><span>Entry</span><b>${fmt(T.entry)}</b><small>next candle's open</small></div><div><span>Stop loss</span><b class="down">${fmt(T.stop)}</b><small>${esc(R.stop || "")}</small></div><div><span>Take profit</span><b class="up">${fmt(T.target)}</b><small>${esc(R.target || "")}</small></div>
       <div><span>Result</span><b class="${T.ret >= 0 ? "up" : "down"}">${T.ret > 0 ? "+" : ""}${T.ret.toFixed(2)}%</b><small>${why[T.why]} at ${fmt(T.exit)}, after fees</small></div></div>
-      <p class="dim sgfoot">From the BTC pattern backtest (every pattern the site detects, since 2021). <a href="index.html#terminal">Open the Terminal ›</a></p>`;
+      <p class="dim sgfoot">From the BTC pattern backtest (every pattern the site detects, since 2021). <a href="patterns.html#${esc(new URLSearchParams({ tf: T.tf, p: `${T.fam}|${T.name}|${T.dir}` }).toString())}">Every ${esc(T.name)} trade ›</a></p>`;
     return;
   }
   const { a, trade, strat } = SIG, long = a.side === "bullish", st = a.strength;
@@ -1107,6 +1107,13 @@ if (PAT_ID) {
     SIG = { a: { id: T.id, ticker: "BTC-USD", side: T.dir === "LONG" ? "bullish" : "bearish", price: T.entry, stop: T.stop, date: new Date(T.ts * 1000).toISOString().slice(0, 10), tf: T.tf, t: T.te, note: T.name },
       pat: T, rules: js.rules?.[`${T.fam}|${T.name}`], chart: null, trade: null, strat: null };
     S.tf = T.tf; writeHash();
+    if (!EMBED) {     // the trade first: no page intro, the pattern's card right above the chart
+      document.querySelectorAll(".hero > :not(#status)").forEach(el => { el.style.display = "none"; });
+      const sc = $("sigcard"), cd = $("card");
+      if (sc && cd) cd.before(sc);
+    }
+    const bk = document.querySelector("nav.bar .back");     // back to this pattern's page on Chart Patterns
+    if (bk && !EMBED) { bk.href = `patterns.html#${new URLSearchParams({ tf: T.tf, p: `${T.fam}|${T.name}|${T.dir}` })}`; bk.textContent = "‹ Patterns"; bk.setAttribute("aria-label", `Back to ${T.name} on Chart Patterns`); }
     S.on = S.on.filter(id => id !== "sr" && id !== "cpat");    // today's levels and forming patterns would only clutter an old trade (not saved)
     drawSigCard();
     load("BTC-USD");

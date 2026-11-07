@@ -39,7 +39,7 @@
 <link rel="icon" href="favicon.ico?v=2" sizes="any">
 <link rel="icon" type="image/svg+xml" href="logo.svg?v=2">
 <link rel="apple-touch-icon" href="icon-180.png?v=2">
-<script src="sections.js?v=2"></script>
+<script src="sections.js?v=3"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
 <style>
@@ -7789,7 +7789,7 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
     return [...(T.open || []), ...(T.closed || [])].filter(x => x.t === a.ticker && x.s === a.strategy && x.side === side && Date.parse(x.d0) >= d0 && Date.parse(x.d0) - d0 <= 5 * 864e5)
       .sort((x, y) => x.d0.localeCompare(y.d0))[0] || null;
   }
-  const CHART_V = 11;   // bump with chart.js?v= in chart.html, so the Terminal's chart frame never shows a cached old page
+  const CHART_V = 12;   // bump with chart.js?v= in chart.html, so the Terminal's chart frame never shows a cached old page
   function tmChartSrc(t, a, embed = true) {
     const tf = a?.tf && ["W", "D", "4H", "1H"].includes(a.tf) ? a.tf : "D";
     const q = ["v=" + CHART_V, embed ? "embed=1" : "", a ? `sig=${encodeURIComponent(a.id)}&m=${S.market}${S.market === "stocks" && uni() === "sp500" ? "&u=sp500" : ""}` : ""].filter(Boolean).join("&");
@@ -8229,7 +8229,7 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
       const th = (k, l, r) => `<button type="button" class="${r ? "r" : ""}" data-tmpatf="sort=${k}" aria-pressed="${sk === k}">${l}</button>`;
       body += `<div class="tr pats th"><span>${th("name", "Pattern")}</span><span>Side</span><span class="r">${th("n", "Trades", 1)}</span><span class="r">${th("win", "Won", 1)}</span><span class="r">${th("avg", "Avg", 1)}</span><span class="r">${th("eur", "€1k / trade", 1)}</span></div>`
         + rows.map(r => { const [f, n, d] = r.k.split("|"), R = D0.rules[`${f}|${n}`] || {}; return `<button type="button" class="tr pats" data-tmpatf="name=${esc(r.k)}" title="Stop loss: ${esc(R.stop || "")} · Take profit: ${esc(R.target || "")}"><span><b>${esc(n)}</b>${r.n < 5 ? ' <small class="few">few</small>' : ""}<small class="dim"> ${esc(PAT_FAM[f])}</small></span><span class="${d === "LONG" ? "side-b" : "side-s"}">${d === "LONG" ? "▲ long" : "▼ short"}</span><span class="r">${r.n}</span><span class="r">${Math.round(r.win)}%</span><span class="r">${tmPct(r.avg, 2)}</span><span class="r">${tmEur(r.eur)}</span></button>`; }).join("");
-      body += `<p class="fine2">Tap a pattern to list each of its trades, then tap a trade to see it on the chart. Hover (or long-press) for its stop loss and take profit rules. “few” = under 5 trades, mostly luck.</p>`;
+      body += `<p class="fine2">Tap a pattern to list each of its trades, then tap a trade to see it on the chart, or open <a href="patterns.html#tf=${F.tf}">Chart Patterns</a> for every trade as a mini chart. Hover (or long-press) for its stop loss and take profit rules. “few” = under 5 trades, mostly luck.</p>`;
     } else {
       const N = S.tmPatN || 120, show = L.slice(0, N);
       // the Patterns tab opens with the latest pattern already on the chart
@@ -8237,7 +8237,7 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
       body += show.length ? `<div class="tr patr th"><span>When (UTC)</span><span>Pattern</span><span></span><span class="r">Entry</span><span>Exit</span><span class="r">Result</span></div>` + show.map(x => `<button type="button" class="tr patr${S.tmPat === x.id ? " on" : ""}" data-tmpat="${esc(x.id)}" title="Tap to see it on the chart"><span class="dim">${esc(tmPatWhen(x))}</span><span><b>${esc(x.name)}</b><small class="dim"> ${esc(PAT_FAM[x.fam])}</small></span><span class="${x.dir === "LONG" ? "side-b" : "side-s"}">${x.dir === "LONG" ? "▲" : "▼"}</span><span class="r">${money(x.entry)}</span><span class="dim">${{ stop: "stop loss", target: "take profit", time: "time", open: "open" }[x.why]}</span><span class="r">${tmPct(x.ret, 2)}</span></button>`).join("")
         + (L.length > N ? `<button type="button" class="btn ghost sm patmore" data-tmpatmore>Show ${Math.min(200, L.length - N)} more (${L.length - N} left)</button>` : "")
         : `<p class="empty2">No patterns match these filters.</p>`;
-      if (F.name) { const [f, n] = F.name.split("|"), R = D0.rules[`${f}|${n}`] || {}; body = body.replace('<div class="kpis">', `<p class="patrule"><b>${esc(n)}</b> · stop loss: ${esc(R.stop || "–")} · take profit: ${esc(R.target || "–")} <a href="#terminal" data-tmpatf="name=">✕ all patterns</a></p><div class="kpis">`); }
+      if (F.name) { const [f, n] = F.name.split("|"), R = D0.rules[`${f}|${n}`] || {}; body = body.replace('<div class="kpis">', `<p class="patrule"><b>${esc(n)}</b> · stop loss: ${esc(R.stop || "–")} · take profit: ${esc(R.target || "–")} <a href="#terminal" data-tmpatf="name=">✕ all patterns</a> · <a href="patterns.html#${esc(new URLSearchParams({ tf: F.tf, p: F.name }).toString())}">every trade on its own chart ›</a></p><div class="kpis">`); }
     }
     body += `<p class="fine2">Every pattern the site's detectors found on BTC/USDT ${TF_PAT[F.tf]} candles since ${esc(fmtDate(D0.start, { day: "numeric", month: "short", year: "numeric" }))}, each traded once: in at the next candle's open, out at the pattern's own stop loss or take profit (2× the risk when the pattern has no target), or after ${D0.hold?.[F.tf]} candles. ${D0.fee_pct}% fees each way, no leverage. Built ${esc(tmAgo(D0.as_of))} ago from ${esc(D0.source)}. Past results, not advice.</p>`;
     return tmPanel("p-pat", "PAT", "BTC chart patterns", null, body, `<small>${St.n} trades · ${TF_PAT[F.tf]}</small>`);
