@@ -412,7 +412,8 @@ const TGROUPS = [
   ["lines", "Lines", ["trend", "ray", "ext", "hline", "hray", "vline", "channel"]],
   ["fib", "Fibonacci", ["fib"]],
   ["shapes", "Shapes", ["rect", "arrow"]],
-  ["proj", "Forecasting and measurement", ["long", "short", "measure", "frvp"]],
+  ["proj", "Forecasting and measurement", ["long", "short", "measure"]],
+  ["vp", "Volume profile", ["frvp"]],
   ["text", "Text", ["text"]],
 ];
 const GL_KEY = "signaldesk.chart.toolgroups";
