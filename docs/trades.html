@@ -1,0 +1,190 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<script src="account.js?v=3"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0b0f14">
+<title>Strategy Trades</title>
+<meta name="description" content="Every strategy in the Strategy Lab, backtested with its default settings on the S&P 100 or S&P 500, crypto and commodities: tap a strategy to see each of its trades on a mini chart, then tap a trade for the full chart. Free, information only.">
+<!-- Link previews (WhatsApp, LinkedIn, Reddit, X…). Absolute addresses: update SITE if the site moves to its own domain. -->
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Investment Center Signals">
+<meta property="og:title" content="Every strategy's trades, on a chart | Investment Center Signals">
+<meta property="og:description" content="Every strategy in the Strategy Lab, backtested with its default settings on the S&P 100 or S&P 500, crypto and commodities: tap a strategy to see each of its trades on a mini chart, then tap a trade for the full chart. Free, information only.">
+<meta property="og:url" content="https://thejackwar.github.io/signal-desk/trades.html">
+<meta property="og:image" content="https://thejackwar.github.io/signal-desk/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Investment Center Signals: trading strategies, explained and backtested">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="canonical" href="https://thejackwar.github.io/signal-desk/trades.html">
+<!-- Cloudflare Web Analytics (free, no cookies): paste the token from Cloudflare → Analytics &amp; Logs → Web Analytics → Add a site. Empty = off. -->
+<script>
+(() => {
+  const CF_ANALYTICS_TOKEN = "a2d6810a28f64b999832485d1635915a";
+  if (!CF_ANALYTICS_TOKEN || location.hostname === "localhost") return;
+  const s = document.createElement("script");
+  s.defer = true; s.src = "https://static.cloudflareinsights.com/beacon.min.js";
+  s.dataset.cfBeacon = JSON.stringify({ token: CF_ANALYTICS_TOKEN });
+  document.head.appendChild(s);
+})();
+</script>
+<script src="sections.js?v=3" defer></script>
+<link rel="icon" href="favicon.ico?v=2" sizes="any">
+<link rel="icon" type="image/svg+xml" href="logo.svg?v=2">
+<link rel="apple-touch-icon" href="icon-180.png?v=2">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+<style>
+/* Same dark look as the other stand-alone pages: frosted bar, big gradient title, cards on a deep blue-black canvas.
+   Overview = rules + one table of strategies; a strategy = its stats + a grid of mini charts, one per trade (trades.js). */
+:root {
+  --bg: #0b0f14; --card: #121820; --fill: #1a222c; --hair: #2b3644; --hair-2: #1f2833;
+  --fg: #e6edf3; --muted: #a5b1bd; --faint: #7d8a97; --accent: #38bdf8; --accent2: #4ade80; --link: #7dd3fc; --on-accent: #04121a;
+  --bar: rgba(11,15,20,.86); --up: #4ade80; --down: #f87171; --amber: #f5b942;
+  --c-bg: #0f151c; --c-grid: #1c2530; --c-txt: #7d8a97; --c-up: #4ade80; --c-dn: #f87171;
+  --grad: linear-gradient(95deg, #38bdf8 0%, #34d399 60%, #4ade80 100%);
+  --title-grad: linear-gradient(95deg, #e6edf3 0%, #e6edf3 40%, #7dd3fc 65%, #86efac 100%);
+  --font: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", Inter, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body { color: var(--fg); font: 17px/1.47 var(--font); letter-spacing: -.022em; -webkit-font-smoothing: antialiased; font-feature-settings: "tnum";
+  padding-bottom: calc(40px + env(safe-area-inset-bottom, 0px));
+  background: radial-gradient(1100px 560px at 85% -10%, color-mix(in srgb, var(--accent) 16%, transparent), transparent 65%),
+    radial-gradient(900px 480px at -5% 105%, color-mix(in srgb, var(--accent2) 11%, transparent), transparent 62%), var(--bg); background-attachment: fixed; }
+a { color: var(--link); text-decoration: none; }
+a:hover { text-decoration: underline; }
+.wrap { max-width: 1180px; margin: 0 auto; padding: 0 22px; }
+@media (max-width: 560px) { .wrap { padding: 0 16px; } }
+.bar { position: sticky; top: 0; z-index: 20; background: var(--bar); backdrop-filter: saturate(180%) blur(20px); -webkit-backdrop-filter: saturate(180%) blur(20px);
+  border-bottom: 1px solid var(--hair-2); padding-top: env(safe-area-inset-top, 0px); }
+.bar-in { max-width: 1180px; margin: 0 auto; padding: 0 22px; height: 48px; display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; }
+.back { font-size: 14px; color: var(--link); }
+.bar-title { font-size: 15px; font-weight: 600; letter-spacing: -.01em; }
+.hero { text-align: center; padding: 56px 0 24px; }
+.hero h1 { font-size: clamp(38px, 7vw, 62px); line-height: 1.06; font-weight: 700; letter-spacing: -.035em; margin: 0; }
+.hero h1, .sec { background: var(--title-grad); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.lede { font-size: clamp(18px, 2.3vw, 22px); line-height: 1.36; color: var(--muted); margin: 12px auto 0; max-width: 680px; }
+@media (max-width: 560px) { .hero { padding: 36px 0 18px; } }
+.ctrls { display: flex; flex-wrap: wrap; gap: 10px 14px; justify-content: center; margin: 22px 0 6px; }
+.seg { display: inline-flex; flex-wrap: wrap; gap: 2px; background: var(--fill); border-radius: 10px; padding: 2px; }
+.seg button { appearance: none; border: 0; background: none; color: var(--fg); font: 500 13px/1 var(--font); padding: 8px 14px; border-radius: 8px; cursor: pointer; }
+.seg button[aria-pressed="true"] { background: var(--grad); color: var(--on-accent); font-weight: 600; }
+.seg button:focus-visible, .row:focus-visible, .mini:focus-visible, .btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.sec { font-size: clamp(24px, 3vw, 30px); font-weight: 700; letter-spacing: -.028em; margin: 0 0 14px; }
+section.block { margin-top: 40px; }
+.panel { background: linear-gradient(150deg, color-mix(in srgb, var(--accent) 7%, var(--card)) 0%, var(--card) 55%); border-radius: 18px; }
+.tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 12px; margin-top: 26px; }
+.tile { padding: 16px 18px; display: grid; gap: 2px; }
+.tile small { font-size: 12px; color: var(--muted); font-weight: 500; letter-spacing: 0; }
+.tile b { font: 600 26px/1.15 var(--font); letter-spacing: -.02em; }
+.tile > span { font-size: 13px; color: var(--faint); letter-spacing: -.005em; }
+.up { color: var(--up); } .down { color: var(--down); }
+.rules { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 16px 28px; padding: 20px 22px; }
+.rules div { font-size: 14.5px; color: var(--muted); line-height: 1.45; }
+.rules b { display: block; color: var(--fg); font-size: 13px; font-weight: 600; margin-bottom: 2px; }
+.tbl { overflow-x: auto; }
+table { border-collapse: collapse; width: 100%; min-width: 900px; font-size: 14.5px; }
+th, td { padding: 12px 16px; text-align: left; vertical-align: top; }
+th { color: var(--muted); font-size: 12px; font-weight: 500; letter-spacing: 0; white-space: nowrap; }
+th button { all: unset; cursor: pointer; } th button[aria-pressed="true"] { color: var(--fg); font-weight: 600; }
+th.n, td.n { text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
+tbody tr { border-top: 1px solid var(--hair-2); cursor: pointer; transition: background .15s; }
+tbody tr:hover { background: color-mix(in srgb, var(--accent) 7%, transparent); }
+td .nm { color: var(--fg); font-weight: 600; }
+td .fam { display: block; font-size: 12px; color: var(--faint); }
+td.rule { color: var(--muted); font-size: 13px; max-width: 220px; }
+.pill { display: inline-block; border-radius: 980px; padding: 3px 10px; font-size: 12px; font-weight: 600; letter-spacing: 0; white-space: nowrap; }
+.pill.L { background: rgba(74,222,128,.14); color: var(--up); } .pill.S { background: rgba(248,113,113,.15); color: var(--down); }
+.few { font: 600 10px var(--mono); color: var(--amber); margin-left: 6px; text-transform: uppercase; }
+.go { color: var(--link); font-size: 13px; white-space: nowrap; }
+.bar2 { display: inline-block; width: 46px; height: 5px; border-radius: 3px; background: var(--hair); margin-left: 8px; vertical-align: middle; overflow: hidden; position: relative; }
+.bar2 i { position: absolute; inset: 0 auto 0 0; background: var(--accent); }
+/* pattern view */
+.crumb { margin: 26px 0 0; font-size: 14px; }
+.ph { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 12px 24px; margin-top: 14px; }
+.ph h1 { margin: 0; font-size: clamp(32px, 5.5vw, 52px); line-height: 1.05; letter-spacing: -.035em; background: var(--title-grad); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.ph .sub { color: var(--muted); font-size: 15px; margin-top: 6px; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.eq { padding: 14px 18px 8px; margin-top: 12px; }
+.eq svg { width: 100%; height: 120px; display: block; }
+.eq small { color: var(--muted); font-size: 12px; }
+.gridbar { display: flex; flex-wrap: wrap; gap: 10px 14px; align-items: center; justify-content: space-between; margin: 34px 0 14px; }
+.gridbar .sec { margin: 0; }
+.minis { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 14px; }
+.mini { display: grid; color: var(--fg); background: var(--card); border: 1px solid var(--hair-2); border-radius: 14px; overflow: hidden; transition: border-color .15s, transform .15s; }
+.mini:hover { text-decoration: none; border-color: color-mix(in srgb, var(--accent) 55%, var(--hair)); transform: translateY(-1px); }
+.mini .mh { display: flex; justify-content: space-between; align-items: center; gap: 8px; padding: 10px 12px 6px; font-size: 13px; }
+.mini .mh span { color: var(--muted); font-variant-numeric: tabular-nums; }
+.mini .mh b { font-size: 14px; font-variant-numeric: tabular-nums; }
+.mini canvas { display: block; width: 100%; height: 170px; background: var(--c-bg); }
+.mini .mf { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; padding: 8px 12px 10px; font-size: 11.5px; color: var(--faint); }
+.mini .mf b { display: block; color: var(--fg); font-weight: 600; font-size: 12.5px; font-variant-numeric: tabular-nums; }
+.mini .mf .s b { color: var(--down); } .mini .mf .t b { color: var(--up); }
+.mini .why { font-size: 11.5px; color: var(--faint); padding: 0 12px 10px; margin-top: -4px; }
+.btn { appearance: none; border: 0; background: var(--grad); color: var(--on-accent); border-radius: 980px; padding: 10px 22px; font: 600 14px var(--font); cursor: pointer; }
+.more { text-align: center; margin: 20px 0 0; }
+.msg { text-align: center; color: var(--muted); padding: 40px 16px; }
+.fine { color: var(--faint); font-size: 12px; line-height: 1.5; margin: 0; }
+footer.foot { border-top: 1px solid var(--hair); margin-top: 56px; padding-top: 18px; display: grid; gap: 10px; }
+@media (max-width: 560px) { .minis { grid-template-columns: 1fr; } .tile b { font-size: 22px; } }
+@media (prefers-reduced-motion: reduce) { .mini, tbody tr { transition: none; } .mini:hover { transform: none; } }
+
+.sub2 { font-size: 13px; color: var(--faint); display: block; }
+td .st { font-size: 12px; color: var(--faint); white-space: nowrap; }
+td.wait { color: var(--faint); font-size: 13px; }
+.find { appearance: none; background: var(--fill); border: 1px solid var(--hair-2); color: var(--fg); border-radius: 10px; padding: 8px 12px; font: 500 13px var(--font); width: 150px; }
+.find:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+.mini .ov { display: flex; gap: 10px; flex-wrap: wrap; padding: 0 12px 6px; font-size: 11px; color: var(--faint); }
+.mini .ov i { display: inline-block; width: 10px; height: 2px; vertical-align: middle; margin-right: 4px; border-radius: 1px; }
+.note { color: var(--muted); font-size: 14px; margin: 10px 0 0; }
+.btn.ghost { background: var(--fill); color: var(--fg); border: 1px solid var(--hair); }
+.links { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 14px; }
+.links a { font-size: 14px; }
+.ics-uni { display: inline-flex; gap: 2px; background: var(--fill); border-radius: 10px; padding: 2px; }
+.ics-uni button { appearance: none; border: 0; background: none; color: var(--fg); font: 500 13px/1 var(--font); padding: 8px 14px; border-radius: 8px; cursor: pointer; }
+.ics-uni button[aria-pressed="true"] { background: var(--grad); color: var(--on-accent); font-weight: 600; }
+</style>
+</head>
+<body>
+<nav class="bar" aria-label="Page">
+  <div class="bar-in">
+    <a class="back" href="index.html#strategylab" aria-label="Back to the Strategy Lab">‹ Strategy Lab</a>
+    <span class="bar-title">Strategy Trades</span>
+    <span></span>
+  </div>
+</nav>
+
+<main class="wrap">
+  <div id="view-all">
+    <section class="hero">
+      <h1>Every strategy, trade by trade.</h1>
+      <p class="lede">Each strategy in the Strategy Lab, run with its default settings. Tap a strategy to see every one of its trades on a chart, then tap a trade to open it full size.</p>
+    </section>
+    <div class="ctrls" id="ctrls"></div>
+    <section class="block">
+      <h2 class="sec">The rules</h2>
+      <div class="panel rules" id="rules"></div>
+    </section>
+    <section class="block">
+      <h2 class="sec">Every strategy</h2>
+      <div class="panel tbl"><table>
+        <thead id="thead"></thead><tbody id="rows"><tr><td colspan="8" class="msg">Loading the price history…</td></tr></tbody>
+      </table></div>
+      <p class="fine" style="margin-top:10px" id="tnote"></p>
+    </section>
+  </div>
+
+  <div id="view-one" hidden></div>
+
+  <footer class="foot">
+    <p class="fine" id="foot">Daily prices from the site's weekly backtest (engine/backtest.py), run on your device with the Strategy Lab's rules. Past results don't predict future ones. For information only. Not investment advice.</p>
+  </footer>
+</main>
+
+<script type="module" src="trades.js?v=1"></script>
+</body>
+</html>

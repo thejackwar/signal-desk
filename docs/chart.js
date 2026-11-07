@@ -128,7 +128,7 @@ const S = { sym: "SPY", tf: "D", on: Array.isArray(saved.on) ? saved.on.filter(i
   tool: "cursor", magnet: saved.magnet !== false, keep: false, hideDr: false };
 // prefs v2 (Nov 2026): chart patterns and major support/resistance are on by default, also for people who saved choices before
 if (Array.isArray(saved.on) && (saved.pv || 1) < 2) for (const id of ["sr", "cpat"]) if (!S.on.includes(id)) S.on.push(id);
-const savePrefs = () => { if (new URLSearchParams(location.search).get("pat")) return; try { localStorage.setItem(PREF_KEY, JSON.stringify({ on: S.on, params: S.params, magnet: S.magnet, pv: 2 })); } catch {} };
+const savePrefs = () => { const q = new URLSearchParams(location.search); if (q.get("pat") || q.get("st")) return; try { localStorage.setItem(PREF_KEY, JSON.stringify({ on: S.on, params: S.params, magnet: S.magnet, pv: 2 })); } catch {} };
 if ((saved.pv || 1) < 2) savePrefs();
 // Signal view: chart.html?sig=<alert id>&m=<market>[&u=sp500]#TICKER/D draws one alert's trade on the chart.
 // embed=1: chart only (the Terminal shows it in a panel next to its own explanation).
@@ -136,6 +136,9 @@ const Q = new URLSearchParams(location.search);
 // Pattern view: chart.html?pat=<trade id>#BTC-USD/D draws one trade from the BTC pattern backtest
 // (docs/data/crypto/btc_patterns.json, engine/btc_patterns.py): the pattern's shape, its stop, its target and how it ended.
 const PAT_ID = Q.get("pat");
+// Strategy trade view: chart.html?st=<Lab strategy>&m=<market>&t=<ticker>&side=1|-1&d0=&d1=&p0=&p1=&why=&r=&n=<name>#TICKER/D draws one
+// trade from Strategy Trades (trades.html, the Strategy Lab's rules on lab.json): entry, exit and the result, as editable drawings.
+const ST_ID = PAT_ID ? null : Q.get("st");
 const SIG_ID = Q.get("sig"), EMBED = Q.get("embed") === "1", SIG_M = ["stocks", "crypto", "commodities"].includes(Q.get("m")) ? Q.get("m") : "stocks";
 const SIG_BASE = SIG_M === "crypto" ? "data/crypto/" : SIG_M === "commodities" ? "data/commodities/" : Q.get("u") === "sp500" ? "data/sp500/" : "data/";
 let SIG = null;                  // {a: the alert, chart: its chart file, trade: its paper trade, strat: the strategy text}
@@ -276,6 +279,11 @@ async function load(sym) {
       const tfs = ["W", "D", "4H", "1H"], upto = tfs.indexOf(SIG.pat.tf);
       for (const t of tfs.slice(0, upto + 1)) { try { await extendBack(d, t, SIG.pat.ts - (t === "W" ? 320 : 420) * STEP[t]); } catch {} if (id !== loadId) return; }
     }
+    if (SIG?.pat?.st && d.kind !== "crypto" && (!d.frames.D?.length || d.frames.D[0].time > SIG.pat.ts - 300 * 86400)) {
+      $("status").textContent = "Loading older candles for the trade…";
+      try { await labBack(d, SIG.a.ticker); } catch (e) { console.warn("lab history", e); }
+      if (id !== loadId) return;
+    }
     if (S.tf === "1m" && can1m(DATA)) { try { await load1m(DATA); } catch {} if (id !== loadId) return; }
     if (!DATA.frames[S.tf]?.length) S.tf = "D";
     $("status").textContent = "";
@@ -288,6 +296,23 @@ async function load(sym) {
   }
 }
 
+// a strategy trade from years ago on a stock or commodity: the live data has about 15 months of daily candles, so the
+// older ones come from the market's lab.json (the same daily prices the Strategy Lab and Strategy Trades use)
+async function labBack(d, sym) {
+  const raw = await fetchJson(`${SIG_BASE}lab.json`), T0 = raw.tickers.find(x => x.t === sym);
+  if (!T0) return;
+  const { decode } = await import("./lab.js");
+  const T = decode({ dates: raw.dates, tickers: [T0], v_scale: raw.v_scale }).tickers[0], D = d.frames.D || [];
+  const first = D.length ? D[0].time : Infinity, old = [];
+  for (let i = 0; i < T.c.length; i++) {
+    const time = dayTime(raw.dates[T.idx[i]]);
+    if (time >= first) break;
+    const v = T.v ? T.v[i] : NaN;
+    old.push({ time, open: T.o ? T.o[i] : i ? T.c[i - 1] : T.c[i], high: T.h[i], low: T.l[i], close: T.c[i], volume: D.length && D[0].volume == null ? null : v === v ? v : 0 });
+  }
+  d.frames.D = [...old, ...D];
+  if (!d.frames.W?.length || d.frames.W[0].time > old[0]?.time) d.frames.W = L.groupDays(d.frames.D, "W");
+}
 function readHash() {
   const [sym, tf] = decodeURIComponent(location.hash.slice(1)).split("/");
   const s = normSym(sym);
@@ -298,7 +323,7 @@ function writeHash() { history.replaceState(null, "", `#${encodeURIComponent(S.s
 
 // ------------------------------------------------------------------ picker UI
 function availability(d, c) {
-  if (d.id === "tlv" && !SIG?.pat) return "Only on a pattern trade's chart (open one from Chart Patterns).";
+  if (d.id === "tlv" && (!SIG?.pat || SIG.pat.st)) return "Only on a pattern trade's chart (open one from Chart Patterns).";
   if (d.intra && STEP[S.tf] >= 86400) return "Intraday charts only (VWAP restarts every day).";
   if (d.vol && c && !L.hasVolume(c)) return DATA?.kind === "commodity" ? "No volume data for commodities yet." : "No volume data for this chart yet.";
   return null;
@@ -306,7 +331,7 @@ function availability(d, c) {
 
 function drawPicker() {
   const c = DATA?.frames[S.tf];
-  $("groups").innerHTML = GROUPS.map(g => `<div class="grp"><em>${g}</em><div class="chips">${DEFS.filter(d => d.grp === g && (d.id !== "tlv" || SIG?.pat)).map(d => {
+  $("groups").innerHTML = GROUPS.map(g => `<div class="grp"><em>${g}</em><div class="chips">${DEFS.filter(d => d.grp === g && (d.id !== "tlv" || (SIG?.pat && !SIG.pat.st))).map(d => {
     const on = S.on.includes(d.id), why = availability(d, c), p = params(d.id);
     const cls = `chip${on && !why ? " on" : ""}${why ? " off" : ""}`;
     return `<span class="${cls}" style="--c:${d.c}"><button type="button" data-id="${d.id}" ${why ? `title="${esc(why)}"` : `title="${esc(d.info)}"`} aria-pressed="${on}"><i></i>${esc(d.name(p))}</button>${on && !why && d.p.length ? `<button type="button" class="gear" data-gear="${d.id}" aria-label="Settings for ${esc(d.name(p))}">⚙</button>` : ""}</span>`;
@@ -400,7 +425,7 @@ function drawTitle() {
 // The tools themselves live in draw.js; this is the toolbar around them.
 // A pattern trade (chart.html?pat=…) keeps its own drawings: the first time it opens, the pattern and the trade are
 // written in as ordinary drawings (editable, movable, deletable), kept apart from the market's normal drawings.
-const patView = () => !!(SIG?.pat && S.sym === "BTC-USD");
+const patView = () => !!(SIG?.pat && S.sym === SIG.a.ticker);
 const drawKey = () => patView() ? `signaldesk.chart.draw.pat.${SIG.pat.id}` : `signaldesk.chart.draw.${S.sym}`;
 const getDrawings = () => {
   let v = null;
@@ -409,7 +434,7 @@ const getDrawings = () => {
     // the levels at the trade join the pattern's drawings once (also for trades opened before they existed)
     const lvKey = drawKey() + ".lv", hasLv = (() => { try { return localStorage.getItem(lvKey) === "1"; } catch { return false; } })();
     if (v == null) v = patDrawings();
-    if (!hasLv && DATA?.frames) { try { v = [...v, ...levelDrawings()]; } catch {} try { localStorage.setItem(lvKey, "1"); } catch {} }
+    if (!hasLv && DATA?.frames && !SIG.pat.st) { try { v = [...v, ...levelDrawings()]; } catch {} try { localStorage.setItem(lvKey, "1"); } catch {} }
     setDrawings(v);
   }
   return v || [];
@@ -785,7 +810,7 @@ function render(keepRange) {
       legend.push(() => all.length ? `<b style="color:${COL.violet}">Patterns</b> ${all.map(chip).join("")}${sel ? `<span class="pchip back" data-pat="">Show all</span>` : ""}`
         : `<b style="color:${COL.violet}">Patterns</b> <span class="dim">none forming</span>`);
     } else if (id === "tlv") {
-      if (!SIG?.pat) continue;
+      if (!SIG?.pat || SIG.pat.st) continue;
       const P = SIG.pat, long = P.dir === "LONG", near = sigIndex(c);
       const ie = near(P.te) ?? near(P.ts), ix = near(P.tx) ?? ie;
       if (ie == null) { addRead(d, "The trade is outside the candles on this chart.", "neu"); continue; }
@@ -889,7 +914,7 @@ function render(keepRange) {
       const j = sc.dates[m.i] ? near(dayTime(sc.dates[m.i])) : null;
       if (j != null && j !== ai) markers.push({ time: c[j].time, position: m.side > 0 ? "belowBar" : "aboveBar", shape: "circle", color: m.side > 0 ? COL.green : COL.red, text: "" });
     });
-    if (SIG.pat && SIG.pat.why !== "open") { const j = near(SIG.pat.tx); if (j != null) markers.push({ time: c[j].time, position: a.side === "bullish" ? "aboveBar" : "belowBar", shape: "square", color: SIG.pat.ret >= 0 ? COL.green : COL.red, text: `${{ stop: "Stop", target: "Target", time: "Time exit" }[SIG.pat.why]} ${SIG.pat.ret > 0 ? "+" : ""}${SIG.pat.ret.toFixed(1)}%` }); }
+    if (SIG.pat && SIG.pat.why !== "open") { const j = near(SIG.pat.tx); if (j != null) markers.push({ time: c[j].time, position: a.side === "bullish" ? "aboveBar" : "belowBar", shape: "square", color: SIG.pat.ret >= 0 ? COL.green : COL.red, text: `${{ stop: "Stop", target: "Target", time: "Time exit", ...ST_WHY }[SIG.pat.why]} ${SIG.pat.ret > 0 ? "+" : ""}${SIG.pat.ret.toFixed(1)}%` }); }
     if (SIG.trade?.d1) { const j = near(dayTime(SIG.trade.d1)); if (j != null) markers.push({ time: c[j].time, position: "aboveBar", shape: "square", color: COL.white, text: `Closed ${SIG.trade.ret > 0 ? "+" : ""}${(+SIG.trade.ret).toFixed(1)}%` }); }
   }
   if (markers.length) cs.setMarkers(markers.sort((a, b) => a.time - b.time));
@@ -1174,6 +1199,15 @@ function sigIndex(c) {
 // a pattern trade: the pattern's own swing points and lines, then the trade box (entry, stop loss, take profit, exit)
 function patShapes(c) {
   const T = SIG.pat, long = T.dir === "LONG", step = STEP[S.tf], out = [], amber = COL.amber;
+  if (T.st) {     // a strategy trade: no pattern, no fixed stop or target, just the entry, the exit and the result
+    const win = T.ret > 0, tEnd = Math.max(T.tx, T.te + step);
+    out.push({ type: "rect", pts: [{ t: T.te, p: T.entry }, { t: tEnd, p: T.exit }], color: win ? COL.green : COL.red, w: 1.5, dash: 0,
+      label: `${T.why === "open" ? "Open" : ST_WHY[T.why] || "Closed"} ${T.ret >= 0 ? "+" : "−"}${Math.abs(T.ret).toFixed(2)}%` });
+    out.push({ type: "trend", pts: [{ t: T.te, p: T.entry }, { t: tEnd, p: T.exit }], color: alpha(COL.white, .7), w: 1.5, dash: 1, label: "" });
+    out.push({ type: "vline", pts: [{ t: T.ts, p: T.entry }], color: alpha(COL.white, .35), w: 1, dash: 2, label: long ? "Buy" : "Short" });
+    if (T.why !== "open") out.push({ type: "vline", pts: [{ t: T.tx, p: T.exit }], color: alpha(COL.white, .25), w: 1, dash: 2, label: "Exit" });
+    return out;
+  }
   const sh = T.shape || {};
   if (sh.box) out.push({ type: "rect", pts: [{ t: sh.box[0], p: sh.box[3] }, { t: sh.box[1] + step, p: sh.box[2] }], color: amber, w: 1.5, dash: 0, label: T.name });
   const pts = (sh.pts || []).map(([t, p, lb]) => ({ t, p, lb })).sort((x, y) => x.t - y.t);
@@ -1187,6 +1221,7 @@ function patShapes(c) {
   out.push({ type: "vline", pts: [{ t: T.ts, p: T.entry }], color: alpha(COL.white, .35), w: 1, dash: 2, label: "Breakout" });
   return out;
 }
+const ST_WHY = { rule: "Exit signal", tp: "Take profit", sl: "Stop loss", trail: "Trailing stop", be: "Break-even stop", time: "Time exit" };
 // the pattern as editable drawings: each gets an id and the usual colour / width / dash settings
 function patDrawings() {
   return patShapes().map((d, k) => ({ id: "p" + k, w: 2, dash: 0, ...d, ...(d.type === "long" || d.type === "short" ? { color: COL.green } : {}) }));
@@ -1215,7 +1250,7 @@ function levelDrawings() {
 // your usual indicators (indicator changes on a pattern chart aren't saved, so a fresh load restores them)
 function resetPat() {
   try { localStorage.removeItem(`signaldesk.chart.draw.pat.${SIG.pat.id}`); localStorage.removeItem(`signaldesk.chart.draw.pat.${SIG.pat.id}.lv`); } catch {}
-  history.replaceState(null, "", `${location.pathname}${location.search}#BTC-USD/${SIG.pat.tf}`);
+  history.replaceState(null, "", `${location.pathname}${location.search}#${encodeURIComponent(SIG.a.ticker)}/${SIG.pat.tf}`);
   location.reload();
 }
 function sigShapes(c) {
@@ -1256,7 +1291,7 @@ function drawSigCard() {
   const box = $("sigcard");
   if (!box) return;
   if (!SIG || EMBED) { box.hidden = true; return; }
-  if (SIG.pat) {
+  if (SIG.pat && !SIG.st) {
     const T = SIG.pat, long = T.dir === "LONG", R = SIG.rules || {}, why = { stop: "stop loss hit", target: "take profit hit", time: "closed after the holding time", open: "still open" };
     box.hidden = false;
     box.innerHTML = `<div class="sghd"><span class="pill ${long ? "bull" : "bear"}">${long ? "▲ Long" : "▼ Short"}</span><h2>BTC · ${esc(T.name)}</h2><span class="dim">${esc(new Date(T.ts * 1000).toISOString().slice(0, T.tf === "D" ? 10 : 16).replace("T", " "))} UTC · ${{ D: "daily", "4H": "4-hour", "1H": "1-hour" }[T.tf]} chart</span></div>
@@ -1264,6 +1299,20 @@ function drawSigCard() {
       <div><span>Result</span><b class="${T.ret >= 0 ? "up" : "down"}">${T.ret > 0 ? "+" : ""}${T.ret.toFixed(2)}%</b><small>${why[T.why]} at ${fmt(T.exit)}, after fees</small></div></div>
       <p class="dim sgfoot">The blue/amber and green/red lines are the support, resistance and trendlines that stood in this trade's way when it opened (solid = major, dashed = local); what each meant for the trade is listed under the chart. These lines, the pattern and the trade are all ordinary drawings: tap one to move it, drag its handles, recolour or delete it. Your changes stay on this device for this trade. <button type="button" class="btn ghost sm" id="patReset">↺ Reset the trade</button></p>
       <p class="dim sgfoot">From the BTC pattern backtest (every pattern the site detects, since 2021). <a href="patterns.html#${esc(new URLSearchParams({ tf: T.tf, p: `${T.fam}|${T.name}|${T.dir}` }).toString())}">Every ${esc(T.name)} trade ›</a></p>`;
+    $("patReset").onclick = resetPat;
+    return;
+  }
+  if (SIG.st) {
+    const T = SIG.pat, long = T.dir === "LONG", days = T.why === "open" ? null : Math.round((T.tx - T.te) / 86400);
+    const dd = t => new Date(t * 1000).toISOString().slice(0, 10);
+    box.hidden = false;
+    box.innerHTML = `<div class="sghd"><span class="pill ${long ? "bull" : "bear"}">${long ? "▲ Long" : "▼ Short"}</span><h2>${esc(label(SIG.a.ticker))} · ${esc(T.name)}</h2><span class="dim">${esc(dd(T.te))} · daily chart</span></div>
+      <div class="sggrid"><div><span>Entry</span><b>${fmt(T.entry)}</b><small>close of ${esc(dd(T.te))}, the signal day</small></div>
+      <div><span>${T.why === "open" ? "Now" : "Exit"}</span><b>${fmt(T.exit)}</b><small>${T.why === "open" ? "last close, trade still open" : `${esc((ST_WHY[T.why] || "closed").toLowerCase())} on ${esc(dd(T.tx))}`}</small></div>
+      <div><span>Result</span><b class="${T.ret >= 0 ? "up" : "down"}">${T.ret > 0 ? "+" : ""}${T.ret.toFixed(2)}%</b><small>€${Math.abs(Math.round(T.ret * 10)).toLocaleString("en-US")} ${T.ret >= 0 ? "made" : "lost"} on €1,000, no costs</small></div>
+      <div><span>Held</span><b>${days == null ? "open" : `${days} day${days === 1 ? "" : "s"}`}</b><small>calendar days</small></div></div>
+      <p class="dim sgfoot">The shaded box runs from the entry to the ${T.why === "open" ? "last close" : "exit"} (green for a win, red for a loss). It and the lines are ordinary drawings: tap one to move it, drag its handles, recolour or delete it. Your changes stay on this device for this trade. <button type="button" class="btn ghost sm" id="patReset">↺ Reset the trade</button></p>
+      <p class="dim sgfoot">From Strategy Trades: the Strategy Lab's default settings for this strategy. <a href="${esc(SIG.back)}">Every ${esc(T.name)} trade ›</a></p>`;
     $("patReset").onclick = resetPat;
     return;
   }
@@ -1323,7 +1372,38 @@ syncDrawButtons();
 drawPicker();
 loadNames();
 if (EMBED) document.querySelector(".picker").hidden = true;
-if (PAT_ID) {
+// a trade with its own drawings (a pattern trade or a strategy trade): the card above the chart, the back link, no clutter
+function openTrade(sym, backHref, backText, backLabel) {
+  S.tf = SIG.pat.tf; writeHash();
+  if ($("patResetBar")) $("patResetBar").hidden = false;
+  if (!EMBED) {
+    document.querySelectorAll(".hero > :not(#status)").forEach(el => { el.style.display = "none"; });
+    const sc = $("sigcard"), cd = $("card");
+    if (sc && cd) cd.before(sc);
+  }
+  const bk = document.querySelector("nav.bar .back");
+  if (bk && !EMBED) { bk.href = backHref; bk.textContent = backText; bk.setAttribute("aria-label", backLabel); }
+  S.on = S.on.filter(id => id !== "sr" && id !== "cpat");    // today's levels and forming patterns would only clutter an old trade (not saved)
+  if (!SIG.pat.st && !S.on.includes("tlv")) S.on.push("tlv"); // a pattern trade: the support/resistance as it stood when it opened
+  drawSigCard();
+  load(sym);
+}
+if (ST_ID) {
+  const num = k => { const v = parseFloat(Q.get(k)); return Number.isFinite(v) ? v : null; };
+  const sym = (Q.get("t") || decodeURIComponent(location.hash.slice(1)).split("/")[0] || "").toUpperCase(), d0 = Q.get("d0") || "", d1 = Q.get("d1") || "";
+  const side = Q.get("side") === "-1" ? -1 : 1, p0 = num("p0"), p1 = num("p1"), ret = num("r");
+  if (!sym || !/^\d{4}-\d\d-\d\d$/.test(d0) || p0 == null || p1 == null) { $("status").className = "status err"; $("status").textContent = "That trade link is incomplete."; load(S.sym); }
+  else {
+    const name = Q.get("n") || ST_ID, why = d1 ? (Q.get("why") || "rule") : "open", te = dayTime(d0);
+    const T = { st: true, id: `st.${SIG_M}.${Q.get("u") || ""}.${ST_ID}.${sym}.${d0}.${side}`, tf: "D", dir: side > 0 ? "LONG" : "SHORT", name, ts: te, te,
+      tx: d1 ? dayTime(d1) : Math.floor(Date.now() / 86400000) * 86400, entry: p0, exit: p1, stop: null, target: null, why,
+      ret: ret ?? side * (p1 / p0 - 1) * 100, shape: {} };
+    const mk = new URLSearchParams({ m: SIG_M, s: ST_ID }).toString();
+    SIG = { a: { id: T.id, ticker: sym, side: side > 0 ? "bullish" : "bearish", price: p0, stop: null, date: d0, tf: "D", t: te, note: name },
+      pat: T, st: true, back: `trades.html#${mk}`, chart: null, trade: null, strat: null };
+    openTrade(sym, `trades.html#${mk}`, "‹ Strategy trades", `Back to ${name} on Strategy Trades`);
+  }
+} else if (PAT_ID) {
   $("status").textContent = "Loading the pattern…";
   const get = u => fetch(u).then(r => r.ok ? r.json() : null).catch(() => null);
   Promise.all([get("data/crypto/btc_patterns.json"), get(`data/crypto/btc_patterns_${PAT_ID.split("-")[0]}.json`)]).then(([js, tj]) => {
