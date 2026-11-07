@@ -5,7 +5,7 @@
 // big (several ATRs tall), recent (its last swing near the right edge) and still alive (not already
 // invalidated, or broken out only in the last few candles), and only the best-scoring ones are kept.
 
-import { findPivots, srLevels, TFS, ORDER } from "./trendlines.js?v=3";
+import { findPivots, srLevels, analyze, TFS, ORDER } from "./trendlines.js?v=3";
 
 // ------------------------------------------------------------------ helpers
 function atrOf(c, from) {
@@ -239,13 +239,14 @@ function flag(c0, atr, bear, fresh = 6) {
 // one). Nearby levels from different timeframes merge into one; each gets a strength score from its
 // touches, its timeframes and how recently it was respected. Only the strongest `k` each side are kept.
 const TF_W = { W: 4, D: 3, "4H": 2, "1H": 1.5, "30m": 1, "15m": 1, "5m": 1, "1m": 1 };
-export function majorLevels(frames, tf, { k = 2, swing = 5, range = 0.25 } = {}) {
+export function majorLevels(frames, tf, { k = 2, swing = 5, range = 0.25, tfs: only = null } = {}) {
   const c = frames[tf];
   const res = { support: [], resistance: [] };
   if (!c?.length) return res;
   const close = c[c.length - 1].close;
   const at = ORDER.indexOf(tf);
-  const tfs = (at < 0 ? ["D", "W"] : ORDER.slice(0, at + 1)).filter(t => frames[t]?.length > 30).slice(-3);   // this one + the next two bigger ones
+  const tfs = only ? only.filter(t => frames[t]?.length > 30)      // a chosen set (a trade's levels use every bigger timeframe)
+    : (at < 0 ? ["D", "W"] : ORDER.slice(0, at + 1)).filter(t => frames[t]?.length > 30).slice(-3);   // this one + the next two bigger ones
   if (!tfs.includes(tf) && c.length > 30) tfs.push(tf);
   const cand = [];
   for (const t of tfs) {
@@ -278,4 +279,56 @@ export function majorLevels(frames, tf, { k = 2, swing = 5, range = 0.25 } = {})
   const pick = list => list.sort((a, b) => b.score - a.score).slice(0, k).sort((a, b) => Math.abs(a.price - close) - Math.abs(b.price - close));
   res.support = pick(res.support); res.resistance = pick(res.resistance);
   return res;
+}
+
+// ------------------------------------------------------------------ the levels around one trade
+// What a trader could see when the trade opened: only candles that had CLOSED before the entry are used
+// (no hindsight). Returns the levels that sit in the trade's path (between a little past the stop and a
+// little past the target), so they're the ones that could stop it, slow it or cap it:
+//   major: horizontal levels from the trade's timeframe and every bigger one (weekly, daily ...), merged
+//   local: horizontal levels of the trade's own timeframe from the last ~150 candles, not already a major one
+//   lines: the up and down trendlines (same rules as the Trendlines page) still intact at the entry, on the
+//          trade's timeframe (local) and the next bigger one (major), as {t1, p1, slope per second, tf}
+// Each level: {price, touches, tfs, kind: "major"|"local", side: "support"|"resistance" (vs the entry)}.
+const STEP_S = t => TFS[t]?.step || 60;
+export function tradeLevels(frames, tf, tEntry, { entry, stop, target, swing = 5, k = 3 } = {}) {
+  const out = { major: [], local: [], lines: [] };
+  const at = ORDER.indexOf(tf);
+  if (at < 0 || !frames[tf]?.length || !entry) return out;
+  const upTo = t => { const c = frames[t] || [], st = STEP_S(t); let j = c.length; while (j > 0 && c[j - 1].time + st > tEntry) j--; return c.slice(0, j); };
+  const tfs = ORDER.slice(0, at + 1), cut = {};
+  for (const t of tfs) cut[t] = upTo(t);
+  const c = cut[tf];
+  if (c.length < 40) return out;
+  const atr = atrOf(c, Math.max(0, c.length - 200));
+  const lo0 = Math.min(stop ?? entry, target ?? entry, entry), hi0 = Math.max(stop ?? entry, target ?? entry, entry);
+  const pad = Math.max((hi0 - lo0) * 0.25, 1.5 * atr);
+  const lo = lo0 - pad, hi = hi0 + pad, inPath = p => p >= lo && p <= hi;
+  const side = p => p > entry ? "resistance" : "support";
+
+  const range = Math.max(Math.abs(lo / entry - 1), Math.abs(hi / entry - 1)) + 0.01;
+  const M = majorLevels(cut, tf, { k, swing, range, tfs });
+  out.major = [...M.support, ...M.resistance].filter(l => inPath(l.price)).map(l => ({ ...l, kind: "major", side: side(l.price) }));
+
+  const zone = Math.max(atr, entry * 0.004);
+  const L = srLevels(c, 150, Math.max(2, swing - 2));
+  const near = (list, n) => list.filter(l => inPath(l.price) && !out.major.some(m => Math.abs(m.price - l.price) <= zone)).slice(0, n);
+  out.local = [...near(L.support, 2), ...near(L.resistance, 2)].map(l => ({ price: l.price, touches: l.touches, tfs: [tf], kind: "local", side: side(l.price) }));
+
+  // trendlines intact at the entry: the trade's timeframe and the next bigger one
+  for (const [t, kind] of [[tf, "local"], [ORDER[at - 1], "major"]]) {
+    const cc = t && cut[t];
+    if (!cc || cc.length < 40) continue;
+    const r = analyze(cc, TFS[t].lookback, swing, "close"), st = STEP_S(t);
+    for (const dir of ["up", "down"]) {
+      const ch = r[dir], v = ch.vertices || [];
+      if (ch.broken || ch.level == null || v.length < 2) continue;
+      const A = v[v.length - 2], B = v[v.length - 1];
+      const t1 = cc[A.index].time, slope = (B.price - A.price) / ((cc[B.index].time - t1) || st);   // price per second
+      const now = A.price + slope * (tEntry - t1);
+      if (!inPath(now)) continue;
+      out.lines.push({ t1, p1: A.price, slope, tf: t, kind, dir, side: dir === "up" ? "support" : "resistance", price: now });
+    }
+  }
+  return out;
 }

@@ -92,3 +92,25 @@ assert.ok(kinds(sf).includes("sflag:forming"), kinds(sf).join());
 const s0 = chartPatterns(sf).find(p => p.kind === "sflag");
 assert.ok(s0.trigger < 176 && s0.trigger > 169 && s0.target < 160 && s0.bull === false, `${s0.trigger} ${s0.target}`);
 console.log("flags OK");
+
+// ------------------------------------------------------------------ levels around a trade (tradeLevels)
+{
+  const { tradeLevels } = await import("../../docs/chart-patterns.js");
+  // a range: resistance tested at 130 three times, support at 100 three times, then a long from 110
+  const pts = [[0, 80], [20, 100], [35, 130], [50, 101], [65, 129.5], [80, 100.5], [95, 130.4], [110, 100], [125, 110], [126, 110]];
+  const D = path(pts, 0.8), entryT = D[125].time;
+  const r = tradeLevels({ D }, "D", entryT, { entry: 110, stop: 98, target: 134 });
+  const res = r.major.find(l => l.side === "resistance"), sup = r.major.find(l => l.side === "support");
+  assert.ok(res && Math.abs(res.price - 130) < 1.5, `resistance ${JSON.stringify(r.major)}`);
+  assert.ok(sup && Math.abs(sup.price - 100) < 1.5, `support ${JSON.stringify(r.major)}`);
+  // no hindsight: a level that only forms after the entry is never used
+  const later = path([...pts.slice(0, -1), [140, 160], [150, 120], [160, 160.2], [170, 140]], 0.8);
+  const r2 = tradeLevels({ D: later }, "D", entryT, { entry: 110, stop: 98, target: 165 });
+  assert.ok(![...r2.major, ...r2.local].some(l => Math.abs(l.price - 160) < 3), JSON.stringify(r2.major));
+  // real BTC: every level/line in the path, priced sensibly
+  const t0 = Date.parse("2026-04-20T00:00:00Z") / 1000, i0 = btc.D.findIndex(b => b.time >= t0), e = btc.D[i0].open;
+  const rb = tradeLevels(btc, "D", btc.D[i0].time, { entry: e, stop: e * 0.92, target: e * 1.16 });
+  assert.ok(rb.major.length && rb.lines.length, JSON.stringify(rb));
+  for (const l of [...rb.major, ...rb.local, ...rb.lines]) assert.ok(l.price > e * 0.85 && l.price < e * 1.25 && ["support", "resistance"].includes(l.side), JSON.stringify(l));
+  console.log("trade levels OK", rb.major.length, "major", rb.local.length, "local", rb.lines.length, "lines");
+}

@@ -6,7 +6,7 @@
 import * as L from "./chart-lib.js?v=1";
 import { TFS, analyze, srLevels, segments, binanceCrypto } from "./trendlines.js?v=3";
 import { createDrawLayer, TOOLS, TOOL } from "./draw.js?v=2";
-import { chartPatterns, majorLevels } from "./chart-patterns.js?v=2";
+import { chartPatterns, majorLevels, tradeLevels } from "./chart-patterns.js?v=3";
 
 const LW = window.LightweightCharts;
 const DEFAULT_API = "https://trendlines.guerragiacomo00.workers.dev";
@@ -81,6 +81,9 @@ const DEFS = [
   { id: "cpat", grp: "Levels", name: () => "Chart patterns", kind: "levels", c: COL.violet,
     p: [["max", "Patterns shown", 2, { min: 1, max: 3 }], ["sw", "Swing size", 4, { min: 2, max: 12 }]],
     info: "Double tops/bottoms, head & shoulders, triangles, wedges and bull/bear flags that are forming now (or broke out in the last few candles). Only big, recent, still-valid ones are drawn, best first. Tap a pattern's name in the chart legend to show just that one, zoomed in. The dashed line is the trigger: a pattern only counts once price closes through it." },
+  { id: "tlv", grp: "Levels", name: () => "Levels at the trade", kind: "levels", c: COL.sky,
+    p: [["which", "Horizontal levels", "all", [["all", "Major and local"], ["major", "Major only"]]], ["lines", "Trendlines", "yes", [["yes", "Show"], ["no", "Hide"]]], ["k", "Major levels each side", 3, { min: 1, max: 6 }]],
+    info: "The support and resistance that could stop, slow or cap this trade, as a trader saw them when it opened (only candles that had closed before the entry, so no hindsight). Major: levels from this timeframe and every bigger one (weekly, daily …), solid, thicker when several timeframes agree. Local: this timeframe's recent levels, dashed. Slanted lines: up and down trendlines still intact at the entry, on this timeframe and the next bigger one. Only levels in the trade's path (around the stop and the take profit) are drawn." },
   { id: "fib", grp: "Levels", name: p => `Fibonacci ${p.n}`, kind: "levels", c: COL.gold, p: [["n", "Look back (candles)", 120, { min: 20, max: 1000 }]],
     info: "Retracement levels of the biggest swing in the window. Pullbacks often pause at 38.2%, 50% or 61.8% before the trend resumes." },
   { id: "piv", grp: "Levels", name: () => "Pivot points", kind: "levels", c: COL.violet, p: [],
@@ -267,7 +270,12 @@ async function load(sym) {
     const d = await getData(sym);
     if (id !== loadId) return;
     DATA = d;
-    if (SIG?.pat && d.kind === "crypto") { $("status").textContent = "Loading older candles for the pattern…"; try { await extendBack(d, SIG.pat.tf, SIG.pat.ts - 400 * STEP[SIG.pat.tf]); } catch {} if (id !== loadId) return; }
+    if (SIG?.pat && d.kind === "crypto") {
+      $("status").textContent = "Loading older candles for the pattern…";
+      // the pattern's timeframe and every bigger one, so the levels at the trade can be found as they stood back then
+      const tfs = ["W", "D", "4H", "1H"], upto = tfs.indexOf(SIG.pat.tf);
+      for (const t of tfs.slice(0, upto + 1)) { try { await extendBack(d, t, SIG.pat.ts - (t === "W" ? 320 : 420) * STEP[t]); } catch {} if (id !== loadId) return; }
+    }
     if (S.tf === "1m" && can1m(DATA)) { try { await load1m(DATA); } catch {} if (id !== loadId) return; }
     if (!DATA.frames[S.tf]?.length) S.tf = "D";
     $("status").textContent = "";
@@ -290,6 +298,7 @@ function writeHash() { history.replaceState(null, "", `#${encodeURIComponent(S.s
 
 // ------------------------------------------------------------------ picker UI
 function availability(d, c) {
+  if (d.id === "tlv" && !SIG?.pat) return "Only on a pattern trade's chart (open one from Chart Patterns).";
   if (d.intra && STEP[S.tf] >= 86400) return "Intraday charts only (VWAP restarts every day).";
   if (d.vol && c && !L.hasVolume(c)) return DATA?.kind === "commodity" ? "No volume data for commodities yet." : "No volume data for this chart yet.";
   return null;
@@ -297,7 +306,7 @@ function availability(d, c) {
 
 function drawPicker() {
   const c = DATA?.frames[S.tf];
-  $("groups").innerHTML = GROUPS.map(g => `<div class="grp"><em>${g}</em><div class="chips">${DEFS.filter(d => d.grp === g).map(d => {
+  $("groups").innerHTML = GROUPS.map(g => `<div class="grp"><em>${g}</em><div class="chips">${DEFS.filter(d => d.grp === g && (d.id !== "tlv" || SIG?.pat)).map(d => {
     const on = S.on.includes(d.id), why = availability(d, c), p = params(d.id);
     const cls = `chip${on && !why ? " on" : ""}${why ? " off" : ""}`;
     return `<span class="${cls}" style="--c:${d.c}"><button type="button" data-id="${d.id}" ${why ? `title="${esc(why)}"` : `title="${esc(d.info)}"`} aria-pressed="${on}"><i></i>${esc(d.name(p))}</button>${on && !why && d.p.length ? `<button type="button" class="gear" data-gear="${d.id}" aria-label="Settings for ${esc(d.name(p))}">⚙</button>` : ""}</span>`;
@@ -769,6 +778,52 @@ function render(keepRange) {
       const chip = pt => `<span class="pchip${sel === pt ? " on" : !sel && pats.includes(pt) ? " shown" : ""}" data-pat="${esc(key(pt))}" style="--pc:${pcol(pt)}" title="${esc(tx(pt))}">${esc(pt.name)} · ${pt.status}</span>`;
       legend.push(() => all.length ? `<b style="color:${COL.violet}">Patterns</b> ${all.map(chip).join("")}${sel ? `<span class="pchip back" data-pat="">Show all</span>` : ""}`
         : `<b style="color:${COL.violet}">Patterns</b> <span class="dim">none forming</span>`);
+    } else if (id === "tlv") {
+      if (!SIG?.pat) continue;
+      const P = SIG.pat, long = P.dir === "LONG", near = sigIndex(c);
+      const ie = near(P.te) ?? near(P.ts), ix = near(P.tx) ?? ie;
+      if (ie == null) { addRead(d, "The trade is outside the candles on this chart.", "neu"); continue; }
+      const r = tradeLevels(DATA.frames, tf, P.te, { entry: P.entry, stop: P.stop, target: P.target, k: p.k });
+      const w = Math.max(ix - ie, 20), i0 = Math.max(0, ie - Math.round(w * 1.2) - 30), i1 = ix + Math.round(w * 0.4) + 6;
+      const items = [];
+      for (const l of [...r.major, ...(p.which === "major" ? [] : r.local)]) {
+        const maj = l.kind === "major", col = l.side === "support" ? COL.blue : COL.amber;
+        main.addLineSeries(lineOpts(maj ? col : alpha(col, .75), { lineWidth: maj ? (l.tfs.length > 1 ? 3 : 2) : 1, lineStyle: maj ? LW.LineStyle.Solid : LW.LineStyle.Dashed, ...noScale }))
+          .setData([{ time: T(i0), value: l.price }, { time: T(i1), value: l.price }]);
+        const nm = `${maj ? "Major" : "Local"} ${l.side} ${fmt(l.price)} (${l.tfs.join(" + ")}, ${l.touches} touches)`;
+        marks.push({ i: i1, p: l.price, text: `${maj ? "Major" : "Local"} ${l.side === "support" ? "S" : "R"} · ${l.tfs.join("+")}`, cls: "pt sm", col });
+        items.push({ nm, at: () => l.price });
+      }
+      if (p.lines !== "no") for (const ln of r.lines) {
+        const maj = ln.kind === "major", col = ln.dir === "up" ? COL.green : COL.red;
+        const a = Math.min(Math.max(i0, near(ln.t1) ?? i0), ie), val = i => ln.p1 + ln.slope * (T(i) - ln.t1);
+        main.addLineSeries(lineOpts(maj ? col : alpha(col, .75), { lineWidth: maj ? 2 : 1.5, lineStyle: maj ? LW.LineStyle.Solid : LW.LineStyle.Dashed, ...noScale }))
+          .setData([{ time: T(a), value: val(a) }, { time: T(i1), value: val(i1) }]);
+        marks.push({ i: i1, p: val(i1), text: `${maj ? "Major" : "Local"} ${ln.dir} line · ${ln.tf}`, cls: "pt sm", col });
+        items.push({ nm: `${maj ? "Major" : "Local"} ${ln.dir === "up" ? "up trendline (support)" : "down trendline (resistance)"} on the ${{ W: "weekly", D: "daily", "4H": "4-hour", "1H": "1-hour" }[ln.tf] || ln.tf} chart, at ${fmt(ln.price)} on entry`, at: i => val(i), line: true });
+      }
+      legend.push(() => `<b style="color:${COL.sky}">At the trade</b> ${r.major.length} major · ${p.which === "major" ? "" : `${r.local.length} local · `}${p.lines === "no" ? "" : `${r.lines.length} trendline${r.lines.length === 1 ? "" : "s"}`}`);
+      if (!items.length) { addRead(d, "No support or resistance in the trade's path when it opened: clear air between the stop and the take profit.", "bull"); continue; }
+      // where each one sat for this trade: in the way of the take profit, a cushion above/below the stop, or past either
+      const sgn = long ? 1 : -1, reach = Math.abs(P.target - P.entry) || 1, su = (P.stop - P.entry) * sgn / reach;
+      const touched = lv => { for (let i = ie; i <= ix && i < n; i++) { const v = lv(i); if (c[i].low <= v && c[i].high >= v) return i; } return null; };
+      const rows = items.map(x => {
+        const u = (x.at(ie) - P.entry) * sgn / reach, hit = touched(x.at);
+        let text, tone, rank;
+        if (u > 0 && u <= 1) {
+          text = `In the way of the take profit: ${x.nm}, ${Math.round(u * 100)}% of the way there.` +
+            (hit == null ? " Price never reached it." : P.why === "target" ? " Price reached it and pushed through." : ` Price reached it${(P.why === "stop" || P.why === "time") ? " and the trade didn't make it to the target" : ""}.`);
+          tone = "warn"; rank = u;
+        } else if (u > 1) { text = `Just past the take profit: ${x.nm}.`; tone = "neu"; rank = 2 + u; }
+        else if (u >= su) {
+          text = `Between the entry and the stop, a cushion for the trade: ${x.nm}.` + (hit == null ? "" : P.why === "stop" ? " Price broke through it to the stop." : " Price tested it and it held.");
+          tone = long ? "bull" : "bear"; rank = 1 + Math.abs(u);
+        } else { text = `Past the stop: ${x.nm}.`; tone = "neu"; rank = 3 + Math.abs(u); }
+        return { text, tone, rank };
+      }).sort((a, b) => a.rank - b.rank);
+      const block = rows.filter(x => x.tone === "warn").length;
+      addRead(d, `${items.length} level${items.length === 1 ? "" : "s"} in this trade's path when it opened${block ? `, ${block} of them between the entry and the take profit` : ", none between the entry and the take profit"}.`, block ? "warn" : "bull");
+      for (const x of rows.slice(0, 7)) addRead(d, x.text, x.tone);
     } else if (id === "fib") {
       const f = L.fibonacci(c, p.n);
       if (!f) continue;
@@ -1181,7 +1236,7 @@ function drawSigCard() {
     box.innerHTML = `<div class="sghd"><span class="pill ${long ? "bull" : "bear"}">${long ? "▲ Long" : "▼ Short"}</span><h2>BTC · ${esc(T.name)}</h2><span class="dim">${esc(new Date(T.ts * 1000).toISOString().slice(0, T.tf === "D" ? 10 : 16).replace("T", " "))} UTC · ${{ D: "daily", "4H": "4-hour", "1H": "1-hour" }[T.tf]} chart</span></div>
       <div class="sggrid"><div><span>Entry</span><b>${fmt(T.entry)}</b><small>next candle's open</small></div><div><span>Stop loss</span><b class="down">${fmt(T.stop)}</b><small>${esc(R.stop || "")}</small></div><div><span>Take profit</span><b class="up">${fmt(T.target)}</b><small>${esc(R.target || "")}</small></div>
       <div><span>Result</span><b class="${T.ret >= 0 ? "up" : "down"}">${T.ret > 0 ? "+" : ""}${T.ret.toFixed(2)}%</b><small>${why[T.why]} at ${fmt(T.exit)}, after fees</small></div></div>
-      <p class="dim sgfoot">The pattern and the trade are ordinary drawings: tap one to move it, drag its handles, recolour or delete it. Your changes stay on this device for this trade. <button type="button" class="btn ghost sm" id="patReset">↺ Reset the trade</button></p>
+      <p class="dim sgfoot">The blue/amber and green/red lines are the support, resistance and trendlines that stood in this trade's way when it opened (solid = major, dashed = local); what each meant for the trade is listed under the chart. The pattern and the trade are ordinary drawings: tap one to move it, drag its handles, recolour or delete it. Your changes stay on this device for this trade. <button type="button" class="btn ghost sm" id="patReset">↺ Reset the trade</button></p>
       <p class="dim sgfoot">From the BTC pattern backtest (every pattern the site detects, since 2021). <a href="patterns.html#${esc(new URLSearchParams({ tf: T.tf, p: `${T.fam}|${T.name}|${T.dir}` }).toString())}">Every ${esc(T.name)} trade ›</a></p>`;
     $("patReset").onclick = resetPat;
     return;
@@ -1260,6 +1315,7 @@ if (PAT_ID) {
     const bk = document.querySelector("nav.bar .back");     // back to this pattern's page on Chart Patterns
     if (bk && !EMBED) { bk.href = `patterns.html#${new URLSearchParams({ tf: T.tf, p: `${T.fam}|${T.name}|${T.dir}` })}`; bk.textContent = "‹ Patterns"; bk.setAttribute("aria-label", `Back to ${T.name} on Chart Patterns`); }
     S.on = S.on.filter(id => id !== "sr" && id !== "cpat");    // today's levels and forming patterns would only clutter an old trade (not saved)
+    if (!S.on.includes("tlv")) S.on.push("tlv");              // instead: the support/resistance as it stood when this trade opened
     drawSigCard();
     load("BTC-USD");
   });
