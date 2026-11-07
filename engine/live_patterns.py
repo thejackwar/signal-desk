@@ -29,7 +29,8 @@ Output
 
 Run
   python engine/live_patterns.py            live scan (needs ALPACA_KEY_ID / ALPACA_SECRET_KEY)
-  python engine/live_patterns.py --stats    weekly backtest for the win rates
+  python engine/live_patterns.py --stats 4H [--budget 80]   weekly backtest for one timeframe's win rates
+  python engine/live_patterns.py --merge-stats             the four timeframes into docs/data/live_patterns_stats.json
   python engine/live_patterns.py --demo     made-up candles, no keys (to check the output and the page)
 """
 from __future__ import annotations
@@ -37,6 +38,7 @@ from __future__ import annotations
 import argparse
 import gzip
 import json
+import multiprocessing
 import os
 import sys
 import time
@@ -78,8 +80,8 @@ WIN = 300                        # candles the detectors see (both need under 30
 # live: calendar days of history kept per bar size (enough for WIN candles of every timeframe built from it)
 LIVE_DAYS = {"15Min": 21, "30Min": 240, "1Day": 620}
 # --stats: trades counted from these dates (data starts earlier, for the detectors' warm-up)
-STATS_FROM = {"D": "2021-01-01", "4H": "2021-01-01", "1H": "2023-01-01", "15m": "2025-05-01"}
-STATS_DATA = {"1Day": "2019-09-01", "30Min": "2020-08-01", "15Min": "2025-03-01"}
+STATS_FROM = {"D": "2021-01-01", "4H": "2021-01-01", "1H": "2024-01-01", "15m": "2025-11-01"}
+STATS_DATA = {"1Day": "2019-09-01", "30Min": "2020-08-01", "15Min": "2025-09-15"}
 NO_FORMING = {"deck-candle"}     # one-candle setups: only listed once they confirm
 NO_FORMING_NAMES = {"Inside bar", "Narrow range"}
 
@@ -329,65 +331,92 @@ def walk(A: dict, e: int, entry: float, long: bool, stop: float, tgt: float, hol
 
 # ===================================================================== --stats (weekly backtest for the win rates)
 def _stats_one(args):
-    sym, rows_by_size = args
-    res = {tf: {} for tf in TFS}
-    for tf, cfg in TFS.items():
-        D = candles(rows_by_size.get(cfg["src"]) or [], tf, 1 << 62)
-        if len(D) < 320:
-            continue
-        A = arrays(D)
-        first = int(np.searchsorted(A["ts"], int(pd.Timestamp(STATS_FROM[tf], tz="UTC").timestamp())))
-        o, c, n = A["o"], A["c"], len(D)
-        for i in range(max(first, 300), n - 1):
-            for s in detect_at(D, A, i, tf, forming=False):
-                long, e = s["dir"] == "LONG", i + 1
-                entry = o[e]
-                lv = trade_levels(entry, s["dir"], s["stop"], s["target"])
-                if not lv:
-                    continue
-                tgt, _ = lv
-                j, out, why = walk(A, e, entry, long, s["stop"], tgt, cfg["hold"])
-                if why == "open":
-                    continue
-                gross = (out / entry - 1) if long else (entry / out - 1)
-                ret = ((1 + gross) * (1 - FEE) ** 2 - 1) * 100
-                res[tf].setdefault(f"{s['fam']}|{s['name']}|{s['dir']}", []).append(round(float(ret), 4))
+    sym, rows, tf = args
+    cfg, res = TFS[tf], {}
+    D = candles(rows or [], tf, 1 << 62)
+    if len(D) < 320:
+        return sym, res
+    A = arrays(D)
+    first = int(np.searchsorted(A["ts"], int(pd.Timestamp(STATS_FROM[tf], tz="UTC").timestamp())))
+    o, n = A["o"], len(D)
+    for i in range(max(first, 300), n - 1):
+        for s in detect_at(D, A, i, tf, forming=False):
+            long, e = s["dir"] == "LONG", i + 1
+            entry = o[e]
+            lv = trade_levels(entry, s["dir"], s["stop"], s["target"])
+            if not lv:
+                continue
+            j, out, why = walk(A, e, entry, long, s["stop"], lv[0], cfg["hold"])
+            if why == "open":
+                continue
+            gross = (out / entry - 1) if long else (entry / out - 1)
+            ret = ((1 + gross) * (1 - FEE) ** 2 - 1) * 100
+            res.setdefault(f"{s['fam']}|{s['name']}|{s['dir']}", []).append(round(float(ret), 4))
     return sym, res
 
 
-def run_stats(demo: bool):
+STATS_PART = ROOT / ".cache" / "live_patterns_stats"     # one file per timeframe, merged by --merge-stats
+
+
+def run_stats(demo: bool, tf: str, budget_min: float):
+    """One timeframe's backtest (the workflow runs the four in parallel). Stops starting new stocks after
+    budget_min minutes and keeps what it has, so a slow day never loses the whole run."""
     syms = U.tickers()
     now = datetime.now(timezone.utc)
+    size = TFS[tf]["src"]
     if demo:
-        data = {s: demo_rows(s, long=True) for s in syms[:12]}
+        data = {s: demo_rows(s, long=True)[size] for s in syms[:12]}
     else:
-        data: dict[str, dict] = {s: {} for s in syms}
-        for size, since in STATS_DATA.items():
-            got = fetch(syms, size, datetime.fromisoformat(since).replace(tzinfo=timezone.utc), now - timedelta(seconds=DELAY))
-            for s, rows in got.items():
-                data[s][size] = rows
-    agg = {tf: {} for tf in TFS}
+        data = fetch(syms, size, datetime.fromisoformat(STATS_DATA[size]).replace(tzinfo=timezone.utc), now - timedelta(seconds=DELAY))
+    agg, done = {}, 0
     t0 = time.time()
-    with ProcessPoolExecutor(max(1, (os.cpu_count() or 2))) as ex:
-        futs = [ex.submit(_stats_one, (s, d)) for s, d in data.items() if d]
-        for k, fu in enumerate(as_completed(futs), 1):
+    ex = ProcessPoolExecutor(max(1, (os.cpu_count() or 2)))
+    futs = [ex.submit(_stats_one, (s, rows, tf)) for s, rows in data.items() if rows]
+    try:
+        for fu in as_completed(futs, timeout=budget_min * 60):
             try:
-                sym, res = fu.result()
+                _, res = fu.result()
             except Exception as e:                                # noqa: BLE001
                 print(f"  ! {e}", flush=True)
                 continue
-            for tf, by in res.items():
-                for key, rets in by.items():
-                    agg[tf].setdefault(key, []).extend(rets)
-            if k % 10 == 0 or k == len(futs):
-                print(f"  backtested {k}/{len(futs)} stocks ({time.time() - t0:.0f}s)", flush=True)
-    stats = {tf: {key: [len(r), round(100 * sum(x > 0 for x in r) / len(r), 1), round(float(np.mean(r)), 3)]
-                  for key, r in sorted(by.items())} for tf, by in agg.items()}
-    out = {"as_of": now.isoformat(timespec="seconds"), "universe": "S&P 100", "demo": demo, "from": STATS_FROM,
-           "hold": {tf: c["hold"] for tf, c in TFS.items()}, "fee_pct": FEE * 100, "stats": stats}
+            done += 1
+            for key, rets in res.items():
+                agg.setdefault(key, []).extend(rets)
+            if done % 10 == 0 or done == len(futs):
+                print(f"  {tf}: backtested {done}/{len(futs)} stocks ({time.time() - t0:.0f}s)", flush=True)
+    except TimeoutError:
+        print(f"  {tf}: time budget reached after {done}/{len(futs)} stocks, keeping those", flush=True)
+    ex.shutdown(wait=False, cancel_futures=True)
+    stats = {key: [len(r), round(100 * sum(x > 0 for x in r) / len(r), 1), round(float(np.mean(r)), 3)] for key, r in sorted(agg.items())}
+    STATS_PART.mkdir(parents=True, exist_ok=True)
+    (STATS_PART / f"{tf}.json").write_text(json.dumps({"tf": tf, "as_of": now.isoformat(timespec="seconds"), "demo": demo,
+                                                       "stocks": done, "of": len(futs), "stats": stats}, separators=(",", ":")))
+    print(f"stats {tf}: {sum(v[0] for v in stats.values())} trades on {done} stocks")
+    for p in multiprocessing.active_children():               # don't wait for stocks still running past the budget
+        p.kill()
+
+
+def merge_stats():
+    """The four timeframe files -> docs/data/live_patterns_stats.json (a timeframe that didn't run keeps its old numbers)."""
+    try:
+        out = json.loads(STATS.read_text())
+    except Exception:
+        out = {}
+    out.update({"universe": "S&P 100", "from": STATS_FROM, "hold": {tf: c["hold"] for tf, c in TFS.items()}, "fee_pct": FEE * 100})
+    out.setdefault("stats", {}); out.setdefault("stocks", {})
+    for tf in TFS:
+        try:
+            part = json.loads((STATS_PART / f"{tf}.json").read_text())
+        except Exception:
+            continue
+        if part.get("stats"):
+            out["stats"][tf] = part["stats"]
+            out["stocks"][tf] = [part["stocks"], part["of"]]
+            out["as_of"] = max(out.get("as_of", ""), part["as_of"])
+            out["demo"] = part.get("demo", False)
     STATS.parent.mkdir(parents=True, exist_ok=True)
     STATS.write_text(json.dumps(out, separators=(",", ":")))
-    print(f"stats: {', '.join(f'{tf} {sum(v[0] for v in s.values())} trades' for tf, s in stats.items())} -> {STATS}")
+    print(f"merged: {', '.join(f'{tf} {len(v)} patterns' for tf, v in out['stats'].items())} -> {STATS}")
 
 
 # ===================================================================== live scan
@@ -558,14 +587,19 @@ def demo_rows(sym: str, long: bool = False) -> dict:
 
 def main():
     ap = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
-    ap.add_argument("--stats", action="store_true", help="weekly backtest for the win rates")
+    ap.add_argument("--stats", choices=list(TFS), help="weekly backtest for the win rates, one timeframe")
+    ap.add_argument("--budget", type=float, default=80, help="--stats: minutes of backtesting before keeping what's done")
+    ap.add_argument("--merge-stats", action="store_true", help="merge the timeframes' backtests into the stats file")
     ap.add_argument("--demo", action="store_true", help="made-up candles, no keys")
     ap.add_argument("--force", action="store_true", help="scan even when the US market is closed")
     a = ap.parse_args()
+    if a.merge_stats:
+        merge_stats()
+        return
     if not a.demo and not os.environ.get("ALPACA_KEY_ID"):
         sys.exit("ALPACA_KEY_ID / ALPACA_SECRET_KEY missing")
     if a.stats:
-        run_stats(a.demo)
+        run_stats(a.demo, a.stats, a.budget)
     else:
         run_live(a.demo, a.force)
 

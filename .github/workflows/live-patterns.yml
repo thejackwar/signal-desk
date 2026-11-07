@@ -4,7 +4,9 @@ name: Live chart patterns (stocks)
 # 1-hour, 4-hour and daily candles, for the Terminal's "Live patterns" section.
 #  - live: every 30 minutes while the US market is open, plus once after the close for the daily candles
 #    (the wide hours cover summer and winter time; the script exits when the market is closed).
-#  - stats: the win rate of every pattern on each timeframe (S&P 100 backtest), every Saturday and when the engine changes.
+#  - stats: the win rate of every pattern on each timeframe (S&P 100 backtest), every Saturday and when the engine
+#    changes. The four timeframes run side by side, each with a time budget (a slow day keeps the stocks it finished),
+#    then one job merges them into docs/data/live_patterns_stats.json. The live scan never waits for it.
 # Runs on GitHub's own timer (it isn't in the scheduler Worker's list).
 on:
   schedule:
@@ -19,24 +21,25 @@ on:
       job:
         description: "What to run"
         type: choice
-        options: [live, stats]
+        options: [live, stats, both]
         default: live
 
 permissions:
   contents: write
 
-concurrency:
-  group: live-patterns
-  cancel-in-progress: false
+env:
+  ALPACA_KEY_ID: ${{ secrets.ALPACA_KEY_ID }}
+  ALPACA_SECRET_KEY: ${{ secrets.ALPACA_SECRET_KEY }}
 
 jobs:
-  run:
+  live:
+    if: github.event.schedule != '20 8 * * 6' && (github.event_name != 'workflow_dispatch' || inputs.job != 'stats')
     runs-on: ubuntu-latest
-    timeout-minutes: 120
+    timeout-minutes: 25
+    concurrency:
+      group: live-patterns-live
+      cancel-in-progress: false
     env:
-      ALPACA_KEY_ID: ${{ secrets.ALPACA_KEY_ID }}
-      ALPACA_SECRET_KEY: ${{ secrets.ALPACA_SECRET_KEY }}
-      STATS: ${{ github.event.schedule == '20 8 * * 6' || github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.job == 'stats') }}
       FORCE: ${{ github.event_name != 'schedule' && '--force' || '' }}
     steps:
       - uses: actions/checkout@v4
@@ -51,10 +54,6 @@ jobs:
           path: .cache/live_patterns
           key: live-patterns-${{ github.run_id }}
           restore-keys: live-patterns-
-      - name: Win rates (S&P 100 backtest)
-        if: env.STATS == 'true'
-        timeout-minutes: 90
-        run: python engine/live_patterns.py --stats
       - name: Live scan, S&P 100
         run: python engine/live_patterns.py $FORCE
       - name: Live scan, S&P 500
@@ -66,7 +65,62 @@ jobs:
         run: |
           git config user.name "signal-desk-bot"
           git config user.email "signal-desk-bot@users.noreply.github.com"
-          for f in docs/data/live_patterns.json docs/data/live_patterns_stats.json docs/data/sp500/live_patterns.json; do if [ -f "$f" ]; then git add "$f"; fi; done
+          for f in docs/data/live_patterns.json docs/data/sp500/live_patterns.json; do if [ -f "$f" ]; then git add "$f"; fi; done
           git diff --cached --quiet && exit 0
           git commit -m "Live patterns $(date -u +%F\ %H:%M)"
+          for i in 1 2 3; do git pull --rebase -X theirs && git push && break; git rebase --abort 2>/dev/null; sleep 5; done
+
+  stats:
+    if: github.event.schedule == '20 8 * * 6' || github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.job != 'live')
+    runs-on: ubuntu-latest
+    timeout-minutes: 150
+    strategy:
+      fail-fast: false
+      matrix:
+        tf: ["15m", "1H", "4H", "D"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: pip install -r requirements.txt
+      - name: Backtest ${{ matrix.tf }}
+        run: python engine/live_patterns.py --stats ${{ matrix.tf }} --budget 110
+      - uses: actions/upload-artifact@v4
+        with:
+          name: live-patterns-stats-${{ matrix.tf }}
+          path: .cache/live_patterns_stats/${{ matrix.tf }}.json
+          include-hidden-files: true
+          retention-days: 3
+
+  merge:
+    needs: stats
+    if: always() && needs.stats.result != 'skipped'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    concurrency:
+      group: live-patterns-merge
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: pip install -r requirements.txt
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: live-patterns-stats-*
+          path: .cache/live_patterns_stats
+          merge-multiple: true
+      - name: Merge the four timeframes
+        run: python engine/live_patterns.py --merge-stats
+      - name: Publish
+        run: |
+          git config user.name "signal-desk-bot"
+          git config user.email "signal-desk-bot@users.noreply.github.com"
+          git add docs/data/live_patterns_stats.json
+          git diff --cached --quiet && exit 0
+          git commit -m "Live patterns win rates $(date -u +%F)"
           for i in 1 2 3; do git pull --rebase -X theirs && git push && break; git rebase --abort 2>/dev/null; sleep 5; done
