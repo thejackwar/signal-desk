@@ -3,7 +3,6 @@
 <head>
 <meta charset="utf-8">
 <script src="account.js?v=3"></script>
-<script src="tradingview-mode.js?v=1"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Investment Center Signals</title>
 <meta name="description" content="Learn how 9 trading strategies work, follow their daily alerts on the S&amp;P 100, crypto and commodities, and see how each did over 15 years. Free, information only.">
@@ -2446,7 +2445,6 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
     el.addEventListener("pointermove", move);
     el.addEventListener("pointerdown", move);
     el.addEventListener("pointerleave", () => { xh.setAttribute("visibility", "hidden"); show(rest); });
-    if (opts.symbol) ICTradingView.mount(box, {symbol: opts.symbol, tf: "D"});
   }
 
   const charts = [];
@@ -3269,7 +3267,7 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
         const data = a.chart || await (await fetch(L().base + "charts/" + a.file)).json();
         if (!box.isConnected) return;
         const focus = data.markers[0]?.i;
-        mountChart(box, data, { focus, symbol: a.ticker, label: `${a.ticker} chart with ${s?.name} alert` });
+        mountChart(box, data, { focus, label: `${a.ticker} chart with ${s?.name} alert` });
       } catch { box.innerHTML = `<p class="loading">The chart couldn't load. Check your connection and open the alert again.</p>`; }
     } };
   }
@@ -3457,7 +3455,7 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
           const k = i + a.side; if (seen.has(k)) continue; seen.add(k);
           data.markers.push({ i, side: a.side === "bullish" ? 1 : -1 });
         }
-        mountChart(box, { ...data, shapes: [] }, { symbol: t, label: `${t} one-year chart`, extra: i => byDay[i] ? `  · ${byDay[i].map(a => `<span class="${a.side === "bullish" ? "up" : "down"}">${esc(stratName(a.strategy))}</span>`).join(", ")}` : "" });
+        mountChart(box, { ...data, shapes: [] }, { label: `${t} one-year chart`, extra: i => byDay[i] ? `  · ${byDay[i].map(a => `<span class="${a.side === "bullish" ? "up" : "down"}">${esc(stratName(a.strategy))}</span>`).join(", ")}` : "" });
       } catch { box.innerHTML = `<p class="loading">The chart couldn't load. Check your connection and try again.</p>`; }
     } };
   }
@@ -7738,7 +7736,7 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
       const alerts = (S.feed?.alerts || []).filter(a => a.ticker === t), pos = {}, seen = new Set(), markers = [];
       data.dates.forEach((d, i) => pos[d] = i);
       for (const a of alerts) { const i = pos[a.date]; if (i == null || seen.has(i + a.side)) continue; seen.add(i + a.side); markers.push({ i, side: a.side === "bullish" ? 1 : -1 }); }
-      mountChart(box, { ...data, markers, shapes: [] }, { symbol: t, label: `${t} one-year chart` });
+      mountChart(box, { ...data, markers, shapes: [] }, { label: `${t} one-year chart` });
     } catch { if (box?.isConnected) box.innerHTML = `<p class="loading">The chart couldn't load.</p>`; }
   }
   function tmSecRender() {
@@ -7791,7 +7789,7 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
     return [...(T.open || []), ...(T.closed || [])].filter(x => x.t === a.ticker && x.s === a.strategy && x.side === side && Date.parse(x.d0) >= d0 && Date.parse(x.d0) - d0 <= 5 * 864e5)
       .sort((x, y) => x.d0.localeCompare(y.d0))[0] || null;
   }
-  const CHART_V = 15;   // bump with chart.js?v= in chart.html, so the Terminal's chart frame never shows a cached old page
+  const CHART_V = 14;   // bump with chart.js?v= in chart.html, so the Terminal's chart frame never shows a cached old page
   function tmChartSrc(t, a, embed = true) {
     const tf = a?.tf && ["W", "D", "4H", "1H"].includes(a.tf) ? a.tf : "D";
     const q = ["v=" + CHART_V, embed ? "embed=1" : "", a ? `sig=${encodeURIComponent(a.id)}&m=${S.market}${S.market === "stocks" && uni() === "sp500" ? "&u=sp500" : ""}` : ""].filter(Boolean).join("&");
@@ -8567,7 +8565,6 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
     const sl = gipSlots();
     document.querySelectorAll(".tm canvas[data-gipc]").forEach(async cv => {
       const x = sl[+cv.dataset.gipc]; if (!x) return;
-      ICTradingView.mount(cv.parentElement, {symbol:x.t, tf:x.tf});
       try { const f = await gipFrames(x.t); if (cv.isConnected) gipDraw(cv, f[x.tf] || f.D || []); }
       catch { const g = cv.getContext("2d"); g.fillStyle = "#888"; g.fillText("Chart couldn't load", 10, 20); }
     });

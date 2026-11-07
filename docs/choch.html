@@ -3,7 +3,6 @@
 <head>
 <meta charset="utf-8">
 <script src="account.js?v=3"></script>
-<script src="tradingview-mode.js?v=1"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#0b0f14">
 <title>4H Change of Character</title>
@@ -337,7 +336,6 @@ function exChart() {
   g += lab(E.entry, "ENTRY", "#9aa7b4") + lab(E.stop, "STOP", "var(--down)") + (E.tp ? lab(E.tp, "TARGET", "var(--up)") : "");
   $("ex").innerHTML = `<svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="4-hour candles of ${esc(E.symbol)} with the CHoCH, the entry zone, the stop and the target">${g}</svg>
     <p class="fine" style="margin:6px 0 0"><b>${esc(E.symbol)}</b> · CHoCH ${esc(fmtD(bars[E.choch][0]))} · ${E.zone_kind === "fvg" ? "fair value gap" : E.zone_kind === "ob" ? "order block" : "lower half of the leg"} ${E.zone[0]}–${E.zone[1]} · in at ${E.entry}, stop ${E.stop}${E.tp ? `, target ${E.tp}` : ""} · ${E.exit != null ? `out at ${E.exit} (${WHY[E.why]}), <b class="${tone(E.r)}" style="color:var(--${E.r >= 0 ? "up" : "down"})">${rr(E.r)}</b>` : "still open"}</p>`;
-  ICTradingView.mount($("ex"), {symbol:E.symbol, tf:"4H"});
   $("ex-nav").innerHTML = exs.length > 1 ? seg("ex", String(EX), exs.map((e, i) => [String(i), e.symbol])) : "";
 }
 

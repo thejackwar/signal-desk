@@ -163,7 +163,6 @@ function render() {
 
 // ------------------------------------------------------------------ chart: candles + profile drawn on a canvas on top
 function drawChart(el, bars, p, sess, naked, crypto) {
-  ICTradingView.mount(el.parentElement, {symbol:S.sym, tf:DATA.range < 250 ? "30m" : "D"});
   const LW = LightweightCharts;
   const cd = candles(bars, CANDLE[crypto ? "crypto" : "stock"][DATA.range]);
   const chart = LW.createChart(el, {

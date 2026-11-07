@@ -483,11 +483,10 @@ function render(keepRange) {
 
   const stage = $("stage");
   stage.innerHTML = "";
-  ICTradingView.mount(stage, {symbol:S.sym, tf:S.tf});
   const panesOn = active.filter(id => DEF[id].kind === "pane");
   const mainEl = document.createElement("div"); mainEl.className = "main"; stage.appendChild(mainEl);
   if (EMBED) {   // fill the frame: price chart gets what the indicator panes leave
-    const top = mainEl.getBoundingClientRect().top + scrollY, paneH = 110;   // measured below the TradingView button
+    const top = stage.getBoundingClientRect().top + scrollY, paneH = 110;
     mainEl.style.height = Math.max(240, innerHeight - top - panesOn.length * paneH - 2) + "px";
     document.documentElement.style.setProperty("--pane-h", paneH + "px");
   }
