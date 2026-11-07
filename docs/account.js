@@ -10,8 +10,8 @@
 //
 // Loaded early on every page (before the page's own scripts), so it sees every save.
 (() => {
-  const SUPABASE_URL = "";          // e.g. https://abcdefgh.supabase.co (Project Settings → API)
-  const SUPABASE_KEY = "";          // the anon / publishable key (public by design; never the service_role key)
+  const SUPABASE_URL = "https://fcbgxiafnbtrtxxhegbu.supabase.co";          // e.g. https://abcdefgh.supabase.co (Project Settings → API)
+  const SUPABASE_KEY = "sb_publishable_DfmNbJR3E-H5dW8mru2JUA_f6kNIQkh";          // the anon / publishable key (public by design; never the service_role key)
   const SITE = "https://thejackwar.github.io/signal-desk/";
   if (!SUPABASE_URL || !SUPABASE_KEY) return;
 
@@ -193,7 +193,7 @@
   // an invite or password-reset link lands here with the session in the address (#access_token=…&type=…)
   const linkType = /[#&]type=(invite|recovery|signup)/.exec(location.hash)?.[1] || null;
   const s = document.createElement("script");
-  s.src = "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js";
+  s.src = "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js";
   s.onload = async () => {
     sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, { auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true, storageKey: "ics.auth" } });
     sb.auth.onAuthStateChange(async (ev, session) => {
