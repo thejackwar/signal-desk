@@ -124,11 +124,14 @@ const S = { sym: "SPY", tf: "D", on: Array.isArray(saved.on) ? saved.on.filter(i
   tool: "cursor", magnet: saved.magnet !== false, keep: false, hideDr: false };
 // prefs v2 (Nov 2026): chart patterns and major support/resistance are on by default, also for people who saved choices before
 if (Array.isArray(saved.on) && (saved.pv || 1) < 2) for (const id of ["sr", "cpat"]) if (!S.on.includes(id)) S.on.push(id);
-const savePrefs = () => { try { localStorage.setItem(PREF_KEY, JSON.stringify({ on: S.on, params: S.params, magnet: S.magnet, pv: 2 })); } catch {} };
+const savePrefs = () => { if (new URLSearchParams(location.search).get("pat")) return; try { localStorage.setItem(PREF_KEY, JSON.stringify({ on: S.on, params: S.params, magnet: S.magnet, pv: 2 })); } catch {} };
 if ((saved.pv || 1) < 2) savePrefs();
 // Signal view: chart.html?sig=<alert id>&m=<market>[&u=sp500]#TICKER/D draws one alert's trade on the chart.
 // embed=1: chart only (the Terminal shows it in a panel next to its own explanation).
 const Q = new URLSearchParams(location.search);
+// Pattern view: chart.html?pat=<trade id>#BTC-USD/D draws one trade from the BTC pattern backtest
+// (docs/data/crypto/btc_patterns.json, engine/btc_patterns.py): the pattern's shape, its stop, its target and how it ended.
+const PAT_ID = Q.get("pat");
 const SIG_ID = Q.get("sig"), EMBED = Q.get("embed") === "1", SIG_M = ["stocks", "crypto", "commodities"].includes(Q.get("m")) ? Q.get("m") : "stocks";
 const SIG_BASE = SIG_M === "crypto" ? "data/crypto/" : SIG_M === "commodities" ? "data/commodities/" : Q.get("u") === "sp500" ? "data/sp500/" : "data/";
 let SIG = null;                  // {a: the alert, chart: its chart file, trade: its paper trade, strat: the strategy text}
@@ -234,6 +237,22 @@ async function load1m(d) {
 }
 const can1m = d => d && (d.kind === "crypto" || (d.kind === "stock" && !d.fallback));
 
+// older Binance candles in front of a frame, so a pattern from years ago is on the chart (one call per 1,000 candles)
+async function extendBack(d, tf, fromT) {
+  const fr = d.frames[tf], iv = { D: "1d", "4H": "4h", "1H": "1h", W: "1w" }[tf];
+  if (!fr?.length || !iv || fr[0].time <= fromT) return;
+  const first = fr[0].time, rows = [];
+  let t = fromT * 1000, calls = 0;
+  while (t < first * 1000 && calls++ < 6) {     // at most 6,000 candles: an old 1-hour pattern gets its own stretch, then a jump to recent candles
+    const q = new URLSearchParams({ symbol: `${d.sym.replace("-USD", "")}USDT`, interval: iv, startTime: String(t), limit: "1000" });
+    const js = await fetchJson(`https://data-api.binance.vision/api/v3/klines?${q}`);
+    if (!Array.isArray(js) || !js.length) break;
+    rows.push(...js); t = js[js.length - 1][0] + 1;
+    if (js.length < 1000) break;
+  }
+  const old = rows.map(k => ({ time: Math.floor(k[0] / 1000), open: +k[1], high: +k[2], low: +k[3], close: +k[4], volume: +k[5] })).filter(b => b.time < first);
+  d.frames[tf] = [...old, ...fr];
+}
 async function load(sym) {
   const id = ++loadId;
   S.sym = sym; S.patSel = null;
@@ -247,6 +266,7 @@ async function load(sym) {
     const d = await getData(sym);
     if (id !== loadId) return;
     DATA = d;
+    if (SIG?.pat && d.kind === "crypto") { $("status").textContent = "Loading older candles for the pattern…"; try { await extendBack(d, SIG.pat.tf, SIG.pat.ts - 400 * STEP[SIG.pat.tf]); } catch {} if (id !== loadId) return; }
     if (S.tf === "1m" && can1m(DATA)) { try { await load1m(DATA); } catch {} if (id !== loadId) return; }
     if (!DATA.frames[S.tf]?.length) S.tf = "D";
     $("status").textContent = "";
@@ -672,11 +692,12 @@ function render(keepRange) {
     }
     const ai = near(sigTime(a));
     if (ai != null) markers.push({ time: c[ai].time, position: a.side === "bullish" ? "belowBar" : "aboveBar", shape: a.side === "bullish" ? "arrowUp" : "arrowDown",
-      color: a.side === "bullish" ? COL.green : COL.red, text: `${a.side === "bullish" ? "Buy" : "Sell"} signal` });
+      color: a.side === "bullish" ? COL.green : COL.red, text: SIG.pat ? `${SIG.pat.name} · ${a.side === "bullish" ? "buy" : "sell"}` : `${a.side === "bullish" ? "Buy" : "Sell"} signal` });
     (sc?.markers || []).forEach(m => {
       const j = sc.dates[m.i] ? near(dayTime(sc.dates[m.i])) : null;
       if (j != null && j !== ai) markers.push({ time: c[j].time, position: m.side > 0 ? "belowBar" : "aboveBar", shape: "circle", color: m.side > 0 ? COL.green : COL.red, text: "" });
     });
+    if (SIG.pat && SIG.pat.why !== "open") { const j = near(SIG.pat.tx); if (j != null) markers.push({ time: c[j].time, position: a.side === "bullish" ? "aboveBar" : "belowBar", shape: "square", color: SIG.pat.ret >= 0 ? COL.green : COL.red, text: `${{ stop: "Stop", target: "Target", time: "Time exit" }[SIG.pat.why]} ${SIG.pat.ret > 0 ? "+" : ""}${SIG.pat.ret.toFixed(1)}%` }); }
     if (SIG.trade?.d1) { const j = near(dayTime(SIG.trade.d1)); if (j != null) markers.push({ time: c[j].time, position: "aboveBar", shape: "square", color: COL.white, text: `Closed ${SIG.trade.ret > 0 ? "+" : ""}${(+SIG.trade.ret).toFixed(1)}%` }); }
   }
   if (markers.length) cs.setMarkers(markers.sort((a, b) => a.time - b.time));
@@ -807,7 +828,14 @@ function render(keepRange) {
   const ro = new ResizeObserver(() => requestAnimationFrame(placeMarks)); ro.observe(mainEl);
 
   const sigAt = SIG ? sigIndex(c)(sigTime(SIG.a)) : null;
-  const showRecent = () => sigAt != null && !keepRange
+  // a pattern trade: zoom to the pattern and its trade, from the first swing point to a little after the exit
+  const patRange = () => {
+    const near = sigIndex(c), P = SIG.pat, t0 = Math.min(P.ts, ...(P.shape?.pts || []).map(q => q[0]), ...(P.shape?.box ? [P.shape.box[0]] : []), ...(P.shape?.lines || []).map(q => q[0]));
+    const a0 = near(t0) ?? sigAt, a1 = near(P.tx) ?? sigAt, w = Math.max(a1 - a0, 30);
+    return { from: Math.max(0, a0 - w * 0.35), to: a1 + w * 0.45 + 6 };
+  };
+  const showRecent = () => sigAt != null && !keepRange && SIG?.pat ? main.timeScale().setVisibleLogicalRange(patRange())
+    : sigAt != null && !keepRange
     ? main.timeScale().setVisibleLogicalRange({ from: Math.max(0, Math.min(sigAt - SHOW[tf] * 0.7, n - SHOW[tf])), to: Math.max(last, sigAt + SHOW[tf] * 0.3) + fut })
     : main.timeScale().setVisibleLogicalRange({ from: Math.max(0, n - SHOW[tf]), to: last + fut });
   if (patFocus) main.timeScale().setVisibleLogicalRange(patFocus); else if (prevRange) main.timeScale().setVisibleLogicalRange(prevRange); else showRecent();
@@ -937,7 +965,7 @@ addEventListener("message", e => {
 
 // ------------------------------------------------------------------ signal view
 const dayTime = d => Date.parse(d + "T00:00:00Z") / 1000;
-const sigTime = a => a.found_at && a.tf && a.tf !== "D" && a.tf !== "W" ? Date.parse(a.found_at.replace(/\+00:00$/, "Z")) / 1000 : dayTime(a.date);
+const sigTime = a => a.t != null ? a.t : a.found_at && a.tf && a.tf !== "D" && a.tf !== "W" ? Date.parse(a.found_at.replace(/\+00:00$/, "Z")) / 1000 : dayTime(a.date);
 // candles -> "which candle holds this time" (same UTC day for daily candles, else the candle the time falls in)
 function sigIndex(c) {
   const daily = STEP[S.tf] >= 86400;
@@ -951,7 +979,24 @@ function sigIndex(c) {
   };
 }
 // the trade drawn as a TradingView long/short box: entry at the alert, the "wrong if" stop, a 2R mark and the result so far
+// a pattern trade: the pattern's own swing points and lines, then the trade box (entry, stop loss, take profit, exit)
+function patShapes(c) {
+  const T = SIG.pat, long = T.dir === "LONG", step = STEP[S.tf], out = [], amber = COL.amber;
+  const sh = T.shape || {};
+  if (sh.box) out.push({ type: "rect", pts: [{ t: sh.box[0], p: sh.box[3] }, { t: sh.box[1] + step, p: sh.box[2] }], color: amber, w: 1.5, dash: 0, label: T.name });
+  const pts = (sh.pts || []).map(([t, p, lb]) => ({ t, p, lb })).sort((x, y) => x.t - y.t);
+  for (let k = 0; k + 1 < pts.length; k++) out.push({ type: "trend", pts: [pts[k], pts[k + 1]], color: amber, w: 2, dash: 0, label: k === 0 && !sh.box ? T.name : "" });
+  for (const q of pts) if (q.lb) out.push({ type: "text", pts: [{ t: q.t, p: q.p }], color: amber, text: q.lb });
+  for (const [t1, p1, t2, p2] of sh.lines || []) out.push({ type: "trend", pts: [{ t: t1, p: p1 }, { t: t2, p: p2 }], color: alpha(COL.white, .7), w: 1.5, dash: 1, label: "" });
+  const tEnd = Math.max(T.tx, T.te) + step * 3;
+  out.push({ type: long ? "long" : "short", pts: [{ t: T.te, p: T.entry }, { t: tEnd, p: T.target }, { t: tEnd, p: T.stop }],
+    tpLabel: T.tr === "2R" ? "Take profit (2R)" : "Take profit", slLabel: "Stop loss", now: { t: T.tx, p: T.exit },
+    nowLabel: `${T.why === "open" ? "now" : { stop: "stopped", target: "target hit", time: "time exit" }[T.why]} ${T.ret >= 0 ? "+" : "−"}${Math.abs(T.ret).toFixed(2)}%` });
+  out.push({ type: "vline", pts: [{ t: T.ts, p: T.entry }], color: alpha(COL.white, .35), w: 1, dash: 2, label: "Breakout" });
+  return out;
+}
 function sigShapes(c) {
+  if (SIG.pat) return patShapes(c);
   const a = SIG.a, out = [], t0 = sigTime(a), long = a.side === "bullish", step = STEP[S.tf];
   const last = c[c.length - 1], tr = SIG.trade;
   const nowP = tr?.p1 ?? tr?.px ?? last.close, nowT = tr?.d1 ? dayTime(tr.d1) : last.time;
@@ -988,6 +1033,15 @@ function drawSigCard() {
   const box = $("sigcard");
   if (!box) return;
   if (!SIG || EMBED) { box.hidden = true; return; }
+  if (SIG.pat) {
+    const T = SIG.pat, long = T.dir === "LONG", R = SIG.rules || {}, why = { stop: "stop loss hit", target: "take profit hit", time: "closed after the holding time", open: "still open" };
+    box.hidden = false;
+    box.innerHTML = `<div class="sghd"><span class="pill ${long ? "bull" : "bear"}">${long ? "▲ Long" : "▼ Short"}</span><h2>BTC · ${esc(T.name)}</h2><span class="dim">${esc(new Date(T.ts * 1000).toISOString().slice(0, T.tf === "D" ? 10 : 16).replace("T", " "))} UTC · ${{ D: "daily", "4H": "4-hour", "1H": "1-hour" }[T.tf]} chart</span></div>
+      <div class="sggrid"><div><span>Entry</span><b>${fmt(T.entry)}</b><small>next candle's open</small></div><div><span>Stop loss</span><b class="down">${fmt(T.stop)}</b><small>${esc(R.stop || "")}</small></div><div><span>Take profit</span><b class="up">${fmt(T.target)}</b><small>${esc(R.target || "")}</small></div>
+      <div><span>Result</span><b class="${T.ret >= 0 ? "up" : "down"}">${T.ret > 0 ? "+" : ""}${T.ret.toFixed(2)}%</b><small>${why[T.why]} at ${fmt(T.exit)}, after fees</small></div></div>
+      <p class="dim sgfoot">From the BTC pattern backtest (every pattern the site detects, since 2021). <a href="index.html#terminal">Open the Terminal ›</a></p>`;
+    return;
+  }
   const { a, trade, strat } = SIG, long = a.side === "bullish", st = a.strength;
   const risk = a.stop ? Math.abs(a.price / a.stop - 1) * 100 : null;
   const why = { sl: "its stop was hit", tp: "it reached its take profit", rule: "the strategy's exit rule fired" };
@@ -1044,7 +1098,20 @@ drawToolbar();
 drawPicker();
 loadNames();
 if (EMBED) document.querySelector(".picker").hidden = true;
-if (SIG_ID) {
+if (PAT_ID) {
+  $("status").textContent = "Loading the pattern…";
+  const get = u => fetch(u).then(r => r.ok ? r.json() : null).catch(() => null);
+  Promise.all([get("data/crypto/btc_patterns.json"), get(`data/crypto/btc_patterns_${PAT_ID.split("-")[0]}.json`)]).then(([js, tj]) => {
+    const T = tj?.trades?.find(x => x.id === PAT_ID);
+    if (!T) { $("status").className = "status err"; $("status").textContent = "That pattern isn't in the backtest file any more."; load(S.sym); return; }
+    SIG = { a: { id: T.id, ticker: "BTC-USD", side: T.dir === "LONG" ? "bullish" : "bearish", price: T.entry, stop: T.stop, date: new Date(T.ts * 1000).toISOString().slice(0, 10), tf: T.tf, t: T.te, note: T.name },
+      pat: T, rules: js.rules?.[`${T.fam}|${T.name}`], chart: null, trade: null, strat: null };
+    S.tf = T.tf; writeHash();
+    S.on = S.on.filter(id => id !== "sr" && id !== "cpat");    // today's levels and forming patterns would only clutter an old trade (not saved)
+    drawSigCard();
+    load("BTC-USD");
+  });
+} else if (SIG_ID) {
   $("status").textContent = "Loading the signal…";
   loadSignal().then(sg => {
     SIG = sg;

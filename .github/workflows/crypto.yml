@@ -26,6 +26,12 @@ jobs:
         run: python engine/scan.py --market crypto
       - name: Long euro price history (DCA calculator, seasonality)
         run: python engine/crypto_market.py --long || echo "long history skipped"
+      - name: BTC chart pattern backtest (Terminal Patterns tab), on Sundays
+        # every pattern since 2021 on daily, 4-hour and 1-hour candles; weekly, since the files are large (about 8 MB)
+        run: |
+          if [ "$(date -u +%u)" = "7" ] || [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            python engine/btc_patterns.py || echo "pattern backtest skipped"
+          fi
       - name: Publish new alerts
         run: |
           git config user.name "signal-desk-bot"
