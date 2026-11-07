@@ -545,12 +545,14 @@ def run_live(demo: bool, force: bool = False):
     confirmed += [x for k, x in prev.items() if k not in have and x.get("why")]
     confirmed.sort(key=lambda x: (-x["ts"], x["t"]))
     forming.sort(key=lambda x: (x["t"], x["tf"]))
+    # the end of the newest finished 15-minute candle (on a weekend: Friday's close)
+    last_bar = max((min(r[0] + 900, data_end) for d in data.values() for r in (d.get("15Min") or [])[-1:]), default=data_end)
     rules = {}
     for x in forming + confirmed:
         rules.setdefault(f"{x['fam']}|{x['name']}", rules_for(x["fam"], x["name"]))
     counts = {tf: {"forming": sum(x["tf"] == tf for x in forming), "confirmed": sum(x["tf"] == tf for x in confirmed)} for tf in TFS}
     out = {"as_of": now.isoformat(timespec="seconds"), "universe": U.label, "demo": demo,
-           "data_end": datetime.fromtimestamp(data_end, timezone.utc).strftime("%Y-%m-%d %H:%M") + " New York",
+           "data_end": datetime.fromtimestamp(last_bar, timezone.utc).strftime("%Y-%m-%d %H:%M") + " New York",
            "tfs": {tf: {"label": c["label"], "hold": c["hold"], "keep_days": c["keep"] // 86400} for tf, c in TFS.items()},
            "fee_pct": FEE * 100, "rules": rules, "counts": counts, "forming": forming, "confirmed": confirmed}
     OUT.parent.mkdir(parents=True, exist_ok=True)
