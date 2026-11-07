@@ -91,16 +91,16 @@ def _get(params: dict) -> dict:
     key, sec = os.environ["ALPACA_KEY_ID"], os.environ["ALPACA_SECRET_KEY"]
     req = urllib.request.Request(BARS_URL + "?" + urllib.parse.urlencode(params),
                                  headers={"APCA-API-KEY-ID": key, "APCA-API-SECRET-KEY": sec})
-    for attempt in range(6):
+    for attempt in range(9):
         try:
             return json.loads(urllib.request.urlopen(req, timeout=60).read())
         except urllib.error.HTTPError as e:
-            if e.code in (429, 500, 502, 503, 504) and attempt < 5:
-                time.sleep(3 * (attempt + 1))
+            if e.code in (429, 500, 502, 503, 504) and attempt < 8:      # 429: the key's 200 requests/minute are shared
+                time.sleep(min(60, 5 * (attempt + 1)))
                 continue
             raise
         except (urllib.error.URLError, TimeoutError):
-            if attempt < 5:
+            if attempt < 8:
                 time.sleep(3 * (attempt + 1))
                 continue
             raise
@@ -151,7 +151,7 @@ def fetch(symbols: list[str], size: str, start: datetime, end: datetime, cache: 
     per = 10 if size != "1Day" else 50
     batches = [(since, syms[i:i + per]) for since, syms in jobs.items() for i in range(0, len(syms), per)]
     print(f"  {size}: {len(symbols)} stocks, {len(batches)} downloads", flush=True)
-    with ThreadPoolExecutor(4) as ex:
+    with ThreadPoolExecutor(2) as ex:
         futs = {ex.submit(_fetch_batch, b, size, datetime.fromisoformat(since).replace(tzinfo=NY), end): (since, b)
                 for since, b in batches}
         for fu in as_completed(futs):

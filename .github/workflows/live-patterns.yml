@@ -35,7 +35,7 @@ jobs:
   live:
     if: github.event.schedule != '20 8 * * 6' && (github.event_name != 'workflow_dispatch' || inputs.job != 'stats')
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 45
     concurrency:
       group: live-patterns-live
       cancel-in-progress: false
@@ -56,12 +56,21 @@ jobs:
           restore-keys: live-patterns-
       - name: Live scan, S&P 100
         run: python engine/live_patterns.py $FORCE
+      - name: Publish the S&P 100
+        run: |
+          git config user.name "signal-desk-bot"
+          git config user.email "signal-desk-bot@users.noreply.github.com"
+          for f in docs/data/live_patterns.json docs/data/sp500/live_patterns.json; do if [ -f "$f" ]; then git add "$f"; fi; done
+          git diff --cached --quiet && exit 0
+          git commit -m "Live patterns $(date -u +%F\ %H:%M)"
+          for i in 1 2 3; do git pull --rebase -X theirs && git push && break; git rebase --abort 2>/dev/null; sleep 5; done
       - name: Live scan, S&P 500
-        continue-on-error: true
+        continue-on-error: true     # the first run downloads 500 stocks; later runs only the last days (cache)
+        timeout-minutes: 20
         env:
           UNIVERSE: sp500
         run: python engine/live_patterns.py $FORCE
-      - name: Publish
+      - name: Publish the S&P 500
         run: |
           git config user.name "signal-desk-bot"
           git config user.email "signal-desk-bot@users.noreply.github.com"
