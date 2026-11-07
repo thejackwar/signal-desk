@@ -388,8 +388,16 @@ function drawTitle() {
 
 // ------------------------------------------------------------------ drawings (kept per market)
 // The tools themselves live in draw.js; this is the toolbar around them.
-const drawKey = () => `signaldesk.chart.draw.${S.sym}`;
-const getDrawings = () => { try { return JSON.parse(localStorage.getItem(drawKey())) || []; } catch { return []; } };
+// A pattern trade (chart.html?pat=…) keeps its own drawings: the first time it opens, the pattern and the trade are
+// written in as ordinary drawings (editable, movable, deletable), kept apart from the market's normal drawings.
+const patView = () => !!(SIG?.pat && S.sym === "BTC-USD");
+const drawKey = () => patView() ? `signaldesk.chart.draw.pat.${SIG.pat.id}` : `signaldesk.chart.draw.${S.sym}`;
+const getDrawings = () => {
+  let v = null;
+  try { v = JSON.parse(localStorage.getItem(drawKey())); } catch {}
+  if (v == null && patView()) { v = patDrawings(); setDrawings(v); }
+  return v || [];
+};
 const setDrawings = list => { try { localStorage.setItem(drawKey(), JSON.stringify(list)); } catch {} };
 const hintText = () => {
   const t = TOOL[S.tool];
@@ -995,8 +1003,16 @@ function patShapes(c) {
   out.push({ type: "vline", pts: [{ t: T.ts, p: T.entry }], color: alpha(COL.white, .35), w: 1, dash: 2, label: "Breakout" });
   return out;
 }
+// the pattern as editable drawings: each gets an id and the usual colour / width / dash settings
+function patDrawings() {
+  return patShapes().map((d, k) => ({ id: "p" + k, w: 2, dash: 0, ...d, ...(d.type === "long" || d.type === "short" ? { color: COL.green } : {}) }));
+}
+function resetPat() {
+  try { localStorage.removeItem(`signaldesk.chart.draw.pat.${SIG.pat.id}`); } catch {}
+  location.reload();
+}
 function sigShapes(c) {
-  if (SIG.pat) return patShapes(c);
+  if (SIG.pat) return patView() ? [] : patShapes(c);
   const a = SIG.a, out = [], t0 = sigTime(a), long = a.side === "bullish", step = STEP[S.tf];
   const last = c[c.length - 1], tr = SIG.trade;
   const nowP = tr?.p1 ?? tr?.px ?? last.close, nowT = tr?.d1 ? dayTime(tr.d1) : last.time;
@@ -1039,7 +1055,9 @@ function drawSigCard() {
     box.innerHTML = `<div class="sghd"><span class="pill ${long ? "bull" : "bear"}">${long ? "▲ Long" : "▼ Short"}</span><h2>BTC · ${esc(T.name)}</h2><span class="dim">${esc(new Date(T.ts * 1000).toISOString().slice(0, T.tf === "D" ? 10 : 16).replace("T", " "))} UTC · ${{ D: "daily", "4H": "4-hour", "1H": "1-hour" }[T.tf]} chart</span></div>
       <div class="sggrid"><div><span>Entry</span><b>${fmt(T.entry)}</b><small>next candle's open</small></div><div><span>Stop loss</span><b class="down">${fmt(T.stop)}</b><small>${esc(R.stop || "")}</small></div><div><span>Take profit</span><b class="up">${fmt(T.target)}</b><small>${esc(R.target || "")}</small></div>
       <div><span>Result</span><b class="${T.ret >= 0 ? "up" : "down"}">${T.ret > 0 ? "+" : ""}${T.ret.toFixed(2)}%</b><small>${why[T.why]} at ${fmt(T.exit)}, after fees</small></div></div>
+      <p class="dim sgfoot">The pattern and the trade are ordinary drawings: tap one to move it, drag its handles, recolour or delete it. Your changes stay on this device for this trade. <button type="button" class="btn ghost sm" id="patReset">Redraw the original pattern</button></p>
       <p class="dim sgfoot">From the BTC pattern backtest (every pattern the site detects, since 2021). <a href="patterns.html#${esc(new URLSearchParams({ tf: T.tf, p: `${T.fam}|${T.name}|${T.dir}` }).toString())}">Every ${esc(T.name)} trade ›</a></p>`;
+    $("patReset").onclick = resetPat;
     return;
   }
   const { a, trade, strat } = SIG, long = a.side === "bullish", st = a.strength;

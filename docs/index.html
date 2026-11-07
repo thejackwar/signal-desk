@@ -7789,7 +7789,7 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
     return [...(T.open || []), ...(T.closed || [])].filter(x => x.t === a.ticker && x.s === a.strategy && x.side === side && Date.parse(x.d0) >= d0 && Date.parse(x.d0) - d0 <= 5 * 864e5)
       .sort((x, y) => x.d0.localeCompare(y.d0))[0] || null;
   }
-  const CHART_V = 12;   // bump with chart.js?v= in chart.html, so the Terminal's chart frame never shows a cached old page
+  const CHART_V = 13;   // bump with chart.js?v= in chart.html, so the Terminal's chart frame never shows a cached old page
   function tmChartSrc(t, a, embed = true) {
     const tf = a?.tf && ["W", "D", "4H", "1H"].includes(a.tf) ? a.tf : "D";
     const q = ["v=" + CHART_V, embed ? "embed=1" : "", a ? `sig=${encodeURIComponent(a.id)}&m=${S.market}${S.market === "stocks" && uni() === "sp500" ? "&u=sp500" : ""}` : ""].filter(Boolean).join("&");
