@@ -168,11 +168,11 @@ async function renderOne(tf, k) {
 
 function card(x) {
   const href = `chart.html?pat=${encodeURIComponent(x.id)}#BTC-USD/${x.tf}`;
-  return `<a class="mini" href="${esc(href)}" data-id="${esc(x.id)}" aria-label="${esc(x.name)} on ${esc(when(x.ts, x.tf))}: ${x.ret > 0 ? "+" : ""}${x.ret.toFixed(2)}%. Open the full chart">
+  return `<div class="mini" data-id="${esc(x.id)}" aria-label="${esc(x.name)} on ${esc(when(x.ts, x.tf))}: ${x.ret > 0 ? "+" : ""}${x.ret.toFixed(2)}%. Open the full chart">
     <div class="mh"><span>${esc(when(x.ts, x.tf))}${x.tf === "D" ? "" : " UTC"}</span><b>${pct(x.ret)}</b></div>
-    <canvas width="520" height="340" aria-hidden="true"></canvas>
+    <a href="${esc(href)}" aria-label="Open full pattern chart"><canvas width="520" height="340" aria-hidden="true"></canvas></a><div class="tv-mode-slot"></div>
     <div class="mf"><div>Entry<b>${money(x.entry)}</b></div><div class="s">Stop loss<b>${money(x.stop)}</b></div><div class="t">Take profit<b>${money(x.target)}${x.tr === "2R" ? " ·2R" : ""}</b></div></div>
-    <div class="why">${WHY[x.why]} at ${money(x.exit)} after ${x.bars} candle${x.bars === 1 ? "" : "s"}</div></a>`;
+    <div class="why">${WHY[x.why]} at ${money(x.exit)} after ${x.bars} candle${x.bars === 1 ? "" : "s"}</div></div>`;
 }
 
 // ------------------------------------------------------------------ mini charts
@@ -230,6 +230,7 @@ function drawMsg(cv, t) {
   g.fillStyle = css("--faint"); g.font = "12px " + css("--font"); g.textAlign = "center"; g.fillText(t, w / 2, h / 2);
 }
 function draw(cv, x, c) {
+  ICTradingView.mount(cv.closest(".mini").querySelector(".tv-mode-slot"), {symbol:"BTC-USD", tf:x.tf});
   if (!c.length) return drawMsg(cv, "No candles");
   const [g, w, h] = prep(cv), sh = x.shape || {}, s = STEP[x.tf], long = x.dir === "LONG";
   const padL = 4, padR = 4, padT = 10, padB = 10, n = c.length, bw = (w - padL - padR) / n;

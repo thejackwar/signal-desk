@@ -3,6 +3,7 @@
 <head>
 <meta charset="utf-8">
 <script src="account.js?v=3"></script>
+<script src="tradingview-mode.js?v=1"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#0b0f14">
 <title>Session Momentum</title>
@@ -271,6 +272,7 @@ function liveChart() {
   const last = bars[bars.length - 1];
   $("lc").innerHTML = `<svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="Today's 5-minute QQQ candles with the 12 EMA${tr ? " and today's trade" : ""}">${g}</svg>
     <p class="fine" style="margin:6px 0 0">${tr ? `${tr.side > 0 ? "Long" : "Short"} at ${tr.entry} (first candle closed ${tr.side > 0 ? "above" : "below"} the EMA, ${tr.sig_close} vs ${(+tr.ema).toFixed(2)}). ${tr.exit ? `Closed at ${tr.exit.price}, ${WHY[tr.exit.reason]}: <b class="${tone(tr.pct)}" style="color:var(--${tr.pct >= 0 ? "up" : "down"})">${pc(tr.pct, 2)}</b>.` : `Stop now ${tr.stop}; last price ${last[4]}, <b style="color:var(--${(last[4] - tr.entry) * tr.side >= 0 ? "up" : "down"})">${pc(100 * tr.side * (last[4] / tr.entry - 1), 2)}</b> so far.`}` : (LV.missed || []).find(m => m.date === T.date) ? `No trade today: ${esc(LV.missed.find(m => m.date === T.date).why)}.` : "No trade yet today."} Updated ${esc((LV.updated || "").replace("T", " "))} UTC.</p>`;
+  ICTradingView.mount($("lc"), {symbol:"NASDAQ:QQQ", tf:"5m"});
 }
 
 // ------------------------------------------------------------------ the wall

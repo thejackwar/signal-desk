@@ -256,7 +256,9 @@ function renderPair() {
   const short = d => new Date(d + "T12:00:00").toLocaleDateString("en-GB", { month: "short", year: "2-digit" });
   const wa = weekly(p.dates, p.pa, p.oa, p.ha, p.la), wb = weekly(p.dates, p.pb, p.ob, p.hb, p.lb);
   candleChart($("#c-px"), { bars: wa, name: p.a, color: "var(--accent)", xfmt: short });
+  ICTradingView.mount($("#c-px"), {symbol:p.a, tf:"W"});
   candleChart($("#c-pxb"), { bars: wb, name: p.b, color: "var(--res)", xfmt: short });
+  ICTradingView.mount($("#c-pxb"), {symbol:p.b, tf:"W"});
   const idx = Object.fromEntries(p.dates.map((d, i) => [d, i]));
   lineChart($("#c-z"), { x: p.dates, xfmt: short, fmt: v => v.toFixed(1), height: 200,
     refs: [R.entry_z, -R.entry_z].map(y => ({ y, color: "var(--up-line)", dash: true }))
