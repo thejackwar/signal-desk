@@ -14,6 +14,15 @@
   const SUPABASE_KEY = "sb_publishable_DfmNbJR3E-H5dW8mru2JUA_f6kNIQkh";          // the anon / publishable key (public by design; never the service_role key)
   const SITE = "https://thejackwar.github.io/signal-desk/";
   if (!SUPABASE_URL || !SUPABASE_KEY) return;
+  // An invite or password-reset email link lands with the session in the address (#access_token=…&type=…).
+  // Read it now, before the page's own router rewrites the address to a page (#terminal), which would lose it.
+  const LINK = (() => {
+    const h = new URLSearchParams(location.hash.replace(/^#/, ""));
+    if (h.get("access_token")) return { at: h.get("access_token"), rt: h.get("refresh_token"), type: h.get("type") };
+    if (h.get("error_description")) return { error: h.get("error_description"), code: h.get("error_code") };
+    return null;
+  })();
+  if (LINK) history.replaceState(null, "", location.pathname + location.search + "#terminal");
 
   // ------------------------------------------------------------------ what is synced
   const META = "signaldesk.sync";    // {key: last change (ms)} on this device; never synced itself
@@ -191,22 +200,28 @@
 
   // ------------------------------------------------------------------ start
   // an invite or password-reset link lands here with the session in the address (#access_token=…&type=…)
-  const linkType = /[#&]type=(invite|recovery|signup)/.exec(location.hash)?.[1] || null;
+  const linkType = LINK?.type || null;
   const s = document.createElement("script");
   s.src = "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js";
   s.onload = async () => {
-    sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, { auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true, storageKey: "ics.auth" } });
+    sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, { auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: false, storageKey: "ics.auth" } });
     sb.auth.onAuthStateChange(async (ev, session) => {
       const was = user?.id;
       user = session?.user || null;
       buttons();
       if (ev === "PASSWORD_RECOVERY") { modal("setpw"); return; }
       if (user && user.id !== was) {
-        if (/access_token=/.test(location.hash)) history.replaceState(null, "", location.pathname + location.search + "#terminal");
         await pull({ reloadIfChanged: !linkType });
         if (linkType === "invite" || linkType === "recovery") modal("setpw");
       }
     });
+    if (LINK?.at) {
+      const { error } = await sb.auth.setSession({ access_token: LINK.at, refresh_token: LINK.rt });
+      if (error) { modal("login"); msg(`That link didn't work (${error.message}). Ask for a new one with “Forgot password?”.`, true); }
+    } else if (LINK?.error) {
+      modal(LINK.code === "otp_expired" ? "forgot" : "login");
+      msg(LINK.code === "otp_expired" ? "That email link has expired or was already used. Send yourself a new one here." : LINK.error, true);
+    }
     const { data } = await sb.auth.getSession();
     user = data.session?.user || null;
     buttons();
