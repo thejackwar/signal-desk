@@ -405,7 +405,13 @@ const drawKey = () => patView() ? `signaldesk.chart.draw.pat.${SIG.pat.id}` : `s
 const getDrawings = () => {
   let v = null;
   try { v = JSON.parse(localStorage.getItem(drawKey())); } catch {}
-  if (v == null && patView()) { v = patDrawings(); setDrawings(v); }
+  if (patView()) {
+    // the levels at the trade join the pattern's drawings once (also for trades opened before they existed)
+    const lvKey = drawKey() + ".lv", hasLv = (() => { try { return localStorage.getItem(lvKey) === "1"; } catch { return false; } })();
+    if (v == null) v = patDrawings();
+    if (!hasLv && DATA?.frames) { try { v = [...v, ...levelDrawings()]; } catch {} try { localStorage.setItem(lvKey, "1"); } catch {} }
+    setDrawings(v);
+  }
   return v || [];
 };
 const setDrawings = list => { try { localStorage.setItem(drawKey(), JSON.stringify(list)); } catch {} };
@@ -785,21 +791,21 @@ function render(keepRange) {
       if (ie == null) { addRead(d, "The trade is outside the candles on this chart.", "neu"); continue; }
       const r = tradeLevels(DATA.frames, tf, P.te, { entry: P.entry, stop: P.stop, target: P.target, k: p.k });
       const w = Math.max(ix - ie, 20), i0 = Math.max(0, ie - Math.round(w * 1.2) - 30), i1 = ix + Math.round(w * 0.4) + 6;
-      const items = [];
+      const items = [], asDr = patView();     // on a pattern trade the lines are editable drawings: here only the readings
       for (const l of [...r.major, ...(p.which === "major" ? [] : r.local)]) {
         const maj = l.kind === "major", col = l.side === "support" ? COL.blue : COL.amber;
-        main.addLineSeries(lineOpts(maj ? col : alpha(col, .75), { lineWidth: maj ? (l.tfs.length > 1 ? 3 : 2) : 1, lineStyle: maj ? LW.LineStyle.Solid : LW.LineStyle.Dashed, ...noScale }))
+        if (!asDr) main.addLineSeries(lineOpts(maj ? col : alpha(col, .75), { lineWidth: maj ? (l.tfs.length > 1 ? 3 : 2) : 1, lineStyle: maj ? LW.LineStyle.Solid : LW.LineStyle.Dashed, ...noScale }))
           .setData([{ time: T(i0), value: l.price }, { time: T(i1), value: l.price }]);
         const nm = `${maj ? "Major" : "Local"} ${l.side} ${fmt(l.price)} (${l.tfs.join(" + ")}, ${l.touches} touches)`;
-        marks.push({ i: i1, p: l.price, text: `${maj ? "Major" : "Local"} ${l.side === "support" ? "S" : "R"} · ${l.tfs.join("+")}`, cls: "pt sm", col });
+        if (!asDr) marks.push({ i: i1, p: l.price, text: `${maj ? "Major" : "Local"} ${l.side === "support" ? "S" : "R"} · ${l.tfs.join("+")}`, cls: "pt sm", col });
         items.push({ nm, at: () => l.price });
       }
       if (p.lines !== "no") for (const ln of r.lines) {
         const maj = ln.kind === "major", col = ln.dir === "up" ? COL.green : COL.red;
         const a = Math.min(Math.max(i0, near(ln.t1) ?? i0), ie), val = i => ln.p1 + ln.slope * (T(i) - ln.t1);
-        main.addLineSeries(lineOpts(maj ? col : alpha(col, .75), { lineWidth: maj ? 2 : 1.5, lineStyle: maj ? LW.LineStyle.Solid : LW.LineStyle.Dashed, ...noScale }))
+        if (!asDr) main.addLineSeries(lineOpts(maj ? col : alpha(col, .75), { lineWidth: maj ? 2 : 1.5, lineStyle: maj ? LW.LineStyle.Solid : LW.LineStyle.Dashed, ...noScale }))
           .setData([{ time: T(a), value: val(a) }, { time: T(i1), value: val(i1) }]);
-        marks.push({ i: i1, p: val(i1), text: `${maj ? "Major" : "Local"} ${ln.dir} line · ${ln.tf}`, cls: "pt sm", col });
+        if (!asDr) marks.push({ i: i1, p: val(i1), text: `${maj ? "Major" : "Local"} ${ln.dir} line · ${ln.tf}`, cls: "pt sm", col });
         items.push({ nm: `${maj ? "Major" : "Local"} ${ln.dir} trendline (${ln.side}) on the ${{ W: "weekly", D: "daily", "4H": "4-hour", "1H": "1-hour" }[ln.tf] || ln.tf} chart, at ${fmt(ln.price)} on entry`, at: i => val(i), line: true });
       }
       legend.push(() => `<b style="color:${COL.sky}">At the trade</b> ${r.major.length} major · ${p.which === "major" ? "" : `${r.local.length} local · `}${p.lines === "no" ? "" : `${r.lines.length} trendline${r.lines.length === 1 ? "" : "s"}`}`);
@@ -1185,10 +1191,30 @@ function patShapes(c) {
 function patDrawings() {
   return patShapes().map((d, k) => ({ id: "p" + k, w: 2, dash: 0, ...d, ...(d.type === "long" || d.type === "short" ? { color: COL.green } : {}) }));
 }
+// the support/resistance and trendlines in the trade's path when it opened (see tradeLevels), as editable drawings
+function levelDrawings() {
+  const P = SIG.pat, tf = P.tf, step = STEP[tf];
+  const r = tradeLevels(DATA.frames, tf, P.te, { entry: P.entry, stop: P.stop, target: P.target, k: 3 });
+  const w = Math.max(Math.round((P.tx - P.te) / step), 20);
+  const t0 = P.te - (Math.round(w * 1.2) + 30) * step, t1 = P.tx + (Math.round(w * 0.4) + 6) * step;
+  const out = [];
+  for (const l of [...r.major, ...r.local]) {
+    const maj = l.kind === "major";
+    out.push({ type: "trend", pts: [{ t: t0, p: l.price }, { t: t1, p: l.price }], color: l.side === "support" ? COL.blue : COL.amber,
+      w: maj ? (l.tfs.length > 1 ? 3 : 2) : 1, dash: maj ? 0 : 1, label: `${maj ? "Major" : "Local"} ${l.side} · ${l.tfs.join("+")}` });
+  }
+  for (const ln of r.lines) {
+    const a = Math.max(ln.t1, t0);
+    out.push({ type: "trend", pts: [{ t: a, p: ln.p1 + ln.slope * (a - ln.t1) }, { t: t1, p: ln.p1 + ln.slope * (t1 - ln.t1) }],
+      color: ln.dir === "up" ? COL.green : COL.red, w: ln.kind === "major" ? 2 : 1.5, dash: ln.kind === "major" ? 0 : 1,
+      label: `${ln.kind === "major" ? "Major" : "Local"} ${ln.dir} line · ${ln.tf}` });
+  }
+  return out.map((d, k) => ({ id: "lv" + k, ...d }));
+}
 // back to the trade as it first opened: the original drawings, the pattern's timeframe, zoomed on the trade and
 // your usual indicators (indicator changes on a pattern chart aren't saved, so a fresh load restores them)
 function resetPat() {
-  try { localStorage.removeItem(`signaldesk.chart.draw.pat.${SIG.pat.id}`); } catch {}
+  try { localStorage.removeItem(`signaldesk.chart.draw.pat.${SIG.pat.id}`); localStorage.removeItem(`signaldesk.chart.draw.pat.${SIG.pat.id}.lv`); } catch {}
   history.replaceState(null, "", `${location.pathname}${location.search}#BTC-USD/${SIG.pat.tf}`);
   location.reload();
 }
@@ -1236,7 +1262,7 @@ function drawSigCard() {
     box.innerHTML = `<div class="sghd"><span class="pill ${long ? "bull" : "bear"}">${long ? "▲ Long" : "▼ Short"}</span><h2>BTC · ${esc(T.name)}</h2><span class="dim">${esc(new Date(T.ts * 1000).toISOString().slice(0, T.tf === "D" ? 10 : 16).replace("T", " "))} UTC · ${{ D: "daily", "4H": "4-hour", "1H": "1-hour" }[T.tf]} chart</span></div>
       <div class="sggrid"><div><span>Entry</span><b>${fmt(T.entry)}</b><small>next candle's open</small></div><div><span>Stop loss</span><b class="down">${fmt(T.stop)}</b><small>${esc(R.stop || "")}</small></div><div><span>Take profit</span><b class="up">${fmt(T.target)}</b><small>${esc(R.target || "")}</small></div>
       <div><span>Result</span><b class="${T.ret >= 0 ? "up" : "down"}">${T.ret > 0 ? "+" : ""}${T.ret.toFixed(2)}%</b><small>${why[T.why]} at ${fmt(T.exit)}, after fees</small></div></div>
-      <p class="dim sgfoot">The blue/amber and green/red lines are the support, resistance and trendlines that stood in this trade's way when it opened (solid = major, dashed = local); what each meant for the trade is listed under the chart. The pattern and the trade are ordinary drawings: tap one to move it, drag its handles, recolour or delete it. Your changes stay on this device for this trade. <button type="button" class="btn ghost sm" id="patReset">↺ Reset the trade</button></p>
+      <p class="dim sgfoot">The blue/amber and green/red lines are the support, resistance and trendlines that stood in this trade's way when it opened (solid = major, dashed = local); what each meant for the trade is listed under the chart. These lines, the pattern and the trade are all ordinary drawings: tap one to move it, drag its handles, recolour or delete it. Your changes stay on this device for this trade. <button type="button" class="btn ghost sm" id="patReset">↺ Reset the trade</button></p>
       <p class="dim sgfoot">From the BTC pattern backtest (every pattern the site detects, since 2021). <a href="patterns.html#${esc(new URLSearchParams({ tf: T.tf, p: `${T.fam}|${T.name}|${T.dir}` }).toString())}">Every ${esc(T.name)} trade ›</a></p>`;
     $("patReset").onclick = resetPat;
     return;
