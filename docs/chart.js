@@ -41,7 +41,8 @@ const big = x => x === null || x === undefined ? "–" : Math.abs(x) >= 1e9 ? `$
 
 // ------------------------------------------------------------------ colours
 const COL = { sky: "#38bdf8", green: "#4ade80", amber: "#f59e0b", violet: "#c084fc", pink: "#f472b6", orange: "#fb923c",
-  teal: "#2dd4bf", white: "#e6edf3", red: "#f87171", blue: "#60a5fa", lime: "#a3e635", gold: "#facc15", grey: "#8b98a5" };
+  teal: "#2dd4bf", white: "#e6edf3", red: "#f87171", blue: "#60a5fa", lime: "#a3e635", gold: "#facc15", grey: "#8b98a5",
+  cup: "#089981", cdn: "#f23645" };   // candles in TradingView's colours
 const alpha = (hex, a) => hex + Math.round(a * 255).toString(16).padStart(2, "0");
 
 // ------------------------------------------------------------------ the tools
@@ -361,7 +362,7 @@ $("settings").addEventListener("click", e => {
 });
 
 function drawTfs() {
-  $("tfs").innerHTML = TF_LIST.map(t => {
+  $("tfs").innerHTML = [...TF_LIST].reverse().map(t => {   // small to large, as on TradingView
     const ok = DATA && (DATA.frames[t]?.length || (t === "1m" && can1m(DATA)));
     return `<button type="button" data-tf="${t}" aria-pressed="${t === S.tf}"${ok ? "" : " disabled"} title="${TF_TXT[t]}">${t}</button>`;
   }).join("");
@@ -404,25 +405,137 @@ const hintText = () => {
   if (!t || t.id === "cursor") return "";
   return t.n === 1 ? `${t.name}: tap the chart.` : t.n === 3 ? `${t.name}: tap two points for the line, then a third for the width.` : `${t.name}: drag on the chart, or tap the start and then the end.`;
 };
+// TradingView-style left column: one button per group showing the last tool used from it, a small arrow opening the
+// group's flyout menu (long-press works too), then magnet / stay / hide / remove all at the bottom.
+const TGROUPS = [
+  ["cursor", "Cursor", ["cursor"]],
+  ["lines", "Lines", ["trend", "ray", "ext", "hline", "hray", "vline", "channel"]],
+  ["fib", "Fibonacci", ["fib"]],
+  ["shapes", "Shapes", ["rect", "arrow"]],
+  ["proj", "Forecasting and measurement", ["long", "short", "measure", "frvp"]],
+  ["text", "Text", ["text"]],
+];
+const GL_KEY = "signaldesk.chart.toolgroups";
+const GL = (() => { try { return JSON.parse(localStorage.getItem(GL_KEY)) || {}; } catch { return {}; } })();
+const ICO = d => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${d}</svg>`;
+const ACTS = [
+  ["magnet", "Magnet: points snap to the candle's open, high, low or close", '<path d="M6 4v8a6 6 0 0 0 12 0V4"/><path d="M6 8h4M14 8h4"/>'],
+  ["keep", "Stay in drawing mode: keep the tool after drawing", '<rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/>'],
+  ["hide", "Hide all drawings", '<path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>'],
+  ["clear", "Remove all drawings on this market", '<path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/>'],
+];
 function drawToolbar() {
-  let grp = "";
-  $("dtools").innerHTML = TOOLS.map(([id, name, , g, icon]) => {
-    const sep = g !== grp && grp ? `<span class="tsep"></span>` : ""; grp = g;
-    return `${sep}<button type="button" data-tool="${id}" aria-pressed="${S.tool === id}" title="${esc(name)}" aria-label="${esc(name)}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">${icon}</svg></button>`;
+  closeFly();
+  const groups = TGROUPS.map(([g, gname, ids]) => {
+    const cur = ids.includes(S.tool) ? S.tool : ids.includes(GL[g]) ? GL[g] : ids[0], t = TOOL[cur];
+    return `<div class="tg" data-g="${g}"><button type="button" class="tmain" data-tool="${cur}" aria-pressed="${S.tool === cur}" title="${esc(t.name)}" aria-label="${esc(t.name)}">${ICO(t.icon)}</button>` +
+      (ids.length > 1 ? `<button type="button" class="tarr" data-fly="${g}" aria-haspopup="menu" aria-expanded="false" title="${esc(gname)}" aria-label="More ${esc(gname.toLowerCase())} tools"><svg viewBox="0 0 6 10" aria-hidden="true"><path d="M1 1l4 4-4 4" fill="none" stroke="currentColor" stroke-width="1.5"/></svg></button>` : "") + `</div>`;
   }).join("");
+  $("dtools").innerHTML = groups + `<span class="tsep"></span>` + ACTS.map(([a, t, i]) =>
+    `<button type="button" class="tact${a === "clear" ? " del" : ""}" data-act="${a}"${a === "clear" ? "" : ` aria-pressed="false"`} title="${esc(t)}" aria-label="${esc(t)}">${ICO(i)}</button>`).join("");
 }
-function setTool(t) { S.tool = TOOL[t] ? t : "cursor"; DRAWL?.cancel(); syncDrawButtons(); }
-$("dtools").addEventListener("click", e => { const b = e.target.closest("[data-tool]"); if (b) setTool(S.tool === b.dataset.tool && b.dataset.tool !== "cursor" ? "cursor" : b.dataset.tool); });
-$("draw").addEventListener("click", e => {
-  const b = e.target.closest("button");
-  if (!b) return;
+let FLY = null;
+function closeFly(refocus) {
+  if (!FLY) return;
+  const g = FLY.dataset.g; FLY.remove(); FLY = null;
+  const b = document.querySelector(`#dtools [data-fly="${g}"]`);
+  if (b) { b.setAttribute("aria-expanded", "false"); if (refocus) b.focus(); }
+}
+function openFly(g) {
+  if (FLY?.dataset.g === g) return closeFly();
+  closeFly();
+  const grp = TGROUPS.find(x => x[0] === g), anchor = document.querySelector(`#dtools .tg[data-g="${g}"]`);
+  if (!grp || !anchor) return;
+  FLY = document.createElement("div"); FLY.className = "tfly"; FLY.dataset.g = g;
+  FLY.setAttribute("role", "menu"); FLY.setAttribute("aria-label", grp[1]);
+  FLY.innerHTML = `<div class="tfh">${esc(grp[1])}</div>` + grp[2].map(id =>
+    `<button type="button" role="menuitemradio" aria-checked="${S.tool === id}" data-tool="${id}">${ICO(TOOL[id].icon)}<span>${esc(TOOL[id].name)}</span></button>`).join("");
+  $("card").appendChild(FLY);
+  const r = anchor.getBoundingClientRect(), row = getComputedStyle($("dtools")).flexDirection === "row", f = FLY.getBoundingClientRect();
+  FLY.style.left = Math.max(6, Math.min(row ? r.left : r.right + 6, innerWidth - f.width - 6)) + "px";
+  FLY.style.top = Math.max(6, Math.min(row ? r.bottom + 6 : r.top, innerHeight - f.height - 6)) + "px";
+  anchor.querySelector("[data-fly]")?.setAttribute("aria-expanded", "true");
+  (FLY.querySelector('[aria-checked="true"]') || FLY.querySelector("button")).focus({ preventScroll: true });
+  FLY.addEventListener("click", e => { const b = e.target.closest("[data-tool]"); if (b) { closeFly(); setTool(b.dataset.tool); } });
+  FLY.addEventListener("keydown", e => {
+    const items = [...FLY.querySelectorAll("button")], i = items.indexOf(document.activeElement);
+    if (e.key === "ArrowDown" || e.key === "ArrowUp") { e.preventDefault(); items[(i + (e.key === "ArrowDown" ? 1 : items.length - 1)) % items.length].focus(); }
+    else if (e.key === "Escape" || e.key === "Tab") { e.preventDefault(); e.stopPropagation(); closeFly(true); }
+  });
+}
+function setTool(t) {
+  S.tool = TOOL[t] ? t : "cursor";
+  const g = TGROUPS.find(x => x[2].includes(S.tool));
+  if (g && g[2].length > 1 && GL[g[0]] !== S.tool) { GL[g[0]] = S.tool; try { localStorage.setItem(GL_KEY, JSON.stringify(GL)); } catch {} }
+  DRAWL?.cancel(); syncDrawButtons();
+}
+let lpT = null, lpFired = false;     // long-press a group button to open its menu (as on TradingView's app)
+$("dtools").addEventListener("pointerdown", e => {
+  const b = e.target.closest(".tmain"), g = b?.closest(".tg");
+  lpFired = false; clearTimeout(lpT);
+  if (g?.querySelector("[data-fly]")) lpT = setTimeout(() => { lpFired = true; openFly(g.dataset.g); }, 450);
+});
+["pointerup", "pointerleave", "pointercancel"].forEach(ev => $("dtools").addEventListener(ev, () => clearTimeout(lpT)));
+$("dtools").addEventListener("contextmenu", e => { if (e.target.closest(".tmain")) e.preventDefault(); });
+$("dtools").addEventListener("click", e => {
+  if (lpFired) { lpFired = false; return; }
+  const f = e.target.closest("[data-fly]"); if (f) return openFly(f.dataset.fly);
+  const a = e.target.closest("[data-act]"); if (a) return doAct(a);
+  const b = e.target.closest("[data-tool]");
+  if (b) { closeFly(); setTool(S.tool === b.dataset.tool && b.dataset.tool !== "cursor" ? "cursor" : b.dataset.tool); }
+});
+$("draw").addEventListener("click", e => { const b = e.target.closest("button[data-act]"); if (b) doAct(b); });
+
+// indicators panel (TradingView's "Indicators" dialog): opens over the chart, closes on ✕, Escape or a tap outside
+const picker = () => document.querySelector(".picker");
+function showPicker(on) {
+  const p = picker(); p.hidden = !on;
+  document.querySelector('[data-act="ind"]')?.setAttribute("aria-expanded", String(on));
+  if (on) p.querySelector(".chip button")?.focus({ preventScroll: true });
+}
+picker().addEventListener("click", e => { if (e.target.closest("[data-pclose]")) { showPicker(false); document.querySelector('[data-act="ind"]')?.focus(); } });
+
+// full screen
+const fsEl = () => document.fullscreenElement || document.webkitFullscreenElement;
+const isFull = () => $("card").classList.contains("full");
+function setFull(on) {
+  const card = $("card");
+  closeFly();
+  card.classList.toggle("full", on); document.documentElement.classList.toggle("tvfull", on);
+  if (on) {
+    const req = card.requestFullscreen || card.webkitRequestFullscreen;
+    try { const r = req?.call(card); r?.catch?.(() => {}); } catch {}     // no API (iPhone): the CSS version covers the page
+  } else if (fsEl()) {
+    try { const r = (document.exitFullscreen || document.webkitExitFullscreen).call(document); r?.catch?.(() => {}); } catch {}
+  }
+  syncDrawButtons();
+  requestAnimationFrame(() => { if (EMBED && DATA) render(true); });
+}
+["fullscreenchange", "webkitfullscreenchange"].forEach(ev => document.addEventListener(ev, () => { if (!fsEl() && isFull()) setFull(false); }));
+
+document.addEventListener("pointerdown", e => {
+  if (FLY && !FLY.contains(e.target) && !e.target.closest("[data-fly]")) closeFly();
+  const p = picker();
+  if (!p.hidden && !p.contains(e.target) && !e.target.closest('[data-act="ind"]')) showPicker(false);
+}, true);
+document.addEventListener("keydown", e => {
+  if (e.target.closest("input, textarea, select, [contenteditable]")) return;
+  if (e.key === "Escape") {
+    if (FLY) { closeFly(true); e.stopImmediatePropagation(); return; }
+    if (!picker().hidden) { showPicker(false); e.stopImmediatePropagation(); return; }
+    if (isFull() && !fsEl() && S.tool === "cursor") setFull(false);
+  } else if ((e.key === "F" || e.key === "f") && e.shiftKey && !e.ctrlKey && !e.metaKey && !e.altKey) { e.preventDefault(); setFull(!isFull()); }
+}, true);
+
+function doAct(b) {
   const a = b.dataset.act;
   if (a === "magnet") { S.magnet = !S.magnet; savePrefs(); }
   else if (a === "keep") S.keep = !S.keep;
   else if (a === "hide") { S.hideDr = !S.hideDr; DRAWL?.redraw(); }
   else if (a === "undo") DRAWL?.undo();
   else if (a === "clear") { if (getDrawings().length && confirm(`Remove all your drawings on ${label(S.sym)}?`)) DRAWL?.clear(); }
-  else if (a === "ind") { const p = document.querySelector(".picker"); p.hidden = !p.hidden; b.setAttribute("aria-expanded", String(!p.hidden)); if (EMBED) render(true); }
+  else if (a === "ind") showPicker(picker().hidden);
+  else if (a === "full") setFull(!isFull());
   else if (a === "fit" && VIEW) VIEW.main.timeScale().fitContent();
   else if (a === "recent" && VIEW) VIEW.showRecent();
   else if (a === "patreset" && SIG?.pat) {     // tap twice: the first tap asks, so a stray tap doesn't wipe your edits
@@ -430,11 +543,16 @@ $("draw").addEventListener("click", e => {
     else { b.dataset.armed = "1"; b.textContent = "Tap again to reset"; setTimeout(() => { delete b.dataset.armed; b.textContent = "↺ Reset trade"; }, 3000); }
   }
   syncDrawButtons();
-});
+}
+const FULL_ICO = { on: '<path d="M9 4v5H4M15 4v5h5M9 20v-5H4M15 20v-5h5"/>', off: '<path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/>' };
 function syncDrawButtons() {
-  document.querySelectorAll("#dtools [data-tool]").forEach(b => b.setAttribute("aria-pressed", String(S.tool === b.dataset.tool)));
-  const set = (a, v) => document.querySelector(`#draw [data-act="${a}"]`)?.setAttribute("aria-pressed", String(v));
-  set("magnet", S.magnet); set("keep", S.keep); set("hide", S.hideDr);
+  const fo = document.activeElement?.closest?.("#dtools button"), key = fo && (fo.dataset.fly ? `[data-fly="${fo.dataset.fly}"]` : fo.dataset.act ? `[data-act="${fo.dataset.act}"]` : `.tg[data-g="${fo.closest(".tg")?.dataset.g}"] .tmain`);
+  drawToolbar();
+  if (key) $("dtools").querySelector(key)?.focus({ preventScroll: true });
+  const set = (a, v) => document.querySelectorAll(`#card [data-act="${a}"]`).forEach(b => b.setAttribute("aria-pressed", String(v)));
+  set("magnet", S.magnet); set("keep", S.keep); set("hide", S.hideDr); set("full", isFull());
+  const fb = document.querySelector('#card [data-act="full"]');
+  if (fb) { fb.innerHTML = ICO(isFull() ? FULL_ICO.on : FULL_ICO.off); fb.title = isFull() ? "Exit full screen (Shift+F or Esc)" : "Full screen (Shift+F)"; fb.setAttribute("aria-label", isFull() ? "Exit full screen" : "Full screen"); }
   $("hint").textContent = hintText();
   DRAWL?.redraw();
 }
@@ -448,7 +566,7 @@ function baseOptions(showTime, logo = false) {
     grid: { vertLines: { color: v("--c-grid") }, horzLines: { color: v("--c-grid") } },
     rightPriceScale: { borderColor: v("--c-grid"), minimumWidth: 78 },
     timeScale: { borderColor: v("--c-grid"), visible: showTime, timeVisible: STEP[S.tf] < 86400, secondsVisible: false, minBarSpacing: 0.3, rightOffset: 0 },
-    crosshair: { mode: LW.CrosshairMode.Normal, vertLine: { color: v("--c-txt"), labelBackgroundColor: "#2b3644" }, horzLine: { color: v("--c-txt"), labelBackgroundColor: "#2b3644" } },
+    crosshair: { mode: LW.CrosshairMode.Normal, vertLine: { color: "#9598a1", width: 1, style: LW.LineStyle.LargeDashed, labelBackgroundColor: "#363a45" }, horzLine: { color: "#9598a1", width: 1, style: LW.LineStyle.LargeDashed, labelBackgroundColor: "#363a45" } },
     handleScale: { axisPressedMouseMove: { time: true, price: true } },
   };
 }
@@ -493,7 +611,7 @@ function render(keepRange) {
   const mainLg = document.createElement("div"); mainLg.className = "lg"; mainEl.appendChild(mainLg);
   const main = LW.createChart(mainEl, baseOptions(!panesOn.length, true));   // TradingView credit once, on the price chart
   main.priceScale("right").applyOptions({ scaleMargins: { top: 0.06, bottom: active.includes("vol") ? 0.2 : 0.06 } });
-  const cs = main.addCandlestickSeries({ upColor: COL.green, downColor: COL.red, wickUpColor: COL.green, wickDownColor: COL.red, borderVisible: false,
+  const cs = main.addCandlestickSeries({ upColor: COL.cup, downColor: COL.cdn, wickUpColor: COL.cup, wickDownColor: COL.cdn, borderVisible: false,
     priceLineColor: COL.grey, priceLineStyle: LW.LineStyle.Dotted, priceFormat: { type: "price", precision: dp(c[n - 1].close), minMove: 10 ** -dp(c[n - 1].close) } });
   cs.setData([...c.map(b => ({ time: b.time, open: b.open, high: b.high, low: b.low, close: b.close })), ...ws]);
 
@@ -571,7 +689,7 @@ function render(keepRange) {
     } else if (id === "vol") {
       const vs = main.addHistogramSeries({ priceScaleId: "vol", priceFormat: { type: "volume" }, priceLineVisible: false, lastValueVisible: false });
       main.priceScale("vol").applyOptions({ scaleMargins: { top: 0.82, bottom: 0 }, visible: false });
-      vs.setData([...c.map(b => ({ time: b.time, value: b.volume, color: b.close >= b.open ? alpha(COL.green, .45) : alpha(COL.red, .45) })), ...ws]);
+      vs.setData([...c.map(b => ({ time: b.time, value: b.volume, color: b.close >= b.open ? alpha(COL.cup, .5) : alpha(COL.cdn, .5) })), ...ws]);
       const avg = p.ma > 0 ? L.sma(c.map(b => b.volume), p.ma) : null;
       if (avg) main.addLineSeries(lineOpts(alpha(COL.white, .55), { lineWidth: 1, priceScaleId: "vol" })).setData(line(avg));
       legend.push(i => `<b style="color:${d.c}">Vol</b> ${big(at(c, i)?.volume)}${avg ? ` <span class="dim">avg ${big(at(avg, i))}</span>` : ""}`);
@@ -1119,7 +1237,7 @@ window.addEventListener("hashchange", () => { const old = S.sym, oldTf = S.tf; r
   if (S.tf === "1m" && !DATA.frames["1m"]?.length) { if (!can1m(DATA)) { S.tf = oldTf; writeHash(); return; } load1m(DATA).then(() => { render(false); liveStart(); }).catch(() => { S.tf = oldTf; writeHash(); }); return; }
   render(false); if (DATA.kind === "crypto") liveStart(); } });
 readHash();
-drawToolbar();
+syncDrawButtons();
 drawPicker();
 loadNames();
 if (EMBED) document.querySelector(".picker").hidden = true;

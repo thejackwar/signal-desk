@@ -42,7 +42,7 @@
   --bg: #0b0f14; --card: #121820; --fill: #1a222c; --fill-2: #0f141b; --hair: #2b3644; --hair-2: #1f2833;
   --fg: #e6edf3; --muted: #a5b1bd; --faint: #7d8a97; --accent: #38bdf8; --accent-hover: #7dd3fc; --link: #7dd3fc; --on-accent: #04121a;
   --accent2: #4ade80; --bar: rgba(11,15,20,.86);
-  --c-bg: #121820; --c-grid: #1a222c; --c-txt: #8b98a5; --c-cup: #4ade80; --c-cdn: #f87171;
+  --c-bg: #131722; --c-grid: #1e222d; --c-txt: #b2b5be; --c-cup: #4ade80; --c-cdn: #f87171;
   --up-line: #4ade80; --down-line: #f87171; --sup: #60a5fa; --res: #f59e0b;
   --pill-up: rgba(48,209,88,.18); --pill-down: rgba(255,69,58,.18); --pill-sq: rgba(255,159,10,.18); --pill-sq-fg: #ff9f0a;
   --grad: linear-gradient(95deg, #38bdf8 0%, #34d399 60%, #4ade80 100%);
@@ -290,6 +290,101 @@ html.embed .pane { height: var(--pane-h, 110px); }
 html.embed .status { margin: 0; min-height: 0; }
 html.embed .status:empty { display: none; }
 .picker[hidden] { display: none; }
+
+/* ===== TradingView-style chart card: top bar, left tool column with flyout menus, indicators panel, full screen ===== */
+.card { --tv-bg: #131722; --tv-line: #2a2e39; --tv-hov: #2a2e39; --tv-fg: #d1d4dc; --tv-dim: #787b86; --tv-blue: #2962ff; --tv-panel: #1e222d;
+  background: var(--tv-bg); border-color: var(--tv-line); border-radius: 12px; color: var(--tv-fg); }
+.tvtop { display: flex; align-items: center; gap: 2px; padding: 4px 6px; min-height: 42px; border-bottom: 1px solid var(--tv-line); overflow-x: auto; scrollbar-width: none; }
+.tvtop::-webkit-scrollbar { display: none; }
+.tvtop > * { flex: none; }
+.tvtop .grow { flex: 1 1 auto; min-width: 4px; }
+.tsp { width: 1px; height: 22px; background: var(--tv-line); margin: 0 5px; }
+.tb { appearance: none; border: 0; background: none; color: var(--tv-fg); height: 32px; min-width: 32px; padding: 0 9px; border-radius: 6px; font: 500 13.5px var(--font);
+  letter-spacing: -.005em; display: inline-flex; align-items: center; justify-content: center; gap: 6px; cursor: pointer; white-space: nowrap; }
+.tb.ic { padding: 0; width: 34px; }
+.tb svg { width: 19px; height: 19px; flex: none; }
+.tb:hover { background: var(--tv-hov); }
+.tb[aria-expanded="true"], .tb[aria-pressed="true"] { color: var(--tv-blue); background: color-mix(in srgb, var(--tv-blue) 14%, transparent); }
+.tb[hidden] { display: none; }
+.tvtop form.pick { display: flex; align-items: center; gap: 0; margin: 0; max-width: none; position: relative; height: 32px; border-radius: 6px; }
+.tvtop form.pick:hover, .tvtop form.pick:focus-within { background: var(--tv-hov); }
+.tvtop form.pick svg { width: 17px; height: 17px; color: var(--tv-dim); position: absolute; left: 8px; pointer-events: none; }
+.tvtop form.pick input { width: 112px; height: 32px; background: none; border: 0; border-radius: 6px; padding: 0 6px 0 31px; color: var(--tv-fg); font: 650 14px var(--font); text-transform: uppercase; box-shadow: none; }
+.tvtop form.pick input::placeholder { color: var(--tv-dim); font-weight: 500; text-transform: none; }
+.tvtop form.pick input:focus { outline: none; box-shadow: none; }
+.tvtop form.pick .go { appearance: none; border: 0; background: var(--tv-blue); color: #fff; font: 600 12px var(--font); height: 24px; padding: 0 9px; border-radius: 5px; margin-right: 4px; cursor: pointer; display: none; }
+.tvtop form.pick:focus-within .go { display: inline-block; }
+.tvtf { display: flex; gap: 1px; }
+.tvtf button { appearance: none; border: 0; background: none; color: var(--tv-fg); font: 500 13.5px var(--font); height: 32px; min-width: 30px; padding: 0 7px; border-radius: 6px; cursor: pointer; }
+.tvtf button:hover:not(:disabled) { background: var(--tv-hov); }
+.tvtf button[aria-pressed="true"] { color: var(--tv-blue); font-weight: 650; }
+.tvtf button:disabled { color: var(--tv-dim); opacity: .45; cursor: default; }
+.tvtop :focus-visible, .dtools :focus-visible, .tfly :focus-visible, .picker :focus-visible { outline: 2px solid var(--tv-blue); outline-offset: -2px; }
+
+.card .head { padding: 8px 14px 6px; align-items: baseline; }
+.card .head h2 { font-size: 17px; font-weight: 650; letter-spacing: -.01em; display: flex; flex-wrap: wrap; align-items: baseline; gap: 0 2px; }
+.card .head h2 small { display: inline; font-size: 12.5px; color: var(--tv-dim); margin: 0 10px 0 0; order: 2; }
+.card .head .px { font-size: 17px; margin-left: 10px; } .card .head .chg { font-size: 13.5px; }
+
+.cbody { position: relative; grid-template-columns: 46px 1fr; border-top: 1px solid var(--tv-line); }
+.dtools { background: var(--tv-bg); border-right: 1px solid var(--tv-line); padding: 4px 3px; gap: 1px; align-items: center; }
+.dtools .tg { position: relative; display: flex; }
+.dtools button { color: var(--tv-fg); width: 38px; height: 36px; border-radius: 6px; }
+.dtools button svg { width: 22px; height: 22px; }
+.dtools button:hover { background: var(--tv-hov); color: var(--tv-fg); }
+.dtools button[aria-pressed="true"] { color: var(--tv-blue); background: color-mix(in srgb, var(--tv-blue) 14%, transparent); }
+.dtools .tarr { position: absolute; right: -2px; bottom: 1px; width: 11px; height: 14px; border-radius: 3px; padding: 0; color: var(--tv-dim); opacity: 0; display: grid; place-items: center; }
+.dtools .tarr svg { width: 5px; height: 8px; }
+.dtools .tg:hover .tarr, .dtools .tarr:focus-visible, .dtools .tarr[aria-expanded="true"] { opacity: 1; }
+.dtools .tarr:hover { color: var(--tv-fg); background: var(--tv-hov); }
+.dtools .tsep { background: var(--tv-line); width: 28px; height: 1px; margin: 5px auto; }
+.dtools .tact.del:hover { color: #f23645; }
+@media (hover: none) { .dtools .tarr { opacity: .8; } }
+.tfly { position: fixed; z-index: 2147483001; min-width: 230px; background: var(--tv-panel); border: 1px solid var(--tv-line); border-radius: 8px; padding: 6px 0;
+  box-shadow: 0 10px 30px rgba(0,0,0,.5); color: var(--tv-fg); }
+.tfly .tfh { font: 600 11px var(--font); letter-spacing: .06em; text-transform: uppercase; color: var(--tv-dim); padding: 4px 14px 6px; }
+.tfly button { appearance: none; border: 0; background: none; color: inherit; width: 100%; display: flex; align-items: center; gap: 12px; padding: 7px 14px; font: 500 14px var(--font); text-align: left; cursor: pointer; }
+.tfly button svg { width: 22px; height: 22px; flex: none; }
+.tfly button:hover, .tfly button:focus-visible { background: var(--tv-hov); outline: none; }
+.tfly button[aria-checked="true"] { color: var(--tv-blue); }
+
+.picker { position: absolute; z-index: 25; top: 8px; left: 54px; width: min(640px, calc(100% - 66px)); max-height: calc(100% - 16px); overflow: auto; overscroll-behavior: contain;
+  background: var(--tv-panel); border: 1px solid var(--tv-line); border-radius: 8px; box-shadow: 0 14px 40px rgba(0,0,0,.55); padding: 4px 16px 14px; }
+.picker-top { position: sticky; top: -4px; z-index: 1; background: var(--tv-panel); margin: 0 -16px; padding: 10px 16px 8px; border-bottom: 1px solid var(--tv-line); flex-wrap: nowrap; }
+.picker-top b { font-size: 15px; text-transform: none; letter-spacing: -.01em; color: var(--tv-fg); flex: none; }
+.picker-top .presets { flex: 1; justify-content: flex-end; }
+.pclose { appearance: none; border: 0; background: none; color: var(--tv-dim); width: 30px; height: 30px; border-radius: 6px; font-size: 16px; cursor: pointer; flex: none; }
+.pclose:hover { background: var(--tv-hov); color: var(--tv-fg); }
+.picker .groups { margin-top: 12px; }
+.card .hint { position: absolute; z-index: 7; left: 56px; bottom: 34px; pointer-events: none; background: color-mix(in srgb, var(--tv-panel) 92%, transparent); border: 1px solid var(--tv-line);
+  color: var(--tv-fg); border-radius: 6px; padding: 4px 9px; font-size: 12px; }
+.card .hint:empty { display: none; }
+.card .foot-note { border-top-color: var(--tv-line); }
+@media (max-width: 640px) {
+  .cbody { grid-template-columns: 1fr; }
+  .dtools { flex-direction: row; border-right: 0; border-bottom: 1px solid var(--tv-line); }
+  .dtools .tsep { width: 1px; height: 24px; margin: auto 4px; }
+  .dtools .tarr { right: -1px; bottom: 0; }
+  .picker { left: 6px; width: calc(100% - 12px); top: 50px; max-height: calc(100% - 58px); padding: 4px 12px 12px; }
+  .picker-top { margin: 0 -12px; padding: 10px 12px 8px; flex-wrap: wrap; }
+  .card .hint { left: 8px; bottom: 30px; }
+  .tb[data-act="ind"] span { display: none; }
+  .tvtop form.pick input { width: 92px; }
+}
+
+/* full screen: the real Fullscreen API where the browser has it, otherwise (iPhone) the card covers the page */
+.card.full { position: fixed; inset: 0; z-index: 2147483000; margin: 0; border: 0; border-radius: 0; width: 100vw; height: 100vh; height: 100dvh; max-width: none;
+  display: flex; flex-direction: column; padding: env(safe-area-inset-top, 0px) env(safe-area-inset-right, 0px) env(safe-area-inset-bottom, 0px) env(safe-area-inset-left, 0px); }
+.card.full:fullscreen { width: 100%; height: 100%; }
+.card.full .cbody { flex: 1 1 auto; min-height: 0; grid-template-rows: minmax(0, 1fr); }
+.card.full .stage { display: flex; flex-direction: column; min-height: 0; height: 100%; overflow: hidden; }
+.card.full .main { flex: 1 1 0; height: auto !important; min-height: 160px; }
+.card.full .pane { flex: none; }
+.card.full .foot-note { display: none; }
+@media (max-width: 640px) { .card.full .cbody { grid-template-rows: auto minmax(0, 1fr); } }
+html.tvfull, html.tvfull body { overflow: hidden; }
+html.embed .tvtop form.pick { display: none; }
+html.embed .tvtop { min-height: 36px; padding: 2px 4px; }
 </style>
 </head>
 <body>
@@ -304,48 +399,45 @@ html.embed .status:empty { display: none; }
 <main class="wrap">
   <section class="hero">
     <h1>Chart.</h1>
-    <p class="lede">Pick a market, then tap the tools you want: they're drawn on the candles, and each one gets a plain-English reading underneath.</p>
-    <form class="pick" id="pick" autocomplete="off">
-      <div class="field">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
-        <input id="sym" list="syms" placeholder="Ticker, e.g. SPY, NVDA, BTC or Gold" aria-label="Ticker" spellcheck="false" autocapitalize="characters">
-        <datalist id="syms"></datalist>
-      </div>
-      <button class="btn" type="submit">Show</button>
-    </form>
+    <p class="lede">Type a symbol in the chart's top bar, add indicators, and draw with the tools on the left, like on TradingView. Each indicator gets a plain-English reading underneath.</p>
     <div class="quick" id="quick"></div>
     <p class="status" id="status"></p>
   </section>
 
   <section class="card" id="card">
-    <div class="head">
-      <h2 id="title"><small>&nbsp;</small>–</h2>
-      <div class="seg" role="group" aria-label="Timeframe" id="tfs"></div>
+    <div class="tvtop" id="draw" role="toolbar" aria-label="Chart toolbar">
+      <form class="pick" id="pick" autocomplete="off" role="search">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+        <input id="sym" list="syms" placeholder="Symbol" aria-label="Ticker, e.g. SPY, NVDA, BTC or Gold" title="Ticker, e.g. SPY, NVDA, BTC or Gold" spellcheck="false" autocapitalize="characters" enterkeyhint="go">
+        <datalist id="syms"></datalist>
+        <button type="submit" class="go" aria-label="Show this market">Go</button>
+      </form>
+      <span class="tsp"></span>
+      <div class="tvtf" role="group" aria-label="Timeframe" id="tfs"></div>
+      <span class="tsp"></span>
+      <button type="button" class="tb" data-act="ind" aria-expanded="false" aria-controls="picker" title="Indicators"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 18 9 11l4 4 7-9"/><path d="M15 6h5v5"/></svg><span>Indicators</span></button>
+      <span class="tsp"></span>
+      <button type="button" class="tb ic" data-act="undo" title="Undo (Ctrl/Cmd+Z)" aria-label="Undo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/></svg></button>
+      <button type="button" class="tb" data-act="patreset" id="patResetBar" hidden title="Put back the trade as the backtest drew it: drawings, timeframe, zoom and indicators">↺ Reset trade</button>
+      <span class="grow"></span>
+      <button type="button" class="tb ic" data-act="fit" title="Show the whole history" aria-label="Show the whole history"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/><path d="M8 12h8"/></svg></button>
+      <button type="button" class="tb ic" data-act="recent" title="Back to the latest candles (or the signal)" aria-label="Back to the latest candles"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h12"/><path d="m13 7 5 5-5 5"/><path d="M21 5v14"/></svg></button>
+      <button type="button" class="tb ic" data-act="full" aria-pressed="false" title="Full screen (Shift+F)" aria-label="Full screen"></button>
     </div>
-    <div class="picker">
-      <div class="picker-top">
-        <b>Add to the chart</b>
-        <div class="presets" id="presets"></div>
-      </div>
-      <div class="groups" id="groups"></div>
-      <div class="settings" id="settings" hidden></div>
-    </div>
-    <div class="tools">
-      <div class="draw" id="draw">
-        <button type="button" data-act="ind" aria-expanded="true" title="Show or hide the indicator list"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 17l5-6 4 4 8-9"/></svg>Indicators</button>
-        <button type="button" data-act="magnet" aria-pressed="true" title="Magnet: points snap to the candle's open, high, low or close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 4v8a6 6 0 0 0 12 0V4"/><path d="M6 8h4M14 8h4"/></svg>Magnet</button>
-        <button type="button" data-act="keep" aria-pressed="false" title="Keep the tool after drawing, to draw several in a row"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>Stay</button>
-        <button type="button" data-act="hide" aria-pressed="false" title="Hide your drawings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>Hide</button>
-        <button type="button" data-act="undo" title="Undo (Ctrl/Cmd+Z)">Undo</button>
-        <button type="button" data-act="clear" title="Remove every drawing on this market">Clear</button>
-        <button type="button" data-act="fit" title="Show the whole history">Fit</button>
-        <button type="button" data-act="recent" title="Back to the latest candles (or the signal)">Latest</button><button type="button" data-act="patreset" id="patResetBar" hidden title="Put back the trade as the backtest drew it: drawings, timeframe, zoom and indicators">↺ Reset trade</button>
-        <span class="hint" id="hint"></span>
-      </div>
-    </div>
+    <div class="head"><h2 id="title"><small>&nbsp;</small>–</h2></div>
     <div class="cbody">
-      <div class="dtools" id="dtools" role="toolbar" aria-label="Drawing tools"></div>
+      <div class="dtools" id="dtools" role="toolbar" aria-label="Drawing tools" aria-orientation="vertical"></div>
       <div class="stage" id="stage"><div class="loading">Loading…</div></div>
+      <div class="picker" id="picker" role="dialog" aria-label="Indicators" hidden>
+        <div class="picker-top">
+          <b>Indicators</b>
+          <div class="presets" id="presets"></div>
+          <button type="button" class="pclose" data-pclose aria-label="Close indicators">✕</button>
+        </div>
+        <div class="groups" id="groups"></div>
+        <div class="settings" id="settings" hidden></div>
+      </div>
+      <span class="hint" id="hint" aria-live="polite"></span>
     </div>
     <p class="foot-note" id="note"></p>
   </section>
@@ -375,6 +467,6 @@ html.embed .status:empty { display: none; }
   </footer>
 </main>
 
-<script type="module" src="chart.js?v=14"></script>
+<script type="module" src="chart.js?v=16"></script>
 </body>
 </html>
