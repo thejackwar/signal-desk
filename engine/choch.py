@@ -451,7 +451,8 @@ def fetch_stocks(symbols: list[str], start: datetime, end: datetime, feed: str =
     jobs: dict[str, list[str]] = {}                 # first day to download -> stocks
     for s in symbols:
         b = cache.get(s)
-        if b and b["t"] and b["t"][0][:10] <= start.astimezone(NY).strftime("%Y-%m-%d"):
+        # cached from (about) the start: the first trading day can be a few days after `start` (1 Jan is a holiday)
+        if b and b["t"] and b["t"][0][:10] <= (start.astimezone(NY) + timedelta(days=10)).strftime("%Y-%m-%d"):
             since = (date.fromisoformat(b["t"][-1][:10]) - timedelta(days=4)).isoformat()   # redo the last days
         else:
             since = start.astimezone(NY).strftime("%Y-%m-%d")
