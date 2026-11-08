@@ -345,7 +345,7 @@ def main() -> None:
         syms = syms[:40]; sp100 = set(syms[:15])
         daily = demo_daily(syms)
     else:
-        today = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+        today = (datetime.now(timezone.utc) - timedelta(minutes=20)).strftime("%Y-%m-%dT%H:%M:%SZ")
         daily = {}
         for j in range(0, len(syms), 100):
             daily.update(fetch(syms[j:j + 100], "1Day", WARMUP + "T00:00:00Z", today))
