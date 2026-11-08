@@ -2,7 +2,7 @@
 # changed time in SCHEDULE goes live without pasting it into the dashboard. Uses the same two repository
 # secrets as deploy-worker.yml (CLOUDFLARE_API_TOKEN, CLOUDFLARE_ACCOUNT_ID).
 # Keeps what was set up by hand: the GITHUB_TOKEN secret stays on Cloudflare, and the Worker's timers and
-# compatibility date are read from Cloudflare and deployed as they are (the every-minute timer is added if missing).
+# compatibility date are read from Cloudflare and deployed as they are (always exactly one every-minute timer).
 name: Deploy scheduler Worker
 
 on:
@@ -53,7 +53,8 @@ jobs:
           echo "Bindings now:"; jq -r '.result.bindings[] | "  \(.type) \(.name)"' settings.json
           echo "Timers now:"; jq -r '.result.schedules[]?.cron | "  \(.)"' schedules.json
           DATE=$(jq -r '.result.compatibility_date // "2024-09-23"' settings.json)
-          CRONS=$(jq -c '[(.result.schedules // [])[].cron] + ["* * * * *"] | unique' schedules.json)
+          # exactly one every-minute timer (two would start every workflow twice): "*/1 * * * *" and "* * * * *" are the same
+          CRONS=$(jq -c '[(.result.schedules // [])[].cron | select(. != "*/1 * * * *" and . != "* * * * *")] + ["* * * * *"] | unique' schedules.json)
           OTHER=$(jq -r '[.result.bindings[] | select(.type != "secret_text" and .type != "plain_text") | .type] | join(",")' settings.json)
           if [ -n "$OTHER" ]; then echo "::error::The Worker has bindings this deploy doesn't copy ($OTHER): stopping so nothing is lost."; exit 1; fi
           if ! jq -e '.result.bindings[] | select(.name == "GITHUB_TOKEN")' settings.json > /dev/null; then
