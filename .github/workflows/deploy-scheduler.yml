@@ -1,0 +1,66 @@
+# Deploys worker/scheduler-worker.js to Cloudflare (the "scheduler" Worker) whenever it changes, so a new or
+# changed time in SCHEDULE goes live without pasting it into the dashboard. Uses the same two repository
+# secrets as deploy-worker.yml (CLOUDFLARE_API_TOKEN, CLOUDFLARE_ACCOUNT_ID).
+# Keeps what was set up by hand: the GITHUB_TOKEN secret stays on Cloudflare, and the Worker's timers and
+# compatibility date are read from Cloudflare and deployed as they are (the every-minute timer is added if missing).
+name: Deploy scheduler Worker
+
+on:
+  push:
+    branches: [main]
+    paths: [worker/scheduler-worker.js, .github/workflows/deploy-scheduler.yml]
+  workflow_dispatch:
+
+concurrency: deploy-scheduler
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      NAME: scheduler
+    steps:
+      - name: Check the secrets are set
+        run: |
+          if [ -z "$CLOUDFLARE_API_TOKEN" ] || [ -z "$CLOUDFLARE_ACCOUNT_ID" ]; then
+            echo "::warning::CLOUDFLARE_API_TOKEN / CLOUDFLARE_ACCOUNT_ID are not set: nothing deployed (see worker/README.md)."
+            echo "SKIP=1" >> "$GITHUB_ENV"
+          fi
+      - uses: actions/checkout@v4
+        if: env.SKIP != '1'
+      - uses: actions/setup-node@v4
+        if: env.SKIP != '1'
+        with: { node-version: 20 }
+      - name: Check the schedule
+        if: env.SKIP != '1'
+        run: |
+          node --input-type=module -e "
+          import { due } from './worker/scheduler-worker.js';
+          const t = Date.UTC(2026, 0, 5); let n = 0;
+          for (let m = 0; m < 7 * 1440; m++) n += due(t + m * 6e4).length;     // throws on a bad cron line
+          console.log('Schedule OK:', n, 'starts in a week');"
+      - name: Read the Worker's current settings
+        if: env.SKIP != '1'
+        run: |
+          API="https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/workers/scripts/$NAME"
+          H="Authorization: Bearer $CLOUDFLARE_API_TOKEN"
+          if ! curl -fsS -H "$H" "$API/settings" > settings.json; then
+            echo "::error::No Worker called '$NAME' on this Cloudflare account (see worker/README.md, 'Exact run times')."; exit 1
+          fi
+          curl -fsS -H "$H" "$API/schedules" > schedules.json
+          echo "Bindings now:"; jq -r '.result.bindings[] | "  \(.type) \(.name)"' settings.json
+          echo "Timers now:"; jq -r '.result.schedules[]?.cron | "  \(.)"' schedules.json
+          DATE=$(jq -r '.result.compatibility_date // "2024-09-23"' settings.json)
+          CRONS=$(jq -c '[(.result.schedules // [])[].cron] + ["* * * * *"] | unique' schedules.json)
+          OTHER=$(jq -r '[.result.bindings[] | select(.type != "secret_text" and .type != "plain_text") | .type] | join(",")' settings.json)
+          if [ -n "$OTHER" ]; then echo "::error::The Worker has bindings this deploy doesn't copy ($OTHER): stopping so nothing is lost."; exit 1; fi
+          if ! jq -e '.result.bindings[] | select(.name == "GITHUB_TOKEN")' settings.json > /dev/null; then
+            echo "::warning::The scheduler has no GITHUB_TOKEN secret on Cloudflare: it will deploy but can't start workflows until it's added."
+          fi
+          printf 'name = "%s"\nmain = "worker/scheduler-worker.js"\ncompatibility_date = "%s"\nworkers_dev = true\n\n[triggers]\ncrons = %s\n' "$NAME" "$DATE" "$CRONS" > wrangler.toml
+          echo "--- wrangler.toml"; cat wrangler.toml
+      - name: Deploy
+        if: env.SKIP != '1'
+        run: npx --yes wrangler@3 deploy --keep-vars

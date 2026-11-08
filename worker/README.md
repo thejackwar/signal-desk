@@ -127,8 +127,9 @@ are the same as the `cron:` lines in `.github/workflows` (UTC).
 
 Back to GitHub's timer at any moment: set `EXTERNAL_SCHEDULER` to `off` (or delete it).
 
-To change a time, edit it in `SCHEDULE` near the top of `scheduler-worker.js`, paste the
-Worker again, and change the matching `cron:` line in the workflow too (that's the backup).
+To change a time, edit it in `SCHEDULE` near the top of `scheduler-worker.js` and change the matching
+`cron:` line in the workflow too (that's the backup). `.github/workflows/deploy-scheduler.yml` deploys the
+Worker on every change (same Cloudflare secrets as the data Worker below), so there's nothing to paste.
 A new scheduled workflow needs a line in `SCHEDULE` too (and the `EXTERNAL_SCHEDULER` line
 under its job), otherwise only GitHub's late timer starts it.
 When the token expires, the page in step 5 says "not working": make a new token (step 1) and

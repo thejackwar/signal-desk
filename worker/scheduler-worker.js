@@ -22,6 +22,8 @@ const SCHEDULE = [
   ["topdown.yml",          "2,32 13-21 * * 1-5",   "Top-Down alerts: every 30 min while the US market is open"],
   ["live-stocks.yml",      "5,35 13-20 * * 1-5",   "Live stock scan (provisional): every 30 min while the US market is open"],
   ["darkpool-blocks.yml",  "6,36 13-21 * * 1-5",   "Dark pool block prints: every 30 min while the US market is open"],
+  ["live-patterns.yml",    "9,39 13-20 * * 1-5",   "Live chart patterns (stocks): every 30 min while the US market is open", { job: "live" }],
+  ["live-patterns.yml",    "39 21 * * 1-5",        "Live chart patterns: after the close in winter time (daily candles)", { job: "live" }],
   ["correlation.yml",      "45 19 * * 1-5",        "Implied correlation (near the close)"],
   // after the close
   ["calendar.yml",         "43 21 * * 1-5",        "Market calendar (evening)"],
@@ -52,6 +54,7 @@ const SCHEDULE = [
   ["gamma-setup.yml",      "15 7 * * 6",           "Gamma setup backtest (Saturday)", { job: "backtest" }],
   ["session-momentum.yml", "35 7 * * 6",           "Session Momentum backtest (Saturday)", { job: "backtest" }],
   ["choch.yml",            "55 7 * * 6",           "4H CHoCH backtest (Saturday)", { job: "backtest" }],
+  ["live-patterns.yml",    "20 8 * * 6",           "Live chart patterns: win rates backtest (Saturday)", { job: "stats" }],
   ["sp500-list.yml",       "13 5 1 * *",           "S&P 500 list (first day of each month)"],
   ["research.yml",         "30 7 1 * *",           "Research engine (first day of each month)"],
 ];

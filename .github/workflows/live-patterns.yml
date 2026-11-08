@@ -7,7 +7,8 @@ name: Live chart patterns (stocks)
 #  - stats: the win rate of every pattern on each timeframe (S&P 100 backtest), every Saturday and when the engine
 #    changes. The four timeframes run side by side, each with a time budget (a slow day keeps the stocks it finished),
 #    then one job merges them into docs/data/live_patterns_stats.json. The live scan never waits for it.
-# Runs on GitHub's own timer (it isn't in the scheduler Worker's list).
+# Started on time by the scheduler Worker (worker/scheduler-worker.js) when the repo variable EXTERNAL_SCHEDULER
+# is "on"; the GitHub schedules below are only used when it's off.
 on:
   schedule:
     - cron: "9,39 13-20 * * 1-5"     # live, during the session
@@ -23,6 +24,10 @@ on:
         type: choice
         options: [live, stats, both]
         default: live
+      force:
+        description: "Scan even when the US market is closed"
+        type: boolean
+        default: false
 
 permissions:
   contents: write
@@ -33,14 +38,17 @@ env:
 
 jobs:
   live:
-    if: github.event.schedule != '20 8 * * 6' && (github.event_name != 'workflow_dispatch' || inputs.job != 'stats')
+    if: >-
+      (github.event_name == 'schedule' && github.event.schedule != '20 8 * * 6' && vars.EXTERNAL_SCHEDULER != 'on')
+      || github.event_name == 'push'
+      || (github.event_name == 'workflow_dispatch' && inputs.job != 'stats')
     runs-on: ubuntu-latest
     timeout-minutes: 45
     concurrency:
       group: live-patterns-live
       cancel-in-progress: false
     env:
-      FORCE: ${{ github.event_name != 'schedule' && '--force' || '' }}
+      FORCE: ${{ inputs.force && '--force' || '' }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -80,7 +88,10 @@ jobs:
           for i in 1 2 3; do git pull --rebase -X theirs && git push && break; git rebase --abort 2>/dev/null; sleep 5; done
 
   stats:
-    if: github.event.schedule == '20 8 * * 6' || github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.job != 'live')
+    if: >-
+      (github.event.schedule == '20 8 * * 6' && vars.EXTERNAL_SCHEDULER != 'on')
+      || github.event_name == 'push'
+      || (github.event_name == 'workflow_dispatch' && inputs.job != 'live')
     runs-on: ubuntu-latest
     timeout-minutes: 150
     strategy:

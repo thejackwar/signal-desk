@@ -1,6 +1,6 @@
 # Deploys worker/trendlines-worker.js to Cloudflare (the "trendlines" data Worker) whenever it changes,
 # so nobody has to paste it into the dashboard. Needs two repository secrets:
-#   CLOUDFLARE_API_TOKEN   a token from the "Edit Cloudflare Workers" template
+#   CLOUDFLARE_API_TOKEN   a token from the "Edit Cloudflare Workers" template (also used by deploy-scheduler.yml)
 #   CLOUDFLARE_ACCOUNT_ID  the account ID shown on the Cloudflare dashboard (Workers & Pages, right side)
 # Keeps what was set up by hand: it reads the Worker's bindings, timers and compatibility date from
 # Cloudflare and deploys with exactly those (the Alpaca secrets survive deploys on their own), adding
