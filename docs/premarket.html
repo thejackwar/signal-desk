@@ -1,0 +1,402 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<script src="account.js?v=3"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0b0f14">
+<title>Premarket Momentum</title>
+<meta name="description" content="Premarket Momentum: buy S&P 500 stocks at the New York open when they have been climbing in the pre-market and are in a daily uptrend. Backtested on 5-minute bars since 2021, every setting adjustable.">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Investment Center Signals">
+<meta property="og:title" content="Premarket Momentum, backtested | Investment Center Signals">
+<meta property="og:description" content="Buy at the open when a stock climbs in the pre-market. 5-minute backtest since 2021 on the S&P 500, with the settings you pick.">
+<meta property="og:url" content="https://thejackwar.github.io/signal-desk/premarket.html">
+<meta property="og:image" content="https://thejackwar.github.io/signal-desk/og-image.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="canonical" href="https://thejackwar.github.io/signal-desk/premarket.html">
+<script>
+(() => {
+  const CF_ANALYTICS_TOKEN = "a2d6810a28f64b999832485d1635915a";
+  if (!CF_ANALYTICS_TOKEN || location.hostname === "localhost") return;
+  const s = document.createElement("script");
+  s.defer = true; s.src = "https://static.cloudflareinsights.com/beacon.min.js";
+  s.dataset.cfBeacon = JSON.stringify({ token: CF_ANALYTICS_TOKEN });
+  document.head.appendChild(s);
+})();
+</script>
+<script src="sections.js?v=3" defer></script>
+<link rel="icon" href="favicon.ico?v=2" sizes="any">
+<link rel="icon" type="image/svg+xml" href="logo.svg?v=2">
+<link rel="apple-touch-icon" href="icon-180.png?v=2">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+:root {
+  --bg: #0b0f14; --panel: #0e141c; --panel-2: #121a24; --line: #1e2834; --line-2: #2a3644;
+  --fg: #e8eef4; --muted: #9aa7b4; --faint: #6b7886;
+  --up: #2fd6a0; --up-2: #1c8f6b; --down: #f0566a; --down-2: #9c3443; --none: #18212c;
+  --blue: #6cb4ff; --blue-bg: rgba(108,180,255,.12);
+  --font: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body { background: radial-gradient(1200px 600px at 50% -200px, #132033 0%, var(--bg) 60%) no-repeat, var(--bg); color: var(--fg);
+  font: 16px/1.5 var(--font); -webkit-font-smoothing: antialiased; font-feature-settings: "tnum"; padding-bottom: calc(40px + env(safe-area-inset-bottom, 0px)); }
+a { color: var(--blue); text-decoration: none; }
+a:hover { text-decoration: underline; }
+.wrap { max-width: 920px; margin: 0 auto; padding: 0 22px; }
+@media (max-width: 560px) { .wrap { padding: 0 16px; } }
+
+.bar { position: sticky; top: 0; z-index: 20; background: rgba(11,15,20,.86); backdrop-filter: saturate(180%) blur(20px); -webkit-backdrop-filter: saturate(180%) blur(20px);
+  border-bottom: 1px solid var(--line); padding-top: env(safe-area-inset-top, 0px); }
+.bar-in { max-width: 920px; margin: 0 auto; padding: 0 22px; height: 48px; display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; }
+.back { font-size: 14px; }
+.bar-title { font-size: 15px; font-weight: 600; }
+
+.k { font: 500 11px/1.3 var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.k.blue { color: var(--blue); }
+.live-dot { display: inline-flex; align-items: center; gap: 6px; }
+.live-dot::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--blue); box-shadow: 0 0 0 0 rgba(108,180,255,.6); animation: pulse 2s infinite; }
+@keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(108,180,255,.55); } 70% { box-shadow: 0 0 0 7px rgba(108,180,255,0); } 100% { box-shadow: 0 0 0 0 rgba(108,180,255,0); } }
+@media (prefers-reduced-motion: reduce) { .live-dot::before { animation: none; } }
+
+.hero { padding: 44px 0 18px; }
+.hero h1 { font-size: clamp(36px, 7vw, 56px); line-height: 1.04; letter-spacing: -.035em; margin: 10px 0 12px; font-weight: 700; }
+.hero p.lede { color: var(--muted); font-size: 18px; max-width: 640px; margin: 0; }
+.big { display: flex; flex-wrap: wrap; gap: 10px 36px; align-items: flex-end; margin: 28px 0 6px; }
+.big .n { font: 600 clamp(48px, 11vw, 84px)/1 var(--font); letter-spacing: -.04em; }
+.big .n.up { color: var(--fg); } .big .n.down { color: var(--down); }
+.big .sub { display: grid; gap: 4px; padding-bottom: 8px; }
+.big .sub b { font: 500 15px var(--mono); }
+.fine { color: var(--faint); font-size: 13px; }
+
+.panel { background: linear-gradient(180deg, var(--panel-2), var(--panel)); border: 1px solid var(--line); border-radius: 4px; padding: 14px 16px 12px; margin: 14px 0; }
+.ph { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 10px; }
+.pf { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-top: 10px; flex-wrap: wrap; }
+
+/* chart */
+svg.chart { display: block; width: 100%; height: auto; }
+.tag { font: 600 9px var(--mono); letter-spacing: .06em; }
+
+/* the tile wall */
+.wall { display: grid; gap: 6px; }
+.yr { display: grid; grid-template-columns: 38px 1fr; gap: 8px; align-items: start; }
+.yr > span { font: 500 11px/10px var(--mono); color: var(--faint); padding-top: 1px; }
+.tiles { display: flex; flex-wrap: wrap; gap: 2px; }
+.t { width: 9px; height: 9px; border-radius: 1px; background: var(--none); border: 0; padding: 0; cursor: pointer; }
+.t.u { background: var(--up-2); } .t.u.s { background: var(--up); }
+.t.d { background: var(--down-2); } .t.d.s { background: var(--down); }
+.t.lv { outline: 1px solid var(--blue); outline-offset: 0; }
+.t.on { outline: 2px solid var(--fg); outline-offset: 1px; }
+@media (min-width: 700px) { .t { width: 11px; height: 11px; } .yr > span { line-height: 12px; } }
+.track { display: flex; gap: 2px; margin-top: 10px; overflow: hidden; }
+.track i { flex: 1; height: 3px; background: var(--line); }
+.track i.f { background: var(--blue); }
+.readout { min-height: 22px; margin-top: 10px; font: 500 12.5px var(--mono); color: var(--muted); }
+.readout b.up { color: var(--up); } .readout b.down { color: var(--down); }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 14px; font: 500 11px var(--mono); color: var(--faint); }
+.legend i { display: inline-block; width: 9px; height: 9px; border-radius: 1px; margin-right: 6px; vertical-align: -1px; }
+
+/* trade activity */
+.sess { display: flex; gap: 5px; flex-wrap: nowrap; overflow: hidden; }
+.sess i { flex: 1; min-width: 0; max-width: 22px; aspect-ratio: 1; border: 1px solid var(--line-2); border-radius: 2px; }
+.sess i.u { background: var(--up-2); border-color: var(--up-2); } .sess i.d { background: var(--down-2); border-color: var(--down-2); }
+.sess i.today { background: #1d4f86; border-color: var(--blue); }
+
+/* controls */
+.ctl { display: grid; gap: 10px; margin: 4px 0 12px; }
+.row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+.row > .k { min-width: 108px; }
+.seg { display: inline-flex; flex-wrap: wrap; gap: 2px; background: #0a1017; border: 1px solid var(--line); border-radius: 6px; padding: 2px; }
+.seg button { font: 500 12.5px var(--font); color: var(--muted); background: none; border: 0; border-radius: 4px; padding: 6px 10px; cursor: pointer; }
+.seg button[aria-pressed="true"] { background: var(--blue-bg); color: var(--fg); box-shadow: inset 0 0 0 1px rgba(108,180,255,.35); }
+
+/* steps */
+.steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 10px; margin: 10px 0; }
+.step { border: 1px solid var(--line); border-radius: 4px; padding: 14px; background: var(--panel); }
+.step h3 { margin: 6px 0 4px; font-size: 17px; letter-spacing: -.01em; }
+.step p { margin: 0; color: var(--muted); font-size: 14px; }
+.step h3 .g { color: var(--up); } .step h3 .r { color: var(--down); }
+
+h2 { font-size: 26px; letter-spacing: -.02em; margin: 44px 0 6px; }
+h2 + p { color: var(--muted); margin: 0 0 8px; }
+.tw { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+table { width: 100%; border-collapse: collapse; font-size: 14px; }
+th, td { padding: 8px 8px; text-align: right; border-bottom: 1px solid var(--line); white-space: nowrap; }
+th { font: 500 11px var(--mono); letter-spacing: .06em; text-transform: uppercase; color: var(--faint); }
+th:first-child, td:first-child { text-align: left; }
+td.up { color: var(--up); } td.down { color: var(--down); }
+.cmp { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; }
+.cmp > div { border: 1px solid var(--line); border-radius: 4px; padding: 14px; background: var(--panel); }
+.cmp b { display: block; font: 600 26px var(--font); letter-spacing: -.02em; margin-top: 4px; }
+.cmp small { color: var(--muted); }
+.note { border-left: 2px solid var(--blue); padding: 4px 0 4px 14px; color: var(--muted); margin: 16px 0; font-size: 15px; }
+.empty { padding: 26px 0; text-align: center; color: var(--muted); }
+footer { margin-top: 48px; border-top: 1px solid var(--line); padding-top: 16px; }
+</style>
+<style>
+.pick { display: grid; gap: 10px; }
+.yrs-up { color: var(--up); } .yrs-down { color: var(--down); }
+.cards2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; }
+.cards2 > div { border: 1px solid var(--line); border-radius: 4px; padding: 14px; background: var(--panel); }
+.cards2 b { display: block; font: 600 26px var(--font); letter-spacing: -.02em; margin-top: 4px; }
+.cards2 small { color: var(--muted); display: block; margin-top: 2px; }
+tr.sel td { background: var(--blue-bg); }
+tr[data-k] { cursor: pointer; }
+.verdict { font-size: 15px; margin: 10px 0 0; color: var(--muted); }
+.verdict b { color: var(--fg); }
+</style>
+</head>
+<body>
+<nav class="bar" aria-label="Page">
+  <div class="bar-in">
+    <a class="back" href="index.html#home" aria-label="Back to Signals">‹ Signals</a>
+    <span class="bar-title">Premarket Momentum</span>
+    <span></span>
+  </div>
+</nav>
+
+<main class="wrap">
+  <section class="hero">
+    <span class="k">S&amp;P 500 · 5 min · Pre-market</span>
+    <h1>Up before the bell.</h1>
+    <p class="lede">If a stock has been climbing in the pre-market and is already in an uptrend on the daily chart, buy it at the 09:30 New York open. Pick how much it has to be up, for how long, and how to get out.</p>
+    <div class="big" id="big"></div>
+    <p class="fine" id="bigfine"></p>
+  </section>
+
+  <div class="panel" id="p-pick">
+    <div class="ph"><span class="k">Your settings</span><span class="k blue" id="is-default"></span></div>
+    <div class="ctl" id="ctl"></div>
+    <svg class="chart" id="eq" viewBox="0 0 720 240" role="img" aria-label="Account value with these settings, monthly candles, against holding SPY"></svg>
+    <div class="legend" style="margin-top:8px"><span><i style="background:var(--up)"></i>Account, monthly candles</span><span><i style="background:var(--muted);height:2px;vertical-align:3px"></i>Holding SPY</span></div>
+    <p class="verdict" id="verdict"></p>
+  </div>
+
+  <h2>Was it luck?</h2>
+  <p>The best settings were chosen on 2021–2023. Here is how the settings you picked did on those years and on 2024–2026, which the choice never saw.</p>
+  <div class="cards2" id="luck"></div>
+
+  <h2>By year</h2>
+  <p>Your settings, year by year, against simply holding SPY.</p>
+  <div class="tw"><table id="yrs"></table></div>
+
+  <h2>The rules</h2>
+  <p>Exactly what the backtest does on every New York session.</p>
+  <div class="steps">
+    <div class="step"><span class="k">Before the open</span><h3>Up in the pre-market</h3><p>The last pre-market price (04:00–09:30) is at least <b id="r-pm">1%</b> above yesterday's close, with at least $1M traded pre-market.</p></div>
+    <div class="step"><span class="k">For a bit</span><h3>Still climbing</h3><p id="r-climb">Higher than it was 30 minutes earlier.</p></div>
+    <div class="step"><span class="k">Daily chart</span><h3>Already in an uptrend</h3><p id="r-trend">Yesterday's close above its 20-day average.</p></div>
+    <div class="step"><span class="k">09:30</span><h3>Buy at the <span class="g">open</span></h3><p id="r-exit">2% stop, 5% target, anything left sold at 10:30.</p></div>
+  </div>
+  <p class="fine">Account: up to 5 trades a day (the biggest pre-market gains first), 20% of the account each, no leverage. 0.03% cost each way. Stop checked before target when a candle hits both.</p>
+
+  <h2>The trend filter is what works</h2>
+  <p>Without the daily uptrend, the same idea loses money. Every switch below is changed on its own, starting from the default settings.</p>
+  <div class="cards2" id="plain"></div>
+  <details style="margin-top:12px"><summary class="k" style="cursor:pointer">Every switch on its own</summary><div class="tw"><table id="sweeps"></table></div></details>
+
+  <h2>Worse fills at the open</h2>
+  <p>Prices jump around at 09:30, so a real order often fills worse than the open price. The average trade is small, so this matters.</p>
+  <div class="tw"><table id="costs"></table></div>
+
+  <h2>Every combination</h2>
+  <p>All 162 settings of the trend follow-up, best first. Tap one to show it.</p>
+  <div class="tw"><table id="all"></table></div>
+  <p><button type="button" class="seg" id="more" style="color:var(--fg);padding:8px 14px;cursor:pointer">Show all</button></p>
+
+  <h2>Latest trades</h2>
+  <p id="rt-p">The last 40 trades with your settings.</p>
+  <div class="tw"><table id="rt"></table></div>
+
+  <footer>
+    <p class="fine">Data: Alpaca 5-minute bars from all US exchanges, pre-market included, split and dividend adjusted, January 2021 to today. Current S&amp;P 500 members only: stocks that left the index are missing, which flatters any buy strategy a little. The settings were picked after testing many, so expect live results to be weaker than the best backtest. Information only, not advice.</p>
+  </footer>
+</main>
+
+<script>
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const pc = (v, d = 1) => v == null ? "–" : (v > 0 ? "+" : v < 0 ? "−" : "") + Math.abs(v).toFixed(d) + "%";
+const tone = v => v > 0 ? "up" : v < 0 ? "down" : "";
+const eur = v => "€" + Math.round(v).toLocaleString("en");
+const fmtD = (d, o = { day: "numeric", month: "short", year: "numeric" }) => new Date(d + "T12:00:00Z").toLocaleDateString("en-GB", { timeZone: "UTC", ...o });
+
+const PMS = [["0.5", "+0.5%"], ["1", "+1%"], ["2", "+2%"]];
+const CLIMBS = [["30m", "30 min"], ["60m", "1 hour"], ["120m", "2 hours"]];
+const TRENDS = [["20", "Above 20-day avg"], ["50", "Above 50-day avg"], ["up5", "Up over 5 days"]];
+const EXITS = [["2|5|1030", "2% stop · 5% target · out 10:30"], ["2|none|1030", "2% stop · out 10:30"], ["2|3|1030", "2% stop · 3% target · out 10:30"],
+  ["1|2|1030", "1% stop · 2% target · out 10:30"], ["2|none|1200", "2% stop · out 12:00"], ["2|3|eod", "2% stop · 3% target · out at close"]];
+const CLIMB_TXT = { any: "No condition on the pre-market climb.", "30m": "Higher than it was 30 minutes earlier (09:00).",
+  "60m": "Higher than an hour earlier (08:30) and above the pre-market average price (VWAP).",
+  "120m": "Higher than two hours earlier (07:30) and above the pre-market average price (VWAP).",
+  steady: "Every 15-minute checkpoint from 08:30 to 09:30 higher than the one before." };
+const TREND_TXT = { any: "No daily trend condition.", "20": "Yesterday's close above its 20-day average.", "50": "Yesterday's close above its 50-day average.",
+  "50_200": "50-day average above the 200-day, close above both.", up5: "Yesterday's close above the close five sessions earlier." };
+const exitTxt = (stop, tp, ex) => `${stop === "none" ? "No stop" : stop + "% stop"}, ${tp === "none" ? "no target" : tp + "% target"}, ${ex === "eod" ? "anything left sold at the 15:55 close" : `anything left sold at ${ex.slice(0, 2)}:${ex.slice(2)}`}.`;
+const WHY = { stop: "stop", target: "target", time: "time exit", close: "close" };
+
+let B = null, SHOW_ALL = false;
+const S = (() => { try { return JSON.parse(localStorage.getItem("premarketMom") || "{}"); } catch { return {}; } })();
+const save = () => { try { localStorage.setItem("premarketMom", JSON.stringify(S)); } catch {} };
+const keyOf = v => `${v.pm}|${v.climb}|${v.trend}|${v.stop}|${v.tp}|${v.exit}`;
+const cur = () => B.trend_check.find(x => keyOf(x.v) === keyOf(S));
+const isDef = () => keyOf(S) === keyOf(B.default);
+
+async function load(p) { try { const r = await fetch(p + "?t=" + Date.now()); return r.ok ? r.json() : null; } catch { return null; } }
+const seg = (name, val, opts) => `<div class="seg" role="group">${opts.map(([v, l]) => `<button type="button" data-${name}="${v}" aria-pressed="${v === val}">${esc(l)}</button>`).join("")}</div>`;
+
+function controls() {
+  $("ctl").innerHTML = `<div class="row"><span class="k">Pre-market up</span>${seg("pm", S.pm, PMS)}</div>
+    <div class="row"><span class="k">Climbing for</span>${seg("climb", S.climb, CLIMBS)}</div>
+    <div class="row"><span class="k">Daily trend</span>${seg("trend", S.trend, TRENDS)}</div>
+    <div class="row"><span class="k">Exit</span>${seg("exit", `${S.stop}|${S.tp}|${S.exit}`, EXITS)}</div>`;
+  $("is-default").innerHTML = isDef() ? "Default settings" : `<a href="#" id="reset">Back to default</a>`;
+  const r = $("reset"); if (r) r.onclick = e => { e.preventDefault(); Object.assign(S, pick(B.default)); save(); render(); };
+}
+const pick = v => ({ pm: v.pm, climb: v.climb, trend: v.trend, stop: v.stop, tp: v.tp, exit: v.exit });
+
+function headline(X) {
+  const F = X.full, end = 100000 * (1 + F.acct_total / 100);
+  const yrsN = Object.keys(X.by_year).length;
+  $("big").innerHTML = `<div class="n ${tone(F.acct_total)}">${pc(F.acct_total, 0)}</div>
+    <div class="sub"><span class="k">${esc(fmtD(B.from, { month: "short", year: "numeric" }))} – today · backtest · €100,000 → ${eur(end)}</span>
+      <b>${F.n.toLocaleString("en")} trades · ${Math.round(F.win)}% won · ${pc(F.acct_cagr)} a year · max drop ${pc(F.acct_maxdd, 0)}</b>
+      <span class="k">SPY held: ${pc(B.spy_total, 0)} · max drop ${spyDD() == null ? "–" : pc(spyDD(), 0)}</span></div>`;
+  $("bigfine").textContent = `Average trade ${pc(F.avg, 3)} after costs · profit factor ${F.pf ?? "–"} · ${yrsN} years.`;
+}
+function spyDD() {
+  const c = B.spy_curve; if (!c?.length) return null;
+  let pk = 0, dd = 0; for (const [, v] of c) { pk = Math.max(pk, v); dd = Math.min(dd, v / pk - 1); } return dd * 100;
+}
+
+function chart(X) {
+  const svg = $("eq"), W = 720, H = 240, pl = 8, pr = 62, pt = 12, pb = 22;
+  const pts = X.curve || [];
+  if (pts.length < 3) { svg.innerHTML = `<text x="360" y="120" text-anchor="middle" fill="#6b7886" font-size="13">The chart for these settings arrives with the next backtest run.</text>`; return; }
+  // monthly candles of the account value
+  const m = []; let prev = 1;
+  for (const [d, v] of pts) {
+    const k = d.slice(0, 7), last = m[m.length - 1];
+    if (!last || last.k !== k) m.push({ k, o: prev, h: Math.max(prev, v), l: Math.min(prev, v), c: v });
+    else { last.h = Math.max(last.h, v); last.l = Math.min(last.l, v); last.c = v; }
+    prev = v;
+  }
+  const spyM = {}; for (const [d, v] of (B.spy_curve || [])) spyM[d.slice(0, 7)] = v;
+  let lo = Infinity, hi = -Infinity;
+  for (const c of m) { lo = Math.min(lo, c.l); hi = Math.max(hi, c.h); const s = spyM[c.k]; if (s) { lo = Math.min(lo, s); hi = Math.max(hi, s); } }
+  lo = Math.min(lo, 1); const pad = (hi - lo) * .06; lo -= pad; hi += pad;
+  const n = m.length, x = i => pl + (i + .5) * (W - pl - pr) / n, y = v => pt + (hi - v) / (hi - lo) * (H - pt - pb), cw = Math.max(2, (W - pl - pr) / n * .64);
+  let g = "";
+  for (let t = 0; t <= 4; t++) { const v = lo + (hi - lo) * t / 4; g += `<line x1="${pl}" x2="${W - pr}" y1="${y(v)}" y2="${y(v)}" stroke="#1e2834"/><text x="${W - pr + 6}" y="${y(v) + 3}" fill="#6b7886" font-size="10" font-family="JetBrains Mono, monospace">${kEur(v)}</text>`; }
+  g += `<line x1="${pl}" x2="${W - pr}" y1="${y(1)}" y2="${y(1)}" stroke="#2a3644" stroke-dasharray="2 3"/>`;
+  m.forEach((c, i) => { if (c.k.endsWith("-01")) g += `<text x="${x(i)}" y="${H - 6}" text-anchor="middle" fill="#6b7886" font-size="10" font-family="JetBrains Mono, monospace">${c.k.slice(0, 4)}</text>`; });
+  const sp = m.map((c, i) => spyM[c.k] ? `${x(i)},${y(spyM[c.k])}` : null).filter(Boolean).join(" ");
+  if (sp) g += `<polyline points="${sp}" fill="none" stroke="#9aa7b4" stroke-width="1.3" stroke-dasharray="4 3" opacity=".8"/>`;
+  m.forEach((c, i) => {
+    const up = c.c >= c.o, col = up ? "var(--up)" : "var(--down)";
+    g += `<line x1="${x(i)}" x2="${x(i)}" y1="${y(c.h)}" y2="${y(c.l)}" stroke="${col}"/><rect x="${x(i) - cw / 2}" y="${y(Math.max(c.o, c.c))}" width="${cw}" height="${Math.max(1, Math.abs(y(c.o) - y(c.c)))}" fill="${col}"/>`;
+  });
+  svg.innerHTML = g;
+}
+// y-axis labels: value in thousands of euro
+function kEur(v) { return "€" + Math.round(v * 100) + "k"; }
+
+function verdict(X) {
+  const F = X.full, spyC = B.spy_total != null ? (Math.pow(1 + B.spy_total / 100, 1 / yrs()) - 1) * 100 : null;
+  const beat = spyC != null && F.acct_cagr > spyC;
+  $("verdict").innerHTML = `${beat ? "<b>Beat holding SPY</b>" : "<b>Did not beat holding SPY</b>"}: ${pc(F.acct_cagr)} a year vs about ${pc(spyC)} for SPY, with a worst drop of ${pc(F.acct_maxdd, 0)} vs ${pc(spyDD(), 0)}. ${F.avg < 0.06 ? "The average trade is thin, so worse fills at the open could erase it (see below)." : ""}`;
+}
+const yrs = () => Math.max(.1, (Date.now() - new Date(B.from + "T00:00:00Z")) / 3.156e10);
+
+function luck(X) {
+  const a = X.train, b = X.test;
+  const spyYr = (from, to) => { const ys = Object.entries(B.spy_by_year).filter(([y]) => y >= from && y <= to); const g = ys.reduce((m, [, v]) => m * (1 + v / 100), 1); return (Math.pow(g, 1 / Math.max(1, ys.length)) - 1) * 100; };
+  const card = (t, s, sp) => `<div><span class="k">${t}</span><b class="${tone(s.acct_cagr)}" style="color:var(--${s.acct_cagr >= 0 ? "up" : "down"})">${pc(s.acct_cagr)} a year</b><small>${(s.n || 0).toLocaleString("en")} trades · ${Math.round(s.win || 0)}% won · max drop ${pc(s.acct_maxdd, 0)}</small><small>SPY: about ${pc(sp)} a year</small></div>`;
+  const held = a.acct_cagr > 0 && b.acct_cagr > 0 && b.acct_cagr >= a.acct_cagr * .5;
+  $("luck").innerHTML = card("2021–2023 · used to pick", a, spyYr("2021", "2023")) + card("2024–2026 · never seen", b, spyYr("2024", "2026")) +
+    `<div><span class="k">Verdict</span><b style="color:var(--${held ? "up" : "down"})">${held ? "Held up" : "Weaker on new data"}</b><small>${held ? "These settings made money in both periods, at a similar pace." : "These settings did clearly worse on the years the choice never saw."}</small></div>`;
+}
+
+function years(X) {
+  const yb = X.by_year;
+  $("yrs").innerHTML = `<thead><tr><th>Year</th><th>Strategy</th><th>SPY held</th><th>Difference</th></tr></thead><tbody>` +
+    Object.entries(yb).map(([y, v]) => { const s = B.spy_by_year[y]; return `<tr><td>${y}${y === new Date().getUTCFullYear() + "" ? " (so far)" : ""}</td><td class="${tone(v)}">${pc(v)}</td><td class="${tone(s)}">${pc(s)}</td><td class="${tone(v - s)}">${s == null ? "–" : pc(v - s)}</td></tr>`; }).join("") + `</tbody>`;
+}
+
+function rules() {
+  $("r-pm").textContent = "+" + S.pm + "%";
+  $("r-climb").textContent = CLIMB_TXT[S.climb];
+  $("r-trend").textContent = TREND_TXT[S.trend];
+  $("r-exit").textContent = exitTxt(S.stop, S.tp, S.exit);
+}
+
+function plainAndSweeps() {
+  const P = B.plain, D = B.trend_check.find(x => keyOf(x.v) === keyOf(B.default))?.full;
+  const card = (t, s, note) => `<div><span class="k">${t}</span><b style="color:var(--${(s?.acct_total ?? 0) >= 0 ? "up" : "down"})">${pc(s?.acct_total, 0)}</b><small>${pc(s?.acct_cagr)} a year · max drop ${pc(s?.acct_maxdd, 0)}</small><small>${note}</small></div>`;
+  $("plain").innerHTML = (P ? card("First version: no daily trend", P, "PM +2%, climbing 1 hour, out at the close") : "") +
+    (D ? card("With the daily uptrend (default)", D, "PM +1%, climbing 30 min, above the 20-day average, out 10:30") : "") +
+    `<div><span class="k">Holding SPY</span><b>${pc(B.spy_total, 0)}</b><small>same period, buy once and wait</small></div>`;
+  const NAMES = { pm: "Pre-market up at least", climb: "Climbing for", trend: "Daily trend", pmvol: "Pre-market volume", cap: "Skip gaps above", entry: "Entry", stop: "Stop", tp: "Target", exit: "Sell by", side: "Side", univ: "Stocks" };
+  const LBL = { pm: o => "+" + o + "%", climb: o => ({ any: "no condition", "30m": "30 min", "60m": "1 hour + VWAP", "120m": "2 hours + VWAP", steady: "steady (every 15 min)" }[o]),
+    trend: o => ({ any: "none", "20": "above 20-day avg", "50": "above 50-day avg", "50_200": "50 > 200-day avg", up5: "up over 5 days" }[o]),
+    pmvol: o => ({ any: "any", "1m": "$1M+", "5m": "$5M+" }[o]), cap: o => o === "none" ? "no cap" : "+" + o + "%", entry: o => o === "open" ? "09:30 open" : "after a green first 5-min candle",
+    stop: o => o === "none" ? "none" : o + "%", tp: o => o === "none" ? "none" : o + "%", exit: o => ({ "1030": "10:30", "1200": "12:00", eod: "the close" }[o]), side: o => o === "long" ? "long (buy)" : "short (bet on a fade)", univ: o => o === "sp100" ? "S&P 100" : "S&P 500" };
+  let rows = "";
+  for (const k of ["pm", "climb", "trend", "pmvol", "cap", "entry", "stop", "tp", "exit", "side", "univ"]) {
+    const sw = B.sweeps?.[k]; if (!sw) continue;
+    rows += `<tr><td colspan="6" class="k" style="padding-top:14px">${NAMES[k]}</td></tr>` + Object.entries(sw).map(([o, s]) => `<tr${o === B.default[k] ? ' style="font-weight:600"' : ""}><td>${esc(LBL[k](o))}${o === B.default[k] ? " · default" : ""}</td><td>${(s.n || 0).toLocaleString("en")}</td><td>${s.n ? Math.round(s.win) + "%" : "–"}</td><td class="${tone(s.avg)}">${pc(s.avg, 3)}</td><td class="${tone(s.acct_cagr)}">${pc(s.acct_cagr)}</td><td>${pc(s.acct_maxdd, 0)}</td></tr>`).join("");
+  }
+  $("sweeps").innerHTML = `<thead><tr><th>Setting</th><th>Trades</th><th>Won</th><th>Avg trade</th><th>A year</th><th>Max drop</th></tr></thead><tbody>${rows}</tbody>`;
+}
+
+function costs() {
+  const C = B.cost_check;
+  if (!C) { $("costs").innerHTML = `<tbody><tr><td class="fine" style="text-align:left;white-space:normal">The cost check arrives with the next backtest run.</td></tr></tbody>`; return; }
+  $("costs").innerHTML = `<thead><tr><th>Cost each way (default settings)</th><th>Avg trade</th><th>A year</th><th>Total</th><th>Max drop</th></tr></thead><tbody>` +
+    Object.entries(C).map(([c, s]) => `<tr${c === "0.03" ? ' style="font-weight:600"' : ""}><td>${c}%${c === "0.00" ? " (perfect fills)" : c === "0.03" ? " (used above)" : c === "0.10" ? " (bad fills)" : ""}</td><td class="${tone(s.avg)}">${pc(s.avg, 3)}</td><td class="${tone(s.acct_cagr)}">${pc(s.acct_cagr)}</td><td class="${tone(s.acct_total)}">${pc(s.acct_total, 0)}</td><td>${pc(s.acct_maxdd, 0)}</td></tr>`).join("") + `</tbody>`;
+}
+
+function all() {
+  const L = B.trend_check.slice().sort((a, b) => (b.full.acct_cagr ?? -99) - (a.full.acct_cagr ?? -99));
+  const lbl = v => `PM +${v.pm}% · ${CLIMBS.find(c => c[0] === v.climb)[1]} · ${TRENDS.find(t => t[0] === v.trend)[1].toLowerCase()} · ${EXITS.find(e => e[0] === `${v.stop}|${v.tp}|${v.exit}`)[1]}`;
+  $("all").innerHTML = `<thead><tr><th>Settings (tap to show)</th><th>Trades</th><th>A year</th><th>2021–23</th><th>2024–26</th><th>Max drop</th></tr></thead><tbody>` +
+    L.filter((x, i) => SHOW_ALL || i < 15 || keyOf(x.v) === keyOf(S)).map(x => `<tr data-k="${keyOf(x.v)}" class="${keyOf(x.v) === keyOf(S) ? "sel" : ""}"><td>${esc(lbl(x.v))}</td><td>${x.full.n.toLocaleString("en")}</td><td class="${tone(x.full.acct_cagr)}">${pc(x.full.acct_cagr)}</td><td class="${tone(x.train.acct_cagr)}">${pc(x.train.acct_cagr)}</td><td class="${tone(x.test.acct_cagr)}">${pc(x.test.acct_cagr)}</td><td>${pc(x.full.acct_maxdd, 0)}</td></tr>`).join("") + `</tbody>`;
+  $("more").textContent = SHOW_ALL ? "Show top 15" : `Show all ${L.length}`;
+  $("more").onclick = () => { SHOW_ALL = !SHOW_ALL; all(); };
+  $("all").onclick = e => { const r = e.target.closest("tr[data-k]"); if (!r) return; const [pm, climb, trend, stop, tp, exit] = r.dataset.k.split("|"); Object.assign(S, { pm, climb, trend, stop, tp, exit }); save(); render(); $("p-pick").scrollIntoView({ behavior: "smooth", block: "start" }); };
+}
+
+function recent(X) {
+  const ts = (X.recent || []).slice().reverse();
+  if (!ts.length) { $("rt").innerHTML = `<tbody><tr><td class="fine" style="text-align:left;white-space:normal">The trade list for these settings arrives with the next backtest run.</td></tr></tbody>`; return; }
+  $("rt").innerHTML = `<thead><tr><th>Day</th><th>Stock</th><th>Pre-market</th><th>Bought</th><th>Sold</th><th>Why</th><th>Result</th></tr></thead><tbody>` +
+    ts.map(t => `<tr><td>${esc(fmtD(t.d))}</td><td><a href="chart.html#${esc(t.s)}">${esc(t.s)}</a></td><td class="up">${pc(t.gain, 2)}</td><td>${t.in}</td><td>${t.out}</td><td>${esc(WHY[t.why] || t.why)} · ${esc(t.at || "")}</td><td class="${tone(t.pct)}">${pc(t.pct, 2)}</td></tr>`).join("") + `</tbody>`;
+}
+
+function render() {
+  const X = cur(); if (!X) { Object.assign(S, pick(B.default)); return render(); }
+  controls(); headline(X); chart(X); verdict(X); luck(X); years(X); rules(); recent(X); all();
+}
+
+document.addEventListener("click", e => {
+  const b = e.target.closest("[data-pm], [data-climb], [data-trend], [data-exit]"); if (!b) return;
+  const d = b.dataset;
+  if (d.pm) S.pm = d.pm; if (d.climb) S.climb = d.climb; if (d.trend) S.trend = d.trend;
+  if (d.exit) [S.stop, S.tp, S.exit] = d.exit.split("|");
+  save(); render();
+});
+
+(async () => {
+  B = await load("data/premarket/backtest.json");
+  if (!B?.trend_check) { $("big").innerHTML = `<div class="empty">The backtest is running on GitHub. Check back soon.</div>`; return; }
+  if (!S.pm || !cur()) Object.assign(S, pick(B.default));
+  if (!B.trend_check.find(x => keyOf(x.v) === keyOf(B.default))) B.default = { ...B.default, ...B.trend_check.slice().sort((a, b) => b.full.acct_cagr - a.full.acct_cagr)[0].v };
+  render(); plainAndSweeps(); costs();
+})();
+</script>
+</body>
+</html>
