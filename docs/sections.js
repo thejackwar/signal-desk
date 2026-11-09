@@ -18,7 +18,7 @@
       ["Options", "options.html"], ["Max pain", "maxpain.html"], ["Dark pools", "darkpool.html"], ["Implied correlation", "correlation.html"]] },
     { id: "strategies", name: "Strategies", items: [
       ["Strategy Lab", "#strategylab", /^strategylab/], ["Strategies", "#strategies", /^(strategies|strategy-)/], ["Research", "research.html"],
-      ["Strategy Board", "board.html"], ["Strategy trades", "trades.html"], ["Chart patterns", "patterns.html"], ["Price Action Lab", "palab.html"], ["Session Momentum", "session.html"], ["Premarket Momentum", "premarket.html"], ["Gap-Down Short", "gapdown.html"], ["4H CHoCH", "choch.html"], ["Pairs trading", "pairs.html"],
+      ["Strategy Board", "board.html"], ["Strategy trades", "trades.html"], ["Chart patterns", "patterns.html"], ["Price Action Lab", "palab.html"], ["Session Momentum", "session.html"], ["Premarket Momentum", "premarket.html"], ["Gap-Down Short", "gapdown.html"], ["Opening Reversal", "reversal.html"], ["4H CHoCH", "choch.html"], ["Pairs trading", "pairs.html"],
       ["Smaller Crashes", "#crashes", /^crashes$/], ["VIX seasonality", "#vix", /^vix$/]] },
     { id: "practice", name: "Practice", items: [["Practice portfolio", "#practice", /^practice$/]] },
     { id: "learn", name: "Learn & more", items: [

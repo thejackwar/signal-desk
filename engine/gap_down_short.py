@@ -106,11 +106,16 @@ def build_candidates(tab: dict, sp100: set[str], demo=None) -> list[dict]:
             intr = demo(d, items)
         else:
             start = datetime.fromisoformat(d + "T09:30").replace(tzinfo=NY).astimezone(timezone.utc)
-            end = datetime.fromisoformat(d + "T16:00").replace(tzinfo=NY).astimezone(timezone.utc)
+            end = min(datetime.fromisoformat(d + "T16:00").replace(tzinfo=NY).astimezone(timezone.utc),
+                      datetime.now(timezone.utc) - timedelta(minutes=20))    # free SIP data: nothing newer than 15 min
             syms, intr = [s for s, _ in items], {}
-            for j in range(0, len(syms), 100):
-                intr.update(fetch(syms[j:j + 100], "5Min", start.strftime("%Y-%m-%dT%H:%M:%SZ"),
-                                  end.strftime("%Y-%m-%dT%H:%M:%SZ")))
+            try:
+                for j in range(0, len(syms), 100):
+                    intr.update(fetch(syms[j:j + 100], "5Min", start.strftime("%Y-%m-%dT%H:%M:%SZ"),
+                                      end.strftime("%Y-%m-%dT%H:%M:%SZ")))
+            except Exception as e:                              # one bad day must not sink a 30-minute run
+                print(f"  {d}: skipped ({e})", flush=True)
+                continue
         for s, r in items:
             c = facts(s, d, r, intr.get(s) or [])
             if c:
