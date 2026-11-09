@@ -1900,6 +1900,30 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
 .tm .gl b { font: 600 13px var(--font-code); white-space: nowrap; }
 .tm .gl.gf.t-focus { border-color: var(--tc); background: var(--amber-bg); }
 
+/* today's outlook */
+.tm .olw { display: grid; gap: 12px; grid-template-columns: minmax(0, 1fr); padding-top: 6px; }
+@media (min-width: 900px) { .tm .olw { grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); } }
+.tm .olh { padding: 12px 14px; border: 1px solid var(--line); border-left: 4px solid var(--oc, var(--faint)); border-radius: 10px; background: var(--bg); }
+.tm .olh.l-up { --oc: var(--bull); } .tm .olh.l-down { --oc: var(--bear); } .tm .olh.l-flat { --oc: var(--amber); }
+.tm .olh h3 { margin: 0 0 8px; font: 700 19px/1.25 var(--font-body); color: var(--fg); }
+.tm .olchips { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
+.tm .olchips span { font: 600 11px var(--font-body); padding: 3px 8px; border-radius: 999px; background: var(--surface-2); color: var(--muted); }
+.tm .olchips span b { color: var(--fg); font-family: var(--font-code); }
+.tm .oltxt { margin: 0; padding-left: 18px; font-size: 13px; line-height: 1.5; color: var(--fg); }
+.tm .oltxt li { margin: 3px 0; }
+.tm .oldr { grid-template-columns: minmax(0, 1fr) 62px 18px; }
+.tm .oldr > span:first-child { white-space: normal; }
+.tm .oldr small { display: block; color: var(--faint); font-size: 11px; line-height: 1.3; white-space: normal; }
+.tm .oldr .ar { text-align: center; font-weight: 700; }
+.tm .ollv { grid-template-columns: minmax(0, 1fr) 66px 54px; }
+.tm .olsc { margin: 4px 0; font-size: 12.5px; line-height: 1.45; color: var(--muted); }
+.tm .olsc b { color: var(--fg); }
+.tm .olpm { display: flex; flex-wrap: wrap; gap: 4px; }
+.tm .olpm button { font: 600 11.5px var(--font-code); padding: 3px 7px; border-radius: 6px; border: 1px solid var(--line); background: var(--surface); color: var(--fg); cursor: pointer; }
+.tm .olrec { display: flex; gap: 3px; margin-top: 4px; }
+.tm .olrec i { width: 12px; height: 12px; border-radius: 3px; background: var(--surface-2); }
+.tm .olrec i.ok { background: var(--bull); } .tm .olrec i.no { background: var(--bear); }
+
 /* mood panel */
 .tm .mgw { display: grid; gap: 12px; grid-template-columns: minmax(0, 1fr); padding-top: 6px; }
 @media (min-width: 900px) { .tm .mgw { grid-template-columns: minmax(240px, .8fr) minmax(0, 1.4fr); } }
@@ -7443,6 +7467,7 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
   ];
   // panels of the Terminal: id -> [code, title]
   const TM_P = {
+    out: ["OUT", "Today&rsquo;s outlook"],
     trd: ["TRD", "Chart &amp; trade"],
     focus: ["FOCUS", "Focus alerts"], trk: ["TRK", "Does Focus work?"], tdt: ["TDT", "Top-Down paper trades"], mood: ["MOOD", "Market mood &amp; flow"],
     mon: ["MON", "Monitor"], sec: ["DES", "Security"], alrt: ["ALRT", "Alerts"], wei: ["WEI", "World markets"], most: ["MOST", "Most active"],
@@ -7451,19 +7476,19 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
     port: ["PORT", "Practice portfolio"], pxa: ["PXA", "Price alerts"], pat: ["PAT", "BTC chart patterns"], lpat: ["LPAT", "Live chart patterns"],
     vols: ["VOLS", "Volume screener"],
   };
-  const TM_ORDER = Object.keys(TM_P), TM_WIDE = ["trd", "eqs", "gip", "mood", "focus", "trk", "pat", "lpat", "vols"];
+  const TM_ORDER = Object.keys(TM_P), TM_WIDE = ["out", "trd", "eqs", "gip", "mood", "focus", "trk", "pat", "lpat", "vols"];
   // workspaces: the Terminal shows one group of panels at a time, so things are easy to find
   // Desk: the one-screen view (chart you can draw on + the signal explained, mood, signals, news, world markets)
-  const TM_WS = { desk: ["trd", "mood", "focus", "alrt", "news", "live", "wei", "cal"], market: ["mood", "brd", "news", "cal", "wei", "gc", "ctm"], ticker: ["trd", "mon", "sec"],
+  const TM_WS = { desk: ["out", "trd", "mood", "focus", "alrt", "news", "live", "wei", "cal"], market: ["out", "mood", "brd", "news", "cal", "wei", "gc", "ctm"], ticker: ["trd", "mon", "sec"],
     signals: ["trd", "focus", "trk", "tdt", "alrt", "live", "grd", "pxa"], tools: ["eqs", "most", "gip", "port"], patterns: ["trd", "pat"], scanner: ["trd", "lpat"], volume: ["vols", "trd"] };
-  const TM_WSL = [["desk", "Desk", "Chart, signals, mood and news on one screen"], ["market", "Market", "Mood, flow, breadth, news"], ["ticker", "Ticker", "Everything on one stock"], ["signals", "Signals", "Focus alerts, live trades"], ["scanner", "Live patterns", "Chart patterns forming now on every stock"], ["volume", "Volume", "The most-traded stocks as a grid of charts"], ["tools", "Tools", "Screener, charts, portfolio"], ["patterns", "Patterns", "Every BTC chart pattern since 2021, on the chart"], ["all", "All", "Every panel"]];
+  const TM_WSL = [["desk", "Desk", "Chart, signals, mood and news on one screen"], ["market", "Market", "Today's outlook, mood, flow, breadth, news"], ["ticker", "Ticker", "Everything on one stock"], ["signals", "Signals", "Focus alerts, live trades"], ["scanner", "Live patterns", "Chart patterns forming now on every stock"], ["volume", "Volume", "The most-traded stocks as a grid of charts"], ["tools", "Tools", "Screener, charts, portfolio"], ["patterns", "Patterns", "Every BTC chart pattern since 2021, on the chart"], ["all", "All", "Every panel"]];
   const tmWs = () => {
     if (!pref("tmWsV3", 0)) { setPref("tmWsV3", 1); setPref("tmWs", "desk"); }   // the Desk is the new start, once for everyone
     const w = pref("tmWs", "desk"); return w === "all" || TM_WS[w] ? w : "desk";
   };
   const tmWsOf = id => Object.keys(TM_WS).find(k => TM_WS[k].includes(id)) || "all";
   // codes that open a panel (and the tab inside it)
-  const TM_JUMP = { TRD: ["trd"], CHART: ["trd"], DESK: ["trd"], MON: ["mon"], WL: ["mon"], WEI: ["wei", "idx"], FUT: ["wei", "fut"], FX: ["wei", "fx"], VOL: ["wei", "vol"], GC: ["gc", "curve"], WIRP: ["gc", "fed"],
+  const TM_JUMP = { OUT: ["out"], TODAY: ["out"], OUTLOOK: ["out"], TRD: ["trd"], CHART: ["trd"], DESK: ["trd"], MON: ["mon"], WL: ["mon"], WEI: ["wei", "idx"], FUT: ["wei", "fut"], FX: ["wei", "fx"], VOL: ["wei", "vol"], GC: ["gc", "curve"], WIRP: ["gc", "fed"],
     ECB: ["gc", "fed"], EU: ["gc", "eu"], CTM: ["ctm", "curve"], COT: ["ctm", "cot"], MOST: ["most"], EQS: ["eqs"], GIP: ["gip"], PORT: ["port"], PXA: ["pxa"], GRD: ["grd"], BRD: ["brd"], MOOD: ["mood"], FOCUS: ["focus"], TRK: ["trk"], TDT: ["tdt"], TOPDOWN: ["tdt"], FOC: ["focus"], PAT: ["pat"], PATTERNS: ["pat"], LPAT: ["lpat"], SCAN: ["lpat"], LIVEPAT: ["lpat"], VOLS: ["vols"], VOLUME: ["vols"], HVOL: ["vols"] };
   // tabs of the security panel (company data: stocks only)
   const TM_SEC = [["DES", "Overview"], ["FLOW", "Buy / sell flow"], ["OMON", "Options"], ["CN", "News"], ["SIG", "Signals"], ["FA", "Financials"], ["ANR", "Analysts"], ["EE", "Estimates"], ["RV", "Comparables"], ["HDS", "Holders"], ["DVD", "Dividends"]];
@@ -7507,9 +7532,10 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
     if (L0.wide && !L0.v4) wide = [...new Set([...wide, "pat"])];
     if (L0.wide && !L0.v5) wide = [...new Set([...wide, "lpat"])];
     if (L0.wide && !L0.v6) wide = [...new Set([...wide, "vols"])];
+    if (L0.wide && !L0.v7) wide = [...new Set([...wide, "out"])];
     return { order, hidden: (L0.hidden || []).filter(id => TM_P[id]), wide };
   }
-  const tmSetLayout = L0 => setPref("tmLayout", { ...L0, v2: true, v3: true, v4: true, v5: true, v6: true });
+  const tmSetLayout = L0 => setPref("tmLayout", { ...L0, v2: true, v3: true, v4: true, v5: true, v6: true, v7: true });
   const tmPanel = (cls, code, title, go, body, extra = "") => {
     const id = cls.replace(/^p-/, ""), L0 = tmLayout(), ed = S.tmEdit;
     const ctl = ed ? `<span class="pctl"><button type="button" data-tmmove="${id}:-1" aria-label="Move earlier">◀</button><button type="button" data-tmmove="${id}:1" aria-label="Move later">▶</button><button type="button" data-tmwide="${id}" aria-pressed="${L0.wide.includes(id)}" aria-label="Full width">⤢</button><button type="button" data-tmhide="${id}" aria-label="Hide">✕</button></span>` : "";
@@ -8135,6 +8161,54 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
       + M.unusual.map(u => `<button type="button" class="tr uo" data-tmseltab="${esc(u[0])}:OMON"><span class="tk">${esc(disp(u[0]))}</span><span class="${/C$/.test(u[1]) ? "up" : "down"}">${esc(u[1].replace(/C$/, " call").replace(/P$/, " put"))}</span><span class="r">${tmBig(u[2])}</span><span class="r dim">${tmBig(u[3])}</span><span class="r">$${tmBig(u[5])}</span></button>`).join("");
     body += `<p class="fine2">Buying and selling are estimates: nobody outside the exchanges knows who started each trade, so each 5-minute bar's volume is split by where it closed in its range. Options: Alpaca's free feed, 15 minutes delayed, without buy/sell side. The gauge describes the mood; it doesn't forecast. ${esc(tmUpd(F))}.</p>`;
     return tmPanel("p-mood", "MOOD", "Market mood &amp; flow", ["#vix", "VIX page"], body, `<small>${esc(tmUpd(F))}</small>`);
+  };
+
+  // OUT: today's outlook. One plain-words read of the next US session, built from everything the site
+  // collects (docs/data/terminal/outlook.json, engine/outlook.py: hourly from the European morning, and
+  // every ~10 minutes in US hours). Rule-based, every sentence backed by a number shown next to it.
+  function tmLoadOut() {
+    if (S.ol !== undefined && Date.now() - (S.olAt || 0) < 5 * 6e4) return S.ol;
+    const first = S.ol === undefined; if (first) S.ol = null;
+    S.olAt = Date.now();
+    opt("data/terminal/outlook.json").then(d => { if (!d && !first) return; const ch = first || d?.generated_at !== S.ol?.generated_at; S.ol = d || false; if (ch) tmRefresh("out"); });
+    return S.ol;
+  }
+  TM_R.out = () => {
+    const O = tmLoadOut();
+    if (!O) return tmPanel("p-out", "OUT", "Today&rsquo;s outlook", null, `<p class="empty2">${O === false ? "Not built yet: it's written every hour from the European morning, and every 10 minutes while the US market is open." : "Loading…"}</p>`);
+    const LEAN = { up: "Leaning higher", down: "Leaning lower", flat: "No clear lean" }, CH = { wild: "Jumpy", event: "Data day", calm: "Calm", normal: "Normal" };
+    const PH = { pre: "before the open", live: "market open", post: "after the close" };
+    const fv = d => d.value == null ? "–" : d.fmt === "pctn" ? `${d.value > 0 ? "+" : d.value < 0 ? "−" : ""}${Math.abs(d.value).toFixed(2)}%` : d.fmt === "pct" ? tmPct(d.value, 2) : d.fmt === "bp" ? `<span class="${d.value > 0 ? "down" : d.value < 0 ? "up" : ""}">${d.value > 0 ? "+" : d.value < 0 ? "−" : ""}${Math.abs(d.value)}bp</span>`
+      : d.fmt === "pctv" ? Math.round(d.value) + "%" : d.fmt === "of100" ? d.value + "<small class='dim'>/100</small>" : d.fmt === "num" ? tmNum(d.value, d.value < 5 ? 2 : 1) : esc(String(d.value));
+    const ar = e => e > 0 ? `<span class="ar up" aria-label="helps">▲</span>` : e < 0 ? `<span class="ar down" aria-label="weighs">▼</span>` : `<span class="ar dim" aria-label="neutral">·</span>`;
+    const R = O.range, B = O.base, K = O.record || {};
+    let left = `<div class="olh l-${esc(O.lean)}"><h3>${esc(O.headline)}</h3><div class="olchips"><span>Lean <b>${LEAN[O.lean] || "–"}</b></span><span>Day <b>${CH[O.character] || "–"}</b></span><span>Confidence <b>${esc(O.confidence || "low")}</b></span>${R ? `<span>Typical move <b>±${tmNum(R.pct, 1)}%</b></span>` : ""}</div>
+      <ul class="oltxt">${(O.text || []).map(t => `<li>${esc(t)}</li>`).join("")}</ul></div>`;
+    if (O.scenarios?.length) left += `<p class="sub2">What would change the picture</p>` + O.scenarios.map(x => `<p class="olsc"><b class="${x.side > 0 ? "up" : x.side < 0 ? "down" : ""}">${x.side > 0 ? "▲" : x.side < 0 ? "▼" : "↔"}</b> ${esc(x.text)}</p>`).join("");
+    if (O.tips?.length) left += `<p class="sub2">How to use it today</p>` + O.tips.map(t => `<p class="olsc">· ${esc(t)}</p>`).join("");
+    let right = `<p class="sub2">What's moving it <span style="text-transform:none;letter-spacing:0">· ▲ helps, ▼ weighs · hover for why</span></p>` + (O.drivers || []).map(d => `<div class="tr oldr" title="${esc(d.note)}"><span>${esc(d.name)}${["fut", "eu", "asia"].includes(d.k) ? `<small>${esc(d.note)}</small>` : ""}</span><span class="r">${fv(d)}</span>${ar(d.effect)}</div>`).join("");
+    if (R || O.levels?.length) {
+      right += `<p class="sub2">Key levels${O.levels_from ? ` · options of ${esc(fmtDate(O.levels_from.slice(0, 10), { day: "numeric", month: "short" }))}` : ""}</p>`;
+      if (R) right += `<div class="tr ollv"><span>S&amp;P 500 expected range <small class="dim">(${esc(R.vix_used)} ${tmNum(R.iv, 1)})</small></span><span class="r">${tmNum(R.lo, 0)}</span><span class="r">${tmNum(R.hi, 0)}</span></div>`;
+      if (O.prev) right += `<div class="tr ollv"><span>S&amp;P 500 last session low / high</span><span class="r">${tmNum(O.prev.low, 0)}</span><span class="r">${tmNum(O.prev.high, 0)}</span></div>`;
+      right += (O.levels || []).map(l => `<div class="tr ollv" title="${esc(l.note)}"><span>${esc(l.name)}</span><span class="r">${tmNum(l.v, 0)}</span><span class="r">${tmPct(l.dist, 1)}</span></div>`).join("");
+      if (O.spy_now) right += `<p class="fine2" style="margin-top:4px">SPY now ≈ ${tmNum(O.spy_now, 2)}; % = distance from it.</p>`;
+    }
+    const ev = O.events || [], en = O.events_next || [], E = O.earnings || {};
+    if (ev.length || en.length || E.pre?.length || E.post?.length) {
+      right += `<p class="sub2">On the calendar</p>` + ev.map(e => `<div class="tr ollv" title="${esc(e.why || "")}"><span>${esc(e.kind)}</span><span class="r dim">${esc(e.time || "")} NY</span><span class="r dim">${e.last != null ? "prev " + e.last : ""}</span></div>`).join("")
+        + en.map(e => `<div class="tr ollv"><span>${esc(e.kind)} <small class="dim">tomorrow</small></span><span class="r dim">${esc(e.time || "")} NY</span><span></span></div>`).join("");
+      const eb = (l, a) => a?.length ? `<p class="olsc" style="margin:6px 0 2px">${l}</p><div class="olpm">${a.map(x => `<button type="button" data-tmsel="${esc(x.t)}" title="${esc(x.name || "")}${x.eps != null ? " · EPS est. " + x.eps : ""}">${esc(x.t)}</button>`).join("")}</div>` : "";
+      right += eb("Earnings before the open", E.pre) + eb("Earnings after the close", E.post);
+    }
+    if (O.premarket?.length) right += `<p class="sub2">Biggest stocks pre-market</p><div class="olpm">${O.premarket.map(x => `<button type="button" data-tmsel="${esc(x.t)}">${esc(disp(x.t))} ${tmPct(x.chg, 1)}</button>`).join("")}</div>`;
+    if (O.focus?.length) right += `<p class="sub2">Focus setups · ${O.focus_sides[0]} long, ${O.focus_sides[1]} short</p><div class="olpm">${O.focus.map(x => `<button type="button" data-tmsel="${esc(x.t)}" title="${esc(x.strength || "")} · score ${x.score}"><span class="${x.side > 0 ? "up" : "down"}">${x.side > 0 ? "▲" : "▼"}</span> ${esc(disp(x.t))}</button>`).join("")}</div>`;
+    let foot = "";
+    if (K.called) foot += `<p class="sub2">Track record of this box</p><p class="olsc">The lean made before the open was right on <b>${K.hit}</b> of <b>${K.called}</b> days (${K.hit_pct}%)${K.inside_n ? `; the S&amp;P 500 stayed inside the expected range on ${K.inside} of ${K.inside_n}` : ""}.</p>${K.recent?.length ? `<div class="olrec" aria-hidden="true">${K.recent.slice().reverse().map(x => `<i class="${x.lean === "flat" ? "" : (x.lean === "up") === (x.actual > 0) ? "ok" : "no"}" title="${esc(x.d)}: ${esc(x.lean)} · S&P ${x.actual > 0 ? "+" : ""}${x.actual}%"></i>`).join("")}</div>` : ""}`;
+    else foot += `<p class="fine2">Every outlook made before the open is logged and checked against the S&amp;P 500's close; the track record shows here after the first few days.</p>`;
+    foot += `<p class="fine2">${B ? `Base rate: ${esc(B.label)}, ${B.n.toLocaleString("en-US")} days since ${esc(B.since.slice(0, 4))}: next day up ${B.up}%, big move (±1.5%+) ${B.big}% of the time. ` : ""}A rule-based read of the site's own numbers (futures, world markets, rates, volatility, options gamma, breadth, calendar), not a forecast and not advice: markets often do the opposite of the lean. ${esc(tmUpd(O))}.</p>`;
+    const body = `<div class="olw"><div>${left}</div><div>${right}</div></div>${foot}`;
+    return tmPanel("p-out", "OUT", "Today&rsquo;s outlook", ["#calendar", "Calendar"], body, `<small>${esc(O.day || "")} · ${esc(PH[O.phase] || "")} · ${esc(tmUpd(O))}</small>`);
   };
 
   // FOCUS: the few alerts worth a look, each with its reasons

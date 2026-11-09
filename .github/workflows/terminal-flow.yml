@@ -46,6 +46,7 @@ jobs:
             if [ "$n" = 1 ]; then python engine/terminal_flow.py; else python engine/terminal_flow.py --fast; fi
             # the S&P 500 version (docs/data/sp500/terminal/); a failure never stops the S&P 100 one
             if [ "$n" = 1 ]; then UNIVERSE=sp500 python engine/terminal_flow.py || true; else UNIVERSE=sp500 python engine/terminal_flow.py --fast || true; fi
+            python engine/outlook.py || true                 # refresh today's outlook with the new mood and Focus list
             git add docs/data/terminal
             git add docs/data/sp500/terminal 2>/dev/null || true
             if ! git diff --cached --quiet; then

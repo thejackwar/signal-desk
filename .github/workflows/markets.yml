@@ -1,14 +1,15 @@
 name: Terminal market boards
 
 # World indices, currencies, yield curves, Fed odds, futures curves and COT for the Terminal
-# (engine/markets_board.py -> docs/data/terminal/markets.json). Also runs when the script changes.
+# (engine/markets_board.py -> docs/data/terminal/markets.json), then today's outlook box
+# (engine/outlook.py -> docs/data/terminal/outlook.json). Also runs when the script changes.
 on:
   schedule:
     - cron: "22 6-21 * * 1-5"   # every hour on weekdays, European morning to US close
     - cron: "22 9 * * 0,6"      # once on weekend days
   push:
     branches: [main]
-    paths: [engine/markets_board.py, .github/workflows/markets.yml]
+    paths: [engine/markets_board.py, engine/outlook.py, .github/workflows/markets.yml]
   workflow_dispatch: {}
 
 permissions:
@@ -30,10 +31,12 @@ jobs:
           cache: pip
       - run: pip install -r requirements.txt
       - run: python engine/markets_board.py
+      # today's outlook box (engine/outlook.py): reads the boards just built plus the site's other files
+      - run: python engine/outlook.py || echo "outlook failed, keeping the old one"
       - name: Publish
         run: |
           git config user.name "signal-desk-bot"
           git config user.email "signal-desk-bot@users.noreply.github.com"
-          git add docs/data/terminal/markets.json
+          git add docs/data/terminal/markets.json docs/data/terminal/outlook.json docs/data/terminal/outlook_log.json 2>/dev/null || git add docs/data/terminal/markets.json
           git diff --cached --quiet || git commit -m "Market boards $(date -u +%FT%H:%M)"
           ok=0; for i in 1 2 3 4; do git pull --rebase && git push && { ok=1; break; }; sleep 15; done; [ $ok = 1 ]
