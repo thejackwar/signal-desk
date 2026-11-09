@@ -5,7 +5,7 @@
 // Hash: #AAPL/D. Choices are remembered on the device (localStorage "signaldesk.chart").
 import * as L from "./chart-lib.js?v=1";
 import { TFS, analyze, srLevels, segments, binanceCrypto } from "./trendlines.js?v=3";
-import { createDrawLayer, TOOLS, TOOL } from "./draw.js?v=2";
+import { createDrawLayer, TOOLS, TOOL } from "./draw.js?v=3";
 import { chartPatterns, majorLevels, tradeLevels } from "./chart-patterns.js?v=4";
 
 const LW = window.LightweightCharts;
@@ -450,6 +450,7 @@ const setDrawings = list => { try { localStorage.setItem(drawKey(), JSON.stringi
 const hintText = () => {
   const t = TOOL[S.tool];
   if (!t || t.id === "cursor") return "";
+  if (t.id === "measure") return "Measure: drag from one point to another to see the % change, price change, bars and time. Tip: Shift + click works with any tool.";
   return t.n === 1 ? `${t.name}: tap the chart.` : t.n === 3 ? `${t.name}: tap two points for the line, then a third for the width.` : `${t.name}: drag on the chart, or tap the start and then the end.`;
 };
 // TradingView-style left column: one button per group showing the last tool used from it, a small arrow opening the
@@ -459,7 +460,8 @@ const TGROUPS = [
   ["lines", "Lines", ["trend", "ray", "ext", "hline", "hray", "vline", "channel"]],
   ["fib", "Fibonacci", ["fib"]],
   ["shapes", "Shapes", ["rect", "arrow"]],
-  ["proj", "Forecasting and measurement", ["long", "short", "measure"]],
+  ["proj", "Forecasting", ["long", "short"]],
+  ["measure", "Measure", ["measure"]],
   ["vp", "Volume profile", ["frvp"]],
   ["text", "Text", ["text"]],
 ];

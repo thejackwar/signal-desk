@@ -28,7 +28,7 @@ export const TOOLS = [
   ["fib", "Fib retracement", 2, "Fibonacci", '<path d="M3 5h18M3 9h18M3 13h18M3 19h18"/><path d="M5 19 19 5" stroke-dasharray="2 2"/>'],
   ["long", "Long position", 2, "Trades", '<rect x="4" y="4" width="16" height="9" rx="1"/><path d="M4 13h16v7H4z" opacity=".55"/>'],
   ["short", "Short position", 2, "Trades", '<path d="M4 4h16v7H4z" opacity=".55"/><rect x="4" y="11" width="16" height="9" rx="1"/>'],
-  ["measure", "Measure", 2, "Trades", '<path d="M4 20 20 4"/><path d="M4 14v6h6M14 4h6v6"/>'],
+  ["measure", "Measure (% change)", 2, "Measure", '<path d="M3 16 16 3l5 5L8 21z"/><path d="M7 12l2 2M10 9l2 2M13 6l2 2"/>'],
   ["frvp", "Fixed range volume profile", 2, "Volume", '<path d="M4 3v18"/><path d="M4 6h7M4 9h11M4 12h16M4 15h9M4 18h5"/>'],
   ["text", "Text note", 1, "Notes", '<path d="M5 6V4h14v2M12 4v16M9 20h6"/>'],
 ];
@@ -67,6 +67,15 @@ export function positionStats(side, entry, target, stop) {
   const dir = side === "short" ? -1 : 1;
   const reward = (target - entry) * dir, risk = (entry - stop) * dir;
   return { reward, risk, rr: risk > 0 ? reward / risk : null, tpPct: (target / entry - 1) * 100 * dir, slPct: (stop / entry - 1) * 100 * dir };
+}
+
+// Measure tool: from point a to point b -> price change, % change, candles and time between them.
+export function measureStats(a, b, tToL) {
+  const diff = b.p - a.p, pct = a.p ? (b.p / a.p - 1) * 100 : 0;
+  const bars = Math.abs(Math.round(tToL(b.t) - tToL(a.t))), sec = Math.abs(b.t - a.t);
+  const d = Math.floor(sec / 86400), h = Math.floor((sec % 86400) / 3600), m = Math.round((sec % 3600) / 60);
+  const span = d >= 1 ? `${d}d${h ? " " + h + "h" : ""}` : h >= 1 ? `${h}h${m ? " " + m + "m" : ""}` : `${m}m`;
+  return { diff, pct, bars, span };
 }
 
 // Fixed range volume profile over candles [from..to] (inclusive, any order): buildProfile plus the
@@ -118,6 +127,7 @@ export function createDrawLayer(o) {
 
   let list = upgrade(store.get());
   let sel = null, build = null, drag = null, sig = "", raf = 0, dead = false;
+  let quick = null;   // Shift+click measure (TradingView): not saved, gone on the next click or Escape
   const vpCache = new WeakMap();   // drawing -> its profile, rebuilt only when its range or rows change
   const undo = [];
   const save = () => { store.set(list); o.onChange?.(list); };
@@ -266,10 +276,16 @@ export function createDrawLayer(o) {
       case "measure": {
         const up = b.p >= a.p, col = up ? "#4ade80" : "#f87171";
         const x = Math.min(a.x, b.x), y = Math.min(a.y, b.y), rw = Math.abs(b.x - a.x), rh = Math.abs(b.y - a.y);
-        const nb = Math.round(tToL(b.t) - tToL(a.t)), days = Math.abs(b.t - a.t) / 86400;
+        const M = measureStats(a, b, tToL);
         g += `<rect class="${sys ? "" : "hitf"}" x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${rw.toFixed(1)}" height="${rh.toFixed(1)}" fill="${col}" fill-opacity=".15" stroke="${col}" stroke-opacity=".7"/>`;
-        g += `<path d="M${a.x} ${a.y}L${b.x} ${b.y}" stroke="${col}" stroke-width="1.4" stroke-dasharray="4 3"/>`;
-        g += tag((a.x + b.x) / 2, Math.max(y + rh + 14, 14), `${fmt(b.p - a.p)} (${pct((b.p / a.p - 1) * 100)}) · ${Math.abs(nb)} bars · ${days >= 1 ? Math.round(days) + "d" : Math.round(days * 24) + "h"}`, col, "middle");
+        // TradingView style: an arrow across the time span and one along the price move, at the box's middle
+        const mx = x + rw / 2, my = y + rh / 2, ah = 6;
+        if (rh > 14) g += `<path d="M${mx.toFixed(1)} ${a.y.toFixed(1)}V${b.y.toFixed(1)}" stroke="${col}" stroke-width="1.4"/><path d="M${(mx - ah).toFixed(1)} ${(b.y + (up ? ah : -ah)).toFixed(1)}L${mx.toFixed(1)} ${b.y.toFixed(1)}L${(mx + ah).toFixed(1)} ${(b.y + (up ? ah : -ah)).toFixed(1)}" stroke="${col}" stroke-width="1.4" fill="none"/>`;
+        if (rw > 14) { const dir = b.x >= a.x ? 1 : -1; g += `<path d="M${a.x.toFixed(1)} ${my.toFixed(1)}H${b.x.toFixed(1)}" stroke="${col}" stroke-width="1.4"/><path d="M${(b.x - dir * ah).toFixed(1)} ${(my - ah).toFixed(1)}L${b.x.toFixed(1)} ${my.toFixed(1)}L${(b.x - dir * ah).toFixed(1)} ${(my + ah).toFixed(1)}" stroke="${col}" stroke-width="1.4" fill="none"/>`; }
+        const ly = up ? y - 32 : y + rh + 14;
+        const lyA = ly < 10 ? y + rh + 14 : ly > H - 30 ? y - 32 : ly;
+        g += tag(mx, lyA, `${fmt(M.diff)} (${pct(M.pct)})`, col, "middle");
+        g += tag(mx, lyA + 20, `${M.bars} bars · ${M.span}`, col, "middle", true);
         handles = [0, 1];
         break;
       }
@@ -323,7 +339,7 @@ export function createDrawLayer(o) {
     if (dead) return;
     const { w: W, h: H } = box();
     svg.setAttribute("width", host.clientWidth); svg.setAttribute("height", host.clientHeight);
-    const sysList = o.extra?.() || [];
+    const sysList = (o.extra?.() || []).concat(quick ? [quick.d] : []);
     const hidden = o.hidden?.();
     const items = hidden ? [] : list.slice();
     if (build) items.push(build.d);
@@ -462,12 +478,31 @@ export function createDrawLayer(o) {
     const d = list.find(x => x.id === g.dataset.id);
     if (d?.type === "text") { const t = prompt("Text", d.text || ""); if (t !== null) { snapshot(); d.text = t.slice(0, 80); save(); draw(); } }
   });
+  // Shift + click (or drag) anywhere on the chart: a quick measure from that point to the pointer; click again to fix
+  // it, and any later click (or Escape) clears it. Works with any tool selected, like on TradingView.
+  const qDown = e => {
+    if (e.button > 0) return;
+    if (quick?.done) { quick = null; draw(); if (!e.shiftKey) return; }
+    if (!e.shiftKey || build) return;
+    const pt = ptAt(e); if (!pt) return;
+    e.preventDefault(); e.stopPropagation();
+    if (quick && !quick.done) { quick.d.pts[1] = pt; quick.done = true; draw(); return; }
+    quick = { d: { id: "quick", type: "measure", pts: [pt, { ...pt }] }, x: e.clientX, y: e.clientY, done: false };
+    draw();
+  };
+  const qMove = e => { if (!quick || quick.done) return; const pt = ptAt(e); if (pt) { quick.d.pts[1] = pt; draw(); } };
+  const qUp = e => {   // a drag fixes the measure on release; a plain Shift+click waits for the second click
+    if (quick && !quick.done && Math.hypot(e.clientX - quick.x, e.clientY - quick.y) > 6) { const pt = ptAt(e); if (pt) quick.d.pts[1] = pt; quick.done = true; draw(); }
+  };
+  host.addEventListener("pointerdown", qDown, true);
+  host.addEventListener("pointermove", qMove, true);
+  host.addEventListener("pointerup", qUp, true);
   const onChartClick = () => { if (tool() === "cursor" && sel && !drag) { sel = null; draw(); } };
   chart.subscribeClick(onChartClick);
   const onKey = e => {
     if (e.target.closest?.("input, textarea, select, [contenteditable]")) return;
     if ((e.key === "Delete" || e.key === "Backspace") && sel) { e.preventDefault(); snapshot(); list = list.filter(x => x.id !== sel); sel = null; save(); draw(); }
-    else if (e.key === "Escape") { if (build) build = null; else if (sel) sel = null; else o.setTool?.("cursor"); draw(); }
+    else if (e.key === "Escape") { if (quick) quick = null; else if (build) build = null; else if (sel) sel = null; else o.setTool?.("cursor"); draw(); }
     else if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "z") { e.preventDefault(); api.undo(); }
   };
   document.addEventListener("keydown", onKey);
@@ -480,7 +515,7 @@ export function createDrawLayer(o) {
     undo() { if (!undo.length) return; list = JSON.parse(undo.pop()); sel = null; save(); draw(); },
     clear() { if (!list.length) return; snapshot(); list = []; sel = null; save(); draw(); },
     add(d) { snapshot(); list.push({ id: uid(), color: COLORS[0], w: 2, dash: 0, ...d }); save(); draw(); },
-    destroy() { dead = true; cancelAnimationFrame(raf); document.removeEventListener("keydown", onKey); chart.unsubscribeClick(onChartClick); svg.remove(); bar.remove(); },
+    destroy() { dead = true; cancelAnimationFrame(raf); document.removeEventListener("keydown", onKey); chart.unsubscribeClick(onChartClick); host.removeEventListener("pointerdown", qDown, true); host.removeEventListener("pointermove", qMove, true); host.removeEventListener("pointerup", qUp, true); svg.remove(); bar.remove(); },
   };
   return api;
 }

@@ -1,6 +1,6 @@
 // Drawing tools maths (docs/draw.js). Run: node tests/chart/test_draw.mjs
 import assert from "node:assert/strict";
-import { makeTimeMap, fibPrice, positionStats, upgrade, rangeProfile, TOOL } from "../../docs/draw.js";
+import { makeTimeMap, fibPrice, positionStats, upgrade, rangeProfile, measureStats, TOOL } from "../../docs/draw.js";
 
 const day = 86400, times = [0, 1, 2, 5, 6].map(d => 1.7e9 + d * day);   // a weekend gap after the third candle
 const { tToL, lToT } = makeTimeMap(times, day);
@@ -39,4 +39,12 @@ near(vp.buy.reduce((a, b) => a + b, 0), 700);   // candles 0 and 2 closed up
 assert.ok(vp.poc > 9.8 && vp.poc < 10.2, "POC where the big candle traded");
 assert.ok(vp.val <= vp.poc && vp.vah >= vp.poc);
 assert.equal(rangeProfile(bars.map(b => ({ ...b, volume: null })), 0, 2), null, "no volume -> no profile");
+// measure tool: % change, bars and time between two points
+{
+  const tm = makeTimeMap([0, 86400, 172800, 259200], 86400);
+  const m = measureStats({ t: 0, p: 100 }, { t: 259200, p: 112.5 }, tm.tToL);
+  near(m.pct, 12.5); near(m.diff, 12.5); assert.equal(m.bars, 3); assert.equal(m.span, "3d");
+  const m2 = measureStats({ t: 0, p: 200 }, { t: 5400, p: 190 }, tm.tToL);
+  near(m2.pct, -5); assert.equal(m2.span, "1h 30m");
+}
 console.log("draw.js: all good");
