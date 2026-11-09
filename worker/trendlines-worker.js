@@ -23,6 +23,14 @@
 // Stocks: Alpaca snapshots on the free IEX feed (real time, IEX trades only). Coins: Binance 24h tickers, Kraken for XMR.
 // Cached for 15 seconds.
 //
+// Volume screener (for the Terminal's VOLS panel):
+//   GET /?volscan=sp100|sp500  ->  { end, partial, rows: { TICKER: [price, prevClose, chgPct, vol, avg10, avg30, dollarAvg10, dollarAvg30, relVol, date] } }
+//   Daily SIP bars of every stock in the list; averages over finished sessions only; relVol = today's volume
+//   against the 10-day average, scaled by how much of the session has passed (so 1.0 = a normal pace). Cached 5 minutes.
+//   GET /?grid=AAPL,MSFT,...&tf=1D|5D|1M|3M|6M|YTD|1Y|5Y  ->  { tf, end, bars: { TICKER: [[t, o, h, l, c, v], ...] } }
+//   Candles for up to 30 stocks in one request (1D: 5-minute, 5D: 15-minute, 1M: 30-minute, regular hours;
+//   3M-1Y: daily; 5Y: weekly). t as in the rest of this Worker (New York wall clock as if UTC).
+//
 // Price alerts (for the Terminal): the page stores an alert, this Worker checks prices every few minutes (Cron Trigger)
 // and sends a phone notification through ntfy.sh to the viewer's own channel when the price crosses the level.
 //   POST /?px=add   {topic, sym, level, dir: "above"|"below", note}   ->  {ok, alert}
@@ -253,6 +261,8 @@ export default {
     if (url.searchParams.has("vp")) return volumeBars(url.searchParams, env, ctx);
     if (url.searchParams.has("quotes")) return quotes(url.searchParams.get("quotes"), env, ctx);
     if (url.searchParams.has("px")) return priceAlerts(request, url, env);
+    if (url.searchParams.has("volscan")) return volScan(url.searchParams.get("volscan"), env, ctx);
+    if (url.searchParams.has("grid")) return gridBars(url.searchParams, env, ctx);
     let sym = (url.searchParams.get("symbol") || "").trim().toUpperCase().replace(/\./g, "-");
     if (["SPX", "^SPX", "^GSPC"].includes(sym)) sym = "SPY";       // index: no Alpaca data
     const coin = isStock(sym) ? null : coinOf(sym);
@@ -449,6 +459,111 @@ async function volumeBars(q, env, ctx) {
 }
 
 // newest `want` candles with their USDT (quote) volume
+// ---------------------------------------------------------------- volume screener (VOLS)
+// several stocks in one Alpaca request: { "AAPL": [bars], ... } (keys with "-" as in the app)
+async function fetchMulti(syms, tf, start, end, env) {
+  const fmt = d => new Date(d).toISOString().replace(/\.\d{3}Z$/, "Z");
+  const params = new URLSearchParams({ symbols: syms.map(x => x.replace(/-/g, ".")).join(","), timeframe: tf, start: fmt(start),
+    end: fmt(end), limit: "10000", adjustment: "all", feed: "sip" });
+  const headers = { "APCA-API-KEY-ID": env.ALPACA_KEY_ID, "APCA-API-SECRET-KEY": env.ALPACA_SECRET_KEY };
+  const out = {};
+  for (let page = 0; page < 40; page++) {
+    let r;
+    for (let tries = 0; tries < 5; tries++) {
+      r = await fetch(`${ALPACA}?${params}`, { headers });
+      if (r.status !== 429) break;
+      await new Promise(ok => setTimeout(ok, 1500 * (tries + 1)));
+    }
+    if (!r.ok) throw new Error(`Alpaca ${tf}: HTTP ${r.status} ${(await r.text()).slice(0, 200)}`);
+    const js = await r.json();
+    for (const [k, v] of Object.entries(js.bars || {})) (out[k.replace(/\./g, "-")] = out[k.replace(/\./g, "-")] || []).push(...v);
+    if (!js.next_page_token) break;
+    params.set("page_token", js.next_page_token);
+  }
+  return out;
+}
+
+async function volScan(list, env, ctx) {
+  if (!env.ALPACA_KEY_ID || !env.ALPACA_SECRET_KEY) return json({ error: "The Alpaca keys are not set on the Worker." }, 500);
+  const which = list === "sp500" ? "sp500" : "sp100";
+  const cache = typeof caches !== "undefined" ? caches.default : null;
+  const key = new Request(`https://trendlines.cache/volscan/${which}`);
+  if (cache) { const hit = await cache.match(key).catch(() => null); if (hit) return hit; }
+  try {
+    const syms = [...new Set([...TICKERS, ...(which === "sp500" ? SP500 : [])])].filter(x => x !== "SPY");
+    const end = Date.now() - 16 * 60e3, start = end - 60 * DAY;
+    const chunks = []; for (let i = 0; i < syms.length; i += 100) chunks.push(syms.slice(i, i + 100));
+    const all = {};
+    for (let i = 0; i < chunks.length; i += 3) {
+      const got = await Promise.all(chunks.slice(i, i + 3).map(c => fetchMulti(c, "1Day", start, end, env)));
+      got.forEach(g => Object.assign(all, g));
+    }
+    // is the last bar today's unfinished session?
+    const nowNy = nyWall(new Date(end).toISOString()), today = new Date(nowNy * 1000).toISOString().slice(0, 10);
+    const mins = Math.floor((nowNy % 86400) / 60), open = mins >= 570 && mins < 960;
+    const pace = open ? Math.min(1, Math.max(0.04, (mins - 570) / 390)) : 1;
+    const avg = xs => xs.length ? xs.reduce((a, b) => a + b, 0) / xs.length : null;
+    const rows = {};
+    for (const [k, bars] of Object.entries(all)) {
+      if (!bars.length) continue;
+      const last = bars[bars.length - 1], d = new Date(nyWall(last.t) * 1000).toISOString().slice(0, 10);
+      const partial = open && d === today;
+      const done = partial ? bars.slice(0, -1) : bars;
+      const prev = bars.length > 1 ? bars[bars.length - 2].c : null;
+      const base = done.slice(partial ? -10 : -11, partial ? undefined : -1);   // the 10 sessions before the latest
+      const a10 = avg(done.slice(-10).map(b => b.v)), a30 = avg(done.slice(-30).map(b => b.v));
+      const d10 = avg(done.slice(-10).map(b => b.v * b.c)), d30 = avg(done.slice(-30).map(b => b.v * b.c));
+      const ref = avg(base.map(b => b.v));
+      const rel = ref ? last.v / (ref * (partial ? pace : 1)) : null;
+      rows[k] = [short(last.c), prev == null ? null : short(prev), prev ? +((last.c / prev - 1) * 100).toFixed(2) : null, last.v,
+        a10 == null ? null : Math.round(a10), a30 == null ? null : Math.round(a30), d10 == null ? null : Math.round(d10),
+        d30 == null ? null : Math.round(d30), rel == null ? null : +rel.toFixed(2), d];
+    }
+    const res = json({ list: which, end: new Date(end).toISOString(), partial: open, rows }, 200, { "Cache-Control": "max-age=300" });
+    if (cache) ctx?.waitUntil?.(cache.put(key, res.clone()));
+    return res;
+  } catch (e) {
+    return json({ error: String(e.message || e) }, 502);
+  }
+}
+
+// tf -> [Alpaca timeframe, calendar days to ask for, regular-hours only, sessions/bars to keep (0 = all)]
+const GRID_TF = { "1D": ["5Min", 7, true, 1], "5D": ["15Min", 12, true, 5], "1M": ["30Min", 38, true, 22],
+  "3M": ["1Day", 100, false, 63], "6M": ["1Day", 190, false, 126], "YTD": ["1Day", 0, false, 0], "1Y": ["1Day", 370, false, 252], "5Y": ["1Week", 1835, false, 0] };
+async function gridBars(q, env, ctx) {
+  if (!env.ALPACA_KEY_ID || !env.ALPACA_SECRET_KEY) return json({ error: "The Alpaca keys are not set on the Worker." }, 500);
+  const tf = GRID_TF[q.get("tf")] ? q.get("tf") : "5D";
+  const syms = [...new Set((q.get("grid") || "").toUpperCase().replace(/\./g, "-").split(",").map(x => x.trim()).filter(isStock))].sort().slice(0, 30);
+  if (!syms.length) return json({ error: "No S&P 500 tickers given." }, 400);
+  const cache = typeof caches !== "undefined" ? caches.default : null;
+  const key = new Request(`https://trendlines.cache/grid/${tf}/${syms.join(",")}`);
+  if (cache) { const hit = await cache.match(key).catch(() => null); if (hit) return hit; }
+  const [atf, days, rth, keep] = GRID_TF[tf];
+  try {
+    const end = Date.now() - 16 * 60e3;
+    const start = days ? end - days * DAY : Date.UTC(new Date(end).getUTCFullYear(), 0, 1) - 5 * DAY;
+    const raw = await fetchMulti(syms, atf, start, end, env);
+    const year = String(new Date(end).getUTCFullYear());
+    const bars = {};
+    for (const s of syms) {
+      let b = (raw[s] || []).map(x => [nyWall(x.t), short(x.o), short(x.h), short(x.l), short(x.c), x.v]);
+      if (rth) {
+        b = b.filter(x => { const m = Math.floor((x[0] % 86400) / 60); return m >= 570 && m < 960; });
+        const day = t => new Date(t * 1000).toISOString().slice(0, 10);
+        const ses = [...new Set(b.map(x => day(x[0])))].slice(-keep);
+        b = b.filter(x => day(x[0]) >= ses[0]);
+      } else if (tf === "YTD") b = b.filter(x => new Date(x[0] * 1000).toISOString().slice(0, 4) === year);
+      else if (keep) b = b.slice(-keep);
+      bars[s] = b;
+    }
+    const res = json({ tf, end: new Date(end).toISOString(), bars }, 200, { "Cache-Control": `max-age=${rth ? 60 : 600}` });
+    if (cache) ctx?.waitUntil?.(cache.put(key, res.clone()));
+    return res;
+  } catch (e) {
+    return json({ error: String(e.message || e) }, 502);
+  }
+}
+
 async function binanceVolume(coin, interval, want) {
   const rows = [];
   let endTime = null;

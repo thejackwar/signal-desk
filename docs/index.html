@@ -2073,6 +2073,36 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
 .tm .gc canvas { display: block; width: 100%; height: 220px; }
 .tm .gip.n1 canvas { height: 340px; }
 
+/* volume screener */
+.tm .vsbar { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; margin: 4px 0 8px; font-size: 12.5px; color: var(--muted); }
+.tm .vsbar label { display: inline-flex; align-items: center; gap: 6px; }
+.tm .vsbar select, .tm .vsbar input { font: 600 12px var(--font-code); padding: 4px 6px; }
+.tm .vsbar input { width: 70px; }
+.tm .vsn { margin-left: auto; font-family: var(--font-code); } .tm .vsn b { color: var(--fg); }
+.tm .vsseg { display: inline-flex; border: 1px solid var(--line); border-radius: 7px; overflow: hidden; }
+.tm .vsseg button, .tm .vstf button { font: 600 11.5px var(--font-code); padding: 5px 10px; color: var(--muted); }
+.tm .vsseg button[aria-pressed="true"], .tm .vstf button[aria-pressed="true"] { color: var(--on-accent); background: var(--tc); }
+.tm .vstf { display: flex; flex-wrap: wrap; align-items: center; gap: 3px; margin: 0 0 10px; }
+.tm .vstf button { border: 1px solid var(--line); border-radius: 6px; }
+.tm .vstf .dim { margin-left: 8px; font-size: 11.5px; }
+.tm .vsgrid { display: grid; gap: 10px; grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr)); }
+.tm .vsc { border: 1px solid var(--line); border-radius: 9px; min-width: 0; display: flex; flex-direction: column; background: var(--bg); }
+.tm .vsh { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; grid-template-areas: "tk nm px" "tk nm rg"; align-items: center; column-gap: 8px; padding: 8px 10px 4px; text-align: left; color: var(--fg); width: 100%; }
+.tm .vsh:hover .tk, .tm .vsh:focus-visible .tk { background: var(--tc); color: var(--on-accent); }
+.tm .vsh .tk { grid-area: tk; font: 700 12px var(--font-code); border: 1px solid var(--line); border-radius: 5px; padding: 3px 6px; }
+.tm .vsh .nm { grid-area: nm; font-size: 12.5px; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.tm .vsh .px { grid-area: px; font: 600 12.5px var(--font-code); text-align: right; }
+.tm .vsh .rg { grid-area: rg; font: 500 11.5px var(--font-code); text-align: right; }
+.tm .vsc canvas { display: block; width: 100%; height: 200px; }
+.tm .vsf { display: flex; flex-wrap: wrap; gap: 2px 12px; padding: 4px 10px 8px; font: 500 11px var(--font-code); color: var(--muted); }
+.tm .vsf b { color: var(--fg); font-weight: 600; } .tm .vsf .hot b, .tm .vst .hot { color: var(--amber); }
+.tm .vsmore { display: block; margin: 12px auto 4px; }
+.tm .vstw { overflow-x: auto; } .tm .vst { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+.tm .vst th, .tm .vst td { padding: 6px 8px; border-bottom: 1px solid var(--line); white-space: nowrap; } .tm .vst .r { text-align: right; font-family: var(--font-code); }
+.tm .vst th { font: 600 11px var(--font-body); color: var(--muted); text-transform: uppercase; letter-spacing: .04em; } .tm .vst th button { font: inherit; color: inherit; text-transform: inherit; }
+.tm .vst th button[aria-pressed="true"] { color: var(--tc); } .tm .vst tr[data-tmsel] { cursor: pointer; } .tm .vst tr[data-tmsel]:hover td { background: var(--hover); }
+.tm .vst td:first-child { max-width: 260px; overflow: hidden; text-overflow: ellipsis; }
+
 /* price alerts */
 .tm .pxf { display: flex; flex-wrap: wrap; gap: 5px; margin: 4px 0; } .tm .pxf input[name=sym] { width: 78px; text-transform: uppercase; font-family: var(--font-code); } .tm .pxf input[name=level] { width: 96px; font-family: var(--font-code); } .tm .pxf input[name=note] { flex: 1 1 120px; }
 .tm .code2 { display: flex; align-items: center; gap: 6px; background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 6px 8px; }
@@ -7419,13 +7449,14 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
     live: ["LIVE", "Live paper trades"], news: ["NEWS", "Headlines"], cal: ["CAL", "Calendar"], gc: ["GC", "Rates &amp; Fed"], eqs: ["EQS", "Screener"],
     ctm: ["CTM", "Futures &amp; positioning"], gip: ["GIP", "Multi-chart"], grd: ["GRD", "Strategy grades"], brd: ["BRD", "Breadth &amp; movers"],
     port: ["PORT", "Practice portfolio"], pxa: ["PXA", "Price alerts"], pat: ["PAT", "BTC chart patterns"], lpat: ["LPAT", "Live chart patterns"],
+    vols: ["VOLS", "Volume screener"],
   };
-  const TM_ORDER = Object.keys(TM_P), TM_WIDE = ["trd", "eqs", "gip", "mood", "focus", "trk", "pat", "lpat"];
+  const TM_ORDER = Object.keys(TM_P), TM_WIDE = ["trd", "eqs", "gip", "mood", "focus", "trk", "pat", "lpat", "vols"];
   // workspaces: the Terminal shows one group of panels at a time, so things are easy to find
   // Desk: the one-screen view (chart you can draw on + the signal explained, mood, signals, news, world markets)
   const TM_WS = { desk: ["trd", "mood", "focus", "alrt", "news", "live", "wei", "cal"], market: ["mood", "brd", "news", "cal", "wei", "gc", "ctm"], ticker: ["trd", "mon", "sec"],
-    signals: ["trd", "focus", "trk", "tdt", "alrt", "live", "grd", "pxa"], tools: ["eqs", "most", "gip", "port"], patterns: ["trd", "pat"], scanner: ["trd", "lpat"] };
-  const TM_WSL = [["desk", "Desk", "Chart, signals, mood and news on one screen"], ["market", "Market", "Mood, flow, breadth, news"], ["ticker", "Ticker", "Everything on one stock"], ["signals", "Signals", "Focus alerts, live trades"], ["scanner", "Live patterns", "Chart patterns forming now on every stock"], ["tools", "Tools", "Screener, charts, portfolio"], ["patterns", "Patterns", "Every BTC chart pattern since 2021, on the chart"], ["all", "All", "Every panel"]];
+    signals: ["trd", "focus", "trk", "tdt", "alrt", "live", "grd", "pxa"], tools: ["eqs", "most", "gip", "port"], patterns: ["trd", "pat"], scanner: ["trd", "lpat"], volume: ["vols", "trd"] };
+  const TM_WSL = [["desk", "Desk", "Chart, signals, mood and news on one screen"], ["market", "Market", "Mood, flow, breadth, news"], ["ticker", "Ticker", "Everything on one stock"], ["signals", "Signals", "Focus alerts, live trades"], ["scanner", "Live patterns", "Chart patterns forming now on every stock"], ["volume", "Volume", "The most-traded stocks as a grid of charts"], ["tools", "Tools", "Screener, charts, portfolio"], ["patterns", "Patterns", "Every BTC chart pattern since 2021, on the chart"], ["all", "All", "Every panel"]];
   const tmWs = () => {
     if (!pref("tmWsV3", 0)) { setPref("tmWsV3", 1); setPref("tmWs", "desk"); }   // the Desk is the new start, once for everyone
     const w = pref("tmWs", "desk"); return w === "all" || TM_WS[w] ? w : "desk";
@@ -7433,7 +7464,7 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
   const tmWsOf = id => Object.keys(TM_WS).find(k => TM_WS[k].includes(id)) || "all";
   // codes that open a panel (and the tab inside it)
   const TM_JUMP = { TRD: ["trd"], CHART: ["trd"], DESK: ["trd"], MON: ["mon"], WL: ["mon"], WEI: ["wei", "idx"], FUT: ["wei", "fut"], FX: ["wei", "fx"], VOL: ["wei", "vol"], GC: ["gc", "curve"], WIRP: ["gc", "fed"],
-    ECB: ["gc", "fed"], EU: ["gc", "eu"], CTM: ["ctm", "curve"], COT: ["ctm", "cot"], MOST: ["most"], EQS: ["eqs"], GIP: ["gip"], PORT: ["port"], PXA: ["pxa"], GRD: ["grd"], BRD: ["brd"], MOOD: ["mood"], FOCUS: ["focus"], TRK: ["trk"], TDT: ["tdt"], TOPDOWN: ["tdt"], FOC: ["focus"], PAT: ["pat"], PATTERNS: ["pat"], LPAT: ["lpat"], SCAN: ["lpat"], LIVEPAT: ["lpat"] };
+    ECB: ["gc", "fed"], EU: ["gc", "eu"], CTM: ["ctm", "curve"], COT: ["ctm", "cot"], MOST: ["most"], EQS: ["eqs"], GIP: ["gip"], PORT: ["port"], PXA: ["pxa"], GRD: ["grd"], BRD: ["brd"], MOOD: ["mood"], FOCUS: ["focus"], TRK: ["trk"], TDT: ["tdt"], TOPDOWN: ["tdt"], FOC: ["focus"], PAT: ["pat"], PATTERNS: ["pat"], LPAT: ["lpat"], SCAN: ["lpat"], LIVEPAT: ["lpat"], VOLS: ["vols"], VOLUME: ["vols"], HVOL: ["vols"] };
   // tabs of the security panel (company data: stocks only)
   const TM_SEC = [["DES", "Overview"], ["FLOW", "Buy / sell flow"], ["OMON", "Options"], ["CN", "News"], ["SIG", "Signals"], ["FA", "Financials"], ["ANR", "Analysts"], ["EE", "Estimates"], ["RV", "Comparables"], ["HDS", "Holders"], ["DVD", "Dividends"]];
   // ticker + code, e.g. "NVDA TL"
@@ -7475,9 +7506,10 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
     if (L0.wide && !L0.v3) wide = [...new Set([...wide, "trd"])];
     if (L0.wide && !L0.v4) wide = [...new Set([...wide, "pat"])];
     if (L0.wide && !L0.v5) wide = [...new Set([...wide, "lpat"])];
+    if (L0.wide && !L0.v6) wide = [...new Set([...wide, "vols"])];
     return { order, hidden: (L0.hidden || []).filter(id => TM_P[id]), wide };
   }
-  const tmSetLayout = L0 => setPref("tmLayout", { ...L0, v2: true, v3: true, v4: true, v5: true });
+  const tmSetLayout = L0 => setPref("tmLayout", { ...L0, v2: true, v3: true, v4: true, v5: true, v6: true });
   const tmPanel = (cls, code, title, go, body, extra = "") => {
     const id = cls.replace(/^p-/, ""), L0 = tmLayout(), ed = S.tmEdit;
     const ctl = ed ? `<span class="pctl"><button type="button" data-tmmove="${id}:-1" aria-label="Move earlier">◀</button><button type="button" data-tmmove="${id}:1" aria-label="Move later">▶</button><button type="button" data-tmwide="${id}" aria-pressed="${L0.wide.includes(id)}" aria-label="Full width">⤢</button><button type="button" data-tmhide="${id}" aria-label="Hide">✕</button></span>` : "";
@@ -7492,6 +7524,7 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
     el.outerHTML = TM_R[id]();
     const n = document.querySelector(`.tm [data-p="${id}"] .pnb`); if (n) n.scrollTop = top;
     if (id === "gip") tmGipDraw();
+    if (id === "vols") vsAfter();
   }
   function tmOpen(id, tab) {
     const L0 = tmLayout(), ws = tmWs();
@@ -8698,6 +8731,134 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
     });
   }
 
+  // ------------------------------------------------ volume screener (VOLS)
+  // The most-traded stocks of the list, as a grid of candle charts (or a table), from the data Worker:
+  // ?volscan= for every stock's volume averages (daily SIP bars), ?grid= for the candles of one page of charts.
+  const VS_TF = [["1D", "1D"], ["5D", "5D"], ["1M", "1M"], ["3M", "3M"], ["6M", "6M"], ["YTD", "YTD"], ["1Y", "1Y"], ["5Y", "5Y"]];
+  const VS_SORT = [["avg", "Average volume"], ["vol", "Today's volume"], ["rel", "Relative volume"], ["usd", "Average $ volume"], ["chg", "Change today"]];
+  const VS_PAGE = 24;
+  const vsF = () => ({ len: pref("vsLen", "10"), min: pref("vsMin", 10), unit: pref("vsUnit", "sh"), sort: pref("vsSort", "avg"), view: pref("vsView", "charts"), tf: pref("vsTf", "5D") });
+  async function vsLoad(force) {
+    const u = uni();
+    if (!force && S.vs?.u === u && (S.vs.loading || Date.now() - S.vs.at < 5 * 6e4)) return;
+    S.vs = { ...(S.vs?.u === u ? S.vs : {}), u, loading: true, at: Date.now() };
+    try {
+      const r = await fetch(`${trendApi()}/?volscan=${u}`), d = await r.json();
+      if (!r.ok || d.error) throw new Error(d.error || r.status);
+      S.vs = { u, rows: d.rows, end: d.end, partial: d.partial, at: Date.now() };
+    } catch (e) { S.vs = { u, err: String(e.message || e), at: Date.now() }; }
+    if (S.vs.u === uni()) tmRefresh("vols");
+  }
+  function vsList() {
+    const F = vsF(), R = S.vs?.rows || {}, mn = (+F.min || 0) * 1e6;
+    const val = (x, k) => ({ avg: F.unit === "usd" ? (F.len === "30" ? x[7] : x[6]) : (F.len === "30" ? x[5] : x[4]), vol: x[3], rel: x[8], usd: F.len === "30" ? x[7] : x[6], chg: x[2] }[k]);
+    const all = (S.stocks?.stocks || []).map(r => [r.ticker, R[r.ticker]]).filter(([, x]) => x);
+    const pass = all.filter(([, x]) => (val(x, "avg") ?? 0) >= mn);
+    pass.sort((a, b) => (val(b[1], F.sort) ?? -1e18) - (val(a[1], F.sort) ?? -1e18));
+    return { pass, total: all.length };
+  }
+  function vsResults() {
+    const F = vsF();
+    if (!S.vs || S.vs.loading && !S.vs.rows) return `<p class="empty2">Loading volume for every stock…</p>`;
+    if (S.vs.err && !S.vs.rows) return `<p class="empty2">Couldn't load volume data (${esc(S.vs.err)}). <button type="button" class="b" data-vsretry>Try again</button></p>`;
+    const { pass } = vsList();
+    if (!pass.length) return `<p class="empty2">No stock trades that much. Lower the minimum.</p>`;
+    const avgK = F.len === "30" ? 5 : 4, usdK = F.len === "30" ? 7 : 6, lbl = F.len + "D";
+    if (F.view === "table") {
+      const th = (k, l, cls = "") => `<th class="${cls}">${k ? `<button type="button" data-vssort="${k}" aria-pressed="${F.sort === k}">${l}${F.sort === k ? " ▾" : ""}</button>` : l}</th>`;
+      return `<div class="vstw"><table class="vst"><thead><tr>${th("", "Stock")}${th("", "Price", "r")}${th("chg", "Chg", "r")}${th("vol", "Volume", "r")}${th("avg", "Avg vol " + lbl, "r")}${th("rel", "Rel vol", "r")}${th("usd", "Avg $ vol " + lbl, "r")}${th("", "1 month", "r")}</tr></thead><tbody>
+        ${pass.map(([t, x]) => { const s = S.stockBy[t] || {}; return `<tr data-tmsel="${esc(t)}"><td><b>${esc(sym(t))}</b> <span class="dim">${esc(s.name || "")}</span></td><td class="r" data-lp="${esc(t)}">${money(x[0])}</td><td class="r" data-lc="${esc(t)}">${tmPct(x[2], 2)}</td><td class="r">${tmBig(x[3])}</td><td class="r">${tmBig(x[avgK])}</td><td class="r ${x[8] >= 1.5 ? "hot" : ""}">${x[8] == null ? "–" : x[8].toFixed(2) + "×"}</td><td class="r">$${tmBig(x[usdK])}</td><td class="r">${tmSpark(s.spark)}</td></tr>`; }).join("")}</tbody></table></div>`;
+    }
+    const n = Math.min(pass.length, S.vsN || VS_PAGE);
+    return `<div class="vsgrid">${pass.slice(0, n).map(([t, x]) => { const s = S.stockBy[t] || {}; return `<article class="vsc">
+        <button type="button" class="vsh" data-tmsel="${esc(t)}" title="Open ${esc(sym(t))} in the Terminal chart"><span class="tk">${esc(sym(t))}</span><span class="nm">${esc(s.name || "")}</span><span class="px" data-lp="${esc(t)}">${money(x[0])}</span><span class="rg" data-vsr="${esc(t)}"></span></button>
+        <canvas data-vscv="${esc(t)}" aria-label="${esc(sym(t))} ${esc(F.tf)} candle chart"></canvas>
+        <div class="vsf"><span>Avg ${lbl} <b>${tmBig(x[avgK])}</b></span><span>Today <b>${tmBig(x[3])}</b></span><span class="${x[8] >= 1.5 ? "hot" : ""}">Rel <b>${x[8] == null ? "–" : x[8].toFixed(2) + "×"}</b></span><span>$ <b>${tmBig(x[usdK])}</b></span></div></article>`; }).join("")}</div>
+      ${pass.length > n ? `<button type="button" class="b vsmore" data-vsmore>Show ${Math.min(VS_PAGE, pass.length - n)} more (${pass.length - n} left)</button>` : ""}`;
+  }
+  TM_R.vols = () => {
+    if (S.market !== "stocks") return tmPanel("p-vols", "VOLS", "Volume screener", null, `<p class="empty2">The volume screener covers stocks. Switch to Stocks to use it.</p>`);
+    vsLoad();
+    const F = vsF(), L1 = S.vs?.rows ? vsList() : null;
+    const opt = (k, list, cur) => list.map(([v, l]) => `<option value="${v}"${v === cur ? " selected" : ""}>${l}</option>`).join("");
+    const body = `<div class="vsbar">
+        <label>Avg volume <select data-vsset="len" aria-label="Average over">${opt("len", [["10", "10 days"], ["30", "30 days"]], F.len)}</select></label>
+        <label>above <input id="vsmin" type="number" min="0" step="1" inputmode="decimal" value="${esc(F.min)}" data-vsmin aria-label="Minimum average volume"></label>
+        <select data-vsset="unit" aria-label="Unit">${opt("unit", [["sh", "M shares"], ["usd", "$M traded"]], F.unit)}</select>
+        <label>Sort <select data-vsset="sort" aria-label="Sort by">${opt("sort", VS_SORT, F.sort)}</select></label>
+        <span class="vsn" id="vsn">${L1 ? `<b>${L1.pass.length}</b> of ${L1.total} ${UL()}` : ""}</span>
+        <span class="vsseg" role="group" aria-label="View"><button type="button" data-vsview="charts" aria-pressed="${F.view === "charts"}">Charts</button><button type="button" data-vsview="table" aria-pressed="${F.view === "table"}">Table</button></span>
+      </div>
+      ${F.view === "charts" ? `<div class="vstf" role="group" aria-label="Chart range">${VS_TF.map(([k, l]) => `<button type="button" data-vstf="${k}" aria-pressed="${F.tf === k}">${l}</button>`).join("")}<span class="dim">${{ "1D": "5-minute candles", "5D": "15-minute candles", "1M": "30-minute candles", "5Y": "weekly candles" }[F.tf] || "daily candles"} · regular hours · data 15 min delayed</span></div>` : ""}
+      <div id="vsres">${vsResults()}</div>
+      <p class="fine2">Volume from Alpaca (all US exchanges). ${S.vs?.partial ? "Today is still trading: the averages use finished sessions only, and relative volume compares today's pace with the 10-day average (1.0× = normal)." : "Relative volume = the last session against the 10 before it."} Tap a stock to open it on the Terminal chart.</p>`;
+    return tmPanel("p-vols", "VOLS", "Volume screener", null, body, S.vs?.end ? `<small>${esc(new Date(S.vs.end).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }))}</small>` : "");
+  };
+  function vsUpdate() {   // redraw only the results (keeps focus in the minimum box)
+    const r = document.getElementById("vsres"); if (!r) return;
+    r.innerHTML = vsResults();
+    const n = document.getElementById("vsn"), L1 = S.vs?.rows ? vsList() : null;
+    if (n && L1) n.innerHTML = `<b>${L1.pass.length}</b> of ${L1.total} ${UL()}`;
+    tmLiveApply(); vsAfter();
+  }
+  async function vsAfter() {
+    const F = vsF(); if (F.view !== "charts") return;
+    const cvs = [...document.querySelectorAll(".tm canvas[data-vscv]")]; if (!cvs.length) return;
+    S.vsBars = S.vsBars || {}; const C = S.vsBars[F.tf] = S.vsBars[F.tf] || {};
+    const fresh = t => C[t] && Date.now() - C[t].at < (["1D", "5D", "1M"].includes(F.tf) ? 2 : 15) * 6e4;
+    cvs.forEach(cv => { if (fresh(cv.dataset.vscv)) vsDraw(cv, C[cv.dataset.vscv].b, F.tf); });
+    const need = cvs.map(cv => cv.dataset.vscv).filter(t => !fresh(t));
+    for (let i = 0; i < need.length; i += 24) {
+      const part = need.slice(i, i + 24);
+      try {
+        const r = await fetch(`${trendApi()}/?grid=${encodeURIComponent(part.join(","))}&tf=${F.tf}`), d = await r.json();
+        if (!r.ok || d.error) throw new Error(d.error || r.status);
+        for (const t of part) C[t] = { b: d.bars[t] || [], at: Date.now() };
+      } catch { for (const t of part) C[t] = { b: null, at: 0 }; }
+      if (vsF().tf !== F.tf) return;
+      part.forEach(t => document.querySelectorAll(`.tm canvas[data-vscv="${CSS.escape(t)}"]`).forEach(cv => vsDraw(cv, C[t].b, F.tf)));
+    }
+  }
+  function vsDraw(cv, bars, tf) {
+    const box = cv.getBoundingClientRect(); if (!box.width) return;
+    const dpr = devicePixelRatio || 1, W = box.width, H = box.height;
+    cv.width = W * dpr; cv.height = H * dpr;
+    const g = cv.getContext("2d"); g.scale(dpr, dpr); g.clearRect(0, 0, W, H);
+    const cs = getComputedStyle(document.documentElement), col = n => cs.getPropertyValue(n).trim();
+    const up = col("--bull"), dn = col("--bear"), ln = col("--line"), mu = col("--faint") || col("--muted"), ac = col("--amber"), onA = col("--on-accent") || "#000";
+    g.font = "10px ui-monospace, SFMono-Regular, Menlo, monospace";
+    const rg = document.querySelector(`.tm [data-vsr="${CSS.escape(cv.dataset.vscv)}"]`);
+    if (!bars || !bars.length) { g.fillStyle = mu; g.fillText(bars ? "No candles for this range" : "Chart couldn't load", 8, 18); if (rg) rg.innerHTML = ""; return; }
+    const B = bars.length > 400 ? bars.slice(-400) : bars, n = B.length;
+    const pr = 44, bot = 16, vH = (H - bot) * .2, pH = H - bot - vH - 6;
+    let lo = Infinity, hi = -Infinity, vm = 0; for (const b of B) { lo = Math.min(lo, b[3]); hi = Math.max(hi, b[2]); vm = Math.max(vm, b[5] || 0); }
+    const pad = (hi - lo) * .06 || hi * .01 || 1; lo -= pad; hi += pad;
+    const cw = (W - pr) / n, y = v => 4 + (hi - v) / (hi - lo) * (pH - 4);
+    g.strokeStyle = ln; g.lineWidth = 1; g.fillStyle = mu;
+    for (let k = 0; k <= 3; k++) { const v = lo + (hi - lo) * k / 3, yy = Math.round(y(v)) + .5; g.beginPath(); g.moveTo(0, yy); g.lineTo(W - pr, yy); g.stroke(); g.fillText(v >= 1000 ? v.toFixed(0) : v.toPrecision(4), W - pr + 4, yy + 3); }
+    // time labels: day starts for intraday, months / years for daily and weekly
+    const day = t => new Date(t * 1000).toISOString().slice(0, 10), intra = ["1D", "5D", "1M"].includes(tf);
+    const mark = []; B.forEach((b, i) => { const d = day(b[0]), p = i ? day(B[i - 1][0]) : null;
+      if (tf === "1D") { const m = new Date(b[0] * 1000).getUTCMinutes(), h = new Date(b[0] * 1000).getUTCHours(); if (m === 0 && h % 2 === 0) mark.push([i, `${h}:00`]); }
+      else if (intra) { if (d !== p) mark.push([i, new Date(b[0] * 1000).toLocaleDateString("en-GB", { day: "numeric", month: "short", timeZone: "UTC" })]); }
+      else if (tf === "5Y") { if (d.slice(0, 4) !== p?.slice(0, 4)) mark.push([i, d.slice(0, 4)]); }
+      else if (d.slice(0, 7) !== p?.slice(0, 7)) mark.push([i, new Date(b[0] * 1000).toLocaleDateString("en-GB", { month: "short", timeZone: "UTC" })]); });
+    const every = Math.max(1, Math.ceil(mark.length / Math.max(2, Math.floor((W - pr) / 70))));
+    g.textAlign = "center";
+    mark.forEach(([i, l], k) => { if (k % every) return; const x = Math.round(i * cw) + .5; g.strokeStyle = ln; g.globalAlpha = .55; g.beginPath(); g.moveTo(x, 0); g.lineTo(x, H - bot); g.stroke(); g.globalAlpha = 1; g.fillStyle = mu; if (x > 14 && x < W - pr - 14) g.fillText(l, x, H - 4); });
+    g.textAlign = "left";
+    const vb = H - bot;
+    B.forEach((b, i) => { const x = i * cw + cw / 2, c = b[4] >= b[1] ? up : dn;
+      if (vm) { g.globalAlpha = .35; g.fillStyle = c; const h = (b[5] || 0) / vm * vH; g.fillRect(x - Math.max(.5, cw * .35), vb - h, Math.max(1, cw * .7), h); g.globalAlpha = 1; }
+      g.strokeStyle = g.fillStyle = c;
+      if (cw >= 2.2) { g.beginPath(); g.moveTo(Math.round(x) + .5, y(b[2])); g.lineTo(Math.round(x) + .5, y(b[3])); g.stroke();
+        g.fillRect(x - Math.max(.6, cw * .33), y(Math.max(b[1], b[4])), Math.max(1, cw * .66), Math.max(1, Math.abs(y(b[1]) - y(b[4])))); }
+      else g.fillRect(Math.round(x), y(b[2]), 1, Math.max(1, y(b[3]) - y(b[2]))); });
+    const last = B[n - 1][4], first = B[0][1], ch = (last / first - 1) * 100;
+    g.fillStyle = ch >= 0 ? up : dn; g.fillRect(W - pr, y(last) - 7, pr, 14); g.fillStyle = onA; g.fillText(last >= 1000 ? last.toFixed(0) : last.toPrecision(5), W - pr + 3, y(last) + 3);
+    if (rg) rg.innerHTML = `${tmPct(ch, 2)} <span class="dim">${esc(tf)}</span>`;
+  }
+
   // ------------------------------------------------ practice portfolio (PORT)
   TM_R.port = () => {
     const P = prLoad();
@@ -8803,6 +8964,7 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
       if (WS !== "ticker" && WS !== "all" && WS !== "desk" && location.hash !== "#terminal") history.replaceState(null, "", "#terminal");
       if (shown.includes("sec") && (S.market !== "stocks" || tmTab("sec", "DES") === "DES")) tmSecAfter(t);
       if (shown.includes("gip")) tmGipDraw();
+      if (shown.includes("vols")) vsAfter();
       tmLoadFlow();
       tmLiveApply(); tmLiveLoad();
       clearInterval(S.tmTimer);
@@ -8903,18 +9065,25 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
     if ((x = D("[data-tmpatmore]"))) { S.tmPatN = (S.tmPatN || 120) + 200; tmRefresh("pat"); return true; }
     if ((x = D("[data-tmsig]"))) { e.preventDefault(); tmOpenSig(x.dataset.tmsig); return true; }
     if ((x = D('a[href^="#alert-"]:not([data-tmnosig])'))) { const a = S.feed?.alerts?.[+x.getAttribute("href").slice(7)]; if (a) { e.preventDefault(); tmOpenSig(a.id); return true; } }
+    if ((x = D("[data-vsview]"))) { setPref("vsView", x.dataset.vsview); tmRefresh("vols"); return true; }
+    if ((x = D("[data-vstf]"))) { setPref("vsTf", x.dataset.vstf); tmRefresh("vols"); return true; }
+    if ((x = D("[data-vssort]"))) { setPref("vsSort", x.dataset.vssort); tmRefresh("vols"); return true; }
+    if ((x = D("[data-vsmore]"))) { S.vsN = (S.vsN || VS_PAGE) + VS_PAGE; vsUpdate(); return true; }
+    if ((x = D("[data-vsretry]"))) { vsLoad(true); return true; }
     if ((x = D("[data-tmsel]")) && !D("input, select")) { e.preventDefault(); tmSelect(x.dataset.tmsel, true); return true; }
     return false;
   }
   // inputs inside the Terminal (one listener for every panel, so panels can redraw freely)
   document.addEventListener("input", e => {
     const el = e.target; if (!el.closest?.(".tm")) return;
+    if (el.dataset.vsmin != null) { setPref("vsMin", el.value === "" ? 0 : +el.value); S.vsN = VS_PAGE; clearTimeout(S.vsT); S.vsT = setTimeout(vsUpdate, 300); return; }
     if (el.id === "tmfilter") { S.tmQ = el.value; const q = el.value.toLowerCase(); document.querySelectorAll(".tm .mon[data-q]").forEach(b => b.hidden = !!q && !b.dataset.q.includes(q)); return; }
     if (el.dataset.tmscr && el.dataset.tmscr.endsWith(":v")) { const c = eqConds(), i = +el.dataset.tmscr.split(":")[0]; if (c[i]) { c[i][2] = el.value === "" ? 0 : +el.value; eqSave(c); clearTimeout(S.eqT); S.eqT = setTimeout(() => { const r = document.getElementById("tmscrres"); if (r) { r.innerHTML = eqResults(); tmLiveApply(); } }, 200); } }
   });
   document.addEventListener("change", e => {
     const el = e.target; if (!el.closest?.(".tm")) return;
     if (el.dataset.tmscr) { const [i, k] = el.dataset.tmscr.split(":"), c = eqConds(); if (!c[+i]) return; if (k === "f") c[+i][0] = el.value; if (k === "op") c[+i][1] = el.value; if (k === "v") return; eqSave(c); tmRefresh("eqs"); return; }
+    if (el.dataset.vsset) { setPref({ len: "vsLen", unit: "vsUnit", sort: "vsSort" }[el.dataset.vsset], el.value); S.vsN = VS_PAGE; vsUpdate(); return; }
     if (el.dataset.tmpatsel) { tmPatSet({ [el.dataset.tmpatsel]: el.value }); return; }
     if (el.dataset.tmlpsel) { S.tmLpN = 150; tmLpSet({ [el.dataset.tmlpsel]: el.value }); return; }
     if (el.matches("[data-tmscrsec]")) { setPref("tmScrSec", el.value); const r = document.getElementById("tmscrres"); if (r) r.innerHTML = eqResults(); return; }
@@ -8944,7 +9113,7 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
     if (e.key.length === 1 && /[a-z0-9]/i.test(e.key)) inp.focus();
   });
   document.addEventListener("visibilitychange", () => { if (!document.hidden && document.getElementById("tmcmd")) tmLiveLoad(); });
-  let tmRz; addEventListener("resize", () => { clearTimeout(tmRz); tmRz = setTimeout(() => { if (document.querySelector(".tm canvas[data-gipc]")) tmGipDraw(); }, 200); });
+  let tmRz; addEventListener("resize", () => { clearTimeout(tmRz); tmRz = setTimeout(() => { if (document.querySelector(".tm canvas[data-gipc]")) tmGipDraw(); if (document.querySelector(".tm canvas[data-vscv]")) vsAfter(); }, 200); });
 
   function route() {
     if (!location.hash) history.replaceState(null, "", "#terminal");
