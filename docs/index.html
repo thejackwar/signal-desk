@@ -8222,7 +8222,15 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
   // OUT for one ticker: the same kind of read, built in the browser from what the Terminal already has on it
   // (trend, buying/selling flow, options, max pain walls, dark pools, news mood, strategy alerts, earnings date)
   // plus the market's lean from outlook.json. Every line shows the number it comes from.
+  // headlines for the ticker outlook: refetch the scored news every 10 minutes while it's on screen
+  function tmSentFresh() {
+    if (S.market !== "stocks" || S.sentBusy || Date.now() - (S.sentAt || 0) < 10 * 6e4) return;
+    S.sentBusy = true; S.sentAt = Date.now();
+    opt(UB() + "sentiment.json").then(d => { S.sentBusy = false; if (d && d.generated_at !== S.sent?.generated_at) { S.sent = d; tmRefresh("out"); } });
+  }
   function tmTkOut(t, O) {
+    if (!S.sentAt) S.sentAt = Date.now();   // just loaded with the page
+    tmSentFresh();
     const r = S.stockBy[t] || {}, stk = S.market === "stocks";
     const F = stk ? tmLoadFlow() : null, f = F?.flow?.[t], o = F?.options?.[t], m = S.sent?.stocks?.[t];
     const g = (F?.focus?.items || []).find(x => x.t === t && (x.score || 0) >= (F.focus.min || 75));
@@ -8235,6 +8243,22 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
     const D = [];   // [name, value html, effect -1/0/1, weight, why]
     let sc = 0;
     const add = (name, val, e, w, why) => { D.push([name, val, e, why]); sc += e * w; };
+    // this stock's headlines (Google News, trusted outlets, FinBERT score per headline) + the general news feed
+    const now = Date.now(), cut = S.sent?.headline_cut ?? .35, hrs = x => (now - Date.parse(x)) / 36e5;
+    const NW = [], seen = new Set();
+    (S.sent?.items || []).filter(x => (x.about || x.syms || []).includes(t) && hrs(x.t) <= 72).forEach(x => { const k = x.title.toLowerCase().slice(0, 60); if (!seen.has(k)) { seen.add(k); NW.push({ title: x.title, url: x.url, src: x.src, t: x.t, s: x.s ?? x.f }); } });
+    (S.news?.items || []).filter(x => (x.tickers || []).includes(t) && hrs(x.time) <= 72).forEach(x => { const k = x.title.toLowerCase().slice(0, 60); if (!seen.has(k)) { seen.add(k); NW.push({ title: x.title, url: x.link, src: x.source, t: x.time, s: null }); } });
+    NW.sort((a, b) => Date.parse(b.t) - Date.parse(a.t));
+    const N24 = NW.filter(x => hrs(x.t) <= 24), sc24 = N24.filter(x => x.s != null);
+    const bear24 = sc24.filter(x => x.s <= -cut).length, bull24 = sc24.filter(x => x.s >= cut).length;
+    const usualDay = m?.n && S.sent?.window_days ? m.n / S.sent.window_days : null, burst = usualDay ? N24.length / Math.max(usualDay, 1) : null;
+    const hot = N24.length >= 3 && (burst == null || burst >= 1.5);
+    if (N24.length) {
+      const tone = sc24.length ? (bull24 - bear24) / sc24.length : 0;
+      add("News, last 24h", `${N24.length} <small class="dim">${bull24}▲ ${bear24}▼</small>${hot ? ` <span class="hot">${burst ? tmNum(burst, 1) + "x" : "busy"}</span>` : ""}`,
+        tone >= .25 ? 1 : tone <= -.25 ? -1 : 0, hot ? 2 : 1,
+        `Headlines on ${disp(t)} in the last 24 hours, each scored by FinBERT. ${hot ? "Far more news than usual: the story is likely to drive the price today." : ""}`);
+    }
     if (O?.lean) add("The market today", O.lean === "up" ? `<span class="up">Higher</span>` : O.lean === "down" ? `<span class="down">Lower</span>` : "Flat", O.lean === "up" ? 1 : O.lean === "down" ? -1 : 0, 1, "Most stocks move with the index on the day: the market box's lean.");
     if (r.vs200 != null) add("vs 200-day average", tmPct(r.vs200), r.vs200 > 0 ? 1 : -1, 1, r.vs200 > 0 ? "In a long-term uptrend: dips have tended to get bought." : "In a long-term downtrend: rallies have tended to get sold.");
     if (r.chg1m != null) add("Last month", tmPct(r.chg1m), r.chg1m >= 4 ? 1 : r.chg1m <= -4 ? -1 : 0, .5, "Short-term momentum.");
@@ -8252,16 +8276,19 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
     if (m?.mood) add("News mood", esc(m.mood.replace(/_/g, " ")), /bull/.test(m.mood) ? 1 : /bear/.test(m.mood) ? -1 : 0, .5, `FinBERT on ${m.n} recent headlines${m.rel_mood ? `; vs its usual: ${String(m.rel_mood).replace(/_/g, " ")}` : ""}.`);
     if (g) add("Focus setup", `<span class="${g.side > 0 ? "up" : "down"}">${g.side > 0 ? "▲ long" : "▼ short"} ${g.score}</span>`, g.side, 1.5, `${g.strats?.length || 1} strategies agree; scored on backtest grade, trend and flow.`);
     if (nb || ns) add("Strategy alerts, 5 days", `<span class="up">${nb}▲</span> <span class="down">${ns}▼</span>`, nb > ns ? 1 : ns > nb ? -1 : 0, .5, "New signals from the site's strategies on this stock.");
-    const lean = sc >= 2.5 ? "up" : sc <= -2.5 ? "down" : "flat";
     const pm = (O?.premarket || []).find(x => x.t === t);
+    if (pm) add("Pre-market", tmPct(pm.chg, 1), pm.chg >= 1 ? 1 : pm.chg <= -1 ? -1 : 0, Math.abs(pm.chg) >= 3 ? 2.5 : 1.5, "Where it trades before the open: the clearest hint of how it opens.");
+    const lean = sc >= 2.5 ? "up" : sc <= -2.5 ? "down" : "flat";
     const dayIv = o?.atm_iv != null ? o.atm_iv / Math.sqrt(252) : null, px = r.price;
-    const wild = (ernDays != null && ernDays <= 1) || (dayIv != null && dayIv >= 3) || (f?.rel_vol || 0) >= 2;
+    const wild = (ernDays != null && ernDays <= 1) || (dayIv != null && dayIv >= 3) || (f?.rel_vol || 0) >= 2 || hot || Math.abs(pm?.chg || 0) >= 3;
     const head = ernDays === 0 ? "Earnings today: expect a big move either way" : ernDays === 1 ? "Earnings tomorrow: positioning day"
+      : hot && (bear24 > bull24 * 1.5 || bull24 > bear24 * 1.5) ? (bear24 > bull24 ? "Bad news is driving it: leaning lower" : "Good news is driving it: leaning higher") + (lean === "flat" || (lean === "up") === (bear24 > bull24) ? ", but signals are mixed" : "")
       : { up: "Leaning higher", down: "Leaning lower", flat: "No clear lean" }[lean] + (wild ? ", with big swings likely" : lean === "flat" ? ": mixed signals" : "");
     const pos = D.filter(d => d[2] > 0).map(d => d[0]), neg = D.filter(d => d[2] < 0).map(d => d[0]);
     const txt = [];
     txt.push(`${esc(disp(t))}${r.name ? ` (${esc(r.name)})` : ""} last traded at ${money(px)}, ${r.chg1d == null ? "" : `${r.chg1d >= 0 ? "up" : "down"} ${Math.abs(r.chg1d).toFixed(1)}% on the day, `}${r.vs200 == null ? "" : `${Math.abs(r.vs200).toFixed(0)}% ${r.vs200 >= 0 ? "above" : "below"} its 200-day average`}.`);
     if (pm) txt.push(`Pre-market it's ${pm.chg >= 0 ? "up" : "down"} ${Math.abs(pm.chg).toFixed(1)}%.`);
+    if (hot) txt.push(`<b>Big news:</b> ${N24.length} headlines in the last 24 hours${burst ? ` (${tmNum(burst, 1)}x its usual)` : ""}, ${bear24} negative and ${bull24} positive. Latest: “${esc(N24[0].title)}” (${esc(N24[0].src || "")}, ${esc(tmAgo(N24[0].t))} ago). On news days the story usually matters more than the chart signals below.`);
     if (pos.length || neg.length) txt.push([pos.length ? `Helping: ${pos.slice(0, 5).join(", ")}.` : "", neg.length ? `Weighing: ${neg.slice(0, 5).join(", ")}.` : ""].filter(Boolean).join(" "));
     if (ern) txt.push(ernDays <= 1 ? `Reports earnings ${ernDays === 0 ? "today" : "tomorrow"} ${ern.time === "bmo" ? "before the open" : ern.time === "amc" ? "after the close" : ""}${ern.eps_est != null ? ` (EPS estimate ${ern.eps_est})` : ""}: the report outweighs every other signal here, and gaps of several % are normal.`
       : `Next earnings ${esc(fmtDate(ern.date, { day: "numeric", month: "short" }))} (in ${ernDays} days).`);
@@ -8289,6 +8316,10 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
     const left = `<div class="olh l-${lean}"><h3>${esc(head)}</h3><div class="olchips"><span>Lean <b>${{ up: "Leaning higher", down: "Leaning lower", flat: "No clear lean" }[lean]}</b></span><span>Day <b>${ernDays != null && ernDays <= 1 ? "Earnings" : wild ? "Jumpy" : "Normal"}</b></span><span>Confidence <b>${Math.abs(sc) >= 5 && !wild ? "medium" : "low"}</b></span>${dayIv != null ? `<span>Typical move <b>±${dayIv.toFixed(1)}%</b></span>` : ""}</div>
       <ul class="oltxt">${txt.map(x => `<li>${x}</li>`).join("")}</ul></div>`
       + (scen.length ? `<p class="sub2">What would change the picture</p>` + scen.map(([sd, x]) => `<p class="olsc"><b class="${sd > 0 ? "up" : "down"}">${sd > 0 ? "▲" : "▼"}</b> ${x}</p>`).join("") : "")
+      + (NW.length ? `<p class="sub2">Latest news on ${esc(disp(t))} · last 3 days${S.sent?.generated_at ? ` · checked ${esc(tmAgo(S.sent.generated_at))} ago` : ""}</p>` + NW.slice(0, 8).map(x => {
+          const tn = x.s == null ? "" : x.s >= cut ? "up" : x.s <= -cut ? "down" : "dim";
+          return `<a class="tr nw" href="${esc(x.url)}" target="_blank" rel="noopener"><span class="dim">${esc(tmAgo(x.t))}</span><span><span class="ttl">${x.s != null ? `<b class="${tn}" aria-label="${tn === "up" ? "positive" : tn === "down" ? "negative" : "neutral"}">${tn === "up" ? "▲" : tn === "down" ? "▼" : "·"}</b> ` : ""}${esc(x.title)}</span><span class="meta">${esc(x.src || "")}</span></span></a>`; }).join("")
+        + `<p class="fine2" style="margin-top:4px">▲▼ = FinBERT's read of the headline (a finance language model). It reads words, not facts: check the story before you trade on it.</p>` : `<p class="olsc dim">No headlines on ${esc(disp(t))} in the last 3 days.</p>`)
       + ((al0 => al0 ? `<p class="olsc">· There's a Focus setup on it: <a href="#terminal" data-tmsig="${esc(al0.id)}">see the trade on the chart</a>.</p>` : "")(g ? tmAlertFor(t, g.side, g.strats) : null));
     let right = `<p class="sub2">What's moving it <span style="text-transform:none;letter-spacing:0">· ▲ helps, ▼ weighs · hover for why</span></p>`
       + (D.length ? D.map(([n, v, e, why]) => `<div class="tr oldr" title="${esc(why)}"><span>${esc(n)}</span><span class="r">${v}</span>${ar(e)}</div>`).join("") : `<p class="empty2">Loading the data on ${esc(disp(t))}…</p>`);

@@ -42,7 +42,7 @@ const SCHEDULE = [
   ["btc-dip-forward.yml",  "7 * * * *",            "BTC dip forward test: every hour"],
   ["liquidations.yml",     "40 */4 * * *",         "BTC liquidation heatmap: every 4 hours"],
   // news and calendar
-  ["news.yml",             "10 * * * *",           "News: every hour"],
+  ["news.yml",             "10,30,50 * * * *",     "News: every 20 minutes"],
   ["mentions.yml",         "20 */6 * * *",         "News mentions: every 6 hours"],
   ["news-market.yml",      "17 5 * * *",           "Market news tone (morning)"],
   ["calendar.yml",         "37 5 * * *",           "Market calendar (morning)"],

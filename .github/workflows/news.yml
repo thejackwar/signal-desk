@@ -2,11 +2,15 @@ name: News
 
 on:
   schedule:
-    - cron: "10 * * * *"    # every hour
+    - cron: "10,30,50 * * * *"    # every 20 minutes (breaking news reaches the Terminal's outlook quickly)
   workflow_dispatch: {}
 
 permissions:
   contents: write
+
+concurrency:
+  group: news
+  cancel-in-progress: false
 
 jobs:
   news:
