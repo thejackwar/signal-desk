@@ -13,7 +13,9 @@
 const SCHEDULE = [
   // [workflow file, cron (UTC), what it is, optional inputs for "Run workflow"]
   // US market hours (wide enough for summer and winter time; the scripts exit when the market is closed)
-  ["gex.yml",              "0 13 * * 1-5",         "Gamma levels (before the open)"],
+  ["gex.yml",              "0 13 * * 1-5",         "Gamma levels (before the open)", { job: "daily" }],
+  ["gex.yml",              "30 7 * * 1-5",         "Gamma levels (European morning: last session's open interest)", { job: "intraday" }],
+  ["gex.yml",              "15,45 14-20 * * 1-5",  "Gamma levels at the live price: every 30 min while the US market is open", { job: "intraday" }],
   ["maxpain.yml",          "20 13 * * 1-5",        "Max pain (backup, in case the gamma levels didn't run)"],
   ["gamma-setup.yml",      "1-59/5 13-21 * * 1-5", "Gamma rejection setup: every 5 min while the US market is open", { job: "live" }],
   ["session-momentum.yml", "2-59/5 13-21 * * 1-5", "Session Momentum (QQQ first 5-min candle): every 5 min while the US market is open", { job: "live" }],

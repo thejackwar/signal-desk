@@ -503,6 +503,7 @@ function gexPanel() {
   let h = `<section class="card gex"><header><h3>Gamma levels</h3><small>SPY options · open interest from ${esc(GEX.oi_date || "the last session")} · computed ${upd} New York</small></header>
     <dl class="lv">${it("Regime now", regime ? `<span class="reg ${regime}">${regime === "positive" ? "Positive gamma" : "Negative gamma"}</span>` : "–")}
     ${it("Gamma flip", pfx(G.flip), "f")}${it("Call wall", pfx(G.call_wall), "u")}${it("Put wall", pfx(G.put_wall), "d")}
+    ${G.vol_call_wall ? it("Call wall · today's volume", pfx(G.vol_call_wall), "u") : ""}${G.vol_put_wall ? it("Put wall · today's volume", pfx(G.vol_put_wall), "d") : ""}
     ${it("Total GEX per 1%", money(G.total_gex), "n")}${it("Put/call open interest", G.put_call_oi ?? "–", "n")}</dl>`;
   h += gexBars(G, last);
   h += `<div class="tbl"><table><thead><tr><th></th><th>Price at calc.</th><th>Flip</th><th>Regime</th><th>Call wall</th><th>Put wall</th><th>Magnets</th><th>Put/call prem. (last session)</th></tr></thead><tbody>`;
@@ -514,7 +515,7 @@ function gexPanel() {
   h += `</tbody></table></div>` + setupBlock() + `
     <details><summary>What these levels mean</summary>
     <p>Options dealers hedge what they've sold. Using the usual assumption (dealers long calls, short puts), <b>GEX</b> estimates how many dollars of stock they must trade for each 1% move. <b>Above the gamma flip</b> they buy dips and sell rallies, so moves tend to be damped and prices pinned near big strikes. <b>Below it</b> they sell into drops and buy into rallies, so moves tend to be larger. The <b>call wall</b> often acts as a ceiling and the <b>put wall</b> as a floor; <b>magnets</b> are the strikes with the most gamma near the price. The bars show net GEX per strike (green calls, red puts) within 5% of the price.</p>
-    <p>Computed once a day before the open from Alpaca's free option data. It's an estimate: dealers' real positions aren't public, and the put/call premium has no buyer/seller side. We save every day's snapshot so the levels can be backtested once enough history has built up. For information only. Not investment advice.</p></details></section>`;
+    <p>Computed before the open from Cboe's free delayed option data (open interest from the last session; Alpaca as a backup), then recomputed every 30 minutes while the US market is open at the live price. "Volume walls" show where today's new option trading is concentrated, since open interest only updates overnight. It's an estimate: dealers' real positions aren't public, and the put/call premium has no buyer/seller side. We save every day's snapshot so the levels can be backtested once enough history has built up. For information only. Not investment advice.</p></details></section>`;
   return h;
 }
 // the "trapped buyers" rejection setup: forward test (paper) and backtest

@@ -1,16 +1,26 @@
 name: Gamma levels
 
 # Daily gamma exposure (GEX) levels for SPY, QQQ and IWM: engine/gex.py.
-# Runs before the US open, after the exchanges publish the previous session's open interest.
+# Runs before the US open, after the exchanges publish the previous session's open interest (daily run:
+# levels + the day's snapshot), then again every 30 minutes while the US market is open and once in the
+# European morning (intraday run: levels at the live price only, see engine/gex.py --intraday).
 # Also saves the day's per-strike snapshot (docs/data/gex/history), which is the data for backtesting
 # gamma later: free history of open interest per strike doesn't exist, so we collect our own.
 on:
   schedule:
     - cron: "0 13 * * 1-5"    # 13:00 UTC = 08:00 New York in winter, 09:00 in summer. Before the 09:30 open either way.
+    - cron: "30 7 * * 1-5"    # intraday: European morning, so the Terminal's outlook has the last session's open interest
+    - cron: "15,45 14-20 * * 1-5"   # intraday: every 30 minutes in US hours
   push:
     branches: [main]
     paths: ["engine/gex.py"]
-  workflow_dispatch: {}
+  workflow_dispatch:
+    inputs:
+      job:
+        description: "daily = pre-open levels + snapshot, intraday = levels at the live price only"
+        type: choice
+        options: [daily, intraday]
+        default: daily
 
 permissions:
   contents: write
@@ -33,7 +43,9 @@ jobs:
         env:
           ALPACA_KEY_ID: ${{ secrets.ALPACA_KEY_ID }}
           ALPACA_SECRET_KEY: ${{ secrets.ALPACA_SECRET_KEY }}
-        run: python engine/gex.py
+          JOB: ${{ inputs.job || (github.event_name == 'schedule' && github.event.schedule != '0 13 * * 1-5' && 'intraday') || 'daily' }}
+        run: |
+          if [ "$JOB" = intraday ]; then python engine/gex.py --intraday; else python engine/gex.py; fi
       - name: Publish
         run: |
           git config user.name "signal-desk-bot"

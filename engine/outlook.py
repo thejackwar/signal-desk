@@ -268,6 +268,58 @@ def build(now: datetime, hist, quotes: dict, prem: dict) -> dict:
     ern_pre = [e for e in ern if e.get("time") == "bmo"][:8]
     ern_post = [e for e in ern if e.get("time") == "amc"][:8]
 
+    # --- expected range from the VIX (one standard deviation for one day)
+    spx = q.get("^GSPC") or {}
+    spx_last = spx.get("last")
+    ref = spx_last * (1 + (es or 0) / 100) if spx_last and phase == "pre" and es is not None else spx_last
+    iv = v9 if v9 and phase == "pre" else vix
+    rng = None
+    if ref and iv:
+        sd = iv / math.sqrt(252)
+        rng = {"vix_used": "VIX9D" if iv == v9 else "VIX", "iv": r(iv, 1), "pct": r(sd, 2), "ref": r(ref, 0),
+               "lo": r(ref * (1 - sd / 100), 0), "hi": r(ref * (1 + sd / 100), 0), "pts": r(ref * sd / 100, 0)}
+
+    # --- key levels (SPY options). engine/gex.py recomputes them every 30 minutes in US hours at the live
+    # price; outside those hours SPY's price is moved to today's via the S&P 500 futures.
+    levels = []
+    spy_spot, spy_now = GX.get("spot"), None
+    try:
+        gx_age = (now - datetime.fromisoformat(GX["updated"].replace("Z", "+00:00"))).total_seconds() / 60
+    except Exception:
+        gx_age = None
+    if spy_spot and gx_age is not None and gx_age <= 70:
+        spy_now = spy_spot
+    elif spy_spot and ref:
+        spx_then = None
+        if hist and GX.get("updated"):
+            try:
+                c0 = hist[0]["Close"]
+                spx_then = float(c0[c0.index <= GX["updated"][:10]].iloc[-1])
+            except Exception:
+                spx_then = None
+        spy_now = r(spy_spot * ref / (spx_then or spx_last), 2)
+    if spy_now and GX.get("flip"):
+        reg = "positive" if spy_now >= GX["flip"] else "negative"     # where the price is now, not when they were computed
+    OP = GX.get("open") or {}
+    moved = lambda k: f" Was {OP[k]:.0f} before the open." if OP.get(k) and GX.get(k) and abs(OP[k] - GX[k]) >= 0.5 and OP.get("date") == sess_s else ""
+    if spy_spot and spy_now:
+        for k, name, note in (("call_wall", "Call wall", "Biggest call position: often acts as a ceiling."),
+                              ("flip", "Gamma flip", "Above it dealers calm moves down; below it they speed them up."),
+                              ("put_wall", "Put wall", "Biggest put position: often acts as a floor; a break can speed up selling."),
+                              ("vol_call_wall", "Call wall by today's volume", "Where today's new call trading is concentrated: shows the ceiling shifting during the session."),
+                              ("vol_put_wall", "Put wall by today's volume", "Where today's new put trading is concentrated: shows the floor shifting during the session.")):
+            v = GX.get(k)
+            if v and not (k.startswith("vol_") and v == GX.get(k[4:])):
+                levels.append({"name": "SPY " + name.lower(), "v": r(v, 2), "dist": r((v / spy_now - 1) * 100, 1), "note": note + moved(k),
+                               "live": k.startswith("vol_")})
+        levels.sort(key=lambda x: -x["v"])
+    lv_stale = False
+    if GX.get("oi_date"):
+        try:
+            lv_stale = sum(1 for i in range(1, (sess - date.fromisoformat(GX["oi_date"])).days) if (sess - timedelta(days=i)).weekday() < 5) >= 2
+        except Exception:
+            pass
+
     # --- character of the day
     vol_hi = (vix or 0) >= 25 or reg == "negative" or (ts or 0) >= 1
     vol_lo = (vix or 99) < 16 and reg == "positive"
@@ -284,38 +336,6 @@ def build(now: datetime, hist, quotes: dict, prem: dict) -> dict:
     # a read is never more than "medium": the backdrop only tilts the odds, and wild or event days tilt them less
     conf = "medium" if abs(score) >= 5 and character not in ("wild", "event") else "low"
 
-    # --- expected range from the VIX (one standard deviation for one day)
-    spx = q.get("^GSPC") or {}
-    spx_last = spx.get("last")
-    ref = spx_last * (1 + (es or 0) / 100) if spx_last and phase == "pre" and es is not None else spx_last
-    iv = v9 if v9 and phase == "pre" else vix
-    rng = None
-    if ref and iv:
-        sd = iv / math.sqrt(252)
-        rng = {"vix_used": "VIX9D" if iv == v9 else "VIX", "iv": r(iv, 1), "pct": r(sd, 2), "ref": r(ref, 0),
-               "lo": r(ref * (1 - sd / 100), 0), "hi": r(ref * (1 + sd / 100), 0), "pts": r(ref * sd / 100, 0)}
-
-    # --- key levels (SPY options), scaled to today's SPY price via the S&P 500
-    levels = []
-    spy_spot, spy_now = GX.get("spot"), None
-    if spy_spot and ref:
-        # the levels come from the last options snapshot: move SPY's price there to today's via the S&P 500
-        spx_then = None
-        if hist and GX.get("updated"):
-            try:
-                c0 = hist[0]["Close"]
-                spx_then = float(c0[c0.index <= GX["updated"][:10]].iloc[-1])
-            except Exception:
-                spx_then = None
-        spy_now = r(spy_spot * ref / (spx_then or spx_last), 2)
-    if spy_spot and spy_now:
-        for k, name, note in (("call_wall", "Call wall", "Biggest call position: often acts as a ceiling."),
-                              ("flip", "Gamma flip", "Above it dealers calm moves down; below it they speed them up."),
-                              ("put_wall", "Put wall", "Biggest put position: often acts as a floor; a break can speed up selling.")):
-            v = GX.get(k)
-            if v:
-                levels.append({"name": "SPY " + name.lower(), "v": r(v, 2), "dist": r((v / spy_now - 1) * 100, 1), "note": note})
-        levels.sort(key=lambda x: -x["v"])
     prev = None
     if hist:
         s = hist[0]
@@ -392,8 +412,8 @@ def build(now: datetime, hist, quotes: dict, prem: dict) -> dict:
 
     scen = []
     if levels and spy_now:
-        above = [l for l in levels if l["v"] > spy_now]
-        below = [l for l in levels if l["v"] <= spy_now]
+        above = [l for l in levels if l["v"] > spy_now and not l.get("live")]
+        below = [l for l in levels if l["v"] <= spy_now and not l.get("live")]
         if below:
             b = below[0]
             scen.append({"side": -1, "text": f"If SPY breaks below {b['v']:.0f} ({b['name'].replace('SPY ', '')}), selling can speed up."})
@@ -420,6 +440,8 @@ def build(now: datetime, hist, quotes: dict, prem: dict) -> dict:
         "lean": lean, "score": r(score, 1), "confidence": conf, "character": character, "headline": head,
         "text": txt, "drivers": drivers, "range": rng, "levels": levels, "prev": prev, "base": br,
         "scenarios": scen, "tips": tips, "spy_now": spy_now, "levels_from": GX.get("oi_date") or GX.get("updated"),
+        "levels_meta": {"oi_date": GX.get("oi_date"), "updated": GX.get("updated"), "source": GX.get("source"), "age_min": r(gx_age, 0), "stale": lv_stale,
+                        "live_price": bool(gx_age is not None and gx_age <= 70)},
         "events": [{"time": e.get("time"), "kind": e.get("kind") or e.get("name"), "last": e.get("last"), "why": e.get("why")} for e in sorted(eco_today, key=lambda e: e.get("time") or "")],
         "events_next": [{"date": e.get("date"), "time": e.get("time"), "kind": e.get("kind") or e.get("name")} for e in eco_next],
         "earnings": {"pre": [{"t": e["ticker"], "name": e.get("name"), "eps": e.get("eps_est")} for e in ern_pre],

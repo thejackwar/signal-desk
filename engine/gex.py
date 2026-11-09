@@ -24,8 +24,21 @@ Writes:
 
 Free history of open interest per strike doesn't exist, so these daily snapshots ARE the backtest data.
 
-    python engine/gex.py            # needs ALPACA_KEY_ID / ALPACA_SECRET_KEY
-    python engine/gex.py --demo     # synthetic chain, no keys, writes to /tmp/gex-demo
+Fresher levels (Nov 2026):
+  - Source: Cboe's free delayed-quotes file first (one request per underlying: every contract with
+    open interest from the LAST session, implied volatility and today's volume, ~15 minutes delayed).
+    Alpaca's contracts list lagged 2-3 sessions on open interest, so it's now the fallback.
+  - --intraday: recomputed every 30 minutes while the US market is open (and once in the European
+    morning) at the live price, with live IV. Only latest.json changes; the daily snapshot/CSV stay the
+    pre-open ones, so the backtest data keeps one consistent time of day. The pre-open levels are kept
+    in latest.json ("open") so the site can show how they moved.
+  - Volume walls: the strikes where today's option volume carries the most gamma. Open interest only
+    updates overnight; today's volume shows where new positions are going during the session
+    (an estimate: volume can be opening or closing trades).
+
+    python engine/gex.py              # pre-open run: levels + daily snapshot
+    python engine/gex.py --intraday   # levels only, at the live price
+    python engine/gex.py --demo       # synthetic chain, no keys, writes to /tmp/gex-demo
 """
 from __future__ import annotations
 
@@ -34,6 +47,7 @@ import csv
 import json
 import math
 import os
+import re
 import sys
 import urllib.error
 import urllib.parse
@@ -150,6 +164,60 @@ def snapshots(sym: str, lo: float, hi: float, today: date) -> dict:
     return out
 
 
+# ------------------------------------------------------------------ Cboe (free, no key)
+CBOE = "https://cdn.cboe.com/api/global/delayed_quotes/options/{}.json"
+OCC = re.compile(r"^([A-Z]{1,6})(\d{6})([CP])(\d{8})$")
+
+
+def prev_session(d: date) -> date:
+    d -= timedelta(days=1)
+    while d.weekday() >= 5:
+        d -= timedelta(days=1)
+    return d
+
+
+def cboe_chain(sym: str, today: date) -> tuple[float | None, list[dict], str | None, str | None]:
+    """(delayed price, contracts within BAND and DAYS_OUT, date of the open interest, Cboe timestamp)."""
+    req = urllib.request.Request(CBOE.format(sym), headers={
+        "User-Agent": "Mozilla/5.0 (signal-desk gamma levels; github.com/thejackwar/signal-desk)", "Accept": "application/json"})
+    js = json.loads(urllib.request.urlopen(req, timeout=40).read())
+    d = js.get("data") or {}
+    S = float(d.get("current_price") or d.get("close") or 0) or None
+    ts = js.get("timestamp") or d.get("last_trade_time")
+    try:
+        stamp = datetime.fromisoformat(str(ts).replace("Z", "")).date()
+    except Exception:
+        stamp = today
+    # open interest is the exchanges' count after the last finished session, published overnight
+    oi_date = prev_session(stamp + timedelta(days=1)) if stamp.weekday() >= 5 else prev_session(stamp)
+    out = []
+    if not S:
+        return None, out, None, ts
+    lo, hi, last = S * (1 - BAND), S * (1 + BAND), today + timedelta(days=DAYS_OUT)
+    for o in d.get("options") or []:
+        m = OCC.match(str(o.get("option") or "").strip())
+        if not m:
+            continue
+        exp = datetime.strptime(m.group(2), "%y%m%d").date()
+        K = int(m.group(4)) / 1000
+        oi = float(o.get("open_interest") or 0)
+        if exp < today or exp > last or not lo <= K <= hi:
+            continue
+        iv = o.get("iv")
+        try:
+            iv = float(iv)
+            iv = iv / 100 if iv > 5 else iv
+        except (TypeError, ValueError):
+            iv = None
+        vol = float(o.get("volume") or 0)
+        bid, ask = float(o.get("bid") or 0), float(o.get("ask") or 0)
+        px = float(o.get("last_trade_price") or 0) or (bid + ask) / 2
+        if oi <= 0 and vol <= 0:
+            continue
+        out.append({"exp": exp, "type": m.group(3), "strike": K, "oi": oi, "iv": iv, "vol": vol, "px": px})
+    return S, out, oi_date.isoformat(), ts
+
+
 # ------------------------------------------------------------------ the maths
 def analyse(sym: str, S: float, contracts: list[dict], now: datetime) -> tuple[dict, dict]:
     """contracts: [{exp, type, strike, oi, iv, vol, px}] -> (levels for the site, per-strike detail)."""
@@ -174,11 +242,12 @@ def analyse(sym: str, S: float, contracts: list[dict], now: datetime) -> tuple[d
     for c in contracts:
         g = gex_dollars(bs_gamma(S, c["strike"], c["T"], c["iv"]), c["oi"], S)
         sign = 1 if c["type"] == "C" else -1
-        k = strikes.setdefault(c["strike"], {"c_oi": 0, "p_oi": 0, "c_gex": 0.0, "p_gex": 0.0, "c_vol": 0, "p_vol": 0})
+        k = strikes.setdefault(c["strike"], {"c_oi": 0, "p_oi": 0, "c_gex": 0.0, "p_gex": 0.0, "c_vol": 0, "p_vol": 0, "c_vg": 0.0, "p_vg": 0.0})
         side = "c" if c["type"] == "C" else "p"
         k[f"{side}_oi"] += c["oi"]
         k[f"{side}_gex"] += sign * g
         k[f"{side}_vol"] += c["vol"]
+        k[f"{side}_vg"] += sign * gex_dollars(bs_gamma(S, c["strike"], c["T"], c["iv"]), c["vol"], S) if c["vol"] else 0.0
         exp_tot[c["exp"].isoformat()] = exp_tot.get(c["exp"].isoformat(), 0) + sign * g
         if c["exp"] == first_exp:
             zero_dte += sign * g
@@ -199,8 +268,13 @@ def analyse(sym: str, S: float, contracts: list[dict], now: datetime) -> tuple[d
 
     total = sum(k["c_gex"] + k["p_gex"] for k in strikes.values())
     near = {K: v for K, v in strikes.items() if abs(K / S - 1) <= 0.05}
-    call_wall = max(strikes, key=lambda K: strikes[K]["c_gex"]) if strikes else None
-    put_wall = min(strikes, key=lambda K: strikes[K]["p_gex"]) if strikes else None
+    strikes_oi = {K: v for K, v in strikes.items() if v["c_oi"] or v["p_oi"]}
+    call_wall = max(strikes_oi, key=lambda K: strikes_oi[K]["c_gex"]) if strikes_oi else None
+    put_wall = min(strikes_oi, key=lambda K: strikes_oi[K]["p_gex"]) if strikes_oi else None
+    # today's volume: where new positions are going during the session (OI only updates overnight)
+    has_vol = sum(v["c_vol"] + v["p_vol"] for v in strikes.values()) > 0
+    vol_call_wall = max(strikes, key=lambda K: strikes[K]["c_vg"]) if has_vol else None
+    vol_put_wall = min(strikes, key=lambda K: strikes[K]["p_vg"]) if has_vol else None
     magnets = sorted(near, key=lambda K: -abs(near[K]["c_gex"] + near[K]["p_gex"]))[:5]
     c_oi = sum(k["c_oi"] for k in strikes.values()); p_oi = sum(k["p_oi"] for k in strikes.values())
     c_vol = sum(c["vol"] for c in contracts if c["type"] == "C"); p_vol = sum(c["vol"] for c in contracts if c["type"] == "P")
@@ -215,6 +289,7 @@ def analyse(sym: str, S: float, contracts: list[dict], now: datetime) -> tuple[d
         "total_gex": round(total), "next_expiry_gex": round(zero_dte),
         "next_expiry": first_exp.isoformat() if first_exp else None,
         "call_wall": call_wall, "put_wall": put_wall,
+        "vol_call_wall": vol_call_wall, "vol_put_wall": vol_put_wall,
         "magnets": [{"strike": K, "gex": round(near[K]["c_gex"] + near[K]["p_gex"])} for K in sorted(magnets)],
         "put_call_oi": r2(p_oi / c_oi) if c_oi else None,
         "put_call_volume": r2(p_vol / c_vol) if c_vol else None,
@@ -260,21 +335,39 @@ def demo_chain(sym: str, S: float, today: date, seed: int) -> list[dict]:
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--demo", action="store_true")
+    ap.add_argument("--intraday", action="store_true", help="levels at the live price only; no daily snapshot")
     a = ap.parse_args()
     out = Path("/tmp/gex-demo") if a.demo else OUT
     now = datetime.now(NY)
     today = now.date()
 
+    keys = bool(os.environ.get("ALPACA_KEY_ID"))
     if a.demo:
         spots, oi_date = {"SPY": 681.4, "QQQ": 612.3, "IWM": 241.9}, (today - timedelta(days=1)).isoformat()
     else:
-        if not os.environ.get("ALPACA_KEY_ID"):
-            sys.exit("ALPACA_KEY_ID / ALPACA_SECRET_KEY missing")
-        spots, oi_date = spot_prices(UNDERLYINGS), None
+        spots, oi_date = {}, None
+        if keys:
+            try:
+                spots = spot_prices(UNDERLYINGS)          # live price (Cboe's is 15 minutes delayed)
+            except Exception as ex:
+                print(f"  ! Alpaca prices: {ex}")
 
-    site, hist = {}, {}
+    site, hist, sources = {}, {}, {}
     for i, sym in enumerate(UNDERLYINGS):
         S = spots.get(sym)
+        contracts = None
+        if not a.demo:
+            try:                                      # 1) Cboe: open interest from the last session
+                cS, cc, cd, cts = cboe_chain(sym, today)
+                if cc and sum(c["oi"] for c in cc) > 0:
+                    S = S or cS
+                    contracts, sources[sym] = cc, "cboe"
+                    oi_date = max(oi_date or "", cd or "") or None
+                    print(f"  {sym} {S:.2f}: Cboe, {len(cc)} contracts, open interest of {cd} (Cboe time {cts})")
+                else:
+                    print(f"  ! {sym}: Cboe chain empty")
+            except Exception as ex:
+                print(f"  ! {sym}: Cboe failed ({type(ex).__name__}: {ex}), trying Alpaca")
         if not S:
             print(f"  ! {sym}: no price, skipped")
             continue
@@ -282,7 +375,10 @@ def main() -> None:
         try:
             if a.demo:
                 contracts = demo_chain(sym, S, today, i)
-            else:
+            elif contracts is None:                   # 2) Alpaca: the old way (open interest lags 2-3 sessions)
+                if not keys:
+                    raise RuntimeError("no Alpaca keys for the fallback")
+                sources[sym] = "alpaca"
                 oi, d = open_interest(sym, lo, hi, today)
                 oi_date = max(oi_date or "", d or "") or None
                 snaps = snapshots(sym, lo, hi, today)
@@ -307,8 +403,24 @@ def main() -> None:
     out.mkdir(parents=True, exist_ok=True)
     (out / "history").mkdir(exist_ok=True)
     stamp = now.astimezone(timezone.utc).strftime("%Y-%m-%dT%H:%MZ")
+    # keep the pre-open levels next to the live ones, so the site can show how they moved today
+    try:
+        prev = json.loads((out / "latest.json").read_text())
+    except Exception:
+        prev = {}
+    for sym, L in site.items():
+        P = (prev.get("underlyings") or {}).get(sym) or {}
+        if a.intraday and (P.get("open") or {}).get("date") == today.isoformat():
+            L["open"] = P["open"]
+        elif not a.intraday:
+            L["open"] = {"date": today.isoformat(), **{k: L.get(k) for k in ("spot", "flip", "call_wall", "put_wall", "regime")}}
+        L["source"] = sources.get(sym, "demo" if a.demo else None)
     (out / "latest.json").write_text(json.dumps(
-        {"updated": stamp, "oi_date": oi_date, "underlyings": site}, separators=(",", ":")))
+        {"updated": stamp, "oi_date": oi_date, "intraday": a.intraday,
+         "source": "Cboe delayed quotes" if "cboe" in sources.values() else "Alpaca", "underlyings": site}, separators=(",", ":")))
+    if a.intraday:
+        print(f"  wrote {out / 'latest.json'} (intraday: no daily snapshot)")
+        return
     (out / "history" / f"{today.isoformat()}.json").write_text(json.dumps(
         {"date": today.isoformat(), "updated": stamp, "oi_date": oi_date, "underlyings": hist}, separators=(",", ":")))
 

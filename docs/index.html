@@ -8188,10 +8188,12 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
     if (O.tips?.length) left += `<p class="sub2">How to use it today</p>` + O.tips.map(t => `<p class="olsc">· ${esc(t)}</p>`).join("");
     let right = `<p class="sub2">What's moving it <span style="text-transform:none;letter-spacing:0">· ▲ helps, ▼ weighs · hover for why</span></p>` + (O.drivers || []).map(d => `<div class="tr oldr" title="${esc(d.note)}"><span>${esc(d.name)}${["fut", "eu", "asia"].includes(d.k) ? `<small>${esc(d.note)}</small>` : ""}</span><span class="r">${fv(d)}</span>${ar(d.effect)}</div>`).join("");
     if (R || O.levels?.length) {
-      right += `<p class="sub2">Key levels${O.levels_from ? ` · options of ${esc(fmtDate(O.levels_from.slice(0, 10), { day: "numeric", month: "short" }))}` : ""}</p>`;
+      const LM = O.levels_meta || {}, dd = x => esc(fmtDate(String(x).slice(0, 10), { day: "numeric", month: "short" }));
+      right += `<p class="sub2">Key levels${LM.oi_date ? ` · open interest of ${dd(LM.oi_date)}` : O.levels_from ? ` · options of ${dd(O.levels_from)}` : ""}${LM.live_price ? ` · at the live price, ${esc(tmAgo(LM.updated))} ago` : ""}</p>`
+        + (LM.stale ? `<p class="olsc" style="color:var(--amber)">⚠ These options levels are more than a session old: treat them as rough.</p>` : "");
       if (R) right += `<div class="tr ollv"><span>S&amp;P 500 expected range <small class="dim">(${esc(R.vix_used)} ${tmNum(R.iv, 1)})</small></span><span class="r">${tmNum(R.lo, 0)}</span><span class="r">${tmNum(R.hi, 0)}</span></div>`;
       if (O.prev) right += `<div class="tr ollv"><span>S&amp;P 500 last session low / high</span><span class="r">${tmNum(O.prev.low, 0)}</span><span class="r">${tmNum(O.prev.high, 0)}</span></div>`;
-      right += (O.levels || []).map(l => `<div class="tr ollv" title="${esc(l.note)}"><span>${esc(l.name)}</span><span class="r">${tmNum(l.v, 0)}</span><span class="r">${tmPct(l.dist, 1)}</span></div>`).join("");
+      right += (O.levels || []).map(l => `<div class="tr ollv" title="${esc(l.note)}"><span>${esc(l.name)}${l.live ? ` <small class="dim">live</small>` : ""}</span><span class="r">${tmNum(l.v, 0)}</span><span class="r">${tmPct(l.dist, 1)}</span></div>`).join("");
       if (O.spy_now) right += `<p class="fine2" style="margin-top:4px">SPY now ≈ ${tmNum(O.spy_now, 2)}; % = distance from it.</p>`;
     }
     const ev = O.events || [], en = O.events_next || [], E = O.earnings || {};
