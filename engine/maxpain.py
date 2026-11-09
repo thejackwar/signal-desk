@@ -5,7 +5,8 @@ For each upcoming expiry (the next 60 days), and every candidate settlement pric
               + sum over puts   of  open interest x max(strike - P, 0) x 100
 Max pain = the strike with the smallest payout: where option buyers, all together, would collect the least.
 
-Open interest is the exchanges' count from the last session (Alpaca's options contracts list), so max pain only
+Open interest is the exchanges' count from the last session: from Cboe's free delayed-quotes file first (it carries
+the last session's count), Alpaca's options contracts list as the fallback (it lagged 2-3 sessions). Max pain only
 changes once a day. Runs every weekday before the US open, right after the gamma levels
 (.github/workflows/maxpain.yml).
 
@@ -36,7 +37,7 @@ from pathlib import Path
 from zoneinfo import ZoneInfo
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from gex import DATA, TRADING, _get, _pages, spot_prices  # noqa: E402  (same Alpaca helpers as the gamma levels)
+from gex import DATA, TRADING, _get, _pages, spot_prices, cboe_chain  # noqa: E402  (same helpers as the gamma levels)
 
 from universe import U  # noqa: E402
 
@@ -119,7 +120,20 @@ def analyse(spot: float, contracts: list[tuple[date, str, float, float]], today:
 
 
 # ------------------------------------------------------------------ Alpaca
-def contracts_for(sym: str, spot: float, today: date) -> tuple[list, str | None]:
+def contracts_for(sym: str, spot: float, today: date) -> tuple[list, str | None, str]:
+    """[(expiry, "C"/"P", strike, open interest)], the open interest's date, and the source."""
+    try:
+        cS, cc, cd, _ = cboe_chain(sym, today, band=BAND, days_out=DAYS_OUT)
+        out = [(c["exp"], c["type"], c["strike"], c["oi"]) for c in cc if c["oi"] > 0]
+        if out:
+            return out, cd, "cboe"
+    except Exception as ex:
+        print(f"  . {sym}: Cboe failed ({type(ex).__name__}), using Alpaca")
+    out, d = contracts_alpaca(sym, spot, today)
+    return out, d, "alpaca"
+
+
+def contracts_alpaca(sym: str, spot: float, today: date) -> tuple[list, str | None]:
     params = {"underlying_symbols": sym.replace("-", "."), "status": "active", "limit": "10000",
               "expiration_date_gte": today.isoformat(),
               "expiration_date_lte": (today + timedelta(days=DAYS_OUT)).isoformat(),
@@ -259,19 +273,22 @@ def main() -> None:
             spots.update({k.replace(".", "-"): v for k, v in got.items()})
 
     out.mkdir(parents=True, exist_ok=True)
-    index, hist_rows = [], []
+    index, hist_rows, srcs = [], [], {}
     for i, sym in enumerate(syms):
         S = spots.get(sym)
         if not S:
             print(f"  ! {sym}: no price, skipped")
             continue
+        sym_oi = oi_date
         try:
             if a.demo:
                 contracts = demo_chain(S, today, i)
             else:
-                contracts, d = contracts_for(sym, S, today)
+                contracts, d, src = contracts_for(sym, S, today)
+                sym_oi = d
                 oi_date = max(oi_date or "", d or "") or None
-                time.sleep(0.25)                                  # stay well under Alpaca's 200 requests a minute
+                srcs[src] = srcs.get(src, 0) + 1
+                time.sleep(0.25 if src == "cboe" else 0.35)       # polite to Cboe; under Alpaca's 200 requests a minute
         except Exception as ex:
             print(f"  ! {sym}: {ex}")
             continue
@@ -280,7 +297,7 @@ def main() -> None:
             print(f"  ! {sym}: no expiry with open interest")
             continue
         (out / f"{sym}.json").write_text(json.dumps(
-            {"symbol": sym, "spot": round(S, 2), "date": today.isoformat(), "oi_date": oi_date, "expiries": exps},
+            {"symbol": sym, "spot": round(S, 2), "date": today.isoformat(), "oi_date": sym_oi, "expiries": exps},
             separators=(",", ":")))
         nxt = exps[0]
         mon = next((e for e in exps if e["monthly"]), None)
@@ -297,7 +314,7 @@ def main() -> None:
         sys.exit("no stock worked")
     stamp = now.astimezone(timezone.utc).strftime("%Y-%m-%dT%H:%MZ")
     (out / "index.json").write_text(json.dumps(
-        {"updated": stamp, "date": today.isoformat(), "oi_date": oi_date, "stocks": index}, separators=(",", ":")))
+        {"updated": stamp, "date": today.isoformat(), "oi_date": oi_date, "sources": srcs, "stocks": index}, separators=(",", ":")))
 
     # history: a re-run on the same day replaces that day's rows
     path = out / "history.csv"
@@ -320,6 +337,7 @@ def main() -> None:
     sc = score(rows, closes, today)
     sc["updated"] = stamp
     (out / "scorecard.json").write_text(json.dumps(sc, separators=(",", ":")))
+    print(f"  sources: {srcs}")
     print(f"  {len(index)} stocks, {len(hist_rows)} expiries; scorecard: {sc['expiries_scored']} expiries scored. Wrote {out}")
 
 

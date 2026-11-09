@@ -176,9 +176,12 @@ def prev_session(d: date) -> date:
     return d
 
 
-def cboe_chain(sym: str, today: date) -> tuple[float | None, list[dict], str | None, str | None]:
-    """(delayed price, contracts within BAND and DAYS_OUT, date of the open interest, Cboe timestamp)."""
-    req = urllib.request.Request(CBOE.format(sym), headers={
+def cboe_chain(sym: str, today: date, band: float | None = None, days_out: int | None = None) -> tuple[float | None, list[dict], str | None, str | None]:
+    """(delayed price, contracts within BAND and DAYS_OUT, date of the open interest, Cboe timestamp).
+    Also used by engine/maxpain.py for every stock (with its own band and window)."""
+    band = BAND if band is None else band
+    days_out = DAYS_OUT if days_out is None else days_out
+    req = urllib.request.Request(CBOE.format(sym.replace("-", ".")), headers={
         "User-Agent": "Mozilla/5.0 (signal-desk gamma levels; github.com/thejackwar/signal-desk)", "Accept": "application/json"})
     js = json.loads(urllib.request.urlopen(req, timeout=40).read())
     d = js.get("data") or {}
@@ -193,7 +196,7 @@ def cboe_chain(sym: str, today: date) -> tuple[float | None, list[dict], str | N
     out = []
     if not S:
         return None, out, None, ts
-    lo, hi, last = S * (1 - BAND), S * (1 + BAND), today + timedelta(days=DAYS_OUT)
+    lo, hi, last = S * (1 - band), S * (1 + band), today + timedelta(days=days_out)
     for o in d.get("options") or []:
         m = OCC.match(str(o.get("option") or "").strip())
         if not m:
