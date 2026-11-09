@@ -1113,7 +1113,7 @@ function periodStart(ny, tf) {
 function liveBadge() {
   if (!LIVE) return "";
   const fresh = LIVE.at && Date.now() - LIVE.at < (LIVE.kind === "crypto" ? 30e3 : 60e3);
-  return `<span class="live${fresh ? "" : " idle"}" title="${esc(LIVE.kind === "crypto" ? "Live from Binance, every trade" : "Last candle follows the real-time IEX price every 15 seconds; the rest of the chart is Alpaca's full data, 15 minutes delayed")}">${fresh ? "LIVE" : LIVE.kind === "stock" && !usOpen(nyNow(), DATA?.ext) ? "Market closed" : "Connecting…"}</span>`;
+  return `<span class="live${fresh ? "" : " idle"}" title="${esc(LIVE.kind === "crypto" ? "Live from Binance, every trade" : "Last candle follows the real-time IEX price every 15 seconds; the rest of the chart is Alpaca's full data, 15 minutes delayed")}">${fresh ? "LIVE" : LIVE.kind === "stock" && !usOpen(nyNow(), DATA?.ext) ? "Market closed" : LIVE.kind === "stock" && !usOpen(nyNow()) ? (new Date(nyNow() * 1000).getUTCHours() < 12 ? "Pre-market · 15 min delayed" : "After-hours · 15 min delayed") : "Connecting…"}</span>`;
 }
 let paintQ = false;
 function paint(newCandle) {
@@ -1158,6 +1158,7 @@ function liveStart() {
       const r = await fetch(`${API.replace(/\/$/, "")}/?quotes=${kindQ}`);
       const q = (await r.json())?.q?.[sym];
       if (dead || !q || !DATA || DATA.sym !== sym) return;
+      if (q[3] && Date.now() - Date.parse(q[3]) > 20 * 60e3) { drawTitle(); return; }   // no IEX trade lately (IEX opens 8:00 New York): don't paint an old price
       const p = +q[0], ny = nyNow();
       let fresh = false;
       for (const [tf, c] of Object.entries(DATA.frames)) {
