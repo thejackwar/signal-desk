@@ -7479,7 +7479,7 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
   const TM_ORDER = Object.keys(TM_P), TM_WIDE = ["out", "trd", "eqs", "gip", "mood", "focus", "trk", "pat", "lpat", "vols"];
   // workspaces: the Terminal shows one group of panels at a time, so things are easy to find
   // Desk: the one-screen view (chart you can draw on + the signal explained, mood, signals, news, world markets)
-  const TM_WS = { desk: ["out", "trd", "mood", "focus", "alrt", "news", "live", "wei", "cal"], market: ["out", "mood", "brd", "news", "cal", "wei", "gc", "ctm"], ticker: ["trd", "mon", "sec"],
+  const TM_WS = { desk: ["out", "trd", "mood", "focus", "alrt", "news", "live", "wei", "cal"], market: ["out", "mood", "brd", "news", "cal", "wei", "gc", "ctm"], ticker: ["out", "trd", "mon", "sec"],
     signals: ["trd", "focus", "trk", "tdt", "alrt", "live", "grd", "pxa"], tools: ["eqs", "most", "gip", "port"], patterns: ["trd", "pat"], scanner: ["trd", "lpat"], volume: ["vols", "trd"] };
   const TM_WSL = [["desk", "Desk", "Chart, signals, mood and news on one screen"], ["market", "Market", "Today's outlook, mood, flow, breadth, news"], ["ticker", "Ticker", "Everything on one stock"], ["signals", "Signals", "Focus alerts, live trades"], ["scanner", "Live patterns", "Chart patterns forming now on every stock"], ["volume", "Volume", "The most-traded stocks as a grid of charts"], ["tools", "Tools", "Screener, charts, portfolio"], ["patterns", "Patterns", "Every BTC chart pattern since 2021, on the chart"], ["all", "All", "Every panel"]];
   const tmWs = () => {
@@ -7820,6 +7820,7 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
   function tmSelect(t, push) {
     if (!S.stockBy[t]) return false;
     S.tmSel = t; setPref("tmSel." + S.market, t);
+    setPref("tmTab.out", "tk"); tmRefresh("out");
     history[push ? "pushState" : "replaceState"](null, "", "#terminal-" + encodeURIComponent(t));
     const trd = document.querySelector(".tm [data-p='trd']");
     if (trd) { S.tmSig = null; tmRefresh("trd"); }
@@ -8100,7 +8101,7 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
       const changed = first || d?.generated_at !== S.fl?.generated_at;
       S.fl = d || false;
       if (!changed) return;
-      ["mood", "focus", "trk"].forEach(tmRefresh); tmPulse(); tmTrdSide();
+      ["mood", "focus", "trk", "out"].forEach(tmRefresh); tmPulse(); tmTrdSide();
       if (S.tmSel && document.getElementById("tmsec") && (first || tmTab("sec", "DES") !== "DES")) tmSecRender();
       else { const h = document.querySelector("#tmsec .glance"); if (h && S.tmSel) h.outerHTML = tmGlance(S.tmSel); }
     });
@@ -8112,7 +8113,7 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
     S.dkAt = Date.now();
     Promise.all([opt(UB() + "darkpool/daily.json"), opt(UB() + "darkpool/blocks.json")]).then(([d, b]) => {
       S.dk = { d, b, by: Object.fromEntries((d?.stocks || []).map(x => [x.t, x])) };
-      tmTrdSide();
+      tmTrdSide(); tmRefresh("out");
       if (S.tmSel && tmTab("sec", "DES") === "FLOW") tmSecRender();
     });
     return S.dk;
@@ -8121,7 +8122,7 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
     S.mp = S.mp || {};
     if (S.mp[t] !== undefined) return S.mp[t];
     S.mp[t] = null;
-    opt(`${UB()}maxpain/${encodeURIComponent(t)}.json`).then(d => { S.mp[t] = d || false; tmTrdSide(); tmTrdLevels(); if (S.tmSel === t && tmTab("sec", "DES") === "OMON") tmSecRender(); });
+    opt(`${UB()}maxpain/${encodeURIComponent(t)}.json`).then(d => { S.mp[t] = d || false; tmTrdSide(); if (S.tmSel === t) tmRefresh("out"); tmTrdLevels(); if (S.tmSel === t && tmTab("sec", "DES") === "OMON") tmSecRender(); });
     return null;
   }
   const tmMoodC = g => g < 20 ? "xf" : g < 40 ? "f" : g < 60 ? "n" : g < 80 ? "g" : "xg";
@@ -8174,8 +8175,13 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
     return S.ol;
   }
   TM_R.out = () => {
-    const O = tmLoadOut();
-    if (!O) return tmPanel("p-out", "OUT", "Today&rsquo;s outlook", null, `<p class="empty2">${O === false ? "Not built yet: it's written every hour from the European morning, and every 10 minutes while the US market is open." : "Loading…"}</p>`);
+    const O = tmLoadOut(), t = S.tmSel && S.stockBy[S.tmSel] ? S.tmSel : null, tab = t ? tmTab("out", "tk") : "mkt";
+    const tabs = t ? tmTabs("out", [["mkt", "Market"], ["tk", esc(disp(t))]], tab) : "";
+    if (tab === "tk") {
+      const T = tmTkOut(t, O);
+      return tmPanel("p-out", "OUT", "Today&rsquo;s outlook", [`#stock-${encodeURIComponent(t)}`, "Stock page"], tabs + T.body, `<small>${esc(disp(t))}${T.upd ? " · flow & options " + esc(T.upd.toLowerCase()) : ""}</small>`);
+    }
+    if (!O) return tmPanel("p-out", "OUT", "Today&rsquo;s outlook", null, tabs + `<p class="empty2">${O === false ? "Not built yet: it's written every hour from the European morning, and every 10 minutes while the US market is open." : "Loading…"}</p>`);
     const LEAN = { up: "Leaning higher", down: "Leaning lower", flat: "No clear lean" }, CH = { wild: "Jumpy", event: "Data day", calm: "Calm", normal: "Normal" };
     const PH = { pre: "before the open", live: "market open", post: "after the close" };
     const fv = d => d.value == null ? "–" : d.fmt === "pctn" ? `${d.value > 0 ? "+" : d.value < 0 ? "−" : ""}${Math.abs(d.value).toFixed(2)}%` : d.fmt === "pct" ? tmPct(d.value, 2) : d.fmt === "bp" ? `<span class="${d.value > 0 ? "down" : d.value < 0 ? "up" : ""}">${d.value > 0 ? "+" : d.value < 0 ? "−" : ""}${Math.abs(d.value)}bp</span>`
@@ -8209,9 +8215,89 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
     if (K.called) foot += `<p class="sub2">Track record of this box</p><p class="olsc">The lean made before the open was right on <b>${K.hit}</b> of <b>${K.called}</b> days (${K.hit_pct}%)${K.inside_n ? `; the S&amp;P 500 stayed inside the expected range on ${K.inside} of ${K.inside_n}` : ""}.</p>${K.recent?.length ? `<div class="olrec" aria-hidden="true">${K.recent.slice().reverse().map(x => `<i class="${x.lean === "flat" ? "" : (x.lean === "up") === (x.actual > 0) ? "ok" : "no"}" title="${esc(x.d)}: ${esc(x.lean)} · S&P ${x.actual > 0 ? "+" : ""}${x.actual}%"></i>`).join("")}</div>` : ""}`;
     else foot += `<p class="fine2">Every outlook made before the open is logged and checked against the S&amp;P 500's close; the track record shows here after the first few days.</p>`;
     foot += `<p class="fine2">${B ? `Base rate: ${esc(B.label)}, ${B.n.toLocaleString("en-US")} days since ${esc(B.since.slice(0, 4))}: next day up ${B.up}%, big move (±1.5%+) ${B.big}% of the time. ` : ""}A rule-based read of the site's own numbers (futures, world markets, rates, volatility, options gamma, breadth, calendar), not a forecast and not advice: markets often do the opposite of the lean. ${esc(tmUpd(O))}.</p>`;
-    const body = `<div class="olw"><div>${left}</div><div>${right}</div></div>${foot}`;
+    const body = tabs + `<div class="olw"><div>${left}</div><div>${right}</div></div>${foot}`;
     return tmPanel("p-out", "OUT", "Today&rsquo;s outlook", ["#calendar", "Calendar"], body, `<small>${esc(O.day || "")} · ${esc(PH[O.phase] || "")} · ${esc(tmUpd(O))}</small>`);
   };
+
+  // OUT for one ticker: the same kind of read, built in the browser from what the Terminal already has on it
+  // (trend, buying/selling flow, options, max pain walls, dark pools, news mood, strategy alerts, earnings date)
+  // plus the market's lean from outlook.json. Every line shows the number it comes from.
+  function tmTkOut(t, O) {
+    const r = S.stockBy[t] || {}, stk = S.market === "stocks";
+    const F = stk ? tmLoadFlow() : null, f = F?.flow?.[t], o = F?.options?.[t], m = S.sent?.stocks?.[t];
+    const g = (F?.focus?.items || []).find(x => x.t === t && (x.score || 0) >= (F.focus.min || 75));
+    const dk = stk ? tmLoadDark()?.by?.[t] : null, mp = stk ? tmLoadMp(t) : null;
+    const today = tmToday(), since = new Date(Date.now() - 6 * 864e5).toISOString().slice(0, 10);
+    const al = (S.feed?.alerts || []).filter(a => a.ticker === t && !a.exit && (a.date || "") >= since);
+    const nb = al.filter(a => a.side === "bullish").length, ns = al.filter(a => a.side === "bearish").length;
+    const ern = stk ? (S.cal?.earnings || []).find(e => e.ticker === t && e.date >= today) : null;
+    const ernDays = ern ? Math.round((new Date(ern.date) - new Date(today)) / 864e5) : null;
+    const D = [];   // [name, value html, effect -1/0/1, weight, why]
+    let sc = 0;
+    const add = (name, val, e, w, why) => { D.push([name, val, e, why]); sc += e * w; };
+    if (O?.lean) add("The market today", O.lean === "up" ? `<span class="up">Higher</span>` : O.lean === "down" ? `<span class="down">Lower</span>` : "Flat", O.lean === "up" ? 1 : O.lean === "down" ? -1 : 0, 1, "Most stocks move with the index on the day: the market box's lean.");
+    if (r.vs200 != null) add("vs 200-day average", tmPct(r.vs200), r.vs200 > 0 ? 1 : -1, 1, r.vs200 > 0 ? "In a long-term uptrend: dips have tended to get bought." : "In a long-term downtrend: rallies have tended to get sold.");
+    if (r.chg1m != null) add("Last month", tmPct(r.chg1m), r.chg1m >= 4 ? 1 : r.chg1m <= -4 ? -1 : 0, .5, "Short-term momentum.");
+    if (r.rsi != null) add("RSI 14", tmNum(r.rsi, 0), r.rsi >= 75 ? -1 : r.rsi <= 25 ? 1 : 0, .5, r.rsi >= 70 ? "Overbought: stretched, pullbacks are common." : r.rsi <= 30 ? "Oversold: stretched, bounces are common." : "Neither stretched up nor down.");
+    if (r.pos52 != null && (r.pos52 >= 95 || r.pos52 <= 5)) add("52-week range", Math.round(r.pos52) + "%", r.pos52 >= 95 ? 1 : -1, .5, r.pos52 >= 95 ? "At 52-week highs: no sellers from above, breakouts often run." : "At 52-week lows: no support below.");
+    if (f?.buy_pct != null) add("Buying last session (est.)", `${Math.round(f.buy_pct)}%`, f.buy_pct >= 58 ? 1 : f.buy_pct <= 42 ? -1 : 0, 1, "Share of volume estimated as buying (where each 5-min bar closed in its range).");
+    if (f?.rel_vol != null) add("Volume vs usual", `<span class="${f.rel_vol >= 1.5 ? "hot" : ""}">${tmNum(f.rel_vol, 1)}x</span>`, 0, 0, f.rel_vol >= 1.5 ? "Heavy volume: big players are active, moves tend to carry." : "Normal or light volume.");
+    if (f?.cmf20 != null) add("Money flow 20 days", `${f.cmf20 > 0 ? "+" : ""}${f.cmf20.toFixed(2)}`, f.cmf20 >= .08 ? 1 : f.cmf20 <= -.08 ? -1 : 0, .5, "Chaikin money flow: positive = accumulation over the last month.");
+    if (o?.pc_vol != null) add("Options put/call", tmNum(o.pc_vol, 2), o.pc_vol <= .6 ? 1 : o.pc_vol >= 1.3 ? -1 : 0, .5, "Below 0.7 = more calls (bullish bets); above 1.2 = more puts (hedging or bearish bets).");
+    if (o?.unusual?.length) {
+      const cp = o.unusual.reduce((a, u) => (a[/C$/.test(u[0]) ? 0 : 1] += u[4] || 0, a), [0, 0]), tot = cp[0] + cp[1];
+      if (tot) add("Unusual options", `${o.unusual.length} <small class="dim">${Math.round(cp[0] / tot * 100)}% calls</small>`, cp[0] / tot >= .7 ? 1 : cp[0] / tot <= .3 ? -1 : 0, .5, "New positions (volume far above open interest), weighted by premium. No buy/sell side: a call can be sold, too.");
+    }
+    if (dk?.sig) add("Dark pools", esc(dk.sig), dk.sig === "buying" ? 1 : dk.sig === "selling" ? -1 : 0, .5, `Off-exchange short-volume ratio vs its usual (z ${tmNum(dk.z, 1)}): high = institutions buying quietly.`);
+    if (m?.mood) add("News mood", esc(m.mood.replace(/_/g, " ")), /bull/.test(m.mood) ? 1 : /bear/.test(m.mood) ? -1 : 0, .5, `FinBERT on ${m.n} recent headlines${m.rel_mood ? `; vs its usual: ${String(m.rel_mood).replace(/_/g, " ")}` : ""}.`);
+    if (g) add("Focus setup", `<span class="${g.side > 0 ? "up" : "down"}">${g.side > 0 ? "▲ long" : "▼ short"} ${g.score}</span>`, g.side, 1.5, `${g.strats?.length || 1} strategies agree; scored on backtest grade, trend and flow.`);
+    if (nb || ns) add("Strategy alerts, 5 days", `<span class="up">${nb}▲</span> <span class="down">${ns}▼</span>`, nb > ns ? 1 : ns > nb ? -1 : 0, .5, "New signals from the site's strategies on this stock.");
+    const lean = sc >= 2.5 ? "up" : sc <= -2.5 ? "down" : "flat";
+    const pm = (O?.premarket || []).find(x => x.t === t);
+    const dayIv = o?.atm_iv != null ? o.atm_iv / Math.sqrt(252) : null, px = r.price;
+    const wild = (ernDays != null && ernDays <= 1) || (dayIv != null && dayIv >= 3) || (f?.rel_vol || 0) >= 2;
+    const head = ernDays === 0 ? "Earnings today: expect a big move either way" : ernDays === 1 ? "Earnings tomorrow: positioning day"
+      : { up: "Leaning higher", down: "Leaning lower", flat: "No clear lean" }[lean] + (wild ? ", with big swings likely" : lean === "flat" ? ": mixed signals" : "");
+    const pos = D.filter(d => d[2] > 0).map(d => d[0]), neg = D.filter(d => d[2] < 0).map(d => d[0]);
+    const txt = [];
+    txt.push(`${esc(disp(t))}${r.name ? ` (${esc(r.name)})` : ""} last traded at ${money(px)}, ${r.chg1d == null ? "" : `${r.chg1d >= 0 ? "up" : "down"} ${Math.abs(r.chg1d).toFixed(1)}% on the day, `}${r.vs200 == null ? "" : `${Math.abs(r.vs200).toFixed(0)}% ${r.vs200 >= 0 ? "above" : "below"} its 200-day average`}.`);
+    if (pm) txt.push(`Pre-market it's ${pm.chg >= 0 ? "up" : "down"} ${Math.abs(pm.chg).toFixed(1)}%.`);
+    if (pos.length || neg.length) txt.push([pos.length ? `Helping: ${pos.slice(0, 5).join(", ")}.` : "", neg.length ? `Weighing: ${neg.slice(0, 5).join(", ")}.` : ""].filter(Boolean).join(" "));
+    if (ern) txt.push(ernDays <= 1 ? `Reports earnings ${ernDays === 0 ? "today" : "tomorrow"} ${ern.time === "bmo" ? "before the open" : ern.time === "amc" ? "after the close" : ""}${ern.eps_est != null ? ` (EPS estimate ${ern.eps_est})` : ""}: the report outweighs every other signal here, and gaps of several % are normal.`
+      : `Next earnings ${esc(fmtDate(ern.date, { day: "numeric", month: "short" }))} (in ${ernDays} days).`);
+    if (dayIv != null) txt.push(`Options price a typical day of about ±${dayIv.toFixed(1)}% (${money(px * (1 - dayIv / 100))}–${money(px * (1 + dayIv / 100))})${o.exp_move != null ? ` and ±${tmNum(o.exp_move, 1)}% by ${esc(fmtDate(o.atm_exp, { day: "numeric", month: "short" }))}` : ""}.`);
+    if (O?.character === "wild" && !wild) txt.push("The whole market is jumpy today, so expect bigger swings than this stock's usual.");
+    // levels: max pain walls of the nearest expiry, 200-day, 52-week
+    const LV = [];
+    const E0 = mp?.expiries?.find(e => e.expiry >= today) || null;
+    if (E0) {
+      if (E0.call_wall) LV.push(["Call wall " + fmtDate(E0.expiry, { day: "numeric", month: "short" }), E0.call_wall, "Biggest call open interest: often a ceiling into expiry."]);
+      if (E0.max_pain) LV.push(["Max pain " + fmtDate(E0.expiry, { day: "numeric", month: "short" }), E0.max_pain, "Where the most options expire worthless: price is often pulled toward it near expiry."]);
+      if (E0.put_wall) LV.push(["Put wall " + fmtDate(E0.expiry, { day: "numeric", month: "short" }), E0.put_wall, "Biggest put open interest: often a floor into expiry."]);
+    }
+    if (r.vs200 != null && px) LV.push(["200-day average", px / (1 + r.vs200 / 100), "The long-term trend line: often support or resistance."]);
+    if (r.hi52) LV.push(["52-week high", r.hi52, "A break above has no sellers from above."]);
+    if (r.lo52) LV.push(["52-week low", r.lo52, ""]);
+    LV.sort((a, b) => b[1] - a[1]);
+    const scen = [];
+    if (px) {
+      const ab = LV.filter(l => l[1] > px * 1.002 && /^(Call wall|200-day|52-week high)/.test(l[0])).pop(), be = LV.filter(l => l[1] < px * .998 && /^(Put wall|200-day|52-week low)/.test(l[0]))[0];
+      if (ab) scen.push([1, `A move above ${money(ab[1])} (${ab[0]}) would clear the nearest ceiling.`]);
+      if (be) scen.push([-1, `A drop below ${money(be[1])} (${ab && ab[0] === be[0] ? "" : be[0]}) would break the nearest floor and puts sellers in control.`.replace(" ()", "")]);
+    }
+    const ar = e => e > 0 ? `<span class="ar up" aria-label="helps">▲</span>` : e < 0 ? `<span class="ar down" aria-label="weighs">▼</span>` : `<span class="ar dim" aria-label="neutral">·</span>`;
+    const left = `<div class="olh l-${lean}"><h3>${esc(head)}</h3><div class="olchips"><span>Lean <b>${{ up: "Leaning higher", down: "Leaning lower", flat: "No clear lean" }[lean]}</b></span><span>Day <b>${ernDays != null && ernDays <= 1 ? "Earnings" : wild ? "Jumpy" : "Normal"}</b></span><span>Confidence <b>${Math.abs(sc) >= 5 && !wild ? "medium" : "low"}</b></span>${dayIv != null ? `<span>Typical move <b>±${dayIv.toFixed(1)}%</b></span>` : ""}</div>
+      <ul class="oltxt">${txt.map(x => `<li>${x}</li>`).join("")}</ul></div>`
+      + (scen.length ? `<p class="sub2">What would change the picture</p>` + scen.map(([sd, x]) => `<p class="olsc"><b class="${sd > 0 ? "up" : "down"}">${sd > 0 ? "▲" : "▼"}</b> ${x}</p>`).join("") : "")
+      + ((al0 => al0 ? `<p class="olsc">· There's a Focus setup on it: <a href="#terminal" data-tmsig="${esc(al0.id)}">see the trade on the chart</a>.</p>` : "")(g ? tmAlertFor(t, g.side, g.strats) : null));
+    let right = `<p class="sub2">What's moving it <span style="text-transform:none;letter-spacing:0">· ▲ helps, ▼ weighs · hover for why</span></p>`
+      + (D.length ? D.map(([n, v, e, why]) => `<div class="tr oldr" title="${esc(why)}"><span>${esc(n)}</span><span class="r">${v}</span>${ar(e)}</div>`).join("") : `<p class="empty2">Loading the data on ${esc(disp(t))}…</p>`);
+    if (LV.length) right += `<p class="sub2">Key levels${mp?.oi_date ? ` · options open interest of ${esc(fmtDate(mp.oi_date, { day: "numeric", month: "short" }))}` : ""}</p>`
+      + LV.map(([n, v, why]) => `<div class="tr ollv" title="${esc(why)}"><span>${esc(n)}</span><span class="r">${money(v)}</span><span class="r">${px ? tmPct((v / px - 1) * 100, 1) : ""}</span></div>`).join("");
+    right += `<div class="secacts" style="margin-top:10px"><a href="#terminal-${encodeURIComponent(t)}" data-tmseltab="${esc(t)}:FLOW"><b>FLOW</b>Buying / selling</a>${stk ? `<a href="#terminal-${encodeURIComponent(t)}" data-tmseltab="${esc(t)}:OMON"><b>OMON</b>Options</a>` : ""}<a href="#terminal-${encodeURIComponent(t)}" data-tmseltab="${esc(t)}:CN"><b>CN</b>News</a></div>`;
+    const body = `<div class="olw"><div>${left}</div><div>${right}</div></div><p class="fine2">A rule-based read of the site's numbers on ${esc(disp(t))}, not a forecast and not advice. ${stk ? "Flow and options are from the last update of the Terminal flow (every ~10 minutes in US hours)." : "Flow and options data are for stocks only."}</p>`;
+    return { body, upd: tmUpd(F) };
+  }
 
   // FOCUS: the few alerts worth a look, each with its reasons
   TM_R.focus = () => {
