@@ -278,13 +278,22 @@ def main() -> None:
         spots, oi_date = {}, None
         a_syms = [s.replace("-", ".") for s in syms]
         for i in range(0, len(a_syms), 50):
-            got = spot_prices(a_syms[i:i + 50])
+            try:
+                got = spot_prices(a_syms[i:i + 50])
+            except Exception as ex:
+                print(f"  ! prices {i}: {ex}")
+                got = {}
             spots.update({k.replace(".", "-"): v for k, v in got.items()})
 
     out.mkdir(parents=True, exist_ok=True)
     index, hist_rows, srcs = [], [], {}
     for i, sym in enumerate(syms):
         S = spots.get(sym)
+        if not S and not a.demo:
+            try:                                       # Alpaca busy or down: Cboe's file carries the (delayed) price too
+                S = cboe_chain(sym, today, band=BAND, days_out=DAYS_OUT)[0]
+            except Exception:
+                S = None
         if not S:
             print(f"  ! {sym}: no price, skipped")
             continue
