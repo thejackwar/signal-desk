@@ -10,24 +10,24 @@ The idea (Giacomo, Nov 2026):
 Exact rules tested here (every one is a switch, see VARIANTS):
   Universe    S&P 500 (default) or S&P 100, current members; 20-day average dollar volume >= $10M.
   Pre-market  gain = last pre-market price (before 09:30) vs yesterday's close. Must be at least
-              0.5%, 1%, 2% (default), 3% or 5%.
+              0.5%, 1% (default), 2%, 3% or 5%.
   Cap         "none" (default) or "6": skip gains above 6% (huge gaps are mostly earnings / big news).
   Climbing    how long the pre-market has been going up:
                 "any"    no condition
-                "30m"    last pre-market price above the price 30 minutes earlier (09:00)
-                "60m"    ... above the price 60 minutes earlier (08:30) and above the pre-market VWAP (default)
+                "30m"    last pre-market price above the price 30 minutes earlier (09:00) (default)
+                "60m"    ... above the price 60 minutes earlier (08:30) and above the pre-market VWAP
                 "120m"   ... above the price 2 hours earlier (07:30) and above the pre-market VWAP
                 "steady" every 15-minute checkpoint from 08:30 to 09:30 higher than the one before
               (no trade before a checkpoint = yesterday's close is used)
   PM volume   pre-market dollar volume: "any", at least $1M (default) or at least $5M (thin pre-markets
               move on a handful of trades).
-  Daily trend as of yesterday's close: "any" (default), "20" close > SMA20, "50" close > SMA50,
+  Daily trend as of yesterday's close: "any", "20" close > SMA20 (default), "50" close > SMA50,
               "50_200" close > SMA50 > SMA200, "up5" close above the close 5 days earlier.
   Entry       "open": buy at the 09:30 open (default); "5m": only if the first 5-minute candle closes green
               (above its open) - buy at its close, 09:35.
   Stop        1%, 2% (default), 3% under the entry, or "none".
-  Target      1%, 2%, 3% (default), 5% above the entry, or "none".
-  Time exit   whatever is still open is sold at 10:30, 12:00 or the 15:55 close (default "eod").
+  Target      1%, 2%, 3%, 5% (default) above the entry, or "none".
+  Time exit   whatever is still open is sold at 10:30 (default), 12:00 or the 15:55 close.
   Side        "long" (the strategy). "short" is the same signal traded the other way, shown only as a
               check: a classic finding is that big pre-market gaps fade after the open.
   Exit rules  stop first if a bar hits both (cautious); a gap through a level fills at the bar's open.
@@ -65,8 +65,12 @@ COST = 0.0003
 MAX_POS = 5
 OPEN_MIN = 1.004
 
-DEFAULT = {"univ": "sp500", "pm": "2", "cap": "none", "climb": "60m", "pmvol": "1m", "trend": "any",
-           "entry": "open", "stop": "2", "tp": "3", "exit": "eod", "side": "long"}
+# default = the best set-up of the trend follow-up that held up on both 2021-2023 and the unseen 2024+
+DEFAULT = {"univ": "sp500", "pm": "1", "cap": "none", "climb": "30m", "pmvol": "1m", "trend": "20",
+           "entry": "open", "stop": "2", "tp": "5", "exit": "1030", "side": "long"}
+# the first version (no daily trend, out at the close): kept on the page to show what the trend filter adds
+PLAIN = {"univ": "sp500", "pm": "2", "cap": "none", "climb": "60m", "pmvol": "1m", "trend": "any",
+         "entry": "open", "stop": "2", "tp": "3", "exit": "eod", "side": "long"}
 VARIANTS = {
     "univ": ["sp100", "sp500"],
     "pm": ["0.5", "1", "2", "3", "5"],
@@ -217,7 +221,7 @@ def trade(c: dict, v: dict) -> dict:
             break
     if px is None:                          # half-day session: out at the last bar
         px, at = (b[5 * (n - 1) + 3] if n > i0 else entry), "close"
-    ret = sgn * (px / entry - 1) - 2 * COST
+    ret = sgn * (px / entry - 1) - 2 * v.get("cost", COST)
     risk = abs(entry - stop) if stop else entry * 0.02
     return {"s": c["s"], "d": c["d"], "pc": round(c["pc"], 2), "gain": round(c["gain"] * 100, 2),
             "in": round(entry, 2), "sl": round(stop, 2) if stop else None, "tp": round(tgt, 2) if tgt else None,
@@ -323,6 +327,21 @@ def main() -> None:
     res["base"] = stats(base, spy)
     res["base_trades_recent"] = [{k: t[k] for k in t if k != "rv"} for t in sorted(base, key=lambda t: t["d"])[-300:]]
 
+    st = stats(run(cands, PLAIN), spy); st.pop("curve", None)
+    res["plain"] = {"v": PLAIN, **st}
+    # does the edge survive worse fills at the open? (0.03% a side is the default)
+    res["cost_check"] = {}
+    for cst in (0.0, 0.0003, 0.0006, 0.001):
+        st = stats(run(cands, {**DEFAULT, "cost": cst}), spy); st.pop("curve", None)
+        res["cost_check"][f"{cst * 100:.2f}"] = {k: st.get(k) for k in KEYS}
+    sc = []
+    prev_c = None
+    for b_ in spy_rows:
+        if b_["t"][:10] < FROM:
+            prev_c = b_["c"]; continue
+        sc.append([b_["t"][:10], round(b_["c"] / prev_c, 4)])
+    res["spy_curve"] = sc[::max(1, len(sc) // 150)] + sc[-1:]
+
     res["sweeps"] = {}                      # one switch at a time around the default
     for k, opts in VARIANTS.items():
         res["sweeps"][k] = {}
@@ -393,6 +412,9 @@ def main() -> None:
                     te_ = stats([t for t in ts if t["d"] >= "2024-01-01"], spy)
                     res["trend_check"].append({
                         "v": {k: v[k] for k in ("pm", "climb", "trend", "stop", "tp", "exit")},
+                        "curve": (full.get("curve") or [])[::2] + (full.get("curve") or [])[-1:],
+                        "recent": [{k: t[k] for k in ("s", "d", "gain", "in", "out", "why", "at", "pct")}
+                                   for t in sorted(ts, key=lambda t: t["d"])[-40:]],
                         "full": {k: full.get(k) for k in KEYS},
                         "by_year": {y: o["acct"] for y, o in (full.get("by_year") or {}).items()},
                         "train": {k: tr_.get(k) for k in KEYS}, "test": {k: te_.get(k) for k in KEYS}})
