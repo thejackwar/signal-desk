@@ -122,13 +122,22 @@ def analyse(spot: float, contracts: list[tuple[date, str, float, float]], today:
 # ------------------------------------------------------------------ Alpaca
 def contracts_for(sym: str, spot: float, today: date) -> tuple[list, str | None, str]:
     """[(expiry, "C"/"P", strike, open interest)], the open interest's date, and the source."""
-    try:
-        cS, cc, cd, _ = cboe_chain(sym, today, band=BAND, days_out=DAYS_OUT)
-        out = [(c["exp"], c["type"], c["strike"], c["oi"]) for c in cc if c["oi"] > 0]
-        if out:
-            return out, cd, "cboe"
-    except Exception as ex:
-        print(f"  . {sym}: Cboe failed ({type(ex).__name__}), using Alpaca")
+    for wait in (0, 3, 10):                       # Cboe's CDN turns some requests away when they come fast: retry
+        time.sleep(wait)
+        try:
+            cS, cc, cd, _ = cboe_chain(sym, today, band=BAND, days_out=DAYS_OUT)
+            out = [(c["exp"], c["type"], c["strike"], c["oi"]) for c in cc if c["oi"] > 0]
+            if out:
+                return out, cd, "cboe"
+            break
+        except urllib.error.HTTPError as ex:
+            err = f"HTTP {ex.code}"
+            if ex.code == 404:
+                break
+        except Exception as ex:
+            err = type(ex).__name__
+    else:
+        print(f"  . {sym}: Cboe failed ({err}), using Alpaca")
     out, d = contracts_alpaca(sym, spot, today)
     return out, d, "alpaca"
 
