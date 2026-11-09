@@ -1,0 +1,15 @@
+name: Data Worker check
+
+# Calls a few endpoints of the data Worker and prints a summary (handy after a deploy).
+on:
+  workflow_dispatch:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - run: |
+          W=https://trendlines.guerragiacomo00.workers.dev
+          curl -s "$W/?volscan=sp500" | python3 -c "import json,sys;d=json.load(sys.stdin);r=d.get('rows',{});print('volscan', d.get('error'), d.get('end'), d.get('partial'), len(r));top=sorted(r.items(),key=lambda x:-(x[1][4] or 0))[:8];[print(k,v) for k,v in top];print('>=10M sh:',sum((v[4] or 0)>=1e7 for v in r.values()))"
+          for tf in 1D 5D 1M 3M YTD 5Y; do curl -s "$W/?grid=AAPL,NVDA,BRK-B&tf=$tf" | python3 -c "import json,sys;d=json.load(sys.stdin);b=d.get('bars',{});print('$tf', d.get('error'), {k:(len(v), v[0][:5] if v else None, v[-1][:5] if v else None) for k,v in b.items()})"; done
