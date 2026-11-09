@@ -1,0 +1,40 @@
+name: Gap-Down Short
+
+# engine/gap_down_short.py - backtest of "short the opening-range break after a gap down" on the
+# S&P 100 / S&P 500 (5-minute bars, from 2021), plus the buy-the-gap-fill mirror.
+# Runs by hand (workflow_dispatch) and when the engine changes.
+on:
+  push:
+    branches: [main]
+    paths: ["engine/gap_down_short.py"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: gap-down-short
+  cancel-in-progress: false
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 240
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Backtest
+        env:
+          ALPACA_KEY_ID: ${{ secrets.ALPACA_KEY_ID }}
+          ALPACA_SECRET_KEY: ${{ secrets.ALPACA_SECRET_KEY }}
+        run: python -u engine/gap_down_short.py
+      - name: Publish
+        run: |
+          git config user.name "signal-desk-bot"
+          git config user.email "signal-desk-bot@users.noreply.github.com"
+          git add docs/data/gapdown
+          git diff --cached --quiet && exit 0
+          git commit -m "Gap-Down Short backtest $(date -u +%F\ %H:%M)"
+          for i in 1 2 3; do git pull --rebase && git push && break; sleep 5; done
