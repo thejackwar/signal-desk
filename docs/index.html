@@ -7892,10 +7892,18 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
       ${newsFor(a.ticker, 3)}
       <div class="secacts"><a href="#alert-${idx}" data-tmnosig><b>ALRT</b>Alert page</a><a href="#terminal-${encodeURIComponent(a.ticker)}" data-tmseltab="${esc(a.ticker)}:DES"><b>DES</b>Everything on ${esc(disp(a.ticker))}</a>${LAB_IND[a.strategy] ? `<a href="#strategylab-${LAB_IND[a.strategy]}"><b>BT</b>Backtest the strategy</a>` : ""}<a href="#strategy-${slug(a.strategy)}"><b>HOW</b>How it works</a><a href="#terminal" data-tmpxfor="${esc(a.ticker)}"><b>PXA</b>Price alert</a></div>`;
   }
+  // the chart frame reports its latest candle, incl. pre-market and after-hours (chart.js postPrice)
+  addEventListener("message", e => {
+    if (e.origin !== location.origin || e.data?.type !== "ics-price") return;
+    S.xp = S.xp || {}; S.xp[e.data.sym] = { ...e.data, at: Date.now() };
+    if (S.tmSel === e.data.sym) tmTrdSide();
+  });
+  const tmXp = t => { const x = S.xp?.[t]; return x && Date.now() - x.at < 20 * 6e4 && x.session !== "regular" ? x : null; };
   function tmTickerSide(t) {
-    const r = S.stockBy[t] || {}, A = (S.feed?.alerts || []).filter(a => a.ticker === t).slice(0, 8), now = tmPx(t) ?? r.price;
+    const r = S.stockBy[t] || {}, A = (S.feed?.alerts || []).filter(a => a.ticker === t).slice(0, 8), X = tmXp(t), now = X ? X.price : tmPx(t) ?? r.price;
+    const hm = X ? new Date(X.t * 1000).toISOString().slice(11, 16) : "";
     return `<div class="trdhd"><b>${esc(disp(t))}</b><span>${esc(r.name || "")}</span></div>
-      <div class="kpis"><div><small>Price</small><b data-lp="${esc(t)}">${money(now)}</b></div><div><small>Today</small><b>${tmPct(r.chg1d, 2)}</b></div><div><small>1 month</small><b>${tmPct(r.chg1m)}</b></div><div><small>vs 200-day</small><b>${tmPct(r.vs200)}</b></div></div>
+      <div class="kpis"><div><small>${X ? (X.session === "pre" ? "Pre-market" : "After hours") : "Price"}</small><b${X ? "" : ` data-lp="${esc(t)}"`}>${money(now)}</b>${X ? `<small class="dim" style="text-transform:none;letter-spacing:0">${hm} NY · 15 min delay</small>` : ""}</div>${X ? `<div><small>${X.session === "pre" ? "vs last close" : "vs today's close"}</small><b>${tmPct(X.chg, 2)}</b><small class="dim" style="text-transform:none;letter-spacing:0">close ${money(X.ref)}</small></div>` : `<div><small>Today</small><b>${tmPct(r.chg1d, 2)}</b></div>`}<div><small>1 month</small><b>${tmPct(r.chg1m)}</b></div><div><small>vs 200-day</small><b>${tmPct(r.vs200)}</b></div></div>
       ${tmTrdMarket(t)}
       <h4>Signals on ${esc(disp(t))}</h4>${A.length ? A.map(a => { const up = a.side === "bullish"; return `<button type="button" class="tr al${S.tmSig === a.id ? " on" : ""}" data-tmsig="${esc(a.id)}"><span class="dim">${esc(fmtDate(a.date, { day: "numeric", month: "short" }))}</span><span class="tk">${esc(disp(a.ticker).slice(0, 8))}</span><span class="${up ? "side-b" : "side-s"}">${up ? "▲" : "▼"}</span><span>${esc(stratName(a.strategy))}</span><span class="r dim">${esc(a.strength?.label || "")}</span></button>`; }).join("") : `<p class="empty2">No recent signals. Draw your own levels on the chart.</p>`}
       <p class="fine2">Tap any signal (here, in Alerts, Focus or Live trades) to see that trade on the chart: entry, “wrong if” level, the strategy's own lines and why it fired. Draw with the tools on the left of the chart; drawings are saved on this device.</p>
@@ -8276,7 +8284,7 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
     if (m?.mood) add("News mood", esc(m.mood.replace(/_/g, " ")), /bull/.test(m.mood) ? 1 : /bear/.test(m.mood) ? -1 : 0, .5, `FinBERT on ${m.n} recent headlines${m.rel_mood ? `; vs its usual: ${String(m.rel_mood).replace(/_/g, " ")}` : ""}.`);
     if (g) add("Focus setup", `<span class="${g.side > 0 ? "up" : "down"}">${g.side > 0 ? "▲ long" : "▼ short"} ${g.score}</span>`, g.side, 1.5, `${g.strats?.length || 1} strategies agree; scored on backtest grade, trend and flow.`);
     if (nb || ns) add("Strategy alerts, 5 days", `<span class="up">${nb}▲</span> <span class="down">${ns}▼</span>`, nb > ns ? 1 : ns > nb ? -1 : 0, .5, "New signals from the site's strategies on this stock.");
-    const pm = (O?.premarket || []).find(x => x.t === t);
+    const xp = tmXp(t), pm = (xp?.session === "pre" && xp.chg != null ? { chg: xp.chg } : null) || (O?.premarket || []).find(x => x.t === t);
     if (pm) add("Pre-market", tmPct(pm.chg, 1), pm.chg >= 1 ? 1 : pm.chg <= -1 ? -1 : 0, Math.abs(pm.chg) >= 3 ? 2.5 : 1.5, "Where it trades before the open: the clearest hint of how it opens.");
     const lean = sc >= 2.5 ? "up" : sc <= -2.5 ? "down" : "flat";
     const dayIv = o?.atm_iv != null ? o.atm_iv / Math.sqrt(252) : null, px = r.price;

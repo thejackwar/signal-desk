@@ -421,11 +421,26 @@ $("tfs").addEventListener("click", e => {
 });
 
 function drawTitle() {
+  postPrice();
   const c = DATA.frames[S.tf], last = c[c.length - 1], prev = c[c.length - 2];
   const ch = prev ? last.close / prev.close - 1 : null;
   const name = NAMES[DATA.sym] && NAMES[DATA.sym] !== label(DATA.sym) ? NAMES[DATA.sym] : { stock: "Stock", crypto: "Crypto", commodity: "Commodity" }[DATA.kind];
   $("title").innerHTML = `<small>${esc(name)} · ${TF_TXT[S.tf]}</small>${esc(label(DATA.sym))}<span class="px">${fmt(last.close)}</span>` +
     (ch === null ? "" : `<span class="chg ${ch >= 0 ? "up" : "down"}">${pctTxt(ch)}</span>`) + liveBadge();
+}
+// tell the page around the chart (the Terminal) the latest price, with pre-market / after-hours change vs the last close
+let lastPost = "";
+function postPrice() {
+  if (parent === window || DATA?.kind !== "stock" || DATA.fallback) return;
+  const I = ["1m", "5m", "15m", "30m"].map(k => DATA.frames[k]).find(c => c?.length), D = DATA.frames.D;
+  if (!I || !D?.length) return;
+  const b = I[I.length - 1], m = Math.floor((b.time % 86400) / 60), dayI = Math.floor(b.time / 86400), dayD = Math.floor(D[D.length - 1].time / 86400);
+  const session = m < 570 ? "pre" : m >= 960 ? "post" : "regular";
+  // pre-market: vs the last regular close; regular: vs yesterday's close; after-hours: vs today's close
+  const ref = session === "regular" ? (dayD === dayI ? D[D.length - 2] : D[D.length - 1])?.close : D[D.length - 1]?.close;
+  const msg = { type: "ics-price", sym: DATA.sym, price: b.close, t: b.time, session, ref, chg: ref ? (b.close / ref - 1) * 100 : null, ext: !!DATA.ext };
+  const key = JSON.stringify(msg); if (key === lastPost) return; lastPost = key;
+  try { parent.postMessage(msg, location.origin); } catch {}
 }
 
 // ------------------------------------------------------------------ drawings (kept per market)
