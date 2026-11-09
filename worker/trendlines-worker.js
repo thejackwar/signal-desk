@@ -2,7 +2,8 @@
 // Holds the Alpaca keys (secrets ALPACA_KEY_ID, ALPACA_SECRET_KEY) so they never reach the browser.
 // GET /?symbol=AAPL  ->  { symbol, end, frames: { W, D, "30m", "15m", "5m" } }
 // Each bar is [t, open, high, low, close]; t = New York wall-clock time written as if UTC (seconds).
-// W/D bars carry their New York date at 00:00. Intraday bars: regular hours only (9:30-16:00).
+// W/D bars carry their New York date at 00:00. Intraday bars: regular hours only (9:30-16:00), or with
+// &hours=all the extended session too (pre-market 4:00-9:30 and after-hours 16:00-20:00 New York).
 // Data exactly as trendlines.py loads it (feed=sip, adjustment=all, end = now - 16 min).
 //
 // Crypto: GET /?symbol=BTC-USD (also BTC, BTCUSD, BTC/USD)  ->  { symbol, market: "crypto", source, end,
@@ -128,7 +129,7 @@ async function cachedHistory(sym, tf, start, end, today, env, cache) {
   return bars;
 }
 
-function shape(bars, kind) {
+function shape(bars, kind, ext) {
   bars = bars.map(b => [nyWall(b.t), b.o, b.h, b.l, b.c, b.v ?? 0]).sort((a, b) => a[0] - b[0]);
   const out = [];
   if (kind === "session") {
@@ -137,7 +138,7 @@ function shape(bars, kind) {
       if (b[0] === prev) continue;                         // duplicate timestamp: keep the first
       prev = b[0];
       const m = Math.floor((b[0] % 86400) / 60);
-      if (m >= 570 && m < 960) out.push(b);                // 9:30-16:00 New York
+      if (ext ? m >= 240 && m < 1200 : m >= 570 && m < 960) out.push(b);   // 9:30-16:00 New York (extended: 4:00-20:00)
     }
   } else {
     let prevT = null;
@@ -272,7 +273,8 @@ export default {
 
     // same request within a minute: answer from the cache (older candles are cached separately for the day)
     const cache = typeof caches !== "undefined" ? caches.default : null;
-    const key = new Request(`https://trendlines.cache/${sym}`);
+    const ext = url.searchParams.get("hours") === "all";
+    const key = new Request(`https://trendlines.cache/${sym}${ext ? "/ext" : ""}`);
     if (cache) { const hit = await cache.match(key); if (hit) return hit; }
 
     const end = Date.now() - 16 * 60e3;                    // free plan: SIP data 15+ minutes old
@@ -282,10 +284,10 @@ export default {
       const got = await Promise.all(names.map(k => fetchSeriesFast(alpacaSym, SERIES[k][0], SERIES[k][1], end, env, cache)));
       const frames = {};
       names.forEach((k, i) => {
-        frames[k] = shape(got[i], SERIES[k][2]);
+        frames[k] = shape(got[i], SERIES[k][2], ext);
       });
       if (!frames.D.length) return json({ error: `No data for ${sym}.` }, 404);
-      const res = json({ symbol: sym, end: new Date(end).toISOString(), frames }, 200, { "Cache-Control": "max-age=60" });
+      const res = json({ symbol: sym, end: new Date(end).toISOString(), hours: ext ? "all" : "rth", frames }, 200, { "Cache-Control": "max-age=60" });
       if (cache) ctx?.waitUntil?.(cache.put(key, res.clone()));
       return res;
     } catch (e) {

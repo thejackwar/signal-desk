@@ -125,10 +125,10 @@ const PRESETS = [
 function loadPrefs() { try { return JSON.parse(localStorage.getItem(PREF_KEY)) || {}; } catch { return {}; } }
 const saved = loadPrefs();
 const S = { sym: "SPY", tf: "D", on: Array.isArray(saved.on) ? saved.on.filter(id => DEF[id]) : ["ma2", "ma3", "vol", "rsi", "sr", "cpat"], params: saved.params || {}, open: null,
-  tool: "cursor", magnet: saved.magnet !== false, keep: false, hideDr: false };
+  tool: "cursor", magnet: saved.magnet !== false, keep: false, hideDr: false, ext: saved.ext !== false };   // ext: pre-market + after-hours candles (stocks)
 // prefs v2 (Nov 2026): chart patterns and major support/resistance are on by default, also for people who saved choices before
 if (Array.isArray(saved.on) && (saved.pv || 1) < 2) for (const id of ["sr", "cpat"]) if (!S.on.includes(id)) S.on.push(id);
-const savePrefs = () => { const q = new URLSearchParams(location.search); if (q.get("pat") || q.get("st")) return; try { localStorage.setItem(PREF_KEY, JSON.stringify({ on: S.on, params: S.params, magnet: S.magnet, pv: 2 })); } catch {} };
+const savePrefs = () => { const q = new URLSearchParams(location.search); if (q.get("pat") || q.get("st")) return; try { localStorage.setItem(PREF_KEY, JSON.stringify({ on: S.on, params: S.params, magnet: S.magnet, ext: S.ext, pv: 2 })); } catch {} };
 if ((saved.pv || 1) < 2) savePrefs();
 // Signal view: chart.html?sig=<alert id>&m=<market>[&u=sp500]#TICKER/D draws one alert's trade on the chart.
 // embed=1: chart only (the Terminal shows it in a panel next to its own explanation).
@@ -195,7 +195,9 @@ async function fetchJson(url) {
   if (!r.ok || js.error) throw new Error(js.error || `HTTP ${r.status}`);
   return js;
 }
-const worker = sym => fetchJson(`${API.replace(/\/$/, "")}/?symbol=${encodeURIComponent(sym)}`);
+const worker = (sym, ext) => fetchJson(`${API.replace(/\/$/, "")}/?symbol=${encodeURIComponent(sym)}${ext ? "&hours=all" : ""}`);
+// extended hours: a New York wall-clock time (as the candles carry it) before 9:30 or from 16:00
+const isExtBar = t => { const m = Math.floor((t % 86400) / 60); return m < 570 || m >= 960; };
 
 async function getData(sym) {
   const kind = kindOf(sym);
@@ -211,8 +213,10 @@ async function getData(sym) {
     return { sym, kind, frames: L.buildFrames(payload), source };
   }
   try {
-    const payload = await worker(sym);
-    return { sym, kind, frames: L.buildFrames(payload), source: "Alpaca, all US exchanges, regular hours, at least 15 minutes old." };
+    const ext = S.ext, payload = await worker(sym, ext);
+    const extOn = ext && payload.hours === "all";      // an older data server ignores &hours=all
+    return { sym, kind, frames: L.buildFrames(payload), ext: extOn,
+      source: `Alpaca, all US exchanges, ${extOn ? "with pre-market (4:00–9:30) and after-hours (16:00–20:00) candles shown faded" : "regular hours"}, at least 15 minutes old.` };
   } catch (e) {
     const folder = SP100.has(sym) ? "data/stocks/" : "data/sp500/stocks/";    // the rest of the S&P 500 has its own folder
     const js = await fetchJson(`${folder}${encodeURIComponent(sym)}.json`).catch(() => { throw new Error(`the data server didn't answer (${e.message})`); });
@@ -239,7 +243,7 @@ async function load1m(d) {
     }
     d.frames["1m"] = rows.map(k => ({ time: Math.floor(k[0] / 1000), open: +k[1], high: +k[2], low: +k[3], close: +k[4], volume: +k[5] }));
   } else {
-    const js = await fetchJson(`${API.replace(/\/$/, "")}/?vp=${encodeURIComponent(d.sym)}&range=5&hours=rth`)
+    const js = await fetchJson(`${API.replace(/\/$/, "")}/?vp=${encodeURIComponent(d.sym)}&range=5&hours=${d.ext ? "all" : "rth"}`)
       .catch(e => { throw /No ticker/.test(e.message) ? new Error("the data server needs updating (paste worker/trendlines-worker.js into Cloudflare again)") : e; });
     d.frames["1m"] = L.toCandles(js.bars || []);
   }
@@ -581,6 +585,7 @@ function doAct(b) {
   else if (a === "ind") showPicker(picker().hidden);
   else if (a === "full") setFull(!isFull());
   else if (a === "fit" && VIEW) VIEW.main.timeScale().fitContent();
+  else if (a === "ext") { S.ext = !S.ext; savePrefs(); if (S.sym) load(S.sym); }
   else if (a === "recent" && VIEW) VIEW.showRecent();
   else if (a === "patreset" && SIG?.pat) {     // tap twice: the first tap asks, so a stray tap doesn't wipe your edits
     if (b.dataset.armed) resetPat();
@@ -594,7 +599,8 @@ function syncDrawButtons() {
   drawToolbar();
   if (key) $("dtools").querySelector(key)?.focus({ preventScroll: true });
   const set = (a, v) => document.querySelectorAll(`#card [data-act="${a}"]`).forEach(b => b.setAttribute("aria-pressed", String(v)));
-  set("magnet", S.magnet); set("keep", S.keep); set("hide", S.hideDr); set("full", isFull());
+  set("magnet", S.magnet); set("keep", S.keep); set("hide", S.hideDr); set("full", isFull()); set("ext", S.ext);
+  const xb = document.querySelector('#card [data-act="ext"]'); if (xb) xb.hidden = !(DATA?.kind === "stock" && !DATA.fallback);
   const fb = document.querySelector('#card [data-act="full"]');
   if (fb) { fb.innerHTML = ICO(isFull() ? FULL_ICO.on : FULL_ICO.off); fb.title = isFull() ? "Exit full screen (Shift+F or Esc)" : "Full screen (Shift+F)"; fb.setAttribute("aria-label", isFull() ? "Exit full screen" : "Full screen"); }
   $("hint").textContent = hintText();
@@ -655,9 +661,16 @@ function render(keepRange) {
   const mainLg = document.createElement("div"); mainLg.className = "lg"; mainEl.appendChild(mainLg);
   const main = LW.createChart(mainEl, baseOptions(!panesOn.length, true));   // TradingView credit once, on the price chart
   main.priceScale("right").applyOptions({ scaleMargins: { top: 0.06, bottom: active.includes("vol") ? 0.2 : 0.06 } });
+  // pre-market / after-hours candles drawn faded, as on TradingView, so the regular session stands out
+  const extFade = DATA.ext && STEP[S.tf] < 86400, xUp = alpha(COL.cup, .42), xDn = alpha(COL.cdn, .42);
+  const candleRow = b => {
+    const r = { time: b.time, open: b.open, high: b.high, low: b.low, close: b.close };
+    if (extFade && isExtBar(b.time)) { const col = b.close >= b.open ? xUp : xDn; r.color = col; r.wickColor = col; r.borderColor = col; }
+    return r;
+  };
   const cs = main.addCandlestickSeries({ upColor: COL.cup, downColor: COL.cdn, wickUpColor: COL.cup, wickDownColor: COL.cdn, borderVisible: false,
     priceLineColor: COL.grey, priceLineStyle: LW.LineStyle.Dotted, priceFormat: { type: "price", precision: dp(c[n - 1].close), minMove: 10 ** -dp(c[n - 1].close) } });
-  cs.setData([...c.map(b => ({ time: b.time, open: b.open, high: b.high, low: b.low, close: b.close })), ...ws]);
+  cs.setData([...c.map(candleRow), ...ws]);
 
   const legend = [], legendIds = [];   // main legend rows (html for candle i) and the tool each belongs to
   const reads = [];       // readings: {id, color, name, text, tone}
@@ -1069,7 +1082,7 @@ function render(keepRange) {
   syncDrawButtons();
 
   // live prices: redraw the candles in place (indicators catch up when a new candle opens)
-  const setCandles = () => cs.setData([...c.map(b => ({ time: b.time, open: b.open, high: b.high, low: b.low, close: b.close })), ...ws]);
+  const setCandles = () => cs.setData([...c.map(candleRow), ...ws]);
   VIEW = { main, showRecent, setCandles, destroy() { ro.disconnect(); layer.destroy(); for (const a of charts) a.chart.remove(); } };
   drawReads(reads);
   $("note").textContent = `${DATA.source} ${c.length} candles. ${STEP[tf] < 86400 && DATA.kind === "stock" ? "Times are New York time." : DATA.kind === "crypto" && STEP[tf] < 86400 ? "Times are UTC." : ""}`;
@@ -1088,7 +1101,7 @@ const nyNow = () => {
     hour: "2-digit", minute: "2-digit", second: "2-digit" }).formatToParts(new Date())) p[type] = +value;
   return Date.UTC(p.year, p.month - 1, p.day, p.hour, p.minute, p.second) / 1000;   // New York wall clock, "as if UTC" like the candles
 };
-const usOpen = ny => { const d = new Date(ny * 1000), m = d.getUTCHours() * 60 + d.getUTCMinutes(), wd = d.getUTCDay(); return wd > 0 && wd < 6 && m >= 570 && m < 960; };
+const usOpen = (ny, ext) => { const d = new Date(ny * 1000), m = d.getUTCHours() * 60 + d.getUTCMinutes(), wd = d.getUTCDay(); return wd > 0 && wd < 6 && (ext ? m >= 240 && m < 1200 : m >= 570 && m < 960); };
 // start of the candle a New York wall time falls in (same anchors as chart-lib: sessions from 9:30, weeks from Monday)
 function periodStart(ny, tf) {
   const day = Math.floor(ny / 86400) * 86400;
@@ -1100,7 +1113,7 @@ function periodStart(ny, tf) {
 function liveBadge() {
   if (!LIVE) return "";
   const fresh = LIVE.at && Date.now() - LIVE.at < (LIVE.kind === "crypto" ? 30e3 : 60e3);
-  return `<span class="live${fresh ? "" : " idle"}" title="${esc(LIVE.kind === "crypto" ? "Live from Binance, every trade" : "Last candle follows the real-time IEX price every 15 seconds; the rest of the chart is Alpaca's full data, 15 minutes delayed")}">${fresh ? "LIVE" : LIVE.kind === "stock" && !usOpen(nyNow()) ? "Market closed" : "Connecting…"}</span>`;
+  return `<span class="live${fresh ? "" : " idle"}" title="${esc(LIVE.kind === "crypto" ? "Live from Binance, every trade" : "Last candle follows the real-time IEX price every 15 seconds; the rest of the chart is Alpaca's full data, 15 minutes delayed")}">${fresh ? "LIVE" : LIVE.kind === "stock" && !usOpen(nyNow(), DATA?.ext) ? "Market closed" : "Connecting…"}</span>`;
 }
 let paintQ = false;
 function paint(newCandle) {
@@ -1140,7 +1153,7 @@ function liveStart() {
   const kindQ = SP100.has(sym) ? "stocks" : "sp500";
   let timer, reload, dead = false;
   const tick = async () => {
-    if (dead || document.hidden || !usOpen(nyNow())) { drawTitle(); return; }
+    if (dead || document.hidden || !usOpen(nyNow(), DATA?.ext)) { drawTitle(); return; }
     try {
       const r = await fetch(`${API.replace(/\/$/, "")}/?quotes=${kindQ}`);
       const q = (await r.json())?.q?.[sym];
@@ -1149,6 +1162,7 @@ function liveStart() {
       let fresh = false;
       for (const [tf, c] of Object.entries(DATA.frames)) {
         const last = c[c.length - 1]; if (!last) continue;
+        if (STEP[tf] >= 86400 && !usOpen(ny)) continue;     // daily/weekly candles follow the regular session only
         const t0 = periodStart(ny, tf);
         if (t0 < last.time) continue;                       // the data is already past this point
         if (t0 === last.time) { last.close = p; last.high = Math.max(last.high, p); last.low = Math.min(last.low, p); }
@@ -1160,7 +1174,7 @@ function liveStart() {
   };
   // every 5 minutes in US hours: the full (15-minute delayed) candles, so the intraday ones fill in
   const refresh = async () => {
-    if (dead || document.hidden || !usOpen(nyNow()) || STEP[S.tf] >= 86400) return;
+    if (dead || document.hidden || !usOpen(nyNow(), DATA?.ext) || STEP[S.tf] >= 86400) return;
     try {
       const d = await getData(sym);
       if (S.tf === "1m") await load1m(d).catch(() => { d.frames["1m"] = DATA?.frames["1m"]; });
