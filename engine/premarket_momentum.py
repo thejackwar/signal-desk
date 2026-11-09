@@ -378,6 +378,26 @@ def main() -> None:
                            "top": [{"v": v, "train": cut(i), "test": cut(o)} for _, v, i, o in tried[:15]]}
     print(f"walk-forward: {len(tried)} set-ups ({time.time() - t0:.0f}s)", flush=True)
 
+    # follow-up (Nov 2026): the daily-trend set-ups, with earlier exits, checked year by year and
+    # on 2021-2023 vs the unseen 2024+ - is the trend filter real or luck?
+    res["trend_check"] = []
+    for pm in ("0.5", "1", "2"):
+        for climb in ("30m", "60m", "120m"):
+            for tr in ("20", "50", "up5"):
+                for stop, tp, ex in (("2", "3", "eod"), ("2", "3", "1030"), ("2", "5", "1030"),
+                                     ("2", "none", "1030"), ("1", "2", "1030"), ("2", "none", "1200")):
+                    v = {**DEFAULT, "pm": pm, "climb": climb, "trend": tr, "stop": stop, "tp": tp, "exit": ex}
+                    ts = run(cands, v)
+                    full = stats(ts, spy)
+                    tr_ = stats([t for t in ts if t["d"] < "2024-01-01"], spy)
+                    te_ = stats([t for t in ts if t["d"] >= "2024-01-01"], spy)
+                    res["trend_check"].append({
+                        "v": {k: v[k] for k in ("pm", "climb", "trend", "stop", "tp", "exit")},
+                        "full": {k: full.get(k) for k in KEYS},
+                        "by_year": {y: o["acct"] for y, o in (full.get("by_year") or {}).items()},
+                        "train": {k: tr_.get(k) for k in KEYS}, "test": {k: te_.get(k) for k in KEYS}})
+    print(f"trend check done ({time.time() - t0:.0f}s)", flush=True)
+
     out = Path("/tmp/premarket-demo.json") if a.demo else OUT_DIR / "backtest.json"
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(json.dumps(res, separators=(",", ":")))
