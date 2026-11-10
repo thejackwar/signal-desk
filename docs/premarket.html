@@ -176,6 +176,11 @@ tr[data-k] { cursor: pointer; }
     <p class="verdict" id="verdict"></p>
   </div>
 
+  <h2>Live</h2>
+  <p id="lv-p">Every New York morning at 09:25 (15:25 in Italy) the default rules scan the S&amp;P 500. The picks go to the phone and are paper traded: bought at the 09:30 open, sold by 10:30. Paper trades, not advice.</p>
+  <div class="tw"><table id="lv-today"></table></div>
+  <div class="tw" style="margin-top:12px"><table id="lv-days"></table></div>
+
   <h2>Was it luck?</h2>
   <p>The best settings were chosen on 2021–2023. Here is how the settings you picked did on those years and on 2024–2026, which the choice never saw.</p>
   <div class="cards2" id="luck"></div>
@@ -390,7 +395,22 @@ document.addEventListener("click", e => {
   save(); render();
 });
 
+function liveView(L) {
+  if (!L?.days?.length) { $("lv-today").innerHTML = `<tbody><tr><td class="fine" style="text-align:left;white-space:normal">The first scan runs on the next New York morning at 09:25 (15:25 in Italy).</td></tr></tbody>`; return; }
+  const ds = L.days.slice().sort((a, b) => a.date < b.date ? 1 : -1), d = ds[0];
+  const tr = Object.fromEntries((d.trades || []).map(t => [t.s, t]));
+  $("lv-today").innerHTML = `<thead><tr><th>${esc(fmtD(d.date))} · scanned ${esc(d.scanned)} NY</th><th>Pre-market</th><th>Price</th><th>Stop ≈</th><th>Target ≈</th><th>Paper result</th></tr></thead><tbody>` +
+    (d.picks.length ? d.picks.map(p => { const t = tr[p.s]; return `<tr><td><a href="chart.html#${esc(p.s)}">${esc(p.s)}</a></td><td class="up">${pc(p.gain, 2)}</td><td>${p.px}</td><td>${(p.px * .98).toFixed(2)}</td><td>${(p.px * 1.05).toFixed(2)}</td><td class="${tone(t?.pct)}">${t ? (t.pct == null ? esc(t.why) : `${pc(t.pct, 2)} · ${esc(WHY[t.why] || t.why)} ${esc(t.at || "")}`) : "open"}</td></tr>`; }).join("")
+      : `<tr><td colspan="6" class="fine" style="text-align:left">No stock passed the rules: no trades.</td></tr>`) + `</tbody>`;
+  const done = ds.filter(x => x.settled);
+  if (!done.length) { $("lv-days").innerHTML = ""; return; }
+  const eq = done[0].equity ?? 1;
+  $("lv-days").innerHTML = `<thead><tr><th>Day (since ${esc(fmtD(L.start))}: ${pc((eq - 1) * 100, 2)})</th><th>Trades</th><th>Account</th></tr></thead><tbody>` +
+    done.map(x => `<tr><td>${esc(fmtD(x.date))}</td><td>${(x.trades || []).filter(t => t.pct != null).map(t => `${esc(t.s)} <span class="${tone(t.pct)}">${pc(t.pct, 1)}</span>`).join(" · ") || "none"}</td><td class="${tone(x.acct_pct)}">${pc(x.acct_pct, 2)}</td></tr>`).join("") + `</tbody>`;
+}
+
 (async () => {
+  load("data/premarket/live.json").then(liveView);
   B = await load("data/premarket/backtest.json");
   if (!B?.trend_check) { $("big").innerHTML = `<div class="empty">The backtest is running on GitHub. Check back soon.</div>`; return; }
   if (!S.pm || !cur()) Object.assign(S, pick(B.default));

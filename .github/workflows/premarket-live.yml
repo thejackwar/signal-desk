@@ -1,0 +1,56 @@
+name: Premarket Momentum live
+
+# engine/premarket_live.py - the morning scan of the Premarket Momentum strategy, phone alerts on the ntfy
+# topic <NTFY_PREFIX>-premarket and paper trades in docs/data/premarket/live.json.
+#   09:25 New York  scan    (top 5 S&P 500 stocks up 1%+ and still climbing in the pre-market, in a daily uptrend)
+#   10:29 New York  remind  (sell what's left at 10:30)
+#   10:50 New York  settle  (paper trades replayed on official 5-minute bars, like the backtest)
+# The script works out which step is due from the New York time, so the hours below cover summer and winter
+# time. Started on time by the scheduler Worker (worker/README.md); GitHub's own timer is the backup.
+on:
+  schedule:
+    - cron: "25 13,14 * * 1-5"   # scan
+    - cron: "29 14,15 * * 1-5"   # remind
+    - cron: "50 14,15 * * 1-5"   # settle
+    - cron: "20 18 * * 1-5"      # settle (backup)
+  workflow_dispatch:
+    inputs:
+      force:
+        description: "Run a step now regardless of the time (empty = whatever is due)"
+        type: choice
+        options: ["", scan, remind, settle]
+        default: ""
+
+permissions:
+  contents: write
+
+concurrency:
+  group: premarket-live
+  cancel-in-progress: false
+
+jobs:
+  run:
+    if: github.event_name != 'schedule' || vars.EXTERNAL_SCHEDULER != 'on'   # the scheduler Worker starts it on time instead (worker/README.md)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Run
+        env:
+          ALPACA_KEY_ID: ${{ secrets.ALPACA_KEY_ID }}
+          ALPACA_SECRET_KEY: ${{ secrets.ALPACA_SECRET_KEY }}
+          NTFY_PREFIX: ${{ vars.NTFY_PREFIX }}
+          FORCE: ${{ inputs.force }}
+        run: python engine/premarket_live.py ${FORCE:+--force $FORCE}
+      - name: Publish
+        run: |
+          git config user.name "signal-desk-bot"
+          git config user.email "signal-desk-bot@users.noreply.github.com"
+          mkdir -p docs/data/premarket
+          git add docs/data/premarket/live.json 2>/dev/null || true
+          git diff --cached --quiet && exit 0
+          git commit -m "Premarket Momentum live $(date -u +%F\ %H:%M)"
+          for i in 1 2 3; do git pull --rebase && git push && break; sleep 5; done
