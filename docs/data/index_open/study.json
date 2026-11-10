@@ -1,0 +1,6076 @@
+{
+ "generated": "2026-11-10T23:52+00:00",
+ "from": "2020-01-01",
+ "to": "2026-11-10",
+ "cost_pct_side": 0.01,
+ "symbols": {
+  "SPY": {
+   "none": {
+    "all": {
+     "days": 1721,
+     "30m": {
+      "match": 47.9,
+      "trade_win": 44.7,
+      "trade_avg": -0.035,
+      "pf": 0.74,
+      "total": -45.5,
+      "first_0.1": {
+       "good_first": 39.2,
+       "bad_first": 57.2,
+       "neither": 3.7
+      },
+      "first_0.2": {
+       "good_first": 32.1,
+       "bad_first": 39.6,
+       "neither": 28.3
+      },
+      "first_0.3": {
+       "good_first": 22.6,
+       "bad_first": 25.4,
+       "neither": 52.0
+      }
+     },
+     "60m": {
+      "match": 49.4,
+      "trade_win": 46.4,
+      "trade_avg": -0.023,
+      "pf": 0.86,
+      "total": -33.8,
+      "first_0.1": {
+       "good_first": 40.5,
+       "bad_first": 58.5,
+       "neither": 1.0
+      },
+      "first_0.2": {
+       "good_first": 38.5,
+       "bad_first": 46.8,
+       "neither": 14.6
+      },
+      "first_0.3": {
+       "good_first": 31.1,
+       "bad_first": 34.6,
+       "neither": 34.3
+      }
+     }
+    },
+    "up_gaps": {
+     "days": 980,
+     "30m": {
+      "match": 50.9,
+      "trade_win": 47.4,
+      "trade_avg": -0.023,
+      "pf": 0.81,
+      "total": -20.5,
+      "first_0.1": {
+       "good_first": 41.9,
+       "bad_first": 53.9,
+       "neither": 4.2
+      },
+      "first_0.2": {
+       "good_first": 31.4,
+       "bad_first": 37.8,
+       "neither": 30.8
+      },
+      "first_0.3": {
+       "good_first": 20.5,
+       "bad_first": 22.9,
+       "neither": 56.6
+      }
+     },
+     "60m": {
+      "match": 51.8,
+      "trade_win": 49.8,
+      "trade_avg": -0.011,
+      "pf": 0.93,
+      "total": -10.9,
+      "first_0.1": {
+       "good_first": 43.7,
+       "bad_first": 55.0,
+       "neither": 1.3
+      },
+      "first_0.2": {
+       "good_first": 39.0,
+       "bad_first": 44.5,
+       "neither": 16.5
+      },
+      "first_0.3": {
+       "good_first": 29.7,
+       "bad_first": 33.2,
+       "neither": 37.1
+      }
+     }
+    },
+    "down_gaps": {
+     "days": 741,
+     "30m": {
+      "match": 44.0,
+      "trade_win": 41.0,
+      "trade_avg": -0.05,
+      "pf": 0.67,
+      "total": -31.5,
+      "first_0.1": {
+       "good_first": 35.5,
+       "bad_first": 61.5,
+       "neither": 3.0
+      },
+      "first_0.2": {
+       "good_first": 33.1,
+       "bad_first": 42.0,
+       "neither": 25.0
+      },
+      "first_0.3": {
+       "good_first": 25.4,
+       "bad_first": 28.7,
+       "neither": 45.9
+      }
+     },
+     "60m": {
+      "match": 46.2,
+      "trade_win": 41.8,
+      "trade_avg": -0.039,
+      "pf": 0.79,
+      "total": -25.7,
+      "first_0.1": {
+       "good_first": 36.3,
+       "bad_first": 63.0,
+       "neither": 0.7
+      },
+      "first_0.2": {
+       "good_first": 37.9,
+       "bad_first": 49.9,
+       "neither": 12.1
+      },
+      "first_0.3": {
+       "good_first": 32.9,
+       "bad_first": 36.6,
+       "neither": 30.5
+      }
+     }
+    },
+    "dev_2020_2023": {
+     "days": 1003,
+     "30m": {
+      "match": 46.9,
+      "trade_win": 43.8,
+      "trade_avg": -0.046,
+      "pf": 0.7,
+      "total": -37.1,
+      "first_0.1": {
+       "good_first": 35.8,
+       "bad_first": 62.0,
+       "neither": 2.2
+      },
+      "first_0.2": {
+       "good_first": 33.0,
+       "bad_first": 45.1,
+       "neither": 21.9
+      },
+      "first_0.3": {
+       "good_first": 25.4,
+       "bad_first": 30.5,
+       "neither": 44.1
+      }
+     },
+     "60m": {
+      "match": 48.7,
+      "trade_win": 46.5,
+      "trade_avg": -0.033,
+      "pf": 0.82,
+      "total": -29.2,
+      "first_0.1": {
+       "good_first": 36.6,
+       "bad_first": 62.8,
+       "neither": 0.6
+      },
+      "first_0.2": {
+       "good_first": 38.5,
+       "bad_first": 51.0,
+       "neither": 10.5
+      },
+      "first_0.3": {
+       "good_first": 33.4,
+       "bad_first": 39.0,
+       "neither": 27.6
+      }
+     }
+    },
+    "test_2024_on": {
+     "days": 718,
+     "30m": {
+      "match": 49.4,
+      "trade_win": 46.0,
+      "trade_avg": -0.02,
+      "pf": 0.82,
+      "total": -13.3,
+      "first_0.1": {
+       "good_first": 43.9,
+       "bad_first": 50.4,
+       "neither": 5.7
+      },
+      "first_0.2": {
+       "good_first": 30.9,
+       "bad_first": 31.9,
+       "neither": 37.2
+      },
+      "first_0.3": {
+       "good_first": 18.7,
+       "bad_first": 18.2,
+       "neither": 63.1
+      }
+     },
+     "60m": {
+      "match": 50.4,
+      "trade_win": 46.2,
+      "trade_avg": -0.009,
+      "pf": 0.94,
+      "total": -6.5,
+      "first_0.1": {
+       "good_first": 46.0,
+       "bad_first": 52.4,
+       "neither": 1.7
+      },
+      "first_0.2": {
+       "good_first": 38.6,
+       "bad_first": 40.9,
+       "neither": 20.5
+      },
+      "first_0.3": {
+       "good_first": 27.9,
+       "bad_first": 28.6,
+       "neither": 43.6
+      }
+     }
+    },
+    "by_gap": {
+     "under 0.25%": {
+      "days": 678,
+      "30m": {
+       "match": 46.9,
+       "trade_win": 43.2,
+       "trade_avg": -0.028,
+       "pf": 0.74,
+       "total": -17.2,
+       "first_0.1": {
+        "good_first": 41.6,
+        "bad_first": 51.5,
+        "neither": 6.9
+       },
+       "first_0.2": {
+        "good_first": 28.2,
+        "bad_first": 33.2,
+        "neither": 38.6
+       },
+       "first_0.3": {
+        "good_first": 16.7,
+        "bad_first": 17.8,
+        "neither": 65.5
+       }
+      },
+      "60m": {
+       "match": 47.6,
+       "trade_win": 43.4,
+       "trade_avg": -0.026,
+       "pf": 0.81,
+       "total": -16.3,
+       "first_0.1": {
+        "good_first": 44.0,
+        "bad_first": 54.0,
+        "neither": 2.1
+       },
+       "first_0.2": {
+        "good_first": 34.8,
+        "bad_first": 42.3,
+        "neither": 22.9
+       },
+       "first_0.3": {
+        "good_first": 24.9,
+        "bad_first": 28.5,
+        "neither": 46.6
+       }
+      }
+     },
+     "0.25-0.5%": {
+      "days": 474,
+      "30m": {
+       "match": 43.5,
+       "trade_win": 41.1,
+       "trade_avg": -0.045,
+       "pf": 0.65,
+       "total": -19.5,
+       "first_0.1": {
+        "good_first": 41.8,
+        "bad_first": 55.7,
+        "neither": 2.5
+       },
+       "first_0.2": {
+        "good_first": 30.8,
+        "bad_first": 38.8,
+        "neither": 30.4
+       },
+       "first_0.3": {
+        "good_first": 19.6,
+        "bad_first": 22.8,
+        "neither": 57.6
+       }
+      },
+      "60m": {
+       "match": 47.7,
+       "trade_win": 45.1,
+       "trade_avg": -0.039,
+       "pf": 0.76,
+       "total": -17.2,
+       "first_0.1": {
+        "good_first": 42.6,
+        "bad_first": 56.5,
+        "neither": 0.8
+       },
+       "first_0.2": {
+        "good_first": 36.7,
+        "bad_first": 47.0,
+        "neither": 16.2
+       },
+       "first_0.3": {
+        "good_first": 28.3,
+        "bad_first": 33.3,
+        "neither": 38.4
+       }
+      }
+     },
+     "0.5-1%": {
+      "days": 365,
+      "30m": {
+       "match": 52.3,
+       "trade_win": 47.9,
+       "trade_avg": -0.012,
+       "pf": 0.91,
+       "total": -4.3,
+       "first_0.1": {
+        "good_first": 39.5,
+        "bad_first": 59.5,
+        "neither": 1.1
+       },
+       "first_0.2": {
+        "good_first": 38.9,
+        "bad_first": 40.5,
+        "neither": 20.5
+       },
+       "first_0.3": {
+        "good_first": 29.6,
+        "bad_first": 28.2,
+        "neither": 42.2
+       }
+      },
+      "60m": {
+       "match": 52.6,
+       "trade_win": 50.4,
+       "trade_avg": -0.01,
+       "pf": 0.94,
+       "total": -4.0,
+       "first_0.1": {
+        "good_first": 40.3,
+        "bad_first": 59.7,
+        "neither": 0.0
+       },
+       "first_0.2": {
+        "good_first": 48.2,
+        "bad_first": 46.6,
+        "neither": 5.2
+       },
+       "first_0.3": {
+        "good_first": 40.0,
+        "bad_first": 37.3,
+        "neither": 22.7
+       }
+      }
+     },
+     "over 1%": {
+      "days": 204,
+      "30m": {
+       "match": 53.9,
+       "trade_win": 52.0,
+       "trade_avg": -0.075,
+       "pf": 0.69,
+       "total": -14.5,
+       "first_0.1": {
+        "good_first": 24.5,
+        "bad_first": 75.5,
+        "neither": 0.0
+       },
+       "first_0.2": {
+        "good_first": 36.3,
+        "bad_first": 60.8,
+        "neither": 2.9
+       },
+       "first_0.3": {
+        "good_first": 36.8,
+        "bad_first": 51.5,
+        "neither": 11.8
+       }
+      },
+      "60m": {
+       "match": 53.4,
+       "trade_win": 52.0,
+       "trade_avg": -0.0,
+       "pf": 1.0,
+       "total": -0.5,
+       "first_0.1": {
+        "good_first": 24.5,
+        "bad_first": 75.5,
+        "neither": 0.0
+       },
+       "first_0.2": {
+        "good_first": 37.7,
+        "bad_first": 61.8,
+        "neither": 0.5
+       },
+       "first_0.3": {
+        "good_first": 42.2,
+        "bad_first": 53.4,
+        "neither": 4.4
+       }
+      }
+     }
+    },
+    "by_year": {
+     "2020": {
+      "days": 252,
+      "30m": {
+       "match": 45.2,
+       "trade_win": 42.5,
+       "trade_avg": -0.104,
+       "pf": 0.49,
+       "total": -23.4,
+       "first_0.1": {
+        "good_first": 31.0,
+        "bad_first": 67.5,
+        "neither": 1.6
+       },
+       "first_0.2": {
+        "good_first": 31.3,
+        "bad_first": 48.8,
+        "neither": 19.8
+       },
+       "first_0.3": {
+        "good_first": 27.0,
+        "bad_first": 35.3,
+        "neither": 37.7
+       }
+      },
+      "60m": {
+       "match": 46.0,
+       "trade_win": 44.4,
+       "trade_avg": -0.078,
+       "pf": 0.67,
+       "total": -18.1,
+       "first_0.1": {
+        "good_first": 31.0,
+        "bad_first": 68.3,
+        "neither": 0.8
+       },
+       "first_0.2": {
+        "good_first": 35.3,
+        "bad_first": 54.4,
+        "neither": 10.3
+       },
+       "first_0.3": {
+        "good_first": 33.7,
+        "bad_first": 42.1,
+        "neither": 24.2
+       }
+      }
+     },
+     "2021": {
+      "days": 252,
+      "30m": {
+       "match": 43.7,
+       "trade_win": 40.5,
+       "trade_avg": -0.03,
+       "pf": 0.74,
+       "total": -7.3,
+       "first_0.1": {
+        "good_first": 38.5,
+        "bad_first": 56.7,
+        "neither": 4.8
+       },
+       "first_0.2": {
+        "good_first": 28.6,
+        "bad_first": 38.1,
+        "neither": 33.3
+       },
+       "first_0.3": {
+        "good_first": 17.9,
+        "bad_first": 21.4,
+        "neither": 60.7
+       }
+      },
+      "60m": {
+       "match": 50.4,
+       "trade_win": 47.6,
+       "trade_avg": -0.009,
+       "pf": 0.94,
+       "total": -2.3,
+       "first_0.1": {
+        "good_first": 40.9,
+        "bad_first": 58.3,
+        "neither": 0.8
+       },
+       "first_0.2": {
+        "good_first": 35.7,
+        "bad_first": 46.4,
+        "neither": 17.9
+       },
+       "first_0.3": {
+        "good_first": 26.6,
+        "bad_first": 30.6,
+        "neither": 42.9
+       }
+      }
+     },
+     "2022": {
+      "days": 250,
+      "30m": {
+       "match": 50.0,
+       "trade_win": 48.4,
+       "trade_avg": -0.007,
+       "pf": 0.96,
+       "total": -1.9,
+       "first_0.1": {
+        "good_first": 30.0,
+        "bad_first": 70.0,
+        "neither": 0.0
+       },
+       "first_0.2": {
+        "good_first": 41.6,
+        "bad_first": 52.8,
+        "neither": 5.6
+       },
+       "first_0.3": {
+        "good_first": 38.8,
+        "bad_first": 44.8,
+        "neither": 16.4
+       }
+      },
+      "60m": {
+       "match": 53.2,
+       "trade_win": 51.6,
+       "trade_avg": -0.023,
+       "pf": 0.9,
+       "total": -6.1,
+       "first_0.1": {
+        "good_first": 30.0,
+        "bad_first": 70.0,
+        "neither": 0.0
+       },
+       "first_0.2": {
+        "good_first": 44.0,
+        "bad_first": 54.8,
+        "neither": 1.2
+       },
+       "first_0.3": {
+        "good_first": 42.8,
+        "bad_first": 49.2,
+        "neither": 8.0
+       }
+      }
+     },
+     "2023": {
+      "days": 249,
+      "30m": {
+       "match": 48.6,
+       "trade_win": 43.8,
+       "trade_avg": -0.041,
+       "pf": 0.63,
+       "total": -9.7,
+       "first_0.1": {
+        "good_first": 43.8,
+        "bad_first": 53.8,
+        "neither": 2.4
+       },
+       "first_0.2": {
+        "good_first": 30.5,
+        "bad_first": 40.6,
+        "neither": 28.9
+       },
+       "first_0.3": {
+        "good_first": 18.1,
+        "bad_first": 20.5,
+        "neither": 61.4
+       }
+      },
+      "60m": {
+       "match": 45.0,
+       "trade_win": 42.2,
+       "trade_avg": -0.023,
+       "pf": 0.83,
+       "total": -5.8,
+       "first_0.1": {
+        "good_first": 44.6,
+        "bad_first": 54.6,
+        "neither": 0.8
+       },
+       "first_0.2": {
+        "good_first": 39.0,
+        "bad_first": 48.6,
+        "neither": 12.4
+       },
+       "first_0.3": {
+        "good_first": 30.5,
+        "bad_first": 34.1,
+        "neither": 35.3
+       }
+      }
+     },
+     "2024": {
+      "days": 252,
+      "30m": {
+       "match": 47.2,
+       "trade_win": 44.0,
+       "trade_avg": -0.019,
+       "pf": 0.77,
+       "total": -4.7,
+       "first_0.1": {
+        "good_first": 43.3,
+        "bad_first": 47.6,
+        "neither": 9.1
+       },
+       "first_0.2": {
+        "good_first": 23.8,
+        "bad_first": 25.4,
+        "neither": 50.8
+       },
+       "first_0.3": {
+        "good_first": 11.1,
+        "bad_first": 11.5,
+        "neither": 77.4
+       }
+      },
+      "60m": {
+       "match": 51.6,
+       "trade_win": 46.0,
+       "trade_avg": -0.01,
+       "pf": 0.92,
+       "total": -2.5,
+       "first_0.1": {
+        "good_first": 47.6,
+        "bad_first": 50.4,
+        "neither": 2.0
+       },
+       "first_0.2": {
+        "good_first": 34.5,
+        "bad_first": 37.7,
+        "neither": 27.8
+       },
+       "first_0.3": {
+        "good_first": 20.6,
+        "bad_first": 24.6,
+        "neither": 54.8
+       }
+      }
+     },
+     "2025": {
+      "days": 250,
+      "30m": {
+       "match": 49.6,
+       "trade_win": 46.0,
+       "trade_avg": -0.024,
+       "pf": 0.8,
+       "total": -6.0,
+       "first_0.1": {
+        "good_first": 39.6,
+        "bad_first": 54.8,
+        "neither": 5.6
+       },
+       "first_0.2": {
+        "good_first": 32.0,
+        "bad_first": 37.6,
+        "neither": 30.4
+       },
+       "first_0.3": {
+        "good_first": 24.0,
+        "bad_first": 22.8,
+        "neither": 53.2
+       }
+      },
+      "60m": {
+       "match": 48.8,
+       "trade_win": 44.8,
+       "trade_avg": -0.017,
+       "pf": 0.89,
+       "total": -4.3,
+       "first_0.1": {
+        "good_first": 40.8,
+        "bad_first": 56.4,
+        "neither": 2.8
+       },
+       "first_0.2": {
+        "good_first": 36.0,
+        "bad_first": 46.0,
+        "neither": 18.0
+       },
+       "first_0.3": {
+        "good_first": 31.2,
+        "bad_first": 31.6,
+        "neither": 37.2
+       }
+      }
+     },
+     "2026": {
+      "days": 216,
+      "30m": {
+       "match": 51.9,
+       "trade_win": 48.1,
+       "trade_avg": -0.015,
+       "pf": 0.87,
+       "total": -3.2,
+       "first_0.1": {
+        "good_first": 49.5,
+        "bad_first": 48.6,
+        "neither": 1.9
+       },
+       "first_0.2": {
+        "good_first": 38.0,
+        "bad_first": 32.9,
+        "neither": 29.2
+       },
+       "first_0.3": {
+        "good_first": 21.3,
+        "bad_first": 20.8,
+        "neither": 57.9
+       }
+      },
+      "60m": {
+       "match": 50.9,
+       "trade_win": 48.1,
+       "trade_avg": 0.002,
+       "pf": 1.01,
+       "total": 0.2,
+       "first_0.1": {
+        "good_first": 50.0,
+        "bad_first": 50.0,
+        "neither": 0.0
+       },
+       "first_0.2": {
+        "good_first": 46.3,
+        "bad_first": 38.9,
+        "neither": 14.8
+       },
+       "first_0.3": {
+        "good_first": 32.4,
+        "bad_first": 29.6,
+        "neither": 38.0
+       }
+      }
+     }
+    }
+   },
+   "with_market_trend": {
+    "all": {
+     "days": 894,
+     "30m": {
+      "match": 49.3,
+      "trade_win": 45.2,
+      "trade_avg": -0.036,
+      "pf": 0.72,
+      "total": -28.1,
+      "first_0.1": {
+       "good_first": 39.7,
+       "bad_first": 55.8,
+       "neither": 4.5
+      },
+      "first_0.2": {
+       "good_first": 29.6,
+       "bad_first": 38.9,
+       "neither": 31.4
+      },
+      "first_0.3": {
+       "good_first": 19.8,
+       "bad_first": 24.0,
+       "neither": 56.2
+      }
+     },
+     "60m": {
+      "match": 51.3,
+      "trade_win": 49.0,
+      "trade_avg": -0.026,
+      "pf": 0.85,
+      "total": -21.1,
+      "first_0.1": {
+       "good_first": 41.6,
+       "bad_first": 56.9,
+       "neither": 1.5
+      },
+      "first_0.2": {
+       "good_first": 36.7,
+       "bad_first": 46.1,
+       "neither": 17.2
+      },
+      "first_0.3": {
+       "good_first": 28.5,
+       "bad_first": 33.7,
+       "neither": 37.8
+      }
+     }
+    },
+    "up_gaps": {
+     "days": 656,
+     "30m": {
+      "match": 48.3,
+      "trade_win": 43.8,
+      "trade_avg": -0.034,
+      "pf": 0.66,
+      "total": -20.3,
+      "first_0.1": {
+       "good_first": 42.5,
+       "bad_first": 51.5,
+       "neither": 5.9
+      },
+      "first_0.2": {
+       "good_first": 25.8,
+       "bad_first": 33.8,
+       "neither": 40.4
+      },
+      "first_0.3": {
+       "good_first": 13.0,
+       "bad_first": 17.2,
+       "neither": 69.8
+      }
+     },
+     "60m": {
+      "match": 50.6,
+      "trade_win": 48.5,
+      "trade_avg": -0.036,
+      "pf": 0.73,
+      "total": -21.5,
+      "first_0.1": {
+       "good_first": 45.0,
+       "bad_first": 53.0,
+       "neither": 2.0
+      },
+      "first_0.2": {
+       "good_first": 34.1,
+       "bad_first": 42.7,
+       "neither": 23.2
+      },
+      "first_0.3": {
+       "good_first": 22.0,
+       "bad_first": 28.7,
+       "neither": 49.4
+      }
+     }
+    },
+    "down_gaps": {
+     "days": 238,
+     "30m": {
+      "match": 52.1,
+      "trade_win": 49.2,
+      "trade_avg": -0.042,
+      "pf": 0.8,
+      "total": -9.8,
+      "first_0.1": {
+       "good_first": 31.9,
+       "bad_first": 67.6,
+       "neither": 0.4
+      },
+      "first_0.2": {
+       "good_first": 40.3,
+       "bad_first": 52.9,
+       "neither": 6.7
+      },
+      "first_0.3": {
+       "good_first": 38.7,
+       "bad_first": 42.9,
+       "neither": 18.5
+      }
+     },
+     "60m": {
+      "match": 53.4,
+      "trade_win": 50.4,
+      "trade_avg": 0.004,
+      "pf": 1.02,
+      "total": 0.5,
+      "first_0.1": {
+       "good_first": 32.4,
+       "bad_first": 67.6,
+       "neither": 0.0
+      },
+      "first_0.2": {
+       "good_first": 43.7,
+       "bad_first": 55.5,
+       "neither": 0.8
+      },
+      "first_0.3": {
+       "good_first": 46.6,
+       "bad_first": 47.5,
+       "neither": 5.9
+      }
+     }
+    },
+    "dev_2020_2023": {
+     "days": 513,
+     "30m": {
+      "match": 48.1,
+      "trade_win": 44.2,
+      "trade_avg": -0.04,
+      "pf": 0.72,
+      "total": -18.9,
+      "first_0.1": {
+       "good_first": 36.1,
+       "bad_first": 60.8,
+       "neither": 3.1
+      },
+      "first_0.2": {
+       "good_first": 31.8,
+       "bad_first": 43.1,
+       "neither": 25.1
+      },
+      "first_0.3": {
+       "good_first": 23.8,
+       "bad_first": 28.3,
+       "neither": 48.0
+      }
+     },
+     "60m": {
+      "match": 51.1,
+      "trade_win": 49.3,
+      "trade_avg": -0.034,
+      "pf": 0.82,
+      "total": -16.5,
+      "first_0.1": {
+       "good_first": 37.4,
+       "bad_first": 61.4,
+       "neither": 1.2
+      },
+      "first_0.2": {
+       "good_first": 37.8,
+       "bad_first": 49.3,
+       "neither": 12.9
+      },
+      "first_0.3": {
+       "good_first": 32.0,
+       "bad_first": 37.4,
+       "neither": 30.6
+      }
+     }
+    },
+    "test_2024_on": {
+     "days": 381,
+     "30m": {
+      "match": 50.9,
+      "trade_win": 46.5,
+      "trade_avg": -0.031,
+      "pf": 0.72,
+      "total": -11.3,
+      "first_0.1": {
+       "good_first": 44.6,
+       "bad_first": 49.1,
+       "neither": 6.3
+      },
+      "first_0.2": {
+       "good_first": 26.8,
+       "bad_first": 33.3,
+       "neither": 39.9
+      },
+      "first_0.3": {
+       "good_first": 14.4,
+       "bad_first": 18.4,
+       "neither": 67.2
+      }
+     },
+     "60m": {
+      "match": 51.7,
+      "trade_win": 48.6,
+      "trade_avg": -0.014,
+      "pf": 0.9,
+      "total": -5.6,
+      "first_0.1": {
+       "good_first": 47.2,
+       "bad_first": 50.9,
+       "neither": 1.8
+      },
+      "first_0.2": {
+       "good_first": 35.2,
+       "bad_first": 41.7,
+       "neither": 23.1
+      },
+      "first_0.3": {
+       "good_first": 23.9,
+       "bad_first": 28.6,
+       "neither": 47.5
+      }
+     }
+    },
+    "by_gap": {
+     "under 0.25%": {
+      "days": 367,
+      "30m": {
+       "match": 51.2,
+       "trade_win": 46.0,
+       "trade_avg": -0.019,
+       "pf": 0.8,
+       "total": -6.8,
+       "first_0.1": {
+        "good_first": 41.4,
+        "bad_first": 51.0,
+        "neither": 7.6
+       },
+       "first_0.2": {
+        "good_first": 25.3,
+        "bad_first": 34.1,
+        "neither": 40.6
+       },
+       "first_0.3": {
+        "good_first": 14.7,
+        "bad_first": 16.6,
+        "neither": 68.7
+       }
+      },
+      "60m": {
+       "match": 51.2,
+       "trade_win": 48.2,
+       "trade_avg": -0.02,
+       "pf": 0.85,
+       "total": -7.2,
+       "first_0.1": {
+        "good_first": 44.4,
+        "bad_first": 53.1,
+        "neither": 2.5
+       },
+       "first_0.2": {
+        "good_first": 32.7,
+        "bad_first": 42.5,
+        "neither": 24.8
+       },
+       "first_0.3": {
+        "good_first": 23.7,
+        "bad_first": 27.2,
+        "neither": 49.0
+       }
+      }
+     },
+     "0.25-0.5%": {
+      "days": 249,
+      "30m": {
+       "match": 44.6,
+       "trade_win": 42.2,
+       "trade_avg": -0.043,
+       "pf": 0.65,
+       "total": -10.3,
+       "first_0.1": {
+        "good_first": 45.4,
+        "bad_first": 51.4,
+        "neither": 3.2
+       },
+       "first_0.2": {
+        "good_first": 29.7,
+        "bad_first": 37.8,
+        "neither": 32.5
+       },
+       "first_0.3": {
+        "good_first": 17.3,
+        "bad_first": 20.9,
+        "neither": 61.8
+       }
+      },
+      "60m": {
+       "match": 50.6,
+       "trade_win": 48.6,
+       "trade_avg": -0.032,
+       "pf": 0.8,
+       "total": -7.8,
+       "first_0.1": {
+        "good_first": 46.6,
+        "bad_first": 51.8,
+        "neither": 1.6
+       },
+       "first_0.2": {
+        "good_first": 36.5,
+        "bad_first": 44.6,
+        "neither": 18.9
+       },
+       "first_0.3": {
+        "good_first": 26.1,
+        "bad_first": 32.5,
+        "neither": 41.4
+       }
+      }
+     },
+     "0.5-1%": {
+      "days": 179,
+      "30m": {
+       "match": 48.0,
+       "trade_win": 43.0,
+       "trade_avg": -0.032,
+       "pf": 0.77,
+       "total": -5.7,
+       "first_0.1": {
+        "good_first": 38.0,
+        "bad_first": 59.8,
+        "neither": 2.2
+       },
+       "first_0.2": {
+        "good_first": 35.2,
+        "bad_first": 38.0,
+        "neither": 26.8
+       },
+       "first_0.3": {
+        "good_first": 24.6,
+        "bad_first": 28.5,
+        "neither": 46.9
+       }
+      },
+      "60m": {
+       "match": 50.8,
+       "trade_win": 49.2,
+       "trade_avg": -0.017,
+       "pf": 0.9,
+       "total": -3.2,
+       "first_0.1": {
+        "good_first": 39.7,
+        "bad_first": 60.3,
+        "neither": 0.0
+       },
+       "first_0.2": {
+        "good_first": 44.7,
+        "bad_first": 46.9,
+        "neither": 8.4
+       },
+       "first_0.3": {
+        "good_first": 33.0,
+        "bad_first": 38.5,
+        "neither": 28.5
+       }
+      }
+     },
+     "over 1%": {
+      "days": 99,
+      "30m": {
+       "match": 56.6,
+       "trade_win": 53.5,
+       "trade_avg": -0.091,
+       "pf": 0.64,
+       "total": -8.8,
+       "first_0.1": {
+        "good_first": 22.2,
+        "bad_first": 77.8,
+        "neither": 0.0
+       },
+       "first_0.2": {
+        "good_first": 35.4,
+        "bad_first": 61.6,
+        "neither": 3.0
+       },
+       "first_0.3": {
+        "good_first": 36.4,
+        "bad_first": 51.5,
+        "neither": 12.1
+       }
+      },
+      "60m": {
+       "match": 54.5,
+       "trade_win": 52.5,
+       "trade_avg": -0.045,
+       "pf": 0.85,
+       "total": -4.7,
+       "first_0.1": {
+        "good_first": 22.2,
+        "bad_first": 77.8,
+        "neither": 0.0
+       },
+       "first_0.2": {
+        "good_first": 37.4,
+        "bad_first": 61.6,
+        "neither": 1.0
+       },
+       "first_0.3": {
+        "good_first": 44.4,
+        "bad_first": 51.5,
+        "neither": 4.0
+       }
+      }
+     }
+    },
+    "by_year": {
+     "2020": {
+      "days": 140,
+      "30m": {
+       "match": 45.7,
+       "trade_win": 43.6,
+       "trade_avg": -0.101,
+       "pf": 0.47,
+       "total": -13.3,
+       "first_0.1": {
+        "good_first": 29.3,
+        "bad_first": 68.6,
+        "neither": 2.1
+       },
+       "first_0.2": {
+        "good_first": 27.1,
+        "bad_first": 48.6,
+        "neither": 24.3
+       },
+       "first_0.3": {
+        "good_first": 23.6,
+        "bad_first": 36.4,
+        "neither": 40.0
+       }
+      },
+      "60m": {
+       "match": 47.1,
+       "trade_win": 45.7,
+       "trade_avg": -0.139,
+       "pf": 0.49,
+       "total": -17.9,
+       "first_0.1": {
+        "good_first": 29.3,
+        "bad_first": 69.3,
+        "neither": 1.4
+       },
+       "first_0.2": {
+        "good_first": 31.4,
+        "bad_first": 55.0,
+        "neither": 13.6
+       },
+       "first_0.3": {
+        "good_first": 30.0,
+        "bad_first": 43.6,
+        "neither": 26.4
+       }
+      }
+     },
+     "2021": {
+      "days": 134,
+      "30m": {
+       "match": 48.5,
+       "trade_win": 42.5,
+       "trade_avg": -0.03,
+       "pf": 0.68,
+       "total": -4.0,
+       "first_0.1": {
+        "good_first": 38.8,
+        "bad_first": 55.2,
+        "neither": 6.0
+       },
+       "first_0.2": {
+        "good_first": 23.1,
+        "bad_first": 35.1,
+        "neither": 41.8
+       },
+       "first_0.3": {
+        "good_first": 11.9,
+        "bad_first": 16.4,
+        "neither": 71.6
+       }
+      },
+      "60m": {
+       "match": 51.5,
+       "trade_win": 48.5,
+       "trade_avg": -0.018,
+       "pf": 0.86,
+       "total": -2.4,
+       "first_0.1": {
+        "good_first": 42.5,
+        "bad_first": 56.0,
+        "neither": 1.5
+       },
+       "first_0.2": {
+        "good_first": 31.3,
+        "bad_first": 44.0,
+        "neither": 24.6
+       },
+       "first_0.3": {
+        "good_first": 20.1,
+        "bad_first": 26.1,
+        "neither": 53.7
+       }
+      }
+     },
+     "2022": {
+      "days": 117,
+      "30m": {
+       "match": 48.7,
+       "trade_win": 47.0,
+       "trade_avg": 0.001,
+       "pf": 1.01,
+       "total": -0.0,
+       "first_0.1": {
+        "good_first": 29.1,
+        "bad_first": 70.9,
+        "neither": 0.0
+       },
+       "first_0.2": {
+        "good_first": 45.3,
+        "bad_first": 47.9,
+        "neither": 6.8
+       },
+       "first_0.3": {
+        "good_first": 41.0,
+        "bad_first": 41.0,
+        "neither": 17.9
+       }
+      },
+      "60m": {
+       "match": 57.3,
+       "trade_win": 56.4,
+       "trade_avg": 0.007,
+       "pf": 1.03,
+       "total": 0.7,
+       "first_0.1": {
+        "good_first": 29.1,
+        "bad_first": 70.9,
+        "neither": 0.0
+       },
+       "first_0.2": {
+        "good_first": 47.9,
+        "bad_first": 51.3,
+        "neither": 0.9
+       },
+       "first_0.3": {
+        "good_first": 46.2,
+        "bad_first": 47.9,
+        "neither": 6.0
+       }
+      }
+     },
+     "2023": {
+      "days": 122,
+      "30m": {
+       "match": 50.0,
+       "trade_win": 44.3,
+       "trade_avg": -0.021,
+       "pf": 0.78,
+       "total": -2.6,
+       "first_0.1": {
+        "good_first": 47.5,
+        "bad_first": 48.4,
+        "neither": 4.1
+       },
+       "first_0.2": {
+        "good_first": 33.6,
+        "bad_first": 41.0,
+        "neither": 25.4
+       },
+       "first_0.3": {
+        "good_first": 20.5,
+        "bad_first": 19.7,
+        "neither": 59.8
+       }
+      },
+      "60m": {
+       "match": 49.2,
+       "trade_win": 47.5,
+       "trade_avg": 0.029,
+       "pf": 1.28,
+       "total": 3.6,
+       "first_0.1": {
+        "good_first": 49.2,
+        "bad_first": 49.2,
+        "neither": 1.6
+       },
+       "first_0.2": {
+        "good_first": 42.6,
+        "bad_first": 46.7,
+        "neither": 10.7
+       },
+       "first_0.3": {
+        "good_first": 33.6,
+        "bad_first": 32.8,
+        "neither": 33.6
+       }
+      }
+     },
+     "2024": {
+      "days": 130,
+      "30m": {
+       "match": 50.8,
+       "trade_win": 47.7,
+       "trade_avg": -0.026,
+       "pf": 0.7,
+       "total": -3.3,
+       "first_0.1": {
+        "good_first": 42.3,
+        "bad_first": 46.9,
+        "neither": 10.8
+       },
+       "first_0.2": {
+        "good_first": 17.7,
+        "bad_first": 25.4,
+        "neither": 56.9
+       },
+       "first_0.3": {
+        "good_first": 6.2,
+        "bad_first": 10.0,
+        "neither": 83.8
+       }
+      },
+      "60m": {
+       "match": 54.6,
+       "trade_win": 50.8,
+       "trade_avg": -0.007,
+       "pf": 0.94,
+       "total": -0.9,
+       "first_0.1": {
+        "good_first": 47.7,
+        "bad_first": 49.2,
+        "neither": 3.1
+       },
+       "first_0.2": {
+        "good_first": 29.2,
+        "bad_first": 36.9,
+        "neither": 33.8
+       },
+       "first_0.3": {
+        "good_first": 16.2,
+        "bad_first": 21.5,
+        "neither": 62.3
+       }
+      }
+     },
+     "2025": {
+      "days": 148,
+      "30m": {
+       "match": 48.6,
+       "trade_win": 42.6,
+       "trade_avg": -0.053,
+       "pf": 0.6,
+       "total": -7.6,
+       "first_0.1": {
+        "good_first": 39.9,
+        "bad_first": 54.1,
+        "neither": 6.1
+       },
+       "first_0.2": {
+        "good_first": 27.0,
+        "bad_first": 40.5,
+        "neither": 32.4
+       },
+       "first_0.3": {
+        "good_first": 18.2,
+        "bad_first": 22.3,
+        "neither": 59.5
+       }
+      },
+      "60m": {
+       "match": 49.3,
+       "trade_win": 46.6,
+       "trade_avg": -0.029,
+       "pf": 0.82,
+       "total": -4.3,
+       "first_0.1": {
+        "good_first": 41.9,
+        "bad_first": 56.1,
+        "neither": 2.0
+       },
+       "first_0.2": {
+        "good_first": 31.8,
+        "bad_first": 48.0,
+        "neither": 20.3
+       },
+       "first_0.3": {
+        "good_first": 26.4,
+        "bad_first": 33.1,
+        "neither": 40.5
+       }
+      }
+     },
+     "2026": {
+      "days": 103,
+      "30m": {
+       "match": 54.4,
+       "trade_win": 50.5,
+       "trade_avg": -0.007,
+       "pf": 0.94,
+       "total": -0.8,
+       "first_0.1": {
+        "good_first": 54.4,
+        "bad_first": 44.7,
+        "neither": 1.0
+       },
+       "first_0.2": {
+        "good_first": 37.9,
+        "bad_first": 33.0,
+        "neither": 29.1
+       },
+       "first_0.3": {
+        "good_first": 19.4,
+        "bad_first": 23.3,
+        "neither": 57.3
+       }
+      },
+      "60m": {
+       "match": 51.5,
+       "trade_win": 48.5,
+       "trade_avg": -0.003,
+       "pf": 0.98,
+       "total": -0.4,
+       "first_0.1": {
+        "good_first": 54.4,
+        "bad_first": 45.6,
+        "neither": 0.0
+       },
+       "first_0.2": {
+        "good_first": 47.6,
+        "bad_first": 38.8,
+        "neither": 13.6
+       },
+       "first_0.3": {
+        "good_first": 30.1,
+        "bad_first": 31.1,
+        "neither": 38.8
+       }
+      }
+     }
+    }
+   },
+   "late_agrees": {
+    "all": {
+     "days": 908,
+     "30m": {
+      "match": 47.9,
+      "trade_win": 43.6,
+      "trade_avg": -0.041,
+      "pf": 0.71,
+      "total": -31.3,
+      "first_0.1": {
+       "good_first": 38.4,
+       "bad_first": 57.8,
+       "neither": 3.7
+      },
+      "first_0.2": {
+       "good_first": 29.7,
+       "bad_first": 40.1,
+       "neither": 30.2
+      },
+      "first_0.3": {
+       "good_first": 21.7,
+       "bad_first": 25.8,
+       "neither": 52.5
+      }
+     },
+     "60m": {
+      "match": 49.0,
+      "trade_win": 46.4,
+      "trade_avg": -0.019,
+      "pf": 0.89,
+      "total": -16.6,
+      "first_0.1": {
+       "good_first": 40.0,
+       "bad_first": 59.1,
+       "neither": 0.9
+      },
+      "first_0.2": {
+       "good_first": 36.7,
+       "bad_first": 47.2,
+       "neither": 16.1
+      },
+      "first_0.3": {
+       "good_first": 29.6,
+       "bad_first": 35.8,
+       "neither": 34.6
+      }
+     }
+    },
+    "up_gaps": {
+     "days": 519,
+     "30m": {
+      "match": 48.9,
+      "trade_win": 44.5,
+      "trade_avg": -0.032,
+      "pf": 0.75,
+      "total": -15.5,
+      "first_0.1": {
+       "good_first": 41.6,
+       "bad_first": 54.7,
+       "neither": 3.7
+      },
+      "first_0.2": {
+       "good_first": 28.5,
+       "bad_first": 37.2,
+       "neither": 34.3
+      },
+      "first_0.3": {
+       "good_first": 18.7,
+       "bad_first": 22.9,
+       "neither": 58.4
+      }
+     },
+     "60m": {
+      "match": 51.1,
+      "trade_win": 48.9,
+      "trade_avg": -0.014,
+      "pf": 0.91,
+      "total": -7.4,
+      "first_0.1": {
+       "good_first": 43.5,
+       "bad_first": 55.7,
+       "neither": 0.8
+      },
+      "first_0.2": {
+       "good_first": 37.0,
+       "bad_first": 44.1,
+       "neither": 18.9
+      },
+      "first_0.3": {
+       "good_first": 26.6,
+       "bad_first": 34.3,
+       "neither": 39.1
+      }
+     }
+    },
+    "down_gaps": {
+     "days": 389,
+     "30m": {
+      "match": 46.5,
+      "trade_win": 42.4,
+      "trade_avg": -0.053,
+      "pf": 0.66,
+      "total": -18.7,
+      "first_0.1": {
+       "good_first": 34.2,
+       "bad_first": 62.0,
+       "neither": 3.9
+      },
+      "first_0.2": {
+       "good_first": 31.4,
+       "bad_first": 44.0,
+       "neither": 24.7
+      },
+      "first_0.3": {
+       "good_first": 25.7,
+       "bad_first": 29.6,
+       "neither": 44.7
+      }
+     },
+     "60m": {
+      "match": 46.3,
+      "trade_win": 42.9,
+      "trade_avg": -0.025,
+      "pf": 0.87,
+      "total": -9.9,
+      "first_0.1": {
+       "good_first": 35.2,
+       "bad_first": 63.8,
+       "neither": 1.0
+      },
+      "first_0.2": {
+       "good_first": 36.2,
+       "bad_first": 51.4,
+       "neither": 12.3
+      },
+      "first_0.3": {
+       "good_first": 33.7,
+       "bad_first": 37.8,
+       "neither": 28.5
+      }
+     }
+    },
+    "dev_2020_2023": {
+     "days": 521,
+     "30m": {
+      "match": 47.6,
+      "trade_win": 43.4,
+      "trade_avg": -0.044,
+      "pf": 0.71,
+      "total": -20.7,
+      "first_0.1": {
+       "good_first": 35.3,
+       "bad_first": 62.0,
+       "neither": 2.7
+      },
+      "first_0.2": {
+       "good_first": 30.3,
+       "bad_first": 45.1,
+       "neither": 24.6
+      },
+      "first_0.3": {
+       "good_first": 24.8,
+       "bad_first": 30.7,
+       "neither": 44.5
+      }
+     },
+     "60m": {
+      "match": 48.2,
+      "trade_win": 46.4,
+      "trade_avg": -0.024,
+      "pf": 0.87,
+      "total": -12.5,
+      "first_0.1": {
+       "good_first": 36.7,
+       "bad_first": 63.0,
+       "neither": 0.4
+      },
+      "first_0.2": {
+       "good_first": 36.5,
+       "bad_first": 51.1,
+       "neither": 12.5
+      },
+      "first_0.3": {
+       "good_first": 31.9,
+       "bad_first": 40.3,
+       "neither": 27.8
+      }
+     }
+    },
+    "test_2024_on": {
+     "days": 387,
+     "30m": {
+      "match": 48.3,
+      "trade_win": 43.9,
+      "trade_avg": -0.037,
+      "pf": 0.69,
+      "total": -13.4,
+      "first_0.1": {
+       "good_first": 42.6,
+       "bad_first": 52.2,
+       "neither": 5.2
+      },
+      "first_0.2": {
+       "good_first": 28.9,
+       "bad_first": 33.3,
+       "neither": 37.7
+      },
+      "first_0.3": {
+       "good_first": 17.6,
+       "bad_first": 19.1,
+       "neither": 63.3
+      }
+     },
+     "60m": {
+      "match": 50.1,
+      "trade_win": 46.3,
+      "trade_avg": -0.011,
+      "pf": 0.92,
+      "total": -4.6,
+      "first_0.1": {
+       "good_first": 44.4,
+       "bad_first": 54.0,
+       "neither": 1.6
+      },
+      "first_0.2": {
+       "good_first": 37.0,
+       "bad_first": 42.1,
+       "neither": 20.9
+      },
+      "first_0.3": {
+       "good_first": 26.6,
+       "bad_first": 29.7,
+       "neither": 43.7
+      }
+     }
+    },
+    "by_gap": {
+     "under 0.25%": {
+      "days": 336,
+      "30m": {
+       "match": 47.3,
+       "trade_win": 42.0,
+       "trade_avg": -0.024,
+       "pf": 0.76,
+       "total": -7.9,
+       "first_0.1": {
+        "good_first": 40.8,
+        "bad_first": 51.5,
+        "neither": 7.7
+       },
+       "first_0.2": {
+        "good_first": 25.9,
+        "bad_first": 33.6,
+        "neither": 40.5
+       },
+       "first_0.3": {
+        "good_first": 17.3,
+        "bad_first": 17.3,
+        "neither": 65.5
+       }
+      },
+      "60m": {
+       "match": 46.4,
+       "trade_win": 42.6,
+       "trade_avg": -0.007,
+       "pf": 0.94,
+       "total": -2.6,
+       "first_0.1": {
+        "good_first": 43.8,
+        "bad_first": 54.2,
+        "neither": 2.1
+       },
+       "first_0.2": {
+        "good_first": 33.0,
+        "bad_first": 42.3,
+        "neither": 24.7
+       },
+       "first_0.3": {
+        "good_first": 25.6,
+        "bad_first": 28.9,
+        "neither": 45.5
+       }
+      }
+     },
+     "0.25-0.5%": {
+      "days": 251,
+      "30m": {
+       "match": 40.6,
+       "trade_win": 37.8,
+       "trade_avg": -0.056,
+       "pf": 0.58,
+       "total": -13.1,
+       "first_0.1": {
+        "good_first": 41.8,
+        "bad_first": 56.2,
+        "neither": 2.0
+       },
+       "first_0.2": {
+        "good_first": 26.7,
+        "bad_first": 39.0,
+        "neither": 34.3
+       },
+       "first_0.3": {
+        "good_first": 15.5,
+        "bad_first": 23.1,
+        "neither": 61.4
+       }
+      },
+      "60m": {
+       "match": 49.4,
+       "trade_win": 47.4,
+       "trade_avg": -0.031,
+       "pf": 0.8,
+       "total": -7.6,
+       "first_0.1": {
+        "good_first": 42.6,
+        "bad_first": 57.0,
+        "neither": 0.4
+       },
+       "first_0.2": {
+        "good_first": 33.9,
+        "bad_first": 47.4,
+        "neither": 18.7
+       },
+       "first_0.3": {
+        "good_first": 23.9,
+        "bad_first": 34.7,
+        "neither": 41.4
+       }
+      }
+     },
+     "0.5-1%": {
+      "days": 204,
+      "30m": {
+       "match": 53.4,
+       "trade_win": 48.0,
+       "trade_avg": -0.025,
+       "pf": 0.82,
+       "total": -5.0,
+       "first_0.1": {
+        "good_first": 39.7,
+        "bad_first": 58.8,
+        "neither": 1.5
+       },
+       "first_0.2": {
+        "good_first": 37.3,
+        "bad_first": 38.2,
+        "neither": 24.5
+       },
+       "first_0.3": {
+        "good_first": 27.5,
+        "bad_first": 27.0,
+        "neither": 45.6
+       }
+      },
+      "60m": {
+       "match": 49.5,
+       "trade_win": 47.1,
+       "trade_avg": -0.037,
+       "pf": 0.8,
+       "total": -7.5,
+       "first_0.1": {
+        "good_first": 40.7,
+        "bad_first": 59.3,
+        "neither": 0.0
+       },
+       "first_0.2": {
+        "good_first": 47.1,
+        "bad_first": 45.6,
+        "neither": 7.4
+       },
+       "first_0.3": {
+        "good_first": 36.3,
+        "bad_first": 37.7,
+        "neither": 26.0
+       }
+      }
+     },
+     "over 1%": {
+      "days": 117,
+      "30m": {
+       "match": 55.6,
+       "trade_win": 53.0,
+       "trade_avg": -0.084,
+       "pf": 0.69,
+       "total": -9.6,
+       "first_0.1": {
+        "good_first": 22.2,
+        "bad_first": 77.8,
+        "neither": 0.0
+       },
+       "first_0.2": {
+        "good_first": 34.2,
+        "bad_first": 64.1,
+        "neither": 1.7
+       },
+       "first_0.3": {
+        "good_first": 37.6,
+        "bad_first": 53.8,
+        "neither": 8.5
+       }
+      },
+      "60m": {
+       "match": 54.7,
+       "trade_win": 53.8,
+       "trade_avg": 0.005,
+       "pf": 1.02,
+       "total": 0.2,
+       "first_0.1": {
+        "good_first": 22.2,
+        "bad_first": 77.8,
+        "neither": 0.0
+       },
+       "first_0.2": {
+        "good_first": 35.0,
+        "bad_first": 64.1,
+        "neither": 0.9
+       },
+       "first_0.3": {
+        "good_first": 41.9,
+        "bad_first": 54.7,
+        "neither": 3.4
+       }
+      }
+     }
+    },
+    "by_year": {
+     "2020": {
+      "days": 117,
+      "30m": {
+       "match": 43.6,
+       "trade_win": 40.2,
+       "trade_avg": -0.118,
+       "pf": 0.5,
+       "total": -13.1,
+       "first_0.1": {
+        "good_first": 23.9,
+        "bad_first": 73.5,
+        "neither": 2.6
+       },
+       "first_0.2": {
+        "good_first": 25.6,
+        "bad_first": 54.7,
+        "neither": 19.7
+       },
+       "first_0.3": {
+        "good_first": 23.9,
+        "bad_first": 41.0,
+        "neither": 35.0
+       }
+      },
+      "60m": {
+       "match": 44.4,
+       "trade_win": 43.6,
+       "trade_avg": -0.085,
+       "pf": 0.7,
+       "total": -9.7,
+       "first_0.1": {
+        "good_first": 23.9,
+        "bad_first": 75.2,
+        "neither": 0.9
+       },
+       "first_0.2": {
+        "good_first": 29.9,
+        "bad_first": 59.0,
+        "neither": 11.1
+       },
+       "first_0.3": {
+        "good_first": 29.1,
+        "bad_first": 48.7,
+        "neither": 22.2
+       }
+      }
+     },
+     "2021": {
+      "days": 147,
+      "30m": {
+       "match": 44.9,
+       "trade_win": 40.1,
+       "trade_avg": -0.037,
+       "pf": 0.68,
+       "total": -5.3,
+       "first_0.1": {
+        "good_first": 41.5,
+        "bad_first": 53.7,
+        "neither": 4.8
+       },
+       "first_0.2": {
+        "good_first": 24.5,
+        "bad_first": 35.4,
+        "neither": 40.1
+       },
+       "first_0.3": {
+        "good_first": 17.7,
+        "bad_first": 21.8,
+        "neither": 60.5
+       }
+      },
+      "60m": {
+       "match": 48.3,
+       "trade_win": 46.3,
+       "trade_avg": -0.03,
+       "pf": 0.8,
+       "total": -4.4,
+       "first_0.1": {
+        "good_first": 44.9,
+        "bad_first": 54.4,
+        "neither": 0.7
+       },
+       "first_0.2": {
+        "good_first": 33.3,
+        "bad_first": 44.9,
+        "neither": 21.8
+       },
+       "first_0.3": {
+        "good_first": 24.5,
+        "bad_first": 33.3,
+        "neither": 42.2
+       }
+      }
+     },
+     "2022": {
+      "days": 127,
+      "30m": {
+       "match": 55.1,
+       "trade_win": 52.0,
+       "trade_avg": 0.011,
+       "pf": 1.07,
+       "total": 1.3,
+       "first_0.1": {
+        "good_first": 32.3,
+        "bad_first": 67.7,
+        "neither": 0.0
+       },
+       "first_0.2": {
+        "good_first": 41.7,
+        "bad_first": 52.0,
+        "neither": 6.3
+       },
+       "first_0.3": {
+        "good_first": 39.4,
+        "bad_first": 43.3,
+        "neither": 17.3
+       }
+      },
+      "60m": {
+       "match": 56.7,
+       "trade_win": 54.3,
+       "trade_avg": 0.03,
+       "pf": 1.14,
+       "total": 3.7,
+       "first_0.1": {
+        "good_first": 32.3,
+        "bad_first": 67.7,
+        "neither": 0.0
+       },
+       "first_0.2": {
+        "good_first": 43.3,
+        "bad_first": 55.9,
+        "neither": 0.8
+       },
+       "first_0.3": {
+        "good_first": 43.3,
+        "bad_first": 48.8,
+        "neither": 7.9
+       }
+      }
+     },
+     "2023": {
+      "days": 130,
+      "30m": {
+       "match": 46.9,
+       "trade_win": 41.5,
+       "trade_avg": -0.039,
+       "pf": 0.64,
+       "total": -4.9,
+       "first_0.1": {
+        "good_first": 41.5,
+        "bad_first": 55.4,
+        "neither": 3.1
+       },
+       "first_0.2": {
+        "good_first": 30.0,
+        "bad_first": 40.8,
+        "neither": 29.2
+       },
+       "first_0.3": {
+        "good_first": 19.2,
+        "bad_first": 19.2,
+        "neither": 61.5
+       }
+      },
+      "60m": {
+       "match": 43.1,
+       "trade_win": 41.5,
+       "trade_avg": -0.017,
+       "pf": 0.87,
+       "total": -2.3,
+       "first_0.1": {
+        "good_first": 43.1,
+        "bad_first": 56.9,
+        "neither": 0.0
+       },
+       "first_0.2": {
+        "good_first": 39.2,
+        "bad_first": 46.2,
+        "neither": 14.6
+       },
+       "first_0.3": {
+        "good_first": 31.5,
+        "bad_first": 32.3,
+        "neither": 36.2
+       }
+      }
+     },
+     "2024": {
+      "days": 146,
+      "30m": {
+       "match": 45.2,
+       "trade_win": 41.1,
+       "trade_avg": -0.026,
+       "pf": 0.71,
+       "total": -3.8,
+       "first_0.1": {
+        "good_first": 41.8,
+        "bad_first": 49.3,
+        "neither": 8.9
+       },
+       "first_0.2": {
+        "good_first": 20.5,
+        "bad_first": 28.1,
+        "neither": 51.4
+       },
+       "first_0.3": {
+        "good_first": 10.3,
+        "bad_first": 12.3,
+        "neither": 77.4
+       }
+      },
+      "60m": {
+       "match": 50.7,
+       "trade_win": 45.2,
+       "trade_avg": -0.016,
+       "pf": 0.87,
+       "total": -2.4,
+       "first_0.1": {
+        "good_first": 45.2,
+        "bad_first": 53.4,
+        "neither": 1.4
+       },
+       "first_0.2": {
+        "good_first": 32.2,
+        "bad_first": 42.5,
+        "neither": 25.3
+       },
+       "first_0.3": {
+        "good_first": 19.2,
+        "bad_first": 27.4,
+        "neither": 53.4
+       }
+      }
+     },
+     "2025": {
+      "days": 133,
+      "30m": {
+       "match": 47.4,
+       "trade_win": 42.1,
+       "trade_avg": -0.071,
+       "pf": 0.54,
+       "total": -9.0,
+       "first_0.1": {
+        "good_first": 34.6,
+        "bad_first": 60.9,
+        "neither": 4.5
+       },
+       "first_0.2": {
+        "good_first": 31.6,
+        "bad_first": 39.1,
+        "neither": 29.3
+       },
+       "first_0.3": {
+        "good_first": 23.3,
+        "bad_first": 26.3,
+        "neither": 50.4
+       }
+      },
+      "60m": {
+       "match": 48.1,
+       "trade_win": 44.4,
+       "trade_avg": -0.037,
+       "pf": 0.79,
+       "total": -5.0,
+       "first_0.1": {
+        "good_first": 35.3,
+        "bad_first": 61.7,
+        "neither": 3.0
+       },
+       "first_0.2": {
+        "good_first": 35.3,
+        "bad_first": 45.1,
+        "neither": 19.5
+       },
+       "first_0.3": {
+        "good_first": 30.8,
+        "bad_first": 35.3,
+        "neither": 33.8
+       }
+      }
+     },
+     "2026": {
+      "days": 108,
+      "30m": {
+       "match": 53.7,
+       "trade_win": 50.0,
+       "trade_avg": -0.009,
+       "pf": 0.92,
+       "total": -1.1,
+       "first_0.1": {
+        "good_first": 53.7,
+        "bad_first": 45.4,
+        "neither": 0.9
+       },
+       "first_0.2": {
+        "good_first": 37.0,
+        "bad_first": 33.3,
+        "neither": 29.6
+       },
+       "first_0.3": {
+        "good_first": 20.4,
+        "bad_first": 19.4,
+        "neither": 60.2
+       }
+      },
+      "60m": {
+       "match": 51.9,
+       "trade_win": 50.0,
+       "trade_avg": 0.026,
+       "pf": 1.2,
+       "total": 2.8,
+       "first_0.1": {
+        "good_first": 54.6,
+        "bad_first": 45.4,
+        "neither": 0.0
+       },
+       "first_0.2": {
+        "good_first": 45.4,
+        "bad_first": 38.0,
+        "neither": 16.7
+       },
+       "first_0.3": {
+        "good_first": 31.5,
+        "bad_first": 25.9,
+        "neither": 42.6
+       }
+      }
+     }
+    }
+   },
+   "both": {
+    "all": {
+     "days": 487,
+     "30m": {
+      "match": 48.7,
+      "trade_win": 43.7,
+      "trade_avg": -0.039,
+      "pf": 0.7,
+      "total": -17.5,
+      "first_0.1": {
+       "good_first": 39.0,
+       "bad_first": 57.1,
+       "neither": 3.9
+      },
+      "first_0.2": {
+       "good_first": 26.3,
+       "bad_first": 38.4,
+       "neither": 35.3
+      },
+      "first_0.3": {
+       "good_first": 19.3,
+       "bad_first": 24.2,
+       "neither": 56.5
+      }
+     },
+     "60m": {
+      "match": 51.7,
+      "trade_win": 49.7,
+      "trade_avg": -0.021,
+      "pf": 0.88,
+      "total": -10.1,
+      "first_0.1": {
+       "good_first": 41.1,
+       "bad_first": 58.1,
+       "neither": 0.8
+      },
+      "first_0.2": {
+       "good_first": 34.7,
+       "bad_first": 46.0,
+       "neither": 19.3
+      },
+      "first_0.3": {
+       "good_first": 26.9,
+       "bad_first": 34.5,
+       "neither": 38.6
+      }
+     }
+    },
+    "up_gaps": {
+     "days": 352,
+     "30m": {
+      "match": 46.0,
+      "trade_win": 40.3,
+      "trade_avg": -0.037,
+      "pf": 0.63,
+      "total": -12.3,
+      "first_0.1": {
+       "good_first": 41.5,
+       "bad_first": 53.4,
+       "neither": 5.1
+      },
+      "first_0.2": {
+       "good_first": 21.9,
+       "bad_first": 32.7,
+       "neither": 45.5
+      },
+      "first_0.3": {
+       "good_first": 11.6,
+       "bad_first": 17.0,
+       "neither": 71.3
+      }
+     },
+     "60m": {
+      "match": 50.3,
+      "trade_win": 48.0,
+      "trade_avg": -0.038,
+      "pf": 0.71,
+      "total": -12.7,
+      "first_0.1": {
+       "good_first": 44.0,
+       "bad_first": 54.8,
+       "neither": 1.1
+      },
+      "first_0.2": {
+       "good_first": 31.8,
+       "bad_first": 41.8,
+       "neither": 26.4
+      },
+      "first_0.3": {
+       "good_first": 18.8,
+       "bad_first": 29.8,
+       "neither": 51.4
+      }
+     }
+    },
+    "down_gaps": {
+     "days": 135,
+     "30m": {
+      "match": 55.6,
+      "trade_win": 52.6,
+      "trade_avg": -0.044,
+      "pf": 0.79,
+      "total": -5.9,
+      "first_0.1": {
+       "good_first": 32.6,
+       "bad_first": 66.7,
+       "neither": 0.7
+      },
+      "first_0.2": {
+       "good_first": 37.8,
+       "bad_first": 53.3,
+       "neither": 8.9
+      },
+      "first_0.3": {
+       "good_first": 39.3,
+       "bad_first": 43.0,
+       "neither": 17.8
+      }
+     },
+     "60m": {
+      "match": 55.6,
+      "trade_win": 54.1,
+      "trade_avg": 0.024,
+      "pf": 1.09,
+      "total": 2.9,
+      "first_0.1": {
+       "good_first": 33.3,
+       "bad_first": 66.7,
+       "neither": 0.0
+      },
+      "first_0.2": {
+       "good_first": 42.2,
+       "bad_first": 57.0,
+       "neither": 0.7
+      },
+      "first_0.3": {
+       "good_first": 48.1,
+       "bad_first": 46.7,
+       "neither": 5.2
+      }
+     }
+    },
+    "dev_2020_2023": {
+     "days": 278,
+     "30m": {
+      "match": 48.9,
+      "trade_win": 44.2,
+      "trade_avg": -0.03,
+      "pf": 0.77,
+      "total": -8.1,
+      "first_0.1": {
+       "good_first": 35.6,
+       "bad_first": 60.4,
+       "neither": 4.0
+      },
+      "first_0.2": {
+       "good_first": 27.3,
+       "bad_first": 41.7,
+       "neither": 30.9
+      },
+      "first_0.3": {
+       "good_first": 22.7,
+       "bad_first": 27.3,
+       "neither": 50.0
+      }
+     },
+     "60m": {
+      "match": 52.9,
+      "trade_win": 51.1,
+      "trade_avg": -0.019,
+      "pf": 0.89,
+      "total": -5.5,
+      "first_0.1": {
+       "good_first": 38.1,
+       "bad_first": 61.2,
+       "neither": 0.7
+      },
+      "first_0.2": {
+       "good_first": 34.5,
+       "bad_first": 49.3,
+       "neither": 16.2
+      },
+      "first_0.3": {
+       "good_first": 29.5,
+       "bad_first": 38.1,
+       "neither": 32.4
+      }
+     }
+    },
+    "test_2024_on": {
+     "days": 209,
+     "30m": {
+      "match": 48.3,
+      "trade_win": 43.1,
+      "trade_avg": -0.051,
+      "pf": 0.6,
+      "total": -10.2,
+      "first_0.1": {
+       "good_first": 43.5,
+       "bad_first": 52.6,
+       "neither": 3.8
+      },
+      "first_0.2": {
+       "good_first": 24.9,
+       "bad_first": 34.0,
+       "neither": 41.1
+      },
+      "first_0.3": {
+       "good_first": 14.8,
+       "bad_first": 20.1,
+       "neither": 65.1
+      }
+     },
+     "60m": {
+      "match": 50.2,
+      "trade_win": 47.8,
+      "trade_avg": -0.023,
+      "pf": 0.85,
+      "total": -4.9,
+      "first_0.1": {
+       "good_first": 45.0,
+       "bad_first": 54.1,
+       "neither": 1.0
+      },
+      "first_0.2": {
+       "good_first": 34.9,
+       "bad_first": 41.6,
+       "neither": 23.4
+      },
+      "first_0.3": {
+       "good_first": 23.4,
+       "bad_first": 29.7,
+       "neither": 46.9
+      }
+     }
+    },
+    "by_gap": {
+     "under 0.25%": {
+      "days": 182,
+      "30m": {
+       "match": 52.2,
+       "trade_win": 45.1,
+       "trade_avg": -0.007,
+       "pf": 0.91,
+       "total": -1.4,
+       "first_0.1": {
+        "good_first": 41.8,
+        "bad_first": 51.1,
+        "neither": 7.1
+       },
+       "first_0.2": {
+        "good_first": 21.4,
+        "bad_first": 33.0,
+        "neither": 45.6
+       },
+       "first_0.3": {
+        "good_first": 13.7,
+        "bad_first": 15.9,
+        "neither": 70.3
+       }
+      },
+      "60m": {
+       "match": 52.2,
+       "trade_win": 48.9,
+       "trade_avg": 0.01,
+       "pf": 1.09,
+       "total": 1.7,
+       "first_0.1": {
+        "good_first": 45.6,
+        "bad_first": 52.7,
+        "neither": 1.6
+       },
+       "first_0.2": {
+        "good_first": 30.2,
+        "bad_first": 42.3,
+        "neither": 27.5
+       },
+       "first_0.3": {
+        "good_first": 22.5,
+        "bad_first": 27.5,
+        "neither": 50.0
+       }
+      }
+     },
+     "0.25-0.5%": {
+      "days": 144,
+      "30m": {
+       "match": 41.7,
+       "trade_win": 38.9,
+       "trade_avg": -0.048,
+       "pf": 0.6,
+       "total": -6.7,
+       "first_0.1": {
+        "good_first": 42.4,
+        "bad_first": 55.6,
+        "neither": 2.1
+       },
+       "first_0.2": {
+        "good_first": 25.0,
+        "bad_first": 38.2,
+        "neither": 36.8
+       },
+       "first_0.3": {
+        "good_first": 14.6,
+        "bad_first": 21.5,
+        "neither": 63.9
+       }
+      },
+      "60m": {
+       "match": 52.1,
+       "trade_win": 50.0,
+       "trade_avg": -0.022,
+       "pf": 0.85,
+       "total": -3.3,
+       "first_0.1": {
+        "good_first": 43.1,
+        "bad_first": 56.2,
+        "neither": 0.7
+       },
+       "first_0.2": {
+        "good_first": 33.3,
+        "bad_first": 45.1,
+        "neither": 21.5
+       },
+       "first_0.3": {
+        "good_first": 22.9,
+        "bad_first": 34.0,
+        "neither": 43.1
+       }
+      }
+     },
+     "0.5-1%": {
+      "days": 103,
+      "30m": {
+       "match": 45.6,
+       "trade_win": 40.8,
+       "trade_avg": -0.057,
+       "pf": 0.61,
+       "total": -5.7,
+       "first_0.1": {
+        "good_first": 38.8,
+        "bad_first": 58.3,
+        "neither": 2.9
+       },
+       "first_0.2": {
+        "good_first": 30.1,
+        "bad_first": 36.9,
+        "neither": 33.0
+       },
+       "first_0.3": {
+        "good_first": 22.3,
+        "bad_first": 30.1,
+        "neither": 47.6
+       }
+      },
+      "60m": {
+       "match": 45.6,
+       "trade_win": 44.7,
+       "trade_avg": -0.083,
+       "pf": 0.61,
+       "total": -8.3,
+       "first_0.1": {
+        "good_first": 40.8,
+        "bad_first": 59.2,
+        "neither": 0.0
+       },
+       "first_0.2": {
+        "good_first": 41.7,
+        "bad_first": 46.6,
+        "neither": 11.7
+       },
+       "first_0.3": {
+        "good_first": 27.2,
+        "bad_first": 40.8,
+        "neither": 32.0
+       }
+      }
+     },
+     "over 1%": {
+      "days": 58,
+      "30m": {
+       "match": 60.3,
+       "trade_win": 56.9,
+       "trade_avg": -0.084,
+       "pf": 0.68,
+       "total": -4.8,
+       "first_0.1": {
+        "good_first": 22.4,
+        "bad_first": 77.6,
+        "neither": 0.0
+       },
+       "first_0.2": {
+        "good_first": 37.9,
+        "bad_first": 58.6,
+        "neither": 3.4
+       },
+       "first_0.3": {
+        "good_first": 43.1,
+        "bad_first": 46.6,
+        "neither": 10.3
+       }
+      },
+      "60m": {
+       "match": 60.3,
+       "trade_win": 60.3,
+       "trade_avg": -0.004,
+       "pf": 0.99,
+       "total": -0.4,
+       "first_0.1": {
+        "good_first": 22.4,
+        "bad_first": 77.6,
+        "neither": 0.0
+       },
+       "first_0.2": {
+        "good_first": 39.7,
+        "bad_first": 58.6,
+        "neither": 1.7
+       },
+       "first_0.3": {
+        "good_first": 50.0,
+        "bad_first": 46.6,
+        "neither": 3.4
+       }
+      }
+     }
+    },
+    "by_year": {
+     "2020": {
+      "days": 64,
+      "30m": {
+       "match": 45.3,
+       "trade_win": 43.8,
+       "trade_avg": -0.091,
+       "pf": 0.53,
+       "total": -5.7,
+       "first_0.1": {
+        "good_first": 25.0,
+        "bad_first": 71.9,
+        "neither": 3.1
+       },
+       "first_0.2": {
+        "good_first": 21.9,
+        "bad_first": 51.6,
+        "neither": 26.6
+       },
+       "first_0.3": {
+        "good_first": 21.9,
+        "bad_first": 39.1,
+        "neither": 39.1
+       }
+      },
+      "60m": {
+       "match": 53.1,
+       "trade_win": 53.1,
+       "trade_avg": -0.112,
+       "pf": 0.6,
+       "total": -7.0,
+       "first_0.1": {
+        "good_first": 25.0,
+        "bad_first": 73.4,
+        "neither": 1.6
+       },
+       "first_0.2": {
+        "good_first": 26.6,
+        "bad_first": 56.2,
+        "neither": 17.2
+       },
+       "first_0.3": {
+        "good_first": 25.0,
+        "bad_first": 46.9,
+        "neither": 28.1
+       }
+      }
+     },
+     "2021": {
+      "days": 88,
+      "30m": {
+       "match": 50.0,
+       "trade_win": 42.0,
+       "trade_avg": -0.028,
+       "pf": 0.68,
+       "total": -2.4,
+       "first_0.1": {
+        "good_first": 39.8,
+        "bad_first": 53.4,
+        "neither": 6.8
+       },
+       "first_0.2": {
+        "good_first": 15.9,
+        "bad_first": 30.7,
+        "neither": 53.4
+       },
+       "first_0.3": {
+        "good_first": 10.2,
+        "bad_first": 13.6,
+        "neither": 76.1
+       }
+      },
+      "60m": {
+       "match": 52.3,
+       "trade_win": 48.9,
+       "trade_avg": -0.021,
+       "pf": 0.82,
+       "total": -1.9,
+       "first_0.1": {
+        "good_first": 45.5,
+        "bad_first": 53.4,
+        "neither": 1.1
+       },
+       "first_0.2": {
+        "good_first": 27.3,
+        "bad_first": 42.0,
+        "neither": 30.7
+       },
+       "first_0.3": {
+        "good_first": 18.2,
+        "bad_first": 25.0,
+        "neither": 56.8
+       }
+      }
+     },
+     "2022": {
+      "days": 62,
+      "30m": {
+       "match": 53.2,
+       "trade_win": 50.0,
+       "trade_avg": 0.02,
+       "pf": 1.12,
+       "total": 1.2,
+       "first_0.1": {
+        "good_first": 32.3,
+        "bad_first": 67.7,
+        "neither": 0.0
+       },
+       "first_0.2": {
+        "good_first": 43.5,
+        "bad_first": 46.8,
+        "neither": 9.7
+       },
+       "first_0.3": {
+        "good_first": 40.3,
+        "bad_first": 43.5,
+        "neither": 16.1
+       }
+      },
+      "60m": {
+       "match": 56.5,
+       "trade_win": 54.8,
+       "trade_avg": 0.015,
+       "pf": 1.06,
+       "total": 0.8,
+       "first_0.1": {
+        "good_first": 32.3,
+        "bad_first": 67.7,
+        "neither": 0.0
+       },
+       "first_0.2": {
+        "good_first": 45.2,
+        "bad_first": 53.2,
+        "neither": 1.6
+       },
+       "first_0.3": {
+        "good_first": 43.5,
+        "bad_first": 53.2,
+        "neither": 3.2
+       }
+      }
+     },
+     "2023": {
+      "days": 64,
+      "30m": {
+       "match": 46.9,
+       "trade_win": 42.2,
+       "trade_avg": -0.02,
+       "pf": 0.81,
+       "total": -1.3,
+       "first_0.1": {
+        "good_first": 43.8,
+        "bad_first": 51.6,
+        "neither": 4.7
+       },
+       "first_0.2": {
+        "good_first": 32.8,
+        "bad_first": 42.2,
+        "neither": 25.0
+       },
+       "first_0.3": {
+        "good_first": 23.4,
+        "bad_first": 18.8,
+        "neither": 57.8
+       }
+      },
+      "60m": {
+       "match": 50.0,
+       "trade_win": 48.4,
+       "trade_avg": 0.044,
+       "pf": 1.43,
+       "total": 2.8,
+       "first_0.1": {
+        "good_first": 46.9,
+        "bad_first": 53.1,
+        "neither": 0.0
+       },
+       "first_0.2": {
+        "good_first": 42.2,
+        "bad_first": 48.4,
+        "neither": 9.4
+       },
+       "first_0.3": {
+        "good_first": 35.9,
+        "bad_first": 32.8,
+        "neither": 31.2
+       }
+      }
+     },
+     "2024": {
+      "days": 76,
+      "30m": {
+       "match": 44.7,
+       "trade_win": 40.8,
+       "trade_avg": -0.04,
+       "pf": 0.57,
+       "total": -3.0,
+       "first_0.1": {
+        "good_first": 43.4,
+        "bad_first": 48.7,
+        "neither": 7.9
+       },
+       "first_0.2": {
+        "good_first": 13.2,
+        "bad_first": 26.3,
+        "neither": 60.5
+       },
+       "first_0.3": {
+        "good_first": 3.9,
+        "bad_first": 10.5,
+        "neither": 85.5
+       }
+      },
+      "60m": {
+       "match": 50.0,
+       "trade_win": 46.1,
+       "trade_avg": -0.023,
+       "pf": 0.79,
+       "total": -1.8,
+       "first_0.1": {
+        "good_first": 46.1,
+        "bad_first": 51.3,
+        "neither": 2.6
+       },
+       "first_0.2": {
+        "good_first": 27.6,
+        "bad_first": 40.8,
+        "neither": 31.6
+       },
+       "first_0.3": {
+        "good_first": 11.8,
+        "bad_first": 23.7,
+        "neither": 64.5
+       }
+      }
+     },
+     "2025": {
+      "days": 87,
+      "30m": {
+       "match": 48.3,
+       "trade_win": 40.2,
+       "trade_avg": -0.084,
+       "pf": 0.49,
+       "total": -7.1,
+       "first_0.1": {
+        "good_first": 36.8,
+        "bad_first": 60.9,
+        "neither": 2.3
+       },
+       "first_0.2": {
+        "good_first": 32.2,
+        "bad_first": 40.2,
+        "neither": 27.6
+       },
+       "first_0.3": {
+        "good_first": 21.8,
+        "bad_first": 27.6,
+        "neither": 50.6
+       }
+      },
+      "60m": {
+       "match": 48.3,
+       "trade_win": 46.0,
+       "trade_avg": -0.06,
+       "pf": 0.7,
+       "total": -5.1,
+       "first_0.1": {
+        "good_first": 37.9,
+        "bad_first": 62.1,
+        "neither": 0.0
+       },
+       "first_0.2": {
+        "good_first": 36.8,
+        "bad_first": 43.7,
+        "neither": 19.5
+       },
+       "first_0.3": {
+        "good_first": 29.9,
+        "bad_first": 36.8,
+        "neither": 33.3
+       }
+      }
+     },
+     "2026": {
+      "days": 46,
+      "30m": {
+       "match": 54.3,
+       "trade_win": 52.2,
+       "trade_avg": -0.007,
+       "pf": 0.94,
+       "total": -0.3,
+       "first_0.1": {
+        "good_first": 56.5,
+        "bad_first": 43.5,
+        "neither": 0.0
+       },
+       "first_0.2": {
+        "good_first": 30.4,
+        "bad_first": 34.8,
+        "neither": 34.8
+       },
+       "first_0.3": {
+        "good_first": 19.6,
+        "bad_first": 21.7,
+        "neither": 58.7
+       }
+      },
+      "60m": {
+       "match": 54.3,
+       "trade_win": 54.3,
+       "trade_avg": 0.046,
+       "pf": 1.32,
+       "total": 2.1,
+       "first_0.1": {
+        "good_first": 56.5,
+        "bad_first": 43.5,
+        "neither": 0.0
+       },
+       "first_0.2": {
+        "good_first": 43.5,
+        "bad_first": 39.1,
+        "neither": 17.4
+       },
+       "first_0.3": {
+        "good_first": 30.4,
+        "bad_first": 26.1,
+        "neither": 43.5
+       }
+      }
+     }
+    }
+   }
+  },
+  "QQQ": {
+   "none": {
+    "all": {
+     "days": 1719,
+     "30m": {
+      "match": 48.2,
+      "trade_win": 46.6,
+      "trade_avg": -0.034,
+      "pf": 0.83,
+      "total": -45.2,
+      "first_0.1": {
+       "good_first": 33.6,
+       "bad_first": 66.3,
+       "neither": 0.1
+      },
+      "first_0.2": {
+       "good_first": 43.0,
+       "bad_first": 51.8,
+       "neither": 5.2
+      },
+      "first_0.3": {
+       "good_first": 36.8,
+       "bad_first": 43.3,
+       "neither": 19.9
+      }
+     },
+     "60m": {
+      "match": 49.0,
+      "trade_win": 47.0,
+      "trade_avg": -0.03,
+      "pf": 0.88,
+      "total": -42.7,
+      "first_0.1": {
+       "good_first": 33.6,
+       "bad_first": 66.3,
+       "neither": 0.1
+      },
+      "first_0.2": {
+       "good_first": 45.2,
+       "bad_first": 53.3,
+       "neither": 1.5
+      },
+      "first_0.3": {
+       "good_first": 42.2,
+       "bad_first": 48.4,
+       "neither": 9.4
+      }
+     }
+    },
+    "up_gaps": {
+     "days": 966,
+     "30m": {
+      "match": 52.2,
+      "trade_win": 50.1,
+      "trade_avg": -0.018,
+      "pf": 0.9,
+      "total": -16.9,
+      "first_0.1": {
+       "good_first": 35.4,
+       "bad_first": 64.5,
+       "neither": 0.1
+      },
+      "first_0.2": {
+       "good_first": 43.1,
+       "bad_first": 50.6,
+       "neither": 6.3
+      },
+      "first_0.3": {
+       "good_first": 36.2,
+       "bad_first": 41.5,
+       "neither": 22.3
+      }
+     },
+     "60m": {
+      "match": 51.4,
+      "trade_win": 49.2,
+      "trade_avg": -0.014,
+      "pf": 0.94,
+      "total": -14.3,
+      "first_0.1": {
+       "good_first": 35.4,
+       "bad_first": 64.5,
+       "neither": 0.1
+      },
+      "first_0.2": {
+       "good_first": 45.4,
+       "bad_first": 52.7,
+       "neither": 1.9
+      },
+      "first_0.3": {
+       "good_first": 42.4,
+       "bad_first": 46.8,
+       "neither": 10.8
+      }
+     }
+    },
+    "down_gaps": {
+     "days": 753,
+     "30m": {
+      "match": 43.2,
+      "trade_win": 42.1,
+      "trade_avg": -0.054,
+      "pf": 0.76,
+      "total": -34.1,
+      "first_0.1": {
+       "good_first": 31.3,
+       "bad_first": 68.7,
+       "neither": 0.0
+      },
+      "first_0.2": {
+       "good_first": 43.0,
+       "bad_first": 53.3,
+       "neither": 3.7
+      },
+      "first_0.3": {
+       "good_first": 37.6,
+       "bad_first": 45.6,
+       "neither": 16.9
+      }
+     },
+     "60m": {
+      "match": 45.8,
+      "trade_win": 44.2,
+      "trade_avg": -0.051,
+      "pf": 0.82,
+      "total": -33.2,
+      "first_0.1": {
+       "good_first": 31.3,
+       "bad_first": 68.7,
+       "neither": 0.0
+      },
+      "first_0.2": {
+       "good_first": 44.9,
+       "bad_first": 54.2,
+       "neither": 0.9
+      },
+      "first_0.3": {
+       "good_first": 41.8,
+       "bad_first": 50.5,
+       "neither": 7.7
+      }
+     }
+    },
+    "dev_2020_2023": {
+     "days": 1002,
+     "30m": {
+      "match": 47.5,
+      "trade_win": 46.1,
+      "trade_avg": -0.047,
+      "pf": 0.78,
+      "total": -38.4,
+      "first_0.1": {
+       "good_first": 31.3,
+       "bad_first": 68.6,
+       "neither": 0.1
+      },
+      "first_0.2": {
+       "good_first": 43.1,
+       "bad_first": 54.2,
+       "neither": 2.7
+      },
+      "first_0.3": {
+       "good_first": 37.1,
+       "bad_first": 47.5,
+       "neither": 15.4
+      }
+     },
+     "60m": {
+      "match": 48.5,
+      "trade_win": 45.9,
+      "trade_avg": -0.051,
+      "pf": 0.81,
+      "total": -41.6,
+      "first_0.1": {
+       "good_first": 31.3,
+       "bad_first": 68.6,
+       "neither": 0.1
+      },
+      "first_0.2": {
+       "good_first": 44.2,
+       "bad_first": 55.4,
+       "neither": 0.4
+      },
+      "first_0.3": {
+       "good_first": 41.1,
+       "bad_first": 51.3,
+       "neither": 7.6
+      }
+     }
+    },
+    "test_2024_on": {
+     "days": 717,
+     "30m": {
+      "match": 49.2,
+      "trade_win": 47.3,
+      "trade_avg": -0.015,
+      "pf": 0.91,
+      "total": -11.1,
+      "first_0.1": {
+       "good_first": 36.8,
+       "bad_first": 63.2,
+       "neither": 0.0
+      },
+      "first_0.2": {
+       "good_first": 43.0,
+       "bad_first": 48.4,
+       "neither": 8.6
+      },
+      "first_0.3": {
+       "good_first": 36.4,
+       "bad_first": 37.4,
+       "neither": 26.2
+      }
+     },
+     "60m": {
+      "match": 49.7,
+      "trade_win": 48.5,
+      "trade_avg": -0.001,
+      "pf": 0.99,
+      "total": -2.0,
+      "first_0.1": {
+       "good_first": 36.8,
+       "bad_first": 63.2,
+       "neither": 0.0
+      },
+      "first_0.2": {
+       "good_first": 46.6,
+       "bad_first": 50.5,
+       "neither": 2.9
+      },
+      "first_0.3": {
+       "good_first": 43.7,
+       "bad_first": 44.4,
+       "neither": 12.0
+      }
+     }
+    },
+    "by_gap": {
+     "under 0.25%": {
+      "days": 533,
+      "30m": {
+       "match": 50.8,
+       "trade_win": 48.6,
+       "trade_avg": -0.002,
+       "pf": 0.99,
+       "total": -1.3,
+       "first_0.1": {
+        "good_first": 39.4,
+        "bad_first": 60.4,
+        "neither": 0.2
+       },
+       "first_0.2": {
+        "good_first": 45.4,
+        "bad_first": 45.4,
+        "neither": 9.2
+       },
+       "first_0.3": {
+        "good_first": 34.7,
+        "bad_first": 35.5,
+        "neither": 29.8
+       }
+      },
+      "60m": {
+       "match": 51.0,
+       "trade_win": 47.3,
+       "trade_avg": 0.012,
+       "pf": 1.07,
+       "total": 6.0,
+       "first_0.1": {
+        "good_first": 39.4,
+        "bad_first": 60.4,
+        "neither": 0.2
+       },
+       "first_0.2": {
+        "good_first": 49.2,
+        "bad_first": 47.7,
+        "neither": 3.2
+       },
+       "first_0.3": {
+        "good_first": 42.0,
+        "bad_first": 42.8,
+        "neither": 15.2
+       }
+      }
+     },
+     "0.25-0.5%": {
+      "days": 411,
+      "30m": {
+       "match": 47.2,
+       "trade_win": 45.5,
+       "trade_avg": -0.042,
+       "pf": 0.78,
+       "total": -16.2,
+       "first_0.1": {
+        "good_first": 36.5,
+        "bad_first": 63.5,
+        "neither": 0.0
+       },
+       "first_0.2": {
+        "good_first": 43.6,
+        "bad_first": 48.9,
+        "neither": 7.5
+       },
+       "first_0.3": {
+        "good_first": 36.0,
+        "bad_first": 42.1,
+        "neither": 21.9
+       }
+      },
+      "60m": {
+       "match": 45.7,
+       "trade_win": 45.0,
+       "trade_avg": -0.061,
+       "pf": 0.76,
+       "total": -22.8,
+       "first_0.1": {
+        "good_first": 36.5,
+        "bad_first": 63.5,
+        "neither": 0.0
+       },
+       "first_0.2": {
+        "good_first": 47.0,
+        "bad_first": 51.6,
+        "neither": 1.5
+       },
+       "first_0.3": {
+        "good_first": 39.9,
+        "bad_first": 49.1,
+        "neither": 10.9
+       }
+      }
+     },
+     "0.5-1%": {
+      "days": 447,
+      "30m": {
+       "match": 47.4,
+       "trade_win": 46.3,
+       "trade_avg": -0.028,
+       "pf": 0.87,
+       "total": -12.1,
+       "first_0.1": {
+        "good_first": 30.4,
+        "bad_first": 69.6,
+        "neither": 0.0
+       },
+       "first_0.2": {
+        "good_first": 41.8,
+        "bad_first": 56.4,
+        "neither": 1.8
+       },
+       "first_0.3": {
+        "good_first": 36.2,
+        "bad_first": 47.4,
+        "neither": 16.3
+       }
+      },
+      "60m": {
+       "match": 48.3,
+       "trade_win": 47.2,
+       "trade_avg": -0.044,
+       "pf": 0.84,
+       "total": -18.7,
+       "first_0.1": {
+        "good_first": 30.4,
+        "bad_first": 69.6,
+        "neither": 0.0
+       },
+       "first_0.2": {
+        "good_first": 42.3,
+        "bad_first": 57.3,
+        "neither": 0.4
+       },
+       "first_0.3": {
+        "good_first": 42.1,
+        "bad_first": 51.0,
+        "neither": 6.9
+       }
+      }
+     },
+     "over 1%": {
+      "days": 328,
+      "30m": {
+       "match": 46.3,
+       "trade_win": 45.1,
+       "trade_avg": -0.084,
+       "pf": 0.7,
+       "total": -24.6,
+       "first_0.1": {
+        "good_first": 25.0,
+        "bad_first": 75.0,
+        "neither": 0.0
+       },
+       "first_0.2": {
+        "good_first": 40.2,
+        "bad_first": 59.5,
+        "neither": 0.3
+       },
+       "first_0.3": {
+        "good_first": 42.1,
+        "bad_first": 51.8,
+        "neither": 6.1
+       }
+      },
+      "60m": {
+       "match": 50.6,
+       "trade_win": 48.8,
+       "trade_avg": -0.042,
+       "pf": 0.87,
+       "total": -13.9,
+       "first_0.1": {
+        "good_first": 25.0,
+        "bad_first": 75.0,
+        "neither": 0.0
+       },
+       "first_0.2": {
+        "good_first": 40.5,
+        "bad_first": 59.5,
+        "neither": 0.0
+       },
+       "first_0.3": {
+        "good_first": 45.4,
+        "bad_first": 53.0,
+        "neither": 1.5
+       }
+      }
+     }
+    },
+    "by_year": {
+     "2020": {
+      "days": 253,
+      "30m": {
+       "match": 45.8,
+       "trade_win": 44.7,
+       "trade_avg": -0.102,
+       "pf": 0.61,
+       "total": -23.0,
+       "first_0.1": {
+        "good_first": 22.9,
+        "bad_first": 77.1,
+        "neither": 0.0
+       },
+       "first_0.2": {
+        "good_first": 39.5,
+        "bad_first": 58.9,
+        "neither": 1.6
+       },
+       "first_0.3": {
+        "good_first": 31.2,
+        "bad_first": 54.9,
+        "neither": 13.8
+       }
+      },
+      "60m": {
+       "match": 47.8,
+       "trade_win": 43.9,
+       "trade_avg": -0.082,
+       "pf": 0.73,
+       "total": -19.4,
+       "first_0.1": {
+        "good_first": 22.9,
+        "bad_first": 77.1,
+        "neither": 0.0
+       },
+       "first_0.2": {
+        "good_first": 39.5,
+        "bad_first": 59.7,
+        "neither": 0.8
+       },
+       "first_0.3": {
+        "good_first": 36.4,
+        "bad_first": 57.3,
+        "neither": 6.3
+       }
+      }
+     },
+     "2021": {
+      "days": 251,
+      "30m": {
+       "match": 41.8,
+       "trade_win": 40.6,
+       "trade_avg": -0.053,
+       "pf": 0.71,
+       "total": -12.7,
+       "first_0.1": {
+        "good_first": 38.2,
+        "bad_first": 61.8,
+        "neither": 0.0
+       },
+       "first_0.2": {
+        "good_first": 45.4,
+        "bad_first": 49.0,
+        "neither": 5.6
+       },
+       "first_0.3": {
+        "good_first": 33.1,
+        "bad_first": 43.4,
+        "neither": 23.5
+       }
+      },
+      "60m": {
+       "match": 47.8,
+       "trade_win": 46.6,
+       "trade_avg": -0.03,
+       "pf": 0.86,
+       "total": -7.6,
+       "first_0.1": {
+        "good_first": 38.2,
+        "bad_first": 61.8,
+        "neither": 0.0
+       },
+       "first_0.2": {
+        "good_first": 48.2,
+        "bad_first": 51.4,
+        "neither": 0.4
+       },
+       "first_0.3": {
+        "good_first": 36.7,
+        "bad_first": 49.4,
+        "neither": 13.9
+       }
+      }
+     },
+     "2022": {
+      "days": 249,
+      "30m": {
+       "match": 50.2,
+       "trade_win": 49.4,
+       "trade_avg": 0.004,
+       "pf": 1.01,
+       "total": 0.4,
+       "first_0.1": {
+        "good_first": 22.5,
+        "bad_first": 77.5,
+        "neither": 0.0
+       },
+       "first_0.2": {
+        "good_first": 37.3,
+        "bad_first": 62.7,
+        "neither": 0.0
+       },
+       "first_0.3": {
+        "good_first": 45.0,
+        "bad_first": 52.6,
+        "neither": 2.4
+       }
+      },
+      "60m": {
+       "match": 48.2,
+       "trade_win": 47.4,
+       "trade_avg": -0.067,
+       "pf": 0.83,
+       "total": -16.1,
+       "first_0.1": {
+        "good_first": 22.5,
+        "bad_first": 77.5,
+        "neither": 0.0
+       },
+       "first_0.2": {
+        "good_first": 37.3,
+        "bad_first": 62.7,
+        "neither": 0.0
+       },
+       "first_0.3": {
+        "good_first": 45.4,
+        "bad_first": 53.4,
+        "neither": 1.2
+       }
+      }
+     },
+     "2023": {
+      "days": 249,
+      "30m": {
+       "match": 52.2,
+       "trade_win": 49.8,
+       "trade_avg": -0.036,
+       "pf": 0.79,
+       "total": -8.8,
+       "first_0.1": {
+        "good_first": 41.8,
+        "bad_first": 57.8,
+        "neither": 0.4
+       },
+       "first_0.2": {
+        "good_first": 50.2,
+        "bad_first": 46.2,
+        "neither": 3.6
+       },
+       "first_0.3": {
+        "good_first": 39.4,
+        "bad_first": 39.0,
+        "neither": 21.7
+       }
+      },
+      "60m": {
+       "match": 50.2,
+       "trade_win": 45.8,
+       "trade_avg": -0.026,
+       "pf": 0.88,
+       "total": -6.5,
+       "first_0.1": {
+        "good_first": 41.8,
+        "bad_first": 57.8,
+        "neither": 0.4
+       },
+       "first_0.2": {
+        "good_first": 51.8,
+        "bad_first": 47.8,
+        "neither": 0.4
+       },
+       "first_0.3": {
+        "good_first": 46.2,
+        "bad_first": 45.0,
+        "neither": 8.8
+       }
+      }
+     },
+     "2024": {
+      "days": 251,
+      "30m": {
+       "match": 47.8,
+       "trade_win": 45.4,
+       "trade_avg": -0.019,
+       "pf": 0.87,
+       "total": -4.8,
+       "first_0.1": {
+        "good_first": 39.4,
+        "bad_first": 60.6,
+        "neither": 0.0
+       },
+       "first_0.2": {
+        "good_first": 43.0,
+        "bad_first": 43.8,
+        "neither": 13.1
+       },
+       "first_0.3": {
+        "good_first": 30.7,
+        "bad_first": 34.7,
+        "neither": 34.7
+       }
+      },
+      "60m": {
+       "match": 51.0,
+       "trade_win": 49.0,
+       "trade_avg": -0.004,
+       "pf": 0.98,
+       "total": -1.2,
+       "first_0.1": {
+        "good_first": 39.4,
+        "bad_first": 60.6,
+        "neither": 0.0
+       },
+       "first_0.2": {
+        "good_first": 48.2,
+        "bad_first": 47.4,
+        "neither": 4.4
+       },
+       "first_0.3": {
+        "good_first": 41.0,
+        "bad_first": 43.8,
+        "neither": 15.1
+       }
+      }
+     },
+     "2025": {
+      "days": 250,
+      "30m": {
+       "match": 48.8,
+       "trade_win": 46.8,
+       "trade_avg": -0.037,
+       "pf": 0.81,
+       "total": -9.0,
+       "first_0.1": {
+        "good_first": 39.2,
+        "bad_first": 60.8,
+        "neither": 0.0
+       },
+       "first_0.2": {
+        "good_first": 44.4,
+        "bad_first": 47.2,
+        "neither": 8.4
+       },
+       "first_0.3": {
+        "good_first": 33.6,
+        "bad_first": 38.8,
+        "neither": 27.6
+       }
+      },
+      "60m": {
+       "match": 47.6,
+       "trade_win": 46.4,
+       "trade_avg": -0.031,
+       "pf": 0.87,
+       "total": -7.8,
+       "first_0.1": {
+        "good_first": 39.2,
+        "bad_first": 60.8,
+        "neither": 0.0
+       },
+       "first_0.2": {
+        "good_first": 47.6,
+        "bad_first": 49.2,
+        "neither": 3.2
+       },
+       "first_0.3": {
+        "good_first": 38.4,
+        "bad_first": 46.4,
+        "neither": 15.2
+       }
+      }
+     },
+     "2026": {
+      "days": 216,
+      "30m": {
+       "match": 51.4,
+       "trade_win": 50.0,
+       "trade_avg": 0.014,
+       "pf": 1.07,
+       "total": 2.7,
+       "first_0.1": {
+        "good_first": 31.0,
+        "bad_first": 69.0,
+        "neither": 0.0
+       },
+       "first_0.2": {
+        "good_first": 41.2,
+        "bad_first": 55.1,
+        "neither": 3.7
+       },
+       "first_0.3": {
+        "good_first": 46.3,
+        "bad_first": 38.9,
+        "neither": 14.8
+       }
+      },
+      "60m": {
+       "match": 50.5,
+       "trade_win": 50.5,
+       "trade_avg": 0.036,
+       "pf": 1.17,
+       "total": 7.7,
+       "first_0.1": {
+        "good_first": 31.0,
+        "bad_first": 69.0,
+        "neither": 0.0
+       },
+       "first_0.2": {
+        "good_first": 43.5,
+        "bad_first": 55.6,
+        "neither": 0.9
+       },
+       "first_0.3": {
+        "good_first": 52.8,
+        "bad_first": 42.6,
+        "neither": 4.6
+       }
+      }
+     }
+    }
+   },
+   "with_market_trend": {
+    "all": {
+     "days": 888,
+     "30m": {
+      "match": 48.6,
+      "trade_win": 46.4,
+      "trade_avg": -0.036,
+      "pf": 0.82,
+      "total": -27.8,
+      "first_0.1": {
+       "good_first": 34.2,
+       "bad_first": 65.7,
+       "neither": 0.1
+      },
+      "first_0.2": {
+       "good_first": 41.6,
+       "bad_first": 51.6,
+       "neither": 6.9
+      },
+      "first_0.3": {
+       "good_first": 33.3,
+       "bad_first": 43.5,
+       "neither": 23.2
+      }
+     },
+     "60m": {
+      "match": 49.8,
+      "trade_win": 47.5,
+      "trade_avg": -0.033,
+      "pf": 0.87,
+      "total": -26.8,
+      "first_0.1": {
+       "good_first": 34.2,
+       "bad_first": 65.7,
+       "neither": 0.1
+      },
+      "first_0.2": {
+       "good_first": 44.3,
+       "bad_first": 53.7,
+       "neither": 2.0
+      },
+      "first_0.3": {
+       "good_first": 39.2,
+       "bad_first": 49.1,
+       "neither": 11.7
+      }
+     }
+    },
+    "up_gaps": {
+     "days": 646,
+     "30m": {
+      "match": 50.5,
+      "trade_win": 47.8,
+      "trade_avg": -0.021,
+      "pf": 0.86,
+      "total": -13.2,
+      "first_0.1": {
+       "good_first": 37.2,
+       "bad_first": 62.7,
+       "neither": 0.2
+      },
+      "first_0.2": {
+       "good_first": 41.8,
+       "bad_first": 48.9,
+       "neither": 9.3
+      },
+      "first_0.3": {
+       "good_first": 30.3,
+       "bad_first": 39.5,
+       "neither": 30.2
+      }
+     },
+     "60m": {
+      "match": 50.3,
+      "trade_win": 47.7,
+      "trade_avg": -0.026,
+      "pf": 0.87,
+      "total": -16.3,
+      "first_0.1": {
+       "good_first": 37.2,
+       "bad_first": 62.7,
+       "neither": 0.2
+      },
+      "first_0.2": {
+       "good_first": 45.4,
+       "bad_first": 51.9,
+       "neither": 2.8
+      },
+      "first_0.3": {
+       "good_first": 37.9,
+       "bad_first": 46.4,
+       "neither": 15.6
+      }
+     }
+    },
+    "down_gaps": {
+     "days": 242,
+     "30m": {
+      "match": 43.8,
+      "trade_win": 42.6,
+      "trade_avg": -0.074,
+      "pf": 0.75,
+      "total": -16.9,
+      "first_0.1": {
+       "good_first": 26.4,
+       "bad_first": 73.6,
+       "neither": 0.0
+      },
+      "first_0.2": {
+       "good_first": 40.9,
+       "bad_first": 58.7,
+       "neither": 0.4
+      },
+      "first_0.3": {
+       "good_first": 41.3,
+       "bad_first": 54.1,
+       "neither": 4.5
+      }
+     },
+     "60m": {
+      "match": 48.3,
+      "trade_win": 47.1,
+      "trade_avg": -0.051,
+      "pf": 0.87,
+      "total": -12.6,
+      "first_0.1": {
+       "good_first": 26.4,
+       "bad_first": 73.6,
+       "neither": 0.0
+      },
+      "first_0.2": {
+       "good_first": 41.3,
+       "bad_first": 58.7,
+       "neither": 0.0
+      },
+      "first_0.3": {
+       "good_first": 42.6,
+       "bad_first": 56.2,
+       "neither": 1.2
+      }
+     }
+    },
+    "dev_2020_2023": {
+     "days": 516,
+     "30m": {
+      "match": 49.4,
+      "trade_win": 47.3,
+      "trade_avg": -0.026,
+      "pf": 0.87,
+      "total": -13.3,
+      "first_0.1": {
+       "good_first": 33.5,
+       "bad_first": 66.3,
+       "neither": 0.2
+      },
+      "first_0.2": {
+       "good_first": 43.6,
+       "bad_first": 52.9,
+       "neither": 3.5
+      },
+      "first_0.3": {
+       "good_first": 34.9,
+       "bad_first": 46.7,
+       "neither": 18.4
+      }
+     },
+     "60m": {
+      "match": 50.0,
+      "trade_win": 46.9,
+      "trade_avg": -0.036,
+      "pf": 0.86,
+      "total": -17.9,
+      "first_0.1": {
+       "good_first": 33.5,
+       "bad_first": 66.3,
+       "neither": 0.2
+      },
+      "first_0.2": {
+       "good_first": 44.6,
+       "bad_first": 54.8,
+       "neither": 0.6
+      },
+      "first_0.3": {
+       "good_first": 39.1,
+       "bad_first": 51.2,
+       "neither": 9.7
+      }
+     }
+    },
+    "test_2024_on": {
+     "days": 372,
+     "30m": {
+      "match": 47.6,
+      "trade_win": 45.2,
+      "trade_avg": -0.048,
+      "pf": 0.74,
+      "total": -16.8,
+      "first_0.1": {
+       "good_first": 35.2,
+       "bad_first": 64.8,
+       "neither": 0.0
+      },
+      "first_0.2": {
+       "good_first": 38.7,
+       "bad_first": 49.7,
+       "neither": 11.6
+      },
+      "first_0.3": {
+       "good_first": 31.2,
+       "bad_first": 39.0,
+       "neither": 29.8
+      }
+     },
+     "60m": {
+      "match": 49.5,
+      "trade_win": 48.4,
+      "trade_avg": -0.029,
+      "pf": 0.87,
+      "total": -10.9,
+      "first_0.1": {
+       "good_first": 35.2,
+       "bad_first": 64.8,
+       "neither": 0.0
+      },
+      "first_0.2": {
+       "good_first": 43.8,
+       "bad_first": 52.2,
+       "neither": 4.0
+      },
+      "first_0.3": {
+       "good_first": 39.2,
+       "bad_first": 46.2,
+       "neither": 14.5
+      }
+     }
+    },
+    "by_gap": {
+     "under 0.25%": {
+      "days": 282,
+      "30m": {
+       "match": 53.5,
+       "trade_win": 50.7,
+       "trade_avg": 0.007,
+       "pf": 1.05,
+       "total": 1.8,
+       "first_0.1": {
+        "good_first": 37.6,
+        "bad_first": 62.1,
+        "neither": 0.4
+       },
+       "first_0.2": {
+        "good_first": 42.2,
+        "bad_first": 46.1,
+        "neither": 11.7
+       },
+       "first_0.3": {
+        "good_first": 31.6,
+        "bad_first": 35.5,
+        "neither": 33.0
+       }
+      },
+      "60m": {
+       "match": 53.5,
+       "trade_win": 50.0,
+       "trade_avg": 0.023,
+       "pf": 1.13,
+       "total": 6.4,
+       "first_0.1": {
+        "good_first": 37.6,
+        "bad_first": 62.1,
+        "neither": 0.4
+       },
+       "first_0.2": {
+        "good_first": 46.5,
+        "bad_first": 49.3,
+        "neither": 4.3
+       },
+       "first_0.3": {
+        "good_first": 39.7,
+        "bad_first": 43.3,
+        "neither": 17.0
+       }
+      }
+     },
+     "0.25-0.5%": {
+      "days": 218,
+      "30m": {
+       "match": 47.2,
+       "trade_win": 45.0,
+       "trade_avg": -0.05,
+       "pf": 0.74,
+       "total": -10.6,
+       "first_0.1": {
+        "good_first": 38.5,
+        "bad_first": 61.5,
+        "neither": 0.0
+       },
+       "first_0.2": {
+        "good_first": 42.2,
+        "bad_first": 48.6,
+        "neither": 9.2
+       },
+       "first_0.3": {
+        "good_first": 33.9,
+        "bad_first": 42.2,
+        "neither": 23.9
+       }
+      },
+      "60m": {
+       "match": 45.0,
+       "trade_win": 44.0,
+       "trade_avg": -0.066,
+       "pf": 0.73,
+       "total": -13.8,
+       "first_0.1": {
+        "good_first": 38.5,
+        "bad_first": 61.5,
+        "neither": 0.0
+       },
+       "first_0.2": {
+        "good_first": 46.3,
+        "bad_first": 51.8,
+        "neither": 1.8
+       },
+       "first_0.3": {
+        "good_first": 38.5,
+        "bad_first": 48.2,
+        "neither": 13.3
+       }
+      }
+     },
+     "0.5-1%": {
+      "days": 233,
+      "30m": {
+       "match": 47.6,
+       "trade_win": 45.9,
+       "trade_avg": -0.025,
+       "pf": 0.87,
+       "total": -6.0,
+       "first_0.1": {
+        "good_first": 31.8,
+        "bad_first": 68.2,
+        "neither": 0.0
+       },
+       "first_0.2": {
+        "good_first": 40.3,
+        "bad_first": 56.7,
+        "neither": 3.0
+       },
+       "first_0.3": {
+        "good_first": 31.8,
+        "bad_first": 45.5,
+        "neither": 22.7
+       }
+      },
+      "60m": {
+       "match": 48.9,
+       "trade_win": 47.2,
+       "trade_avg": -0.048,
+       "pf": 0.82,
+       "total": -10.9,
+       "first_0.1": {
+        "good_first": 31.8,
+        "bad_first": 68.2,
+        "neither": 0.0
+       },
+       "first_0.2": {
+        "good_first": 41.2,
+        "bad_first": 57.9,
+        "neither": 0.9
+       },
+       "first_0.3": {
+        "good_first": 39.5,
+        "bad_first": 50.6,
+        "neither": 9.9
+       }
+      }
+     },
+     "over 1%": {
+      "days": 155,
+      "30m": {
+       "match": 43.2,
+       "trade_win": 41.3,
+       "trade_avg": -0.107,
+       "pf": 0.64,
+       "total": -15.6,
+       "first_0.1": {
+        "good_first": 25.8,
+        "bad_first": 74.2,
+        "neither": 0.0
+       },
+       "first_0.2": {
+        "good_first": 41.3,
+        "bad_first": 58.1,
+        "neither": 0.6
+       },
+       "first_0.3": {
+        "good_first": 38.1,
+        "bad_first": 56.8,
+        "neither": 5.2
+       }
+      },
+      "60m": {
+       "match": 51.0,
+       "trade_win": 48.4,
+       "trade_avg": -0.067,
+       "pf": 0.82,
+       "total": -10.5,
+       "first_0.1": {
+        "good_first": 25.8,
+        "bad_first": 74.2,
+        "neither": 0.0
+       },
+       "first_0.2": {
+        "good_first": 41.9,
+        "bad_first": 58.1,
+        "neither": 0.0
+       },
+       "first_0.3": {
+        "good_first": 38.7,
+        "bad_first": 58.7,
+        "neither": 2.6
+       }
+      }
+     }
+    },
+    "by_year": {
+     "2020": {
+      "days": 151,
+      "30m": {
+       "match": 47.0,
+       "trade_win": 45.7,
+       "trade_avg": -0.084,
+       "pf": 0.64,
+       "total": -12.1,
+       "first_0.1": {
+        "good_first": 25.8,
+        "bad_first": 74.2,
+        "neither": 0.0
+       },
+       "first_0.2": {
+        "good_first": 42.4,
+        "bad_first": 56.3,
+        "neither": 1.3
+       },
+       "first_0.3": {
+        "good_first": 25.8,
+        "bad_first": 56.3,
+        "neither": 17.9
+       }
+      },
+      "60m": {
+       "match": 48.3,
+       "trade_win": 44.4,
+       "trade_avg": -0.123,
+       "pf": 0.62,
+       "total": -17.3,
+       "first_0.1": {
+        "good_first": 25.8,
+        "bad_first": 74.2,
+        "neither": 0.0
+       },
+       "first_0.2": {
+        "good_first": 42.4,
+        "bad_first": 57.0,
+        "neither": 0.7
+       },
+       "first_0.3": {
+        "good_first": 33.8,
+        "bad_first": 58.9,
+        "neither": 7.3
+       }
+      }
+     },
+     "2021": {
+      "days": 130,
+      "30m": {
+       "match": 46.2,
+       "trade_win": 44.6,
+       "trade_avg": -0.018,
+       "pf": 0.88,
+       "total": -2.4,
+       "first_0.1": {
+        "good_first": 39.2,
+        "bad_first": 60.8,
+        "neither": 0.0
+       },
+       "first_0.2": {
+        "good_first": 43.8,
+        "bad_first": 47.7,
+        "neither": 8.5
+       },
+       "first_0.3": {
+        "good_first": 29.2,
+        "bad_first": 39.2,
+        "neither": 31.5
+       }
+      },
+      "60m": {
+       "match": 48.5,
+       "trade_win": 46.9,
+       "trade_avg": -0.007,
+       "pf": 0.97,
+       "total": -1.0,
+       "first_0.1": {
+        "good_first": 39.2,
+        "bad_first": 60.8,
+        "neither": 0.0
+       },
+       "first_0.2": {
+        "good_first": 46.9,
+        "bad_first": 52.3,
+        "neither": 0.8
+       },
+       "first_0.3": {
+        "good_first": 33.1,
+        "bad_first": 47.7,
+        "neither": 19.2
+       }
+      }
+     },
+     "2022": {
+      "days": 116,
+      "30m": {
+       "match": 48.3,
+       "trade_win": 46.6,
+       "trade_avg": 0.011,
+       "pf": 1.04,
+       "total": 1.0,
+       "first_0.1": {
+        "good_first": 20.7,
+        "bad_first": 79.3,
+        "neither": 0.0
+       },
+       "first_0.2": {
+        "good_first": 33.6,
+        "bad_first": 66.4,
+        "neither": 0.0
+       },
+       "first_0.3": {
+        "good_first": 43.1,
+        "bad_first": 54.3,
+        "neither": 2.6
+       }
+      },
+      "60m": {
+       "match": 48.3,
+       "trade_win": 48.3,
+       "trade_avg": -0.035,
+       "pf": 0.91,
+       "total": -4.5,
+       "first_0.1": {
+        "good_first": 20.7,
+        "bad_first": 79.3,
+        "neither": 0.0
+       },
+       "first_0.2": {
+        "good_first": 33.6,
+        "bad_first": 66.4,
+        "neither": 0.0
+       },
+       "first_0.3": {
+        "good_first": 44.0,
+        "bad_first": 55.2,
+        "neither": 0.9
+       }
+      }
+     },
+     "2023": {
+      "days": 119,
+      "30m": {
+       "match": 57.1,
+       "trade_win": 52.9,
+       "trade_avg": 0.002,
+       "pf": 1.01,
+       "total": 0.1,
+       "first_0.1": {
+        "good_first": 49.6,
+        "bad_first": 49.6,
+        "neither": 0.8
+       },
+       "first_0.2": {
+        "good_first": 54.6,
+        "bad_first": 41.2,
+        "neither": 4.2
+       },
+       "first_0.3": {
+        "good_first": 44.5,
+        "bad_first": 35.3,
+        "neither": 20.2
+       }
+      },
+      "60m": {
+       "match": 55.5,
+       "trade_win": 48.7,
+       "trade_avg": 0.042,
+       "pf": 1.26,
+       "total": 5.0,
+       "first_0.1": {
+        "good_first": 49.6,
+        "bad_first": 49.6,
+        "neither": 0.8
+       },
+       "first_0.2": {
+        "good_first": 55.5,
+        "bad_first": 43.7,
+        "neither": 0.8
+       },
+       "first_0.3": {
+        "good_first": 47.9,
+        "bad_first": 41.2,
+        "neither": 10.9
+       }
+      }
+     },
+     "2024": {
+      "days": 122,
+      "30m": {
+       "match": 44.3,
+       "trade_win": 41.0,
+       "trade_avg": -0.055,
+       "pf": 0.67,
+       "total": -6.6,
+       "first_0.1": {
+        "good_first": 36.9,
+        "bad_first": 63.1,
+        "neither": 0.0
+       },
+       "first_0.2": {
+        "good_first": 36.1,
+        "bad_first": 46.7,
+        "neither": 17.2
+       },
+       "first_0.3": {
+        "good_first": 25.4,
+        "bad_first": 36.9,
+        "neither": 37.7
+       }
+      },
+      "60m": {
+       "match": 53.3,
+       "trade_win": 50.8,
+       "trade_avg": -0.026,
+       "pf": 0.87,
+       "total": -3.2,
+       "first_0.1": {
+        "good_first": 36.9,
+        "bad_first": 63.1,
+        "neither": 0.0
+       },
+       "first_0.2": {
+        "good_first": 42.6,
+        "bad_first": 50.8,
+        "neither": 6.6
+       },
+       "first_0.3": {
+        "good_first": 36.9,
+        "bad_first": 45.1,
+        "neither": 18.0
+       }
+      }
+     },
+     "2025": {
+      "days": 148,
+      "30m": {
+       "match": 48.6,
+       "trade_win": 46.6,
+       "trade_avg": -0.072,
+       "pf": 0.64,
+       "total": -10.3,
+       "first_0.1": {
+        "good_first": 38.5,
+        "bad_first": 61.5,
+        "neither": 0.0
+       },
+       "first_0.2": {
+        "good_first": 41.9,
+        "bad_first": 48.0,
+        "neither": 10.1
+       },
+       "first_0.3": {
+        "good_first": 28.4,
+        "bad_first": 39.9,
+        "neither": 31.8
+       }
+      },
+      "60m": {
+       "match": 48.0,
+       "trade_win": 47.3,
+       "trade_avg": -0.044,
+       "pf": 0.82,
+       "total": -6.5,
+       "first_0.1": {
+        "good_first": 38.5,
+        "bad_first": 61.5,
+        "neither": 0.0
+       },
+       "first_0.2": {
+        "good_first": 45.9,
+        "bad_first": 50.7,
+        "neither": 3.4
+       },
+       "first_0.3": {
+        "good_first": 34.5,
+        "bad_first": 48.6,
+        "neither": 16.9
+       }
+      }
+     },
+     "2026": {
+      "days": 102,
+      "30m": {
+       "match": 50.0,
+       "trade_win": 48.0,
+       "trade_avg": -0.006,
+       "pf": 0.97,
+       "total": -0.7,
+       "first_0.1": {
+        "good_first": 28.4,
+        "bad_first": 71.6,
+        "neither": 0.0
+       },
+       "first_0.2": {
+        "good_first": 37.3,
+        "bad_first": 55.9,
+        "neither": 6.9
+       },
+       "first_0.3": {
+        "good_first": 42.2,
+        "bad_first": 40.2,
+        "neither": 17.6
+       }
+      },
+      "60m": {
+       "match": 47.1,
+       "trade_win": 47.1,
+       "trade_avg": -0.013,
+       "pf": 0.95,
+       "total": -1.5,
+       "first_0.1": {
+        "good_first": 28.4,
+        "bad_first": 71.6,
+        "neither": 0.0
+       },
+       "first_0.2": {
+        "good_first": 42.2,
+        "bad_first": 55.9,
+        "neither": 2.0
+       },
+       "first_0.3": {
+        "good_first": 49.0,
+        "bad_first": 44.1,
+        "neither": 6.9
+       }
+      }
+     }
+    }
+   },
+   "late_agrees": {
+    "all": {
+     "days": 870,
+     "30m": {
+      "match": 48.3,
+      "trade_win": 46.3,
+      "trade_avg": -0.036,
+      "pf": 0.83,
+      "total": -27.9,
+      "first_0.1": {
+       "good_first": 34.0,
+       "bad_first": 65.9,
+       "neither": 0.1
+      },
+      "first_0.2": {
+       "good_first": 42.4,
+       "bad_first": 51.6,
+       "neither": 6.0
+      },
+      "first_0.3": {
+       "good_first": 37.6,
+       "bad_first": 42.2,
+       "neither": 20.2
+      }
+     },
+     "60m": {
+      "match": 49.2,
+      "trade_win": 47.7,
+      "trade_avg": -0.017,
+      "pf": 0.93,
+      "total": -15.6,
+      "first_0.1": {
+       "good_first": 34.0,
+       "bad_first": 65.9,
+       "neither": 0.1
+      },
+      "first_0.2": {
+       "good_first": 44.6,
+       "bad_first": 53.7,
+       "neither": 1.7
+      },
+      "first_0.3": {
+       "good_first": 42.4,
+       "bad_first": 47.2,
+       "neither": 10.3
+      }
+     }
+    },
+    "up_gaps": {
+     "days": 468,
+     "30m": {
+      "match": 50.9,
+      "trade_win": 48.3,
+      "trade_avg": -0.018,
+      "pf": 0.9,
+      "total": -8.7,
+      "first_0.1": {
+       "good_first": 37.4,
+       "bad_first": 62.4,
+       "neither": 0.2
+      },
+      "first_0.2": {
+       "good_first": 42.5,
+       "bad_first": 50.0,
+       "neither": 7.5
+      },
+      "first_0.3": {
+       "good_first": 36.5,
+       "bad_first": 40.0,
+       "neither": 23.5
+      }
+     },
+     "60m": {
+      "match": 50.9,
+      "trade_win": 48.7,
+      "trade_avg": -0.003,
+      "pf": 0.99,
+      "total": -2.0,
+      "first_0.1": {
+       "good_first": 37.4,
+       "bad_first": 62.4,
+       "neither": 0.2
+      },
+      "first_0.2": {
+       "good_first": 44.9,
+       "bad_first": 53.0,
+       "neither": 2.1
+      },
+      "first_0.3": {
+       "good_first": 41.7,
+       "bad_first": 45.9,
+       "neither": 12.4
+      }
+     }
+    },
+    "down_gaps": {
+     "days": 402,
+     "30m": {
+      "match": 45.3,
+      "trade_win": 44.0,
+      "trade_avg": -0.057,
+      "pf": 0.76,
+      "total": -21.0,
+      "first_0.1": {
+       "good_first": 30.1,
+       "bad_first": 69.9,
+       "neither": 0.0
+      },
+      "first_0.2": {
+       "good_first": 42.3,
+       "bad_first": 53.5,
+       "neither": 4.2
+      },
+      "first_0.3": {
+       "good_first": 38.8,
+       "bad_first": 44.8,
+       "neither": 16.4
+      }
+     },
+     "60m": {
+      "match": 47.3,
+      "trade_win": 46.5,
+      "trade_avg": -0.035,
+      "pf": 0.88,
+      "total": -13.9,
+      "first_0.1": {
+       "good_first": 30.1,
+       "bad_first": 69.9,
+       "neither": 0.0
+      },
+      "first_0.2": {
+       "good_first": 44.3,
+       "bad_first": 54.5,
+       "neither": 1.2
+      },
+      "first_0.3": {
+       "good_first": 43.3,
+       "bad_first": 48.8,
+       "neither": 8.0
+      }
+     }
+    },
+    "dev_2020_2023": {
+     "days": 507,
+     "30m": {
+      "match": 48.1,
+      "trade_win": 46.4,
+      "trade_avg": -0.056,
+      "pf": 0.76,
+      "total": -25.2,
+      "first_0.1": {
+       "good_first": 30.4,
+       "bad_first": 69.4,
+       "neither": 0.2
+      },
+      "first_0.2": {
+       "good_first": 41.8,
+       "bad_first": 55.2,
+       "neither": 3.0
+      },
+      "first_0.3": {
+       "good_first": 38.1,
+       "bad_first": 46.2,
+       "neither": 15.8
+      }
+     },
+     "60m": {
+      "match": 48.9,
+      "trade_win": 46.9,
+      "trade_avg": -0.04,
+      "pf": 0.85,
+      "total": -19.5,
+      "first_0.1": {
+       "good_first": 30.4,
+       "bad_first": 69.4,
+       "neither": 0.2
+      },
+      "first_0.2": {
+       "good_first": 43.0,
+       "bad_first": 56.4,
+       "neither": 0.6
+      },
+      "first_0.3": {
+       "good_first": 41.4,
+       "bad_first": 49.9,
+       "neither": 8.7
+      }
+     }
+    },
+    "test_2024_on": {
+     "days": 363,
+     "30m": {
+      "match": 48.5,
+      "trade_win": 46.3,
+      "trade_avg": -0.009,
+      "pf": 0.95,
+      "total": -3.6,
+      "first_0.1": {
+       "good_first": 39.1,
+       "bad_first": 60.9,
+       "neither": 0.0
+      },
+      "first_0.2": {
+       "good_first": 43.3,
+       "bad_first": 46.6,
+       "neither": 10.2
+      },
+      "first_0.3": {
+       "good_first": 36.9,
+       "bad_first": 36.6,
+       "neither": 26.4
+      }
+     },
+     "60m": {
+      "match": 49.6,
+      "trade_win": 48.8,
+      "trade_avg": 0.015,
+      "pf": 1.07,
+      "total": 4.8,
+      "first_0.1": {
+       "good_first": 39.1,
+       "bad_first": 60.9,
+       "neither": 0.0
+      },
+      "first_0.2": {
+       "good_first": 46.8,
+       "bad_first": 49.9,
+       "neither": 3.3
+      },
+      "first_0.3": {
+       "good_first": 43.8,
+       "bad_first": 43.5,
+       "neither": 12.7
+      }
+     }
+    },
+    "by_gap": {
+     "under 0.25%": {
+      "days": 239,
+      "30m": {
+       "match": 50.2,
+       "trade_win": 47.3,
+       "trade_avg": 0.003,
+       "pf": 1.02,
+       "total": 0.6,
+       "first_0.1": {
+        "good_first": 39.7,
+        "bad_first": 59.8,
+        "neither": 0.4
+       },
+       "first_0.2": {
+        "good_first": 43.9,
+        "bad_first": 43.9,
+        "neither": 12.1
+       },
+       "first_0.3": {
+        "good_first": 35.6,
+        "bad_first": 31.4,
+        "neither": 33.1
+       }
+      },
+      "60m": {
+       "match": 52.7,
+       "trade_win": 49.8,
+       "trade_avg": 0.039,
+       "pf": 1.24,
+       "total": 9.4,
+       "first_0.1": {
+        "good_first": 39.7,
+        "bad_first": 59.8,
+        "neither": 0.4
+       },
+       "first_0.2": {
+        "good_first": 49.4,
+        "bad_first": 46.9,
+        "neither": 3.8
+       },
+       "first_0.3": {
+        "good_first": 43.9,
+        "bad_first": 39.3,
+        "neither": 16.7
+       }
+      }
+     },
+     "0.25-0.5%": {
+      "days": 220,
+      "30m": {
+       "match": 46.4,
+       "trade_win": 44.5,
+       "trade_avg": -0.02,
+       "pf": 0.9,
+       "total": -4.5,
+       "first_0.1": {
+        "good_first": 36.4,
+        "bad_first": 63.6,
+        "neither": 0.0
+       },
+       "first_0.2": {
+        "good_first": 43.6,
+        "bad_first": 48.2,
+        "neither": 8.2
+       },
+       "first_0.3": {
+        "good_first": 36.4,
+        "bad_first": 41.8,
+        "neither": 21.8
+       }
+      },
+      "60m": {
+       "match": 46.4,
+       "trade_win": 45.9,
+       "trade_avg": -0.042,
+       "pf": 0.82,
+       "total": -9.1,
+       "first_0.1": {
+        "good_first": 36.4,
+        "bad_first": 63.6,
+        "neither": 0.0
+       },
+       "first_0.2": {
+        "good_first": 45.9,
+        "bad_first": 51.8,
+        "neither": 2.3
+       },
+       "first_0.3": {
+        "good_first": 38.6,
+        "bad_first": 48.6,
+        "neither": 12.7
+       }
+      }
+     },
+     "0.5-1%": {
+      "days": 225,
+      "30m": {
+       "match": 49.8,
+       "trade_win": 48.0,
+       "trade_avg": -0.012,
+       "pf": 0.94,
+       "total": -3.0,
+       "first_0.1": {
+        "good_first": 33.8,
+        "bad_first": 66.2,
+        "neither": 0.0
+       },
+       "first_0.2": {
+        "good_first": 43.1,
+        "bad_first": 54.7,
+        "neither": 2.2
+       },
+       "first_0.3": {
+        "good_first": 37.8,
+        "bad_first": 44.0,
+        "neither": 18.2
+       }
+      },
+      "60m": {
+       "match": 47.1,
+       "trade_win": 46.2,
+       "trade_avg": -0.014,
+       "pf": 0.95,
+       "total": -3.5,
+       "first_0.1": {
+        "good_first": 33.8,
+        "bad_first": 66.2,
+        "neither": 0.0
+       },
+       "first_0.2": {
+        "good_first": 43.6,
+        "bad_first": 56.0,
+        "neither": 0.4
+       },
+       "first_0.3": {
+        "good_first": 43.1,
+        "bad_first": 48.0,
+        "neither": 8.9
+       }
+      }
+     },
+     "over 1%": {
+      "days": 186,
+      "30m": {
+       "match": 46.2,
+       "trade_win": 45.2,
+       "trade_avg": -0.135,
+       "pf": 0.58,
+       "total": -22.6,
+       "first_0.1": {
+        "good_first": 24.2,
+        "bad_first": 75.8,
+        "neither": 0.0
+       },
+       "first_0.2": {
+        "good_first": 38.2,
+        "bad_first": 61.8,
+        "neither": 0.0
+       },
+       "first_0.3": {
+        "good_first": 41.4,
+        "bad_first": 54.3,
+        "neither": 4.3
+       }
+      },
+      "60m": {
+       "match": 50.5,
+       "trade_win": 48.9,
+       "trade_avg": -0.065,
+       "pf": 0.82,
+       "total": -12.1,
+       "first_0.1": {
+        "good_first": 24.2,
+        "bad_first": 75.8,
+        "neither": 0.0
+       },
+       "first_0.2": {
+        "good_first": 38.2,
+        "bad_first": 61.8,
+        "neither": 0.0
+       },
+       "first_0.3": {
+        "good_first": 44.1,
+        "bad_first": 54.8,
+        "neither": 1.1
+       }
+      }
+     }
+    },
+    "by_year": {
+     "2020": {
+      "days": 127,
+      "30m": {
+       "match": 42.5,
+       "trade_win": 41.7,
+       "trade_avg": -0.18,
+       "pf": 0.46,
+       "total": -20.7,
+       "first_0.1": {
+        "good_first": 17.3,
+        "bad_first": 82.7,
+        "neither": 0.0
+       },
+       "first_0.2": {
+        "good_first": 32.3,
+        "bad_first": 65.4,
+        "neither": 2.4
+       },
+       "first_0.3": {
+        "good_first": 29.9,
+        "bad_first": 55.1,
+        "neither": 15.0
+       }
+      },
+      "60m": {
+       "match": 44.1,
+       "trade_win": 40.9,
+       "trade_avg": -0.14,
+       "pf": 0.6,
+       "total": -16.6,
+       "first_0.1": {
+        "good_first": 17.3,
+        "bad_first": 82.7,
+        "neither": 0.0
+       },
+       "first_0.2": {
+        "good_first": 32.3,
+        "bad_first": 66.1,
+        "neither": 1.6
+       },
+       "first_0.3": {
+        "good_first": 34.6,
+        "bad_first": 57.5,
+        "neither": 7.9
+       }
+      }
+     },
+     "2021": {
+      "days": 128,
+      "30m": {
+       "match": 43.0,
+       "trade_win": 40.6,
+       "trade_avg": -0.048,
+       "pf": 0.72,
+       "total": -6.0,
+       "first_0.1": {
+        "good_first": 39.8,
+        "bad_first": 60.2,
+        "neither": 0.0
+       },
+       "first_0.2": {
+        "good_first": 46.1,
+        "bad_first": 47.7,
+        "neither": 6.2
+       },
+       "first_0.3": {
+        "good_first": 34.4,
+        "bad_first": 39.8,
+        "neither": 25.8
+       }
+      },
+      "60m": {
+       "match": 49.2,
+       "trade_win": 48.4,
+       "trade_avg": -0.004,
+       "pf": 0.98,
+       "total": -0.7,
+       "first_0.1": {
+        "good_first": 39.8,
+        "bad_first": 60.2,
+        "neither": 0.0
+       },
+       "first_0.2": {
+        "good_first": 49.2,
+        "bad_first": 50.8,
+        "neither": 0.0
+       },
+       "first_0.3": {
+        "good_first": 37.5,
+        "bad_first": 46.1,
+        "neither": 16.4
+       }
+      }
+     },
+     "2022": {
+      "days": 125,
+      "30m": {
+       "match": 52.8,
+       "trade_win": 52.8,
+       "trade_avg": 0.031,
+       "pf": 1.12,
+       "total": 3.6,
+       "first_0.1": {
+        "good_first": 23.2,
+        "bad_first": 76.8,
+        "neither": 0.0
+       },
+       "first_0.2": {
+        "good_first": 40.0,
+        "bad_first": 60.0,
+        "neither": 0.0
+       },
+       "first_0.3": {
+        "good_first": 48.8,
+        "bad_first": 49.6,
+        "neither": 1.6
+       }
+      },
+      "60m": {
+       "match": 52.0,
+       "trade_win": 52.0,
+       "trade_avg": 0.002,
+       "pf": 1.01,
+       "total": -0.1,
+       "first_0.1": {
+        "good_first": 23.2,
+        "bad_first": 76.8,
+        "neither": 0.0
+       },
+       "first_0.2": {
+        "good_first": 40.0,
+        "bad_first": 60.0,
+        "neither": 0.0
+       },
+       "first_0.3": {
+        "good_first": 48.8,
+        "bad_first": 49.6,
+        "neither": 1.6
+       }
+      }
+     },
+     "2023": {
+      "days": 127,
+      "30m": {
+       "match": 54.3,
+       "trade_win": 50.4,
+       "trade_avg": -0.024,
+       "pf": 0.86,
+       "total": -3.1,
+       "first_0.1": {
+        "good_first": 40.9,
+        "bad_first": 58.3,
+        "neither": 0.8
+       },
+       "first_0.2": {
+        "good_first": 48.8,
+        "bad_first": 48.0,
+        "neither": 3.1
+       },
+       "first_0.3": {
+        "good_first": 39.4,
+        "bad_first": 40.2,
+        "neither": 20.5
+       }
+      },
+      "60m": {
+       "match": 50.4,
+       "trade_win": 46.5,
+       "trade_avg": -0.02,
+       "pf": 0.9,
+       "total": -2.7,
+       "first_0.1": {
+        "good_first": 40.9,
+        "bad_first": 58.3,
+        "neither": 0.8
+       },
+       "first_0.2": {
+        "good_first": 50.4,
+        "bad_first": 48.8,
+        "neither": 0.8
+       },
+       "first_0.3": {
+        "good_first": 44.9,
+        "bad_first": 46.5,
+        "neither": 8.7
+       }
+      }
+     },
+     "2024": {
+      "days": 136,
+      "30m": {
+       "match": 45.6,
+       "trade_win": 44.1,
+       "trade_avg": -0.024,
+       "pf": 0.84,
+       "total": -3.3,
+       "first_0.1": {
+        "good_first": 42.6,
+        "bad_first": 57.4,
+        "neither": 0.0
+       },
+       "first_0.2": {
+        "good_first": 44.9,
+        "bad_first": 41.9,
+        "neither": 13.2
+       },
+       "first_0.3": {
+        "good_first": 30.9,
+        "bad_first": 31.6,
+        "neither": 37.5
+       }
+      },
+      "60m": {
+       "match": 50.7,
+       "trade_win": 49.3,
+       "trade_avg": -0.001,
+       "pf": 0.99,
+       "total": -0.3,
+       "first_0.1": {
+        "good_first": 42.6,
+        "bad_first": 57.4,
+        "neither": 0.0
+       },
+       "first_0.2": {
+        "good_first": 49.3,
+        "bad_first": 47.1,
+        "neither": 3.7
+       },
+       "first_0.3": {
+        "good_first": 41.2,
+        "bad_first": 42.6,
+        "neither": 16.2
+       }
+      }
+     },
+     "2025": {
+      "days": 125,
+      "30m": {
+       "match": 45.6,
+       "trade_win": 42.4,
+       "trade_avg": -0.087,
+       "pf": 0.63,
+       "total": -10.5,
+       "first_0.1": {
+        "good_first": 37.6,
+        "bad_first": 62.4,
+        "neither": 0.0
+       },
+       "first_0.2": {
+        "good_first": 40.0,
+        "bad_first": 50.4,
+        "neither": 9.6
+       },
+       "first_0.3": {
+        "good_first": 32.8,
+        "bad_first": 41.6,
+        "neither": 25.6
+       }
+      },
+      "60m": {
+       "match": 44.8,
+       "trade_win": 44.0,
+       "trade_avg": -0.069,
+       "pf": 0.75,
+       "total": -8.5,
+       "first_0.1": {
+        "good_first": 37.6,
+        "bad_first": 62.4,
+        "neither": 0.0
+       },
+       "first_0.2": {
+        "good_first": 41.6,
+        "bad_first": 53.6,
+        "neither": 4.8
+       },
+       "first_0.3": {
+        "good_first": 36.0,
+        "bad_first": 48.8,
+        "neither": 15.2
+       }
+      }
+     },
+     "2026": {
+      "days": 102,
+      "30m": {
+       "match": 55.9,
+       "trade_win": 53.9,
+       "trade_avg": 0.107,
+       "pf": 1.7,
+       "total": 11.4,
+       "first_0.1": {
+        "good_first": 36.3,
+        "bad_first": 63.7,
+        "neither": 0.0
+       },
+       "first_0.2": {
+        "good_first": 45.1,
+        "bad_first": 48.0,
+        "neither": 6.9
+       },
+       "first_0.3": {
+        "good_first": 50.0,
+        "bad_first": 37.3,
+        "neither": 12.7
+       }
+      },
+      "60m": {
+       "match": 53.9,
+       "trade_win": 53.9,
+       "trade_avg": 0.139,
+       "pf": 1.83,
+       "total": 15.0,
+       "first_0.1": {
+        "good_first": 36.3,
+        "bad_first": 63.7,
+        "neither": 0.0
+       },
+       "first_0.2": {
+        "good_first": 50.0,
+        "bad_first": 49.0,
+        "neither": 1.0
+       },
+       "first_0.3": {
+        "good_first": 56.9,
+        "bad_first": 38.2,
+        "neither": 4.9
+       }
+      }
+     }
+    }
+   },
+   "both": {
+    "all": {
+     "days": 451,
+     "30m": {
+      "match": 46.3,
+      "trade_win": 43.9,
+      "trade_avg": -0.061,
+      "pf": 0.72,
+      "total": -24.6,
+      "first_0.1": {
+       "good_first": 34.1,
+       "bad_first": 65.6,
+       "neither": 0.2
+      },
+      "first_0.2": {
+       "good_first": 40.8,
+       "bad_first": 51.4,
+       "neither": 7.8
+      },
+      "first_0.3": {
+       "good_first": 33.9,
+       "bad_first": 41.9,
+       "neither": 24.2
+      }
+     },
+     "60m": {
+      "match": 48.3,
+      "trade_win": 46.3,
+      "trade_avg": -0.048,
+      "pf": 0.82,
+      "total": -20.2,
+      "first_0.1": {
+       "good_first": 34.1,
+       "bad_first": 65.6,
+       "neither": 0.2
+      },
+      "first_0.2": {
+       "good_first": 43.5,
+       "bad_first": 54.3,
+       "neither": 2.2
+      },
+      "first_0.3": {
+       "good_first": 38.6,
+       "bad_first": 48.1,
+       "neither": 13.3
+      }
+     }
+    },
+    "up_gaps": {
+     "days": 314,
+     "30m": {
+      "match": 48.7,
+      "trade_win": 45.5,
+      "trade_avg": -0.024,
+      "pf": 0.85,
+      "total": -7.5,
+      "first_0.1": {
+       "good_first": 38.2,
+       "bad_first": 61.5,
+       "neither": 0.3
+      },
+      "first_0.2": {
+       "good_first": 41.1,
+       "bad_first": 48.1,
+       "neither": 10.8
+      },
+      "first_0.3": {
+       "good_first": 30.3,
+       "bad_first": 36.9,
+       "neither": 32.8
+      }
+     },
+     "60m": {
+      "match": 49.7,
+      "trade_win": 47.1,
+      "trade_avg": -0.027,
+      "pf": 0.86,
+      "total": -8.4,
+      "first_0.1": {
+       "good_first": 38.2,
+       "bad_first": 61.5,
+       "neither": 0.3
+      },
+      "first_0.2": {
+       "good_first": 44.6,
+       "bad_first": 52.2,
+       "neither": 3.2
+      },
+      "first_0.3": {
+       "good_first": 36.6,
+       "bad_first": 44.9,
+       "neither": 18.5
+      }
+     }
+    },
+    "down_gaps": {
+     "days": 137,
+     "30m": {
+      "match": 40.9,
+      "trade_win": 40.1,
+      "trade_avg": -0.147,
+      "pf": 0.59,
+      "total": -18.5,
+      "first_0.1": {
+       "good_first": 24.8,
+       "bad_first": 75.2,
+       "neither": 0.0
+      },
+      "first_0.2": {
+       "good_first": 40.1,
+       "bad_first": 59.1,
+       "neither": 0.7
+      },
+      "first_0.3": {
+       "good_first": 42.3,
+       "bad_first": 53.3,
+       "neither": 4.4
+      }
+     },
+     "60m": {
+      "match": 45.3,
+      "trade_win": 44.5,
+      "trade_avg": -0.096,
+      "pf": 0.76,
+      "total": -12.9,
+      "first_0.1": {
+       "good_first": 24.8,
+       "bad_first": 75.2,
+       "neither": 0.0
+      },
+      "first_0.2": {
+       "good_first": 40.9,
+       "bad_first": 59.1,
+       "neither": 0.0
+      },
+      "first_0.3": {
+       "good_first": 43.1,
+       "bad_first": 55.5,
+       "neither": 1.5
+      }
+     }
+    },
+    "dev_2020_2023": {
+     "days": 261,
+     "30m": {
+      "match": 47.9,
+      "trade_win": 45.2,
+      "trade_avg": -0.059,
+      "pf": 0.74,
+      "total": -14.6,
+      "first_0.1": {
+       "good_first": 31.4,
+       "bad_first": 68.2,
+       "neither": 0.4
+      },
+      "first_0.2": {
+       "good_first": 42.5,
+       "bad_first": 53.3,
+       "neither": 4.2
+      },
+      "first_0.3": {
+       "good_first": 34.9,
+       "bad_first": 44.1,
+       "neither": 21.1
+      }
+     },
+     "60m": {
+      "match": 49.4,
+      "trade_win": 47.1,
+      "trade_avg": -0.051,
+      "pf": 0.81,
+      "total": -13.0,
+      "first_0.1": {
+       "good_first": 31.4,
+       "bad_first": 68.2,
+       "neither": 0.4
+      },
+      "first_0.2": {
+       "good_first": 43.7,
+       "bad_first": 55.6,
+       "neither": 0.8
+      },
+      "first_0.3": {
+       "good_first": 38.7,
+       "bad_first": 49.0,
+       "neither": 12.3
+      }
+     }
+    },
+    "test_2024_on": {
+     "days": 190,
+     "30m": {
+      "match": 44.2,
+      "trade_win": 42.1,
+      "trade_avg": -0.065,
+      "pf": 0.69,
+      "total": -11.8,
+      "first_0.1": {
+       "good_first": 37.9,
+       "bad_first": 62.1,
+       "neither": 0.0
+      },
+      "first_0.2": {
+       "good_first": 38.4,
+       "bad_first": 48.9,
+       "neither": 12.6
+      },
+      "first_0.3": {
+       "good_first": 32.6,
+       "bad_first": 38.9,
+       "neither": 28.4
+      }
+     },
+     "60m": {
+      "match": 46.8,
+      "trade_win": 45.3,
+      "trade_avg": -0.043,
+      "pf": 0.82,
+      "total": -8.2,
+      "first_0.1": {
+       "good_first": 37.9,
+       "bad_first": 62.1,
+       "neither": 0.0
+      },
+      "first_0.2": {
+       "good_first": 43.2,
+       "bad_first": 52.6,
+       "neither": 4.2
+      },
+      "first_0.3": {
+       "good_first": 38.4,
+       "bad_first": 46.8,
+       "neither": 14.7
+      }
+     }
+    },
+    "by_gap": {
+     "under 0.25%": {
+      "days": 126,
+      "30m": {
+       "match": 50.8,
+       "trade_win": 47.6,
+       "trade_avg": -0.008,
+       "pf": 0.95,
+       "total": -1.0,
+       "first_0.1": {
+        "good_first": 38.9,
+        "bad_first": 60.3,
+        "neither": 0.8
+       },
+       "first_0.2": {
+        "good_first": 42.1,
+        "bad_first": 42.9,
+        "neither": 15.1
+       },
+       "first_0.3": {
+        "good_first": 33.3,
+        "bad_first": 29.4,
+        "neither": 37.3
+       }
+      },
+      "60m": {
+       "match": 52.4,
+       "trade_win": 49.2,
+       "trade_avg": 0.011,
+       "pf": 1.06,
+       "total": 1.2,
+       "first_0.1": {
+        "good_first": 38.9,
+        "bad_first": 60.3,
+        "neither": 0.8
+       },
+       "first_0.2": {
+        "good_first": 47.6,
+        "bad_first": 47.6,
+        "neither": 4.8
+       },
+       "first_0.3": {
+        "good_first": 41.3,
+        "bad_first": 39.7,
+        "neither": 19.0
+       }
+      }
+     },
+     "0.25-0.5%": {
+      "days": 125,
+      "30m": {
+       "match": 43.2,
+       "trade_win": 40.8,
+       "trade_avg": -0.055,
+       "pf": 0.72,
+       "total": -6.7,
+       "first_0.1": {
+        "good_first": 38.4,
+        "bad_first": 61.6,
+        "neither": 0.0
+       },
+       "first_0.2": {
+        "good_first": 40.8,
+        "bad_first": 50.4,
+        "neither": 8.8
+       },
+       "first_0.3": {
+        "good_first": 34.4,
+        "bad_first": 42.4,
+        "neither": 23.2
+       }
+      },
+      "60m": {
+       "match": 45.6,
+       "trade_win": 44.8,
+       "trade_avg": -0.066,
+       "pf": 0.71,
+       "total": -8.1,
+       "first_0.1": {
+        "good_first": 38.4,
+        "bad_first": 61.6,
+        "neither": 0.0
+       },
+       "first_0.2": {
+        "good_first": 44.0,
+        "bad_first": 53.6,
+        "neither": 2.4
+       },
+       "first_0.3": {
+        "good_first": 36.8,
+        "bad_first": 48.0,
+        "neither": 15.2
+       }
+      }
+     },
+     "0.5-1%": {
+      "days": 115,
+      "30m": {
+       "match": 48.7,
+       "trade_win": 46.1,
+       "trade_avg": -0.016,
+       "pf": 0.92,
+       "total": -1.9,
+       "first_0.1": {
+        "good_first": 33.9,
+        "bad_first": 66.1,
+        "neither": 0.0
+       },
+       "first_0.2": {
+        "good_first": 40.9,
+        "bad_first": 54.8,
+        "neither": 4.3
+       },
+       "first_0.3": {
+        "good_first": 33.0,
+        "bad_first": 40.9,
+        "neither": 26.1
+       }
+      },
+      "60m": {
+       "match": 46.1,
+       "trade_win": 44.3,
+       "trade_avg": -0.031,
+       "pf": 0.87,
+       "total": -3.7,
+       "first_0.1": {
+        "good_first": 33.9,
+        "bad_first": 66.1,
+        "neither": 0.0
+       },
+       "first_0.2": {
+        "good_first": 41.7,
+        "bad_first": 57.4,
+        "neither": 0.9
+       },
+       "first_0.3": {
+        "good_first": 39.1,
+        "bad_first": 47.0,
+        "neither": 13.9
+       }
+      }
+     },
+     "over 1%": {
+      "days": 85,
+      "30m": {
+       "match": 41.2,
+       "trade_win": 40.0,
+       "trade_avg": -0.213,
+       "pf": 0.46,
+       "total": -16.8,
+       "first_0.1": {
+        "good_first": 21.2,
+        "bad_first": 78.8,
+        "neither": 0.0
+       },
+       "first_0.2": {
+        "good_first": 38.8,
+        "bad_first": 61.2,
+        "neither": 0.0
+       },
+       "first_0.3": {
+        "good_first": 35.3,
+        "bad_first": 61.2,
+        "neither": 3.5
+       }
+      },
+      "60m": {
+       "match": 49.4,
+       "trade_win": 47.1,
+       "trade_avg": -0.13,
+       "pf": 0.71,
+       "total": -10.9,
+       "first_0.1": {
+        "good_first": 21.2,
+        "bad_first": 78.8,
+        "neither": 0.0
+       },
+       "first_0.2": {
+        "good_first": 38.8,
+        "bad_first": 61.2,
+        "neither": 0.0
+       },
+       "first_0.3": {
+        "good_first": 36.5,
+        "bad_first": 62.4,
+        "neither": 1.2
+       }
+      }
+     }
+    },
+    "by_year": {
+     "2020": {
+      "days": 72,
+      "30m": {
+       "match": 38.9,
+       "trade_win": 37.5,
+       "trade_avg": -0.201,
+       "pf": 0.36,
+       "total": -13.6,
+       "first_0.1": {
+        "good_first": 20.8,
+        "bad_first": 79.2,
+        "neither": 0.0
+       },
+       "first_0.2": {
+        "good_first": 34.7,
+        "bad_first": 62.5,
+        "neither": 2.8
+       },
+       "first_0.3": {
+        "good_first": 19.4,
+        "bad_first": 58.3,
+        "neither": 22.2
+       }
+      },
+      "60m": {
+       "match": 41.7,
+       "trade_win": 38.9,
+       "trade_avg": -0.237,
+       "pf": 0.41,
+       "total": -15.9,
+       "first_0.1": {
+        "good_first": 20.8,
+        "bad_first": 79.2,
+        "neither": 0.0
+       },
+       "first_0.2": {
+        "good_first": 34.7,
+        "bad_first": 63.9,
+        "neither": 1.4
+       },
+       "first_0.3": {
+        "good_first": 27.8,
+        "bad_first": 61.1,
+        "neither": 11.1
+       }
+      }
+     },
+     "2021": {
+      "days": 70,
+      "30m": {
+       "match": 48.6,
+       "trade_win": 45.7,
+       "trade_avg": 0.013,
+       "pf": 1.11,
+       "total": 0.9,
+       "first_0.1": {
+        "good_first": 42.9,
+        "bad_first": 57.1,
+        "neither": 0.0
+       },
+       "first_0.2": {
+        "good_first": 47.1,
+        "bad_first": 42.9,
+        "neither": 10.0
+       },
+       "first_0.3": {
+        "good_first": 32.9,
+        "bad_first": 30.0,
+        "neither": 37.1
+       }
+      },
+      "60m": {
+       "match": 51.4,
+       "trade_win": 51.4,
+       "trade_avg": 0.049,
+       "pf": 1.36,
+       "total": 3.4,
+       "first_0.1": {
+        "good_first": 42.9,
+        "bad_first": 57.1,
+        "neither": 0.0
+       },
+       "first_0.2": {
+        "good_first": 51.4,
+        "bad_first": 48.6,
+        "neither": 0.0
+       },
+       "first_0.3": {
+        "good_first": 37.1,
+        "bad_first": 38.6,
+        "neither": 24.3
+       }
+      }
+     },
+     "2022": {
+      "days": 60,
+      "30m": {
+       "match": 43.3,
+       "trade_win": 43.3,
+       "trade_avg": -0.066,
+       "pf": 0.79,
+       "total": -4.0,
+       "first_0.1": {
+        "good_first": 16.7,
+        "bad_first": 83.3,
+        "neither": 0.0
+       },
+       "first_0.2": {
+        "good_first": 33.3,
+        "bad_first": 66.7,
+        "neither": 0.0
+       },
+       "first_0.3": {
+        "good_first": 45.0,
+        "bad_first": 53.3,
+        "neither": 1.7
+       }
+      },
+      "60m": {
+       "match": 45.0,
+       "trade_win": 45.0,
+       "trade_avg": -0.078,
+       "pf": 0.81,
+       "total": -4.8,
+       "first_0.1": {
+        "good_first": 16.7,
+        "bad_first": 83.3,
+        "neither": 0.0
+       },
+       "first_0.2": {
+        "good_first": 33.3,
+        "bad_first": 66.7,
+        "neither": 0.0
+       },
+       "first_0.3": {
+        "good_first": 45.0,
+        "bad_first": 53.3,
+        "neither": 1.7
+       }
+      }
+     },
+     "2023": {
+      "days": 59,
+      "30m": {
+       "match": 62.7,
+       "trade_win": 55.9,
+       "trade_avg": 0.035,
+       "pf": 1.25,
+       "total": 2.1,
+       "first_0.1": {
+        "good_first": 45.8,
+        "bad_first": 52.5,
+        "neither": 1.7
+       },
+       "first_0.2": {
+        "good_first": 55.9,
+        "bad_first": 40.7,
+        "neither": 3.4
+       },
+       "first_0.3": {
+        "good_first": 45.8,
+        "bad_first": 33.9,
+        "neither": 20.3
+       }
+      },
+      "60m": {
+       "match": 61.0,
+       "trade_win": 54.2,
+       "trade_avg": 0.084,
+       "pf": 1.58,
+       "total": 5.0,
+       "first_0.1": {
+        "good_first": 45.8,
+        "bad_first": 52.5,
+        "neither": 1.7
+       },
+       "first_0.2": {
+        "good_first": 55.9,
+        "bad_first": 42.4,
+        "neither": 1.7
+       },
+       "first_0.3": {
+        "good_first": 47.5,
+        "bad_first": 42.4,
+        "neither": 10.2
+       }
+      }
+     },
+     "2024": {
+      "days": 64,
+      "30m": {
+       "match": 40.6,
+       "trade_win": 39.1,
+       "trade_avg": -0.074,
+       "pf": 0.57,
+       "total": -4.7,
+       "first_0.1": {
+        "good_first": 45.3,
+        "bad_first": 54.7,
+        "neither": 0.0
+       },
+       "first_0.2": {
+        "good_first": 40.6,
+        "bad_first": 45.3,
+        "neither": 14.1
+       },
+       "first_0.3": {
+        "good_first": 26.6,
+        "bad_first": 32.8,
+        "neither": 40.6
+       }
+      },
+      "60m": {
+       "match": 50.0,
+       "trade_win": 46.9,
+       "trade_avg": -0.058,
+       "pf": 0.71,
+       "total": -3.7,
+       "first_0.1": {
+        "good_first": 45.3,
+        "bad_first": 54.7,
+        "neither": 0.0
+       },
+       "first_0.2": {
+        "good_first": 43.8,
+        "bad_first": 50.0,
+        "neither": 6.2
+       },
+       "first_0.3": {
+        "good_first": 35.9,
+        "bad_first": 45.3,
+        "neither": 18.8
+       }
+      }
+     },
+     "2025": {
+      "days": 80,
+      "30m": {
+       "match": 41.2,
+       "trade_win": 38.8,
+       "trade_avg": -0.142,
+       "pf": 0.45,
+       "total": -10.8,
+       "first_0.1": {
+        "good_first": 36.2,
+        "bad_first": 63.8,
+        "neither": 0.0
+       },
+       "first_0.2": {
+        "good_first": 37.5,
+        "bad_first": 51.2,
+        "neither": 11.2
+       },
+       "first_0.3": {
+        "good_first": 30.0,
+        "bad_first": 45.0,
+        "neither": 25.0
+       }
+      },
+      "60m": {
+       "match": 42.5,
+       "trade_win": 41.2,
+       "trade_avg": -0.126,
+       "pf": 0.59,
+       "total": -9.7,
+       "first_0.1": {
+        "good_first": 36.2,
+        "bad_first": 63.8,
+        "neither": 0.0
+       },
+       "first_0.2": {
+        "good_first": 40.0,
+        "bad_first": 56.2,
+        "neither": 3.8
+       },
+       "first_0.3": {
+        "good_first": 31.2,
+        "bad_first": 53.8,
+        "neither": 15.0
+       }
+      }
+     },
+     "2026": {
+      "days": 46,
+      "30m": {
+       "match": 54.3,
+       "trade_win": 52.2,
+       "trade_avg": 0.082,
+       "pf": 1.49,
+       "total": 3.8,
+       "first_0.1": {
+        "good_first": 30.4,
+        "bad_first": 69.6,
+        "neither": 0.0
+       },
+       "first_0.2": {
+        "good_first": 37.0,
+        "bad_first": 50.0,
+        "neither": 13.0
+       },
+       "first_0.3": {
+        "good_first": 45.7,
+        "bad_first": 37.0,
+        "neither": 17.4
+       }
+      },
+      "60m": {
+       "match": 50.0,
+       "trade_win": 50.0,
+       "trade_avg": 0.121,
+       "pf": 1.72,
+       "total": 5.6,
+       "first_0.1": {
+        "good_first": 30.4,
+        "bad_first": 69.6,
+        "neither": 0.0
+       },
+       "first_0.2": {
+        "good_first": 47.8,
+        "bad_first": 50.0,
+        "neither": 2.2
+       },
+       "first_0.3": {
+        "good_first": 54.3,
+        "bad_first": 37.0,
+        "neither": 8.7
+       }
+      }
+     }
+    }
+   }
+  }
+ }
+}
