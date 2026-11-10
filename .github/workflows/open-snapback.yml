@@ -1,0 +1,40 @@
+name: Open Drive Snap-Back
+
+# engine/open_snapback.py - backtest of "ride the opening drive, then fade it back to the open" on the
+# S&P 100 (1-minute bars 09:30-11:00, from 2021).
+# Runs by hand (workflow_dispatch) and when the engine changes.
+on:
+  push:
+    branches: [main]
+    paths: ["engine/open_snapback.py"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: open-snapback
+  cancel-in-progress: false
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 240
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Backtest
+        env:
+          ALPACA_KEY_ID: ${{ secrets.ALPACA_KEY_ID }}
+          ALPACA_SECRET_KEY: ${{ secrets.ALPACA_SECRET_KEY }}
+        run: python -u engine/open_snapback.py
+      - name: Publish
+        run: |
+          git config user.name "signal-desk-bot"
+          git config user.email "signal-desk-bot@users.noreply.github.com"
+          git add docs/data/snapback
+          git diff --cached --quiet && exit 0
+          git commit -m "Open Drive Snap-Back backtest $(date -u +%F\ %H:%M)"
+          for i in 1 2 3; do git pull --rebase && git push && break; sleep 5; done
