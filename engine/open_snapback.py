@@ -24,12 +24,18 @@ Exact rules tested here (every one is a switch, see VARIANTS):
   Leg 2       only after Leg 1 ended on exhaustion ("exh", default) - or also after the extension target
               ("exh+tgt") - and only if price is still at least 0 / 0.25 / 0.5 (default) / 0.75 ATR away
               from the open. Enter against the drive at that candle's close.
-              Target: the opening price ("open", default) or halfway back to it ("half").
+              Target: the trade doesn't need the full trip back - it only has to move toward the open:
+              a third of the way back ("third"), halfway (default, "half"), all the way ("open"), 1R or 2R
+              (R = entry to stop), or "none" (no target, just the stop and the time stop).
               Stop: just beyond the day's high (after an up-drive) / low so far. Time stop 10:30 or 11:00 (default).
   Exit rules  stop first if a candle hits both (cautious); a gap through a level fills at the candle's open.
   Costs       0.03% a side, per leg.
   Account     each day up to 5 setups (the biggest drives in ATR units first), 20% of the account each,
               no leverage; both legs use the same 20% one after the other.
+
+Also reported with no trades placed ("frequency"): how many stock-days show the drive, how often it keeps
+going, how often the exhaustion candle appears and when, and how often price then moves a third / half / all
+the way back toward the open by 11:00 - plus how often drives happen for each drive size / volume filter.
 
 Data: Alpaca SIP 1-minute regular-session bars 09:30-11:00, split/dividend adjusted, from 2021.
 Current S&P 100 members only (survivorship bias).
@@ -64,7 +70,7 @@ DRIVE_MIN = 0.15          # loosest drive kept (ATR units)
 RVOL_DAYS = 20
 
 DEFAULT = {"drive": "0.25", "rvol": "2", "cloc": "25", "stop1": "mid", "exfrom": "0940", "exh": "1",
-           "ext": "1", "last1": "1000", "leg2on": "exh", "dist": "0.5", "tgt2": "open", "last2": "1100"}
+           "ext": "1", "last1": "1000", "leg2on": "exh", "dist": "0.5", "tgt2": "half", "last2": "1100"}
 VARIANTS = {
     "drive": ["0.15", "0.25", "0.4"],
     "rvol": ["any", "1.5", "2", "3"],
@@ -76,7 +82,7 @@ VARIANTS = {
     "last1": ["1000", "1015", "1030"],
     "leg2on": ["exh", "exh+tgt"],
     "dist": ["0", "0.25", "0.5", "0.75"],
-    "tgt2": ["open", "half"],
+    "tgt2": ["third", "half", "open", "1R", "2R", "none"],
     "last2": ["1030", "1100"],
 }
 MIN = {"0936": 576, "0940": 580, "1000": 600, "1015": 615, "1030": 630, "1100": 660}
@@ -131,7 +137,7 @@ def build_candidates(tab: dict, atr: dict, sp100: set[str], demo=None) -> list[d
                 cands.append(c)
         if k % 100 == 0:
             print(f"  {d}: {k + 1}/{len(days)} sessions, {len(cands)} candidates", flush=True)
-    return cands
+    return cands, len(days)
 
 
 def facts(s: str, d: str, atr: float, bars: list[dict], hist: deque) -> dict | None:
@@ -230,11 +236,13 @@ def setup(c: dict, v: dict, leg1=True, leg2=True) -> dict | None:
         ext = max(ext, c["fh"]) if sgn > 0 else min(ext, c["fl"])
         s2, e2 = -sgn, px
         st2 = ext * (1 + sgn * TICK)
-        tg2 = o0 if v["tgt2"] == "open" else (e2 + o0) / 2
-        if abs(e2 - st2) > e2 * 0.0005 and s2 * (tg2 - e2) > 0:
+        risk2 = abs(e2 - st2)
+        tg2 = {"open": o0, "half": (e2 + o0) / 2, "third": e2 + (o0 - e2) / 3,
+               "1R": e2 + s2 * risk2, "2R": e2 + s2 * 2 * risk2, "none": None}[v["tgt2"]]
+        if risk2 > e2 * 0.0005 and (tg2 is None or s2 * (tg2 - e2) > 0):
             p2, w2, a2, _ = _walk(b, i1 + 1, n, s2, e2, st2, tg2, MIN[v["last2"]])
             r2 = s2 * (p2 / e2 - 1) - 2 * cost
-            t["l2"] = {"in": round(e2, 2), "tin": hhmm(at + 1), "sl": round(st2, 2), "tp": round(tg2, 2),
+            t["l2"] = {"in": round(e2, 2), "tin": hhmm(at + 1), "sl": round(st2, 2), "tp": round(tg2, 2) if tg2 else None,
                        "out": round(p2, 2), "why": w2, "at": hhmm(a2 + 1), "pct": round(r2 * 100, 3)}
             pct += r2 * 100
     if not leg1 and t["l2"] is None:
@@ -283,6 +291,71 @@ def split(ts, spy):
             "test": cut(stats([t for t in ts if t["d"] >= "2024-01-01"], spy))}
 
 
+
+# ===================================================================== how often (no trades)
+def count_grid(cands: list[dict], sessions: int, dr: str, rv: str) -> dict:
+    v = {**DEFAULT, "drive": dr, "rvol": rv}
+    hit = [c for c in cands if passes(c, v)]
+    days = {c["d"] for c in hit}
+    return {"n": len(hit), "per_day": round(len(hit) / sessions, 2), "days_pct": round(100 * len(days) / sessions, 1)}
+
+
+def frequency(cands: list[dict], sessions: int) -> dict:
+    """With the default rules, how often does each step of the pattern happen? No trades are placed."""
+    hit = [c for c in cands if passes(c, DEFAULT)]
+    per_day, per_stock, per_year = defaultdict(int), defaultdict(int), defaultdict(int)
+    f = {"sessions": sessions, "drives": len(hit), "up": sum(c["drv"] > 0 for c in hit),
+         "kept_going_after_0935": 0, "exhaustion_seen": 0, "exhaustion_by": defaultdict(int),
+         "reached_ext_target": 0, "moved_back_after_turn": {"any": 0, "third": 0, "half": 0, "open": 0},
+         "back_toward_open_by_1100": {"third": 0, "half": 0, "open": 0}}
+    exfrom, last1, ext = MIN[DEFAULT["exfrom"]], MIN[DEFAULT["last1"]], float(DEFAULT["ext"])
+    for c in hit:
+        per_day[c["d"]] += 1; per_stock[c["s"]] += 1; per_year[c["d"][:4]] += 1
+        b, n, o0, sgn = c["bars"], len(c["bars"]) // 5, c["o0"], (1 if c["drv"] > 0 else -1)
+        hi = [b[5 * i + 1] for i in range(n)]; lo = [b[5 * i + 2] for i in range(n)]
+        best = max(hi) if sgn > 0 else min(lo)
+        if sgn * (best - c["fc"]) > 0:
+            f["kept_going_after_0935"] += 1
+        if any(((hi[i] >= o0 * (1 + ext * c["atr"])) if sgn > 0 else (lo[i] <= o0 * (1 - ext * c["atr"])))
+               for i in range(n)):
+            f["reached_ext_target"] += 1
+        # how far back toward the open does price come between the far point and 11:00?
+        far = c["fc"]
+        bk = {"third": False, "half": False, "open": False}
+        for i in range(n):
+            far = max(far, hi[i]) if sgn > 0 else min(far, lo[i])
+            back = (far - lo[i]) / (far - o0) if sgn > 0 else (hi[i] - far) / (o0 - far)
+            for k, q in (("third", 1 / 3), ("half", 0.5), ("open", 1.0)):
+                if back >= q:
+                    bk[k] = True
+        for k in bk:
+            f["back_toward_open_by_1100"][k] += bk[k]
+        # the exhaustion candle (default rule) and what came after it
+        for i in range(1, n):
+            m = b[5 * i + 4]
+            if m + 1 > last1:
+                break
+            if m < exfrom:
+                continue
+            cl = b[5 * i + 3]
+            if (cl < lo[i - 1]) if sgn > 0 else (cl > hi[i - 1]):
+                f["exhaustion_seen"] += 1
+                f["exhaustion_by"]["09:40-09:45" if m < 585 else "09:45-09:50" if m < 590 else "09:50-10:00"] += 1
+                rest_best = min(lo[i + 1:] or [cl]) if sgn > 0 else max(hi[i + 1:] or [cl])
+                if sgn * (cl - rest_best) > 0:
+                    f["moved_back_after_turn"]["any"] += 1
+                dist = abs(cl - o0)
+                for k, q in (("third", 1 / 3), ("half", 0.5), ("open", 1.0)):
+                    if dist > 0 and sgn * (cl - rest_best) >= q * dist:
+                        f["moved_back_after_turn"][k] += 1
+                break
+    f["exhaustion_by"] = dict(f["exhaustion_by"])
+    f["per_session_avg"] = round(len(hit) / sessions, 2)
+    f["sessions_with_one_pct"] = round(100 * len(per_day) / sessions, 1)
+    f["per_year"] = dict(sorted(per_year.items()))
+    f["top_stocks"] = sorted(per_stock.items(), key=lambda x: -x[1])[:15]
+    return f
+
 # ===================================================================== demo data
 def demo_intraday(d: str, items: list) -> dict:
     rnd, out = random.Random(d), {}
@@ -330,7 +403,7 @@ def main() -> None:
     first = [b for b in spy_rows if b["t"][:10] < FROM]
     spy_total = round((spy_rows[-1]["c"] / (first[-1]["c"] if first else spy_rows[0]["o"]) - 1) * 100, 1)
 
-    cands = build_candidates(tab, atr, sp100, demo_intraday if a.demo else None)
+    cands, sessions = build_candidates(tab, atr, sp100, demo_intraday if a.demo else None)
     print(f"{len(cands)} stock-days with an opening drive >= {DRIVE_MIN} ATR ({time.time() - t0:.0f}s)", flush=True)
 
     res = {"generated": datetime.now(timezone.utc).isoformat(timespec="minutes"), "from": FROM,
@@ -355,7 +428,7 @@ def main() -> None:
     }
 
     # how often does a qualifying drive come all the way back to the open by 11:00?
-    back = {"drives": 0, "touched_open": 0, "made_1atr_ext": 0}
+    back = {"drives": 0, "touched_open": 0, "came_halfway_back": 0, "made_1atr_ext": 0}
     for c in cands:
         if not passes(c, DEFAULT):
             continue
@@ -364,9 +437,15 @@ def main() -> None:
         hit = any(((b[5 * i + 2] <= c["o0"]) if sgn > 0 else (b[5 * i + 1] >= c["o0"])) for i in range(len(b) // 5))
         ext = any(((b[5 * i + 1] >= c["o0"] * (1 + c["atr"])) if sgn > 0 else (b[5 * i + 2] <= c["o0"] * (1 - c["atr"])))
                   for i in range(len(b) // 5))
+        mid = (c["o0"] + c["fc"]) / 2
+        half = any(((b[5 * i + 2] <= mid) if sgn > 0 else (b[5 * i + 1] >= mid)) for i in range(len(b) // 5))
+        back["came_halfway_back"] += half
         back["touched_open"] += hit; back["made_1atr_ext"] += ext
     res["back_to_open"] = back
 
+    res["frequency"] = frequency(cands, sessions)
+    res["frequency_grid"] = {f"{dr}|{rv}": count_grid(cands, sessions, dr, rv)
+                             for dr in VARIANTS["drive"] for rv in VARIANTS["rvol"]}
     res["cost_check"] = {f"{cst * 100:.2f}": cut(summary(run(cands, {**DEFAULT, "cost": cst}), spy))
                          for cst in (0.0, 0.0003, 0.0006, 0.001)}
 
@@ -376,11 +455,11 @@ def main() -> None:
     print(f"sweeps done ({time.time() - t0:.0f}s)", flush=True)
 
     res["combos"] = []
-    for dr, rv, ex, ds, l2on in product(VARIANTS["drive"], VARIANTS["rvol"], VARIANTS["ext"], VARIANTS["dist"],
-                                       VARIANTS["leg2on"]):
-        v = {**DEFAULT, "drive": dr, "rvol": rv, "ext": ex, "dist": ds, "leg2on": l2on}
+    for dr, rv, ex, ds, tg in product(VARIANTS["drive"], VARIANTS["rvol"], VARIANTS["ext"], VARIANTS["dist"],
+                                      VARIANTS["tgt2"]):
+        v = {**DEFAULT, "drive": dr, "rvol": rv, "ext": ex, "dist": ds, "tgt2": tg}
         ts = run(cands, v)
-        res["combos"].append({"v": {k: v[k] for k in ("drive", "rvol", "ext", "dist", "leg2on")},
+        res["combos"].append({"v": {k: v[k] for k in ("drive", "rvol", "ext", "dist", "tgt2")},
                               "full": cut(summary(ts, spy)), **split(ts, spy)})
     print(f"{len(res['combos'])} combinations ({time.time() - t0:.0f}s)", flush=True)
 
@@ -390,6 +469,7 @@ def main() -> None:
     for name, st in res["compare"].items():
         print(f"{name:20s} n={st['n']} win={st['win']}% avg={st['avg']}% PF={st['pf']} acct={st['acct_total']}% "
               f"DD={st['acct_maxdd']}% | train {st['train']['acct_total']}% test {st['test']['acct_total']}%")
+    print("frequency:", json.dumps({k: v for k, v in res["frequency"].items() if k not in ("top_stocks",)}))
     print(f"SPY {spy_total}%  back-to-open {back}  -> {out} ({time.time() - t0:.0f}s)")
 
 
