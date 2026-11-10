@@ -59,7 +59,7 @@ OPEN_MIN = pm.OPEN_MIN
 # the mirror of the long default and of its first version
 DEFAULT = {**pm.DEFAULT, "side": "short"}
 PLAIN = {**pm.PLAIN, "side": "short"}
-VARIANTS = {**pm.VARIANTS, "side": ["short", "long"]}
+VARIANTS = {**{k: o for k, o in pm.VARIANTS.items() if k != "market"}, "side": ["short", "long"]}  # market filter: long side only
 
 
 def build_candidates(tab: dict, daily: dict, sp100: set[str], demo=None) -> list[dict]:

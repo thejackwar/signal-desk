@@ -21,6 +21,9 @@ Exact rules tested here (every one is a switch, see VARIANTS):
               (no trade before a checkpoint = yesterday's close is used)
   PM volume   pre-market dollar volume: "any", at least $1M (default) or at least $5M (thin pre-markets
               move on a handful of trades).
+  Market      the S&P 500 itself (added Nov 2026): "any" (default), "spy20" SPY's close above its
+              20-day average yesterday, "spy_pm" SPY's last pre-market price above yesterday's close,
+              "both" both of them.
   Daily trend as of yesterday's close: "any", "20" close > SMA20 (default), "50" close > SMA50,
               "50_200" close > SMA50 > SMA200, "up5" close above the close 5 days earlier.
   Entry       "open": buy at the 09:30 open (default); "5m": only if the first 5-minute candle closes green
@@ -69,7 +72,7 @@ OPEN_MIN = 1.004
 
 # default = the best set-up of the trend follow-up that held up on both 2021-2023 and the unseen 2024+
 DEFAULT = {"univ": "sp500", "pm": "1", "cap": "none", "climb": "30m", "pmvol": "1m", "trend": "20",
-           "entry": "open", "stop": "2", "tp": "5", "exit": "1030", "side": "long"}
+           "entry": "open", "stop": "2", "tp": "5", "exit": "1030", "side": "long", "market": "any"}
 # the first version (no daily trend, out at the close): kept on the page to show what the trend filter adds
 PLAIN = {"univ": "sp500", "pm": "2", "cap": "none", "climb": "60m", "pmvol": "1m", "trend": "any",
          "entry": "open", "stop": "2", "tp": "3", "exit": "eod", "side": "long"}
@@ -85,7 +88,11 @@ VARIANTS = {
     "tp": ["1", "2", "3", "5", "none"],
     "exit": ["1030", "1200", "eod"],
     "side": ["long", "short"],
+    "market": ["any", "spy20", "spy_pm", "both"],
 }
+# per session: {"spy20": bool, "spy_pm": bool}, filled by main() and build_candidates()
+MARKET: dict[str, dict] = {}
+SPY_PC: dict[str, float] = {}             # SPY's previous regular close, per session
 EXIT_MIN = {"1030": 625, "1200": 715, "eod": 955}   # start minute of the bar whose close we sell at
 
 
@@ -111,14 +118,23 @@ def build_candidates(tab: dict, daily: dict, sp100: set[str], demo=None) -> list
         else:
             start = datetime.fromisoformat(d + "T04:00").replace(tzinfo=NY).astimezone(timezone.utc)
             end = datetime.fromisoformat(d + "T16:00").replace(tzinfo=NY).astimezone(timezone.utc)
-            syms, intr = [s for s, _ in items], {}
+            syms, intr = [s for s, _ in items] + ["SPY"], {}
             for j in range(0, len(syms), 100):
                 intr.update(fetch(syms[j:j + 100], "5Min", start.strftime("%Y-%m-%dT%H:%M:%SZ"),
                                   end.strftime("%Y-%m-%dT%H:%M:%SZ")))
+        mk = MARKET.setdefault(d, {"spy20": False})
+        if demo:
+            mk["spy_pm"] = random.Random("spy" + d).random() < 0.55
+        else:
+            spm = [b for b in intr.get("SPY") or [] if ny(b["t"]).date().isoformat() == d
+                   and 240 <= ny(b["t"]).hour * 60 + ny(b["t"]).minute < 570]
+            mk["spy_pm"] = bool(spm) and d in SPY_PC and spm[-1]["c"] > SPY_PC[d]
+        mk["both"] = mk["spy20"] and mk["spy_pm"]
         for s, r in items:
             c = facts(s, d, r, intr.get(s) or [])
             if c:
                 c["sp100"] = s in sp100
+                c["market"] = {"any": True, **mk}
                 cands.append(c)
         if k % 100 == 0:
             print(f"  {d}: {k + 1}/{len(days)} sessions, {len(cands)} candidates", flush=True)
@@ -181,6 +197,8 @@ def passes(c: dict, v: dict) -> bool:
     if v["cap"] != "none" and c["gain"] > float(v["cap"]) / 100:
         return False
     if not c["climb"][v["climb"]] or not c["trend"][v["trend"]]:
+        return False
+    if not c.get("market", {}).get(v.get("market", "any"), True):
         return False
     if v["pmvol"] == "1m" and c["usd"] < 1e6 or v["pmvol"] == "5m" and c["usd"] < 5e6:
         return False
@@ -318,6 +336,12 @@ def main() -> None:
         yb = [b for b in spy_rows if b["t"][:4] == y]
         prev = [b for b in spy_rows if b["t"][:4] < y]
         spy[y] = round((yb[-1]["c"] / (prev[-1]["c"] if prev else yb[0]["o"]) - 1) * 100, 1)
+    for i, b_ in enumerate(spy_rows):        # what SPY looked like at yesterday's close, per session
+        if i >= 1:
+            d_ = b_["t"][:10]
+            SPY_PC[d_] = spy_rows[i - 1]["c"]
+            prev20 = [x["c"] for x in spy_rows[max(0, i - 20):i]]
+            MARKET[d_] = {"spy20": len(prev20) == 20 and spy_rows[i - 1]["c"] > sum(prev20) / 20}
     first = [b for b in spy_rows if b["t"][:10] < FROM]
     spy_total = round((spy_rows[-1]["c"] / (first[-1]["c"] if first else spy_rows[0]["o"]) - 1) * 100, 1)
 
@@ -364,6 +388,26 @@ def main() -> None:
             st.pop("curve", None)
             res["sweeps"][k][o] = st
     print(f"sweeps done ({time.time() - t0:.0f}s)", flush=True)
+
+    # follow-up (Nov 2026): does a market filter (SPY's trend / SPY's pre-market) help the default?
+    # Win rate is the thing to watch: does it make the direction more predictable, or only trim trades?
+    if "market" in VARIANTS:
+        res["market_check"] = []
+        for mk_ in VARIANTS["market"]:
+            for tr in ("any", "20"):
+                v = {**DEFAULT, "market": mk_, "trend": tr}
+                ts = run(cands, v)
+                full = stats(ts, spy)
+                res["market_check"].append({
+                    "market": mk_, "trend": tr, "full": {k: full.get(k) for k in KEYS},
+                    "by_year": {y: o["acct"] for y, o in (full.get("by_year") or {}).items()},
+                    "train": {k: v_ for k, v_ in stats([t for t in ts if t["d"] < "2024-01-01"], spy).items() if k in KEYS},
+                    "test": {k: v_ for k, v_ in stats([t for t in ts if t["d"] >= "2024-01-01"], spy).items() if k in KEYS}})
+        for r_ in res["market_check"]:
+            f_ = r_["full"]
+            print(f"  market {r_['market']:7} trend {r_['trend']:4} n={f_.get('n')} win={f_.get('win')}% "
+                  f"avg={f_.get('avg')}% pf={f_.get('pf')} cagr={f_.get('acct_cagr')}% "
+                  f"test win={r_['test'].get('win')}% test pf={r_['test'].get('pf')}", flush=True)
 
     # how much up, and for how long: pre-market gain x climbing x daily trend, at the default exits
     res["entry_grid"] = []
