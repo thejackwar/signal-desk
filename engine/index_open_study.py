@@ -28,7 +28,7 @@ from __future__ import annotations
 import argparse
 import json
 import sys
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
@@ -196,7 +196,7 @@ def main() -> None:
         out_md = Path("/tmp/index-open-demo/REPORT.md")
     else:
         start = datetime(2019, 11, 1, tzinfo=NY)
-        bars = fetch_bars(SYMBOLS, start, datetime.now(timezone.utc), "sip")
+        bars = fetch_bars(SYMBOLS, start, datetime.now(timezone.utc) - timedelta(minutes=16), "sip")  # free SIP: 15+ min old
         out_json = ROOT / "docs" / "data" / "index_open" / "study.json"
         out_md = ROOT / "research" / "index-open" / "REPORT.md"
     rows = {s: session_rows(bars[s]) for s in SYMBOLS}
