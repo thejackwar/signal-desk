@@ -1,0 +1,40 @@
+name: Fibonacci Retracement
+
+# engine/fib_retrace.py - backtest of "wait 30 minutes, draw Fibonacci retracement levels on the morning swing,
+# then enter on the pullback" on the S&P 100 (5-minute bars, from 2021). Results: docs/data/fib/SUMMARY.md.
+# Runs by hand (workflow_dispatch) and when the engine changes.
+on:
+  push:
+    branches: [main]
+    paths: ["engine/fib_retrace.py"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: fib-retrace
+  cancel-in-progress: false
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 340
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Backtest
+        env:
+          ALPACA_KEY_ID: ${{ secrets.ALPACA_KEY_ID }}
+          ALPACA_SECRET_KEY: ${{ secrets.ALPACA_SECRET_KEY }}
+        run: python -u engine/fib_retrace.py
+      - name: Publish
+        run: |
+          git config user.name "signal-desk-bot"
+          git config user.email "signal-desk-bot@users.noreply.github.com"
+          git add docs/data/fib
+          git diff --cached --quiet && exit 0
+          git commit -m "Fibonacci Retracement backtest $(date -u +%F\ %H:%M)"
+          for i in 1 2 3; do git pull --rebase && git push && break; sleep 5; done
