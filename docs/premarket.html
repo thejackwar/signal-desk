@@ -154,7 +154,7 @@ tr[data-k] { cursor: pointer; }
 <nav class="bar" aria-label="Page">
   <div class="bar-in">
     <a class="back" href="index.html#home" aria-label="Back to Signals">‹ Signals</a>
-    <span class="bar-title">Premarket Momentum</span>
+    <span class="bar-title" id="t-bar">Premarket Momentum</span>
     <span></span>
   </div>
 </nav>
@@ -162,8 +162,9 @@ tr[data-k] { cursor: pointer; }
 <main class="wrap">
   <section class="hero">
     <span class="k">S&amp;P 500 · 5 min · Pre-market</span>
-    <h1>Up before the bell.</h1>
-    <p class="lede">If a stock has been climbing in the pre-market and is already in an uptrend on the daily chart, buy it at the 09:30 New York open. Pick how much it has to be up, for how long, and how to get out.</p>
+    <div class="seg" role="group" aria-label="Side" style="margin-top:12px"><button type="button" data-side="long">Long · buy the risers</button><button type="button" data-side="short">Short · sell the fallers</button></div>
+    <h1 id="t-h1">Up before the bell.</h1>
+    <p class="lede" id="t-lede">If a stock has been climbing in the pre-market and is already in an uptrend on the daily chart, buy it at the 09:30 New York open. Pick how much it has to be up, for how long, and how to get out.</p>
     <div class="big" id="big"></div>
     <p class="fine" id="bigfine"></p>
   </section>
@@ -177,7 +178,7 @@ tr[data-k] { cursor: pointer; }
   </div>
 
   <h2>Live</h2>
-  <p id="lv-p">Every New York morning at 09:25 (15:25 in Italy) the default rules scan the S&amp;P 500. The picks go to the phone and are paper traded: bought at the 09:30 open, sold by 10:30. Paper trades, not advice.</p>
+  <p id="lv-p" data-long="Every New York morning at 09:25 (15:25 in Italy) the default rules scan the S&amp;P 500. The picks go to the phone and are paper traded: bought at the 09:30 open, sold by 10:30. Paper trades, not advice.">Every New York morning at 09:25 (15:25 in Italy) the default rules scan the S&amp;P 500. The picks go to the phone and are paper traded: bought at the 09:30 open, sold by 10:30. Paper trades, not advice.</p>
   <div class="tw"><table id="lv-today"></table></div>
   <div class="tw" style="margin-top:12px"><table id="lv-days"></table></div>
 
@@ -192,15 +193,15 @@ tr[data-k] { cursor: pointer; }
   <h2>The rules</h2>
   <p>Exactly what the backtest does on every New York session.</p>
   <div class="steps">
-    <div class="step"><span class="k">Before the open</span><h3>Up in the pre-market</h3><p>The last pre-market price (04:00–09:30) is at least <b id="r-pm">1%</b> above yesterday's close, with at least $1M traded pre-market.</p></div>
-    <div class="step"><span class="k">For a bit</span><h3>Still climbing</h3><p id="r-climb">Higher than it was 30 minutes earlier.</p></div>
-    <div class="step"><span class="k">Daily chart</span><h3>Already in an uptrend</h3><p id="r-trend">Yesterday's close above its 20-day average.</p></div>
-    <div class="step"><span class="k">09:30</span><h3>Buy at the <span class="g">open</span></h3><p id="r-exit">2% stop, 5% target, anything left sold at 10:30.</p></div>
+    <div class="step"><span class="k">Before the open</span><h3 id="t-s1">Up in the pre-market</h3><p>The last pre-market price (04:00–09:30) is at least <b id="r-pm">1%</b> <span id="t-s1b">above</span> yesterday's close, with at least $1M traded pre-market.</p></div>
+    <div class="step"><span class="k">For a bit</span><h3 id="t-s2">Still climbing</h3><p id="r-climb">Higher than it was 30 minutes earlier.</p></div>
+    <div class="step"><span class="k">Daily chart</span><h3 id="t-s3">Already in an uptrend</h3><p id="r-trend">Yesterday's close above its 20-day average.</p></div>
+    <div class="step"><span class="k">09:30</span><h3 id="t-s4">Buy at the <span class="g">open</span></h3><p id="r-exit">2% stop, 5% target, anything left sold at 10:30.</p></div>
   </div>
-  <p class="fine">Account: up to 5 trades a day (the biggest pre-market gains first), 20% of the account each, no leverage. 0.03% cost each way. Stop checked before target when a candle hits both.</p>
+  <p class="fine">Account: up to 5 trades a day (the biggest pre-market <span id="t-gains">gains</span> first), 20% of the account each, no leverage. 0.03% cost each way. Stop checked before target when a candle hits both.</p>
 
-  <h2>The trend filter is what works</h2>
-  <p>Without the daily uptrend, the same idea loses money. Every switch below is changed on its own, starting from the default settings.</p>
+  <h2 id="t-plainh">The trend filter is what works</h2>
+  <p id="t-plainp">Without the daily uptrend, the same idea loses money. Every switch below is changed on its own, starting from the default settings.</p>
   <div class="cards2" id="plain"></div>
   <details style="margin-top:12px"><summary class="k" style="cursor:pointer">Every switch on its own</summary><div class="tw"><table id="sweeps"></table></div></details>
 
@@ -218,7 +219,7 @@ tr[data-k] { cursor: pointer; }
   <div class="tw"><table id="rt"></table></div>
 
   <footer>
-    <p class="fine">Data: Alpaca 5-minute bars from all US exchanges, pre-market included, split and dividend adjusted, January 2021 to today. Current S&amp;P 500 members only: stocks that left the index are missing, which flatters any buy strategy a little. The settings were picked after testing many, so expect live results to be weaker than the best backtest. Information only, not advice.</p>
+    <p class="fine">Data: Alpaca 5-minute bars from all US exchanges, pre-market included, split and dividend adjusted, January 2021 to today. Current S&amp;P 500 members only: stocks that left the index are missing, <span id="t-surv">which flatters any buy strategy a little</span>. The settings were picked after testing many, so expect live results to be weaker than the best backtest. Information only, not advice.</p>
   </footer>
 </main>
 
@@ -230,23 +231,41 @@ const tone = v => v > 0 ? "up" : v < 0 ? "down" : "";
 const eur = v => "€" + Math.round(v).toLocaleString("en");
 const fmtD = (d, o = { day: "numeric", month: "short", year: "numeric" }) => new Date(d + "T12:00:00Z").toLocaleDateString("en-GB", { timeZone: "UTC", ...o });
 
-const PMS = [["0.5", "+0.5%"], ["1", "+1%"], ["2", "+2%"]];
+let SIDE = location.hash === "#short" ? "short" : "long";
+const SH = () => SIDE === "short";
+const sg = () => SH() ? "−" : "+";   // sign of the pre-market move
+const PMS_ = () => [["0.5", sg() + "0.5%"], ["1", sg() + "1%"], ["2", sg() + "2%"]];
 const CLIMBS = [["30m", "30 min"], ["60m", "1 hour"], ["120m", "2 hours"]];
-const TRENDS = [["20", "Above 20-day avg"], ["50", "Above 50-day avg"], ["up5", "Up over 5 days"]];
+const TRENDS_ = () => SH() ? [["20", "Below 20-day avg"], ["50", "Below 50-day avg"], ["up5", "Down over 5 days"]] : [["20", "Above 20-day avg"], ["50", "Above 50-day avg"], ["up5", "Up over 5 days"]];
 const EXITS = [["2|5|1030", "2% stop · 5% target · out 10:30"], ["2|none|1030", "2% stop · out 10:30"], ["2|3|1030", "2% stop · 3% target · out 10:30"],
   ["1|2|1030", "1% stop · 2% target · out 10:30"], ["2|none|1200", "2% stop · out 12:00"], ["2|3|eod", "2% stop · 3% target · out at close"]];
-const CLIMB_TXT = { any: "No condition on the pre-market climb.", "30m": "Higher than it was 30 minutes earlier (09:00).",
+const CLIMB_TXT_L = { any: "No condition on the pre-market climb.", "30m": "Higher than it was 30 minutes earlier (09:00).",
   "60m": "Higher than an hour earlier (08:30) and above the pre-market average price (VWAP).",
   "120m": "Higher than two hours earlier (07:30) and above the pre-market average price (VWAP).",
   steady: "Every 15-minute checkpoint from 08:30 to 09:30 higher than the one before." };
-const TREND_TXT = { any: "No daily trend condition.", "20": "Yesterday's close above its 20-day average.", "50": "Yesterday's close above its 50-day average.",
+const TREND_TXT_L = { any: "No daily trend condition.", "20": "Yesterday's close above its 20-day average.", "50": "Yesterday's close above its 50-day average.",
   "50_200": "50-day average above the 200-day, close above both.", up5: "Yesterday's close above the close five sessions earlier." };
-const exitTxt = (stop, tp, ex) => `${stop === "none" ? "No stop" : stop + "% stop"}, ${tp === "none" ? "no target" : tp + "% target"}, ${ex === "eod" ? "anything left sold at the 15:55 close" : `anything left sold at ${ex.slice(0, 2)}:${ex.slice(2)}`}.`;
+const CLIMB_TXT_S = { any: "No condition on the pre-market fall.", "30m": "Lower than it was 30 minutes earlier (09:00).",
+  "60m": "Lower than an hour earlier (08:30) and below the pre-market average price (VWAP).",
+  "120m": "Lower than two hours earlier (07:30) and below the pre-market average price (VWAP).",
+  steady: "Every 15-minute checkpoint from 08:30 to 09:30 lower than the one before." };
+const TREND_TXT_S = { any: "No daily trend condition.", "20": "Yesterday's close below its 20-day average.", "50": "Yesterday's close below its 50-day average.",
+  "50_200": "50-day average below the 200-day, close below both.", up5: "Yesterday's close below the close five sessions earlier." };
+const CLIMB_TXT = () => SH() ? CLIMB_TXT_S : CLIMB_TXT_L, TREND_TXT = () => SH() ? TREND_TXT_S : TREND_TXT_L;
+const exitTxt = (stop, tp, ex) => `${stop === "none" ? "No stop" : stop + "% stop"}, ${tp === "none" ? "no target" : tp + "% target"}, ${ex === "eod" ? `anything left ${SH() ? "covered" : "sold"} at the 15:55 close` : `anything left ${SH() ? "covered" : "sold"} at ${ex.slice(0, 2)}:${ex.slice(2)}`}.`;
+const COPY = {
+  long: { bar: "Premarket Momentum", h1: "Up before the bell.", lede: "If a stock has been climbing in the pre-market and is already in an uptrend on the daily chart, buy it at the 09:30 New York open. Pick how much it has to be up, for how long, and how to get out.",
+    s1: "Up in the pre-market", s1b: "above", s2: "Still climbing", s3: "Already in an uptrend", s4: 'Buy at the <span class="g">open</span>', gains: "gains",
+    plainh: "The trend filter is what works", plainp: "Without the daily uptrend, the same idea loses money. Every switch below is changed on its own, starting from the default settings.", surv: "which flatters any buy strategy a little", key: "premarketMom" },
+  short: { bar: "Premarket Momentum Short", h1: "Down before the bell.", lede: "The mirror of the long strategy: if a stock has been falling in the pre-market and is already in a downtrend on the daily chart, short it at the 09:30 New York open. Pick how much it has to be down, for how long, and how to get out.",
+    s1: "Down in the pre-market", s1b: "below", s2: "Still falling", s3: "Already in a downtrend", s4: 'Short at the <span class="r" style="color:var(--down)">open</span>', gains: "drops",
+    plainh: "With and without the trend filter", plainp: "The first version without the daily downtrend, against the default. Every switch below is changed on its own, starting from the default settings.", surv: "which makes any short strategy look a little worse than it was", key: "premarketShort" } };
 const WHY = { stop: "stop", target: "target", time: "time exit", close: "close" };
 
-let B = null, SHOW_ALL = false;
-const S = (() => { try { return JSON.parse(localStorage.getItem("premarketMom") || "{}"); } catch { return {}; } })();
-const save = () => { try { localStorage.setItem("premarketMom", JSON.stringify(S)); } catch {} };
+let B = null, SHOW_ALL = false, LIVE = null;
+const loadS = () => { try { return JSON.parse(localStorage.getItem(COPY[SIDE].key) || "{}"); } catch { return {}; } };
+let S = loadS();
+const save = () => { try { localStorage.setItem(COPY[SIDE].key, JSON.stringify(S)); } catch {} };
 const keyOf = v => `${v.pm}|${v.climb}|${v.trend}|${v.stop}|${v.tp}|${v.exit}`;
 const cur = () => B.trend_check.find(x => keyOf(x.v) === keyOf(S));
 const isDef = () => keyOf(S) === keyOf(B.default);
@@ -255,9 +274,9 @@ async function load(p) { try { const r = await fetch(p + "?t=" + Date.now()); re
 const seg = (name, val, opts) => `<div class="seg" role="group">${opts.map(([v, l]) => `<button type="button" data-${name}="${v}" aria-pressed="${v === val}">${esc(l)}</button>`).join("")}</div>`;
 
 function controls() {
-  $("ctl").innerHTML = `<div class="row"><span class="k">Pre-market up</span>${seg("pm", S.pm, PMS)}</div>
-    <div class="row"><span class="k">Climbing for</span>${seg("climb", S.climb, CLIMBS)}</div>
-    <div class="row"><span class="k">Daily trend</span>${seg("trend", S.trend, TRENDS)}</div>
+  $("ctl").innerHTML = `<div class="row"><span class="k">${SH() ? "Pre-market down" : "Pre-market up"}</span>${seg("pm", S.pm, PMS_())}</div>
+    <div class="row"><span class="k">${SH() ? "Falling for" : "Climbing for"}</span>${seg("climb", S.climb, CLIMBS)}</div>
+    <div class="row"><span class="k">Daily trend</span>${seg("trend", S.trend, TRENDS_())}</div>
     <div class="row"><span class="k">Exit</span>${seg("exit", `${S.stop}|${S.tp}|${S.exit}`, EXITS)}</div>`;
   $("is-default").innerHTML = isDef() ? "Default settings" : `<a href="#" id="reset">Back to default</a>`;
   const r = $("reset"); if (r) r.onclick = e => { e.preventDefault(); Object.assign(S, pick(B.default)); save(); render(); };
@@ -333,23 +352,23 @@ function years(X) {
 }
 
 function rules() {
-  $("r-pm").textContent = "+" + S.pm + "%";
-  $("r-climb").textContent = CLIMB_TXT[S.climb];
-  $("r-trend").textContent = TREND_TXT[S.trend];
+  $("r-pm").textContent = S.pm + "%";
+  $("r-climb").textContent = CLIMB_TXT()[S.climb];
+  $("r-trend").textContent = TREND_TXT()[S.trend];
   $("r-exit").textContent = exitTxt(S.stop, S.tp, S.exit);
 }
 
 function plainAndSweeps() {
   const P = B.plain, D = B.trend_check.find(x => keyOf(x.v) === keyOf(B.default))?.full;
   const card = (t, s, note) => `<div><span class="k">${t}</span><b style="color:var(--${(s?.acct_total ?? 0) >= 0 ? "up" : "down"})">${pc(s?.acct_total, 0)}</b><small>${pc(s?.acct_cagr)} a year · max drop ${pc(s?.acct_maxdd, 0)}</small><small>${note}</small></div>`;
-  $("plain").innerHTML = (P ? card("First version: no daily trend", P, "PM +2%, climbing 1 hour, out at the close") : "") +
-    (D ? card("With the daily uptrend (default)", D, "PM +1%, climbing 30 min, above the 20-day average, out 10:30") : "") +
+  $("plain").innerHTML = (P ? card("First version: no daily trend", P, SH() ? "PM −2%, falling 1 hour, out at the close" : "PM +2%, climbing 1 hour, out at the close") : "") +
+    (D ? card(SH() ? "With the daily downtrend (default)" : "With the daily uptrend (default)", D, SH() ? "PM −1%, falling 30 min, below the 20-day average, out 10:30" : "PM +1%, climbing 30 min, above the 20-day average, out 10:30") : "") +
     `<div><span class="k">Holding SPY</span><b>${pc(B.spy_total, 0)}</b><small>same period, buy once and wait</small></div>`;
-  const NAMES = { pm: "Pre-market up at least", climb: "Climbing for", trend: "Daily trend", pmvol: "Pre-market volume", cap: "Skip gaps above", entry: "Entry", stop: "Stop", tp: "Target", exit: "Sell by", side: "Side", univ: "Stocks" };
-  const LBL = { pm: o => "+" + o + "%", climb: o => ({ any: "no condition", "30m": "30 min", "60m": "1 hour + VWAP", "120m": "2 hours + VWAP", steady: "steady (every 15 min)" }[o]),
-    trend: o => ({ any: "none", "20": "above 20-day avg", "50": "above 50-day avg", "50_200": "50 > 200-day avg", up5: "up over 5 days" }[o]),
-    pmvol: o => ({ any: "any", "1m": "$1M+", "5m": "$5M+" }[o]), cap: o => o === "none" ? "no cap" : "+" + o + "%", entry: o => o === "open" ? "09:30 open" : "after a green first 5-min candle",
-    stop: o => o === "none" ? "none" : o + "%", tp: o => o === "none" ? "none" : o + "%", exit: o => ({ "1030": "10:30", "1200": "12:00", eod: "the close" }[o]), side: o => o === "long" ? "long (buy)" : "short (bet on a fade)", univ: o => o === "sp100" ? "S&P 100" : "S&P 500" };
+  const NAMES = { pm: SH() ? "Pre-market down at least" : "Pre-market up at least", climb: SH() ? "Falling for" : "Climbing for", trend: "Daily trend", pmvol: "Pre-market volume", cap: "Skip gaps above", entry: "Entry", stop: "Stop", tp: "Target", exit: "Sell by", side: "Side", univ: "Stocks" };
+  const LBL = { pm: o => sg() + o + "%", climb: o => ({ any: "no condition", "30m": "30 min", "60m": "1 hour + VWAP", "120m": "2 hours + VWAP", steady: "steady (every 15 min)" }[o]),
+    trend: o => (SH() ? { any: "none", "20": "below 20-day avg", "50": "below 50-day avg", "50_200": "50 < 200-day avg", up5: "down over 5 days" } : { any: "none", "20": "above 20-day avg", "50": "above 50-day avg", "50_200": "50 > 200-day avg", up5: "up over 5 days" })[o],
+    pmvol: o => ({ any: "any", "1m": "$1M+", "5m": "$5M+" }[o]), cap: o => o === "none" ? "no cap" : sg() + o + "%", entry: o => o === "open" ? "09:30 open" : SH() ? "after a red first 5-min candle" : "after a green first 5-min candle",
+    stop: o => o === "none" ? "none" : o + "%", tp: o => o === "none" ? "none" : o + "%", exit: o => ({ "1030": "10:30", "1200": "12:00", eod: "the close" }[o]), side: o => SH() ? (o === "short" ? "short (sell)" : "long (bet on a bounce)") : (o === "long" ? "long (buy)" : "short (bet on a fade)"), univ: o => o === "sp100" ? "S&P 100" : "S&P 500" };
   let rows = "";
   for (const k of ["pm", "climb", "trend", "pmvol", "cap", "entry", "stop", "tp", "exit", "side", "univ"]) {
     const sw = B.sweeps?.[k]; if (!sw) continue;
@@ -367,7 +386,7 @@ function costs() {
 
 function all() {
   const L = B.trend_check.slice().sort((a, b) => (b.full.acct_cagr ?? -99) - (a.full.acct_cagr ?? -99));
-  const lbl = v => `PM +${v.pm}% · ${CLIMBS.find(c => c[0] === v.climb)[1]} · ${TRENDS.find(t => t[0] === v.trend)[1].toLowerCase()} · ${EXITS.find(e => e[0] === `${v.stop}|${v.tp}|${v.exit}`)[1]}`;
+  const lbl = v => `PM ${sg()}${v.pm}% · ${CLIMBS.find(c => c[0] === v.climb)[1]} · ${TRENDS_().find(t => t[0] === v.trend)[1].toLowerCase()} · ${EXITS.find(e => e[0] === `${v.stop}|${v.tp}|${v.exit}`)[1]}`;
   $("all").innerHTML = `<thead><tr><th>Settings (tap to show)</th><th>Trades</th><th>A year</th><th>2021–23</th><th>2024–26</th><th>Max drop</th></tr></thead><tbody>` +
     L.filter((x, i) => SHOW_ALL || i < 15 || keyOf(x.v) === keyOf(S)).map(x => `<tr data-k="${keyOf(x.v)}" class="${keyOf(x.v) === keyOf(S) ? "sel" : ""}"><td>${esc(lbl(x.v))}</td><td>${x.full.n.toLocaleString("en")}</td><td class="${tone(x.full.acct_cagr)}">${pc(x.full.acct_cagr)}</td><td class="${tone(x.train.acct_cagr)}">${pc(x.train.acct_cagr)}</td><td class="${tone(x.test.acct_cagr)}">${pc(x.test.acct_cagr)}</td><td>${pc(x.full.acct_maxdd, 0)}</td></tr>`).join("") + `</tbody>`;
   $("more").textContent = SHOW_ALL ? "Show top 15" : `Show all ${L.length}`;
@@ -378,8 +397,8 @@ function all() {
 function recent(X) {
   const ts = (X.recent || []).slice().reverse();
   if (!ts.length) { $("rt").innerHTML = `<tbody><tr><td class="fine" style="text-align:left;white-space:normal">The trade list for these settings arrives with the next backtest run.</td></tr></tbody>`; return; }
-  $("rt").innerHTML = `<thead><tr><th>Day</th><th>Stock</th><th>Pre-market</th><th>Bought</th><th>Sold</th><th>Why</th><th>Result</th></tr></thead><tbody>` +
-    ts.map(t => `<tr><td>${esc(fmtD(t.d))}</td><td><a href="chart.html#${esc(t.s)}">${esc(t.s)}</a></td><td class="up">${pc(t.gain, 2)}</td><td>${t.in}</td><td>${t.out}</td><td>${esc(WHY[t.why] || t.why)} · ${esc(t.at || "")}</td><td class="${tone(t.pct)}">${pc(t.pct, 2)}</td></tr>`).join("") + `</tbody>`;
+  $("rt").innerHTML = `<thead><tr><th>Day</th><th>Stock</th><th>Pre-market</th><th>${SH() ? "Shorted" : "Bought"}</th><th>${SH() ? "Covered" : "Sold"}</th><th>Why</th><th>Result</th></tr></thead><tbody>` +
+    ts.map(t => `<tr><td>${esc(fmtD(t.d))}</td><td><a href="chart.html#${esc(t.s)}">${esc(t.s)}</a></td><td class="${SH() ? "down" : "up"}">${pc(SH() ? -t.gain : t.gain, 2)}</td><td>${t.in}</td><td>${t.out}</td><td>${esc(WHY[t.why] || t.why)} · ${esc(t.at || "")}</td><td class="${tone(t.pct)}">${pc(t.pct, 2)}</td></tr>`).join("") + `</tbody>`;
 }
 
 function render() {
@@ -396,6 +415,8 @@ document.addEventListener("click", e => {
 });
 
 function liveView(L) {
+  $("lv-p").innerHTML = SH() ? "The short side is not scanned or paper traded yet: this page shows the backtest only. Switch to Long to see the live picks." : $("lv-p").dataset.long;
+  if (SH()) { $("lv-today").innerHTML = ""; $("lv-days").innerHTML = ""; return; }
   if (!L?.days?.length) { $("lv-today").innerHTML = `<tbody><tr><td class="fine" style="text-align:left;white-space:normal">The first scan runs on the next New York morning at 09:25 (15:25 in Italy).</td></tr></tbody>`; return; }
   const ds = L.days.slice().sort((a, b) => a.date < b.date ? 1 : -1), d = ds[0];
   const tr = Object.fromEntries((d.trades || []).map(t => [t.s, t]));
@@ -409,14 +430,31 @@ function liveView(L) {
     done.map(x => `<tr><td>${esc(fmtD(x.date))}</td><td>${(x.trades || []).filter(t => t.pct != null).map(t => `${esc(t.s)} <span class="${tone(t.pct)}">${pc(t.pct, 1)}</span>`).join(" · ") || "none"}</td><td class="${tone(x.acct_pct)}">${pc(x.acct_pct, 2)}</td></tr>`).join("") + `</tbody>`;
 }
 
-(async () => {
-  load("data/premarket/live.json").then(liveView);
-  B = await load("data/premarket/backtest.json");
+function copy() {
+  const C = COPY[SIDE];
+  for (const k of ["bar", "h1", "lede", "s1", "s1b", "s2", "s3", "gains", "plainh", "plainp", "surv"]) $("t-" + k).textContent = C[k];
+  $("t-s4").innerHTML = C.s4;
+  document.title = C.bar;
+  document.querySelectorAll("[data-side]").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.side === SIDE)));
+}
+document.addEventListener("click", e => {
+  const b = e.target.closest("[data-side]"); if (!b || b.dataset.side === SIDE) return;
+  SIDE = b.dataset.side; history.replaceState(null, "", SH() ? "#short" : location.pathname + location.search); boot();
+});
+async function boot() {
+  copy(); S = loadS(); SHOW_ALL = false;
+  ["eq", "luck", "yrs", "plain", "sweeps", "costs", "all", "rt", "verdict", "ctl", "bigfine"].forEach(id => $(id).innerHTML = "");
+  liveView(LIVE ??= await load("data/premarket/live.json"));
+  const side = SIDE;
+  const data = await load(SH() ? "data/premarket/short/backtest.json" : "data/premarket/backtest.json");
+  if (side !== SIDE) return;
+  B = data;
   if (!B?.trend_check) { $("big").innerHTML = `<div class="empty">The backtest is running on GitHub. Check back soon.</div>`; return; }
   if (!S.pm || !cur()) Object.assign(S, pick(B.default));
   if (!B.trend_check.find(x => keyOf(x.v) === keyOf(B.default))) B.default = { ...B.default, ...B.trend_check.slice().sort((a, b) => b.full.acct_cagr - a.full.acct_cagr)[0].v };
   render(); plainAndSweeps(); costs();
-})();
+}
+boot();
 </script>
 </body>
 </html>

@@ -1,0 +1,40 @@
+name: Premarket Momentum Short
+
+# engine/premarket_short.py - backtest of "short at the open when the pre-market is falling" (mirror of the long one) on the
+# S&P 100 / S&P 500 (5-minute bars incl. pre-market, from 2021).
+# Runs by hand (workflow_dispatch) and when the engine changes.
+on:
+  push:
+    branches: [main]
+    paths: ["engine/premarket_short.py"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: premarket-short
+  cancel-in-progress: false
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 240
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Backtest
+        env:
+          ALPACA_KEY_ID: ${{ secrets.ALPACA_KEY_ID }}
+          ALPACA_SECRET_KEY: ${{ secrets.ALPACA_SECRET_KEY }}
+        run: python -u engine/premarket_short.py
+      - name: Publish
+        run: |
+          git config user.name "signal-desk-bot"
+          git config user.email "signal-desk-bot@users.noreply.github.com"
+          git add docs/data/premarket/short
+          git diff --cached --quiet && exit 0
+          git commit -m "Premarket Momentum Short backtest $(date -u +%F\ %H:%M)"
+          for i in 1 2 3; do git pull --rebase && git push && break; sleep 5; done
