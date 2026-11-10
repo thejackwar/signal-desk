@@ -93,6 +93,32 @@ a:hover { text-decoration: underline; }
 .legend i { display: inline-block; width: 9px; height: 9px; border-radius: 1px; margin-right: 6px; vertical-align: -1px; }
 .empty { padding: 26px 0; text-align: center; color: var(--muted); }
 footer { margin-top: 40px; border-top: 1px solid var(--line); padding-top: 16px; }
+.t[data-a] { cursor: pointer; }
+.row.hold .t[data-a] { cursor: default; outline: none; }
+.t[data-a]:hover, .t.pick { outline: 1px solid var(--fg); outline-offset: 1px; }
+.nm b small.wipe { color: var(--down); }
+/* the trades behind a tile */
+.sheet { position: fixed; inset: 0; z-index: 50; display: none; background: rgba(4,7,10,.62); padding: 24px 16px; }
+.sheet.on { display: flex; }
+.sheet .box { margin: auto; width: 100%; max-width: 760px; max-height: calc(100vh - 48px); overflow: auto; background: linear-gradient(180deg, var(--panel-2), var(--panel));
+  border: 1px solid var(--line-2); border-radius: 6px; padding: 16px 16px 18px; box-shadow: 0 20px 60px rgba(0,0,0,.5); }
+@media (max-width: 560px) { .sheet { padding: 0; } .sheet .box { margin: auto 0 0; max-height: 86vh; border-radius: 10px 10px 0 0; padding-bottom: calc(18px + env(safe-area-inset-bottom, 0px)); } }
+.sh-top { display: flex; justify-content: space-between; gap: 12px; align-items: start; }
+.sh-top h2 { margin: 4px 0 2px; font-size: 18px; letter-spacing: -.01em; }
+.sh-x { background: none; border: 1px solid var(--line-2); color: var(--muted); border-radius: 4px; font: 500 13px var(--font); padding: 4px 10px; cursor: pointer; flex: none; }
+.sh-x:hover { color: var(--fg); }
+.sh-sum { display: flex; flex-wrap: wrap; gap: 6px 18px; margin: 10px 0 12px; font-size: 13.5px; color: var(--muted); }
+.sh-sum b { font: 500 14px var(--mono); }
+.tt { width: 100%; border-collapse: collapse; font-size: 13px; }
+.tt th { font: 500 10.5px var(--mono); letter-spacing: .06em; text-transform: uppercase; color: var(--faint); text-align: left; padding: 6px 6px; border-bottom: 1px solid var(--line); white-space: nowrap; }
+.tt td { padding: 7px 6px; border-bottom: 1px solid var(--line); vertical-align: top; }
+.tt td.n, .tt th.n { text-align: right; font-family: var(--mono); white-space: nowrap; }
+.tt td small { display: block; color: var(--faint); font-size: 11.5px; }
+.tt td b { font-weight: 600; }
+.tag { display: inline-block; font: 500 10px var(--mono); letter-spacing: .05em; text-transform: uppercase; padding: 1px 5px; border-radius: 3px; margin-left: 4px; vertical-align: 1px; }
+.tag.b { background: var(--blue-bg); color: var(--blue); } .tag.s { background: rgba(240,86,106,.12); color: var(--down); } .tag.o { background: rgba(47,214,160,.12); color: var(--up); }
+.sheet .fine { margin: 12px 0 0; }
+@media (max-width: 560px) { .tt .hide-s { display: none; } }
 </style>
 </head>
 <body>
@@ -111,12 +137,13 @@ footer { margin-top: 40px; border-top: 1px solid var(--line); padding-top: 16px;
   </section>
 
   <div class="ctl" id="ctl"></div>
-  <div class="legend"><span><i style="background:var(--up)"></i>Profit</span><span><i style="background:var(--down)"></i>Loss</span><span><i style="background:var(--none)"></i>No position</span><span><i style="box-shadow:inset 0 0 0 1px var(--blue);background:var(--none)"></i>Live</span><span>Brighter = bigger than that strategy's typical day</span></div>
+  <div class="legend"><span><i style="background:var(--up)"></i>Profit</span><span><i style="background:var(--down)"></i>Loss</span><span><i style="background:var(--none)"></i>No position</span><span><i style="box-shadow:inset 0 0 0 1px var(--blue);background:var(--none)"></i>Live</span><span>Brighter = bigger than that strategy's typical day</span><span>Tap a tile to see its trades</span></div>
   <div class="panel" id="board"><div class="empty">Loading…</div></div>
   <p class="fine" id="asof"></p>
+  <div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-labelledby="sh-h"><div class="box" id="sh-box"></div></div>
 
   <footer>
-    <p class="fine">Strategy Lab strategies: default settings, buys only (the Lab's default), from 2021, through the same code as the Lab; a tile is the whole account's change that day, open trades included, before tax and fees. Live days (from 2 Nov 2026) are the same rules on fresh prices after each daily scan. The other strategies come from their own pages' backtests, each with its own account as that page reports it: the intraday ones (Session Momentum, Premarket Momentum, Gap-Down Short, Opening Reversal and the rest) count each day's trades, 4H CHoCH, gamma levels, Top-Down and the BTC dip buy count a trade on the day it closes, and Top-Down only has live paper trades (5% of the account each). Options strategies and the research tests only keep month-end results, so they show one tile a month. Tap a strategy to see every day since 2021. Backtests are not a promise of future results. For information only. Not investment advice.</p>
+    <p class="fine">Strategy Lab strategies: default settings, buys only (the Lab's default), from 2021, through the same code as the Lab; a tile is the whole account's change that day, open trades included, before tax and fees. Live days (from 2 Nov 2026) are the same rules on fresh prices after each daily scan. The other strategies come from their own pages' backtests, each with its own account as that page reports it: the intraday ones (Session Momentum, Premarket Momentum, Gap-Down Short, Opening Reversal and the rest) count each day's trades, 4H CHoCH, gamma levels, Top-Down and the BTC dip buy count a trade on the day it closes, and Top-Down only has live paper trades (5% of the account each). Options strategies and the research tests only keep month-end results, so they show one tile a month. Tap a strategy to see every day since 2021, and tap a tile to see the trades behind it (Strategy Lab strategies; the others link to their own page, where their trades are). Leverage: each day's change of the account is multiplied (2× turns a +1% day into +2%, and a −1% day into −2%), rebalanced every day, less a 5% a year borrowing cost on the borrowed part on the days the strategy holds something; a day that would lose 100% or more wipes the account out and it stays at zero. Leverage on the benchmark row too, so the comparison stays fair. Backtests are not a promise of future results. For information only. Not investment advice.</p>
   </footer>
 </main>
 <script>
@@ -127,7 +154,7 @@ const fmtD = (d, o = { day: "numeric", month: "short", year: "numeric" }) => new
 const MK = [["stocks", "Stocks"], ["crypto", "Crypto"], ["commodities", "Commodities"]];
 const PER = [["21", "1 month"], ["63", "3 months"], ["252", "1 year"], ["all", "Since 2021"]];
 const S = (() => { try { return JSON.parse(localStorage.getItem("board") || "{}"); } catch { return {}; } })();
-S.m ||= "stocks"; S.p ||= "63"; S.show ||= "core"; S.sort ||= "ret";
+S.m ||= "stocks"; S.p ||= "63"; S.show ||= "core"; S.sort ||= "ret"; S.lev = [1, 2, 3, 5].includes(+S.lev) ? +S.lev : 1;
 const save = () => { try { localStorage.setItem("board", JSON.stringify(S)); } catch {} };
 // stocks: the S&P 100 or the S&P 500, the same choice as in the app (its prefs, "universe")
 const PK = "signaldesk.prefs";
@@ -138,16 +165,16 @@ async function get(p) { if (p in cache) return cache[p]; try { const r = await f
 const seg = (k, v, o) => `<div class="seg" role="group">${o.map(([a, l]) => `<button type="button" data-${k}="${a}" aria-pressed="${a === v}">${esc(l)}</button>`).join("")}</div>`;
 
 function controls() {
-  $("ctl").innerHTML = seg("m", S.m, MK) + (S.m === "stocks" ? seg("u", getU(), [["sp100", "S&P 100"], ["sp500", "S&P 500"]]) : "") + seg("p", S.p, PER) + seg("show", S.m !== "stocks" && S.show === "research" ? "all" : S.show, [["core", "Main strategies"], ["all", "All, incl. vault"], ...(S.m === "stocks" ? [["research", "+ Research tests"]] : [])]) + seg("sort", S.sort, [["ret", "Best first"], ["name", "A–Z"]]);
+  $("ctl").innerHTML = seg("m", S.m, MK) + (S.m === "stocks" ? seg("u", getU(), [["sp100", "S&P 100"], ["sp500", "S&P 500"]]) : "") + seg("p", S.p, PER) + seg("show", S.m !== "stocks" && S.show === "research" ? "all" : S.show, [["core", "Main strategies"], ["all", "All, incl. vault"], ...(S.m === "stocks" ? [["research", "+ Research tests"]] : [])]) + seg("sort", S.sort, [["ret", "Best first"], ["name", "A–Z"]]) + seg("lev", String(S.lev), [["1", "No leverage"], ["2", "2×"], ["3", "3×"], ["5", "5×"]]);
 }
 
 // one tile list for a row: the period's days (or weeks, for "since 2021", so it stays readable)
 // group days into weeks (key = that week's Monday) or months (key = YYYY-MM): the compounded change
-function group(ds, vs, live, key) {
+function group(ds, vs, live, key, off = 0) {
   const W = new Map();
-  ds.forEach((d, i) => { const k = key(d); const w = W.get(k) || { v: 1, any: false, lv: false }; w.v *= 1 + vs[i] / 1e5; w.any ||= vs[i] !== 0; w.lv ||= d >= live; W.set(k, w); });
+  ds.forEach((d, i) => { const k = key(d); const w = W.get(k) || { v: 1, any: false, lv: false, a: i + off }; w.v *= 1 + vs[i] / 1e5; w.any ||= vs[i] !== 0; w.lv ||= d >= live; w.b = i + off; W.set(k, w); });
   const ws = [...W.values()];
-  return { ds: [...W.keys()], vs: ws.map(w => w.any ? Math.round((w.v - 1) * 1e5) || (w.v > 1 ? 1 : -1) : 0), lvs: ws.map(w => w.lv) };
+  return { ds: [...W.keys()], vs: ws.map(w => w.any ? Math.round((w.v - 1) * 1e5) || (w.v > 1 ? 1 : -1) : 0), lvs: ws.map(w => w.lv), ab: ws.map(w => [w.a, w.b]) };
 }
 const weekKey = d => { const dt = new Date(d + "T12:00:00Z"); return new Date(dt - ((dt.getUTCDay() + 6) % 7) * 864e5).toISOString().slice(0, 10); };
 const monthKey = d => d.slice(0, 7);
@@ -155,27 +182,45 @@ const fmtM = m => fmtD(m + "-15", { month: "short", year: "numeric" });
 
 function tiles(dates, vals, live, res = "D") {
   const n = S.p === "all" ? vals.length : Math.min(vals.length, +S.p);
-  let ds = dates.slice(-n), vs = vals.slice(-n), lvs;
+  const off = vals.length - n;
+  let ds = dates.slice(-n), vs = vals.slice(-n), lvs, ab = ds.map((_, i) => [i + off, i + off]);
   if (res === "M" || S.p === "all") {     // monthly results: one tile a month; since 2021: one tile a week
-    ({ ds, vs, lvs } = group(ds, vs, live, res === "M" ? monthKey : weekKey));
+    ({ ds, vs, lvs, ab } = group(ds, vs, live, res === "M" ? monthKey : weekKey, off));
   }
   const abs = vs.filter(v => v).map(Math.abs).sort((a, b) => a - b), med = abs[abs.length >> 1] || 1;
   const ret = (vs.reduce((v, x) => v * (1 + x / 1e5), 1) - 1) * 100, up = vs.filter(v => v > 0).length, act = vs.filter(v => v).length;
-  const html = vs.map((v, i) => `<i class="t${v > 0 ? " u" : v < 0 ? " d" : ""}${Math.abs(v) > med ? " s" : ""}${(lvs ? lvs[i] : ds[i] >= live) ? " lv" : ""}" title="${esc(res === "M" ? fmtM(ds[i]) : fmtD(ds[i]))}${res === "M" ? " (month)" : S.p === "all" ? " (week)" : ""}: ${v ? pc(v / 1e3, 2) : "no position"}"></i>`).join("");
+  const html = vs.map((v, i) => `<i class="t${v > 0 ? " u" : v < 0 ? " d" : ""}${Math.abs(v) > med ? " s" : ""}${(lvs ? lvs[i] : ds[i] >= live) ? " lv" : ""}" data-a="${ab[i][0]}" data-b="${ab[i][1]}" title="${esc(res === "M" ? fmtM(ds[i]) : fmtD(ds[i]))}${res === "M" ? " (month)" : S.p === "all" ? " (week)" : ""}: ${v ? pc(v / 1e3, 2) : "no position"}"></i>`).join("");
   return { html, ret, upPct: act ? up / act * 100 : null };
 }
 
 function wall(dates, vals, live, res = "D") {
   if (res === "M") {        // one tile a month
     const G = group(dates, vals, live, monthKey), Y = {};
-    G.ds.forEach((m, i) => { const v = G.vs[i]; (Y[m.slice(0, 4)] ||= []).push(`<i class="t${v > 0 ? " u s" : v < 0 ? " d s" : ""}${G.lvs[i] ? " lv" : ""}" title="${esc(fmtM(m))}: ${v ? pc(v / 1e3, 2) : "no result"}"></i>`); });
+    G.ds.forEach((m, i) => { const v = G.vs[i]; (Y[m.slice(0, 4)] ||= []).push(`<i class="t${v > 0 ? " u s" : v < 0 ? " d s" : ""}${G.lvs[i] ? " lv" : ""}" data-a="${G.ab[i][0]}" data-b="${G.ab[i][1]}" title="${esc(fmtM(m))}: ${v ? pc(v / 1e3, 2) : "no result"}"></i>`); });
     return Object.keys(Y).sort().map(y => `<div class="yr"><span>${y}</span><div class="tiles">${Y[y].join("")}</div></div>`).join("");
   }
   const Y = {};
   const abs = vals.filter(v => v).map(Math.abs).sort((a, b) => a - b), med = abs[abs.length >> 1] || 1;
-  dates.forEach((d, i) => { const v = vals[i]; (Y[d.slice(0, 4)] ||= []).push(`<i class="t${v > 0 ? " u" : v < 0 ? " d" : ""}${Math.abs(v) > med ? " s" : ""}${d >= live ? " lv" : ""}" title="${esc(fmtD(d))}: ${v ? pc(v / 1e3, 2) : "no position"}"></i>`); });
+  dates.forEach((d, i) => { const v = vals[i]; (Y[d.slice(0, 4)] ||= []).push(`<i class="t${v > 0 ? " u" : v < 0 ? " d" : ""}${Math.abs(v) > med ? " s" : ""}${d >= live ? " lv" : ""}" data-a="${i}" data-b="${i}" title="${esc(fmtD(d))}: ${v ? pc(v / 1e3, 2) : "no position"}"></i>`); });
   return Object.keys(Y).sort().map(y => `<div class="yr"><span>${y}</span><div class="tiles">${Y[y].join("")}</div></div>`).join("");
 }
+
+// Leverage: each day's (or, for monthly rows, each month's) change × L, less the borrowing cost on
+// the borrowed part (L − 1) on the days with a position; a change of −100% or worse wipes the account
+// out and it stays at zero. Values in the board's unit (0.1 bp). wiped: the index it happened at.
+const BORROW = 0.05;
+function lever(vals, L, res = "D") {
+  if (L === 1) return { days: vals, wiped: null };
+  const cost = (L - 1) * BORROW / (res === "M" ? 12 : 252), out = new Array(vals.length).fill(0);
+  for (let i = 0; i < vals.length; i++) {
+    if (!vals[i]) continue;
+    const y = L * vals[i] / 1e5 - cost;
+    if (y <= -1) { out[i] = -1e5; return { days: out, wiped: i }; }
+    out[i] = Math.round(y * 1e5) || (y > 0 ? 1 : -1);
+  }
+  return { days: out, wiped: null };
+}
+const compPct = a => (a.reduce((v, x) => v * (1 + x / 1e5), 1) - 1) * 100;
 
 const labLink = (m, ind) => "index.html#strategylab?c=" + btoa(JSON.stringify({ m, cfg: { ind }, side: "long" })).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
 
@@ -198,38 +243,104 @@ async function render() {
   }
   const shown = S.show === "research" ? () => true : S.show === "all" ? r => r.group !== "research" : r => r.core;
   rows = rows.filter(shown);
+  if (S.lev > 1) rows = rows.map(r => {
+    const X = lever(r.days, S.lev, r.res);
+    return { ...r, raw: r.days, days: X.days, wiped: X.wiped == null ? null : r.dates[X.wiped], total: compPct(X.days) };
+  });
+  const HL = lever(B.hold.days, S.lev), hold = { days: HL.days, total: S.lev > 1 ? compPct(HL.days) : B.hold.total, wiped: HL.wiped == null ? null : B.dates[HL.wiped] };
+  const levTag = S.lev > 1 ? ` · ${S.lev}×` : "";
   const ts = S.p === "all" ? "7px" : S.p === "252" ? "7px" : S.p === "63" ? "10px" : "14px";
   const out = rows.map(r => ({ r, T: tiles(r.dates, r.days, B.live_from, r.res) }));
   if (S.sort === "ret") out.sort((a, b) => b.T.ret - a.T.ret); else out.sort((a, b) => a.r.name.localeCompare(b.r.name));
-  const H = tiles(B.dates, B.hold.days, B.live_from);
+  const H = tiles(B.dates, hold.days, B.live_from);
   const per = PER.find(p => p[0] === S.p)[1];
   const holdName = S.m === "stocks" ? `Holding the ${getU() === "sp500" ? "S&P 500" : "S&P 100"}` : S.m === "crypto" ? "Holding the coins" : "Holding the commodities";
-  let h = `<div class="head"><span class="k">Strategy · ${esc(per)}${S.p === "all" ? " · 1 tile = 1 week" : " · 1 tile = 1 day"}</span><span class="k">Return</span><span class="k">Up days</span></div>`;
-  h += `<div class="row hold" style="--ts:${ts}"><div class="nm"><b>${holdName}<small>benchmark</small></b><span class="${H.ret >= 0 ? "up" : "down"}">${pc(H.ret)}</span><span>${H.upPct == null ? "–" : Math.round(H.upPct) + "%"}</span></div><div class="tiles">${H.html}</div></div>`;
+  let h = `<div class="head"><span class="k">Strategy · ${esc(per)}${S.p === "all" ? " · 1 tile = 1 week" : " · 1 tile = 1 day"}${S.lev > 1 ? ` · ${S.lev}× leverage` : ""}</span><span class="k">Return</span><span class="k">Up days</span></div>`;
+  h += `<div class="row hold" style="--ts:${ts}"><div class="nm"><b>${holdName}<small>benchmark${levTag}</small>${hold.wiped ? `<small class="wipe">wiped out ${esc(fmtD(hold.wiped, { month: "short", year: "numeric" }))}</small>` : ""}</b><span class="${H.ret >= 0 ? "up" : "down"}">${pc(H.ret)}</span><span>${H.upPct == null ? "–" : Math.round(H.upPct) + "%"}</span></div><div class="tiles">${H.html}</div></div>`;
   h += out.map(({ r, T }) => `<div class="row" data-id="${esc(r.id)}" style="--ts:${ts}" tabindex="0" role="button" aria-expanded="false">
-      <div class="nm"><b>${esc(r.name)}${r.tag ? `<small>${esc(r.tag)}</small>` : r.group === "vault" ? `<small>vault</small>` : ""}</b><span class="${T.ret >= 0 ? "up" : "down"}">${pc(T.ret)}</span><span>${T.upPct == null ? "–" : Math.round(T.upPct) + "%"}</span></div>
+      <div class="nm"><b>${esc(r.name)}${r.tag ? `<small>${esc(r.tag)}</small>` : r.group === "vault" ? `<small>vault</small>` : ""}${r.wiped ? `<small class="wipe">wiped out ${esc(fmtD(r.wiped, { month: "short", year: "numeric" }))}</small>` : ""}</b><span class="${T.ret >= 0 ? "up" : "down"}">${pc(T.ret)}</span><span>${T.upPct == null ? "–" : Math.round(T.upPct) + "%"}</span></div>
       <div class="tiles">${T.html}</div>
       <div class="more"></div></div>`).join("");
   $("board").innerHTML = h;
   $("board").onclick = e => {
     const row = e.target.closest(".row[data-id]"); if (!row || e.target.closest("a")) return;
     const r = rows.find(x => x.id === row.dataset.id), M = row.querySelector(".more");
+    const tile = e.target.closest(".t[data-a]");
+    if (tile) { document.querySelectorAll(".t.pick").forEach(t => t.classList.remove("pick")); tile.classList.add("pick"); openTile(B, r, +tile.dataset.a, +tile.dataset.b); return; }
     if (!row.classList.contains("open") && !M.innerHTML) {
       const up = r.days.filter(v => v > 0).length, dn = r.days.filter(v => v < 0).length;
       const unit = r.res === "M" ? "months" : "days", since = r.since && r.since > r.dates[0] ? r.since : r.dates[0];
       const link = r.href ? `<a href="${esc(r.href)}">Open ${esc(r.name)} ›</a>` : r.lab ? `<a href="${labLink(S.m, r.lab)}">Open in the Strategy Lab ›</a>` : "";
       const mup = r.res === "M" ? group(r.dates, r.days, B.live_from, monthKey).vs : null;
       M.innerHTML = `<div style="--ts:7px">${wall(r.dates, r.days, B.live_from, r.res)}</div>
-        <p>Since ${esc(fmtD(since, { month: "short", year: "numeric" }))}: <b class="${r.total >= 0 ? "up" : "down"}">${pc(r.total)}</b> (holding: ${pc(B.hold.total)}), ${mup ? mup.filter(v => v > 0).length : up} up ${unit} and ${mup ? mup.filter(v => v < 0).length : dn} down ${unit}.${r.res === "M" ? " This backtest only keeps month-end results, so it shows one tile a month." : ""} ${link}</p>`;
+        <p>Since ${esc(fmtD(since, { month: "short", year: "numeric" }))}: <b class="${r.total >= 0 ? "up" : "down"}">${pc(r.total)}</b>${S.lev > 1 ? ` with ${S.lev}× leverage` : ""} (holding${S.lev > 1 ? ` with ${S.lev}×` : ""}: ${pc(hold.total)}), ${mup ? mup.filter(v => v > 0).length : up} up ${unit} and ${mup ? mup.filter(v => v < 0).length : dn} down ${unit}.${r.res === "M" ? " This backtest only keeps month-end results, so it shows one tile a month." : ""} ${link}</p>`;
     }
     row.classList.toggle("open"); row.setAttribute("aria-expanded", row.classList.contains("open"));
   };
   $("asof").textContent = `${rows.length} strategies · prices to ${fmtD(B.to)} · updated after each daily scan.`;
 }
 
+// ------------------------------------------------------------ the trades behind a tile
+// Strategy Lab rows: the Lab's own run on the same prices as the board (docs/board-trades.js);
+// lab.json for the history, lab_recent.json for the days after it, as engine/day_board.mjs does.
+const LABS = {}, RUNS = {};
+let MODS = null;
+const dirOf = () => S.m === "stocks" ? (getU() === "sp500" ? "data/sp500/" : "data/") : `data/${S.m}/`;
+async function labData(f) {
+  if (!(f in LABS)) LABS[f] = (async () => { const r = await fetch(f + "?t=" + Math.floor(Date.now() / 6e5)); if (!r.ok) throw new Error(r.status); return MODS.Lab.decode(await r.json()); })();
+  try { return await LABS[f]; } catch (e) { delete LABS[f]; throw e; }
+}
+const sheet = (h) => { $("sh-box").innerHTML = h; $("sheet").classList.add("on"); document.body.style.overflow = "hidden"; };
+const closeSheet = () => { $("sheet").classList.remove("on"); document.body.style.overflow = ""; document.querySelectorAll(".t.pick").forEach(t => t.classList.remove("pick")); };
+$("sheet").addEventListener("click", e => { if (e.target.id === "sheet" || e.target.closest(".sh-x")) closeSheet(); });
+document.addEventListener("keydown", e => { if (e.key === "Escape" && $("sheet").classList.contains("on")) closeSheet(); });
+const px = v => v == null || !isFinite(v) ? "–" : v >= 1000 ? v.toFixed(0) : v >= 10 ? v.toFixed(2) : v.toPrecision(4);
+
+async function openTile(B, r, a, b) {
+  const dA = r.dates[a], dB = r.dates[b], whenTxt = r.res === "M" ? fmtM(dB.slice(0, 7)) : a === b ? fmtD(dA, { weekday: "long", day: "numeric", month: "long", year: "numeric" }) : `Week of ${fmtD(dA, { day: "numeric", month: "short" })} – ${fmtD(dB, { day: "numeric", month: "short", year: "numeric" })}`;
+  const tv = compPct(r.days.slice(a, b + 1)), raw = r.raw ? compPct(r.raw.slice(a, b + 1)) : tv, live = dB >= B.live_from;
+  const head = `<div class="sh-top"><div><span class="k${live ? " blue" : ""}">${esc(r.name)}${live ? " · live paper trading" : ""}</span><h2 id="sh-h">${esc(whenTxt)}</h2></div><button type="button" class="sh-x" aria-label="Close">Close</button></div>
+    <div class="sh-sum"><span>Account that ${r.res === "M" ? "month" : a === b ? "day" : "week"} <b class="${raw >= 0 ? "up" : "down"}">${pc(raw, 2)}</b></span>${S.lev > 1 ? `<span>with ${S.lev}× leverage <b class="${tv >= 0 ? "up" : "down"}">${pc(tv, 2)}</b></span>` : ""}`;
+  if (!r.lab) {
+    const link = r.href ? `<a href="${esc(r.href)}">Open ${esc(r.name)} ›</a>` : "";
+    sheet(head + `</div><p class="fine" style="font-size:14px;color:var(--muted)">This strategy's backtest runs on its own page, so its trades are listed there, not here. ${link}</p>`);
+    return;
+  }
+  sheet(head + `</div><div class="empty">Loading the prices and rerunning the strategy…</div>`);
+  try {
+    MODS ||= { Lab: await import("./lab.js"), BT: await import("./board-trades.js") };
+    const { Lab, BT } = MODS, dir = dirOf(), hist = await labData(dir + "lab.json");
+    let data = hist, f = "lab.json";
+    if (!hist.dates.includes(dB)) { data = await labData(dir + "lab_recent.json"); f = "lab_recent.json"; }
+    const fi = f === "lab.json" ? Math.max(0, data.dates.findIndex(d => d >= "2021-01-01")) : 0;
+    const gB = data.dates.indexOf(dB), gA = data.dates.findIndex(d => d >= dA);
+    if (gB < 0 || gA < 0) throw new Error("no prices for that day");
+    const cfg = Lab.defaults(r.lab), key = dir + f + "|" + r.lab;
+    const R = RUNS[key] ||= Lab.traceRun(data, cfg, fi);
+    const X = BT.tileTrades(Lab, data, cfg, fi, gA, gB, R);
+    if (!$("sheet").classList.contains("on")) return;
+    const held = X.trades.filter(t => t.share != null), fresh = X.trades.filter(t => t.share == null);
+    const dd = d => fmtD(d, { day: "numeric", month: "short", year: "2-digit" });
+    const one = a === b, colMove = one ? "That day" : "That week";
+    const tr = t => `<tr><td><b>${esc(t.t)}</b>${t.bought ? `<span class="tag b">bought</span>` : ""}${t.sold ? `<span class="tag s">sold</span>` : ""}${t.open && !t.sold ? `<span class="tag o">open</span>` : ""}
+        <small>${t.before ? "held from before 2021" : `in ${esc(dd(t.d0))} at ${px(t.p0)}`}${t.d1 ? ` · out ${esc(dd(t.d1))} at ${px(t.p1)}` : ` · now ${px(t.p1)}`}</small></td>
+      <td class="n">${t.move == null ? "–" : `<span class="${t.move >= 0 ? "up" : "down"}">${pc(t.move * 100, 2)}</span>`}</td>
+      <td class="n">${t.share == null ? "–" : `<span class="${t.share >= 0 ? "up" : "down"}">${pc(t.share * 100, 3)}</span>`}</td>
+      <td class="n hide-s"><span class="${t.ret >= 0 ? "up" : "down"}">${pc(t.ret * 100, 1)}</span><small>${t.open ? "so far" : "whole trade"}</small></td></tr>`;
+    const win = held.filter(t => t.share > 0).length;
+    let h = head + `<span>${held.length} position${held.length === 1 ? "" : "s"} held${held.length ? `, ${win} up` : ""}</span>${fresh.length ? `<span>${fresh.length} bought at the close</span>` : ""}</div>`;
+    if (!X.trades.length) h += `<div class="empty">No positions: the strategy was in cash${one ? " that day" : " that week"}.</div>`;
+    else h += `<table class="tt"><thead><tr><th>Stock</th><th class="n">${colMove}</th><th class="n">Share of account</th><th class="n hide-s">Trade</th></tr></thead><tbody>${held.map(tr).join("")}${fresh.map(tr).join("")}</tbody></table>`;
+    h += `<p class="fine">Default settings, buys only, the same run as the board's tile. <b>${colMove}</b>: the stock's move while held${one ? "" : " in the week"}, buying and selling costs included. <b>Share of account</b>: what it added to the whole account (its move ÷ the positions open), so the column adds up to the ${one ? "tile" : "week (near enough: the days compound)"}${S.lev > 1 ? " before leverage" : ""}. A stock bought at the close starts counting the next session. Prices are adjusted for splits and dividends. <a href="${labLink(S.m, r.lab)}">Open in the Strategy Lab ›</a></p>`;
+    $("sh-box").innerHTML = h;
+  } catch (e) {
+    if ($("sheet").classList.contains("on")) $("sh-box").innerHTML = head + `</div><div class="empty">Couldn't load the trades (${esc(e.message || e)}). Try again in a moment.</div>`;
+  }
+}
+
 document.addEventListener("click", e => {
-  const b = e.target.closest("[data-m], [data-u], [data-p], [data-show], [data-sort]"); if (!b) return;
-  const d = b.dataset; if (d.u) setU(d.u); if (d.m) S.m = d.m; if (d.p) S.p = d.p; if (d.show) S.show = d.show; if (d.sort) S.sort = d.sort;
+  const b = e.target.closest("[data-m], [data-u], [data-p], [data-show], [data-sort], [data-lev]"); if (!b) return;
+  const d = b.dataset; if (d.u) setU(d.u); if (d.m) S.m = d.m; if (d.p) S.p = d.p; if (d.show) S.show = d.show; if (d.sort) S.sort = d.sort; if (d.lev) S.lev = +d.lev;
   save(); render();
 });
 document.addEventListener("keydown", e => { if ((e.key === "Enter" || e.key === " ") && e.target.matches(".row[data-id]")) { e.preventDefault(); e.target.click(); } });

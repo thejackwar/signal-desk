@@ -59,6 +59,8 @@ docs/                    the website (served by GitHub Pages)
   board.html             Strategy Board: every Lab strategy (default settings, buys only) as one green/red tile per
                          trading day since 2021, stocks/crypto/commodities, live days outlined; data/board.json (and
                          crypto/, commodities/) written by engine/day_board.mjs after each daily scan (live-trades.yml)
+                         Tap a tile: the trades behind it (docs/board-trades.js on Lab.traceRun(), the same run as the tile;
+                         test: tests/board/test_trades.mjs). Leverage switch (2×/3×/5×, daily, 5% a year borrowing cost).
   session.html           Session Momentum: QQQ's first 5-minute candle vs the 12 EMA, one trade a day with a trailing stop;
                          every session since 2020 as a green/red tile, each setting tested, live paper trades
   data/session/          backtest.json (Saturdays) and live.json (every 5 min in market hours), engine/session_momentum.py

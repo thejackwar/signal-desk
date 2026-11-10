@@ -657,6 +657,15 @@ export function riskHit(side, entry, h, l, cfg, peak = entry) {
 // every open position and rebalanced daily, idle money earns 0%, no costs, taxes or borrow fees.
 // With maxPos set, the account has that many slots of 1/maxPos each: an alert that comes while
 // every slot is taken is skipped, and empty slots wait in cash. `cost` is taken on every buy and sell.
+// The board's tile panel (docs/board-trades.js) needs to know which stock earned each day's return:
+// traceRun() is run() that also returns every position the account held ({ t, g0, gE, g, r }),
+// the same objects whose daily returns make the curve. Off unless traceRun() is used.
+let TRACE = null;
+export function traceRun(data, cfg, fromIdx = 0) {
+  TRACE = [];
+  try { return run(data, cfg, fromIdx); } finally { TRACE = null; }
+}
+
 export function run(data, cfg, fromIdx = 0) {
   cfg = clean(cfg);
   if (INDICATORS[cfg.ind].own) return runOwn(data, cfg, fromIdx);
@@ -737,7 +746,7 @@ export function run(data, cfg, fromIdx = 0) {
       }
       if (newL) {
         entL = c[i]; sinceL = idx[i]; pkL = c[i]; freshL = fee > 0;
-        if (slots) { posL = { t: T.t, g0: g, gE: Infinity, g: [], r: [] }; book.long.push(posL); }
+        if (slots || TRACE) { posL = { t: T.t, g0: g, gE: Infinity, g: [], r: [], p0: c[i] }; if (slots) book.long.push(posL); if (TRACE) TRACE.push(posL); }
       }
       heldLS = hLS; heldL = hL;
     }
@@ -800,6 +809,7 @@ function runOwn(data, cfg, fromIdx) {
       for (const key of keys) {
         if (slots) book[key].push({ t: T.t, g0: idx[s0], gE: closed ? idx[b] : Infinity, g, r });
         else for (let m = 0; m < g.length; m++) { sum[key][g[m]] += r[m]; cnt[key][g[m]]++; }
+        if (TRACE && key === "long") TRACE.push({ t: T.t, g0: idx[s0], gE: closed ? idx[b] : Infinity, g, r, p0: pin, p1: closed ? pout : null });
       }
       if (!closed && side > 0 && idx[n - 1] === D - 1) openL.push({ t: T.t, since: data.dates[idx[a]], ret: (c[n - 1] / pin - 1) * 100 });
       if (closed && idx[s0] >= fromIdx)
@@ -869,6 +879,7 @@ function runAvg(data, cfg, fromIdx) {
     for (const x of P) for (const key of ["ls", "long"]) {
       if (slots) book[key].push(x);
       else for (let m = 0; m < x.g.length; m++) { sum[key][x.g[m]] += x.r[m]; cnt[key][x.g[m]]++; }
+      if (TRACE && key === "long") TRACE.push(x);
     }
   }
   return finish(data, cfg, fromIdx, sum, cnt, book, trades, openL, openT);
@@ -1016,6 +1027,7 @@ function runPro(data, cfg, fromIdx) {
     for (const P of Ps) for (const key of P.side > 0 ? ["ls", "long"] : ["ls"]) {
       if (useBook) book[key].push(P);
       else for (let m = 0; m < P.g.length; m++) { sum[key][P.g[m]] += P.r[m]; cnt[key][P.g[m]]++; }
+      if (TRACE && key === "long") TRACE.push(P);
     }
   }
   return finish(data, cfg, fromIdx, sum, cnt, book, trades, openL, openT);
@@ -1100,6 +1112,8 @@ function finish(data, cfg, fromIdx, sum, cnt, book, trades, openL, openT = []) {
     open: (avg && books ? openL.filter(o => books.long.acc.has(o.t + "|" + o.g0)) : openL).sort((a, b) => a.ret - b.ret),   // long positions still held on the last day, worst first
     // trades (as in all.list) not closed by the last day, long and short; a position limit keeps only the ones it took
     openTrades: books ? openT.filter(o => books[o.side > 0 ? "long" : "ls"].acc.has(o.t + "|" + o.g0)) : openT,
+    // traceRun() only: the long positions the account held (with a position limit, the ones it took)
+    ...(TRACE ? { trace: books ? TRACE.filter(p => books.long.acc.has(p.t + "|" + p.g0)) : TRACE.slice(), weights: { slots: slots || 0, risk, avg: avg && !!books } } : {}),
   };
 }
 
