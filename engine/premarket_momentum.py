@@ -229,7 +229,7 @@ def trade(c: dict, v: dict) -> dict:
             "r": round(sgn * (px - entry) / risk, 2), "rv": c["gain"]}
 
 
-def stats(ts: list[dict], spy: dict[str, float]) -> dict:
+def stats(ts: list[dict], spy: dict[str, float], lev: float = 1.0) -> dict:
     if not ts:
         return {"n": 0}
     w = [t for t in ts if t["pct"] > 0]
@@ -237,11 +237,12 @@ def stats(ts: list[dict], spy: dict[str, float]) -> dict:
     days: dict[str, list[dict]] = defaultdict(list)
     for t in ts:
         days[t["d"]].append(t)
-    eq, peak, dd, curve, yearly = 1.0, 1.0, 0.0, [], defaultdict(lambda: 1.0)
+    eq, peak, dd, curve, yearly, worst = 1.0, 1.0, 0.0, [], defaultdict(lambda: 1.0), 0.0
     for d in sorted(days):
         take = sorted(days[d], key=lambda t: -t["rv"])[:MAX_POS]
-        r = sum(t["pct"] for t in take) / 100 / MAX_POS
-        eq *= 1 + r; yearly[d[:4]] *= 1 + r
+        r = lev * sum(t["pct"] for t in take) / 100 / MAX_POS
+        worst = min(worst, r)
+        eq *= max(0.0, 1 + r); yearly[d[:4]] *= max(0.0, 1 + r)
         peak = max(peak, eq); dd = min(dd, eq / peak - 1)
         curve.append([d, round(eq, 4)])
     d0, d1 = min(days), max(days)
@@ -257,7 +258,7 @@ def stats(ts: list[dict], spy: dict[str, float]) -> dict:
             "pf": round(gain / loss, 2) if loss else None,
             "exits": {k: sum(t["why"] == k for t in ts) for k in ("target", "stop", "time")},
             "acct_total": round((eq - 1) * 100, 1), "acct_cagr": round((eq ** (1 / yrs) - 1) * 100, 1),
-            "acct_maxdd": round(dd * 100, 1), "by_year": by_year,
+            "acct_maxdd": round(dd * 100, 1), "worst_day": round(worst * 100, 1), "by_year": by_year,
             "curve": curve[::max(1, len(curve) // 300)] + curve[-1:]}
 
 
@@ -334,6 +335,15 @@ def main() -> None:
     for cst in (0.0, 0.0003, 0.0006, 0.001):
         st = stats(run(cands, {**DEFAULT, "cost": cst}), spy); st.pop("curve", None)
         res["cost_check"][f"{cst * 100:.2f}"] = {k: st.get(k) for k in KEYS}
+    # leverage (CFD-style, intraday only so no overnight financing): every day's account move times L,
+    # costs scale with it because they are paid on the bigger position
+    res["leverage"] = {}
+    for cst in (0.0003, 0.0006):
+        ts_ = run(cands, {**DEFAULT, "cost": cst})
+        for lv in (1, 2, 3, 5):
+            st = stats(ts_, spy, lv)
+            res["leverage"][f"{lv}x@{cst * 100:.2f}"] = {**{k: st.get(k) for k in KEYS}, "worst_day": st.get("worst_day"),
+                                                       "by_year": {y: o["acct"] for y, o in st["by_year"].items()}}
     sc = []
     prev_c = None
     for b_ in spy_rows:
