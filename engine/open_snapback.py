@@ -61,6 +61,8 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 from open_breakout import NY, WARMUP, daily_table, demo_daily, fetch, load_tickers, ny  # noqa: E402
 from opening_reversal import stats  # noqa: E402
 
+import board_series as BS  # noqa: E402
+
 ROOT = Path(__file__).resolve().parent.parent
 OUT_DIR = ROOT / "docs" / "data" / "snapback"
 FROM = "2021-01-04"
@@ -465,6 +467,8 @@ def main() -> None:
 
     out = Path("/tmp/snapback-demo.json") if a.demo else OUT_DIR / "backtest.json"
     out.parent.mkdir(parents=True, exist_ok=True)
+    res["board"] = BS.pack((res.get("base") or {}).get("_daily") or [])
+    BS.strip(res)
     out.write_text(json.dumps(res, separators=(",", ":")))
     for name, st in res["compare"].items():
         print(f"{name:20s} n={st['n']} win={st['win']}% avg={st['avg']}% PF={st['pf']} acct={st['acct_total']}% "

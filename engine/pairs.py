@@ -40,6 +40,7 @@ from statsmodels.tsa.stattools import coint
 ENGINE = Path(__file__).resolve().parent
 sys.path.insert(0, str(ENGINE))
 from universe import U  # noqa: E402
+import board_series as BS  # noqa: E402
 
 OUT = U.path("pairs")      # UNIVERSE=sp500: docs/data/sp500/pairs/, from that list's Strategy Lab price files
 
@@ -334,6 +335,8 @@ def walk_forward(prices: pd.DataFrame, sectors: dict[str, str], rules=RULES) -> 
         "exits": exits,
         "periods": periods,
         "curve": curve(port), "spy_curve": curve(spy),
+        # the Strategy Board's tiles (engine/board_series.py); older history is weekly prices, so weekly steps
+        "board": BS.pack([[str(d.date()), float(v)] for d, v in port.items() if d >= pd.Timestamp("2020-12-01")]),
         "recent_trades": sorted(all_trades, key=lambda t: t["close"])[-40:][::-1],
     }
 

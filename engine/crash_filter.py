@@ -31,6 +31,9 @@ import numpy as np
 import pandas as pd
 
 ROOT = Path(__file__).resolve().parent.parent
+import sys  # noqa: E402
+sys.path.insert(0, str(ROOT / "engine"))
+import board_series as BS  # noqa: E402
 OUT = ROOT / "docs" / "data" / "crashfilter.json"
 N, COST, TAX, TAX_BILLS, START = 200, 0.001, 0.26, 0.125, 10_000
 CRASHES = [("Dot-com bust", "2000-03-24", "2002-10-09"), ("Financial crisis", "2007-10-09", "2009-03-09"),
@@ -162,6 +165,8 @@ def main():
                    "rule": [round(float(x)) for x in eq_rule.reindex(wk)],
                    "hold": [round(float(x)) for x in eq_hold.reindex(wk)],
                    "in": [1 if pos.reindex(wk).iloc[i] else 0 for i in range(len(wk))]},
+        # the Strategy Board's daily tiles (engine/board_series.py)
+        "board": BS.pack([[f"{d:%Y-%m-%d}", float(x)] for d, x in rule.items() if d >= pd.Timestamp("2020-12-01")]),
     }
     OUT.write_text(json.dumps(doc, separators=(",", ":")))
     s = doc["stats"]

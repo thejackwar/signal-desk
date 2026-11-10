@@ -38,6 +38,9 @@ import numpy as np
 import pandas as pd
 
 ROOT = Path(__file__).resolve().parent.parent
+import sys  # noqa: E402
+sys.path.insert(0, str(ROOT / "engine"))
+import board_series as BS  # noqa: E402
 OUT = ROOT / "docs" / "data" / "vix.json"
 YEAR, MIN_YEARS = 252, 5                      # past-year average; years of history before a seasonal estimate
 TH, GRID = 1.25, [1.10, 1.25, 1.50, 1.75]     # the rule's threshold, and the ones shown next to it
@@ -346,7 +349,7 @@ def main():
     yrs = len(c) / 252
     seasonal_ok = al(ratio_s <= TH).fillna(True).astype(bool)
     plain_ok = al(ratio_p <= TH).fillna(True).astype(bool)
-    rules, eqs = [], {}
+    rules, eqs, board = [], {}, {}
     for rid, desc, pos in [
         ("calendar", f"Hold the S&P 500, except in the {SKIP} calendar months whose VIX was highest (vs its past-year average) in all the years "
                      f"before; T-bills then. Sell at the close before those months start, buy back at the close before they end. 10 bp per switch.",
@@ -359,6 +362,8 @@ def main():
     ]:
         R, d = rule_doc(rid, desc, c, i_rx, pos)
         eqs[rid] = d.pop("eq")
+        if rid != "plain":      # the Strategy Board's daily tiles (engine/board_series.py)
+            board[rid] = BS.pack([[f"{t:%Y-%m-%d}", float(x)] for t, x in R.items() if t >= pd.Timestamp("2020-12-01")])
         rules.append(d)
 
     grid = []
@@ -411,7 +416,7 @@ def main():
                     "crashes": [window_dd(R_hold, a, b) for _, a, b in CRASHES],
                     "years": {int(y): r1(((1 + R_hold[R_hold.index.year == y]).prod() - 1) * 100) for y in sorted(set(c.index.year))}},
            "crashes": [{"name": n, "from": a, "to": b} for n, a, b in CRASHES],
-           "rules": rules, "grid": grid, "weekly": weekly, "gate": gate}
+           "rules": rules, "grid": grid, "weekly": weekly, "gate": gate, "board": board}
     OUT.write_text(json.dumps(doc, separators=(",", ":"), allow_nan=False))
 
     s = {r["id"]: r["stats"] for r in rules}

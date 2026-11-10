@@ -56,6 +56,8 @@ from pathlib import Path
 from zoneinfo import ZoneInfo
 
 ROOT = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(ROOT / "engine"))
+import board_series as BS  # noqa: E402
 DATA_DIR = ROOT / "docs" / "data" / "gamma"
 GEX_FILE = ROOT / "docs" / "data" / "gex" / "latest.json"
 SYMBOLS = ["SPY", "QQQ", "IWM"]
@@ -211,6 +213,17 @@ def demo_bars(symbols: list[str], days: int, seed: int = 3) -> dict[str, list[di
 
 
 # ===================================================================== backtest
+BOARD_RISK = 0.005      # Strategy Board account: each trade risks 0.5% of it (1R = 0.5%), no costs, like the stats above
+
+
+def board(trades: list[dict]) -> dict:
+    """The Strategy Board's daily tiles (engine/board_series.py): each day's trades added up in R x 0.5%."""
+    day: dict[str, float] = {}
+    for t in trades:
+        day[t["date"]] = day.get(t["date"], 0.0) + t["r"] * BOARD_RISK
+    return BS.pack(sorted(day.items()))
+
+
 def backtest(data: dict[str, list[dict]]) -> dict:
     trades = []
     for sym, bars in data.items():
@@ -267,7 +280,7 @@ def backtest(data: dict[str, list[dict]]) -> dict:
             "from": trades[0]["date"] if trades else None, "to": trades[-1]["date"] if trades else None,
             "groups": {k: stats(v) for k, v in groups.items()},
             "by_year": {y: stats([t for t in trades if t["date"][:4] == y]) for y in years},
-            "recent": trades[-60:]}
+            "recent": trades[-60:], "board": board(trades)}
 
 
 # ===================================================================== live

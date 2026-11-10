@@ -57,6 +57,8 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from open_breakout import NY, WARMUP, daily_table, demo_daily, fetch, load_tickers, ny  # noqa: E402
 
+import board_series as BS  # noqa: E402
+
 ROOT = Path(__file__).resolve().parent.parent
 OUT_DIR = ROOT / "docs" / "data" / "gapdown"
 FROM = "2021-01-04"
@@ -247,12 +249,14 @@ def stats(ts: list[dict], spy: dict[str, float]) -> dict:
     for t in ts:
         days[t["d"]].append(t)
     eq, peak, dd, curve, yearly = 1.0, 1.0, 0.0, [], defaultdict(lambda: 1.0)
+    daily = []
     for d in sorted(days):
         take = sorted(days[d], key=lambda t: -t["rv"])[:MAX_POS]
         r = sum(t["pct"] for t in take) / 100 / MAX_POS
         eq *= 1 + r; yearly[d[:4]] *= 1 + r
         peak = max(peak, eq); dd = min(dd, eq / peak - 1)
         curve.append([d, round(eq, 4)])
+        daily.append([d, r])
     d0, d1 = min(days), max(days)
     yrs = max((date.fromisoformat(d1) - date.fromisoformat(d0)).days / 365.25, 0.1)
     by_year = {}
@@ -268,7 +272,7 @@ def stats(ts: list[dict], spy: dict[str, float]) -> dict:
             "exits": {k: sum(t["why"] == k for t in ts) for k in ("target", "stop", "time")},
             "acct_total": round((eq - 1) * 100, 1), "acct_cagr": round((eq ** (1 / yrs) - 1) * 100, 1),
             "acct_maxdd": round(dd * 100, 1), "by_year": by_year,
-            "curve": curve[::max(1, len(curve) // 300)] + curve[-1:]}
+            "_daily": daily, "curve": curve[::max(1, len(curve) // 300)] + curve[-1:]}
 
 
 KEYS = ("n", "win", "avg", "avg_r", "pf", "acct_total", "acct_cagr", "acct_maxdd")
@@ -456,6 +460,8 @@ def main() -> None:
 
     out = Path("/tmp/gapdown-demo.json") if a.demo else OUT_DIR / "backtest.json"
     out.parent.mkdir(parents=True, exist_ok=True)
+    res["board"] = BS.pack((res.get("base") or {}).get("_daily") or [])
+    BS.strip(res)
     out.write_text(json.dumps(res, separators=(",", ":")))
     b, mi = res["base"], res["mirror"]
     print(f"short (default): {b.get('n')} trades, win {b.get('win')}%, avg {b.get('avg')}%, PF {b.get('pf')}, "

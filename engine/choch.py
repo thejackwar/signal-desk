@@ -68,6 +68,7 @@ from zoneinfo import ZoneInfo
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT / "engine"))
 from universe import U  # noqa: E402
+import board_series as BS  # noqa: E402
 
 DATA_DIR = U.path("choch")       # UNIVERSE=sp500: docs/data/sp500/choch/ (stocks only; bitcoin stays in docs/data/choch/)
 NY = ZoneInfo("America/New_York")
@@ -657,7 +658,7 @@ def backtest_market(market: str, data: dict[str, dict], day_of, bench: dict | No
     d0 = BT_FROM
     d1 = max(data[s]["t"][-1][:10] for s in syms)
     yrs, yrs_is, yrs_oos = years_between(d0, d1), years_between(d0, OOS_FROM), years_between(OOS_FROM, d1)
-    variants, default_detail = {}, None
+    variants, default_detail, board = {}, None, None
     for n in PIVOTS:
         per = {}
         for s in syms:
@@ -693,13 +694,14 @@ def backtest_market(market: str, data: dict[str, dict], day_of, bench: dict | No
                         if (n, entry, target, side, filt) == DEFAULT:
                             v["curve"] = monthly([(d0, 1.0)] + pts)
                             default_detail = picked
+                            board = BS.pack(BS.from_points(pts))
                         variants[key] = v
         print(f"  {market} pivot {n}: done", flush=True)
     recent = sorted(default_detail, key=lambda st: data[st[0]]["t"][st[1]["fill"]], reverse=True)
     rows = [trade_row(data[s], t, s) for s, t in recent[:80]]
     exs = [example(data[s], t, s) for s, t in recent if "out" in t][:3]
     out = {"from": d0, "to": d1, "symbols": len(syms), "variants": variants, "recent": rows, "examples": exs,
-           "cost_pct_side": cost * 100}
+           "cost_pct_side": cost * 100, "board": board}
     if market == "btc":
         b = data[syms[0]]
         out["hold_pct"] = hold_pct(b, d0, d1)

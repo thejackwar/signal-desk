@@ -54,7 +54,9 @@ jobs:
       - name: Update the live trades
         run: python engine/live_trades.py --market ${{ steps.m.outputs.market }}
       - name: Update the strategy board (one green/red tile per day per strategy)
-        run: node engine/day_board.mjs ${{ steps.m.outputs.market }}
+        run: |
+          node engine/day_board.mjs ${{ steps.m.outputs.market }}
+          python engine/board_extra.py ${{ steps.m.outputs.market }} || echo "board extras failed; the Lab rows still publish"
       - name: The same for the S&P 500
         if: steps.m.outputs.market == 'stocks'
         continue-on-error: true   # never hold back the S&P 100 record
@@ -63,11 +65,12 @@ jobs:
         run: |
           python engine/live_trades.py --market stocks
           node engine/day_board.mjs stocks
+          python engine/board_extra.py stocks || true
       - name: Publish
         run: |
           git config user.name "signal-desk-bot"
           git config user.email "signal-desk-bot@users.noreply.github.com"
-          for f in docs/data/live_trades.json docs/data/crypto/live_trades.json docs/data/commodities/live_trades.json docs/data/lab_recent.json docs/data/crypto/lab_recent.json docs/data/commodities/lab_recent.json docs/data/board.json docs/data/crypto/board.json docs/data/commodities/board.json docs/data/sp500/live_trades.json docs/data/sp500/lab_recent.json docs/data/sp500/board.json; do
+          for f in docs/data/live_trades.json docs/data/crypto/live_trades.json docs/data/commodities/live_trades.json docs/data/lab_recent.json docs/data/crypto/lab_recent.json docs/data/commodities/lab_recent.json docs/data/board.json docs/data/crypto/board.json docs/data/commodities/board.json docs/data/sp500/live_trades.json docs/data/sp500/lab_recent.json docs/data/sp500/board.json docs/data/board_extra.json docs/data/sp500/board_extra.json docs/data/crypto/board_extra.json; do
             [ -f "$f" ] && git add "$f"
           done
           git diff --cached --quiet || git commit -m "Live trades ${{ steps.m.outputs.market }} $(date -u +%F)"

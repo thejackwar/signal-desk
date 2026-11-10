@@ -52,6 +52,7 @@ ROOT = Path(__file__).resolve().parent.parent
 ENGINE = ROOT / "engine"
 sys.path.insert(0, str(ENGINE))
 from universe import U  # noqa: E402
+import board_series as BS  # noqa: E402
 
 OUT = U.path("darkpool")          # UNIVERSE=sp500: docs/data/sp500/darkpool/
 NY = ZoneInfo("America/New_York")
@@ -668,7 +669,10 @@ def run_backtest(sv, tv, opn, close, split: str) -> dict:
                       "As a strategy it did not beat simply holding all the stocks equally."))
     return {"generated_at": now_utc().strftime("%Y-%m-%dT%H:%MZ"), "start": days[0], "end": days[-1], "split": split,
             "z_hot": Z_HOT, "z_win": Z_WIN, "cost": cost, "events": events, "results": out, "curves": curves,
-            "verdict": verdict, "good": len(good), "of": len(oo)}
+            "verdict": verdict, "good": len(good), "of": len(oo),
+            # the Strategy Board's daily tiles (engine/board_series.py)
+            "board": {k: BS.pack([[str(d)[:10], float(v)] for d, v in s.items() if str(d)[:10] >= "2020-12-01"])
+                      for k, s in (("dark_buys", s1), ("dark_index_spy", s2))}}
 
 
 def cmd_backtest(args) -> None:
