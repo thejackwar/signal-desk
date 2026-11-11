@@ -1,6 +1,6 @@
-# Fibonacci Retracement backtest (2026-11-11T19:08+00:00)
+# Fibonacci Retracement backtest (2026-11-11T19:12+00:00)
 
-SPY, 5-minute bars from 2021-01-04, costs 0.03% a side. SPY over the same period: 119.6%. Train = 2021-2023, test = 2024 on.
+SPY, 5-minute bars from 2021-01-04, costs 0.03% a side. SPY over the same period: 119.4%. Train = 2021-2023, test = 2024 on.
 
 ## The five versions on their default switches
 
