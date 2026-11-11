@@ -32,6 +32,10 @@ Exact rules tested here (every one is a switch, see VARIANTS):
               (First version also looked at the entry minute's own close - look-ahead, fixed 11 Nov 2026.)
   Candles     "tf": "1" (default) - everything on 1-minute candles; "5" - the burst, levels, slowing and exits on
               5-minute candles (window, wait and hold converted: 15 min = 3 candles).
+  Side        "with" (default): trade the pullback in the burst's direction. "against" (Giacomo, 11 Nov 2026): when
+              price comes back to the entry level, trade the bounce the OTHER way - stop a tick beyond 38.2% (the
+              mirror of the 61.8% stop), "rsplit" 50 / 25 % off a tick before 78.6%, the rest a tick before 100%
+              (the burst's start), or closed at 61.8% if price comes back there first.
   Big         "big" "on": the burst's candles average at least 2x the size (high-low) of the candles in the 2 hours
               before it - an impulsive move, as on the chart (Giacomo, 11 Nov 2026).
   Filters     (each "off" by default; tested on top of slowing + 23.6% target):
@@ -91,7 +95,7 @@ SPLIT = "2024-01-01"
 DEFAULT = {"n": "15", "x": "1", "vol": "2", "level": "0.5", "entry": "touch", "wait": "60",
            "stop": "0.786", "tp": "swing", "hold": "240", "cost": "0", "one": "keep", "slow": "off",
            "trend": "off", "pvol": "off", "clean": "off", "vwap": "off", "hours": "all", "cap": "off",
-           "tf": "1", "big": "off"}
+           "tf": "1", "big": "off", "side": "with", "rsplit": "50"}
 VARIANTS = {
     "n": ["5", "15", "30"],
     "x": ["0.5", "1", "1.5", "2"],
@@ -106,6 +110,8 @@ VARIANTS = {
     "cap": ["off", "1day", "cool"],
     "tf": ["1", "5"],
     "big": ["off", "on"],
+    "side": ["with", "against"],
+    "rsplit": ["50", "25"],
     "level": ["0.382", "0.5", "0.618"],
     "entry": ["touch", "confirm", "bounce", "zone"],
     "wait": ["60", "180"],
@@ -412,6 +418,25 @@ def simulate(B: Bars, ev: np.ndarray, v: dict) -> list[dict]:
         if entry is None or ((entry <= stop) if upb else (entry >= stop)):
             free_from = i + 1
             continue
+        if v["side"] == "against":                              # trade the bounce the other way from here
+            sg, up_t = -sgn, not upb
+            lv = lambda f: ext - (ext - a) * f
+            stop_t = lv(0.382) * (1 - sg * TICK)
+            t1 = lv(0.786) * (1 - sg * TICK)
+            if (entry <= stop_t) if up_t else (entry >= stop_t):
+                free_from = i + 1
+                continue
+            end = min(B.n - 1, ie + hold)
+            px, why, j = scale_exit(B, ie, ie, end, False, entry, stop_t, t1, lv(0.618), a, up_t,
+                                    int(v["rsplit"]) / 100)
+            ret = sg * (px / entry - 1) - 2 * cost
+            out.append({"t": int(B.t[ie]), "dir": "long" if up_t else "short", "a": round(a, 2), "ext": round(ext, 2),
+                        "_i": (i0, a_i, last_new, ie, j), "in": round(entry, 2), "sl": round(stop_t, 2), "tp": round(t1, 2),
+                        "out": round(px, 2), "why": why, "mins": j - ie, "pct": round(ret * 100, 4),
+                        "r": round(sg * (px - entry) / abs(entry - stop_t), 2)})
+            free_from = j + 1
+            last_day = B.day[ie]
+            continue
         risk = abs(entry - stop)
         tp = v["tp"]
         if tp == "swing":
@@ -531,7 +556,8 @@ def summary(res: dict) -> str:
     for name, p_ in res.get("presets", {}).items():
         L.append(row(name, p_))
     days = max(1, (date.fromisoformat(res["to"]) - date.fromisoformat(res["from"])).days)
-    for key_, title in (("tf", "5-minute candles and big candles, on Giacomo's rule (stop beyond 61.8%, 75% at 23.6%)"),
+    for key_, title in (("rev", "Trading the bounce AGAINST the burst from 50% (stop beyond 38.2%) vs. with it"),
+                        ("tf", "5-minute candles and big candles, on Giacomo's rule (stop beyond 61.8%, 75% at 23.6%)"),
                         ("filters", "Filters on top of the best rules (slowing + 23.6% target)")):
         if not res.get(key_):
             continue
@@ -614,6 +640,14 @@ def main() -> None:
                 q = {**G, **bp, **tp_, **gp}
                 res["tf"][f"{bname}, {tname}{gname}"] = {"v": q, **split(run({**DEFAULT, **q}))}
     print(f"5-minute / big candles done ({time.time() - t0:.0f}s)", flush=True)
+    res["rev"] = {}
+    for bname, bp in (("1% bursts", {}), ("2% bursts, 3x vol", {"x": "2", "vol": "3"})):
+        for tname, tp_ in (("1-min", {}), ("5-min", {"tf": "5"})):
+            res["rev"][f"{bname}, {tname}: WITH the burst (Giacomo's rule)"] = {"v": {**G, **bp, **tp_}, **split(run({**DEFAULT, **G, **bp, **tp_}))}
+            for sp in ("50", "25"):
+                q = {"side": "against", "rsplit": sp, **bp, **tp_}
+                res["rev"][f"{bname}, {tname}: AGAINST, {sp}% at 78.6%, rest to 100% or out at 61.8%"] = {"v": q, **split(run({**DEFAULT, **q}))}
+    print(f"against-the-burst done ({time.time() - t0:.0f}s)", flush=True)
     res["filters"] = {"best: slowing + 23.6%": {"v": BEST, **split(run({**DEFAULT, **BEST}))}}
     for name, p in {**FILTERS, "ALL filters": FILTERS_ALL,
                     "ALL filters except max 1/day": {**FILTERS_ALL, "cap": "off"},
