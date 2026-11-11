@@ -32,7 +32,7 @@
 //   Candles for up to 30 stocks in one request (1D: 5-minute, 5D: 15-minute, 1M: 30-minute, regular hours;
 //   3M-1Y: daily; 5Y: weekly). t as in the rest of this Worker (New York wall clock as if UTC).
 //
-// Bar replay (for docs/replay.html): GET /?replay=AAPL&tf=1Day|1Hour|15Min|5Min&start=YYYY-MM-DD
+// Bar replay (for docs/replay.html): GET /?replay=AAPL&tf=1Day|1Hour|15Min|5Min&start=YYYY-MM-DD   (also replay=BTC: Binance BTC/USDT, market: "crypto")
 //   ->  { symbol, tf, start, end, source, bars: [[t, open, high, low, close, volume], ...] }
 //   t is plain UTC (seconds), unlike the rest of this Worker. Intraday bars include pre-market and after-hours
 //   (4:00-20:00 New York) so the page can shade them. Window: some history before `start`, then a fixed stretch
@@ -732,8 +732,10 @@ const REPLAY = { "1Day": [400, 3650], "1Hour": [30, 365], "15Min": [8, 90], "5Mi
 async function replayBars(q, env, ctx) {
   let sym = (q.get("replay") || "").trim().toUpperCase().replace(/\./g, "-");
   if (["SPX", "^SPX", "^GSPC"].includes(sym)) sym = "SPY";
-  if (!isStock(sym)) return json({ error: `${sym || "No ticker"}: only S&P 500 stocks and SPY are available.` }, 400);
-  if (!env.ALPACA_KEY_ID || !env.ALPACA_SECRET_KEY) return json({ error: "The Alpaca keys are not set on the Worker." }, 500);
+  const coin = isStock(sym) ? null : coinOf(sym);
+  if (coin && coin !== "BTC") return json({ error: `${coin}: only bitcoin (BTC) is available for crypto so far.` }, 400);
+  if (!coin && !isStock(sym)) return json({ error: `${sym || "No ticker"}: only S&P 500 stocks, SPY and BTC are available.` }, 400);
+  if (!coin && (!env.ALPACA_KEY_ID || !env.ALPACA_SECRET_KEY)) return json({ error: "The Alpaca keys are not set on the Worker." }, 500);
   const tf = REPLAY[q.get("tf")] ? q.get("tf") : "1Day";
   const day = (q.get("start") || "").slice(0, 10);
   const start = Date.parse(day + "T00:00:00Z");
@@ -744,8 +746,22 @@ async function replayBars(q, env, ctx) {
   const from = Math.max(Date.UTC(2016, 0, 1), start - back * DAY), to = Math.min(now, start + fwd * DAY);
   const past = to < now - DAY;
   const cache = typeof caches !== "undefined" ? caches.default : null;
-  const key = new Request(`https://trendlines.cache/replay/${sym}/${tf}/${day}${past ? "" : "/" + Math.floor(now / 60e3)}`);
+  const key = new Request(`https://trendlines.cache/replay/${coin ? coin + "-USD" : sym}/${tf}/${day}${past ? "" : "/" + Math.floor(now / 60e3)}`);
   if (cache) { const hit = await cache.match(key).catch(() => null); if (hit) return hit; }
+  if (coin) {
+    // Binance coin/USDT, around the clock, times in UTC (Binance history starts in August 2017)
+    try {
+      const iv = { "1Day": "1d", "1Hour": "1h", "15Min": "15m", "5Min": "5m" }[tf];
+      const bars = await binanceRange(coin, iv, Math.max(from, Date.UTC(2017, 7, 17)), Math.min(to, Date.now()));
+      if (bars.length < 5) return json({ error: `No ${tf} candles for ${coin} around ${day}.` }, 404);
+      const res = json({ symbol: `${coin}-USD`, market: "crypto", tf, start: day, end: new Date(to).toISOString(), source: `Binance ${coin}/USDT`, bars },
+        200, { "Cache-Control": `max-age=${past ? 86400 : 60}` });
+      if (cache) ctx?.waitUntil?.(cache.put(key, res.clone()));
+      return res;
+    } catch (e) {
+      return json({ error: String(e.message || e) }, 502);
+    }
+  }
   try {
     const raw = await fetchSeries(sym.replace(/-/g, "."), tf, from, to, env);
     const intraday = tf !== "1Day";
@@ -762,4 +778,19 @@ async function replayBars(q, env, ctx) {
   } catch (e) {
     return json({ error: String(e.message || e) }, 502);
   }
+}
+
+// Binance candles between two times (ms), oldest first, 1000 per request: [t (s), o, h, l, c, coin volume]
+async function binanceRange(coin, interval, from, to) {
+  const rows = [];
+  let start = from;
+  for (let page = 0; page < 40 && start < to; page++) {
+    const q = new URLSearchParams({ symbol: `${coin}USDT`, interval, startTime: String(start), endTime: String(to), limit: "1000" });
+    const js = await getJson(`${BINANCE}?${q}`, `Binance ${interval}`);
+    if (!Array.isArray(js) || !js.length) break;
+    rows.push(...js);
+    if (js.length < 1000) break;
+    start = js[js.length - 1][0] + 1;
+  }
+  return rows.map(k => [Math.floor(k[0] / 1000), +k[1], +k[2], +k[3], +k[4], +k[5]]);
 }

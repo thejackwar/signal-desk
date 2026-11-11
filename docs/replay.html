@@ -146,7 +146,7 @@ canvas{position:absolute;inset:0;width:100%;height:100%;touch-action:none;displa
     </select>
     <span class="lbl">from</span>
     <input type="date" id="startdate" aria-label="Start date">
-    <input type="time" id="starttime" value="09:30" aria-label="Start time, New York" hidden>
+    <input type="time" id="starttime" value="09:30" aria-label="Start time (New York for stocks, UTC for bitcoin)" title="New York time for stocks, UTC for bitcoin" hidden>
     <button class="primary" id="loadbtn" type="submit">Load chart</button>
     <label class="upload" for="csv">Upload CSV<input type="file" id="csv" accept=".csv,.txt,text/csv"></label>
     <span class="source" id="source"></span>
@@ -191,7 +191,7 @@ canvas{position:absolute;inset:0;width:100%;height:100%;touch-action:none;displa
       <select id="speed" aria-label="Speed">
         <option value="1">1 / s</option><option value="3" selected>3 / s</option><option value="8">8 / s</option><option value="20">20 / s</option>
       </select>
-      <label class="chk" id="eodwrap" hidden><input type="checkbox" id="eod" checked> Close at 4:00 pm NY</label>
+      <label class="chk" id="eodwrap" hidden><input type="checkbox" id="eod" checked> <span id="eodlbl">Close at 4:00 pm NY</span></label>
       <span class="where" id="where"></span>
     </div>
   </section>
@@ -205,11 +205,11 @@ canvas{position:absolute;inset:0;width:100%;height:100%;touch-action:none;displa
         <div class="stat"><span>Net result</span><b id="sNet">0.00R</b></div>
         <div class="stat"><span>Avg per trade</span><b id="sAvg">–</b></div>
       </div>
-      <div class="note">No fees or slippage. If stop and target fall in the same candle, the stop counts. Intraday trades close at the 4:00 pm New York bell; unfilled orders cancel. 1R is the distance from fill to stop.</div>
+      <div class="note">No fees or slippage. If stop and target fall in the same candle, the stop counts. Intraday trades close at the 4:00 pm New York bell (bitcoin: 00:00 UTC); unfilled orders cancel. 1R is the distance from fill to stop.</div>
     </div>
     <div class="tradecol"><ul id="trades"></ul></div>
   </section>
-  <p class="fine">Prices from Alpaca (all US exchanges) through the site's data server: SPY and S&amp;P 500 stocks since 2016, with pre-market and after-hours (shaded) on intraday candles. One load covers about 10 years on daily candles, a year on 1-hour, 3 months on 15-min and a month on 5-min. Drawings and indicator settings are saved on this device for each ticker. Information only, not investment advice.</p>
+  <p class="fine">Prices from Alpaca (all US exchanges) through the site's data server: SPY and S&amp;P 500 stocks since 2016, and bitcoin (type BTC) from Binance since August 2017 with times in UTC, with pre-market and after-hours (shaded) on intraday candles. One load covers about 10 years on daily candles, a year on 1-hour, 3 months on 15-min and a month on 5-min. Drawings and indicator settings are saved on this device for each ticker. Information only, not investment advice.</p>
 </div>
 
 <div id="indpop" hidden role="dialog" aria-label="Indicators"></div>
@@ -227,14 +227,16 @@ const P={main:{top:TOP,h:100},subs:[]};
 const nyDate=new Intl.DateTimeFormat('en-CA',{timeZone:'America/New_York',year:'numeric',month:'2-digit',day:'2-digit'});
 const nyTime=new Intl.DateTimeFormat('en-GB',{timeZone:'America/New_York',hour:'2-digit',minute:'2-digit',hourCycle:'h23'});
 const utcDate=t=>new Date(t).toISOString().slice(0,10);
-const dayKey=t=>S.intraday?nyDate.format(t):utcDate(t);
-const fmtBar=t=>S.intraday?dayKey(t)+' '+nyTime.format(t):dayKey(t);
+const dayKey=t=>S.intraday&&!S.crypto?nyDate.format(t):utcDate(t);
+const hm=t=>S.crypto?new Date(t).toISOString().slice(11,16):nyTime.format(t);
+const fmtBar=t=>S.intraday?dayKey(t)+' '+hm(t):dayKey(t);
+const tzLab=()=>S.intraday?(S.crypto?' UTC':' NY'):'';
 const MON=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 function tzOff(u){const p={};new Intl.DateTimeFormat('en-US',{timeZone:'America/New_York',hourCycle:'h23',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',second:'2-digit'}).formatToParts(u).forEach(x=>p[x.type]=x.value);
   return Date.UTC(+p.year,+p.month-1,+p.day,+p.hour,+p.minute,+p.second)-u;}
 function nyToUtc(d,tm){const[Y,M,D]=d.split('-').map(Number);const[h,m]=(tm||'09:30').split(':').map(Number);const g=Date.UTC(Y,M-1,D,h,m);let u=g-tzOff(g);return g-tzOff(u);}
 function nyMin(t){const[h,m]=nyTime.format(t).split(':').map(Number);return h*60+m;}
-function isExt(t){if(!S.intraday)return false;const mm=nyMin(t);return mm<570||mm>=960;}
+function isExt(t){if(!S.intraday||S.crypto)return false;const mm=nyMin(t);return mm<570||mm>=960;}
 
 /* ---------- saved settings & drawings (this device) ---------- */
 const STORE='signaldesk.replay';
@@ -267,15 +269,16 @@ function sampleBars(){
     out.push({t,o,h,l,c,v:Math.round(5e6*(0.6+rnd()))});p=c;}t+=86400000;}
   return out;
 }
-function setData(bars,{label,key,startDate,startTime}){
+function setData(bars,{label,key,startDate,startTime,crypto}){
   stop();closeText(false);
+  S.crypto=!!crypto;
   S.bars=bars;S.sel=null;S.draft=null;S.manual=null;S.undo=[];
   const diffs=[];for(let i=1;i<Math.min(bars.length,300);i++)diffs.push(bars[i].t-bars[i-1].t);diffs.sort((a,b)=>a-b);
   S.step=diffs[diffs.length>>1]||86400000;S.intraday=S.step<20*3600000;
   bars.forEach(b=>b.x=isExt(b.t));S.hasExt=bars.some(b=>b.x);
   let si=bars.length-1;
   if(startDate){
-    if(S.intraday){const u=nyToUtc(startDate,startTime);si=bars.findIndex(b=>b.t>=u);}
+    if(S.intraday){const u=S.crypto?Date.parse(startDate+'T'+(startTime||'00:00')+':00Z'):nyToUtc(startDate,startTime);si=bars.findIndex(b=>b.t>=u);}
     else si=bars.findIndex(b=>utcDate(b.t)>=startDate);
     if(si<0)si=bars.length-1;
   }
@@ -284,7 +287,7 @@ function setData(bars,{label,key,startDate,startTime}){
   S.key=key||'';
   const st=loadStore();S.drawings=((st.draw&&st.draw[S.key])||[]).map(o=>{try{return deser(o);}catch(e){return null;}}).filter(Boolean);
   $('#source').innerHTML=label;
-  $('#eodwrap').hidden=!S.intraday;
+  $('#eodwrap').hidden=!S.intraday;$('#eodlbl').textContent=S.crypto?'Close at 00:00 UTC':'Close at 4:00 pm NY';
   recalc();renderStyle();refresh();
 }
 function parseCSV(text){
@@ -309,12 +312,14 @@ const API=(()=>{try{return(JSON.parse(localStorage.getItem("signaldesk.trendline
 const TF={'1d':'1Day','1h':'1Hour','15m':'15Min','5m':'5Min'};
 async function loadLive(sym,interval,date){
   if(date>new Date().toISOString().slice(0,10))throw{msg:'The start date is in the future. Pick a date in the past.'};
-  if(date<'2016-01-04')throw{msg:'Prices start in January 2016. Pick a later start date.'};
+  const btc=/^(BTC|XBT)([-\/]?USDT?)?$/.test(sym);
+  if(btc&&date<'2017-08-17')throw{msg:'Bitcoin prices start in August 2017. Pick a later start date.'};
+  if(!btc&&date<'2016-01-04')throw{msg:'Prices start in January 2016. Pick a later start date.'};
   let r,j;
   try{r=await fetch(`${API.replace(/\/$/,'')}/?replay=${encodeURIComponent(sym)}&tf=${TF[interval]}&start=${date}`);j=await r.json();}
   catch(e){throw{msg:'Could not reach the data server. Check your connection and try again.'};}
   if(!r.ok||j.error)throw{msg:j&&j.error?j.error:`The data server answered HTTP ${r.status}.`};
-  return j.bars.map(b=>({t:b[0]*1000,o:b[1],h:b[2],l:b[3],c:b[4],v:b[5]}));
+  return{bars:j.bars.map(b=>({t:b[0]*1000,o:b[1],h:b[2],l:b[3],c:b[4],v:b[5]})),crypto:j.market==='crypto',sym:j.symbol||sym,src:j.source||'Alpaca'};
 }
 function setMsg(t,err){const m=$('#msg');m.textContent=t||'';m.className=err?'err':'';}
 $('#loadform').addEventListener('submit',async ev=>{
@@ -324,10 +329,10 @@ $('#loadform').addEventListener('submit',async ev=>{
   if(!date){setMsg('Pick a start date.',true);return;}
   const btn=$('#loadbtn');btn.disabled=true;btn.textContent='Loading…';setMsg(`Loading ${sym}…`);
   try{
-    const bars=await loadLive(sym,interval,date);
-    setData(bars,{label:`<b>${sym}</b> · ${$('#interval').selectedOptions[0].text} · Alpaca`,key:`${sym}|${interval}`,startDate:date,startTime:time});
-    try{history.replaceState(null,'',`#${sym}`);}catch(e){}
-    setMsg(`Loaded ${bars.length} candles. The chart stops just before ${date}${interval!=='1d'?' '+time+' NY':''}. Step forward with → or Play.`);
+    const L=await loadLive(sym,interval,date),bars=L.bars;
+    setData(bars,{label:`<b>${L.sym}</b> · ${$('#interval').selectedOptions[0].text} · ${L.src.split(' ')[0]}`,key:`${L.sym}|${interval}`,startDate:date,startTime:time,crypto:L.crypto});
+    try{history.replaceState(null,'',`#${L.sym}`);}catch(e){}
+    setMsg(`Loaded ${bars.length} candles. The chart stops just before ${date}${interval!=='1d'?' '+time+(L.crypto?' UTC':' NY'):''}. Step forward with → or Play.`);
   }catch(e){setMsg((e&&(e.msg||e.message))||'Something went wrong loading prices.',true);}
   finally{btn.disabled=false;btn.textContent='Load chart';}
 });
@@ -456,7 +461,7 @@ function draw(){
   ctx.textAlign='center';
   for(let i=i0;i<=iE;i++){if(i%every)continue;const x=xOf(i);if(x<20||x>pw-20)continue;
     const t=B[i].t;let lab;
-    if(S.intraday){const prev=B[i-every];lab=(!prev||dayKey(prev.t)!==dayKey(t))?dayKey(t).slice(5):nyTime.format(t);}
+    if(S.intraday){const prev=B[i-every];lab=(!prev||dayKey(prev.t)!==dayKey(t))?dayKey(t).slice(5):hm(t);}
     else{const d=new Date(t),pv=B[i-every];lab=pv&&new Date(pv.t).getUTCFullYear()!==d.getUTCFullYear()?String(d.getUTCFullYear()):MON[d.getUTCMonth()]+' '+d.getUTCDate();}
     ctx.strokeStyle=C.grid;ctx.beginPath();ctx.moveTo(Math.round(x)+.5,M.top);ctx.lineTo(Math.round(x)+.5,H-BX);ctx.stroke();
     ctx.fillStyle=C.muted;ctx.fillText(lab,x,H-BX/2);}
@@ -552,7 +557,7 @@ function drawShape(d,C,sel){
     if(o.fill!=null){ctx.fillStyle=C.ink;ctx.beginPath();ctx.arc(xOf(o.fi),yOf(o.fill),3.5,0,7);ctx.fill();
       if(o.xi!=null){ctx.fillStyle=o.r>=0?C.up:C.down;ctx.beginPath();ctx.arc(xOf(o.xi),yOf(o.exit),3.5,0,7);ctx.fill();}}
     const L=d.side==='long';const rr=Math.abs(d.target-d.entry)/(Math.abs(d.entry-d.stop)||1);
-    const st={pending:'waiting for entry',open:'open',win:'target hit',loss:'stopped out',eod:'closed at 4 pm',cancelled:'not filled',invalid:'stop/target on wrong side'}[o.status];
+    const st={pending:'waiting for entry',open:'open',win:'target hit',loss:'stopped out',eod:S.crypto?'closed at day end':'closed at 4 pm',cancelled:'not filled',invalid:'stop/target on wrong side'}[o.status];
     const txt=`${L?'LONG':'SHORT'} · ${rr.toFixed(1)}:1 · ${st}${o.r!=null?' · '+(o.r>=0?'+':'')+o.r.toFixed(2)+'R':''}`;
     ctx.font=`600 11px ${C.num}`;const tw=ctx.measureText(txt).width+12;const ly=Math.min(ye,ys,yt)-20;
     ctx.fillStyle=C.panel;ctx.globalAlpha=.92;ctx.fillRect(x0,ly,tw,17);ctx.globalAlpha=1;
@@ -574,7 +579,7 @@ function updateReadouts(){
   if(S.ind.vol.on)lg.push(`<span>Vol ${fmtVol(b.v)}</span>`);
   if(S.hasExt&&b.x)lg.push(`<span style="color:#f59e0b">${nyMin(b.t)<570?'Pre-market':'After-hours'}</span>`);
   const el=$('#ohlc');
-  el.innerHTML=`<div>${fmtBar(b.t)}${S.intraday?' NY':''} &nbsp;O <b>${fp(b.o)}</b> H <b>${fp(b.h)}</b> L <b>${fp(b.l)}</b> C <b>${fp(b.c)}</b> <span class="${chg>=0?'pos':'neg'}">${chg>=0?'+':''}${chg.toFixed(2)}%</span></div>${lg.length?`<div class="lg">${lg.join('')}</div>`:''}`;
+  el.innerHTML=`<div>${fmtBar(b.t)}${tzLab()} &nbsp;O <b>${fp(b.o)}</b> H <b>${fp(b.h)}</b> L <b>${fp(b.l)}</b> C <b>${fp(b.c)}</b> <span class="${chg>=0?'pos':'neg'}">${chg>=0?'+':''}${chg.toFixed(2)}%</span></div>${lg.length?`<div class="lg">${lg.join('')}</div>`:''}`;
   const h=el.offsetHeight+8;if(Math.abs(h-(S.ohlcH||0))>2){S.ohlcH=h;requestAnimationFrame(draw);}
   const n=S.cursor-S.startIdx+1;
   $('#where').innerHTML=`${n>0?`<b>${n}</b> candle${n===1?'':'s'} past start`:'At start'} · ${fmtBar(B[S.cursor].t)} · ${B.length-1-S.cursor} left`;
@@ -585,7 +590,7 @@ function renderTrades(){
   if(!pos.length){list.innerHTML='<li class="empty" style="display:block;cursor:default">No trades yet. Pick Long or Short in the toolbar, then click the chart at your entry price. Drag the stop and target lines to set them.</li>';}
   else list.innerHTML=pos.map((d,k)=>{const o=evalPos(d);d._o=o;
     const cls=o.status==='win'||(o.status==='eod'&&o.r>0)?'win':o.status==='loss'||(o.status==='eod'&&o.r<0)?'loss':o.status==='open'?'open':'';
-    const lab={pending:'Waiting',open:'Open',win:'Target',loss:'Stop',eod:'4 pm close',cancelled:'Not filled',invalid:'Fix levels'}[o.status];
+    const lab={pending:'Waiting',open:'Open',win:'Target',loss:'Stop',eod:S.crypto?'Day-end close':'4 pm close',cancelled:'Not filled',invalid:'Fix levels'}[o.status];
     const r=o.r!=null?`<span class="rval ${o.r>=0?'pos':'neg'}">${o.r>=0?'+':''}${o.r.toFixed(2)}R</span>`:'<span class="rval">–</span>';
     return`<li data-id="${d.id}" class="${d===S.sel?'sel':''}"><span class="side ${d.side==='long'?'pos':'neg'}">#${k+1} ${d.side}</span><span class="pill ${cls}">${lab}</span>${r}
       <span class="lvls">${fmtBar(S.bars[d.at].t)} · in ${fp(o.fill??d.entry)} · stop ${fp(d.stop)} · tgt ${fp(d.target)}${o.pct!=null?' · '+(o.pct>=0?'+':'')+o.pct.toFixed(2)+'%':''}</span></li>`;}).join('');

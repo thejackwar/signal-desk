@@ -51,6 +51,7 @@ just paste the updated code (step 3) once. Test: `node tests/volumeprofile/test_
 **Bar replay:** `GET /?replay=AAPL&tf=1Day|1Hour|15Min|5Min&start=2024-03-01` returns candles around that date for
 `docs/replay.html`: some history before it and a stretch after it (about 10 years of daily candles, a year of 1-hour, 3 months
 of 15-min, a month of 5-min), intraday including pre-market and after-hours (4:00–20:00 New York), times in plain UTC.
+`replay=BTC` (or BTC-USD) gives bitcoin from Binance's public data (BTC/USDT, around the clock, from August 2017, no keys).
 Same keys, nothing to add: the deploy workflow ships it, or paste the updated code (step 3) once.
 
 **Live quotes and price alerts (Terminal):** `GET /?quotes=stocks` (Alpaca snapshots, free IEX real-time feed) and
