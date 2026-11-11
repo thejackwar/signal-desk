@@ -1,10 +1,10 @@
-# Fibonacci on a burst - Bitcoin (2026-11-11T21:37+00:00)
+# Fibonacci on a burst - Bitcoin (2026-11-11T22:21+00:00)
 
 BTCUSDT 1-minute, 2021-01-01 -> 2026-11-10. Buy-and-hold BTC over the same time: 155.1%. Train = 2021-2023, test = 2024 on.
 
 ## Default rules
 
-`n=15 | x=1 | vol=2 | level=0.5 | entry=touch | wait=60 | stop=0.786 | tp=swing | hold=240 | cost=0 | one=keep | slow=off | trend=off | pvol=off | clean=off | vwap=off | hours=all | cap=off | tf=1 | big=off`
+`n=15 | x=1 | vol=2 | level=0.5 | entry=touch | wait=60 | stop=0.786 | tp=swing | hold=240 | cost=0 | one=keep | slow=off | trend=off | pvol=off | clean=off | vwap=off | hours=all | cap=off | tf=1 | big=off | side=with | rsplit=50`
 
 | Variant | Trades | Win | Avg/trade | Avg R | PF | Account | Max DD | Train n: avg / PF | Test n: avg / PF |
 |---|---|---|---|---|---|---|---|---|---|
@@ -57,6 +57,23 @@ Exits: {'stop': 2161, 'target': 1203, 'time': 206}
 | Giacomo's rule + one-candle bursts read by their close + slowing | 2920 | 33.8% | 0.009% | 0.01 | 1.06 | 26.7% | -29.0% | 1824: 0.005% / 1.03 | 1096: 0.016% / 1.12 |
 | close + bounce + 70% stop + scale out | 2421 | 57.0% | -0.013% | -0.01 | 0.94 | -29.4% | -46.2% | 1505: -0.026% / 0.89 | 916: 0.009% / 1.05 |
 | close + bounce + 70% stop + scale out + slowing | 1728 | 55.6% | -0.008% | -0.01 | 0.97 | -14.3% | -40.0% | 1079: -0.03% / 0.87 | 649: 0.03% / 1.17 |
+
+## Trading the bounce AGAINST the burst from 50% (stop beyond 38.2%) vs. with it
+
+| Variant | Trades | Per day | Win | Avg/trade | PF | Account | Max DD | Train n: avg / PF | Test n: avg / PF |
+|---|---|---|---|---|---|---|---|---|---|
+| 1% bursts, 1-min: WITH the burst (Giacomo's rule) | 3835 | 1.79 | 35.7% | 0.018% | 1.12 | 93.7% | -20.4% | 2411: 0.02% / 1.12 | 1424: 0.016% / 1.11 |
+| 1% bursts, 1-min: AGAINST, 50% at 78.6%, rest to 100% or out at 61.8% | 3907 | 1.83 | 19.4% | -0.108% | 0.47 | -98.6% | -98.6% | 2478: -0.126% / 0.42 | 1429: -0.077% / 0.56 |
+| 1% bursts, 1-min: AGAINST, 25% at 78.6%, rest to 100% or out at 61.8% | 3907 | 1.83 | 19.4% | -0.108% | 0.46 | -98.6% | -98.6% | 2478: -0.126% / 0.42 | 1429: -0.078% / 0.55 |
+| 1% bursts, 5-min: WITH the burst (Giacomo's rule) | 3424 | 1.6 | 32.5% | 0.003% | 1.02 | 6.8% | -21.4% | 2158: 0.004% / 1.02 | 1266: 0.002% / 1.01 |
+| 1% bursts, 5-min: AGAINST, 50% at 78.6%, rest to 100% or out at 61.8% | 3676 | 1.72 | 10.7% | -0.173% | 0.23 | -99.8% | -99.8% | 2347: -0.191% / 0.2 | 1329: -0.142% / 0.28 |
+| 1% bursts, 5-min: AGAINST, 25% at 78.6%, rest to 100% or out at 61.8% | 3676 | 1.72 | 10.4% | -0.172% | 0.23 | -99.8% | -99.8% | 2347: -0.19% / 0.21 | 1329: -0.141% / 0.29 |
+| 2% bursts, 3x vol, 1-min: WITH the burst (Giacomo's rule) | 608 | 0.28 | 35.2% | 0.046% | 1.16 | 29.8% | -12.4% | 442: 0.031% / 1.1 | 166: 0.087% / 1.35 |
+| 2% bursts, 3x vol, 1-min: AGAINST, 50% at 78.6%, rest to 100% or out at 61.8% | 607 | 0.28 | 16.6% | -0.211% | 0.44 | -72.6% | -72.8% | 442: -0.22% / 0.43 | 165: -0.187% / 0.46 |
+| 2% bursts, 3x vol, 1-min: AGAINST, 25% at 78.6%, rest to 100% or out at 61.8% | 607 | 0.28 | 16.6% | -0.207% | 0.45 | -72.0% | -72.0% | 442: -0.216% / 0.44 | 165: -0.184% / 0.47 |
+| 2% bursts, 3x vol, 5-min: WITH the burst (Giacomo's rule) | 541 | 0.25 | 29.2% | -0.009% | 0.97 | -6.5% | -23.5% | 386: -0.03% / 0.91 | 155: 0.043% / 1.17 |
+| 2% bursts, 3x vol, 5-min: AGAINST, 50% at 78.6%, rest to 100% or out at 61.8% | 592 | 0.28 | 9.3% | -0.318% | 0.21 | -84.9% | -84.9% | 425: -0.33% / 0.21 | 167: -0.287% / 0.21 |
+| 2% bursts, 3x vol, 5-min: AGAINST, 25% at 78.6%, rest to 100% or out at 61.8% | 592 | 0.28 | 9.0% | -0.316% | 0.22 | -84.8% | -84.7% | 425: -0.326% / 0.23 | 167: -0.291% / 0.21 |
 
 ## 5-minute candles and big candles, on Giacomo's rule (stop beyond 61.8%, 75% at 23.6%)
 
@@ -126,6 +143,10 @@ Exits: {'stop': 2161, 'target': 1203, 'time': 206}
 | tf=5 | 3312 | 37.6% | -0.002% | 0.0 | 1.0 | -15.0% | -48.7% | 2107: -0.006% / 0.98 | 1205: 0.006% / 1.02 |
 | big=off (default) | 3570 | 37.5% | -0.0% | -0.02 | 1.0 | -12.9% | -61.2% | 2225: 0.005% / 1.01 | 1345: -0.009% / 0.97 |
 | big=on | 2036 | 37.5% | -0.011% | -0.03 | 0.97 | -26.0% | -50.5% | 1246: -0.03% / 0.92 | 790: 0.019% / 1.06 |
+| side=with (default) | 3570 | 37.5% | -0.0% | -0.02 | 1.0 | -12.9% | -61.2% | 2225: 0.005% / 1.01 | 1345: -0.009% / 0.97 |
+| side=against | 3907 | 19.4% | -0.108% | -0.4 | 0.47 | -98.6% | -98.6% | 2478: -0.126% / 0.42 | 1429: -0.077% / 0.56 |
+| rsplit=50 (default) | 3570 | 37.5% | -0.0% | -0.02 | 1.0 | -12.9% | -61.2% | 2225: 0.005% / 1.01 | 1345: -0.009% / 0.97 |
+| rsplit=25 | 3570 | 37.5% | -0.0% | -0.02 | 1.0 | -12.9% | -61.2% | 2225: 0.005% / 1.01 | 1345: -0.009% / 0.97 |
 | level=0.382 | 4978 | 51.9% | 0.011% | 0.01 | 1.03 | 47.1% | -33.8% | 3115: 0.017% / 1.05 | 1863: 0.002% / 1.01 |
 | level=0.5 (default) | 3570 | 37.5% | -0.0% | -0.02 | 1.0 | -12.9% | -61.2% | 2225: 0.005% / 1.01 | 1345: -0.009% / 0.97 |
 | level=0.618 | 2536 | 22.8% | -0.008% | -0.06 | 0.97 | -23.7% | -48.1% | 1571: 0.018% / 1.07 | 965: -0.051% / 0.78 |
