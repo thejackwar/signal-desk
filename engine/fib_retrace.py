@@ -43,7 +43,7 @@ only (survivorship bias). Train 2021-2023, test 2024 on, reported side by side f
 
     python engine/fib_retrace.py           # needs ALPACA_KEY_ID / ALPACA_SECRET_KEY
     python engine/fib_retrace.py --demo    # synthetic data, writes /tmp/fib-demo.json
-    python engine/fib_retrace.py --symbols SPY   # quick test on a few symbols (minutes, not hours):
+    python engine/fib_retrace.py --symbols SPY   # quick test on a few symbols (a couple of minutes on GitHub):
                                                  # writes backtest_spy.json, SUMMARY_spy.md, trades_spy.json
 Output: docs/data/fib/backtest.json and docs/data/fib/SUMMARY.md
 """
