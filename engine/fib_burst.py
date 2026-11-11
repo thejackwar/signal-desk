@@ -25,6 +25,11 @@ Exact rules tested here (every one is a switch, see VARIANTS):
               is holding, not a red candle that happens to close a few dollars above it; or "zone": enter the first minute
               price trades between 38.2% and 50% (at the 38.2% level, or at the minute's open if it opens inside
               the zone; a minute that opens past 50% does not count).
+  Slowing     "off" (default) or "on": only enter when the pullback has paused at the level - the minute trades
+              through the level (not already far past it) and at least one of the last 2 candles closed against the
+              pullback (green or flat for a long, red or flat for a short). Never buy into 2+ red candles in a row
+              (sell into 2+ green); the setup keeps waiting while it is still alive.
+              (From the 4 Nov 04:23 and 6 Nov 16:13 shorts: price ran straight up through 50%.)
   Wait        if the level is not reached within 60 minutes (default) / 180 minutes of the last new high, the
               setup is dropped.
   Stop        78.6% (default), 70% (between 61.8% and 78.6%: below that the move has failed) or 100% (the
@@ -70,12 +75,13 @@ TICK = 0.0002
 SPLIT = "2024-01-01"
 
 DEFAULT = {"n": "15", "x": "1", "vol": "2", "level": "0.5", "entry": "touch", "wait": "60",
-           "stop": "0.786", "tp": "swing", "hold": "240", "cost": "0.05", "one": "keep"}
+           "stop": "0.786", "tp": "swing", "hold": "240", "cost": "0.05", "one": "keep", "slow": "off"}
 VARIANTS = {
     "n": ["5", "15", "30"],
     "x": ["0.5", "1", "1.5", "2"],
     "vol": ["any", "2", "3"],
     "one": ["keep", "skip", "close"],
+    "slow": ["off", "on"],
     "level": ["0.382", "0.5", "0.618"],
     "entry": ["touch", "confirm", "bounce", "zone"],
     "wait": ["60", "180"],
@@ -269,6 +275,7 @@ def simulate(B: Bars, ev: np.ndarray, v: dict) -> list[dict]:
     confirm = v["entry"] in ("confirm", "bounce")
     green = v["entry"] == "bounce"
     zone = v["entry"] == "zone"
+    slow = v["slow"] == "on"
     if zone:
         lvf = 0.382                                             # zone 38.2% (first fill) .. 50% (deepest open)
     out, free_from = [], 0
@@ -293,6 +300,12 @@ def simulate(B: Bars, ev: np.ndarray, v: dict) -> list[dict]:
                 deep = ext - rng * 0.5
                 if (o[i] < deep) if upb else (o[i] > deep):     # opened past 50%: not in the zone, setup dead
                     break
+            if reach and slow:                                  # still running into the level: wait
+                at_level = l[i] <= lvl <= h[i]                  # price is at the level, not already far past it
+                paused = any((c[k] >= o[k]) if upb else (c[k] <= o[k]) for k in (i - 1, i))
+                if not (at_level and paused):
+                    reach = False
+            if reach and zone:
                 entry = min(o[i], lvl) if upb else max(o[i], lvl)
                 ie = i
                 break
@@ -424,8 +437,7 @@ def summary(res: dict) -> str:
          f"Train = 2021-2023, test = 2024 on.", "",
          "## Default rules", "", "`" + " | ".join(f"{k}={v}" for k, v in DEFAULT.items()) + "`", "", hdr,
          row("default", b), "", f"Account by year: {b['by_year']}", f"Exits: {b['full'].get('exits')}", "",
-         "## Fixes from reviewing the trades (each on its own, then together; everything else at default)", "", hdr,
-         row("default (as before)", b)]
+         "## Fixes from reviewing the trades (each on its own, then together, each without and with the slowing check; everything else at default)", "", hdr]
     for name, p_ in res.get("presets", {}).items():
         L.append(row(name, p_))
     L += ["", "## One switch changed at a time", "", hdr]
@@ -475,7 +487,10 @@ def main() -> None:
     res["base"] = split(base)
     res["base_trades_recent"] = [{k: x for k, x in t.items() if k != "_i"} for t in base[-100:]]
     res["sweeps"] = {k: {o_: split(run({**DEFAULT, k: o_})) for o_ in opts} for k, opts in VARIANTS.items()}
-    res["presets"] = {name: {"v": p, **split(run({**DEFAULT, **p}))} for name, p in PRESETS.items()}
+    res["presets"] = {}
+    for name, p in {"default rules": {}, **PRESETS}.items():          # every fix without and with slowing
+        res["presets"][name] = {"v": p, **split(run({**DEFAULT, **p}))}
+        res["presets"][name + " + slowing"] = {"v": {**p, "slow": "on"}, **split(run({**DEFAULT, **p, "slow": "on"}))}
     print(f"sweeps done ({time.time() - t0:.0f}s)", flush=True)
     combos = [{}]
     for k in GRID:
