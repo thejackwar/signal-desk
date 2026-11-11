@@ -606,6 +606,8 @@ def main() -> None:
 
     by_key = {(c["s"], c["d"]): c for c in cands}
     viewer: dict = {}
+    ftrades: dict = {}
+    fdays: dict = {}
     for mode, anchor in MODES:
         mk = f"{mode}|{anchor}"
         dv = {**DEFAULT, "mode": mode, "anchor": anchor}
@@ -615,7 +617,17 @@ def main() -> None:
              "cost_check": {f"{cst * 100:.2f}": cut(stats(run(cands, {**dv, "cost": cst}), spy))
                             for cst in (0.0, 0.0003, 0.0006, 0.001)},
              "sweeps": {k: {o: split(run(cands, {**dv, k: o}), spy) for o in VARIANTS[k]} for k in USES[mode]}}
-        m["filters"] = {name: {"v": p, **split(run(cands, {**dv, **p}), spy)} for name, p in FILTERS.items()}
+        m["filters"] = {}
+        for name, p in FILTERS.items():
+            ts = run(cands, {**dv, **p})
+            m["filters"][name] = {"v": p, **split(ts, spy)}
+            if quick:                                           # few trades: keep every one, with its day's candles
+                ftrades.setdefault(mk, {})[name] = [{k: t[k] for k in t if k != "rv"} for t in sorted(ts, key=lambda t: (t["d"], t["tin"]))]
+                for t in ts:
+                    c = by_key[(t["s"], t["d"])]
+                    b = c["bars"]
+                    fdays[f"{t['s']}|{t['d']}"] = [[int(b[5 * i + 4])] + [round(float(x), 2) for x in b[5 * i:5 * i + 4]]
+                                                   for i in range(len(b) // 5)]
         res["modes"][mk] = m
         viewer[mk] = sample(base, by_key, dv)
 
@@ -641,6 +653,10 @@ def main() -> None:
     (out.with_name(f"fib-demo-trades{tag or '_stocks'}.json") if a.demo else OUT_DIR / f"trades{tag or '_stocks'}.json").write_text(
         json.dumps({"generated": res["generated"], "default": DEFAULT, "names": MODE_NAME, "modes": viewer},
                    separators=(",", ":")))
+    if quick:
+        (out.with_name(f"fib-demo-filter-trades{tag}.json") if a.demo else OUT_DIR / f"filter_trades{tag}.json").write_text(
+            json.dumps({"generated": res["generated"], "default": DEFAULT, "filters": ftrades, "days": fdays},
+                       separators=(",", ":")))
     print(f"done -> {out} ({time.time() - t0:.0f}s)")
 
 

@@ -43,7 +43,7 @@ jobs:
         run: |
           git config user.name "signal-desk-bot"
           git config user.email "signal-desk-bot@users.noreply.github.com"
-          git add docs/data/fib/backtest_spy.json docs/data/fib/SUMMARY_spy.md docs/data/fib/trades_spy.json
+          git add docs/data/fib/backtest_spy.json docs/data/fib/SUMMARY_spy.md docs/data/fib/trades_spy.json docs/data/fib/filter_trades_spy.json
           git diff --cached --quiet && exit 0
           git commit -m "Fibonacci Retracement SPY quick backtest $(date -u +%F\ %H:%M)"
           for i in 1 2 3; do git pull --rebase && git push && break; sleep 5; done
