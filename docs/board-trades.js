@@ -45,3 +45,60 @@ export function tileTrades(Lab, data, cfg, fi, gA, gB, R = null) {
   out.sort((a, b) => (b.share ?? -1e9) - (a.share ?? -1e9) || a.t.localeCompare(b.t));
   return { trades: out, acct: acct - 1, sum: out.reduce((s, x) => s + (x.share || 0), 0) };
 }
+
+// ------------------------------------------------------------ the trades bought on a tile's day(s)
+// The board's tiles show each trade on the day it was bought, coloured by how the whole trade did
+// (closed: its result; still open: its result so far), not by the days it was only being held.
+// The same functions build the tiles (engine/day_board.mjs) and the list behind a tile (board.html),
+// so the two always agree. Test: tests/board/test_buys.mjs
+//
+//   tradeOf(data, P)              -> one trade { t, d0, d1, p0, p1, ret, open, n } from a traceRun() position
+//   buysIn(data, R, gA, gB)       -> the trades bought from session gA to gB
+//   freshIndex(data, R)           -> a lookup of a newer run's trades by ticker and buy date
+//   freshen(tr, recent, idx)      -> a trade still open in the history, followed on to its exit (or today)
+//                                    in the newer prices (lab_recent.json), when the newer run has it too
+//   allBuys(hist, Rh, fi, recent, Rr) -> every trade bought after session fi, fresh, oldest first
+
+function priceAt(T, g) {      // the ticker's close on session g, or its last close before it
+  let lo = 0, hi = T.idx.length - 1, k = -1;
+  while (lo <= hi) { const m = (lo + hi) >> 1; if (T.idx[m] <= g) { k = m; lo = m + 1; } else hi = m - 1; }
+  return k < 0 ? null : { p: T.c[k], g: T.idx[k] };
+}
+const tickerMap = data => data._byT ||= new Map(data.tickers.map(T => [T.t, T]));
+
+export function tradeOf(data, P) {
+  const D = data.dates.length, T = tickerMap(data).get(P.t);
+  let ret = 1; for (const r of P.r) ret *= 1 + r;
+  const lastG = P.g.length ? P.g[P.g.length - 1] : P.g0;
+  const endPx = T ? priceAt(T, D - 1) : null;
+  // still open: no exit yet and the stock still trades (one that left the index is closed at its last price)
+  const open = !(P.gE < Infinity) && !!endPx && endPx.g === D - 1;
+  const gOut = open ? D - 1 : P.gE < Infinity ? Math.min(P.gE, D - 1) : lastG;
+  const p1 = open ? endPx.p : (P.p1 ?? (T ? priceAt(T, gOut)?.p : null));
+  return { t: P.t, d0: data.dates[P.g0], d1: open ? null : data.dates[gOut], p0: P.p0 ?? (T ? priceAt(T, P.g0)?.p : null), p1,
+    ret: ret - 1, open, n: gOut - P.g0 };
+}
+
+export function buysIn(data, R, gA, gB) {
+  return (R.trace || []).filter(P => P.g0 >= gA && P.g0 <= gB).map(P => tradeOf(data, P));
+}
+
+export function freshIndex(data, R) {
+  const m = new Map();
+  for (const P of R?.trace || []) m.set(P.t + "|" + data.dates[P.g0], P);
+  return m;
+}
+
+export function freshen(tr, recent, idx) {
+  if (!tr.open || !recent || !idx) return tr;
+  const Q = idx.get(tr.t + "|" + tr.d0);
+  return Q ? tradeOf(recent, Q) : tr;
+}
+
+export function allBuys(hist, Rh, fi, recent = null, Rr = null) {
+  const last = hist.dates[hist.dates.length - 1], idx = recent && Rr ? freshIndex(recent, Rr) : null;
+  const out = [];
+  for (const P of Rh.trace || []) if (P.g0 > fi) out.push(freshen(tradeOf(hist, P), recent, idx));
+  if (idx) for (const P of Rr.trace || []) if (recent.dates[P.g0] > last) out.push(tradeOf(recent, P));
+  return out.sort((a, b) => a.d0.localeCompare(b.d0) || a.t.localeCompare(b.t));
+}

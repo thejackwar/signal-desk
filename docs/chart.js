@@ -1470,7 +1470,9 @@ if (ST_ID) {
     const mk = new URLSearchParams({ m: SIG_M, s: ST_ID }).toString();
     SIG = { a: { id: T.id, ticker: sym, side: side > 0 ? "bullish" : "bearish", price: p0, stop: null, date: d0, tf: "D", t: te, note: name },
       pat: T, st: true, back: `trades.html#${mk}`, chart: null, trade: null, strat: null };
-    openTrade(sym, `trades.html#${mk}`, "‹ Strategy trades", `Back to ${name} on Strategy Trades`);
+    // opened from the Strategy Board (board.html): back there instead
+    if (Q.get("from") === "board") { openTrade(sym, "board.html", "‹ Strategy Board", "Back to the Strategy Board"); }
+    else openTrade(sym, `trades.html#${mk}`, "‹ Strategy trades", `Back to ${name} on Strategy Trades`);
   }
 } else if (LP_ID) {
   $("status").textContent = "Loading the pattern…";

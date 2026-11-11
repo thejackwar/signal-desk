@@ -84,6 +84,11 @@ a:hover { text-decoration: underline; }
 .t.u { background: var(--up-2); } .t.u.s { background: var(--up); }
 .t.d { background: var(--down-2); } .t.d.s { background: var(--down); }
 .t.lv { box-shadow: inset 0 0 0 1px var(--blue); }
+.t.op { background-image: radial-gradient(circle at center, rgba(232,238,244,.75) 0 1.4px, transparent 1.9px); }
+.tt a.tk { color: var(--fg); font-weight: 600; border-bottom: 1px dotted var(--faint); }
+.tt a.tk:hover { color: var(--blue); border-color: var(--blue); text-decoration: none; }
+.sh-alt { background: none; border: 0; padding: 0; color: var(--blue); font: inherit; cursor: pointer; }
+.sh-alt:hover { text-decoration: underline; }
 .more { display: none; padding: 8px 0 4px; }
 .row.open .more { display: block; }
 .yr { display: grid; grid-template-columns: 38px 1fr; gap: 8px; align-items: start; margin: 4px 0; }
@@ -133,11 +138,11 @@ footer { margin-top: 40px; border-top: 1px solid var(--line); padding-top: 16px;
   <section class="hero">
     <span class="k">Performance tracking · every strategy</span>
     <h1>Every strategy, every day.</h1>
-    <p>One tile per trading day: green when the strategy's account made money that day, red when it lost. Tiles with a blue edge are live paper-trading days.</p>
+    <p id="lede"></p>
   </section>
 
   <div class="ctl" id="ctl"></div>
-  <div class="legend"><span><i style="background:var(--up)"></i>Profit</span><span><i style="background:var(--down)"></i>Loss</span><span><i style="background:var(--none)"></i>No position</span><span><i style="box-shadow:inset 0 0 0 1px var(--blue);background:var(--none)"></i>Live</span><span>Brighter = bigger than that strategy's typical day</span><span>Tap a tile to see its trades</span></div>
+  <div class="legend" id="legend"></div>
   <div class="panel" id="board"><div class="empty">Loading…</div></div>
   <p class="fine" id="asof"></p>
   <div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-labelledby="sh-h"><div class="box" id="sh-box"></div></div>
@@ -155,6 +160,9 @@ const MK = [["stocks", "Stocks"], ["crypto", "Crypto"], ["commodities", "Commodi
 const PER = [["21", "1 month"], ["63", "3 months"], ["252", "1 year"], ["all", "Since 2021"]];
 const S = (() => { try { return JSON.parse(localStorage.getItem("board") || "{}"); } catch { return {}; } })();
 S.m ||= "stocks"; S.p ||= "63"; S.show ||= "core"; S.sort ||= "ret"; S.lev = [1, 2, 3, 5].includes(+S.lev) ? +S.lev : 1;
+// tiles by trade (default): each trade on the day it was bought, coloured by the whole trade's result;
+// by day: the account's change each day, as before
+S.by = S.by === "day" ? "day" : "buy";
 const save = () => { try { localStorage.setItem("board", JSON.stringify(S)); } catch {} };
 // stocks: the S&P 100 or the S&P 500, the same choice as in the app (its prefs, "universe")
 const PK = "signaldesk.prefs";
@@ -165,7 +173,15 @@ async function get(p) { if (p in cache) return cache[p]; try { const r = await f
 const seg = (k, v, o) => `<div class="seg" role="group">${o.map(([a, l]) => `<button type="button" data-${k}="${a}" aria-pressed="${a === v}">${esc(l)}</button>`).join("")}</div>`;
 
 function controls() {
-  $("ctl").innerHTML = seg("m", S.m, MK) + (S.m === "stocks" ? seg("u", getU(), [["sp100", "S&P 100"], ["sp500", "S&P 500"]]) : "") + seg("p", S.p, PER) + seg("show", S.m !== "stocks" && S.show === "research" ? "all" : S.show, [["core", "Main strategies"], ["all", "All, incl. vault"], ...(S.m === "stocks" ? [["research", "+ Research tests"]] : [])]) + seg("sort", S.sort, [["ret", "Best first"], ["name", "A–Z"]]) + seg("lev", String(S.lev), [["1", "No leverage"], ["2", "2×"], ["3", "3×"], ["5", "5×"]]);
+  $("ctl").innerHTML = seg("m", S.m, MK) + (S.m === "stocks" ? seg("u", getU(), [["sp100", "S&P 100"], ["sp500", "S&P 500"]]) : "") + seg("p", S.p, PER) + seg("show", S.m !== "stocks" && S.show === "research" ? "all" : S.show, [["core", "Main strategies"], ["all", "All, incl. vault"], ...(S.m === "stocks" ? [["research", "+ Research tests"]] : [])]) + seg("sort", S.sort, [["ret", "Best first"], ["name", "A–Z"]]) + seg("lev", String(S.lev), [["1", "No leverage"], ["2", "2×"], ["3", "3×"], ["5", "5×"]]) + seg("by", S.by, [["buy", "Tiles by trade"], ["day", "Tiles by day"]]);
+  const lv = `<span><i style="box-shadow:inset 0 0 0 1px var(--blue);background:var(--none)"></i>Live</span>`;
+  if (S.by === "buy") {
+    $("lede").textContent = "Each trade sits on the day it was bought: green when the whole trade made money, red when it lost, judged on how it ended (or how it stands now, if it's still open). Days when a strategy only held what it already had stay grey. Tiles with a blue edge are live paper-trading days.";
+    $("legend").innerHTML = `<span><i style="background:var(--up)"></i>Trade won</span><span><i style="background:var(--down)"></i>Trade lost</span><span><i class="t op" style="background-color:var(--up-2);margin-right:6px"></i>Still open (so far)</span><span><i style="background:var(--none)"></i>Nothing bought</span>${lv}<span>Brighter = bigger than that strategy's typical trade</span><span>Tap a tile to see what it bought</span>`;
+  } else {
+    $("lede").textContent = "One tile per trading day: green when the strategy's account made money that day, red when it lost, counting every trade it held that day. Tiles with a blue edge are live paper-trading days.";
+    $("legend").innerHTML = `<span><i style="background:var(--up)"></i>Profit</span><span><i style="background:var(--down)"></i>Loss</span><span><i style="background:var(--none)"></i>No position</span>${lv}<span>Brighter = bigger than that strategy's typical day</span><span>Tap a tile to see its trades</span>`;
+  }
 }
 
 // one tile list for a row: the period's days (or weeks, for "since 2021", so it stays readable)
@@ -192,6 +208,37 @@ function tiles(dates, vals, live, res = "D") {
   const html = vs.map((v, i) => `<i class="t${v > 0 ? " u" : v < 0 ? " d" : ""}${Math.abs(v) > med ? " s" : ""}${(lvs ? lvs[i] : ds[i] >= live) ? " lv" : ""}" data-a="${ab[i][0]}" data-b="${ab[i][1]}" title="${esc(res === "M" ? fmtM(ds[i]) : fmtD(ds[i]))}${res === "M" ? " (month)" : S.p === "all" ? " (week)" : ""}: ${v ? pc(v / 1e3, 2) : "no position"}"></i>`).join("");
   return { html, ret, upPct: act ? up / act * 100 : null };
 }
+
+// tiles by trade: the trades bought each day (board.json "buys", sparse), one tile a day, or a week for
+// "since 2021"; a tile's value is the average result of the trades bought on it, a dot when any is still open
+function buyDays(r) {
+  if (r._bd) return r._bd;
+  const N = r.dates.length, n = new Array(N).fill(0), o = new Array(N).fill(0), w = new Array(N).fill(0), v = new Array(N).fill(0), B = r.buys;
+  B.i.forEach((i, k) => { n[i] = B.n[k]; o[i] = B.o[k]; w[i] = B.w[k]; v[i] = B.v[k]; });
+  return r._bd = { n, o, w, v };
+}
+function buyTiles(r, live, a, b, byWeek, size) {
+  const X = buyDays(r), ds = r.dates, T = [];
+  for (let i = a; i <= b; i++) {
+    const k = byWeek ? weekKey(ds[i]) : ds[i], L = T[T.length - 1];
+    if (L && L.k === k) { L.b = i; L.n += X.n[i]; L.o += X.o[i]; L.w += X.w[i]; L.s += X.v[i] * X.n[i]; L.lv ||= ds[i] >= live; }
+    else T.push({ k, a: i, b: i, n: X.n[i], o: X.o[i], w: X.w[i], s: X.v[i] * X.n[i], lv: ds[i] >= live });
+  }
+  const val = t => t.n ? t.s / t.n : 0;
+  const abs = T.filter(t => t.n).map(t => Math.abs(val(t))).sort((x, y) => x - y), med = abs[abs.length >> 1] || 1;
+  const html = T.map(t => { const v = val(t);
+    const when = byWeek ? `Week of ${fmtD(t.k, { day: "numeric", month: "short", year: "numeric" })}` : fmtD(t.k);
+    const tip = t.n ? `${t.n} trade${t.n === 1 ? "" : "s"} bought, average ${pc(v / 1e3, 1)}${t.o ? `, ${t.o} still open` : ""}` : "nothing bought";
+    return `<i class="t${t.n ? v >= 0 ? " u" : " d" : ""}${t.n && Math.abs(v) > med ? " s" : ""}${t.o ? " op" : ""}${t.lv ? " lv" : ""}" data-a="${t.a}" data-b="${t.b}" title="${esc(when)}: ${esc(tip)}"></i>`; });
+  const n = T.reduce((s, t) => s + t.n, 0), w = T.reduce((s, t) => s + t.w, 0);
+  return { html, n, won: n ? w / n * 100 : null, T };
+}
+function buyWall(r, live) {     // every day since 2021, a row a year
+  const X = buyTiles(r, live, 0, r.dates.length - 1, false), Y = {};
+  X.T.forEach((t, k) => (Y[t.k.slice(0, 4)] ||= []).push(X.html[k]));
+  return Object.keys(Y).sort().map(y => `<div class="yr"><span>${y}</span><div class="tiles">${Y[y].join("")}</div></div>`).join("");
+}
+const byBuy = r => S.by === "buy" && r.buys && !r.res;
 
 function wall(dates, vals, live, res = "D") {
   if (res === "M") {        // one tile a month
@@ -250,15 +297,20 @@ async function render() {
   const HL = lever(B.hold.days, S.lev), hold = { days: HL.days, total: S.lev > 1 ? compPct(HL.days) : B.hold.total, wiped: HL.wiped == null ? null : B.dates[HL.wiped] };
   const levTag = S.lev > 1 ? ` · ${S.lev}×` : "";
   const ts = S.p === "all" ? "7px" : S.p === "252" ? "7px" : S.p === "63" ? "10px" : "14px";
-  const out = rows.map(r => ({ r, T: tiles(r.dates, r.days, B.live_from, r.res) }));
+  const out = rows.map(r => {
+    const T = tiles(r.dates, r.days, B.live_from, r.res);
+    if (!byBuy(r)) return { r, T };
+    const n = S.p === "all" ? r.dates.length : Math.min(r.dates.length, +S.p), X = buyTiles(r, B.live_from, r.dates.length - n, r.dates.length - 1, S.p === "all");
+    return { r, T: { html: X.html.join(""), ret: T.ret, upPct: X.won, won: true } };
+  });
   if (S.sort === "ret") out.sort((a, b) => b.T.ret - a.T.ret); else out.sort((a, b) => a.r.name.localeCompare(b.r.name));
   const H = tiles(B.dates, hold.days, B.live_from);
   const per = PER.find(p => p[0] === S.p)[1];
   const holdName = S.m === "stocks" ? `Holding the ${getU() === "sp500" ? "S&P 500" : "S&P 100"}` : S.m === "crypto" ? "Holding the coins" : "Holding the commodities";
-  let h = `<div class="head"><span class="k">Strategy · ${esc(per)}${S.p === "all" ? " · 1 tile = 1 week" : " · 1 tile = 1 day"}${S.lev > 1 ? ` · ${S.lev}× leverage` : ""}</span><span class="k">Return</span><span class="k">Up days</span></div>`;
+  let h = `<div class="head"><span class="k">Strategy · ${esc(per)}${S.p === "all" ? " · 1 tile = 1 week" : " · 1 tile = 1 day"}${S.lev > 1 ? ` · ${S.lev}× leverage` : ""}</span><span class="k">Return</span><span class="k" title="${S.by === "buy" ? "Strategy Lab rows: the share of the trades bought in the period that made money (open ones so far). Other rows: up days." : "The share of the days with a position that made money"}">${S.by === "buy" ? "Wins" : "Up days"}</span></div>`;
   h += `<div class="row hold" style="--ts:${ts}"><div class="nm"><b>${holdName}<small>benchmark${levTag}</small>${hold.wiped ? `<small class="wipe">wiped out ${esc(fmtD(hold.wiped, { month: "short", year: "numeric" }))}</small>` : ""}</b><span class="${H.ret >= 0 ? "up" : "down"}">${pc(H.ret)}</span><span>${H.upPct == null ? "–" : Math.round(H.upPct) + "%"}</span></div><div class="tiles">${H.html}</div></div>`;
   h += out.map(({ r, T }) => `<div class="row" data-id="${esc(r.id)}" style="--ts:${ts}" tabindex="0" role="button" aria-expanded="false">
-      <div class="nm"><b>${esc(r.name)}${r.tag ? `<small>${esc(r.tag)}</small>` : r.group === "vault" ? `<small>vault</small>` : ""}${r.wiped ? `<small class="wipe">wiped out ${esc(fmtD(r.wiped, { month: "short", year: "numeric" }))}</small>` : ""}</b><span class="${T.ret >= 0 ? "up" : "down"}">${pc(T.ret)}</span><span>${T.upPct == null ? "–" : Math.round(T.upPct) + "%"}</span></div>
+      <div class="nm"><b>${esc(r.name)}${r.tag ? `<small>${esc(r.tag)}</small>` : r.group === "vault" ? `<small>vault</small>` : ""}${r.wiped ? `<small class="wipe">wiped out ${esc(fmtD(r.wiped, { month: "short", year: "numeric" }))}</small>` : ""}</b><span class="${T.ret >= 0 ? "up" : "down"}">${pc(T.ret)}</span><span title="${T.won ? "trades won" : "up days"}">${T.upPct == null ? "–" : Math.round(T.upPct) + "%"}</span></div>
       <div class="tiles">${T.html}</div>
       <div class="more"></div></div>`).join("");
   $("board").innerHTML = h;
@@ -266,13 +318,14 @@ async function render() {
     const row = e.target.closest(".row[data-id]"); if (!row || e.target.closest("a")) return;
     const r = rows.find(x => x.id === row.dataset.id), M = row.querySelector(".more");
     const tile = e.target.closest(".t[data-a]");
-    if (tile) { document.querySelectorAll(".t.pick").forEach(t => t.classList.remove("pick")); tile.classList.add("pick"); openTile(B, r, +tile.dataset.a, +tile.dataset.b); return; }
+    if (tile) { document.querySelectorAll(".t.pick").forEach(t => t.classList.remove("pick")); tile.classList.add("pick"); (byBuy(r) ? openBuys : openTile)(B, r, +tile.dataset.a, +tile.dataset.b); return; }
     if (!row.classList.contains("open") && !M.innerHTML) {
       const up = r.days.filter(v => v > 0).length, dn = r.days.filter(v => v < 0).length;
       const unit = r.res === "M" ? "months" : "days", since = r.since && r.since > r.dates[0] ? r.since : r.dates[0];
       const link = r.href ? `<a href="${esc(r.href)}">Open ${esc(r.name)} ›</a>` : r.lab ? `<a href="${labLink(S.m, r.lab)}">Open in the Strategy Lab ›</a>` : "";
       const mup = r.res === "M" ? group(r.dates, r.days, B.live_from, monthKey).vs : null;
-      M.innerHTML = `<div style="--ts:7px">${wall(r.dates, r.days, B.live_from, r.res)}</div>
+      const W = byBuy(r) ? buyWall(r, B.live_from) : wall(r.dates, r.days, B.live_from, r.res);
+      M.innerHTML = `<div style="--ts:7px">${W}</div>
         <p>Since ${esc(fmtD(since, { month: "short", year: "numeric" }))}: <b class="${r.total >= 0 ? "up" : "down"}">${pc(r.total)}</b>${S.lev > 1 ? ` with ${S.lev}× leverage` : ""} (holding${S.lev > 1 ? ` with ${S.lev}×` : ""}: ${pc(hold.total)}), ${mup ? mup.filter(v => v > 0).length : up} up ${unit} and ${mup ? mup.filter(v => v < 0).length : dn} down ${unit}.${r.res === "M" ? " This backtest only keeps month-end results, so it shows one tile a month." : ""} ${link}</p>`;
     }
     row.classList.toggle("open"); row.setAttribute("aria-expanded", row.classList.contains("open"));
@@ -308,7 +361,7 @@ async function openTile(B, r, a, b) {
   }
   sheet(head + `</div><div class="empty">Loading the prices and rerunning the strategy…</div>`);
   try {
-    MODS ||= { Lab: await import("./lab.js"), BT: await import("./board-trades.js") };
+    MODS ||= { Lab: await import("./lab.js"), BT: await import("./board-trades.js?v=2") };
     const { Lab, BT } = MODS, dir = dirOf(), hist = await labData(dir + "lab.json");
     let data = hist, f = "lab.json";
     if (!hist.dates.includes(dB)) { data = await labData(dir + "lab_recent.json"); f = "lab_recent.json"; }
@@ -322,7 +375,7 @@ async function openTile(B, r, a, b) {
     const held = X.trades.filter(t => t.share != null), fresh = X.trades.filter(t => t.share == null);
     const dd = d => fmtD(d, { day: "numeric", month: "short", year: "2-digit" });
     const one = a === b, colMove = one ? "That day" : "That week";
-    const tr = t => `<tr><td><b>${esc(t.t)}</b>${t.bought ? `<span class="tag b">bought</span>` : ""}${t.sold ? `<span class="tag s">sold</span>` : ""}${t.open && !t.sold ? `<span class="tag o">open</span>` : ""}
+    const tr = t => `<tr><td>${t.before ? `<b>${esc(t.t)}</b>` : tkLink(r, t)}${t.bought ? `<span class="tag b">bought</span>` : ""}${t.sold ? `<span class="tag s">sold</span>` : ""}${t.open && !t.sold ? `<span class="tag o">open</span>` : ""}
         <small>${t.before ? "held from before 2021" : `in ${esc(dd(t.d0))} at ${px(t.p0)}`}${t.d1 ? ` · out ${esc(dd(t.d1))} at ${px(t.p1)}` : ` · now ${px(t.p1)}`}</small></td>
       <td class="n">${t.move == null ? "–" : `<span class="${t.move >= 0 ? "up" : "down"}">${pc(t.move * 100, 2)}</span>`}</td>
       <td class="n">${t.share == null ? "–" : `<span class="${t.share >= 0 ? "up" : "down"}">${pc(t.share * 100, 3)}</span>`}</td>
@@ -338,9 +391,61 @@ async function openTile(B, r, a, b) {
   }
 }
 
+// a ticker opens the full chart with the trade drawn on it (chart.html, the same link as Strategy Trades)
+function chartHref(r, t) {
+  const q = new URLSearchParams({ st: r.lab, n: r.name, m: S.m, t: t.t, side: "1", d0: t.d0, p0: String(+(+t.p0).toPrecision(8)), p1: String(+(+t.p1).toPrecision(8)), why: "rule", r: (t.ret * 100).toFixed(2), from: "board" });
+  if (t.d1) q.set("d1", t.d1);
+  if (S.m === "stocks" && getU() === "sp500") q.set("u", "sp500");
+  return `chart.html?${q}#${encodeURIComponent(t.t)}/D`;
+}
+const tkLink = (r, t) => t.p0 != null && t.p1 != null ? `<a class="tk" href="${esc(chartHref(r, t))}" title="Open the chart with this trade">${esc(t.t)}</a>` : `<b>${esc(t.t)}</b>`;
+
+// ------------------------------------------------------------ the trades bought on a tile (tiles by trade)
+// The same trades as the tile (docs/board-trades.js allBuys, as engine/day_board.mjs): lab.json for the
+// history, each trade still open there followed on in lab_recent.json, and the newer days' buys from it.
+const BUYS = {};
+async function strategyBuys(r) {
+  const dir = dirOf(), key = dir + "|" + r.lab;
+  if (BUYS[key]) return BUYS[key];
+  const { Lab, BT } = MODS, hist = await labData(dir + "lab.json");
+  let recent = null; try { recent = await labData(dir + "lab_recent.json"); } catch {}
+  const fi = Math.max(0, hist.dates.findIndex(d => d >= "2021-01-01")), cfg = Lab.defaults(r.lab);
+  const Rh = RUNS[dir + "lab.json|" + r.lab] ||= Lab.traceRun(hist, cfg, fi);
+  const Rr = recent && Lab.available(recent, r.lab, S.m) ? (RUNS[dir + "lab_recent.json|" + r.lab] ||= Lab.traceRun(recent, cfg, 0)) : null;
+  return BUYS[key] = BT.allBuys(hist, Rh, fi, Rr && recent, Rr);
+}
+
+async function openBuys(B, r, a, b) {
+  const dA = r.dates[a], dB = r.dates[b], one = a === b, live = dB >= B.live_from;
+  const whenTxt = one ? fmtD(dA, { weekday: "long", day: "numeric", month: "long", year: "numeric" }) : `Week of ${fmtD(dA, { day: "numeric", month: "short" })} – ${fmtD(dB, { day: "numeric", month: "short", year: "numeric" })}`;
+  const head = `<div class="sh-top"><div><span class="k${live ? " blue" : ""}">${esc(r.name)} · bought ${one ? "this day" : "this week"}${live ? " · live paper trading" : ""}</span><h2 id="sh-h">${esc(whenTxt)}</h2></div><button type="button" class="sh-x" aria-label="Close">Close</button></div>`;
+  const alt = `<button type="button" class="sh-alt" id="sh-acct">What the account held ${one ? "that day" : "that week"} ›</button>`;
+  sheet(head + `<div class="empty">Loading the prices and rerunning the strategy…</div>`);
+  try {
+    MODS ||= { Lab: await import("./lab.js"), BT: await import("./board-trades.js?v=2") };
+    const all = await strategyBuys(r);
+    if (!$("sheet").classList.contains("on")) return;
+    const L = all.filter(t => t.d0 >= dA && t.d0 <= dB).sort((x, y) => y.ret - x.ret || x.t.localeCompare(y.t));
+    const dd = d => fmtD(d, { day: "numeric", month: "short", year: "2-digit" });
+    const won = L.filter(t => t.ret > 0).length, open = L.filter(t => t.open).length, avg = L.length ? L.reduce((s, t) => s + t.ret, 0) / L.length : 0;
+    let h = head + `<div class="sh-sum"><span>${L.length} trade${L.length === 1 ? "" : "s"} bought${L.length ? `, ${won} up` : ""}</span>${L.length ? `<span>Average result <b class="${avg >= 0 ? "up" : "down"}">${pc(avg * 100, 1)}</b></span>` : ""}${open ? `<span>${open} still open</span>` : ""}</div>`;
+    if (!L.length) h += `<div class="empty">Nothing bought ${one ? "that day" : "that week"}. The strategy only held what it already had, or was in cash.</div>`;
+    else h += `<table class="tt"><thead><tr><th>Stock</th><th>Status</th><th class="n hide-s">Held</th><th class="n">Result</th></tr></thead><tbody>${L.map(t => `<tr>
+        <td>${tkLink(r, t)}<small>bought ${esc(dd(t.d0))} at ${px(t.p0)}</small></td>
+        <td>${t.open ? `<span class="tag o">open</span><small>still open · now ${px(t.p1)}</small>` : `<span class="tag s">closed</span><small>sold ${esc(dd(t.d1))} at ${px(t.p1)}</small>`}</td>
+        <td class="n hide-s">${t.n} day${t.n === 1 ? "" : "s"}</td>
+        <td class="n"><span class="${t.ret >= 0 ? "up" : "down"}">${pc(t.ret * 100, 1)}</span><small>${t.open ? "so far" : "whole trade"}</small></td></tr>`).join("")}</tbody></table>`;
+    h += `<p class="fine">Default settings, buys only. A trade is bought at the close${one ? " of this day" : ""} and counts from the next session; <b>Result</b> is the whole trade with buying and selling costs, to the sale (or to the last close, if it's still open). <b>Held</b>: trading sessions. Tap a ticker for the chart with the trade on it. The tile's colour is these trades' average result${S.lev > 1 ? ", before leverage" : ""}. Prices are adjusted for splits and dividends. ${alt} · <a href="${labLink(S.m, r.lab)}">Open in the Strategy Lab ›</a></p>`;
+    $("sh-box").innerHTML = h;
+  } catch (e) {
+    if ($("sheet").classList.contains("on")) $("sh-box").innerHTML = head + `<div class="empty">Couldn't load the trades (${esc(e.message || e)}). Try again in a moment.</div><p class="fine">${alt}</p>`;
+  }
+  const A = $("sh-acct"); if (A) A.onclick = () => openTile(B, r, a, b);
+}
+
 document.addEventListener("click", e => {
-  const b = e.target.closest("[data-m], [data-u], [data-p], [data-show], [data-sort], [data-lev]"); if (!b) return;
-  const d = b.dataset; if (d.u) setU(d.u); if (d.m) S.m = d.m; if (d.p) S.p = d.p; if (d.show) S.show = d.show; if (d.sort) S.sort = d.sort; if (d.lev) S.lev = +d.lev;
+  const b = e.target.closest("[data-m], [data-u], [data-p], [data-show], [data-sort], [data-lev], [data-by]"); if (!b) return;
+  const d = b.dataset; if (d.by) S.by = d.by; if (d.u) setU(d.u); if (d.m) S.m = d.m; if (d.p) S.p = d.p; if (d.show) S.show = d.show; if (d.sort) S.sort = d.sort; if (d.lev) S.lev = +d.lev;
   save(); render();
 });
 document.addEventListener("keydown", e => { if ((e.key === "Enter" || e.key === " ") && e.target.matches(".row[data-id]")) { e.preventDefault(); e.target.click(); } });

@@ -1,5 +1,7 @@
 // Strategy board: every Strategy Lab strategy (default settings, long only like the Lab's default),
-// one number per trading day = the whole account's change that day, open trades included.
+// one number per trading day = the whole account's change that day, open trades included,
+// and the trades bought each day with how each whole trade did (closed: its result, open: so far),
+// which is what the board's tiles show by default (docs/board-trades.js allBuys).
 // History comes from lab.json (weekly), the days after it from lab_recent.json (fresh prices after each
 // daily scan), both run through docs/lab.js, the same code as the Lab and its calendar.
 // Days from the live start (2 Nov 2026, the paper-trading go-live) are marked live on the page.
@@ -10,6 +12,7 @@ import { readFileSync, writeFileSync, existsSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import * as Lab from "../docs/lab.js";
+import { allBuys } from "../docs/board-trades.js";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const market = process.argv[2] || "stocks";
@@ -35,6 +38,20 @@ const changes = (eq, from) => {
   for (let g = from + 1; g < eq.length; g++) out.push(eq[g - 1] > 0 && Number.isFinite(eq[g]) ? Math.round((eq[g] / eq[g - 1] - 1) * 1e5) : 0);
   return out;
 };
+// the trades bought each board day, only the days with a buy: the day's index in dates (i), how many (n),
+// how many still open (o), how many in profit (w), and their average result in 0.1 bp (v: closed trades'
+// result, open trades' result so far)
+const BI = new Map(dates.slice(1).map((d, i) => [d, i]));
+function byDay(trades) {
+  const N = dates.length - 1, bn = new Array(N).fill(0), bo = new Array(N).fill(0), bw = new Array(N).fill(0), sum = new Array(N).fill(0);
+  for (const x of trades) {
+    const i = BI.get(x.d0); if (i == null || !Number.isFinite(x.ret)) continue;
+    bn[i]++; sum[i] += x.ret; if (x.open) bo[i]++; if (x.ret > 0) bw[i]++;
+  }
+  const bi = []; for (let i = 0; i < N; i++) if (bn[i]) bi.push(i);
+  const pick = a => bi.map(i => a[i]);
+  return { buys: { i: bi, n: pick(bn), o: pick(bo), w: pick(bw), v: bi.map(i => Math.round(sum[i] / bn[i] * 1e5) || (sum[i] > 0 ? 1 : -1)) } };
+}
 const comp = a => a.reduce((v, x) => v * (1 + x / 1e5), 1);
 
 const rows = [];
@@ -42,17 +59,20 @@ const t0 = Date.now();
 for (const ind of Object.keys(Lab.INDICATORS)) {
   if (!Lab.available(hist, ind, market)) continue;
   const I = Lab.INDICATORS[ind], cfg = Lab.defaults(ind);
-  let days;
+  let days, buys;
   try {
-    days = changes(Lab.run(hist, cfg, fi).long.eq, fi);
-    if (extra.length && Lab.available(recent, ind, market)) {
-      const R = Lab.run(recent, cfg, 0).long.eq, rd = recent.dates;
+    const Rh = Lab.traceRun(hist, cfg, fi);
+    days = changes(Rh.long.eq, fi);
+    const fresh = recent && Lab.available(recent, ind, market) ? Lab.traceRun(recent, cfg, 0) : null;
+    buys = byDay(allBuys(hist, Rh, fi, fresh && recent, fresh));
+    if (extra.length && fresh) {
+      const R = fresh.long.eq, rd = recent.dates;
       for (const d of extra) { const g = rd.indexOf(d); days.push(g > 0 && R[g - 1] > 0 ? Math.round((R[g] / R[g - 1] - 1) * 1e5) : 0); }
     } else days.push(...extra.map(() => 0));
   } catch (e) { console.log(`  ! ${ind}: ${e.message}`); continue; }
   const up = days.filter(x => x > 0).length, dn = days.filter(x => x < 0).length;
   rows.push({ id: I.base, lab: ind, name: I.name, group: I.group || "", core: core.has(I.base),
-    total: +((comp(days) - 1) * 100).toFixed(1), up, down: dn, days });
+    total: +((comp(days) - 1) * 100).toFixed(1), up, down: dn, days, ...buys });
 }
 // buy and hold: the same stocks (coins, commodities), equal weight
 const hold = changes(Lab.holdCurve(hist, fi), fi).concat(extra.map(() => 0));
