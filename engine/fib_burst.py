@@ -30,6 +30,10 @@ Exact rules tested here (every one is a switch, see VARIANTS):
               flat for a short), and the entry minute does not open more than 10% of the burst past the level.
               Never buy into 2+ red candles in a row (sell into 2+ green); the setup keeps waiting while alive.
               (First version also looked at the entry minute's own close - look-ahead, fixed 11 Nov 2026.)
+  Candles     "tf": "1" (default) - everything on 1-minute candles; "5" - the burst, levels, slowing and exits on
+              5-minute candles (window, wait and hold converted: 15 min = 3 candles).
+  Big         "big" "on": the burst's candles average at least 2x the size (high-low) of the candles in the 2 hours
+              before it - an impulsive move, as on the chart (Giacomo, 11 Nov 2026).
   Filters     (each "off" by default; tested on top of slowing + 23.6% target):
               trend  "on": longs only when the burst's close is above the 1-hour 50-EMA (last completed hour),
                      shorts only below it.
@@ -86,7 +90,8 @@ SPLIT = "2024-01-01"
 
 DEFAULT = {"n": "15", "x": "1", "vol": "2", "level": "0.5", "entry": "touch", "wait": "60",
            "stop": "0.786", "tp": "swing", "hold": "240", "cost": "0", "one": "keep", "slow": "off",
-           "trend": "off", "pvol": "off", "clean": "off", "vwap": "off", "hours": "all", "cap": "off"}
+           "trend": "off", "pvol": "off", "clean": "off", "vwap": "off", "hours": "all", "cap": "off",
+           "tf": "1", "big": "off"}
 VARIANTS = {
     "n": ["5", "15", "30"],
     "x": ["0.5", "1", "1.5", "2"],
@@ -99,6 +104,8 @@ VARIANTS = {
     "vwap": ["off", "on"],
     "hours": ["all", "day", "day_wk"],
     "cap": ["off", "1day", "cool"],
+    "tf": ["1", "5"],
+    "big": ["off", "on"],
     "level": ["0.382", "0.5", "0.618"],
     "entry": ["touch", "confirm", "bounce", "zone"],
     "wait": ["60", "180"],
@@ -222,7 +229,7 @@ def demo() -> pd.DataFrame:
 
 
 # ===================================================================== bursts
-def bursts(df: pd.DataFrame, n: int, x: float, vol: str, one: str = "keep") -> np.ndarray:
+def bursts(df: pd.DataFrame, n: int, x: float, vol: str, one: str = "keep", day_bars: int = 1440) -> np.ndarray:
     """Minutes where a burst is first seen: +i for an up burst, -i for a down burst (sorted by i)."""
     lo = df["l"].rolling(n, min_periods=n).min()
     hi = df["h"].rolling(n, min_periods=n).max()
@@ -240,7 +247,7 @@ def bursts(df: pd.DataFrame, n: int, x: float, vol: str, one: str = "keep") -> n
         dn &= ~(both & ~red)
     if vol != "any":
         recent = df["v"].rolling(n).mean()
-        base = df["v"].shift(n).rolling(1440, min_periods=720).mean()
+        base = df["v"].shift(n).rolling(day_bars, min_periods=day_bars // 2).mean()
         ok = recent >= float(vol) * base
         up &= ok
         dn &= ok
@@ -330,6 +337,9 @@ def simulate(B: Bars, ev: np.ndarray, v: dict) -> list[dict]:
     slow = v["slow"] == "on"
     trend, pvol, clean, vwap = (v[k] == "on" for k in ("trend", "pvol", "clean", "vwap"))
     hours, cap = v["hours"], v["cap"]
+    tfm = int(v.get("_tfm", 1))                                  # minutes per candle (n, wait, hold already in candles)
+    big = v["big"] == "on"
+    look = 120 // tfm                                           # "big": compare with the 2 hours before the burst
     last_day = -1
     if zone:
         lvf = 0.382                                             # zone 38.2% (first fill) .. 50% (deepest open)
@@ -352,6 +362,13 @@ def simulate(B: Bars, ev: np.ndarray, v: dict) -> list[dict]:
             continue
         if clean and (i0 - a_i < 2 or ext == a or (c[i0] - a) / (ext - a) < 0.7):
             continue
+        if big:
+            if a_i - look < 0:
+                continue
+            burst_r = sum(h[k] - l[k] for k in range(a_i, i0 + 1)) / (i0 - a_i + 1)
+            before_r = sum(h[k] - l[k] for k in range(a_i - look, a_i)) / look
+            if burst_r < 2 * before_r:
+                continue
         entry = ie = None
         i = i0 + 1
         while i < B.n and i - last_new <= wait:
@@ -441,7 +458,7 @@ def simulate(B: Bars, ev: np.ndarray, v: dict) -> list[dict]:
         free_from = j + 1
         last_day = B.day[ie]
         if cap == "cool" and ret < 0:
-            free_from = j + 240
+            free_from = j + 240 // tfm
     return out
 
 
@@ -513,12 +530,15 @@ def summary(res: dict) -> str:
          "## Fixes from reviewing the trades (each on its own, then together, each without and with the slowing check; everything else at default)", "", hdr]
     for name, p_ in res.get("presets", {}).items():
         L.append(row(name, p_))
-    if res.get("filters"):
-        days = max(1, (date.fromisoformat(res["to"]) - date.fromisoformat(res["from"])).days)
-        L += ["", "## Filters on top of the best rules (slowing + 23.6% target)", "",
+    days = max(1, (date.fromisoformat(res["to"]) - date.fromisoformat(res["from"])).days)
+    for key_, title in (("tf", "5-minute candles and big candles, on Giacomo's rule (stop beyond 61.8%, 75% at 23.6%)"),
+                        ("filters", "Filters on top of the best rules (slowing + 23.6% target)")):
+        if not res.get(key_):
+            continue
+        L += ["", "## " + title, "",
               "| Variant | Trades | Per day | Win | Avg/trade | PF | Account | Max DD | Train n: avg / PF | Test n: avg / PF |",
               "|---|---|---|---|---|---|---|---|---|---|"]
-        for name, s_ in res["filters"].items():
+        for name, s_ in res[key_].items():
             f, tr, te = s_["full"], s_["train"], s_["test"]
             L.append(f"| {name} | {f.get('n')} | {round((f.get('n') or 0) / days, 2)} | {f.get('win')}% | {f.get('avg')}% | "
                      f"{f.get('pf')} | {f.get('acct')}% | {f.get('maxdd')}% | {tr.get('n')}: {tr.get('avg')}% / {tr.get('pf')} | "
@@ -554,8 +574,24 @@ def main() -> None:
     B = Bars(df)
     print(f"data ready ({time.time() - t0:.0f}s)", flush=True)
     ev_cache: dict = {}
+    five: dict = {}
+
+    def tf5():                                                  # 5-minute candles built from the 1-minute ones
+        if not five:
+            g = df.groupby(df["t"] // 300_000, sort=True)
+            d5 = pd.DataFrame({"t": g["t"].first(), "o": g["o"].first(), "h": g["h"].max(), "l": g["l"].min(),
+                               "c": g["c"].last(), "v": g["v"].sum()}).reset_index(drop=True)
+            five["df"], five["B"] = d5, Bars(d5)
+        return five["df"], five["B"]
 
     def run(v):
+        if v.get("tf", "1") == "5":
+            d5, b5 = tf5()
+            v5 = {**v, "n": str(max(2, int(v["n"]) // 5)), "wait": str(int(v["wait"]) // 5), "hold": str(int(v["hold"]) // 5), "_tfm": 5}
+            key = ("5", v5["n"], v["x"], v["vol"], v["one"])
+            if key not in ev_cache:
+                ev_cache[key] = bursts(d5, int(v5["n"]), float(v["x"]), v["vol"], v["one"], day_bars=288)
+            return simulate(b5, ev_cache[key], v5)
         key = (v["n"], v["x"], v["vol"], v["one"])
         if key not in ev_cache:
             ev_cache[key] = bursts(df, int(v["n"]), float(v["x"]), v["vol"], v["one"])
@@ -570,6 +606,14 @@ def main() -> None:
     res["base"] = split(base)
     res["base_trades_recent"] = [{k: x for k, x in t.items() if k != "_i"} for t in base[-100:]]
     res["sweeps"] = {k: {o_: split(run({**DEFAULT, k: o_})) for o_ in opts} for k, opts in VARIANTS.items()}
+    G = {"stop": "0.618", "tp": "scale75"}                       # Giacomo's rule
+    res["tf"] = {}
+    for bname, bp in (("1% bursts, 2x volume", {}), ("2% bursts, 3x volume", {"x": "2", "vol": "3"})):
+        for tname, tp_ in (("1-min candles", {}), ("5-min candles", {"tf": "5"})):
+            for gname, gp in (("", {}), (" + big candles", {"big": "on"})):
+                q = {**G, **bp, **tp_, **gp}
+                res["tf"][f"{bname}, {tname}{gname}"] = {"v": q, **split(run({**DEFAULT, **q}))}
+    print(f"5-minute / big candles done ({time.time() - t0:.0f}s)", flush=True)
     res["filters"] = {"best: slowing + 23.6%": {"v": BEST, **split(run({**DEFAULT, **BEST}))}}
     for name, p in {**FILTERS, "ALL filters": FILTERS_ALL,
                     "ALL filters except max 1/day": {**FILTERS_ALL, "cap": "off"},
