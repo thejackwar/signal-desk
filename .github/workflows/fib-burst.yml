@@ -1,0 +1,38 @@
+name: Fibonacci Burst (BTC)
+
+# engine/fib_burst.py - Bitcoin: find a sharp burst (X% in N minutes on a volume spike), draw Fibonacci levels on
+# it, trade the pullback. Binance 1-minute BTCUSDT from 2021 (public data, no key). Results: docs/data/fib/BURST.md.
+# Runs by hand (workflow_dispatch) and when the engine changes.
+on:
+  push:
+    branches: [main]
+    paths: ["engine/fib_burst.py"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: fib-burst
+  cancel-in-progress: false
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 340
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install pandas numpy
+      - name: Backtest
+        run: python -u engine/fib_burst.py
+      - name: Publish
+        run: |
+          git config user.name "signal-desk-bot"
+          git config user.email "signal-desk-bot@users.noreply.github.com"
+          git add docs/data/fib/burst.json docs/data/fib/BURST.md
+          git diff --cached --quiet && exit 0
+          git commit -m "Fibonacci Burst (BTC) backtest $(date -u +%F\ %H:%M)"
+          for i in 1 2 3; do git pull --rebase && git push && break; sleep 5; done
