@@ -1,6 +1,6 @@
-# Fibonacci on a burst - SPY (the Bitcoin setup) (2026-11-11T19:20+00:00)
+# Fibonacci on a burst - SPY (the Bitcoin setup) (2026-11-11T19:26+00:00)
 
-SPY 1-minute (regular session, Alpaca), 2021-01-04 -> 2026-11-12. Buy-and-hold SPY over the same time: 119.2%. Train = 2021-2023, test = 2024 on.
+SPY 1-minute (regular session, Alpaca), 2021-01-04 -> 2026-11-11. Buy-and-hold SPY over the same time: 119.1%. Train = 2021-2023, test = 2024 on.
 
 ## Default rules
 
