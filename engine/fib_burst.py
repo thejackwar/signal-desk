@@ -30,7 +30,10 @@ Exact rules tested here (every one is a switch, see VARIANTS):
   Stop        78.6% (default), 70% (between 61.8% and 78.6%: below that the move has failed) or 100% (the
               burst's low), plus a small tick.
   Target      "swing" (default): back to the burst's high; "1.272": the 127.2% extension; "2R"; "0.236" / "0.382":
-              the first level back (take profit at the 23.6% / 38.2% level instead of the full move).
+              the first level back (take profit at the 23.6% / 38.2% level instead of the full move); "scale":
+              half off at 23.6%, the rest rides to the swing - but if price comes back to 38.2% the rest is
+              closed there. Level targets sit a tick (0.02%) in front of the level so a touch fills them (9 Nov
+              23:06: a short's 23.6% target at 74,033.56 was missed by 96 cents).
   Time exit   whatever is still open is closed 60 / 240 (default) / 1440 minutes after the entry.
   Exit rules  stop first if a minute hits both (cautious); gaps fill at the minute's open.
   Costs       0.05% a side (default; checked at 0, 0.02, 0.05 and 0.1).
@@ -53,7 +56,7 @@ import urllib.error
 import urllib.request
 import zipfile
 from array import array
-from collections import defaultdict
+from collections import Counter, defaultdict
 from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 
@@ -77,7 +80,7 @@ VARIANTS = {
     "entry": ["touch", "confirm", "bounce", "zone"],
     "wait": ["60", "180"],
     "stop": ["0.7", "0.786", "1"],
-    "tp": ["swing", "1.272", "2R", "0.236", "0.382"],
+    "tp": ["swing", "1.272", "2R", "0.236", "0.382", "scale"],
     "hold": ["60", "240", "1440"],
     "cost": ["0", "0.02", "0.05", "0.1"],
 }
@@ -96,6 +99,9 @@ PRESETS = {
     "bounce entry + 70% stop": {"entry": "bounce", "stop": "0.7"},
     "close + bounce + 70% stop": {"one": "close", "entry": "bounce", "stop": "0.7"},
     "close + bounce + 70% stop + 23.6%": {"one": "close", "entry": "bounce", "stop": "0.7", "tp": "0.236"},
+    "scale out: half at 23.6%, rest out at 38.2% or the swing": {"tp": "scale"},
+    "close + scale out": {"one": "close", "tp": "scale"},
+    "close + bounce + 70% stop + scale out": {"one": "close", "entry": "bounce", "stop": "0.7", "tp": "scale"},
 }
 
 
@@ -222,6 +228,39 @@ class Bars:
         return self.lo[n], self.hi[n]
 
 
+def scale_exit(B: Bars, ie: int, j: int, end: int, confirm: bool, entry: float, stop: float, t1: float,
+               back: float, ext: float, upb: bool) -> tuple[float, str, int]:
+    """Half off at the first target (23.6%); the rest rides to the swing, but if price comes back to 38.2% the rest
+    is closed there. Before the first half: the normal stop. Returns (average exit price, why, exit minute)."""
+    o, h, l, c = B.o, B.h, B.l, B.c
+    hit = (lambda j_, p: h[j_] >= p) if upb else (lambda j_, p: l[j_] <= p)       # toward the swing
+    against = (lambda j_, p: l[j_] <= p) if upb else (lambda j_, p: h[j_] >= p)   # away from it
+    fill_with = (lambda j_, p: max(o[j_], p)) if upb else (lambda j_, p: min(o[j_], p))
+    fill_against = (lambda j_, p: min(o[j_], p)) if upb else (lambda j_, p: max(o[j_], p))
+    p1 = None
+    if not confirm:
+        if against(ie, stop):
+            return stop, "stop", ie                             # same minute: assume the worst
+        if entry == o[ie] and hit(ie, t1):
+            p1, j = t1, ie + 1                                  # filled at the open, stop untouched
+    while j <= end:
+        if j > ie:
+            if p1 is None:
+                if against(j, stop):
+                    return fill_against(j, stop), "stop", j
+                if hit(j, t1):
+                    p1 = fill_with(j, t1)
+                    j += 1
+                    continue                                    # the rest is checked from the next minute
+            else:
+                if against(j, back):
+                    return (p1 + fill_against(j, back)) / 2, "half + back to 38.2%", j
+                if hit(j, ext):
+                    return (p1 + fill_with(j, ext)) / 2, "half + swing", j
+        j += 1
+    return (c[end] if p1 is None else (p1 + c[end]) / 2), ("time" if p1 is None else "half + time"), end
+
+
 def simulate(B: Bars, ev: np.ndarray, v: dict) -> list[dict]:
     o, h, l, c = B.o, B.h, B.l, B.c
     lo_w, hi_w = B.window(int(v["n"]))
@@ -281,18 +320,22 @@ def simulate(B: Bars, ev: np.ndarray, v: dict) -> list[dict]:
             tgt = entry + sgn * 2 * risk
         elif tp == "1.272":
             tgt = a + (ext - a) * 1.272
-        else:                                                   # a level back toward the swing: 0.236 / 0.382
-            tgt = ext - (ext - a) * float(tp)
+        else:                                                   # a level back toward the swing (0.236 / 0.382),
+            lv_ = ext - (ext - a) * (0.236 if tp == "scale" else float(tp))   # placed a tick in front of the level
+            tgt = lv_ * (1 - sgn * TICK)                        # so a touch of the level fills it
+        back = ext - (ext - a) * 0.382                          # "scale": after the first half, back here = out
         if (tgt <= entry) if upb else (tgt >= entry):
             free_from = i + 1
             continue
         px = why = None
         j = ie if not confirm else ie + 1
-        if not confirm and ((l[ie] <= stop) if upb else (h[ie] >= stop)):
+        end = min(B.n - 1, ie + hold)
+        if tp == "scale":
+            px, why, j = scale_exit(B, ie, j, end, confirm, entry, stop, tgt, back, ext, upb)
+        elif not confirm and ((l[ie] <= stop) if upb else (h[ie] >= stop)):
             px, why, j = stop, "stop", ie                       # same minute: assume the worst
         elif not confirm and entry == o[ie] and ((h[ie] >= tgt) if upb else (l[ie] <= tgt)):
             px, why, j = tgt, "target", ie                      # filled at the open, stop untouched: target counts
-        end = min(B.n - 1, ie + hold)
         while px is None and j <= end:
             if j > ie:
                 if (l[j] <= stop) if upb else (h[j] >= stop):
@@ -307,7 +350,7 @@ def simulate(B: Bars, ev: np.ndarray, v: dict) -> list[dict]:
             j += 1
         if px is None:
             px, why, j = c[end], "time", end
-        ret = sgn * (px / entry - 1) - 2 * cost
+        ret =sgn * (px / entry - 1) - 2 * cost
         out.append({"t": int(B.t[ie]), "dir": "long" if upb else "short", "a": round(a, 2), "ext": round(ext, 2),
                     "_i": (i0, a_i, last_new, ie, j),
                     "in": round(entry, 2), "sl": round(stop, 2), "tp": round(tgt, 2), "out": round(px, 2),
@@ -350,7 +393,7 @@ def stats(ts: list[dict]) -> dict:
             "avg": round(float(100 * p.mean()), 3), "avg_r": round(float(np.mean([t["r"] for t in ts])), 2),
             "pf": round(float(gain / loss), 2) if loss else None, "acct": round(float(100 * (eq[-1] - 1)), 1),
             "maxdd": round(float(100 * dd), 1),
-            "exits": {k: sum(t["why"] == k for t in ts) for k in ("target", "stop", "time")}}
+            "exits": dict(sorted(Counter(t["why"] for t in ts).items()))}
 
 
 def day(t: int) -> str:
