@@ -10,15 +10,24 @@ Exact rules tested here (every one is a switch, see VARIANTS):
               the last N minutes (5, 15 (default), 30), and the high is being made right now. Volume filter:
               "any", or the burst's minutes averaged at least 2x (default) / 3x the average minute of the previous
               24 hours. A sell-off burst is the mirror (we then short the bounce).
+  One candle  a 1-minute candle can hold the whole move (its own low AND high are the window's extremes), and
+              1-minute data cannot say which came first. "keep" (default, the original behaviour): such a candle
+              counts as an up burst whenever it qualifies as one; "skip": ignore bursts whose low (up) / high (down)
+              is in the trigger candle itself; "close": a candle that makes a new high and a new low at once is read
+              by its close - closed down (red) = the spike came first, a sell-off; closed up = a burst up.
+              (Found on 10 Nov 2026 14:30: spike to 74,770, crash to 73,525 in one candle, traded as a long.)
   Levels      from the burst's low (100%) to its high (0%). While price keeps making new highs the levels are
               redrawn up to the new high (as you would on the chart); the low stays where it is.
   Entry       a limit order at the 38.2%, 50% (default) or 61.8% pullback - filled the first minute that reaches
               it (at the minute's open if it gaps through) - "touch" (default); or "confirm": a minute that
-              reaches the level and closes back above it, enter at that close.
+              reaches the level and closes back above it, enter at that close; or "zone": enter the first minute
+              price trades between 38.2% and 50% (at the 38.2% level, or at the minute's open if it opens inside
+              the zone; a minute that opens past 50% does not count).
   Wait        if the level is not reached within 60 minutes (default) / 180 minutes of the last new high, the
               setup is dropped.
   Stop        78.6% (default) or 100% (the burst's low), plus a small tick.
-  Target      "swing" (default): back to the burst's high; "1.272": the 127.2% extension; "2R".
+  Target      "swing" (default): back to the burst's high; "1.272": the 127.2% extension; "2R"; "0.236" / "0.382":
+              the first level back (take profit at the 23.6% / 38.2% level instead of the full move).
   Time exit   whatever is still open is closed 60 / 240 (default) / 1440 minutes after the entry.
   Exit rules  stop first if a minute hits both (cautious); gaps fill at the minute's open.
   Costs       0.05% a side (default; checked at 0, 0.02, 0.05 and 0.1).
@@ -55,20 +64,31 @@ TICK = 0.0002
 SPLIT = "2024-01-01"
 
 DEFAULT = {"n": "15", "x": "1", "vol": "2", "level": "0.5", "entry": "touch", "wait": "60",
-           "stop": "0.786", "tp": "swing", "hold": "240", "cost": "0.05"}
+           "stop": "0.786", "tp": "swing", "hold": "240", "cost": "0.05", "one": "keep"}
 VARIANTS = {
     "n": ["5", "15", "30"],
     "x": ["0.5", "1", "1.5", "2"],
     "vol": ["any", "2", "3"],
+    "one": ["keep", "skip", "close"],
     "level": ["0.382", "0.5", "0.618"],
-    "entry": ["touch", "confirm"],
+    "entry": ["touch", "confirm", "zone"],
     "wait": ["60", "180"],
     "stop": ["0.786", "1"],
-    "tp": ["swing", "1.272", "2R"],
+    "tp": ["swing", "1.272", "2R", "0.236", "0.382"],
     "hold": ["60", "240", "1440"],
     "cost": ["0", "0.02", "0.05", "0.1"],
 }
-GRID = ("n", "x", "vol", "level", "stop", "tp")       # the full combination grid (others at default)
+GRID = ("n", "x", "vol", "one", "level", "stop", "tp")   # the full combination grid (others at default)
+# Giacomo's fixes from reviewing the trades (11 Nov 2026), tested on their own and together (others at default).
+PRESETS = {
+    "read one-candle bursts by their close": {"one": "close"},
+    "skip one-candle bursts": {"one": "skip"},
+    "enter anywhere in 38.2-50%": {"entry": "zone"},
+    "take profit at 23.6%": {"tp": "0.236"},
+    "all three (close, zone, 23.6%)": {"one": "close", "entry": "zone", "tp": "0.236"},
+    "all three, skipping one-candle bursts": {"one": "skip", "entry": "zone", "tp": "0.236"},
+    "close + confirmed entry at 50% + 23.6%": {"one": "close", "entry": "confirm", "tp": "0.236"},
+}
 
 
 # ===================================================================== data
@@ -148,12 +168,22 @@ def demo() -> pd.DataFrame:
 
 
 # ===================================================================== bursts
-def bursts(df: pd.DataFrame, n: int, x: float, vol: str) -> np.ndarray:
+def bursts(df: pd.DataFrame, n: int, x: float, vol: str, one: str = "keep") -> np.ndarray:
     """Minutes where a burst is first seen: +i for an up burst, -i for a down burst (sorted by i)."""
     lo = df["l"].rolling(n, min_periods=n).min()
     hi = df["h"].rolling(n, min_periods=n).max()
     up = (df["h"] >= hi) & (df["h"] / lo - 1 >= x / 100)
     dn = (df["l"] <= lo) & (1 - df["l"] / hi >= x / 100)
+    if one == "skip":                                           # the move's start must be in an earlier candle
+        lo_prev = df["l"].shift(1).rolling(n - 1, min_periods=1).min()
+        hi_prev = df["h"].shift(1).rolling(n - 1, min_periods=1).max()
+        up &= ~(df["l"] < lo_prev)
+        dn &= ~(df["h"] > hi_prev)
+    elif one == "close":                                        # new high and new low in one candle: read the close
+        both = up & dn
+        red = df["c"] < df["o"]
+        up &= ~(both & red)
+        dn &= ~(both & ~red)
     if vol != "any":
         recent = df["v"].rolling(n).mean()
         base = df["v"].shift(n).rolling(1440, min_periods=720).mean()
@@ -190,6 +220,9 @@ def simulate(B: Bars, ev: np.ndarray, v: dict) -> list[dict]:
     lvf, stf = float(v["level"]), float(v["stop"])
     wait, hold, cost = int(v["wait"]), int(v["hold"]), float(v["cost"]) / 100
     confirm = v["entry"] == "confirm"
+    zone = v["entry"] == "zone"
+    if zone:
+        lvf = 0.382                                             # zone 38.2% (first fill) .. 50% (deepest open)
     out, free_from = [], 0
     for e in ev.tolist():
         upb = e >= 0
@@ -208,6 +241,13 @@ def simulate(B: Bars, ev: np.ndarray, v: dict) -> list[dict]:
             lvl = ext - rng * lvf
             stop = (ext - rng * stf) * (1 - sgn * TICK)
             reach = (l[i] <= lvl) if upb else (h[i] >= lvl)
+            if reach and zone:
+                deep = ext - rng * 0.5
+                if (o[i] < deep) if upb else (o[i] > deep):     # opened past 50%: not in the zone, setup dead
+                    break
+                entry = min(o[i], lvl) if upb else max(o[i], lvl)
+                ie = i
+                break
             if reach and not confirm:
                 entry = min(o[i], lvl) if upb else max(o[i], lvl)
                 ie = i
@@ -224,7 +264,15 @@ def simulate(B: Bars, ev: np.ndarray, v: dict) -> list[dict]:
             free_from = i + 1
             continue
         risk = abs(entry - stop)
-        tgt = ext if v["tp"] == "swing" else (entry + sgn * 2 * risk if v["tp"] == "2R" else a + (ext - a) * 1.272)
+        tp = v["tp"]
+        if tp == "swing":
+            tgt = ext
+        elif tp == "2R":
+            tgt = entry + sgn * 2 * risk
+        elif tp == "1.272":
+            tgt = a + (ext - a) * 1.272
+        else:                                                   # a level back toward the swing: 0.236 / 0.382
+            tgt = ext - (ext - a) * float(tp)
         if (tgt <= entry) if upb else (tgt >= entry):
             free_from = i + 1
             continue
@@ -232,6 +280,8 @@ def simulate(B: Bars, ev: np.ndarray, v: dict) -> list[dict]:
         j = ie if not confirm else ie + 1
         if not confirm and ((l[ie] <= stop) if upb else (h[ie] >= stop)):
             px, why, j = stop, "stop", ie                       # same minute: assume the worst
+        elif not confirm and entry == o[ie] and ((h[ie] >= tgt) if upb else (l[ie] <= tgt)):
+            px, why, j = tgt, "target", ie                      # filled at the open, stop untouched: target counts
         end = min(B.n - 1, ie + hold)
         while px is None and j <= end:
             if j > ie:
@@ -321,7 +371,11 @@ def summary(res: dict) -> str:
          f"Train = 2021-2023, test = 2024 on.", "",
          "## Default rules", "", "`" + " | ".join(f"{k}={v}" for k, v in DEFAULT.items()) + "`", "", hdr,
          row("default", b), "", f"Account by year: {b['by_year']}", f"Exits: {b['full'].get('exits')}", "",
-         "## One switch changed at a time", "", hdr]
+         "## Fixes from reviewing the trades (each on its own, then together; everything else at default)", "", hdr,
+         row("default (as before)", b)]
+    for name, p_ in res.get("presets", {}).items():
+        L.append(row(name, p_))
+    L += ["", "## One switch changed at a time", "", hdr]
     for k, opts in res["sweeps"].items():
         for o_, s in opts.items():
             L.append(row(f"{k}={o_}" + (" (default)" if DEFAULT[k] == o_ else ""), s))
@@ -354,9 +408,9 @@ def main() -> None:
     ev_cache: dict = {}
 
     def run(v):
-        key = (v["n"], v["x"], v["vol"])
+        key = (v["n"], v["x"], v["vol"], v["one"])
         if key not in ev_cache:
-            ev_cache[key] = bursts(df, int(v["n"]), float(v["x"]), v["vol"])
+            ev_cache[key] = bursts(df, int(v["n"]), float(v["x"]), v["vol"], v["one"])
         return simulate(B, ev_cache[key], v)
 
     res = {"generated": datetime.now(timezone.utc).isoformat(timespec="minutes"),
@@ -368,6 +422,7 @@ def main() -> None:
     res["base"] = split(base)
     res["base_trades_recent"] = [{k: x for k, x in t.items() if k != "_i"} for t in base[-100:]]
     res["sweeps"] = {k: {o_: split(run({**DEFAULT, k: o_})) for o_ in opts} for k, opts in VARIANTS.items()}
+    res["presets"] = {name: {"v": p, **split(run({**DEFAULT, **p}))} for name, p in PRESETS.items()}
     print(f"sweeps done ({time.time() - t0:.0f}s)", flush=True)
     combos = [{}]
     for k in GRID:
