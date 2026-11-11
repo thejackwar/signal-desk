@@ -1,4 +1,4 @@
-# Fibonacci on a burst - Bitcoin (2026-11-11T16:39+00:00)
+# Fibonacci on a burst - Bitcoin (2026-11-11T17:19+00:00)
 
 BTCUSDT 1-minute, 2021-01-01 -> 2026-11-10. Buy-and-hold BTC over the same time: 155.1%. Train = 2021-2023, test = 2024 on.
 
