@@ -35,7 +35,18 @@ Exact rules tested here (every one is a switch, see VARIANTS):
               or the 15:55 close.
   Time exit   whatever is still open is closed at 12:00 or the 15:55 close (default).
   Exit rules  stop first if a candle hits both (cautious); a gap through a level fills at the candle's open.
-  Costs       0.03% a side.
+  Costs       none by default (Giacomo, 11 Nov 2026: costs are added once the broker is chosen); 0.03 / 0.06 / 0.1%
+              a side are shown in the cost check.
+  Filters     (11 Nov 2026, each "off" by default, tested on each version's default rules - see FILTERS):
+              trend  "daily": longs only when yesterday's close is above the 50-day average, shorts only below;
+                     "spy": only in the direction SPY has moved since the open (up -> longs, down -> shorts), measured
+                     at the close of the candle before the entry.
+              pvol   "on": pullback / bounce versions - the pullback's candles average under 60% of the volume of the
+                     move it pulls back from; fade - the candle that breaks the level trades at least the move's average.
+              conf   the entry level must line up with another level (within a tenth of the swing): "prev" yesterday's
+                     high, low or close; "sr" those plus the 5-day and 20-day high and low (support / resistance);
+                     "vwap" today's VWAP (up to the candle before the entry); "round" a round number ($1 under $100, $5
+                     under $500, $10 above); "any" any of them.
   Account     each day up to 5 trades (the biggest morning moves first), 20% of the account each, no leverage.
 
 Data: Alpaca SIP 5-minute regular-session bars, split/dividend adjusted, from 2021. Current S&P 100 members
@@ -65,13 +76,35 @@ from opening_reversal import cut, demo_intraday, stats  # noqa: E402
 ROOT = Path(__file__).resolve().parent.parent
 OUT_DIR = ROOT / "docs" / "data" / "fib"
 FROM = "2021-01-04"
-COST = 0.0003
+COST = 0.0                 # no costs by default for now (Giacomo, 11 Nov 2026)
 TICK = 0.0005
 MOVE_MIN = 0.0025
 LEG_CONFIRM = 0.5          # leg mode: the reversal is "on" once price gives back half the morning move
 
 DEFAULT = {"mode": "trend", "anchor": "window", "win": "30", "move": "0.5", "gapf": "all", "level": "0.618",
-           "entry": "touch", "stop": "0.786", "fstop": "extreme", "tp": "swing", "late": "1200", "exit": "eod"}
+           "entry": "touch", "stop": "0.786", "fstop": "extreme", "tp": "swing", "late": "1200", "exit": "eod",
+           "trend": "off", "pvol": "off", "conf": "off"}
+FILTERS = {
+    "no filter (default rules)": {},
+    "with the daily trend (50-day average)": {"trend": "daily"},
+    "with SPY's direction today": {"trend": "spy"},
+    "low-volume pullback (fade: strong break)": {"pvol": "on"},
+    "level near yesterday's high / low / close": {"conf": "prev"},
+    "level near support / resistance (yesterday + 5-day + 20-day highs and lows)": {"conf": "sr"},
+    "level near VWAP": {"conf": "vwap"},
+    "level near a round number": {"conf": "round"},
+    "level near any of those": {"conf": "any"},
+    "S/R level, entry at 50%": {"conf": "sr", "level": "0.5"},
+    "S/R level, entry at 38.2%": {"conf": "sr", "level": "0.382"},
+    "daily trend + low volume": {"trend": "daily", "pvol": "on"},
+    "daily trend + S/R level": {"trend": "daily", "conf": "sr"},
+    "SPY direction + S/R level": {"trend": "spy", "conf": "sr"},
+    "low volume + S/R level": {"pvol": "on", "conf": "sr"},
+    "daily trend + low volume + any level": {"trend": "daily", "pvol": "on", "conf": "any"},
+    "all: daily trend + SPY + low volume + S/R level": {"trend": "daily", "pvol": "on", "conf": "sr", "spy": "on"},
+}
+EXTRA: dict = {}           # (symbol, day) -> yesterday's low, 5- and 20-day highs and lows (set in main)
+SPYDAY: dict = {}          # day -> {"o": SPY's 09:30 open, minute -> SPY's close}
 VARIANTS = {
     "win": ["15", "30", "45", "60"],
     "move": ["0.25", "0.5", "1"],
@@ -118,6 +151,8 @@ def build_candidates(tab: dict, sp100: set[str], demo=None) -> list[dict]:
             end = min(datetime.fromisoformat(d + "T16:00").replace(tzinfo=NY).astimezone(timezone.utc),
                       datetime.now(timezone.utc) - timedelta(minutes=20))
             syms, intr = [s for s, _ in items], {}
+            if "SPY" not in syms:
+                syms = syms + ["SPY"]                           # for the "SPY's direction today" filter
             try:
                 for j in range(0, len(syms), 100):
                     intr.update(fetch(syms[j:j + 100], "5Min", start.strftime("%Y-%m-%dT%H:%M:%SZ"),
@@ -125,9 +160,15 @@ def build_candidates(tab: dict, sp100: set[str], demo=None) -> list[dict]:
             except Exception as e:
                 print(f"  {d}: skipped ({e})", flush=True)
                 continue
+        spyb = [(ny(b["t"]), b) for b in (intr.get("SPY") or [])]
+        spyb = [(t.hour * 60 + t.minute, b) for t, b in spyb if t.date().isoformat() == d]
+        if spyb and spyb[0][0] == 570:
+            SPYDAY[d] = {"o": spyb[0][1]["o"], **{m: b["c"] for m, b in spyb}}
         for s, r in items:
             c = facts(s, d, r, intr.get(s) or [])
             if c:
+                c.update(EXTRA.get((s, d), {}))
+                c["s50"] = r.get("s50")
                 cands.append(c)
         if k % 100 == 0:
             print(f"  {d}: {k + 1}/{len(days)} sessions, {len(cands)} candidates", flush=True)
@@ -157,9 +198,74 @@ def facts(s: str, d: str, r: dict, bars: list[dict]) -> dict | None:
     if max(abs(x[0]) for x in sw.values()) < MOVE_MIN:
         return None
     ohlc = array("f")
+    vol = array("f")
     for m, b in today:
         ohlc.extend((b["o"], b["h"], b["l"], b["c"], m))
-    return {"s": s, "d": d, "o0": o0, "pc": r["pc"], "gap": r["o"] / r["pc"] - 1, "sw": sw, "bars": ohlc}
+        vol.append(float(b.get("v") or 0))
+    return {"s": s, "d": d, "o0": o0, "pc": r["pc"], "ph": r.get("ph"), "gap": r["o"] / r["pc"] - 1, "sw": sw,
+            "bars": ohlc, "vol": vol}
+
+
+def extra_levels(daily: dict) -> dict:
+    """(symbol, day) -> levels known before the open: yesterday's low and the 5- and 20-day highs and lows."""
+    out = {}
+    for s, bars in daily.items():
+        for i in range(20, len(bars)):
+            p5, p20 = bars[i - 5:i], bars[i - 20:i]
+            out[(s, bars[i]["t"][:10])] = {"pl": bars[i - 1]["l"], "h5": max(b["h"] for b in p5),
+                                           "l5": min(b["l"] for b in p5), "h20": max(b["h"] for b in p20),
+                                           "l20": min(b["l"] for b in p20)}
+    return out
+
+
+def filt(c: dict, v: dict, t: dict) -> bool:
+    """The entry filters (FILTERS). Only what was known before the entry candle is used."""
+    d = t["_draw"]
+    ie, z, o = d["ie"], d.get("z"), d.get("o")
+    if z is None or o is None:
+        return True
+    sgn = 1 if t["dir"] == "long" else -1
+    b, vol = c["bars"], c["vol"]
+    m_prev = int(b[5 * (ie - 1) + 4]) if ie > 0 else 570
+    if v["trend"] == "daily" or v.get("spy") == "on":
+        if c.get("s50") and ((c["pc"] <= c["s50"]) if sgn > 0 else (c["pc"] >= c["s50"])):
+            return False
+    if v["trend"] == "spy" or v.get("spy") == "on":
+        sd = SPYDAY.get(c["d"])
+        if sd and m_prev in sd and ((sd[m_prev] <= sd["o"]) if sgn > 0 else (sd[m_prev] >= sd["o"])):
+            return False
+    if v["pvol"] == "on":
+        io = d.get("io") if d.get("io") is not None else 0
+        iz = d.get("iz") if d.get("iz") is not None else ie
+        a_, b_ = min(io, iz), max(io, iz)
+        move = [vol[i] for i in range(a_, b_ + 1)]
+        mv_avg = sum(move) / len(move) if move else 0
+        if v["mode"] == "fade":
+            if vol[ie] < mv_avg:
+                return False
+        else:
+            pull = [vol[i] for i in range(b_ + 1, ie)]
+            if pull and sum(pull) / len(pull) >= 0.6 * mv_avg:
+                return False
+    if v["conf"] != "off":
+        lvl = z + (o - z) * float(v["level"])
+        tol = max(0.1 * abs(o - z), lvl * 0.0005)
+        lv = []
+        if v["conf"] in ("prev", "sr", "any"):
+            lv += [c.get("ph"), c.get("pl"), c["pc"]]
+        if v["conf"] in ("sr", "any"):
+            lv += [c.get("h5"), c.get("l5"), c.get("h20"), c.get("l20")]
+        if v["conf"] in ("vwap", "any") and ie > 0:
+            pv = sum((b[5 * i + 1] + b[5 * i + 2] + b[5 * i + 3]) / 3 * vol[i] for i in range(ie))
+            sv = sum(vol[i] for i in range(ie))
+            if sv:
+                lv.append(pv / sv)
+        if v["conf"] in ("round", "any"):
+            step = 1 if lvl < 100 else 5 if lvl < 500 else 10
+            lv.append(round(lvl / step) * step)
+        if not any(x is not None and abs(x - lvl) <= tol for x in lv):
+            return False
+    return True
 
 
 # ===================================================================== rules
@@ -368,10 +474,12 @@ def finish(c, v, sgn, entry, ie, stop, tgt, px, why, at, at_close) -> dict | Non
 
 def run(cands: list[dict], v: dict) -> list[dict]:
     out = []
+    use_f = v.get("trend", "off") != "off" or v.get("pvol", "off") != "off" or v.get("conf", "off") != "off" \
+        or v.get("spy") == "on"
     for c in cands:
         if passes(c, v):
             t = trade(c, v)
-            if t:
+            if t and (not use_f or filt(c, {**DEFAULT, **v}, t)):
                 out.append(t)
     return out
 
@@ -427,6 +535,9 @@ def summary(res: dict) -> str:
         for k, opts in s["sweeps"].items():
             for o, st in opts.items():
                 L.append(row(f"{k}={o}" + (" (default)" if DEFAULT[k] == o else ""), st))
+        L += ["", "### Filters (on the default rules)", "", hdr]
+        for name, st in (s.get("filters") or {}).items():
+            L.append(row(name, st))
         mine = [c for c in res["combos"] if f"{c['v']['mode']}|{c['v']['anchor']}" == mk]
         mn = res.get("min_train", 200)
         top = sorted((c for c in mine if (c["train"].get("n") or 0) >= mn),
@@ -465,6 +576,7 @@ def main() -> None:
         spy_rows = fetch(["SPY"], "1Day", WARMUP + "T00:00:00Z", today)["SPY"]
         print(f"daily bars for {len(daily)} of {len(syms)} symbols ({time.time() - t0:.0f}s)", flush=True)
     tab = daily_table(daily)
+    EXTRA.update(extra_levels(daily))
     spy = {}
     for y in sorted({b["t"][:4] for b in spy_rows if b["t"][:10] >= FROM}):
         yb = [b for b in spy_rows if b["t"][:4] == y]
@@ -502,6 +614,7 @@ def main() -> None:
              "cost_check": {f"{cst * 100:.2f}": cut(stats(run(cands, {**dv, "cost": cst}), spy))
                             for cst in (0.0, 0.0003, 0.0006, 0.001)},
              "sweeps": {k: {o: split(run(cands, {**dv, k: o}), spy) for o in VARIANTS[k]} for k in USES[mode]}}
+        m["filters"] = {name: {"v": p, **split(run(cands, {**dv, **p}), spy)} for name, p in FILTERS.items()}
         res["modes"][mk] = m
         viewer[mk] = sample(base, by_key, dv)
 

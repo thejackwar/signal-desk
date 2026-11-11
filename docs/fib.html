@@ -392,9 +392,10 @@ function rules() {
     const rows = Object.entries(R.presets).map(([name, s]) => [esc(name), s, name === "default rules"]);
     html += group("p", "Fixes from reviewing the trades", `${rows.length} rules · ${rows.filter(r => both(r[1])).length} made money in both halves`, rtable(rows), true);
   }
-  if (isB() && R.filters) {
-    const rows = Object.entries(R.filters).map(([name, s]) => [esc(name), s, false]);
-    html += group("f", "Filters (on top of the best fixes)", `${rows.length} rules · ${rows.filter(r => both(r[1])).length} made money in both halves`, rtable(rows));
+  const FL = isB() ? R.filters : R.modes?.[S.mode]?.filters;
+  if (FL) {
+    const rows = Object.entries(FL).map(([name, s]) => [esc(name), s, name.startsWith("no filter")]);
+    html += group("f", isB() ? "Filters (on top of the best fixes)" : "Filters: trend, volume and levels (on the default rules)", `${rows.length} rules · ${rows.filter(r => both(r[1])).length} made money in both halves`, rtable(rows), !isB());
   }
   if (sweeps) {
     const rows = [];
