@@ -1,4 +1,4 @@
-# Fibonacci Retracement backtest (2026-11-11T22:07+00:00)
+# Fibonacci Retracement backtest (2026-11-11T22:10+00:00)
 
 SPY, 5-minute bars from 2021-01-04, costs 0.0% a side. SPY over the same period: 119.2%. Train = 2021-2023, test = 2024 on.
 
@@ -130,7 +130,7 @@ Of those 10, **8** were still profitable per trade in the test years. Combinatio
 |---|---|---|---|---|---|---|---|---|---|
 | no filter (default rules) | 46 | 21.7% | -0.064% | -0.29 | 0.57 | -0.6% | -0.8% | -0.064% / 0.6 | -0.065% / 0.5 |
 | with the daily trend (50-day average) | 18 | 11.1% | -0.114% | -0.57 | 0.39 | -0.4% | -0.6% | -0.132% / 0.35 | -0.079% / 0.5 |
-| with SPY's direction today | 46 | 21.7% | -0.064% | -0.29 | 0.57 | -0.6% | -0.8% | -0.064% / 0.6 | -0.065% / 0.5 |
+| with SPY's direction today | 43 | 23.3% | -0.043% | -0.24 | 0.68 | -0.4% | -0.6% | -0.043% / 0.7 | -0.041% / 0.63 |
 | low-volume pullback (fade: strong break) | 19 | 10.5% | -0.143% | -0.7 | 0.15 | -0.5% | -0.5% | -0.11% / 0.29 | -0.189% / 0.0 |
 | level near yesterday's high / low / close | 6 | 33.3% | -0.08% | -0.13 | 0.35 | -0.1% | -0.1% | -0.023% / 0.52 | -0.137% / 0.31 |
 | level near support / resistance (yesterday + 5-day + 20-day highs and lows) | 6 | 33.3% | -0.08% | -0.13 | 0.35 | -0.1% | -0.1% | -0.023% / 0.52 | -0.137% / 0.31 |
@@ -141,10 +141,10 @@ Of those 10, **8** were still profitable per trade in the test years. Combinatio
 | S/R level, entry at 38.2% | 8 | 50.0% | -0.033% | -0.09 | 0.87 | -0.1% | -0.3% | -0.114% / 0.68 | 0.102% / 2.22 |
 | daily trend + low volume | 6 | 0.0% | -0.233% | -1.0 | 0.0 | -0.3% | -0.3% | -0.211% / 0.0 | -0.278% / 0.0 |
 | daily trend + S/R level | 1 | 0.0% | -0.442% | -1.0 | 0.0 | -0.1% | -0.1% | None% / None | -0.442% / 0.0 |
-| SPY direction + S/R level | 6 | 33.3% | -0.08% | -0.13 | 0.35 | -0.1% | -0.1% | -0.023% / 0.52 | -0.137% / 0.31 |
+| SPY direction + S/R level | 5 | 40.0% | -0.007% | 0.05 | 0.88 | -0.0% | -0.0% | -0.023% / 0.52 | 0.015% / 1.2 |
 | low volume + S/R level | 4 | 25.0% | -0.148% | -0.48 | 0.11 | -0.1% | -0.1% | 0.003% / 1.09 | -0.299% / 0.0 |
 | daily trend + low volume + any level | 1 | 0.0% | -0.442% | -1.0 | 0.0 | -0.1% | -0.1% | None% / None | -0.442% / 0.0 |
-| all: daily trend + SPY + low volume + S/R level | 1 | 0.0% | -0.442% | -1.0 | 0.0 | -0.1% | -0.1% | None% / None | -0.442% / 0.0 |
+| all: daily trend + SPY + low volume + S/R level | 0 | None% | None% | None | None | None% | None% | None% / None | None% / None |
 
 ### Best 10 combinations chosen on TRAIN only (min 50 train trades) - does TEST hold?
 
@@ -200,7 +200,7 @@ Of those 10, **0** were still profitable per trade in the test years. Combinatio
 |---|---|---|---|---|---|---|---|---|---|
 | no filter (default rules) | 56 | 67.9% | -0.017% | -0.05 | 0.91 | -0.2% | -0.5% | -0.03% / 0.85 | 0.004% / 1.02 |
 | with the daily trend (50-day average) | 31 | 74.2% | 0.027% | 0.04 | 1.16 | 0.2% | -0.2% | -0.046% / 0.79 | 0.117% / 2.12 |
-| with SPY's direction today | 56 | 67.9% | -0.017% | -0.05 | 0.91 | -0.2% | -0.5% | -0.03% / 0.85 | 0.004% / 1.02 |
+| with SPY's direction today | 0 | None% | None% | None | None | None% | None% | None% / None | None% / None |
 | low-volume pullback (fade: strong break) | 5 | 60.0% | -0.089% | -0.18 | 0.58 | -0.1% | -0.1% | -0.118% / 0.44 | -0.07% / 0.67 |
 | level near yesterday's high / low / close | 13 | 76.9% | 0.081% | 0.04 | 1.71 | 0.2% | -0.1% | 0.031% / 1.22 | 0.138% / 2.68 |
 | level near support / resistance (yesterday + 5-day + 20-day highs and lows) | 14 | 71.4% | 0.014% | -0.04 | 1.08 | 0.0% | -0.3% | -0.08% / 0.65 | 0.138% / 2.68 |
@@ -211,10 +211,10 @@ Of those 10, **0** were still profitable per trade in the test years. Combinatio
 | S/R level, entry at 38.2% | 14 | 42.9% | -0.055% | -0.17 | 0.78 | -0.2% | -0.5% | 0.116% / 1.56 | -0.149% / 0.45 |
 | daily trend + low volume | 2 | 100.0% | 0.206% | 0.32 | None | 0.1% | 0.0% | 0.188% / None | 0.223% / None |
 | daily trend + S/R level | 8 | 75.0% | 0.032% | -0.03 | 1.19 | 0.1% | -0.2% | -0.123% / 0.57 | 0.125% / 2.26 |
-| SPY direction + S/R level | 14 | 71.4% | 0.014% | -0.04 | 1.08 | 0.0% | -0.3% | -0.08% / 0.65 | 0.138% / 2.68 |
+| SPY direction + S/R level | 0 | None% | None% | None | None | None% | None% | None% / None | None% / None |
 | low volume + S/R level | 1 | 100.0% | 0.188% | 0.19 | None | 0.0% | 0.0% | 0.188% / None | None% / None |
 | daily trend + low volume + any level | 1 | 100.0% | 0.188% | 0.19 | None | 0.0% | 0.0% | 0.188% / None | None% / None |
-| all: daily trend + SPY + low volume + S/R level | 1 | 100.0% | 0.188% | 0.19 | None | 0.0% | 0.0% | 0.188% / None | None% / None |
+| all: daily trend + SPY + low volume + S/R level | 0 | None% | None% | None | None | None% | None% | None% / None | None% / None |
 
 ### Best 10 combinations chosen on TRAIN only (min 50 train trades) - does TEST hold?
 
@@ -270,7 +270,7 @@ Of those 10, **7** were still profitable per trade in the test years. Combinatio
 |---|---|---|---|---|---|---|---|---|---|
 | no filter (default rules) | 38 | 76.3% | 0.051% | 0.01 | 1.39 | 0.4% | -0.4% | -0.002% / 0.99 | 0.154% / 6.68 |
 | with the daily trend (50-day average) | 22 | 72.7% | -0.01% | -0.07 | 0.93 | -0.0% | -0.4% | -0.069% / 0.65 | 0.095% / 3.15 |
-| with SPY's direction today | 38 | 76.3% | 0.051% | 0.01 | 1.39 | 0.4% | -0.4% | -0.002% / 0.99 | 0.154% / 6.68 |
+| with SPY's direction today | 3 | 66.7% | 0.306% | 0.18 | 2.59 | 0.2% | -0.1% | 0.042% / 1.15 | 0.834% / None |
 | low-volume pullback (fade: strong break) | 6 | 100.0% | 0.12% | 0.22 | None | 0.1% | 0.0% | 0.139% / None | 0.11% / None |
 | level near yesterday's high / low / close | 3 | 100.0% | 0.365% | 0.46 | None | 0.2% | 0.0% | 0.054% / None | 0.521% / None |
 | level near support / resistance (yesterday + 5-day + 20-day highs and lows) | 3 | 100.0% | 0.365% | 0.46 | None | 0.2% | 0.0% | 0.054% / None | 0.521% / None |
@@ -281,7 +281,7 @@ Of those 10, **7** were still profitable per trade in the test years. Combinatio
 | S/R level, entry at 38.2% | 8 | 50.0% | -0.043% | -0.15 | 0.85 | -0.1% | -0.2% | 0.087% / 1.3 | -0.26% / 0.01 |
 | daily trend + low volume | 3 | 100.0% | 0.101% | 0.16 | None | 0.1% | 0.0% | 0.16% / None | 0.072% / None |
 | daily trend + S/R level | 2 | 100.0% | 0.131% | 0.42 | None | 0.1% | 0.0% | 0.054% / None | 0.208% / None |
-| SPY direction + S/R level | 3 | 100.0% | 0.365% | 0.46 | None | 0.2% | 0.0% | 0.054% / None | 0.521% / None |
+| SPY direction + S/R level | 1 | 100.0% | 0.834% | 0.54 | None | 0.2% | 0.0% | None% / None | 0.834% / None |
 | low volume + S/R level | 0 | None% | None% | None | None | None% | None% | None% / None | None% / None |
 | daily trend + low volume + any level | 1 | 100.0% | 0.004% | 0.01 | None | 0.0% | 0.0% | None% / None | 0.004% / None |
 | all: daily trend + SPY + low volume + S/R level | 0 | None% | None% | None | None | None% | None% | None% / None | None% / None |
@@ -342,7 +342,7 @@ Of those 10, **10** were still profitable per trade in the test years. Combinati
 |---|---|---|---|---|---|---|---|---|---|
 | no filter (default rules) | 51 | 27.5% | -0.006% | -0.08 | 0.96 | -0.1% | -0.5% | 0.005% / 1.03 | -0.022% / 0.83 |
 | with the daily trend (50-day average) | 26 | 23.1% | -0.045% | -0.24 | 0.71 | -0.2% | -0.4% | -0.109% / 0.37 | 0.043% / 1.34 |
-| with SPY's direction today | 51 | 27.5% | -0.006% | -0.08 | 0.96 | -0.1% | -0.5% | 0.005% / 1.03 | -0.022% / 0.83 |
+| with SPY's direction today | 2 | 50.0% | -0.146% | -0.28 | 0.23 | -0.1% | -0.1% | -0.381% / 0.0 | 0.089% / None |
 | low-volume pullback (fade: strong break) | 18 | 11.1% | -0.117% | -0.61 | 0.27 | -0.4% | -0.4% | -0.071% / 0.5 | -0.189% / 0.0 |
 | level near yesterday's high / low / close | 10 | 50.0% | 0.088% | 0.41 | 1.87 | 0.2% | -0.2% | 0.056% / 1.39 | 0.135% / 4.97 |
 | level near support / resistance (yesterday + 5-day + 20-day highs and lows) | 11 | 45.5% | 0.062% | 0.28 | 1.57 | 0.1% | -0.2% | 0.056% / 1.39 | 0.069% / 2.04 |
@@ -353,10 +353,10 @@ Of those 10, **10** were still profitable per trade in the test years. Combinati
 | S/R level, entry at 38.2% | 10 | 50.0% | 0.141% | -0.07 | 1.59 | 0.3% | -0.2% | -0.123% / 0.64 | 0.318% / 2.86 |
 | daily trend + low volume | 9 | 11.1% | -0.118% | -0.61 | 0.28 | -0.2% | -0.2% | -0.087% / 0.44 | -0.18% / 0.0 |
 | daily trend + S/R level | 6 | 50.0% | 0.095% | 0.46 | 2.0 | 0.1% | -0.1% | 0.059% / 1.47 | 0.131% / 3.01 |
-| SPY direction + S/R level | 11 | 45.5% | 0.062% | 0.28 | 1.57 | 0.1% | -0.2% | 0.056% / 1.39 | 0.069% / 2.04 |
+| SPY direction + S/R level | 1 | 100.0% | 0.089% | 0.44 | None | 0.0% | 0.0% | None% / None | 0.089% / None |
 | low volume + S/R level | 1 | 0.0% | -0.21% | -1.0 | 0.0 | -0.0% | -0.0% | -0.21% / 0.0 | None% / None |
 | daily trend + low volume + any level | 3 | 0.0% | -0.217% | -1.0 | 0.0 | -0.1% | -0.1% | -0.24% / 0.0 | -0.169% / 0.0 |
-| all: daily trend + SPY + low volume + S/R level | 1 | 0.0% | -0.21% | -1.0 | 0.0 | -0.0% | -0.0% | -0.21% / 0.0 | None% / None |
+| all: daily trend + SPY + low volume + S/R level | 0 | None% | None% | None | None | None% | None% | None% / None | None% / None |
 
 ### Best 10 combinations chosen on TRAIN only (min 50 train trades) - does TEST hold?
 
