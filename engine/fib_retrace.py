@@ -187,6 +187,14 @@ def swing(c: dict, v: dict):
     return up, s0, s1
 
 
+def mark(c: dict, k: int, up: bool, s0: float, s1: float, anchor: str) -> None:
+    """Remember where the levels were drawn (for the trade viewer): 0% at s1, 100% at s0."""
+    b = c["bars"]
+    hi_i = max(range(k), key=lambda j: b[5 * j + 1])
+    lo_i = min(range(k), key=lambda j: b[5 * j + 2])
+    c["_lv"] = {"z": s1, "o": s0, "iz": hi_i if up else lo_i, "io": None if anchor == "pdc" else (lo_i if up else hi_i)}
+
+
 def target(v, sgn, entry, stop, base, rng):
     """base = where the 'swing' target sits; rng = signed size of the move the extensions are measured on."""
     if v["tp"] == "swing":
@@ -210,6 +218,7 @@ def trade_trend(c: dict, v: dict) -> dict | None:
         return None
     up, s0, s1 = sw
     b, n, k = c["bars"], len(c["bars"]) // 5, int(v["win"]) // 5
+    mark(c, k, up, s0, s1, v["anchor"])
     sgn = 1 if up else -1                                      # with the morning move
     rng = s1 - s0
     lvl = s1 - rng * float(v["level"])
@@ -242,6 +251,7 @@ def trade_fade(c: dict, v: dict) -> dict | None:
         return None
     up, s0, s1 = sw
     b, n, k = c["bars"], len(c["bars"]) // 5, int(v["win"]) // 5
+    mark(c, k, up, s0, s1, v["anchor"])
     sgn = -1 if up else 1                                      # against the morning move
     rng = s1 - s0
     lvl = s1 - rng * float(v["level"])
@@ -272,7 +282,7 @@ def trade_leg(c: dict, v: dict) -> dict | None:
         ext_i = min(range(k), key=lambda j: b[5 * j + 2]); ext = b[5 * ext_i + 2]
     late, last_m = MIN[v["late"]], MIN[v["exit"]]
     lvf, stf = float(v["level"]), float(v["stop"])
-    on, far = False, None                                       # far = the leg's low (high) so far
+    on, far, far_i = False, None, None                          # far = the leg's low (high) so far
     for i in range(k, n):
         o, h, l, cl, m = b[5 * i:5 * i + 5]
         if m >= late or m >= last_m:
@@ -283,11 +293,15 @@ def trade_leg(c: dict, v: dict) -> dict | None:
             half = ext - (ext - base) * LEG_CONFIRM
             if (cl < half) if up else (cl > half):
                 on = True
-                far = min(b[5 * j + 2] for j in range(ext_i, i + 1)) if up else max(b[5 * j + 1] for j in range(ext_i, i + 1))
+                if up:
+                    far_i = min(range(ext_i, i + 1), key=lambda j: b[5 * j + 2]); far = b[5 * far_i + 2]
+                else:
+                    far_i = max(range(ext_i, i + 1), key=lambda j: b[5 * j + 1]); far = b[5 * far_i + 1]
             continue
         leg = ext - far                                         # signed: + for an up morning (leg goes down)
         lvl = far + leg * lvf
         stop = (far + leg * stf) * (1 - sgn * TICK)
+        c["_lv"] = {"z": far, "o": ext, "iz": far_i, "io": ext_i}
         reach = (h >= lvl) if up else (l <= lvl)
         if v["entry"] == "touch" and reach:
             entry = max(o, lvl) if up else min(o, lvl)
@@ -302,7 +316,8 @@ def trade_leg(c: dict, v: dict) -> dict | None:
             return manage(c, v, sgn, cl, i, stop, target(v, sgn, cl, stop, far, leg), True)
         if (h >= ext) if up else (l <= ext):                    # back through the top: the reversal failed
             return None
-        far = min(far, l) if up else max(far, h)               # redraw on new lows (highs)
+        if (l < far) if up else (h > far):                      # redraw on new lows (highs)
+            far, far_i = (l if up else h), i
     return None
 
 
@@ -333,12 +348,20 @@ def finish(c, v, sgn, entry, ie, stop, tgt, px, why, at, at_close) -> dict | Non
         return None
     mv = c["sw"][v["win"]][0]
     ret = sgn * (px / entry - 1) - 2 * v.get("cost", COST)
-    m_in = int(c["bars"][5 * ie + 4]) + (5 if at_close else 0)
+    b = c["bars"]
+    m_in = int(b[5 * ie + 4]) + (5 if at_close else 0)
+    ix = ie
+    while ix + 1 < len(b) // 5 and b[5 * (ix + 1) + 4] < at:
+        ix += 1
+    if why != "time" and b[5 * ix + 4] < at and ix + 1 < len(b) // 5:
+        ix += 1
     return {"s": c["s"], "d": c["d"], "mv": round(mv * 100, 2), "dir": "long" if sgn > 0 else "short",
             "in": round(entry, 2), "tin": f"{m_in // 60:02d}:{m_in % 60:02d}", "sl": round(stop, 2),
             "tp": round(tgt, 2), "out": round(px, 2), "why": why,
             "at": f"{int(at) // 60:02d}:{int(at) % 60:02d}", "pct": round(ret * 100, 3),
-            "r": round(sgn * (px - entry) / risk, 2), "rv": abs(mv)}
+            "r": round(sgn * (px - entry) / risk, 2), "rv": abs(mv),
+            "_draw": {**{k: (round(x, 2) if isinstance(x, float) else x) for k, x in (c.get("_lv") or {}).items()},
+                      "ie": ie, "ix": ix}}
 
 
 def run(cands: list[dict], v: dict) -> list[dict]:
@@ -348,6 +371,23 @@ def run(cands: list[dict], v: dict) -> list[dict]:
             t = trade(c, v)
             if t:
                 out.append(t)
+    return out
+
+
+def sample(ts: list[dict], by_key: dict, v: dict, n_last: int = 40, n_rand: int = 60) -> list[dict]:
+    """Trades for the page's trade viewer: the latest ones plus a random spread over the years, with their day's bars."""
+    import random
+    ts = sorted(ts, key=lambda t: (t["d"], t["tin"], t["s"]))
+    pick = ts[-n_last:]
+    rest = ts[:-n_last]
+    pick += random.Random(20261111).sample(rest, min(n_rand, len(rest)))
+    out = []
+    for t in sorted(pick, key=lambda t: (t["d"], t["tin"], t["s"]), reverse=True):
+        c = by_key[(t["s"], t["d"])]
+        b = c["bars"]
+        bars = [[int(b[5 * i + 4])] + [round(float(x), 2) for x in b[5 * i:5 * i + 4]] for i in range(len(b) // 5)]
+        out.append({**{k: t[k] for k in t if k not in ("rv", "_draw")}, "draw": t["_draw"], "pc": round(c["pc"], 2),
+                    "win": v["win"], "bars": bars})
     return out
 
 
@@ -433,16 +473,19 @@ def main() -> None:
            "default": DEFAULT, "variants": VARIANTS, "spy_by_year": spy, "spy_total": spy_total,
            "costs_pct_a_side": COST * 100, "modes": {}, "combos": []}
 
+    by_key = {(c["s"], c["d"]): c for c in cands}
+    viewer: dict = {}
     for mode, anchor in MODES:
         mk = f"{mode}|{anchor}"
         dv = {**DEFAULT, "mode": mode, "anchor": anchor}
         base = run(cands, dv)
         m = {"base": split(base, spy),
-             "base_trades_recent": [{k: t[k] for k in t if k != "rv"} for t in sorted(base, key=lambda t: t["d"])[-100:]],
+             "base_trades_recent": [{k: t[k] for k in t if k not in ("rv", "_draw")} for t in sorted(base, key=lambda t: t["d"])[-100:]],
              "cost_check": {f"{cst * 100:.2f}": cut(stats(run(cands, {**dv, "cost": cst}), spy))
                             for cst in (0.0, 0.0003, 0.0006, 0.001)},
              "sweeps": {k: {o: split(run(cands, {**dv, k: o}), spy) for o in VARIANTS[k]} for k in USES[mode]}}
         res["modes"][mk] = m
+        viewer[mk] = sample(base, by_key, dv)
 
         # the move threshold only filters days, so simulate once at the smallest move and filter the trades
         grid = [k for k in USES[mode] if k not in ("move", "gapf", "late")]
@@ -463,6 +506,9 @@ def main() -> None:
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(json.dumps(res, separators=(",", ":")))
     (out.with_name("fib-demo-SUMMARY.md") if a.demo else OUT_DIR / "SUMMARY.md").write_text(summary(res))
+    (out.with_name("fib-demo-trades.json") if a.demo else OUT_DIR / "trades_stocks.json").write_text(
+        json.dumps({"generated": res["generated"], "default": DEFAULT, "names": MODE_NAME, "modes": viewer},
+                   separators=(",", ":")))
     print(f"done -> {out} ({time.time() - t0:.0f}s)")
 
 

@@ -1,0 +1,343 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<script src="account.js?v=3"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0b0f14">
+<title>Fibonacci Retracement</title>
+<meta name="description" content="Fibonacci retracement levels, backtested: S&P 100 stocks after the open (five ways of drawing the levels) and Bitcoin after a sharp burst. Click any trade to see the chart with the levels.">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Investment Center Signals">
+<meta property="og:title" content="Fibonacci Retracement, backtested | Investment Center Signals">
+<meta property="og:description" content="Do Fibonacci levels hold? S&P 100 since 2021 and Bitcoin 1-minute since 2021, with every sample trade drawn on its chart.">
+<meta property="og:url" content="https://thejackwar.github.io/signal-desk/fib.html">
+<meta property="og:image" content="https://thejackwar.github.io/signal-desk/og-image.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="canonical" href="https://thejackwar.github.io/signal-desk/fib.html">
+<script>
+(() => {
+  const CF_ANALYTICS_TOKEN = "a2d6810a28f64b999832485d1635915a";
+  if (!CF_ANALYTICS_TOKEN || location.hostname === "localhost") return;
+  const s = document.createElement("script");
+  s.defer = true; s.src = "https://static.cloudflareinsights.com/beacon.min.js";
+  s.dataset.cfBeacon = JSON.stringify({ token: CF_ANALYTICS_TOKEN });
+  document.head.appendChild(s);
+})();
+</script>
+<script src="sections.js?v=4" defer></script>
+<link rel="icon" href="favicon.ico?v=2" sizes="any">
+<link rel="icon" type="image/svg+xml" href="logo.svg?v=2">
+<link rel="apple-touch-icon" href="icon-180.png?v=2">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+:root {
+  --bg: #0b0f14; --panel: #0e141c; --panel-2: #121a24; --line: #1e2834; --line-2: #2a3644;
+  --fg: #e8eef4; --muted: #9aa7b4; --faint: #6b7886;
+  --up: #2fd6a0; --up-2: #1c8f6b; --down: #f0566a; --down-2: #9c3443;
+  --blue: #6cb4ff; --blue-bg: rgba(108,180,255,.12);
+  --font: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body { background: radial-gradient(1200px 600px at 50% -200px, #132033 0%, var(--bg) 60%) no-repeat, var(--bg); color: var(--fg);
+  font: 16px/1.5 var(--font); -webkit-font-smoothing: antialiased; font-feature-settings: "tnum"; padding-bottom: calc(40px + env(safe-area-inset-bottom, 0px)); }
+a { color: var(--blue); text-decoration: none; }
+a:hover { text-decoration: underline; }
+.wrap { max-width: 980px; margin: 0 auto; padding: 0 22px; }
+@media (max-width: 560px) { .wrap { padding: 0 16px; } }
+.bar { position: sticky; top: 0; z-index: 20; background: rgba(11,15,20,.86); backdrop-filter: saturate(180%) blur(20px); -webkit-backdrop-filter: saturate(180%) blur(20px);
+  border-bottom: 1px solid var(--line); padding-top: env(safe-area-inset-top, 0px); }
+.bar-in { max-width: 980px; margin: 0 auto; padding: 0 22px; height: 48px; display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; }
+.back { font-size: 14px; }
+.bar-title { font-size: 15px; font-weight: 600; }
+.k { font: 500 11px/1.3 var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.k.blue { color: var(--blue); }
+.hero { padding: 40px 0 10px; }
+.hero h1 { font-size: clamp(34px, 7vw, 52px); line-height: 1.04; letter-spacing: -.035em; margin: 10px 0 12px; font-weight: 700; }
+.hero p.lede { color: var(--muted); font-size: 18px; max-width: 680px; margin: 0; }
+.fine { color: var(--faint); font-size: 13px; }
+h2 { font-size: 24px; letter-spacing: -.02em; margin: 40px 0 6px; }
+h2 + p { color: var(--muted); margin: 0 0 10px; }
+.panel { background: linear-gradient(180deg, var(--panel-2), var(--panel)); border: 1px solid var(--line); border-radius: 4px; padding: 14px 16px 12px; margin: 14px 0; }
+.ph { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 8px; flex-wrap: wrap; }
+.seg { display: inline-flex; flex-wrap: wrap; gap: 2px; background: #0a1017; border: 1px solid var(--line); border-radius: 6px; padding: 2px; }
+.seg button { font: 500 13px var(--font); color: var(--muted); background: none; border: 0; border-radius: 4px; padding: 7px 11px; cursor: pointer; }
+.seg button[aria-pressed="true"] { background: var(--blue-bg); color: var(--fg); box-shadow: inset 0 0 0 1px rgba(108,180,255,.35); }
+.tabs { margin: 22px 0 6px; }
+.tabs .seg button { font-size: 15px; padding: 9px 16px; }
+.row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin: 8px 0; }
+.cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 10px; margin: 12px 0; }
+.cards > div { border: 1px solid var(--line); border-radius: 4px; padding: 12px 14px; background: var(--panel); }
+.cards b { display: block; font: 600 24px var(--font); letter-spacing: -.02em; margin-top: 4px; }
+.cards small { color: var(--muted); display: block; margin-top: 2px; font-size: 13px; }
+.up { color: var(--up); } .down { color: var(--down); }
+.note { border-left: 2px solid var(--blue); padding: 4px 0 4px 14px; color: var(--muted); margin: 14px 0; font-size: 15px; }
+.note b { color: var(--fg); }
+.steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; margin: 10px 0; }
+.step { border: 1px solid var(--line); border-radius: 4px; padding: 12px 14px; background: var(--panel); }
+.step h3 { margin: 4px 0 4px; font-size: 16px; }
+.step p { margin: 0; color: var(--muted); font-size: 14px; }
+svg.chart { display: block; width: 100%; height: auto; touch-action: pan-y; }
+svg.chart text { paint-order: stroke; stroke: #0b0f14; stroke-width: 3px; stroke-linejoin: round; }
+.cap { font-size: 15px; color: var(--muted); margin: 10px 0 2px; }
+.cap b { color: var(--fg); }
+.nav { display: flex; gap: 8px; align-items: center; }
+.nav button { font: 500 13px var(--font); color: var(--fg); background: #0a1017; border: 1px solid var(--line); border-radius: 6px; padding: 6px 12px; cursor: pointer; }
+.nav button:disabled { opacity: .35; cursor: default; }
+.tw { overflow-x: auto; -webkit-overflow-scrolling: touch; max-height: 560px; overflow-y: auto; border: 1px solid var(--line); border-radius: 4px; }
+table { width: 100%; border-collapse: collapse; font-size: 14px; }
+th, td { padding: 8px 9px; text-align: right; border-bottom: 1px solid var(--line); white-space: nowrap; }
+th { font: 500 11px var(--mono); letter-spacing: .06em; text-transform: uppercase; color: var(--faint); position: sticky; top: 0; background: var(--panel-2); }
+th:first-child, td:first-child { text-align: left; }
+tbody tr { cursor: pointer; }
+tbody tr:hover td { background: rgba(255,255,255,.025); }
+tr.sel td { background: var(--blue-bg) !important; }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 14px; font: 500 11px var(--mono); color: var(--faint); margin-top: 6px; }
+.legend i { display: inline-block; width: 14px; height: 2px; margin-right: 6px; vertical-align: 3px; }
+.empty { padding: 30px 0; text-align: center; color: var(--muted); }
+footer { margin-top: 48px; border-top: 1px solid var(--line); padding-top: 16px; }
+</style>
+</head>
+<body>
+<nav class="bar" aria-label="Page">
+  <div class="bar-in">
+    <a class="back" href="index.html#home" aria-label="Back to Signals">‹ Signals</a>
+    <span class="bar-title">Fibonacci Retracement</span>
+    <span></span>
+  </div>
+</nav>
+
+<main class="wrap">
+  <section class="hero">
+    <span class="k">Backtest · S&amp;P 100 + Bitcoin · since 2021</span>
+    <h1>Do Fibonacci levels hold?</h1>
+    <p class="lede">Let a move happen, draw the retracement levels on it, and wait for price to come back to a level. Tested on every S&amp;P 100 stock since 2021, and on Bitcoin minute by minute. Click any trade below to see exactly where the levels were drawn and what happened.</p>
+  </section>
+
+  <div class="tabs"><div class="seg" role="tablist" id="tabs">
+    <button type="button" data-tab="stocks" aria-pressed="true">S&amp;P 100 stocks</button>
+    <button type="button" data-tab="btc" aria-pressed="false">Bitcoin bursts</button>
+  </div></div>
+
+  <div id="mode-row" class="row"></div>
+  <div class="steps" id="how"></div>
+  <div class="cards" id="cards"></div>
+  <p class="note" id="verdict"></p>
+
+  <h2>The trades, one by one</h2>
+  <p id="tr-p">A sample of the trades with the default settings: the latest 40 and 60 more picked at random over the years. Click a row to draw it.</p>
+
+  <div class="panel" id="viewer">
+    <div class="ph">
+      <span class="k blue" id="v-title">–</span>
+      <div class="nav"><button type="button" id="prev" aria-label="Previous trade">‹ Newer</button><button type="button" id="next" aria-label="Next trade">Older ›</button></div>
+    </div>
+    <svg class="chart" id="ch" viewBox="0 0 900 420" role="img" aria-label="Candle chart of the selected trade with the Fibonacci levels, entry, stop, target and exit"></svg>
+    <div class="legend">
+      <span><i style="background:#6cb4ff;height:3px"></i>Entry level</span>
+      <span><i style="background:var(--down);border-top:1px dashed var(--down);height:0"></i>Stop</span>
+      <span><i style="background:var(--up);height:0;border-top:1px dashed var(--up)"></i>Target</span>
+      <span>▲▼ entry · ● exit</span>
+    </div>
+    <p class="cap" id="cap"></p>
+  </div>
+
+  <div class="row"><span class="k">Show</span><div class="seg" id="filter">
+    <button type="button" data-f="all" aria-pressed="true">All</button><button type="button" data-f="win" aria-pressed="false">Winners</button><button type="button" data-f="lose" aria-pressed="false">Losers</button>
+  </div><span class="fine" id="count"></span></div>
+  <div class="tw"><table id="list"></table></div>
+
+  <footer>
+    <p class="fine" id="foot">Information only, not advice.</p>
+  </footer>
+</main>
+
+<script>
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const pc = (v, d = 2) => v == null ? "–" : (v > 0 ? "+" : v < 0 ? "−" : "") + Math.abs(v).toFixed(d) + "%";
+const tone = v => v > 0 ? "up" : v < 0 ? "down" : "";
+const hm = m => `${String(Math.floor(m / 60)).padStart(2, "0")}:${String(m % 60).padStart(2, "0")}`;
+const fmtD = d => new Date(d + "T12:00:00Z").toLocaleDateString("en-GB", { timeZone: "UTC", weekday: "short", day: "numeric", month: "short", year: "numeric" });
+const px = v => v >= 1000 ? v.toLocaleString("en", { maximumFractionDigits: 0 }) : v.toFixed(2);
+const pctLbl = f => (f * 100).toFixed(1).replace(".0", "") + "%";
+const WHY = { stop: "stop", target: "target", time: "time exit" };
+const LEVELS = [[0, "#8a96a3"], [0.236, "#f0566a"], [0.382, "#f5a623"], [0.5, "#2fd6a0"], [0.618, "#26c6da"], [0.786, "#4fc3f7"], [1, "#8a96a3"]];
+const MODES = [["trend|window", "Pullback (trend)"], ["trend|pdc", "Pullback, from yesterday's close"], ["fade|window", "Fade the break"], ["fade|pdc", "Fade, from yesterday's close"], ["leg|window", "Reversal leg"]];
+const HOW = {
+  "trend|window": [["Watch", w => `First ${w} minutes after the 09:30 New York open (15:30 Italy). No trade.`], ["Draw", () => "Levels from that window's low to its high (the other way round on a down morning)."], ["Enter", l => `Buy the pullback to the ${l} level, with the morning move (short it on a down morning).`], ["Out", () => "Stop below 78.6%, target back to the morning high, anything left closed at 15:55."]],
+  "trend|pdc": [["Watch", w => `First ${w} minutes after the open.`], ["Draw", () => "Levels from yesterday's close to the morning high (low on a down morning)."], ["Enter", l => `Buy the pullback to the ${l} level, with the morning move.`], ["Out", () => "Stop below 78.6%, target back to the morning high, closed by 15:55."]],
+  "fade|window": [["Watch", w => `First ${w} minutes after the open.`], ["Draw", () => "Levels from that window's low to its high."], ["Enter", l => `A 5-minute candle CLOSES beyond the ${l} level: the morning is reversing, trade against it at that close.`], ["Out", () => "Stop beyond the morning high (low), target all the way back to where the move started."]],
+  "fade|pdc": [["Watch", w => `First ${w} minutes after the open.`], ["Draw", () => "Levels from yesterday's close to the morning high (low)."], ["Enter", l => `A 5-minute candle closes beyond the ${l} level: trade against the morning move.`], ["Out", () => "Stop beyond the morning extreme, target back to yesterday's close."]],
+  "leg|window": [["Watch", w => `First ${w} minutes after the open; keep following the high (low).`], ["Turn", () => "Once price gives back half of the morning move, the reversal leg is on."], ["Draw", () => "Levels on the new leg, from the top down to the lowest low since; redrawn on new lows."], ["Enter", l => `Short the bounce to the ${l} level of the leg (buy it after a morning sell-off). Stop above 78.6%, target the leg's low.`]],
+  "btc": [["Burst", () => "Bitcoin moves at least 1% within 15 minutes, on at least 2× the normal volume of the last 24 hours."], ["Draw", () => "Levels from the burst's low to its high, redrawn while it keeps making new highs."], ["Enter", l => `Buy the pullback to the ${l} level within 60 minutes (short the bounce after a sell-off burst).`], ["Out", () => "Stop below 78.6%, target back to the burst's high, closed after 4 hours."]],
+};
+
+const S = { tab: "stocks", mode: "trend|window", f: "all", i: 0 };
+try { Object.assign(S, JSON.parse(localStorage.getItem("fibPage") || "{}")); } catch {}
+const save = () => { try { localStorage.setItem("fibPage", JSON.stringify({ tab: S.tab, mode: S.mode, f: S.f })); } catch {} };
+const D = {};
+async function load(p) { try { const r = await fetch(p + "?t=" + Date.now()); return r.ok ? r.json() : null; } catch { return null; } }
+
+function trades() {
+  const all = S.tab === "btc" ? (D.btcT?.trades || []) : (D.stT?.modes?.[S.mode] || []);
+  return all.filter(t => S.f === "all" || (S.f === "win" ? t.pct > 0 : t.pct <= 0));
+}
+const defLevel = () => S.tab === "btc" ? +(D.btcT?.default?.level ?? 0.5) : +(D.stT?.default?.level ?? 0.618);
+
+// ------------------------------------------------------------------ top of the page
+function header() {
+  document.querySelectorAll("#tabs button").forEach(b => b.setAttribute("aria-pressed", b.dataset.tab === S.tab));
+  $("mode-row").innerHTML = S.tab === "stocks" ? `<span class="k">Version</span><div class="seg" id="modes">${MODES.map(([k, l]) => `<button type="button" data-mode="${k}" aria-pressed="${k === S.mode}">${esc(l)}</button>`).join("")}</div>` : "";
+  const how = HOW[S.tab === "btc" ? "btc" : S.mode], w = D.stT?.default?.win || "30", l = pctLbl(defLevel());
+  $("how").innerHTML = how.map(([h, f]) => `<div class="step"><span class="k">${esc(h)}</span><p>${esc(f(h === "Watch" ? w : l))}</p></div>`).join("");
+
+  let st = null, bench = null, benchName = "";
+  if (S.tab === "btc") { st = D.btcB?.base; bench = D.btcB?.hold_btc; benchName = "Holding Bitcoin"; }
+  else { st = D.stB?.modes?.[S.mode]?.base; bench = D.stB?.spy_total; benchName = "Holding SPY"; }
+  if (!st) { $("cards").innerHTML = `<div class="empty" style="grid-column:1/-1">The backtest for this version is still running on GitHub. Check back soon.</div>`; $("verdict").textContent = ""; return; }
+  const F = st.full, A = st.train, B = st.test, acct = F.acct ?? F.acct_total, dd = F.maxdd ?? F.acct_maxdd;
+  $("cards").innerHTML = `
+    <div><span class="k">Trades</span><b>${(F.n || 0).toLocaleString("en")}</b><small>${Math.round(F.win)}% won</small></div>
+    <div><span class="k">Average trade</span><b class="${tone(F.avg)}">${pc(F.avg, 3)}</b><small>after costs · profit factor ${F.pf ?? "–"}</small></div>
+    <div><span class="k">Account</span><b class="${tone(acct)}">${pc(acct, 0)}</b><small>${esc(benchName)}: ${pc(bench, 0)} · worst drop ${pc(dd, 0)}</small></div>
+    <div><span class="k">2021–23 vs 2024–26</span><b><span class="${tone(A.avg)}">${pc(A.avg, 3)}</span> <span style="color:var(--faint)">/</span> <span class="${tone(B.avg)}">${pc(B.avg, 3)}</span></b><small>average trade in each half</small></div>`;
+  const ok = A.avg > 0 && B.avg > 0;
+  $("verdict").innerHTML = ok ? `<b>Made money in both halves</b> with the default settings.` :
+    `<b>${F.avg > 0 ? "Thin" : "Lost money"}</b> with the default settings${A.avg > 0 !== B.avg > 0 ? " (and not consistent between the two halves)" : ""}. ${F.pf != null && F.pf < 1 ? "For every €1 won, about €" + (1 / F.pf).toFixed(2) + " was lost." : ""}`;
+  $("foot").textContent = S.tab === "btc"
+    ? `Data: Binance BTCUSDT 1-minute candles, ${D.btcB?.from ?? "2021"} to ${D.btcB?.to ?? "today"}. Costs 0.05% each way. One trade at a time, whole account, no leverage. Full tables: docs/data/fib/BURST.md. Information only, not advice.`
+    : `Data: Alpaca 5-minute bars, split and dividend adjusted, January 2021 to today. Current S&P 100 members only (survivorship bias). Costs 0.03% each way. Up to 5 trades a day, 20% of the account each. Full tables: docs/data/fib/SUMMARY.md. Information only, not advice.`;
+}
+
+// ------------------------------------------------------------------ the list
+function list() {
+  const ts = trades();
+  $("count").textContent = ts.length ? `${ts.length} trades` : "";
+  if (!ts.length) { $("list").innerHTML = `<tbody><tr><td class="empty">No sample trades yet. They appear when the backtest has run.</td></tr></tbody>`; return; }
+  S.i = Math.min(S.i, ts.length - 1);
+  const btc = S.tab === "btc";
+  $("list").innerHTML = `<thead><tr><th>Day</th>${btc ? "" : "<th>Stock</th>"}<th>Trade</th><th>In</th><th>Out</th><th>Why</th><th>Result</th></tr></thead><tbody>` +
+    ts.map((t, i) => { const tm = times(t);
+      return `<tr data-i="${i}" class="${i === S.i ? "sel" : ""}"><td>${esc(tm.day)}</td>${btc ? "" : `<td>${esc(t.s)}</td>`}<td>${t.dir === "long" ? "buy" : "short"}</td><td>${px(t.in)} · ${esc(tm.tin)}</td><td>${px(t.out)} · ${esc(tm.tout)}</td><td>${esc(WHY[t.why] || t.why)}</td><td class="${tone(t.pct)}">${pc(t.pct)}</td></tr>`; }).join("") + `</tbody>`;
+}
+
+// times shown: stocks in New York time (Italy +6h most of the year), Bitcoin in your own time zone
+function times(t) {
+  if (S.tab === "btc") {
+    const at = i => new Date(t.t0 + i * t.step * 60000);
+    const f = d => d.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" });
+    return { day: at(t.draw.ie).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }), tin: f(at(t.draw.ie)), tout: f(at(t.draw.ix)), label: i => f(at(i)) };
+  }
+  return { day: new Date(t.d + "T12:00:00Z").toLocaleDateString("en-GB", { timeZone: "UTC", day: "numeric", month: "short", year: "numeric" }), tin: t.tin, tout: t.at, label: i => hm(t.bars[i]?.[0] ?? 0) };
+}
+
+// ------------------------------------------------------------------ the chart
+function chart() {
+  const ts = trades(), t = ts[S.i], svg = $("ch");
+  $("prev").disabled = !t || S.i <= 0; $("next").disabled = !t || S.i >= ts.length - 1;
+  if (!t) { svg.innerHTML = `<text x="450" y="210" text-anchor="middle" fill="#6b7886" font-size="14">No trade to show yet.</text>`; $("cap").textContent = ""; $("v-title").textContent = "–"; return; }
+  const btc = S.tab === "btc", tm = times(t), dr = t.draw;
+  const O = [], H = [], L = [], C = [];
+  for (const b of t.bars) { const k = btc ? 0 : 1; O.push(b[k]); H.push(b[k + 1]); L.push(b[k + 2]); C.push(b[k + 3]); }
+  const n = O.length;
+  const z = btc ? t.ext : dr.z, o = btc ? t.a : (dr.o ?? t.pc);          // 0% and 100% prices
+  const io = btc ? dr.io : dr.io, iz = dr.iz;
+  const lvl = f => z + (o - z) * f;
+  let lo = Math.min(...L, t.sl, t.tp, lvl(0), lvl(1)), hi = Math.max(...H, t.sl, t.tp, lvl(0), lvl(1));
+  const pad = (hi - lo) * .05; lo -= pad; hi += pad;
+  const narrow = window.innerWidth < 640;
+  const W = narrow ? 480 : 900, Hh = narrow ? 470 : 420, pl = 4, pr = narrow ? 98 : 128, pt = 14, pb = 26;
+  svg.setAttribute("viewBox", `0 0 ${W} ${Hh}`);
+  const x = i => pl + (i + .5) * (W - pl - pr) / n, y = v => pt + (hi - v) / (hi - lo) * (Hh - pt - pb);
+  const cw = Math.max(1.2, (W - pl - pr) / n * .66);
+  const M = "JetBrains Mono, monospace";
+  let g = "";
+  // price grid
+  for (let k = 0; k <= 5; k++) { const v = lo + (hi - lo) * k / 5; g += `<line x1="${pl}" x2="${W - pr}" y1="${y(v)}" y2="${y(v)}" stroke="#151d27"/>`; }
+  // the watch window (stocks)
+  if (!btc) { const k = +t.win / 5; g += `<rect x="${pl}" y="${pt}" width="${x(k - 1) + (W - pl - pr) / n / 2 - pl}" height="${Hh - pt - pb}" fill="rgba(108,180,255,.05)"/><text x="${pl + 4}" y="${pt + 12}" fill="#6b7886" font-size="10" font-family="${M}">first ${t.win} min</text>`; }
+  if (btc && dr.ib != null) g += `<line x1="${x(dr.ib)}" x2="${x(dr.ib)}" y1="${pt}" y2="${Hh - pb}" stroke="#2a3644" stroke-dasharray="2 3"/><text x="${x(dr.ib) + 4}" y="${pt + 12}" fill="#6b7886" font-size="10" font-family="${M}">burst spotted</text>`;
+  // time labels
+  const every = Math.max(1, Math.round(n / (narrow ? 4 : 8)));
+  for (let i = 0; i < n; i += every) g += `<text x="${x(i)}" y="${Hh - 8}" text-anchor="${i === 0 ? "start" : "middle"}" fill="#6b7886" font-size="10" font-family="${M}">${esc(tm.label(i))}</text>`;
+  // fib levels
+  const x0 = io == null ? pl : x(io), entF = defLevel();
+  for (const [f, col] of LEVELS) {
+    const yy = y(lvl(f)), main = Math.abs(f - entF) < 1e-6;
+    g += `<line x1="${x0}" x2="${W - pr}" y1="${yy}" y2="${yy}" stroke="${main ? "#6cb4ff" : col}" stroke-width="${main ? 2 : 1}" opacity="${main ? 1 : .55}"/>`;
+    g += `<text x="${W - pr + 6}" y="${yy + 3.5}" fill="${main ? "#6cb4ff" : col}" font-size="10.5" font-family="${M}" font-weight="${main ? 600 : 400}">${pctLbl(f)} ${px(lvl(f))}</text>`;
+  }
+  if (io == null) g += `<text x="${pl + 4}" y="${y(o) - 5}" fill="#8a96a3" font-size="10" font-family="${M}">yesterday's close</text>`;
+  // the swing it was drawn on
+  if (iz != null) g += `<line x1="${x0}" y1="${y(o)}" x2="${x(iz)}" y2="${y(z)}" stroke="#9aa7b4" stroke-dasharray="4 4" opacity=".7"/>`;
+  // candles
+  for (let i = 0; i < n; i++) { const up = C[i] >= O[i], col = up ? "#2fd6a0" : "#f0566a";
+    g += `<line x1="${x(i)}" x2="${x(i)}" y1="${y(H[i])}" y2="${y(L[i])}" stroke="${col}"/><rect x="${x(i) - cw / 2}" y="${y(Math.max(O[i], C[i]))}" width="${cw}" height="${Math.max(1, Math.abs(y(O[i]) - y(C[i])))}" fill="${col}"/>`; }
+  // stop and target while the trade was open
+  const xe = x(dr.ie), xx = x(Math.max(dr.ie, dr.ix));
+  g += `<rect x="${xe}" y="${Math.min(y(t.in), y(t.tp))}" width="${Math.max(2, xx - xe)}" height="${Math.abs(y(t.in) - y(t.tp))}" fill="rgba(47,214,160,.08)"/>`;
+  g += `<rect x="${xe}" y="${Math.min(y(t.in), y(t.sl))}" width="${Math.max(2, xx - xe)}" height="${Math.abs(y(t.in) - y(t.sl))}" fill="rgba(240,86,106,.10)"/>`;
+  g += `<line x1="${xe}" x2="${Math.max(xx, xe + 20)}" y1="${y(t.sl)}" y2="${y(t.sl)}" stroke="#f0566a" stroke-dasharray="5 3" stroke-width="1.4"/>`;
+  g += `<line x1="${xe}" x2="${Math.max(xx, xe + 20)}" y1="${y(t.tp)}" y2="${y(t.tp)}" stroke="#2fd6a0" stroke-dasharray="5 3" stroke-width="1.4"/>`;
+  // entry and exit
+  const ye = y(t.in), long = t.dir === "long";
+  g += long ? `<path d="M${xe} ${ye + 3} l-7 12 h14 z" fill="#6cb4ff" stroke="#0b0f14"/>` : `<path d="M${xe} ${ye - 3} l-7 -12 h14 z" fill="#6cb4ff" stroke="#0b0f14"/>`;
+  g += `<circle cx="${xx}" cy="${y(t.out)}" r="5" fill="${t.pct > 0 ? "#2fd6a0" : "#f0566a"}" stroke="#0b0f14" stroke-width="1.5"/>`;
+  g += `<text x="${xe}" y="${long ? ye + 28 : ye - 18}" text-anchor="middle" fill="#6cb4ff" font-size="10.5" font-family="${M}">${long ? "buy" : "short"} ${px(t.in)}</text>`;
+  svg.innerHTML = g;
+
+  $("v-title").textContent = `${btc ? "BTC" : t.s} · ${tm.day} · ${long ? "buy" : "short"} · ${pc(t.pct)}`;
+  $("cap").innerHTML = caption(t, tm, z, o, entF);
+  document.querySelectorAll("#list tr.sel").forEach(r => r.classList.remove("sel"));
+  const row = document.querySelector(`#list tr[data-i="${S.i}"]`); if (row) row.classList.add("sel");
+}
+
+function caption(t, tm, z, o, f) {
+  const long = t.dir === "long", res = `<b class="${tone(t.pct)}">${pc(t.pct)}</b>`;
+  const out = `Out at ${px(t.out)} at ${esc(tm.tout)} (${esc(WHY[t.why] || t.why)}): ${res} after costs.`;
+  const lv = `${pctLbl(f)} level (${px(z + (o - z) * f)})`;
+  if (S.tab === "btc") {
+    const upb = t.ext > t.a;
+    return `Bitcoin ${upb ? "jumped" : "dropped"} from <b>${px(t.a)}</b> to <b>${px(t.ext)}</b> (${pc((t.ext / t.a - 1) * 100, 1)}) in a burst. Levels drawn from ${upb ? "low to high" : "high to low"}; price came back to the ${lv} and the test ${long ? "bought" : "shorted"} at ${px(t.in)} at ${esc(tm.tin)}. Stop ${px(t.sl)}, target ${px(t.tp)}. ${out} <span class="fine">Times in your time zone${t.step > 1 ? `, ${t.step}-minute candles` : ", 1-minute candles"}.</span>`;
+  }
+  const [mode] = S.mode.split("|"), up = t.mv > 0, from = S.mode.endsWith("pdc") ? "yesterday's close" : (up ? "the morning low" : "the morning high");
+  const morning = `In the first ${t.win} minutes ${esc(t.s)} went <b class="${tone(t.mv)}">${pc(t.mv, 1)}</b>.`;
+  if (mode === "trend") return `${morning} Levels drawn from ${from} (${px(o)}) to the ${up ? "high" : "low"} (${px(z)}). Price pulled back to the ${lv} and the test ${long ? "bought" : "shorted"} at ${px(t.in)} at ${esc(tm.tin)} New York, with the morning move. Stop ${px(t.sl)} (78.6%), target ${px(t.tp)}. ${out}`;
+  if (mode === "fade") return `${morning} Levels drawn from ${from} (${px(o)}) to the ${up ? "high" : "low"} (${px(z)}). A 5-minute candle closed ${up ? "below" : "above"} the ${lv}, so the test traded the reversal: ${long ? "bought" : "shorted"} at ${px(t.in)} at ${esc(tm.tin)} New York. Stop ${px(t.sl)}, target ${px(t.tp)}. ${out}`;
+  return `${morning} It then turned and gave back half the move, so the levels went on the new leg: from the ${up ? "top" : "bottom"} (${px(o)}) to the ${up ? "lowest low" : "highest high"} since (${px(z)}). Price bounced to the ${lv} and the test ${long ? "bought" : "shorted"} at ${px(t.in)} at ${esc(tm.tin)} New York. Stop ${px(t.sl)}, target ${px(t.tp)}. ${out}`;
+}
+
+function render() { save(); header(); list(); chart(); }
+
+document.addEventListener("click", e => {
+  const tb = e.target.closest("[data-tab]"); if (tb) { S.tab = tb.dataset.tab; S.i = 0; ensure().then(render); return; }
+  const md = e.target.closest("[data-mode]"); if (md) { S.mode = md.dataset.mode; S.i = 0; render(); return; }
+  const fl = e.target.closest("[data-f]"); if (fl) { S.f = fl.dataset.f; S.i = 0; document.querySelectorAll("#filter button").forEach(b => b.setAttribute("aria-pressed", b.dataset.f === S.f)); render(); return; }
+  const r = e.target.closest("#list tr[data-i]"); if (r) { S.i = +r.dataset.i; chart(); if (window.innerWidth < 900) $("viewer").scrollIntoView({ behavior: "smooth", block: "start" }); }
+});
+let rz; window.addEventListener("resize", () => { clearTimeout(rz); rz = setTimeout(chart, 150); });
+$("prev").onclick = () => { if (S.i > 0) { S.i--; chart(); } };
+$("next").onclick = () => { S.i++; chart(); };
+document.addEventListener("keydown", e => {
+  if (e.target.closest("input, textarea")) return;
+  if (e.key === "ArrowDown" || e.key === "ArrowRight") { const n = trades().length; if (S.i < n - 1) { S.i++; chart(); e.preventDefault(); } }
+  if (e.key === "ArrowUp" || e.key === "ArrowLeft") { if (S.i > 0) { S.i--; chart(); e.preventDefault(); } }
+});
+
+async function ensure() {
+  if (S.tab === "btc" && !D.btcT) [D.btcB, D.btcT] = await Promise.all([load("data/fib/burst.json"), load("data/fib/trades_btc.json")]);
+  if (S.tab === "stocks" && !D.stT) [D.stB, D.stT] = await Promise.all([load("data/fib/backtest.json"), load("data/fib/trades_stocks.json")]);
+}
+(async () => {
+  if (!MODES.some(m => m[0] === S.mode)) S.mode = "trend|window";
+  document.querySelectorAll("#filter button").forEach(b => b.setAttribute("aria-pressed", b.dataset.f === S.f));
+  await ensure(); render();
+})();
+</script>
+</body>
+</html>

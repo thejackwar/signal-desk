@@ -199,6 +199,8 @@ def simulate(B: Bars, ev: np.ndarray, v: dict) -> list[dict]:
         sgn = 1 if upb else -1
         a = lo_w[i0] if upb else hi_w[i0]                      # burst start (100%)
         ext, last_new = (h[i0] if upb else l[i0]), i0          # burst extreme (0%), redrawn on new extremes
+        n_ = int(v["n"])
+        a_i = max(range(max(0, i0 - n_ + 1), i0 + 1), key=lambda j: -l[j] if upb else h[j])
         entry = ie = None
         i = i0 + 1
         while i < B.n and i - last_new <= wait:
@@ -247,9 +249,32 @@ def simulate(B: Bars, ev: np.ndarray, v: dict) -> list[dict]:
             px, why, j = c[end], "time", end
         ret = sgn * (px / entry - 1) - 2 * cost
         out.append({"t": int(B.t[ie]), "dir": "long" if upb else "short", "a": round(a, 2), "ext": round(ext, 2),
+                    "_i": (i0, a_i, last_new, ie, j),
                     "in": round(entry, 2), "sl": round(stop, 2), "tp": round(tgt, 2), "out": round(px, 2),
                     "why": why, "mins": j - ie, "pct": round(ret * 100, 4), "r": round(sgn * (px - entry) / risk, 2)})
         free_from = j + 1
+    return out
+
+
+def sample(ts: list[dict], B: Bars, n_last: int = 40, n_rand: int = 60) -> list[dict]:
+    """Trades for the page's trade viewer, with the minutes around them (grouped into 2-5 minute candles if long)."""
+    import random
+    pick = ts[-n_last:] + random.Random(20261111).sample(ts[:-n_last], min(n_rand, max(0, len(ts) - n_last)))
+    out = []
+    for t in sorted(pick, key=lambda t: -t["t"]):
+        i0, a_i, z_i, ie, ix = t["_i"]
+        lo_i, hi_i = max(0, a_i - 30), min(B.n - 1, ix + 30)
+        step = 1
+        while (hi_i - lo_i + 1) / step > 240:
+            step = {1: 2, 2: 3, 3: 5, 5: 10, 10: 15, 15: 30}.get(step, step * 2)
+        lo_i -= lo_i % step if step > 1 else 0
+        bars = []
+        for s_ in range(lo_i, hi_i + 1, step):
+            e_ = min(hi_i, s_ + step - 1)
+            bars.append([round(B.o[s_], 2), round(max(B.h[s_:e_ + 1]), 2), round(min(B.l[s_:e_ + 1]), 2), round(B.c[e_], 2)])
+        rel = lambda i: (i - lo_i) // step
+        out.append({**{k: x for k, x in t.items() if k != "_i"}, "t0": int(B.t[lo_i]), "step": step, "bars": bars,
+                    "draw": {"io": rel(a_i), "iz": rel(z_i), "ib": rel(i0), "ie": rel(ie), "ix": rel(ix)}})
     return out
 
 
@@ -341,7 +366,7 @@ def main() -> None:
            "hold_btc": round((df.c.iloc[-1] / df.o.iloc[0] - 1) * 100, 1)}
     base = run(DEFAULT)
     res["base"] = split(base)
-    res["base_trades_recent"] = base[-100:]
+    res["base_trades_recent"] = [{k: x for k, x in t.items() if k != "_i"} for t in base[-100:]]
     res["sweeps"] = {k: {o_: split(run({**DEFAULT, k: o_})) for o_ in opts} for k, opts in VARIANTS.items()}
     print(f"sweeps done ({time.time() - t0:.0f}s)", flush=True)
     combos = [{}]
@@ -358,6 +383,8 @@ def main() -> None:
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(json.dumps(res, separators=(",", ":")))
     (out.with_name("fib-burst-demo.md") if a.demo else OUT_DIR / "BURST.md").write_text(summary(res))
+    (out.with_name("fib-burst-demo-trades.json") if a.demo else OUT_DIR / "trades_btc.json").write_text(
+        json.dumps({"generated": res["generated"], "default": DEFAULT, "trades": sample(base, B)}, separators=(",", ":")))
     f = res["base"]["full"]
     print(f"default: {f.get('n')} trades, win {f.get('win')}%, avg {f.get('avg')}%, PF {f.get('pf')}, "
           f"account {f.get('acct')}% | BTC {res['hold_btc']}% -> {out} ({time.time() - t0:.0f}s)")
