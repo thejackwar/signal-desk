@@ -90,7 +90,8 @@ VARIANTS = {
     "hold": ["60", "240", "1440"],
     "cost": ["0", "0.02", "0.05", "0.1"],
 }
-GRID = ("n", "x", "vol", "one", "level", "stop", "tp")   # the full combination grid (others at default)
+GRID = ("n", "x", "vol", "one", "slow", "level", "stop", "tp")   # the full combination grid (others at default)
+GRID_OPTS = {"one": ["keep", "close"], "tp": ["swing", "0.236", "scale"]}   # trimmed in the grid (no effect / worse)
 # Giacomo's fixes from reviewing the trades (11 Nov 2026), tested on their own and together (others at default).
 PRESETS = {
     "read one-candle bursts by their close": {"one": "close"},
@@ -494,7 +495,7 @@ def main() -> None:
     print(f"sweeps done ({time.time() - t0:.0f}s)", flush=True)
     combos = [{}]
     for k in GRID:
-        combos = [{**x, k: o_} for x in combos for o_ in VARIANTS[k]]
+        combos = [{**x, k: o_} for x in combos for o_ in GRID_OPTS.get(k, VARIANTS[k])]
     res["combos"] = []
     for k, x in enumerate(combos):
         v = {**DEFAULT, **x}
