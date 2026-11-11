@@ -114,7 +114,7 @@ footer { margin-top: 48px; border-top: 1px solid var(--line); padding-top: 16px;
 
 <main class="wrap">
   <section class="hero">
-    <span class="k">Backtest · S&amp;P 100 + Bitcoin · since 2021</span>
+    <span class="k">Backtest · S&amp;P 100, SPY + Bitcoin · since 2021</span>
     <h1>Do Fibonacci levels hold?</h1>
     <p class="lede">Let a move happen, draw the retracement levels on it, and wait for price to come back to a level. Tested on every S&amp;P 100 stock since 2021, and on Bitcoin minute by minute. Click any trade below to see exactly where the levels were drawn and what happened.</p>
   </section>
@@ -123,6 +123,7 @@ footer { margin-top: 48px; border-top: 1px solid var(--line); padding-top: 16px;
     <button type="button" data-tab="stocks" aria-pressed="true">S&amp;P 100 stocks</button>
     <button type="button" data-tab="spy" aria-pressed="false">SPY (quick test)</button>
     <button type="button" data-tab="btc" aria-pressed="false">Bitcoin bursts</button>
+    <button type="button" data-tab="spyb" aria-pressed="false">SPY bursts</button>
   </div></div>
 
   <div id="mode-row" class="row"></div>
@@ -182,27 +183,41 @@ const HOW = {
 const S = { tab: "stocks", mode: "trend|window", f: "all", i: 0 };
 try { Object.assign(S, JSON.parse(localStorage.getItem("fibPage") || "{}")); } catch {}
 const save = () => { try { localStorage.setItem("fibPage", JSON.stringify({ tab: S.tab, mode: S.mode, f: S.f })); } catch {} };
-const D = { stocks: {}, spy: {} };
+const D = { stocks: {}, spy: {}, btc: {}, spyb: {} };
+const isB = () => S.tab === "btc" || S.tab === "spyb";        // the burst tabs (Bitcoin setup)
+const BD = () => D[S.tab] || {};
+const NAME = () => S.tab === "btc" ? "Bitcoin" : "SPY";
+// the burst rules in words, from the defaults the backtest actually used
+function howBurst() {
+  const d = BD().T?.default || {}, spy = S.tab === "spyb";
+  const tp = { swing: "back to the burst's high", "0.236": "the 23.6% level", "0.382": "the 38.2% level", "1.272": "the 127.2% extension", "2R": "2× the risk", scale: "half at 23.6%, the rest to the high (out at 38.2% if it comes back)" }[d.tp] || d.tp;
+  const hold = +(d.hold || 240), holdTxt = hold >= 390 ? "the rest of the day" : hold >= 60 ? `${hold / 60} hour${hold > 60 ? "s" : ""}` : `${hold} minutes`;
+  return [["Burst", `${NAME()} moves at least ${d.x ?? "1"}% within ${d.n ?? 15} minutes${d.vol === "any" ? "" : `, on at least ${d.vol ?? 2}× the normal minute volume of the ${spy ? "previous session" : "last 24 hours"}`}.`],
+    ["Draw", "Levels from the burst's low to its high, redrawn while it keeps making new highs."],
+    ["Enter", `Buy the pullback to the ${pctLbl(+(d.level ?? 0.5))} level within ${d.wait ?? 60} minutes${d.slow === "on" ? ", once the pullback has slowed down" : ""} (short the bounce after a sell-off burst).`],
+    ["Out", `Stop below ${pctLbl(+(d.stop ?? 0.786))}, target ${tp}, closed after ${holdTxt}${spy ? " or at the 16:00 close" : ""}.`]];
+}
 const SD = () => D[S.tab] || {};                              // the stock-type tabs: {B: results, T: trades}
 async function load(p) { try { const r = await fetch(p + "?t=" + Date.now()); return r.ok ? r.json() : null; } catch { return null; } }
 
 function trades() {
-  const all = S.tab === "btc" ? (D.btcT?.trades || []) : (SD().T?.modes?.[S.mode] || []);
+  const all = isB() ? (BD().T?.trades || []) : (SD().T?.modes?.[S.mode] || []);
   return all.filter(t => S.f === "all" || (S.f === "win" ? t.pct > 0 : t.pct <= 0));
 }
-const defLevel = () => S.tab === "btc" ? +(D.btcT?.default?.level ?? 0.5) : +(SD().T?.default?.level ?? 0.618);
+const defLevel = () => isB() ? +(BD().T?.default?.level ?? 0.5) : +(SD().T?.default?.level ?? 0.618);
 
 // ------------------------------------------------------------------ top of the page
 function header() {
   document.querySelectorAll("#tabs button").forEach(b => b.setAttribute("aria-pressed", b.dataset.tab === S.tab));
-  $("mode-row").innerHTML = S.tab !== "btc" ? `<span class="k">Version</span><div class="seg" id="modes">${MODES.map(([k, l]) => `<button type="button" data-mode="${k}" aria-pressed="${k === S.mode}">${esc(l)}</button>`).join("")}</div>` : "";
-  const how = HOW[S.tab === "btc" ? "btc" : S.mode], w = SD().T?.default?.win || "30", l = pctLbl(defLevel());
-  $("how").innerHTML = how.map(([h, f]) => `<div class="step"><span class="k">${esc(h)}</span><p>${esc(f(h === "Watch" ? w : l))}</p></div>`).join("");
+  $("mode-row").innerHTML = !isB() ? `<span class="k">Version</span><div class="seg" id="modes">${MODES.map(([k, l]) => `<button type="button" data-mode="${k}" aria-pressed="${k === S.mode}">${esc(l)}</button>`).join("")}</div>` : "";
+  const w = SD().T?.default?.win || "30", l = pctLbl(defLevel());
+  const how = isB() ? howBurst() : HOW[S.mode].map(([h, f]) => [h, f(h === "Watch" ? w : l)]);
+  $("how").innerHTML = how.map(([h, t]) => `<div class="step"><span class="k">${esc(h)}</span><p>${esc(t)}</p></div>`).join("");
 
   let st = null, bench = null, benchName = "";
-  if (S.tab === "btc") { st = D.btcB?.base; bench = D.btcB?.hold_btc; benchName = "Holding Bitcoin"; }
+  if (isB()) { st = BD().B?.base; bench = BD().B?.hold_btc; benchName = `Holding ${NAME()}`; }
   else { st = SD().B?.modes?.[S.mode]?.base; bench = SD().B?.spy_total; benchName = "Holding SPY"; }
-  if (!st) { $("cards").innerHTML = `<div class="empty" style="grid-column:1/-1">${S.tab === "spy" ? "The SPY quick test runs in a few minutes after each change. Check back shortly." : "The S&amp;P 100 backtest takes a few hours on GitHub. The <a href=\"#\" data-tab=\"spy\">SPY quick test</a> is faster."} The <a href="#" data-tab="btc">Bitcoin bursts</a> trades are ready.</div>`; $("verdict").textContent = ""; return; }
+  if (!st) { $("cards").innerHTML = `<div class="empty" style="grid-column:1/-1">${S.tab === "stocks" ? "The S&amp;P 100 backtest takes a few hours on GitHub. The <a href=\"#\" data-tab=\"spy\">SPY quick test</a> is faster." : "This backtest runs in a few minutes after each change on GitHub. Check back shortly."}${S.tab !== "btc" ? ` The <a href="#" data-tab="btc">Bitcoin bursts</a> trades are ready.` : ""}</div>`; $("verdict").textContent = ""; return; }
   const F = st.full, A = st.train, B = st.test, acct = F.acct ?? F.acct_total, dd = F.maxdd ?? F.acct_maxdd;
   $("cards").innerHTML = `
     <div><span class="k">Trades</span><b>${(F.n || 0).toLocaleString("en")}</b><small>${Math.round(F.win)}% won</small></div>
@@ -213,7 +228,9 @@ function header() {
   $("verdict").innerHTML = ok ? `<b>Made money in both halves</b> with the default settings.` :
     `<b>${F.avg > 0 ? "Thin" : "Lost money"}</b> with the default settings${A.avg > 0 !== B.avg > 0 ? " (and not consistent between the two halves)" : ""}. ${F.pf != null && F.pf < 1 ? "For every €1 won, about €" + (1 / F.pf).toFixed(2) + " was lost." : ""}`;
   $("foot").textContent = S.tab === "btc"
-    ? `Data: Binance BTCUSDT 1-minute candles, ${D.btcB?.from ?? "2021"} to ${D.btcB?.to ?? "today"}. Costs 0.05% each way. One trade at a time, whole account, no leverage. Full tables: docs/data/fib/BURST.md. Information only, not advice.`
+    ? `Data: Binance BTCUSDT 1-minute candles, ${BD().B?.from ?? "2021"} to ${BD().B?.to ?? "today"}. Costs ${BD().T?.default?.cost ?? "0.05"}% each way. One trade at a time, whole account, no leverage. Full tables: docs/data/fib/BURST.md. Information only, not advice.`
+    : S.tab === "spyb"
+    ? `Data: Alpaca SPY 1-minute candles, regular session (09:30-16:00 New York), ${BD().B?.from ?? "2021"} to ${BD().B?.to ?? "today"}, split and dividend adjusted. The same rules as the Bitcoin test; nothing is held overnight. Costs ${BD().T?.default?.cost ?? "0.03"}% each way. One trade at a time, whole account, no leverage. Full tables: docs/data/fib/BURST_spy.md. Information only, not advice.`
     : S.tab === "spy"
     ? `Data: Alpaca 5-minute SPY bars, split and dividend adjusted, January 2021 to today. Costs 0.03% each way. Each trade uses 20% of the account (the same sizing as the S&P 100 test), so judge it by the average trade. Full tables: docs/data/fib/SUMMARY_spy.md. Information only, not advice.`
     : `Data: Alpaca 5-minute bars, split and dividend adjusted, January 2021 to today. Current S&P 100 members only (survivorship bias). Costs 0.03% each way. Up to 5 trades a day, 20% of the account each. Full tables: docs/data/fib/SUMMARY.md. Information only, not advice.`;
@@ -225,7 +242,7 @@ function list() {
   $("count").textContent = ts.length ? `${ts.length} trades` : "";
   if (!ts.length) { $("list").innerHTML = `<tbody><tr><td class="empty" style="text-align:center">No sample trades yet. They appear when the backtest has run.</td></tr></tbody>`; return; }
   S.i = Math.min(S.i, ts.length - 1);
-  const btc = S.tab === "btc";
+  const btc = isB();
   $("list").innerHTML = `<thead><tr><th>Day</th>${btc ? "" : "<th>Stock</th>"}<th>Trade</th><th>In</th><th>Out</th><th>Why</th><th>Result</th></tr></thead><tbody>` +
     ts.map((t, i) => { const tm = times(t);
       return `<tr data-i="${i}" class="${i === S.i ? "sel" : ""}"><td>${esc(tm.day)}</td>${btc ? "" : `<td>${esc(t.s)}</td>`}<td>${t.dir === "long" ? "buy" : "short"}</td><td>${px(t.in)} · ${esc(tm.tin)}</td><td>${px(t.out)} · ${esc(tm.tout)}</td><td>${esc(WHY[t.why] || t.why)}</td><td class="${tone(t.pct)}">${pc(t.pct)}</td></tr>`; }).join("") + `</tbody>`;
@@ -233,7 +250,7 @@ function list() {
 
 // times shown: stocks in New York time (Italy +6h most of the year), Bitcoin in your own time zone
 function times(t) {
-  if (S.tab === "btc") {
+  if (isB()) {
     const at = i => new Date(t.t0 + i * t.step * 60000);
     const f = d => d.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" });
     return { day: at(t.draw.ie).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }), tin: f(at(t.draw.ie)), tout: f(at(t.draw.ix)), label: i => f(at(i)) };
@@ -246,7 +263,7 @@ function chart() {
   const ts = trades(), t = ts[S.i], svg = $("ch");
   $("prev").disabled = !t || S.i <= 0; $("next").disabled = !t || S.i >= ts.length - 1;
   if (!t) { svg.innerHTML = `<text x="450" y="210" text-anchor="middle" fill="#6b7886" font-size="14">No trade to show yet.</text>`; $("cap").textContent = ""; $("v-title").textContent = "–"; return; }
-  const btc = S.tab === "btc", tm = times(t), dr = t.draw;
+  const btc = isB(), tm = times(t), dr = t.draw;
   const O = [], H = [], L = [], C = [];
   for (const b of t.bars) { const k = btc ? 0 : 1; O.push(b[k]); H.push(b[k + 1]); L.push(b[k + 2]); C.push(b[k + 3]); }
   const n = O.length;
@@ -296,7 +313,7 @@ function chart() {
   g += `<text x="${xe}" y="${long ? ye + 28 : ye - 18}" text-anchor="middle" fill="#6cb4ff" font-size="10.5" font-family="${M}">${long ? "buy" : "short"} ${px(t.in)}</text>`;
   svg.innerHTML = g;
 
-  $("v-title").textContent = `${btc ? "BTC" : t.s} · ${tm.day} · ${long ? "buy" : "short"} · ${pc(t.pct)}`;
+  $("v-title").textContent = `${btc ? (S.tab === "btc" ? "BTC" : "SPY") : t.s} · ${tm.day} · ${long ? "buy" : "short"} · ${pc(t.pct)}`;
   $("cap").innerHTML = caption(t, tm, z, o, entF);
   document.querySelectorAll("#list tr.sel").forEach(r => r.classList.remove("sel"));
   const row = document.querySelector(`#list tr[data-i="${S.i}"]`); if (row) row.classList.add("sel");
@@ -306,9 +323,9 @@ function caption(t, tm, z, o, f) {
   const long = t.dir === "long", res = `<b class="${tone(t.pct)}">${pc(t.pct)}</b>`;
   const out = `Out at ${px(t.out)} at ${esc(tm.tout)} (${esc(WHY[t.why] || t.why)}): ${res} after costs.`;
   const lv = `${pctLbl(f)} level (${px(z + (o - z) * f)})`;
-  if (S.tab === "btc") {
+  if (isB()) {
     const upb = t.ext > t.a;
-    return `Bitcoin ${upb ? "jumped" : "dropped"} from <b>${px(t.a)}</b> to <b>${px(t.ext)}</b> (${pc((t.ext / t.a - 1) * 100, 1)}) in a burst. Levels drawn from ${upb ? "low to high" : "high to low"}; price came back to the ${lv} and the test ${long ? "bought" : "shorted"} at ${px(t.in)} at ${esc(tm.tin)}. Stop ${px(t.sl)}, target ${px(t.tp)}. ${out} <span class="fine">Times in your time zone${t.step > 1 ? `, ${t.step}-minute candles` : ", 1-minute candles"}.</span>`;
+    return `${NAME()} ${upb ? "jumped" : "dropped"} from <b>${px(t.a)}</b> to <b>${px(t.ext)}</b> (${pc((t.ext / t.a - 1) * 100, 1)}) in a burst. Levels drawn from ${upb ? "low to high" : "high to low"}; price came back to the ${lv} and the test ${long ? "bought" : "shorted"} at ${px(t.in)} at ${esc(tm.tin)}. Stop ${px(t.sl)}, target ${px(t.tp)}. ${out} <span class="fine">Times in your time zone${t.step > 1 ? `, ${t.step}-minute candles` : ", 1-minute candles"}.</span>`;
   }
   const [mode] = S.mode.split("|"), up = t.mv > 0, from = S.mode.endsWith("pdc") ? "yesterday's close" : (up ? "the morning low" : "the morning high");
   const morning = `In the first ${t.win} minutes ${esc(t.s)} went <b class="${tone(t.mv)}">${pc(t.mv, 1)}</b>.`;
@@ -335,7 +352,8 @@ document.addEventListener("keydown", e => {
 });
 
 async function ensure() {
-  if (S.tab === "btc" && !D.btcT) [D.btcB, D.btcT] = await Promise.all([load("data/fib/burst.json"), load("data/fib/trades_btc.json")]);
+  if (S.tab === "btc" && !D.btc.T) [D.btc.B, D.btc.T] = await Promise.all([load("data/fib/burst.json"), load("data/fib/trades_btc.json")]);
+  if (S.tab === "spyb" && !D.spyb.T) [D.spyb.B, D.spyb.T] = await Promise.all([load("data/fib/burst_spy.json"), load("data/fib/trades_burst_spy.json")]);
   if (S.tab === "stocks" && !D.stocks.T) [D.stocks.B, D.stocks.T] = await Promise.all([load("data/fib/backtest.json"), load("data/fib/trades_stocks.json")]);
   if (S.tab === "spy" && !D.spy.T) [D.spy.B, D.spy.T] = await Promise.all([load("data/fib/backtest_spy.json"), load("data/fib/trades_spy.json")]);
 }
