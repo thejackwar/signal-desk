@@ -41,8 +41,8 @@ Exact rules tested here (every one is a switch, see VARIANTS):
               (From the 4 Nov 04:23 and 6 Nov 16:13 shorts: price ran straight up through 50%.)
   Wait        if the level is not reached within 60 minutes (default) / 180 minutes of the last new high, the
               setup is dropped.
-  Stop        78.6% (default), 70% (between 61.8% and 78.6%: below that the move has failed) or 100% (the
-              burst's low), plus a small tick.
+  Stop        78.6% (default), 61.8% (Giacomo: just beyond it), 70% (between 61.8% and 78.6%: below that the
+              move has failed) or 100% (the burst's low), plus a small tick.
   Target      "swing" (default): back to the burst's high; "1.272": the 127.2% extension; "2R"; "0.236" / "0.382":
               the first level back (take profit at the 23.6% / 38.2% level instead of the full move); "scale":
               half off at 23.6%, the rest rides to the swing - but if price comes back to 38.2% the rest is
@@ -101,7 +101,7 @@ VARIANTS = {
     "level": ["0.382", "0.5", "0.618"],
     "entry": ["touch", "confirm", "bounce", "zone"],
     "wait": ["60", "180"],
-    "stop": ["0.7", "0.786", "1"],
+    "stop": ["0.618", "0.7", "0.786", "1"],
     "tp": ["swing", "1.272", "2R", "0.236", "0.382", "scale", "scale75"],
     "hold": ["60", "240", "1440"],
     "cost": ["0", "0.02", "0.05", "0.1"],
@@ -138,6 +138,8 @@ PRESETS = {
     "close + scale out": {"one": "close", "tp": "scale"},
     "Giacomo's exit: 75% at 23.6%, rest to the swing or out at 38.2%": {"tp": "scale75"},
     "Giacomo's exit + one-candle bursts read by their close": {"one": "close", "tp": "scale75"},
+    "Giacomo's rule: stop just beyond 61.8% + his exit": {"stop": "0.618", "tp": "scale75"},
+    "Giacomo's rule + one-candle bursts read by their close": {"one": "close", "stop": "0.618", "tp": "scale75"},
     "close + bounce + 70% stop + scale out": {"one": "close", "entry": "bounce", "stop": "0.7", "tp": "scale"},
 }
 
