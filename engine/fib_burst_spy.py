@@ -12,7 +12,7 @@ made there applies here too. Only what has to differ for a stock index is change
   Volume      "2x / 3x the normal minute" is measured against the previous 390 minutes (one SPY session) instead
               of Bitcoin's 1,440 (one day).
   Hold        60, 240 (default) or 390 minutes (the rest of the day) - never overnight.
-  Costs       0.03% a side by default (the S&P 100 tests use the same); 0 / 0.02 / 0.05 / 0.1 are checked too.
+  Costs       the same default as the Bitcoin test (none for now, 11 Nov 2026); 0 / 0.02 / 0.05 / 0.1 are checked too.
   Entry       by default WITH confirmation: "bounce" (a green 1-minute candle that reaches the level and closes back
               above it; red and below for a short) plus the slowing-down check. Plain "touch" is still tested.
 
@@ -46,7 +46,7 @@ NY = "America/New_York"
 
 # Default entry with confirmation (Giacomo, 11 Nov 2026, from the 16 Sep 2026 20:47 trade that bought into falling
 # red candles): a green candle that reaches the level and closes back above it, and the pullback must have slowed.
-FB.DEFAULT.update({"x": "0.5", "cost": "0.03", "entry": "bounce", "slow": "on"})
+FB.DEFAULT.update({"x": "0.5", "entry": "bounce", "slow": "on"})    # costs follow the Bitcoin default
 FB.VARIANTS["x"] = ["0.25", "0.5", "0.75", "1"]
 FB.VARIANTS["hold"] = ["60", "240", "390"]
 
@@ -101,13 +101,33 @@ def pad(df: pd.DataFrame) -> pd.DataFrame:
 
 
 # ===================================================================== the SPY parts of the engine
-REAL: np.ndarray = np.zeros(0, bool)
-SESS_END: np.ndarray = np.zeros(0, int)
-SESS_START: np.ndarray = np.zeros(0, int)
 
 
-def bursts(df: pd.DataFrame, n: int, x: float, vol: str, one: str = "keep") -> np.ndarray:
-    """fib_burst.bursts, session by session: windows hold only today's minutes, volume against the last session."""
+_SESS: dict = {}
+
+
+def sessions(h, l):
+    """(real, first candle of the session, last candle of the session) for each candle - for the 1-minute data and for
+    any candles built from it (e.g. fib_burst's 5-minute option): empty minutes have high -inf / low +inf."""
+    h, l = np.asarray(h, float), np.asarray(l, float)
+    key = len(h)
+    if key not in _SESS:
+        real = np.isfinite(h) & np.isfinite(l)
+        idx = np.arange(len(h))
+        last_real = pd.Series(np.where(real, idx, np.nan)).ffill().fillna(0).to_numpy()
+        nxt_fill = pd.Series(np.where(~real, idx, np.nan)).bfill().fillna(len(h)).to_numpy()
+        prev_fill = pd.Series(np.where(~real, idx, np.nan)).ffill().fillna(-1).to_numpy()
+        end = np.where(real, nxt_fill - 1, last_real).astype(int)
+        start = np.where(real, prev_fill + 1, 0).astype(int)
+        _SESS[key] = (real, start, end)
+    return _SESS[key]
+
+
+def bursts(df: pd.DataFrame, n: int, x: float, vol: str, one: str = "keep", day_bars: int = 1440, **_) -> np.ndarray:
+    """fib_burst.bursts, session by session: windows hold only today's candles, volume against the last session."""
+    real = pd.Series(sessions(df["h"], df["l"])[0], index=df.index)
+    per_session = max(2, round(SESSION * day_bars / 1440))      # 390 one-minute / 78 five-minute candles
+    df = df.assign(real=real)
     h = df["h"].where(df["real"])
     l = df["l"].where(df["real"])
     lo = l.rolling(n, min_periods=1).min()
@@ -128,7 +148,7 @@ def bursts(df: pd.DataFrame, n: int, x: float, vol: str, one: str = "keep") -> n
         v = df["v"].where(df["real"])
         recent = v.rolling(n, min_periods=1).mean()
         rv = v[df["real"]]
-        base = rv.shift(n).rolling(SESSION, min_periods=SESSION // 2).mean().reindex(df.index).ffill()
+        base = rv.shift(n).rolling(per_session, min_periods=per_session // 2).mean().reindex(df.index).ffill()
         ok = recent >= float(vol) * base
         up &= ok
         dn &= ok
@@ -144,15 +164,17 @@ _sample = FB.sample
 
 def simulate(B, ev, v):
     """fib_burst.simulate, then: no entries in the empty minutes; exits there are shown at the 16:00 close."""
+    real, _, end = sessions(B.h, B.l)
+    tfm = int(v.get("_tfm", 1))
     out = []
     for t in _simulate(B, ev, v):
         i0, a_i, z_i, ie, j = t["_i"]
-        if not REAL[ie]:
+        if not real[ie]:
             continue
-        if not REAL[j]:
-            j = int(SESS_END[ie])
+        if not real[j]:
+            j = int(end[ie])
             t["_i"] = (i0, a_i, z_i, ie, j)
-            t["mins"] = j - ie + 1
+            t["mins"] = (j - ie + 1) * tfm
         out.append(t)
     return out
 
@@ -161,6 +183,7 @@ def sample(ts, B, *a, **k):
     """fib_burst.sample, with each chart cut to its own session (09:30-16:00): the trade viewer counts time from
     the first candle, so the chart must not reach back across the night."""
     out = _sample(ts, B, *a, **k)
+    _, SESS_START, SESS_END = sessions(B.h, B.l)
     for t in out:
         st, d = t["step"], t["draw"]
         lo_i = int(np.searchsorted(B.t, t["t0"]))
@@ -181,16 +204,8 @@ def sample(ts, B, *a, **k):
 
 # ===================================================================== main
 def main() -> None:
-    global REAL, SESS_END, SESS_START
     demo = "--demo" in sys.argv
     df = pad(demo_raw()) if demo else download()
-    REAL = df["real"].to_numpy(bool)
-    idx = np.arange(len(df))
-    last_real = pd.Series(np.where(REAL, idx, np.nan)).ffill().to_numpy()
-    nxt_fill = pd.Series(np.where(~REAL, idx, np.nan)).bfill().fillna(len(df)).to_numpy()
-    SESS_END = np.where(REAL, nxt_fill - 1, last_real).astype(int)    # last real minute of each minute's session
-    prev_fill = pd.Series(np.where(~REAL, idx, np.nan)).ffill().fillna(-1).to_numpy()
-    SESS_START = np.where(REAL, prev_fill + 1, 0).astype(int)          # first minute (09:30) of that session
 
     FB.download = lambda: df
     FB.demo = lambda: df
