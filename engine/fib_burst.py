@@ -46,7 +46,7 @@ Exact rules tested here (every one is a switch, see VARIANTS):
   Target      "swing" (default): back to the burst's high; "1.272": the 127.2% extension; "2R"; "0.236" / "0.382":
               the first level back (take profit at the 23.6% / 38.2% level instead of the full move); "scale":
               half off at 23.6%, the rest rides to the swing - but if price comes back to 38.2% the rest is
-              closed there. Level targets sit a tick (0.02%) in front of the level so a touch fills them (9 Nov
+              closed there; "scale75": the same with 75% off at 23.6% (Giacomo's exit, 11 Nov 2026). Level targets sit a tick (0.02%) in front of the level so a touch fills them (9 Nov
               23:06: a short's 23.6% target at 74,033.56 was missed by 96 cents).
   Time exit   whatever is still open is closed 60 / 240 (default) / 1440 minutes after the entry.
   Exit rules  stop first if a minute hits both (cautious); gaps fill at the minute's open.
@@ -102,12 +102,12 @@ VARIANTS = {
     "entry": ["touch", "confirm", "bounce", "zone"],
     "wait": ["60", "180"],
     "stop": ["0.7", "0.786", "1"],
-    "tp": ["swing", "1.272", "2R", "0.236", "0.382", "scale"],
+    "tp": ["swing", "1.272", "2R", "0.236", "0.382", "scale", "scale75"],
     "hold": ["60", "240", "1440"],
     "cost": ["0", "0.02", "0.05", "0.1"],
 }
 GRID = ("n", "x", "vol", "one", "slow", "level", "stop", "tp")   # the full combination grid (others at default)
-GRID_OPTS = {"one": ["keep", "close"], "tp": ["swing", "0.236", "scale"]}   # trimmed in the grid (no effect / worse)
+GRID_OPTS = {"one": ["keep", "close"], "tp": ["swing", "0.236", "scale75"]}   # trimmed in the grid (no effect / worse)
 # Giacomo's fixes from reviewing the trades (11 Nov 2026), tested on their own and together (others at default).
 BEST = {"slow": "on", "tp": "0.236"}                    # best fixes so far: the base for the filters
 FILTERS = {
@@ -136,6 +136,8 @@ PRESETS = {
     "close + bounce + 70% stop + 23.6%": {"one": "close", "entry": "bounce", "stop": "0.7", "tp": "0.236"},
     "scale out: half at 23.6%, rest out at 38.2% or the swing": {"tp": "scale"},
     "close + scale out": {"one": "close", "tp": "scale"},
+    "Giacomo's exit: 75% at 23.6%, rest to the swing or out at 38.2%": {"tp": "scale75"},
+    "Giacomo's exit + one-candle bursts read by their close": {"one": "close", "tp": "scale75"},
     "close + bounce + 70% stop + scale out": {"one": "close", "entry": "bounce", "stop": "0.7", "tp": "scale"},
 }
 
@@ -281,15 +283,16 @@ class Bars:
 
 
 def scale_exit(B: Bars, ie: int, j: int, end: int, confirm: bool, entry: float, stop: float, t1: float,
-               back: float, ext: float, upb: bool) -> tuple[float, str, int]:
-    """Half off at the first target (23.6%); the rest rides to the swing, but if price comes back to 38.2% the rest
-    is closed there. Before the first half: the normal stop. Returns (average exit price, why, exit minute)."""
+               back: float, ext: float, upb: bool, part: float = 0.5) -> tuple[float, str, int]:
+    """`part` (half, or 75%) off at the first target (23.6%); the rest rides to the swing (a tick before it), but if
+    price comes back to 38.2% the rest is closed there. Before the first half: the normal stop. Returns (average exit price, why, exit minute)."""
     o, h, l, c = B.o, B.h, B.l, B.c
     hit = (lambda j_, p: h[j_] >= p) if upb else (lambda j_, p: l[j_] <= p)       # toward the swing
     against = (lambda j_, p: l[j_] <= p) if upb else (lambda j_, p: h[j_] >= p)   # away from it
     fill_with = (lambda j_, p: max(o[j_], p)) if upb else (lambda j_, p: min(o[j_], p))
     fill_against = (lambda j_, p: min(o[j_], p)) if upb else (lambda j_, p: max(o[j_], p))
     p1 = None
+    t2 = ext * (1 - (1 if upb else -1) * TICK)                  # the swing, a tick in front of it
     if not confirm:
         if against(ie, stop):
             return stop, "stop", ie                             # same minute: assume the worst
@@ -306,11 +309,11 @@ def scale_exit(B: Bars, ie: int, j: int, end: int, confirm: bool, entry: float, 
                     continue                                    # the rest is checked from the next minute
             else:
                 if against(j, back):
-                    return (p1 + fill_against(j, back)) / 2, "half + back to 38.2%", j
-                if hit(j, ext):
-                    return (p1 + fill_with(j, ext)) / 2, "half + swing", j
+                    return part * p1 + (1 - part) * fill_against(j, back), "part + back to 38.2%", j
+                if hit(j, t2):
+                    return part * p1 + (1 - part) * fill_with(j, t2), "part + swing", j
         j += 1
-    return (c[end] if p1 is None else (p1 + c[end]) / 2), ("time" if p1 is None else "half + time"), end
+    return (c[end] if p1 is None else part * p1 + (1 - part) * c[end]), ("time" if p1 is None else "part + time"), end
 
 
 def simulate(B: Bars, ev: np.ndarray, v: dict) -> list[dict]:
@@ -398,7 +401,7 @@ def simulate(B: Bars, ev: np.ndarray, v: dict) -> list[dict]:
         elif tp == "1.272":
             tgt = a + (ext - a) * 1.272
         else:                                                   # a level back toward the swing (0.236 / 0.382),
-            lv_ = ext - (ext - a) * (0.236 if tp == "scale" else float(tp))   # placed a tick in front of the level
+            lv_ = ext - (ext - a) * (0.236 if tp.startswith("scale") else float(tp))   # a tick in front of the level
             tgt = lv_ * (1 - sgn * TICK)                        # so a touch of the level fills it
         back = ext - (ext - a) * 0.382                          # "scale": after the first half, back here = out
         if (tgt <= entry) if upb else (tgt >= entry):
@@ -407,8 +410,8 @@ def simulate(B: Bars, ev: np.ndarray, v: dict) -> list[dict]:
         px = why = None
         j = ie if not confirm else ie + 1
         end = min(B.n - 1, ie + hold)
-        if tp == "scale":
-            px, why, j = scale_exit(B, ie, j, end, confirm, entry, stop, tgt, back, ext, upb)
+        if tp.startswith("scale"):
+            px, why, j = scale_exit(B, ie, j, end, confirm, entry, stop, tgt, back, ext, upb, 0.75 if tp == "scale75" else 0.5)
         elif not confirm and ((l[ie] <= stop) if upb else (h[ie] >= stop)):
             px, why, j = stop, "stop", ie                       # same minute: assume the worst
         elif not confirm and entry == o[ie] and ((h[ie] >= tgt) if upb else (l[ie] <= tgt)):
