@@ -50,7 +50,8 @@ Exact rules tested here (every one is a switch, see VARIANTS):
               23:06: a short's 23.6% target at 74,033.56 was missed by 96 cents).
   Time exit   whatever is still open is closed 60 / 240 (default) / 1440 minutes after the entry.
   Exit rules  stop first if a minute hits both (cautious); gaps fill at the minute's open.
-  Costs       0.05% a side (default; checked at 0, 0.02, 0.05 and 0.1).
+  Costs       0 (default since 11 Nov 2026 evening, at Giacomo's request: costs are added back later; checked at
+              0, 0.02, 0.05 and 0.1 in the one-switch table).
   Account     one trade at a time, the whole account in it, no leverage; new bursts are ignored while a setup or
               trade is open.
 
@@ -84,7 +85,7 @@ TICK = 0.0002
 SPLIT = "2024-01-01"
 
 DEFAULT = {"n": "15", "x": "1", "vol": "2", "level": "0.5", "entry": "touch", "wait": "60",
-           "stop": "0.786", "tp": "swing", "hold": "240", "cost": "0.05", "one": "keep", "slow": "off",
+           "stop": "0.786", "tp": "swing", "hold": "240", "cost": "0", "one": "keep", "slow": "off",
            "trend": "off", "pvol": "off", "clean": "off", "vwap": "off", "hours": "all", "cap": "off"}
 VARIANTS = {
     "n": ["5", "15", "30"],
