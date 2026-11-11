@@ -32,7 +32,16 @@ jobs:
         run: |
           git config user.name "signal-desk-bot"
           git config user.email "signal-desk-bot@users.noreply.github.com"
-          git add docs/data/fib/burst.json docs/data/fib/BURST.md docs/data/fib/trades_btc.json
-          git diff --cached --quiet && exit 0
-          git commit -m "Fibonacci Burst (BTC) backtest $(date -u +%F\ %H:%M)"
-          for i in 1 2 3; do git pull --rebase && git push && break; sleep 5; done
+          # A queued run checks out the commit that started it, so newer results may have landed on main meanwhile:
+          # put this run's files on top of the latest main instead of rebasing onto it (this run's results win).
+          F="docs/data/fib/burst.json docs/data/fib/BURST.md docs/data/fib/trades_btc.json"
+          mkdir -p /tmp/out && cp $F /tmp/out/
+          for i in 1 2 3; do
+            git fetch origin main && git reset --hard origin/main
+            cp /tmp/out/burst.json /tmp/out/BURST.md /tmp/out/trades_btc.json docs/data/fib/
+            git add $F
+            git diff --cached --quiet && exit 0
+            git commit -m "Fibonacci Burst (BTC) backtest $(date -u +%F\ %H:%M)"
+            git push origin HEAD:main && break
+            sleep 5
+          done
