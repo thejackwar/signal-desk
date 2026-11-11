@@ -112,6 +112,10 @@ svg.chart { display: block; width: 100%; height: auto; }
 .row > .k { min-width: 108px; }
 .seg { display: inline-flex; flex-wrap: wrap; gap: 2px; background: #0a1017; border: 1px solid var(--line); border-radius: 6px; padding: 2px; }
 .seg button { font: 500 12.5px var(--font); color: var(--muted); background: none; border: 0; border-radius: 4px; padding: 6px 10px; cursor: pointer; }
+.seg button small { display: block; font: 500 10.5px var(--mono); margin-top: 2px; opacity: .85; }
+.seg button small.up { color: var(--up); } .seg button small.down { color: var(--down); }
+.pnl { display: flex; flex-wrap: wrap; gap: 6px 22px; align-items: baseline; margin-top: 12px; padding: 10px 12px; border: 1px solid var(--line); border-radius: 6px; background: #0a1017; font: 500 12.5px var(--mono); color: var(--muted); }
+.pnl b { font: 600 20px var(--mono); color: var(--fg); } .pnl b.up, .pnl .up { color: var(--up); } .pnl b.down, .pnl .down { color: var(--down); }
 .seg button[aria-pressed="true"] { background: var(--blue-bg); color: var(--fg); box-shadow: inset 0 0 0 1px rgba(108,180,255,.35); }
 
 /* steps */
@@ -167,6 +171,7 @@ footer { margin-top: 48px; border-top: 1px solid var(--line); padding-top: 16px;
     <div class="wall" id="wall"></div>
     <div class="track" id="track" aria-hidden="true"></div>
     <div class="pf"><span class="k" id="wall-left"></span><span class="k blue">Live · tracking</span></div>
+    <div class="pnl" id="pnl"></div>
     <div class="readout" id="readout" aria-live="polite">Tap a tile to see that session.</div>
     <div class="legend"><span><i style="background:var(--up)"></i>Profit</span><span><i style="background:var(--down)"></i>Loss</span><span><i style="background:var(--none)"></i>No trade</span><span><i style="outline:1px solid var(--blue);background:var(--none)"></i>Live paper trade</span><span>Brighter = bigger than a typical day</span></div>
     <p class="fine" style="margin:10px 0 0"><a href="board.html">See every strategy this way on the Strategy Board ›</a></p>
@@ -225,8 +230,12 @@ const vkey = () => `${S.ema}|${S.trail}|${S.side}`;
 
 async function load(p) { try { const r = await fetch(p + "?t=" + Date.now()); return r.ok ? r.json() : null; } catch { return null; } }
 
-function seg(name, val, opts) {
-  return `<div class="seg" role="group">${opts.map(([v, l]) => `<button type="button" data-${name}="${v}" aria-pressed="${v === val}">${esc(l)}</button>`).join("")}</div>`;
+// optsKey(v) gives the variant key that option would select, keeping the other settings as they are
+function seg(name, val, opts, optsKey) {
+  return `<div class="seg" role="group">${opts.map(([v, l]) => {
+    const A = optsKey && B?.variants[optsKey(v)]?.all;
+    return `<button type="button" data-${name}="${v}" aria-pressed="${v === val}">${esc(l)}${A ? `<small class="${tone(A.total_pct)}">${pc(A.total_pct, 0)}</small>` : ""}</button>`;
+  }).join("")}</div>`;
 }
 
 // ------------------------------------------------------------------ the live chart
@@ -275,9 +284,33 @@ function liveChart() {
 
 // ------------------------------------------------------------------ the wall
 function controls() {
-  $("ctl").innerHTML = `<div class="row"><span class="k">Trailing stop</span>${seg("trail", S.trail, TRAILS)}</div>
-    <div class="row"><span class="k">12 EMA from</span>${seg("ema", S.ema, [["ext", "Incl. pre-market"], ["rth", "Regular hours"]])}</div>
-    <div class="row"><span class="k">Trades</span>${seg("side", S.side, [["both", "Long + short"], ["long", "Long only"]])}</div>`;
+  $("ctl").innerHTML = `<div class="row"><span class="k">Trailing stop</span>${seg("trail", S.trail, TRAILS, v => `${S.ema}|${v}|${S.side}`)}</div>
+    <div class="row"><span class="k">12 EMA from</span>${seg("ema", S.ema, [["ext", "Incl. pre-market"], ["rth", "Regular hours"]], v => `${v}|${S.trail}|${S.side}`)}</div>
+    <div class="row"><span class="k">Trades</span>${seg("side", S.side, [["both", "Long + short"], ["long", "Long only"]], v => `${S.ema}|${S.trail}|${v}`)}</div>`;
+}
+
+// Total profit or loss of the selected settings, and how much it changed from the settings shown before the last click
+let PREV = null;
+const LBL = { ...Object.fromEntries(TRAILS), ext: "Incl. pre-market", rth: "Regular hours", both: "Long + short", long: "Long only" };
+const pts = v => (v > 0 ? "+" : v < 0 ? "−" : "±") + Math.abs(v).toFixed(0) + " pts";
+function pnl() {
+  const A = B.variants[vkey()].all;
+  const live = (LV?.trades || []).filter(t => t.exit && t.date > B.to);
+  const liveTot = live.length ? 100 * (live.reduce((m, t) => m * (1 + t.pct / 100), 1) - 1) : null;
+  let h = `<span>Total P&amp;L <b class="${tone(A.total_pct)}">${pc(A.total_pct, 1)}</b></span>
+    <span>${A.trades.toLocaleString("en")} trades · ${Math.round(A.win_rate * 100)}% won</span>
+    <span>a year <span class="${tone(A.cagr_pct)}">${pc(A.cagr_pct)}</span></span>
+    <span>max drop <span class="down">${pc(A.max_dd_pct, 1)}</span></span>
+    <span>profit factor ${A.profit_factor ?? "–"}</span>`;
+  if (liveTot != null) h += `<span>live <span class="${tone(liveTot)}">${pc(liveTot, 2)}</span></span>`;
+  const P = PREV && PREV !== vkey() && B.variants[PREV]?.all;
+  if (P) {
+    const was = PREV.split("|"), now = vkey().split("|");
+    const what = now.map((v, i) => v !== was[i] ? `${LBL[was[i]]} → ${LBL[v]}` : null).filter(Boolean).join(", ");
+    const d = A.total_pct - P.total_pct;
+    h += `<span style="flex-basis:100%">${esc(what)}: ${pc(P.total_pct, 1)} → ${pc(A.total_pct, 1)} · <span class="${tone(d)}">${pts(d)}</span> · ${(A.trades - P.trades >= 0 ? "+" : "−") + Math.abs(A.trades - P.trades)} trades</span>`;
+  }
+  $("pnl").innerHTML = h;
 }
 
 function wall() {
@@ -329,7 +362,7 @@ function variants() {
     rows.push(`<tr style="${k === vkey() ? "background:var(--blue-bg)" : ""}${k === B.default ? ";font-weight:600" : ""}" data-k="${k}"><td>${esc(tl)} · ${el} · ${sl}</td><td>${A.trades}</td><td>${Math.round(A.win_rate * 100)}%</td><td class="${tone(A.total_pct)}">${pc(A.total_pct, 0)}</td><td>${pc(A.cagr_pct)}</td><td>${pc(A.max_dd_pct)}</td><td>${A.profit_factor ?? "–"}</td></tr>`);
   }
   $("vars").innerHTML = `<thead><tr><th>Setting (tap to show)</th><th>Trades</th><th>Won</th><th>Total</th><th>A year</th><th>Max drop</th><th>Profit factor</th></tr></thead><tbody>${rows.join("")}</tbody>`;
-  $("vars").onclick = e => { const r = e.target.closest("tr[data-k]"); if (!r) return; [S.ema, S.trail, S.side] = r.dataset.k.split("|"); save(); render(); $("p-wall").scrollIntoView({ behavior: "smooth", block: "start" }); };
+  $("vars").onclick = e => { const r = e.target.closest("tr[data-k]"); if (!r) return; PREV = vkey(); [S.ema, S.trail, S.side] = r.dataset.k.split("|"); save(); render(); $("p-wall").scrollIntoView({ behavior: "smooth", block: "start" }); };
   $("vars").querySelectorAll("tr[data-k]").forEach(r => r.style.cursor = "pointer");
 }
 
@@ -360,11 +393,11 @@ function activity() {
   $("act-n").textContent = `${tr.filter(t => t.exit).length} live sessions`;
 }
 
-function render() { controls(); headline(); wall(); years(); variants(); compare(); }
+function render() { controls(); headline(); wall(); pnl(); years(); variants(); compare(); }
 
 document.addEventListener("click", e => {
   const b = e.target.closest("[data-trail], [data-ema], [data-side]"); if (!b) return;
-  const d = b.dataset; if (d.trail) S.trail = d.trail; if (d.ema) S.ema = d.ema; if (d.side) S.side = d.side;
+  PREV = vkey(); const d = b.dataset; if (d.trail) S.trail = d.trail; if (d.ema) S.ema = d.ema; if (d.side) S.side = d.side;
   save(); render();
 });
 

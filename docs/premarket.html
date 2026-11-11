@@ -112,6 +112,10 @@ svg.chart { display: block; width: 100%; height: auto; }
 .row > .k { min-width: 108px; }
 .seg { display: inline-flex; flex-wrap: wrap; gap: 2px; background: #0a1017; border: 1px solid var(--line); border-radius: 6px; padding: 2px; }
 .seg button { font: 500 12.5px var(--font); color: var(--muted); background: none; border: 0; border-radius: 4px; padding: 6px 10px; cursor: pointer; }
+.seg button small { display: block; font: 500 10.5px var(--mono); margin-top: 2px; opacity: .85; }
+.seg button small.up { color: var(--up); } .seg button small.down { color: var(--down); }
+.pnl { display: flex; flex-wrap: wrap; gap: 6px 22px; align-items: baseline; margin: 2px 0 14px; padding: 10px 12px; border: 1px solid var(--line); border-radius: 6px; background: #0a1017; font: 500 12.5px var(--mono); color: var(--muted); }
+.pnl b { font: 600 20px var(--mono); color: var(--fg); } .pnl b.up, .pnl .up { color: var(--up); } .pnl b.down, .pnl .down { color: var(--down); }
 .seg button[aria-pressed="true"] { background: var(--blue-bg); color: var(--fg); box-shadow: inset 0 0 0 1px rgba(108,180,255,.35); }
 
 /* steps */
@@ -271,15 +275,44 @@ const cur = () => B.trend_check.find(x => keyOf(x.v) === keyOf(S));
 const isDef = () => keyOf(S) === keyOf(B.default);
 
 async function load(p) { try { const r = await fetch(p + "?t=" + Date.now()); return r.ok ? r.json() : null; } catch { return null; } }
-const seg = (name, val, opts) => `<div class="seg" role="group">${opts.map(([v, l]) => `<button type="button" data-${name}="${v}" aria-pressed="${v === val}">${esc(l)}</button>`).join("")}</div>`;
+const seg = (name, val, opts, tot) => `<div class="seg" role="group">${opts.map(([v, l]) => `<button type="button" data-${name}="${v}" aria-pressed="${v === val}">${esc(l)}${tot ? pnlTag(tot(v)) : ""}</button>`).join("")}</div>`;
+
+// ---- Total P&L on each setting button, and a box with the total and how much the last click changed it
+let PNL_PREV = null;
+const pnlTag = t => t == null ? "" : `<small class="${tone(t)}">${pc(t, 0)}</small>`;
+const pnlLabels = () => [...document.querySelectorAll("#ctl .seg")].map(g => g.querySelector('[aria-pressed="true"]')?.firstChild?.textContent || "");
+const pnlMark = () => { const s = pnlNow(); PNL_PREV = s && { s, l: pnlLabels() }; };
+function pnlBox() {
+  let el = $("pnl"); if (!el) { el = document.createElement("div"); el.id = "pnl"; el.className = "pnl"; $("ctl").after(el); }
+  const A = pnlNow(); if (!A) { el.innerHTML = `<span>No trades with these settings.</span>`; return; }
+  let h = `<span>Total P&amp;L <b class="${tone(A.total)}">${pc(A.total, 1)}</b></span>
+    <span>${A.n.toLocaleString("en")} trades · ${Math.round(A.win)}% won</span>
+    <span>a year <span class="${tone(A.cagr)}">${pc(A.cagr)}</span></span>
+    <span>max drop <span class="down">${pc(A.dd, 1)}</span></span>
+    <span>profit factor ${A.pf ?? "–"}</span>`;
+  const P = PNL_PREV, L = pnlLabels();
+  if (P && P.l.join("|") !== L.join("|")) {
+    const what = L.map((v, i) => v !== P.l[i] ? `${P.l[i]} → ${v}` : null).filter(Boolean).join(", ");
+    const d = A.total - P.s.total, dn = A.n - P.s.n;
+    h += `<span style="flex-basis:100%">${esc(what)}: ${pc(P.s.total, 1)} → ${pc(A.total, 1)} · <span class="${tone(d)}">${(d > 0 ? "+" : d < 0 ? "−" : "±") + Math.abs(d).toFixed(0)} pts</span> · ${(dn >= 0 ? "+" : "−") + Math.abs(dn)} trades</span>`;
+  }
+  el.innerHTML = h;
+}
+const PNL_IDX = new WeakMap();
+const pnlFind = st => { const L = B?.trend_check; if (!L) return null; let m = PNL_IDX.get(L); if (!m) { m = new Map(L.map(x => [keyOf(x.v), x])); PNL_IDX.set(L, m); } return m.get(keyOf(st)); };
+const pnlStats = x => x?.full?.n ? { total: x.full.acct_total, n: x.full.n, win: x.full.win, cagr: x.full.acct_cagr, dd: x.full.acct_maxdd, pf: x.full.pf } : null;
+const pnlNow = () => pnlStats(pnlFind(S));
+// total for one button: the current settings with only that switch changed
+const alt = name => v => pnlStats(pnlFind(name === "exit" ? { ...S, ...Object.fromEntries(["stop", "tp", "exit"].map((k, i) => [k, v.split("|")[i]])) } : { ...S, [name]: v }))?.total ?? null;
+
 
 function controls() {
-  $("ctl").innerHTML = `<div class="row"><span class="k">${SH() ? "Pre-market down" : "Pre-market up"}</span>${seg("pm", S.pm, PMS_())}</div>
-    <div class="row"><span class="k">${SH() ? "Falling for" : "Climbing for"}</span>${seg("climb", S.climb, CLIMBS)}</div>
-    <div class="row"><span class="k">Daily trend</span>${seg("trend", S.trend, TRENDS_())}</div>
-    <div class="row"><span class="k">Exit</span>${seg("exit", `${S.stop}|${S.tp}|${S.exit}`, EXITS)}</div>`;
+  $("ctl").innerHTML = `<div class="row"><span class="k">${SH() ? "Pre-market down" : "Pre-market up"}</span>${seg("pm", S.pm, PMS_(), alt("pm"))}</div>
+    <div class="row"><span class="k">${SH() ? "Falling for" : "Climbing for"}</span>${seg("climb", S.climb, CLIMBS, alt("climb"))}</div>
+    <div class="row"><span class="k">Daily trend</span>${seg("trend", S.trend, TRENDS_(), alt("trend"))}</div>
+    <div class="row"><span class="k">Exit</span>${seg("exit", `${S.stop}|${S.tp}|${S.exit}`, EXITS, alt("exit"))}</div>`;
   $("is-default").innerHTML = isDef() ? "Default settings" : `<a href="#" id="reset">Back to default</a>`;
-  const r = $("reset"); if (r) r.onclick = e => { e.preventDefault(); Object.assign(S, pick(B.default)); save(); render(); };
+  const r = $("reset"); if (r) r.onclick = e => { e.preventDefault(); pnlMark(); Object.assign(S, pick(B.default)); save(); render(); };
 }
 const pick = v => ({ pm: v.pm, climb: v.climb, trend: v.trend, stop: v.stop, tp: v.tp, exit: v.exit });
 
@@ -403,12 +436,12 @@ function recent(X) {
 
 function render() {
   const X = cur(); if (!X) { Object.assign(S, pick(B.default)); return render(); }
-  controls(); headline(X); chart(X); verdict(X); luck(X); years(X); rules(); recent(X); all();
+  controls(); pnlBox(); headline(X); chart(X); verdict(X); luck(X); years(X); rules(); recent(X); all();
 }
 
 document.addEventListener("click", e => {
   const b = e.target.closest("[data-pm], [data-climb], [data-trend], [data-exit]"); if (!b) return;
-  const d = b.dataset;
+  pnlMark(); const d = b.dataset;
   if (d.pm) S.pm = d.pm; if (d.climb) S.climb = d.climb; if (d.trend) S.trend = d.trend;
   if (d.exit) [S.stop, S.tp, S.exit] = d.exit.split("|");
   save(); render();
@@ -442,7 +475,7 @@ document.addEventListener("click", e => {
   SIDE = b.dataset.side; history.replaceState(null, "", SH() ? "#short" : location.pathname + location.search); boot();
 });
 async function boot() {
-  copy(); S = loadS(); SHOW_ALL = false;
+  copy(); S = loadS(); SHOW_ALL = false; PNL_PREV = null;
   ["eq", "luck", "yrs", "plain", "sweeps", "costs", "all", "rt", "verdict", "ctl", "bigfine"].forEach(id => $(id).innerHTML = "");
   liveView(LIVE ??= await load("data/premarket/live.json"));
   const side = SIDE;
