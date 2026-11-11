@@ -48,6 +48,11 @@ full-market SIP feed (`feed=sip`, end = now − 16 min, so the free plan works),
 (`hours=all`). Coins come from Binance with their dollar (USDT) volume, Kraken as a fallback. Same keys, nothing to add:
 just paste the updated code (step 3) once. Test: `node tests/volumeprofile/test_vp.mjs`.
 
+**Bar replay:** `GET /?replay=AAPL&tf=1Day|1Hour|15Min|5Min&start=2024-03-01` returns candles around that date for
+`docs/replay.html`: some history before it and a stretch after it (about 10 years of daily candles, a year of 1-hour, 3 months
+of 15-min, a month of 5-min), intraday including pre-market and after-hours (4:00–20:00 New York), times in plain UTC.
+Same keys, nothing to add: the deploy workflow ships it, or paste the updated code (step 3) once.
+
 **Live quotes and price alerts (Terminal):** `GET /?quotes=stocks` (Alpaca snapshots, free IEX real-time feed) and
 `GET /?quotes=crypto` (Binance, Kraken for XMR) give the Terminal live prices, cached for 15 seconds. Price alerts need
 two extra things on this same Worker, once:

@@ -13,7 +13,7 @@
       ["Markets", "#stocks", /^(stocks|stock-.*)$/], ["Heatmap", "#heatmap", /^heatmap$/],
       ["News & calendar", "#news", /^(news|buzz|mood|earnings.*|calendar.*)$/], ["Crypto dashboard", "#crypto", /^crypto/, "crypto-only"]] },
     { id: "charts", name: "Charts", items: [
-      ["Chart", "chart.html"], ["Trendlines", "trendlines.html"], ["Volume profile", "volumeprofile.html"]] },
+      ["Chart", "chart.html"], ["Trendlines", "trendlines.html"], ["Volume profile", "volumeprofile.html"], ["Bar replay", "replay.html"]] },
     { id: "options", name: "Options & flow", items: [
       ["Options", "options.html"], ["Max pain", "maxpain.html"], ["Dark pools", "darkpool.html"], ["Implied correlation", "correlation.html"]] },
     { id: "strategies", name: "Strategies", items: [

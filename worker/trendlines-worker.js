@@ -32,6 +32,12 @@
 //   Candles for up to 30 stocks in one request (1D: 5-minute, 5D: 15-minute, 1M: 30-minute, regular hours;
 //   3M-1Y: daily; 5Y: weekly). t as in the rest of this Worker (New York wall clock as if UTC).
 //
+// Bar replay (for docs/replay.html): GET /?replay=AAPL&tf=1Day|1Hour|15Min|5Min&start=YYYY-MM-DD
+//   ->  { symbol, tf, start, end, source, bars: [[t, open, high, low, close, volume], ...] }
+//   t is plain UTC (seconds), unlike the rest of this Worker. Intraday bars include pre-market and after-hours
+//   (4:00-20:00 New York) so the page can shade them. Window: some history before `start`, then a fixed stretch
+//   after it (see REPLAY). Alpaca SIP data from 2016. Past windows are cached for a day.
+//
 // Price alerts (for the Terminal): the page stores an alert, this Worker checks prices every few minutes (Cron Trigger)
 // and sends a phone notification through ntfy.sh to the viewer's own channel when the price crosses the level.
 //   POST /?px=add   {topic, sym, level, dir: "above"|"below", note}   ->  {ok, alert}
@@ -264,6 +270,7 @@ export default {
     if (url.searchParams.has("px")) return priceAlerts(request, url, env);
     if (url.searchParams.has("volscan")) return volScan(url.searchParams.get("volscan"), env, ctx);
     if (url.searchParams.has("grid")) return gridBars(url.searchParams, env, ctx);
+    if (url.searchParams.has("replay")) return replayBars(url.searchParams, env, ctx);
     let sym = (url.searchParams.get("symbol") || "").trim().toUpperCase().replace(/\./g, "-");
     if (["SPX", "^SPX", "^GSPC"].includes(sym)) sym = "SPY";       // index: no Alpaca data
     const coin = isStock(sym) ? null : coinOf(sym);
@@ -717,4 +724,42 @@ async function checkPriceAlerts(env) {
     } catch { keep.push(a); }
   }
   if (keep.length !== all.length) await env.PX.put(PX_KEY, JSON.stringify(keep));
+}
+
+// ---------------------------------------------------------------- bar replay (docs/replay.html)
+// tf: [days of history before start, days after start]; sized to stay under one Alpaca page (10,000 bars)
+const REPLAY = { "1Day": [400, 3650], "1Hour": [30, 365], "15Min": [8, 90], "5Min": [4, 30] };
+async function replayBars(q, env, ctx) {
+  let sym = (q.get("replay") || "").trim().toUpperCase().replace(/\./g, "-");
+  if (["SPX", "^SPX", "^GSPC"].includes(sym)) sym = "SPY";
+  if (!isStock(sym)) return json({ error: `${sym || "No ticker"}: only S&P 500 stocks and SPY are available.` }, 400);
+  if (!env.ALPACA_KEY_ID || !env.ALPACA_SECRET_KEY) return json({ error: "The Alpaca keys are not set on the Worker." }, 500);
+  const tf = REPLAY[q.get("tf")] ? q.get("tf") : "1Day";
+  const day = (q.get("start") || "").slice(0, 10);
+  const start = Date.parse(day + "T00:00:00Z");
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(day) || !isFinite(start)) return json({ error: "Add a start date (start=YYYY-MM-DD)." }, 400);
+  const now = Date.now() - 16 * 60e3;                      // free plan: SIP data 15+ minutes old
+  if (start > now) return json({ error: "The start date is in the future." }, 400);
+  const [back, fwd] = REPLAY[tf];
+  const from = Math.max(Date.UTC(2016, 0, 1), start - back * DAY), to = Math.min(now, start + fwd * DAY);
+  const past = to < now - DAY;
+  const cache = typeof caches !== "undefined" ? caches.default : null;
+  const key = new Request(`https://trendlines.cache/replay/${sym}/${tf}/${day}${past ? "" : "/" + Math.floor(now / 60e3)}`);
+  if (cache) { const hit = await cache.match(key).catch(() => null); if (hit) return hit; }
+  try {
+    const raw = await fetchSeries(sym.replace(/-/g, "."), tf, from, to, env);
+    const intraday = tf !== "1Day";
+    const bars = [];
+    for (const b of raw) {
+      if (intraday) { const m = Math.floor((nyWall(b.t) % 86400) / 60); if (m < 240 || m >= 1200) continue; }
+      bars.push([Math.floor(Date.parse(b.t) / 1000), b.o, b.h, b.l, b.c, b.v]);
+    }
+    if (bars.length < 5) return json({ error: `No ${tf} candles for ${sym} around ${day}.` }, 404);
+    const res = json({ symbol: sym, tf, start: day, end: new Date(to).toISOString(), source: "Alpaca (all US exchanges, SIP)", bars },
+      200, { "Cache-Control": `max-age=${past ? 86400 : 60}` });
+    if (cache) ctx?.waitUntil?.(cache.put(key, res.clone()));
+    return res;
+  } catch (e) {
+    return json({ error: String(e.message || e) }, 502);
+  }
 }
