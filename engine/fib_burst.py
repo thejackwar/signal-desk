@@ -20,12 +20,15 @@ Exact rules tested here (every one is a switch, see VARIANTS):
               redrawn up to the new high (as you would on the chart); the low stays where it is.
   Entry       a limit order at the 38.2%, 50% (default) or 61.8% pullback - filled the first minute that reaches
               it (at the minute's open if it gaps through) - "touch" (default); or "confirm": a minute that
-              reaches the level and closes back above it, enter at that close; or "zone": enter the first minute
+              reaches the level and closes back above it, enter at that close; or "bounce": like "confirm" but the
+              minute must also be a green candle (closes above its open; red for a short) - a real sign the level
+              is holding, not a red candle that happens to close a few dollars above it; or "zone": enter the first minute
               price trades between 38.2% and 50% (at the 38.2% level, or at the minute's open if it opens inside
               the zone; a minute that opens past 50% does not count).
   Wait        if the level is not reached within 60 minutes (default) / 180 minutes of the last new high, the
               setup is dropped.
-  Stop        78.6% (default) or 100% (the burst's low), plus a small tick.
+  Stop        78.6% (default), 70% (between 61.8% and 78.6%: below that the move has failed) or 100% (the
+              burst's low), plus a small tick.
   Target      "swing" (default): back to the burst's high; "1.272": the 127.2% extension; "2R"; "0.236" / "0.382":
               the first level back (take profit at the 23.6% / 38.2% level instead of the full move).
   Time exit   whatever is still open is closed 60 / 240 (default) / 1440 minutes after the entry.
@@ -71,9 +74,9 @@ VARIANTS = {
     "vol": ["any", "2", "3"],
     "one": ["keep", "skip", "close"],
     "level": ["0.382", "0.5", "0.618"],
-    "entry": ["touch", "confirm", "zone"],
+    "entry": ["touch", "confirm", "bounce", "zone"],
     "wait": ["60", "180"],
-    "stop": ["0.786", "1"],
+    "stop": ["0.7", "0.786", "1"],
     "tp": ["swing", "1.272", "2R", "0.236", "0.382"],
     "hold": ["60", "240", "1440"],
     "cost": ["0", "0.02", "0.05", "0.1"],
@@ -88,6 +91,11 @@ PRESETS = {
     "all three (close, zone, 23.6%)": {"one": "close", "entry": "zone", "tp": "0.236"},
     "all three, skipping one-candle bursts": {"one": "skip", "entry": "zone", "tp": "0.236"},
     "close + confirmed entry at 50% + 23.6%": {"one": "close", "entry": "confirm", "tp": "0.236"},
+    "bounce entry at 50% (green candle closing above)": {"entry": "bounce"},
+    "stop at 70%": {"stop": "0.7"},
+    "bounce entry + 70% stop": {"entry": "bounce", "stop": "0.7"},
+    "close + bounce + 70% stop": {"one": "close", "entry": "bounce", "stop": "0.7"},
+    "close + bounce + 70% stop + 23.6%": {"one": "close", "entry": "bounce", "stop": "0.7", "tp": "0.236"},
 }
 
 
@@ -219,7 +227,8 @@ def simulate(B: Bars, ev: np.ndarray, v: dict) -> list[dict]:
     lo_w, hi_w = B.window(int(v["n"]))
     lvf, stf = float(v["level"]), float(v["stop"])
     wait, hold, cost = int(v["wait"]), int(v["hold"]), float(v["cost"]) / 100
-    confirm = v["entry"] == "confirm"
+    confirm = v["entry"] in ("confirm", "bounce")
+    green = v["entry"] == "bounce"
     zone = v["entry"] == "zone"
     if zone:
         lvf = 0.382                                             # zone 38.2% (first fill) .. 50% (deepest open)
@@ -252,7 +261,8 @@ def simulate(B: Bars, ev: np.ndarray, v: dict) -> list[dict]:
                 entry = min(o[i], lvl) if upb else max(o[i], lvl)
                 ie = i
                 break
-            if reach and confirm and ((c[i] > lvl) if upb else (c[i] < lvl)) and ((c[i] > stop) if upb else (c[i] < stop)):
+            if reach and confirm and ((c[i] > lvl) if upb else (c[i] < lvl)) and ((c[i] > stop) if upb else (c[i] < stop)) \
+                    and (not green or ((c[i] > o[i]) if upb else (c[i] < o[i]))):
                 entry, ie = c[i], i
                 break
             if (l[i] <= stop) if upb else (h[i] >= stop):
