@@ -25,10 +25,19 @@ Exact rules tested here (every one is a switch, see VARIANTS):
               is holding, not a red candle that happens to close a few dollars above it; or "zone": enter the first minute
               price trades between 38.2% and 50% (at the 38.2% level, or at the minute's open if it opens inside
               the zone; a minute that opens past 50% does not count).
-  Slowing     "off" (default) or "on": only enter when the pullback has paused at the level - the minute trades
-              through the level (not already far past it) and at least one of the last 2 candles closed against the
-              pullback (green or flat for a long, red or flat for a short). Never buy into 2+ red candles in a row
-              (sell into 2+ green); the setup keeps waiting while it is still alive.
+  Slowing     "off" (default) or "on": only enter when the pullback has paused - at least one of the last 2
+              CLOSED candles (before the entry minute) closed against the pullback (green or flat for a long, red or
+              flat for a short), and the entry minute does not open more than 10% of the burst past the level.
+              Never buy into 2+ red candles in a row (sell into 2+ green); the setup keeps waiting while alive.
+              (First version also looked at the entry minute's own close - look-ahead, fixed 11 Nov 2026.)
+  Filters     (each "off" by default; tested on top of slowing + 23.6% target):
+              trend  "on": longs only when the burst's close is above the 1-hour 50-EMA (last completed hour),
+                     shorts only below it.
+              pvol   "on": the pullback's average minute volume must be under 60% of the burst's.
+              clean  "on": the burst is built over 3+ candles and its trigger candle closes in the top 30% of it.
+              vwap   "on": longs only when the burst closes above the day's VWAP (from 00:00 UTC), shorts below.
+              hours  "all" / "day": entries 08:00-22:00 Rome time / "day_wk": the same, Monday to Friday.
+              cap    "off" / "1day": at most one trade a day (Rome) / "cool": no new trade for 4 hours after a loss.
               (From the 4 Nov 04:23 and 6 Nov 16:13 shorts: price ran straight up through 50%.)
   Wait        if the level is not reached within 60 minutes (default) / 180 minutes of the last new high, the
               setup is dropped.
@@ -75,13 +84,20 @@ TICK = 0.0002
 SPLIT = "2024-01-01"
 
 DEFAULT = {"n": "15", "x": "1", "vol": "2", "level": "0.5", "entry": "touch", "wait": "60",
-           "stop": "0.786", "tp": "swing", "hold": "240", "cost": "0.05", "one": "keep", "slow": "off"}
+           "stop": "0.786", "tp": "swing", "hold": "240", "cost": "0.05", "one": "keep", "slow": "off",
+           "trend": "off", "pvol": "off", "clean": "off", "vwap": "off", "hours": "all", "cap": "off"}
 VARIANTS = {
     "n": ["5", "15", "30"],
     "x": ["0.5", "1", "1.5", "2"],
     "vol": ["any", "2", "3"],
     "one": ["keep", "skip", "close"],
     "slow": ["off", "on"],
+    "trend": ["off", "on"],
+    "pvol": ["off", "on"],
+    "clean": ["off", "on"],
+    "vwap": ["off", "on"],
+    "hours": ["all", "day", "day_wk"],
+    "cap": ["off", "1day", "cool"],
     "level": ["0.382", "0.5", "0.618"],
     "entry": ["touch", "confirm", "bounce", "zone"],
     "wait": ["60", "180"],
@@ -93,6 +109,18 @@ VARIANTS = {
 GRID = ("n", "x", "vol", "one", "slow", "level", "stop", "tp")   # the full combination grid (others at default)
 GRID_OPTS = {"one": ["keep", "close"], "tp": ["swing", "0.236", "scale"]}   # trimmed in the grid (no effect / worse)
 # Giacomo's fixes from reviewing the trades (11 Nov 2026), tested on their own and together (others at default).
+BEST = {"slow": "on", "tp": "0.236"}                    # best fixes so far: the base for the filters
+FILTERS = {
+    "trend: with the 1h 50-EMA": {"trend": "on"},
+    "pullback volume under 60% of the burst's": {"pvol": "on"},
+    "clean burst (3+ candles, closes near the extreme)": {"clean": "on"},
+    "VWAP side": {"vwap": "on"},
+    "08:00-22:00 Rome": {"hours": "day"},
+    "08:00-22:00 Rome, weekdays": {"hours": "day_wk"},
+    "max 1 trade a day": {"cap": "1day"},
+    "4 h pause after a loss": {"cap": "cool"},
+}
+FILTERS_ALL = {"trend": "on", "pvol": "on", "clean": "on", "vwap": "on", "hours": "day_wk", "cap": "1day"}
 PRESETS = {
     "read one-candle bursts by their close": {"one": "close"},
     "skip one-candle bursts": {"one": "skip"},
@@ -224,6 +252,23 @@ class Bars:
         self.l = array("d", df["l"].to_numpy())
         self.c = array("d", df["c"].to_numpy())
         self.t = df["t"].to_numpy()
+        self.v = array("d", df["v"].to_numpy())
+        t = df["t"].to_numpy()
+        hour = t // 3_600_000
+        last = pd.Series(df["c"].to_numpy(), index=hour).groupby(level=0).last()
+        ema = last.ewm(span=50, adjust=False).mean().shift(1)    # EMA of COMPLETED hours only
+        self.ema = array("d", ema.reindex(hour).to_numpy())
+        day = t // 86_400_000
+        tp = (df["h"] + df["l"] + df["c"]).to_numpy() / 3
+        vol = df["v"].to_numpy()
+        g = pd.DataFrame({"d": day, "pv": tp * vol, "v": vol}).groupby("d")
+        vwap = (g["pv"].cumsum() / g["v"].cumsum()).to_numpy()   # through this minute's close (known at the close)
+        self.vwap = array("d", np.nan_to_num(vwap, nan=np.nan))
+        rome = pd.to_datetime(t, unit="ms", utc=True).tz_convert("Europe/Rome")
+        hr, wd = rome.hour.to_numpy(), rome.dayofweek.to_numpy()
+        self.hok = array("b", ((hr >= 8) & (hr < 22)).astype("int8"))
+        self.hwk = array("b", ((hr >= 8) & (hr < 22) & (wd < 5)).astype("int8"))
+        self.day = array("q", (rome.year.to_numpy() * 1000 + rome.dayofyear.to_numpy()).astype("int64"))
         self.lo = {}
         self.hi = {}
         self.n = len(self.o)
@@ -277,6 +322,9 @@ def simulate(B: Bars, ev: np.ndarray, v: dict) -> list[dict]:
     green = v["entry"] == "bounce"
     zone = v["entry"] == "zone"
     slow = v["slow"] == "on"
+    trend, pvol, clean, vwap = (v[k] == "on" for k in ("trend", "pvol", "clean", "vwap"))
+    hours, cap = v["hours"], v["cap"]
+    last_day = -1
     if zone:
         lvf = 0.382                                             # zone 38.2% (first fill) .. 50% (deepest open)
     out, free_from = [], 0
@@ -290,6 +338,14 @@ def simulate(B: Bars, ev: np.ndarray, v: dict) -> list[dict]:
         ext, last_new = (h[i0] if upb else l[i0]), i0          # burst extreme (0%), redrawn on new extremes
         n_ = int(v["n"])
         a_i = max(range(max(0, i0 - n_ + 1), i0 + 1), key=lambda j: -l[j] if upb else h[j])
+        if cap == "1day" and B.day[i0] == last_day:
+            continue
+        if trend and B.ema[i0] == B.ema[i0] and ((c[i0] <= B.ema[i0]) if upb else (c[i0] >= B.ema[i0])):
+            continue
+        if vwap and B.vwap[i0] == B.vwap[i0] and ((c[i0] <= B.vwap[i0]) if upb else (c[i0] >= B.vwap[i0])):
+            continue
+        if clean and (i0 - a_i < 2 or ext == a or (c[i0] - a) / (ext - a) < 0.7):
+            continue
         entry = ie = None
         i = i0 + 1
         while i < B.n and i - last_new <= wait:
@@ -302,9 +358,16 @@ def simulate(B: Bars, ev: np.ndarray, v: dict) -> list[dict]:
                 if (o[i] < deep) if upb else (o[i] > deep):     # opened past 50%: not in the zone, setup dead
                     break
             if reach and slow:                                  # still running into the level: wait
-                at_level = l[i] <= lvl <= h[i]                  # price is at the level, not already far past it
-                paused = any((c[k] >= o[k]) if upb else (c[k] <= o[k]) for k in (i - 1, i))
-                if not (at_level and paused):
+                paused = any((c[k] >= o[k]) if upb else (c[k] <= o[k]) for k in (i - 2, i - 1))   # closed candles
+                past = (lvl - o[i]) if upb else (o[i] - lvl)    # how far this minute OPENS past the level
+                if not paused or past > 0.1 * abs(rng):
+                    reach = False
+            if reach and hours != "all" and not (B.hok[i] if hours == "day" else B.hwk[i]):
+                reach = False
+            if reach and pvol:
+                pull = range(last_new + 1, i)
+                burst = range(a_i, last_new + 1)
+                if not pull or sum(B.v[k] for k in pull) / len(pull) >= 0.6 * sum(B.v[k] for k in burst) / len(burst):
                     reach = False
             if reach and zone:
                 entry = min(o[i], lvl) if upb else max(o[i], lvl)
@@ -370,6 +433,9 @@ def simulate(B: Bars, ev: np.ndarray, v: dict) -> list[dict]:
                     "in": round(entry, 2), "sl": round(stop, 2), "tp": round(tgt, 2), "out": round(px, 2),
                     "why": why, "mins": j - ie, "pct": round(ret * 100, 4), "r": round(sgn * (px - entry) / risk, 2)})
         free_from = j + 1
+        last_day = B.day[ie]
+        if cap == "cool" and ret < 0:
+            free_from = j + 240
     return out
 
 
@@ -441,6 +507,16 @@ def summary(res: dict) -> str:
          "## Fixes from reviewing the trades (each on its own, then together, each without and with the slowing check; everything else at default)", "", hdr]
     for name, p_ in res.get("presets", {}).items():
         L.append(row(name, p_))
+    if res.get("filters"):
+        days = max(1, (date.fromisoformat(res["to"]) - date.fromisoformat(res["from"])).days)
+        L += ["", "## Filters on top of the best rules (slowing + 23.6% target)", "",
+              "| Variant | Trades | Per day | Win | Avg/trade | PF | Account | Max DD | Train n: avg / PF | Test n: avg / PF |",
+              "|---|---|---|---|---|---|---|---|---|---|"]
+        for name, s_ in res["filters"].items():
+            f, tr, te = s_["full"], s_["train"], s_["test"]
+            L.append(f"| {name} | {f.get('n')} | {round((f.get('n') or 0) / days, 2)} | {f.get('win')}% | {f.get('avg')}% | "
+                     f"{f.get('pf')} | {f.get('acct')}% | {f.get('maxdd')}% | {tr.get('n')}: {tr.get('avg')}% / {tr.get('pf')} | "
+                     f"{te.get('n')}: {te.get('avg')}% / {te.get('pf')} |")
     L += ["", "## One switch changed at a time", "", hdr]
     for k, opts in res["sweeps"].items():
         for o_, s in opts.items():
@@ -488,6 +564,15 @@ def main() -> None:
     res["base"] = split(base)
     res["base_trades_recent"] = [{k: x for k, x in t.items() if k != "_i"} for t in base[-100:]]
     res["sweeps"] = {k: {o_: split(run({**DEFAULT, k: o_})) for o_ in opts} for k, opts in VARIANTS.items()}
+    res["filters"] = {"best: slowing + 23.6%": {"v": BEST, **split(run({**DEFAULT, **BEST}))}}
+    for name, p in {**FILTERS, "ALL filters": FILTERS_ALL,
+                    "ALL filters except max 1/day": {**FILTERS_ALL, "cap": "off"},
+                    "ALL filters, 24/7": {**FILTERS_ALL, "hours": "all"}}.items():
+        res["filters"]["best + " + name] = {"v": {**BEST, **p}, **split(run({**DEFAULT, **BEST, **p}))}
+    for name, p in {"ALL filters": FILTERS_ALL}.items():
+        q = {**BEST, **p, "tp": "scale"}
+        res["filters"]["slowing + scale-out + " + name] = {"v": q, **split(run({**DEFAULT, **q}))}
+    print(f"filters done ({time.time() - t0:.0f}s)", flush=True)
     res["presets"] = {}
     for name, p in {"default rules": {}, **PRESETS}.items():          # every fix without and with slowing
         res["presets"][name] = {"v": p, **split(run({**DEFAULT, **p}))}
