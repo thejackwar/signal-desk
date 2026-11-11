@@ -162,6 +162,7 @@ def build_candidates(tab: dict, sp100: set[str], demo=None) -> list[dict]:
                 continue
         spyb = [(ny(b["t"]), b) for b in (intr.get("SPY") or [])]
         spyb = [(t.hour * 60 + t.minute, b) for t, b in spyb if t.date().isoformat() == d]
+        spyb = [(m, b) for m, b in spyb if 570 <= m <= 955]           # regular session only (quick mode has pre-market)
         if spyb and spyb[0][0] == 570:
             SPYDAY[d] = {"o": spyb[0][1]["o"], **{m: b["c"] for m, b in spyb}}
         for s, r in items:
