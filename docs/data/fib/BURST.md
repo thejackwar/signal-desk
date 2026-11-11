@@ -1,10 +1,10 @@
-# Fibonacci on a burst - Bitcoin (2026-11-11T21:18+00:00)
+# Fibonacci on a burst - Bitcoin (2026-11-11T21:37+00:00)
 
 BTCUSDT 1-minute, 2021-01-01 -> 2026-11-10. Buy-and-hold BTC over the same time: 155.1%. Train = 2021-2023, test = 2024 on.
 
 ## Default rules
 
-`n=15 | x=1 | vol=2 | level=0.5 | entry=touch | wait=60 | stop=0.786 | tp=swing | hold=240 | cost=0 | one=keep | slow=off | trend=off | pvol=off | clean=off | vwap=off | hours=all | cap=off`
+`n=15 | x=1 | vol=2 | level=0.5 | entry=touch | wait=60 | stop=0.786 | tp=swing | hold=240 | cost=0 | one=keep | slow=off | trend=off | pvol=off | clean=off | vwap=off | hours=all | cap=off | tf=1 | big=off`
 
 | Variant | Trades | Win | Avg/trade | Avg R | PF | Account | Max DD | Train n: avg / PF | Test n: avg / PF |
 |---|---|---|---|---|---|---|---|---|---|
@@ -58,6 +58,19 @@ Exits: {'stop': 2161, 'target': 1203, 'time': 206}
 | close + bounce + 70% stop + scale out | 2421 | 57.0% | -0.013% | -0.01 | 0.94 | -29.4% | -46.2% | 1505: -0.026% / 0.89 | 916: 0.009% / 1.05 |
 | close + bounce + 70% stop + scale out + slowing | 1728 | 55.6% | -0.008% | -0.01 | 0.97 | -14.3% | -40.0% | 1079: -0.03% / 0.87 | 649: 0.03% / 1.17 |
 
+## 5-minute candles and big candles, on Giacomo's rule (stop beyond 61.8%, 75% at 23.6%)
+
+| Variant | Trades | Per day | Win | Avg/trade | PF | Account | Max DD | Train n: avg / PF | Test n: avg / PF |
+|---|---|---|---|---|---|---|---|---|---|
+| 1% bursts, 2x volume, 1-min candles | 3835 | 1.79 | 35.7% | 0.018% | 1.12 | 93.7% | -20.4% | 2411: 0.02% / 1.12 | 1424: 0.016% / 1.11 |
+| 1% bursts, 2x volume, 1-min candles + big candles | 2106 | 0.98 | 34.0% | 0.01% | 1.06 | 21.2% | -17.8% | 1294: 0.002% / 1.01 | 812: 0.023% / 1.16 |
+| 1% bursts, 2x volume, 5-min candles | 3424 | 1.6 | 32.5% | 0.003% | 1.02 | 6.8% | -21.4% | 2158: 0.004% / 1.02 | 1266: 0.002% / 1.01 |
+| 1% bursts, 2x volume, 5-min candles + big candles | 2134 | 1.0 | 31.9% | 0.0% | 1.0 | -2.1% | -18.1% | 1329: -0.005% / 0.97 | 805: 0.008% / 1.06 |
+| 2% bursts, 3x volume, 1-min candles | 608 | 0.28 | 35.2% | 0.046% | 1.16 | 29.8% | -12.4% | 442: 0.031% / 1.1 | 166: 0.087% / 1.35 |
+| 2% bursts, 3x volume, 1-min candles + big candles | 447 | 0.21 | 36.7% | 0.061% | 1.22 | 29.5% | -10.2% | 314: 0.044% / 1.15 | 133: 0.102% / 1.43 |
+| 2% bursts, 3x volume, 5-min candles | 541 | 0.25 | 29.2% | -0.009% | 0.97 | -6.5% | -23.5% | 386: -0.03% / 0.91 | 155: 0.043% / 1.17 |
+| 2% bursts, 3x volume, 5-min candles + big candles | 440 | 0.21 | 29.1% | -0.008% | 0.97 | -4.9% | -24.3% | 303: -0.024% / 0.93 | 137: 0.028% / 1.11 |
+
 ## Filters on top of the best rules (slowing + 23.6% target)
 
 | Variant | Trades | Per day | Win | Avg/trade | PF | Account | Max DD | Train n: avg / PF | Test n: avg / PF |
@@ -109,6 +122,10 @@ Exits: {'stop': 2161, 'target': 1203, 'time': 206}
 | cap=off (default) | 3570 | 37.5% | -0.0% | -0.02 | 1.0 | -12.9% | -61.2% | 2225: 0.005% / 1.01 | 1345: -0.009% / 0.97 |
 | cap=1day | 1341 | 38.3% | -0.01% | -0.02 | 0.97 | -14.7% | -31.4% | 792: -0.019% / 0.94 | 549: 0.004% / 1.01 |
 | cap=cool | 2427 | 37.3% | -0.023% | -0.03 | 0.93 | -46.6% | -59.0% | 1525: -0.031% / 0.91 | 902: -0.01% / 0.97 |
+| tf=1 (default) | 3570 | 37.5% | -0.0% | -0.02 | 1.0 | -12.9% | -61.2% | 2225: 0.005% / 1.01 | 1345: -0.009% / 0.97 |
+| tf=5 | 3312 | 37.6% | -0.002% | 0.0 | 1.0 | -15.0% | -48.7% | 2107: -0.006% / 0.98 | 1205: 0.006% / 1.02 |
+| big=off (default) | 3570 | 37.5% | -0.0% | -0.02 | 1.0 | -12.9% | -61.2% | 2225: 0.005% / 1.01 | 1345: -0.009% / 0.97 |
+| big=on | 2036 | 37.5% | -0.011% | -0.03 | 0.97 | -26.0% | -50.5% | 1246: -0.03% / 0.92 | 790: 0.019% / 1.06 |
 | level=0.382 | 4978 | 51.9% | 0.011% | 0.01 | 1.03 | 47.1% | -33.8% | 3115: 0.017% / 1.05 | 1863: 0.002% / 1.01 |
 | level=0.5 (default) | 3570 | 37.5% | -0.0% | -0.02 | 1.0 | -12.9% | -61.2% | 2225: 0.005% / 1.01 | 1345: -0.009% / 0.97 |
 | level=0.618 | 2536 | 22.8% | -0.008% | -0.06 | 0.97 | -23.7% | -48.1% | 1571: 0.018% / 1.07 | 965: -0.051% / 0.78 |
