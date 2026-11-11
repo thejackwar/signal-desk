@@ -13,6 +13,8 @@ made there applies here too. Only what has to differ for a stock index is change
               of Bitcoin's 1,440 (one day).
   Hold        60, 240 (default) or 390 minutes (the rest of the day) - never overnight.
   Costs       0.03% a side by default (the S&P 100 tests use the same); 0 / 0.02 / 0.05 / 0.1 are checked too.
+  Entry       by default WITH confirmation: "bounce" (a green 1-minute candle that reaches the level and closes back
+              above it; red and below for a short) plus the slowing-down check. Plain "touch" is still tested.
 
     python engine/fib_burst_spy.py           # needs ALPACA_KEY_ID / ALPACA_SECRET_KEY
     python engine/fib_burst_spy.py --demo    # synthetic sessions, writes /tmp/fib-burst-spy-demo*.json
@@ -42,7 +44,9 @@ SESSION = 390                     # minutes in a regular session
 PAD = 400                         # empty minutes after each session (> the longest hold / wait), see pad()
 NY = "America/New_York"
 
-FB.DEFAULT.update({"x": "0.5", "cost": "0.03"})
+# Default entry with confirmation (Giacomo, 11 Nov 2026, from the 16 Sep 2026 20:47 trade that bought into falling
+# red candles): a green candle that reaches the level and closes back above it, and the pullback must have slowed.
+FB.DEFAULT.update({"x": "0.5", "cost": "0.03", "entry": "bounce", "slow": "on"})
 FB.VARIANTS["x"] = ["0.25", "0.5", "0.75", "1"]
 FB.VARIANTS["hold"] = ["60", "240", "390"]
 

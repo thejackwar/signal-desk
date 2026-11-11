@@ -194,7 +194,11 @@ function howBurst() {
   const hold = +(d.hold || 240), holdTxt = hold >= 390 ? "the rest of the day" : hold >= 60 ? `${hold / 60} hour${hold > 60 ? "s" : ""}` : `${hold} minutes`;
   return [["Burst", `${NAME()} moves at least ${d.x ?? "1"}% within ${d.n ?? 15} minutes${d.vol === "any" ? "" : `, on at least ${d.vol ?? 2}× the normal minute volume of the ${spy ? "previous session" : "last 24 hours"}`}.`],
     ["Draw", "Levels from the burst's low to its high, redrawn while it keeps making new highs."],
-    ["Enter", `Buy the pullback to the ${pctLbl(+(d.level ?? 0.5))} level within ${d.wait ?? 60} minutes${d.slow === "on" ? ", once the pullback has slowed down" : ""} (short the bounce after a sell-off burst).`],
+    ["Enter", (() => { const L = pctLbl(+(d.level ?? 0.5));
+      const how = d.entry === "bounce" ? `Wait for a green candle that touches the ${L} level and closes back above it, then buy at that close`
+        : d.entry === "confirm" ? `Wait for a candle that touches the ${L} level and closes back above it, then buy at that close`
+        : d.entry === "zone" ? "Buy the first minute price trades between 38.2% and 50%" : `Buy the pullback with a limit order at the ${L} level`;
+      return `${how}, within ${d.wait ?? 60} minutes${d.slow === "on" ? "; not while it is still falling (one of the last 2 candles must be green)" : ""}. Mirror for a sell-off burst.`; })()],
     ["Out", `Stop below ${pctLbl(+(d.stop ?? 0.786))}, target ${tp}, closed after ${holdTxt}${spy ? " or at the 16:00 close" : ""}.`]];
 }
 const SD = () => D[S.tab] || {};                              // the stock-type tabs: {B: results, T: trades}
