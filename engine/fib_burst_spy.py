@@ -200,8 +200,11 @@ def main() -> None:
 
     res = json.loads((tmp / "burst.json").read_text())
     res["market"] = "SPY"
+    last_day = FB.day(int(df["t"][df["real"]].iloc[-1]))         # the padding after the last close runs past midnight UTC
+    md = None
+    res["to"], old_to = last_day, res["to"]
     res["rules"] = __doc__.split("only what has to differ")[0] + "\n\n" + res["rules"]
-    md = (tmp / "BURST.md").read_text()
+    md = (tmp / "BURST.md").read_text().replace(f"-> {old_to}.", f"-> {last_day}.")
     md = (md.replace("Fibonacci on a burst - Bitcoin", "Fibonacci on a burst - SPY (the Bitcoin setup)")
             .replace("BTCUSDT 1-minute", "SPY 1-minute (regular session, Alpaca)")
             .replace("Buy-and-hold BTC", "Buy-and-hold SPY"))
