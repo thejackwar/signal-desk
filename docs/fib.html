@@ -77,6 +77,7 @@ h2 + p { color: var(--muted); margin: 0 0 10px; }
 .up { color: var(--up); } .down { color: var(--down); }
 .note { border-left: 2px solid var(--blue); padding: 4px 0 4px 14px; color: var(--muted); margin: 14px 0; font-size: 15px; }
 .note b { color: var(--fg); }
+.note:empty { display: none; }
 .steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; margin: 10px 0; }
 .step { border: 1px solid var(--line); border-radius: 4px; padding: 12px 14px; background: var(--panel); }
 .step h3 { margin: 4px 0 4px; font-size: 16px; }
@@ -199,7 +200,7 @@ function header() {
   let st = null, bench = null, benchName = "";
   if (S.tab === "btc") { st = D.btcB?.base; bench = D.btcB?.hold_btc; benchName = "Holding Bitcoin"; }
   else { st = D.stB?.modes?.[S.mode]?.base; bench = D.stB?.spy_total; benchName = "Holding SPY"; }
-  if (!st) { $("cards").innerHTML = `<div class="empty" style="grid-column:1/-1">The backtest for this version is still running on GitHub. Check back soon.</div>`; $("verdict").textContent = ""; return; }
+  if (!st) { $("cards").innerHTML = `<div class="empty" style="grid-column:1/-1">The stock backtest is still running on GitHub (ready later tonight).${S.tab === "stocks" ? ` Meanwhile the <a href="#" data-tab="btc">Bitcoin bursts</a> trades are ready.` : ""}</div>`; $("verdict").textContent = ""; return; }
   const F = st.full, A = st.train, B = st.test, acct = F.acct ?? F.acct_total, dd = F.maxdd ?? F.acct_maxdd;
   $("cards").innerHTML = `
     <div><span class="k">Trades</span><b>${(F.n || 0).toLocaleString("en")}</b><small>${Math.round(F.win)}% won</small></div>
@@ -218,7 +219,7 @@ function header() {
 function list() {
   const ts = trades();
   $("count").textContent = ts.length ? `${ts.length} trades` : "";
-  if (!ts.length) { $("list").innerHTML = `<tbody><tr><td class="empty">No sample trades yet. They appear when the backtest has run.</td></tr></tbody>`; return; }
+  if (!ts.length) { $("list").innerHTML = `<tbody><tr><td class="empty" style="text-align:center">No sample trades yet. They appear when the backtest has run.</td></tr></tbody>`; return; }
   S.i = Math.min(S.i, ts.length - 1);
   const btc = S.tab === "btc";
   $("list").innerHTML = `<thead><tr><th>Day</th>${btc ? "" : "<th>Stock</th>"}<th>Trade</th><th>In</th><th>Out</th><th>Why</th><th>Result</th></tr></thead><tbody>` +
@@ -315,7 +316,7 @@ function caption(t, tm, z, o, f) {
 function render() { save(); header(); list(); chart(); }
 
 document.addEventListener("click", e => {
-  const tb = e.target.closest("[data-tab]"); if (tb) { S.tab = tb.dataset.tab; S.i = 0; ensure().then(render); return; }
+  const tb = e.target.closest("[data-tab]"); if (tb) { e.preventDefault(); S.tab = tb.dataset.tab; S.i = 0; ensure().then(render); return; }
   const md = e.target.closest("[data-mode]"); if (md) { S.mode = md.dataset.mode; S.i = 0; render(); return; }
   const fl = e.target.closest("[data-f]"); if (fl) { S.f = fl.dataset.f; S.i = 0; document.querySelectorAll("#filter button").forEach(b => b.setAttribute("aria-pressed", b.dataset.f === S.f)); render(); return; }
   const r = e.target.closest("#list tr[data-i]"); if (r) { S.i = +r.dataset.i; chart(); if (window.innerWidth < 900) $("viewer").scrollIntoView({ behavior: "smooth", block: "start" }); }
