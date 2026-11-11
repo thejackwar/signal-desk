@@ -43,6 +43,8 @@ only (survivorship bias). Train 2021-2023, test 2024 on, reported side by side f
 
     python engine/fib_retrace.py           # needs ALPACA_KEY_ID / ALPACA_SECRET_KEY
     python engine/fib_retrace.py --demo    # synthetic data, writes /tmp/fib-demo.json
+    python engine/fib_retrace.py --symbols SPY   # quick test on a few symbols (minutes, not hours):
+                                                 # writes backtest_spy.json, SUMMARY_spy.md, trades_spy.json
 Output: docs/data/fib/backtest.json and docs/data/fib/SUMMARY.md
 """
 from __future__ import annotations
@@ -409,7 +411,7 @@ def summary(res: dict) -> str:
     hdr = ("| Variant | Trades | Win | Avg/trade | Avg R | PF | Account | Max DD | Train avg / PF | Test avg / PF |\n"
            "|---|---|---|---|---|---|---|---|---|---|")
     L = [f"# Fibonacci Retracement backtest ({res['generated']})", "",
-         f"S&P 100, 5-minute bars from {res['from']}, costs {res['costs_pct_a_side']}% a side. "
+         f"{res.get('universe', 'S&P 100')}, 5-minute bars from {res['from']}, costs {res['costs_pct_a_side']}% a side. "
          f"SPY over the same period: {res['spy_total']}%. Train = 2021-2023, test = 2024 on.", "",
          "## The five versions on their default switches", "",
          "`" + " | ".join(f"{k}={v}" for k, v in res["default"].items() if k not in ("mode", "anchor")) + "`", "",
@@ -426,9 +428,10 @@ def summary(res: dict) -> str:
             for o, st in opts.items():
                 L.append(row(f"{k}={o}" + (" (default)" if DEFAULT[k] == o else ""), st))
         mine = [c for c in res["combos"] if f"{c['v']['mode']}|{c['v']['anchor']}" == mk]
-        top = sorted((c for c in mine if (c["train"].get("n") or 0) >= 200),
+        mn = res.get("min_train", 200)
+        top = sorted((c for c in mine if (c["train"].get("n") or 0) >= mn),
                      key=lambda c: -(c["train"].get("avg") or -9))[:10]
-        L += ["", "### Best 10 combinations chosen on TRAIN only (min 200 train trades) - does TEST hold?", "", hdr]
+        L += ["", f"### Best 10 combinations chosen on TRAIN only (min {mn} train trades) - does TEST hold?", "", hdr]
         for c in top:
             L.append(row(" ".join(f"{k}={c['v'][k]}" for k in USES[mode] if k not in ("gapf", "late")), c))
         L += ["", f"Of those 10, **{sum(1 for c in top if (c['test'].get('avg') or 0) > 0)}** were still profitable "
@@ -441,10 +444,15 @@ def summary(res: dict) -> str:
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--demo", action="store_true")
+    ap.add_argument("--symbols", help="comma-separated symbols for a quick run, e.g. SPY or SPY,QQQ")
     a = ap.parse_args()
     t0 = time.time()
     _, sp100 = load_tickers()
     syms = sorted(sp100)
+    quick = [x.strip().upper() for x in (a.symbols or "").split(",") if x.strip()]
+    tag = "_" + "_".join(quick).lower() if quick else ""
+    if quick:
+        syms = quick; sp100 = set(quick)
     if a.demo:
         syms = syms[:30]; sp100 = set(syms)
         daily = demo_daily(syms)
@@ -465,13 +473,23 @@ def main() -> None:
     first = [b for b in spy_rows if b["t"][:10] < FROM]
     spy_total = round((spy_rows[-1]["c"] / (first[-1]["c"] if first else spy_rows[0]["o"]) - 1) * 100, 1)
 
-    cands = build_candidates(tab, sp100, demo_intraday if a.demo else None)
+    feed = demo_intraday if a.demo else None
+    if quick and not a.demo:                                    # few symbols: one paginated download, not one per day
+        allb = fetch(syms, "5Min", FROM + "T00:00:00Z", today)
+        by_sd: dict = defaultdict(list)
+        for s_, bars in allb.items():
+            for b_ in bars:
+                by_sd[(s_, ny(b_["t"]).date().isoformat())].append(b_)
+        print(f"5-minute bars: {sum(map(len, allb.values()))} ({time.time() - t0:.0f}s)", flush=True)
+        feed = lambda d, items: {s_: by_sd.get((s_, d), []) for s_, _ in items}
+    cands = build_candidates(tab, sp100, feed)
     print(f"{len(cands)} stock-days with a morning move ({time.time() - t0:.0f}s)", flush=True)
 
     res = {"generated": datetime.now(timezone.utc).isoformat(timespec="minutes"), "from": FROM,
            "rules": __doc__.split("Exact rules tested here")[1].split("Data:")[0].strip(),
            "default": DEFAULT, "variants": VARIANTS, "spy_by_year": spy, "spy_total": spy_total,
-           "costs_pct_a_side": COST * 100, "modes": {}, "combos": []}
+           "costs_pct_a_side": COST * 100, "modes": {}, "combos": [],
+           "universe": ", ".join(quick) if quick else "S&P 100", "min_train": 50 if quick else 200}
 
     by_key = {(c["s"], c["d"]): c for c in cands}
     viewer: dict = {}
@@ -502,11 +520,11 @@ def main() -> None:
         print(f"{mk}: default {b.get('n')} trades, win {b.get('win')}%, avg {b.get('avg')}%, PF {b.get('pf')}, "
               f"account {b.get('acct_total')}% | {len(combos) * 3} combinations ({time.time() - t0:.0f}s)", flush=True)
 
-    out = Path("/tmp/fib-demo.json") if a.demo else OUT_DIR / "backtest.json"
+    out = Path(f"/tmp/fib-demo{tag}.json") if a.demo else OUT_DIR / f"backtest{tag}.json"
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(json.dumps(res, separators=(",", ":")))
-    (out.with_name("fib-demo-SUMMARY.md") if a.demo else OUT_DIR / "SUMMARY.md").write_text(summary(res))
-    (out.with_name("fib-demo-trades.json") if a.demo else OUT_DIR / "trades_stocks.json").write_text(
+    (out.with_name(f"fib-demo-SUMMARY{tag}.md") if a.demo else OUT_DIR / f"SUMMARY{tag}.md").write_text(summary(res))
+    (out.with_name(f"fib-demo-trades{tag or '_stocks'}.json") if a.demo else OUT_DIR / f"trades{tag or '_stocks'}.json").write_text(
         json.dumps({"generated": res["generated"], "default": DEFAULT, "names": MODE_NAME, "modes": viewer},
                    separators=(",", ":")))
     print(f"done -> {out} ({time.time() - t0:.0f}s)")

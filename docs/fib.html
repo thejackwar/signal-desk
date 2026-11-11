@@ -121,6 +121,7 @@ footer { margin-top: 48px; border-top: 1px solid var(--line); padding-top: 16px;
 
   <div class="tabs"><div class="seg" role="tablist" id="tabs">
     <button type="button" data-tab="stocks" aria-pressed="true">S&amp;P 100 stocks</button>
+    <button type="button" data-tab="spy" aria-pressed="false">SPY (quick test)</button>
     <button type="button" data-tab="btc" aria-pressed="false">Bitcoin bursts</button>
   </div></div>
 
@@ -181,26 +182,27 @@ const HOW = {
 const S = { tab: "stocks", mode: "trend|window", f: "all", i: 0 };
 try { Object.assign(S, JSON.parse(localStorage.getItem("fibPage") || "{}")); } catch {}
 const save = () => { try { localStorage.setItem("fibPage", JSON.stringify({ tab: S.tab, mode: S.mode, f: S.f })); } catch {} };
-const D = {};
+const D = { stocks: {}, spy: {} };
+const SD = () => D[S.tab] || {};                              // the stock-type tabs: {B: results, T: trades}
 async function load(p) { try { const r = await fetch(p + "?t=" + Date.now()); return r.ok ? r.json() : null; } catch { return null; } }
 
 function trades() {
-  const all = S.tab === "btc" ? (D.btcT?.trades || []) : (D.stT?.modes?.[S.mode] || []);
+  const all = S.tab === "btc" ? (D.btcT?.trades || []) : (SD().T?.modes?.[S.mode] || []);
   return all.filter(t => S.f === "all" || (S.f === "win" ? t.pct > 0 : t.pct <= 0));
 }
-const defLevel = () => S.tab === "btc" ? +(D.btcT?.default?.level ?? 0.5) : +(D.stT?.default?.level ?? 0.618);
+const defLevel = () => S.tab === "btc" ? +(D.btcT?.default?.level ?? 0.5) : +(SD().T?.default?.level ?? 0.618);
 
 // ------------------------------------------------------------------ top of the page
 function header() {
   document.querySelectorAll("#tabs button").forEach(b => b.setAttribute("aria-pressed", b.dataset.tab === S.tab));
-  $("mode-row").innerHTML = S.tab === "stocks" ? `<span class="k">Version</span><div class="seg" id="modes">${MODES.map(([k, l]) => `<button type="button" data-mode="${k}" aria-pressed="${k === S.mode}">${esc(l)}</button>`).join("")}</div>` : "";
-  const how = HOW[S.tab === "btc" ? "btc" : S.mode], w = D.stT?.default?.win || "30", l = pctLbl(defLevel());
+  $("mode-row").innerHTML = S.tab !== "btc" ? `<span class="k">Version</span><div class="seg" id="modes">${MODES.map(([k, l]) => `<button type="button" data-mode="${k}" aria-pressed="${k === S.mode}">${esc(l)}</button>`).join("")}</div>` : "";
+  const how = HOW[S.tab === "btc" ? "btc" : S.mode], w = SD().T?.default?.win || "30", l = pctLbl(defLevel());
   $("how").innerHTML = how.map(([h, f]) => `<div class="step"><span class="k">${esc(h)}</span><p>${esc(f(h === "Watch" ? w : l))}</p></div>`).join("");
 
   let st = null, bench = null, benchName = "";
   if (S.tab === "btc") { st = D.btcB?.base; bench = D.btcB?.hold_btc; benchName = "Holding Bitcoin"; }
-  else { st = D.stB?.modes?.[S.mode]?.base; bench = D.stB?.spy_total; benchName = "Holding SPY"; }
-  if (!st) { $("cards").innerHTML = `<div class="empty" style="grid-column:1/-1">The stock backtest is still running on GitHub (ready later tonight).${S.tab === "stocks" ? ` Meanwhile the <a href="#" data-tab="btc">Bitcoin bursts</a> trades are ready.` : ""}</div>`; $("verdict").textContent = ""; return; }
+  else { st = SD().B?.modes?.[S.mode]?.base; bench = SD().B?.spy_total; benchName = "Holding SPY"; }
+  if (!st) { $("cards").innerHTML = `<div class="empty" style="grid-column:1/-1">${S.tab === "spy" ? "The SPY quick test runs in a few minutes after each change. Check back shortly." : "The S&amp;P 100 backtest takes a few hours on GitHub. The <a href=\"#\" data-tab=\"spy\">SPY quick test</a> is faster."} The <a href="#" data-tab="btc">Bitcoin bursts</a> trades are ready.</div>`; $("verdict").textContent = ""; return; }
   const F = st.full, A = st.train, B = st.test, acct = F.acct ?? F.acct_total, dd = F.maxdd ?? F.acct_maxdd;
   $("cards").innerHTML = `
     <div><span class="k">Trades</span><b>${(F.n || 0).toLocaleString("en")}</b><small>${Math.round(F.win)}% won</small></div>
@@ -212,6 +214,8 @@ function header() {
     `<b>${F.avg > 0 ? "Thin" : "Lost money"}</b> with the default settings${A.avg > 0 !== B.avg > 0 ? " (and not consistent between the two halves)" : ""}. ${F.pf != null && F.pf < 1 ? "For every €1 won, about €" + (1 / F.pf).toFixed(2) + " was lost." : ""}`;
   $("foot").textContent = S.tab === "btc"
     ? `Data: Binance BTCUSDT 1-minute candles, ${D.btcB?.from ?? "2021"} to ${D.btcB?.to ?? "today"}. Costs 0.05% each way. One trade at a time, whole account, no leverage. Full tables: docs/data/fib/BURST.md. Information only, not advice.`
+    : S.tab === "spy"
+    ? `Data: Alpaca 5-minute SPY bars, split and dividend adjusted, January 2021 to today. Costs 0.03% each way. Each trade uses 20% of the account (the same sizing as the S&P 100 test), so judge it by the average trade. Full tables: docs/data/fib/SUMMARY_spy.md. Information only, not advice.`
     : `Data: Alpaca 5-minute bars, split and dividend adjusted, January 2021 to today. Current S&P 100 members only (survivorship bias). Costs 0.03% each way. Up to 5 trades a day, 20% of the account each. Full tables: docs/data/fib/SUMMARY.md. Information only, not advice.`;
 }
 
@@ -332,7 +336,8 @@ document.addEventListener("keydown", e => {
 
 async function ensure() {
   if (S.tab === "btc" && !D.btcT) [D.btcB, D.btcT] = await Promise.all([load("data/fib/burst.json"), load("data/fib/trades_btc.json")]);
-  if (S.tab === "stocks" && !D.stT) [D.stB, D.stT] = await Promise.all([load("data/fib/backtest.json"), load("data/fib/trades_stocks.json")]);
+  if (S.tab === "stocks" && !D.stocks.T) [D.stocks.B, D.stocks.T] = await Promise.all([load("data/fib/backtest.json"), load("data/fib/trades_stocks.json")]);
+  if (S.tab === "spy" && !D.spy.T) [D.spy.B, D.spy.T] = await Promise.all([load("data/fib/backtest_spy.json"), load("data/fib/trades_spy.json")]);
 }
 (async () => {
   if (!MODES.some(m => m[0] === S.mode)) S.mode = "trend|window";

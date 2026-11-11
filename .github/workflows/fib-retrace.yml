@@ -1,31 +1,66 @@
 name: Fibonacci Retracement
 
-# engine/fib_retrace.py - backtest of "wait 30 minutes, draw Fibonacci retracement levels on the morning swing,
-# then enter on the pullback" on the S&P 100 (5-minute bars, from 2021). Results: docs/data/fib/SUMMARY.md.
-# Runs by hand (workflow_dispatch) and when the engine changes.
+# engine/fib_retrace.py - "wait for the morning move, draw Fibonacci levels, trade a level" (five versions).
+#  - quick: SPY only, a few minutes. Runs on every change to the engine, and by hand (universe = spy).
+#            -> docs/data/fib/SUMMARY_spy.md, backtest_spy.json, trades_spy.json
+#  - full:  the S&P 100, a few hours. Runs by hand (universe = sp100), or on a push whose commit message
+#            contains [full].  -> docs/data/fib/SUMMARY.md, backtest.json, trades_stocks.json
+# The two have separate queues, so a quick run never waits behind a full one.
 on:
   push:
     branches: [main]
     paths: ["engine/fib_retrace.py"]
   workflow_dispatch:
+    inputs:
+      universe:
+        description: "spy = quick (minutes), sp100 = full (hours)"
+        type: choice
+        options: [spy, sp100]
+        default: spy
 
 permissions:
   contents: write
 
-concurrency:
-  group: fib-retrace
-  cancel-in-progress: false
-
 jobs:
-  run:
+  quick:
+    if: github.event_name == 'push' || inputs.universe == 'spy'
     runs-on: ubuntu-latest
-    timeout-minutes: 340
+    timeout-minutes: 60
+    concurrency:
+      group: fib-retrace-quick
+      cancel-in-progress: true
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - name: Backtest
+      - name: Backtest (SPY)
+        env:
+          ALPACA_KEY_ID: ${{ secrets.ALPACA_KEY_ID }}
+          ALPACA_SECRET_KEY: ${{ secrets.ALPACA_SECRET_KEY }}
+        run: python -u engine/fib_retrace.py --symbols SPY
+      - name: Publish
+        run: |
+          git config user.name "signal-desk-bot"
+          git config user.email "signal-desk-bot@users.noreply.github.com"
+          git add docs/data/fib/backtest_spy.json docs/data/fib/SUMMARY_spy.md docs/data/fib/trades_spy.json
+          git diff --cached --quiet && exit 0
+          git commit -m "Fibonacci Retracement SPY quick backtest $(date -u +%F\ %H:%M)"
+          for i in 1 2 3; do git pull --rebase && git push && break; sleep 5; done
+
+  full:
+    if: (github.event_name == 'push' && contains(github.event.head_commit.message, '[full]')) || inputs.universe == 'sp100'
+    runs-on: ubuntu-latest
+    timeout-minutes: 340
+    concurrency:
+      group: fib-retrace
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Backtest (S&P 100)
         env:
           ALPACA_KEY_ID: ${{ secrets.ALPACA_KEY_ID }}
           ALPACA_SECRET_KEY: ${{ secrets.ALPACA_SECRET_KEY }}
@@ -34,7 +69,7 @@ jobs:
         run: |
           git config user.name "signal-desk-bot"
           git config user.email "signal-desk-bot@users.noreply.github.com"
-          git add docs/data/fib
+          git add docs/data/fib/backtest.json docs/data/fib/SUMMARY.md docs/data/fib/trades_stocks.json
           git diff --cached --quiet && exit 0
           git commit -m "Fibonacci Retracement backtest $(date -u +%F\ %H:%M)"
           for i in 1 2 3; do git pull --rebase && git push && break; sleep 5; done
