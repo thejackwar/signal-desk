@@ -1,26 +1,38 @@
-"""Fibonacci Retracement: let the first 30 minutes draw the swing, then buy/sell the pullback to a fib level.
+"""Fibonacci Retracement: let the morning draw the swing, place Fibonacci levels, trade a level.
 
 The idea (Giacomo, 11 Nov 2026):
   - Don't trade the open. Wait ~30 minutes and see how the stock is moving.
-  - Draw Fibonacci retracement levels on that morning swing.
-  - Wait for price to come back to a level and enter there, in the direction of the morning move.
+  - Draw Fibonacci retracement levels on that morning swing and wait for price to reach a level to enter.
+  - Follow-up the same day: "many times it reverses in the morning" - so the reversal is tested too, with three
+    ways of placing the levels. Five versions ("mode" + "anchor"), all side by side:
+
+    trend / window  levels from the first-N-minutes low to high; buy the pullback to the level (with the move).
+    trend / pdc     same, but levels from yesterday's close to the morning high/low.
+    fade / window   levels from the first-N-minutes low to high; when a 5-minute candle CLOSES beyond the level,
+                    trade AGAINST the morning move (it's reversing), at that close.
+    fade / pdc      same, levels from yesterday's close to the morning high/low.
+    leg             the reversal leg: the stock runs up (down), tops (bottoms) and gives back half the morning move
+                    -> draw the levels on the new leg, from the top down to the lowest low since (redrawn as new
+                    lows come), and short the bounce to the level (buy the dip for a morning sell-off).
 
 Exact rules tested here (every one is a switch, see VARIANTS):
   Universe    S&P 100, current members; 20-day average dollar volume >= $10M.
   Window      watch the first 15, 30 (default), 45 or 60 minutes after the 09:30 New York open.
-  Swing       the window's low and high. The move from the 09:30 open to the window's close must be at
-              least 0.25%, 0.5% (default) or 1%. Up -> fibs from low (100%) to high (0%), we look to buy;
-              down -> fibs from high to low, we look to short.
+  Move        the move from the 09:30 open to the window's close must be at least 0.25%, 0.5% (default) or 1%.
   Gap filter  "all" days (default), "gap": the open was at least 2% from yesterday's close, "quiet": within 1%.
-  Entry level 38.2%, 50% or 61.8% (default) retracement of the swing.
-  Entry       "touch" (default): a limit order at the level - filled the first time a 5-minute candle reaches
-              it (at the candle's open if it gaps through). "confirm": wait for a 5-minute candle that reaches
-              the level and then closes back on the trend side of it - enter at that close.
-  Stop        78.6% (default) or 100% (the start of the swing), plus a small tick.
-  Target      "swing" (default): back to the swing extreme (0%), "1.272" / "1.618": Fibonacci extensions
-              beyond it, or "2R" (twice the entry-to-stop distance).
-  Setup ends  if price hits the stop level before the entry, the setup is cancelled. No new entry after
-              11:00, 12:00 (default) or the 15:55 close.
+  Level       38.2%, 50% or 61.8% (default).
+  Entry       trend / leg: "touch" (default) - a limit order at the level, filled the first time a 5-minute
+              candle reaches it (at the candle's open if it gaps through); "confirm" - the candle reaches the level
+              and closes back on the trade's side of it, enter at that close. fade: always at the close of the
+              candle that closed beyond the level.
+  Stop        trend / leg: at the 78.6% level (default) or 100% (the start of the swing / the top of the leg).
+              fade ("fstop"): "extreme" (default) - beyond the morning high/low; "half" - halfway back from the
+              level to that extreme.
+  Target      "swing" (default): trend - back to the morning extreme; fade - all the way back to where the swing
+              started (the low / yesterday's close); leg - the leg's low (high). "1.272" / "1.618": Fibonacci
+              extensions beyond that. "2R": twice the entry-to-stop distance.
+  Setup ends  trend: cancelled if the stop is hit before the entry. No new entry after 11:00, 12:00 (default)
+              or the 15:55 close.
   Time exit   whatever is still open is closed at 12:00 or the 15:55 close (default).
   Exit rules  stop first if a candle hits both (cautious); a gap through a level fills at the candle's open.
   Costs       0.03% a side.
@@ -54,9 +66,10 @@ FROM = "2021-01-04"
 COST = 0.0003
 TICK = 0.0005
 MOVE_MIN = 0.0025
+LEG_CONFIRM = 0.5          # leg mode: the reversal is "on" once price gives back half the morning move
 
-DEFAULT = {"win": "30", "move": "0.5", "gapf": "all", "level": "0.618", "entry": "touch",
-           "stop": "0.786", "tp": "swing", "late": "1200", "exit": "eod"}
+DEFAULT = {"mode": "trend", "anchor": "window", "win": "30", "move": "0.5", "gapf": "all", "level": "0.618",
+           "entry": "touch", "stop": "0.786", "fstop": "extreme", "tp": "swing", "late": "1200", "exit": "eod"}
 VARIANTS = {
     "win": ["15", "30", "45", "60"],
     "move": ["0.25", "0.5", "1"],
@@ -64,10 +77,20 @@ VARIANTS = {
     "level": ["0.382", "0.5", "0.618"],
     "entry": ["touch", "confirm"],
     "stop": ["0.786", "1"],
+    "fstop": ["extreme", "half"],
     "tp": ["swing", "1.272", "1.618", "2R"],
     "late": ["1100", "1200", "eod"],
     "exit": ["1200", "eod"],
 }
+MODES = [("trend", "window"), ("trend", "pdc"), ("fade", "window"), ("fade", "pdc"), ("leg", "window")]
+MODE_NAME = {"trend|window": "Trend pullback, levels on first N min", "trend|pdc": "Trend pullback, levels from yesterday's close",
+             "fade|window": "Reversal: fade the break, levels on first N min",
+             "fade|pdc": "Reversal: fade the break, levels from yesterday's close",
+             "leg|window": "Reversal leg: levels on the move after the top/bottom"}
+# switches that do something in each mode (the others are left at the default)
+USES = {"trend": ("win", "move", "gapf", "level", "entry", "stop", "tp", "late", "exit"),
+        "fade": ("win", "move", "gapf", "level", "fstop", "tp", "late", "exit"),
+        "leg": ("win", "move", "gapf", "level", "entry", "stop", "tp", "late", "exit")}
 MIN = {"1100": 660, "1200": 720, "eod": 955}
 PAGE_KEYS = tuple(DEFAULT)
 
@@ -134,7 +157,7 @@ def facts(s: str, d: str, r: dict, bars: list[dict]) -> dict | None:
     ohlc = array("f")
     for m, b in today:
         ohlc.extend((b["o"], b["h"], b["l"], b["c"], m))
-    return {"s": s, "d": d, "o0": o0, "gap": r["o"] / r["pc"] - 1, "sw": sw, "bars": ohlc}
+    return {"s": s, "d": d, "o0": o0, "pc": r["pc"], "gap": r["o"] / r["pc"] - 1, "sw": sw, "bars": ohlc}
 
 
 # ===================================================================== rules
@@ -148,53 +171,146 @@ def passes(c: dict, v: dict) -> bool:
     return True
 
 
-def trade(c: dict, v: dict) -> dict | None:
-    b, n = c["bars"], len(c["bars"]) // 5
-    k = int(v["win"]) // 5
+def swing(c: dict, v: dict):
+    """(up, s0, s1): the morning swing from s0 (start) to s1 (extreme), or None."""
     mv, hi, lo = c["sw"][v["win"]]
-    sgn = 1 if mv > 0 else -1                                  # +1 = long (buy the pullback)
-    s0, s1 = (lo, hi) if sgn > 0 else (hi, lo)                  # swing start -> swing end
-    rng = s1 - s0                                               # signed
-    if abs(rng) <= c["o0"] * 0.001:
+    up = mv > 0
+    s1 = hi if up else lo
+    if v["anchor"] == "pdc":
+        s0 = c["pc"]
+        if (up and s0 >= s1) or (not up and s0 <= s1):
+            return None
+    else:
+        s0 = lo if up else hi
+    if abs(s1 - s0) <= c["o0"] * 0.001:
         return None
+    return up, s0, s1
+
+
+def target(v, sgn, entry, stop, base, rng):
+    """base = where the 'swing' target sits; rng = signed size of the move the extensions are measured on."""
+    if v["tp"] == "swing":
+        return base
+    if v["tp"] == "2R":
+        return entry + 2 * (entry - stop)
+    return base + sgn * abs(rng) * (float(v["tp"]) - 1)
+
+
+def trade(c: dict, v: dict) -> dict | None:
+    if v["mode"] == "trend":
+        return trade_trend(c, v)
+    if v["mode"] == "fade":
+        return trade_fade(c, v)
+    return trade_leg(c, v)
+
+
+def trade_trend(c: dict, v: dict) -> dict | None:
+    sw = swing(c, v)
+    if not sw:
+        return None
+    up, s0, s1 = sw
+    b, n, k = c["bars"], len(c["bars"]) // 5, int(v["win"]) // 5
+    sgn = 1 if up else -1                                      # with the morning move
+    rng = s1 - s0
     lvl = s1 - rng * float(v["level"])
     stop = (s1 - rng * float(v["stop"])) * (1 - sgn * TICK)
-    if v["tp"] == "swing":
-        tgt = s1
-    elif v["tp"] == "2R":
-        tgt = lvl + 2 * (lvl - stop)
-    else:
-        tgt = s0 + rng * float(v["tp"])
+    tgt = target(v, sgn, lvl, stop, s1, rng)
     late, last_m = MIN[v["late"]], MIN[v["exit"]]
-
-    entry, ie = None, None
     for i in range(k, n):
         o, h, l, cl, m = b[5 * i:5 * i + 5]
         if m >= late or m >= last_m:
             return None
         reach = (l <= lvl) if sgn > 0 else (h >= lvl)
         broke = (l <= stop) if sgn > 0 else (h >= stop)
-        if v["entry"] == "touch":
-            if reach:
-                entry = min(o, lvl) if sgn > 0 else max(o, lvl)
-                ie = i
-                if broke:                                       # same candle took the stop: cautious
-                    px, why, at = stop, "stop", m
-                    if (sgn > 0 and entry <= stop) or (sgn < 0 and entry >= stop):
-                        return None                             # gapped straight through the stop
-                    return finish(c, v, sgn, entry, ie, stop, tgt, px, why, at, mv)
-                break
-        else:
+        if v["entry"] == "touch" and reach:
+            entry = min(o, lvl) if sgn > 0 else max(o, lvl)
+            if (sgn > 0 and entry <= stop) or (sgn < 0 and entry >= stop):
+                return None                                     # gapped straight through the stop
             if broke:
-                return None
-            if reach and ((cl > lvl) if sgn > 0 else (cl < lvl)):
-                entry, ie = cl, i
-                break
+                return finish(c, v, sgn, entry, i, stop, tgt, stop, "stop", m, False)
+            return manage(c, v, sgn, entry, i, stop, tgt, False)
         if broke:
             return None
-    if entry is None:
-        return None
+        if v["entry"] == "confirm" and reach and ((cl > lvl) if sgn > 0 else (cl < lvl)):
+            return manage(c, v, sgn, cl, i, stop, tgt, True)
+    return None
 
+
+def trade_fade(c: dict, v: dict) -> dict | None:
+    sw = swing(c, v)
+    if not sw:
+        return None
+    up, s0, s1 = sw
+    b, n, k = c["bars"], len(c["bars"]) // 5, int(v["win"]) // 5
+    sgn = -1 if up else 1                                      # against the morning move
+    rng = s1 - s0
+    lvl = s1 - rng * float(v["level"])
+    late, last_m = MIN[v["late"]], MIN[v["exit"]]
+    for i in range(k, n):
+        o, h, l, cl, m = b[5 * i:5 * i + 5]
+        if m >= late or m >= last_m:
+            return None
+        if (cl < lvl) if up else (cl > lvl):
+            ext = s1 if v["fstop"] == "extreme" else (lvl + s1) / 2
+            stop = ext * (1 - sgn * TICK)
+            tgt = target(v, sgn, cl, stop, s0, rng)
+            if (sgn < 0 and tgt >= cl) or (sgn > 0 and tgt <= cl):
+                return None
+            return manage(c, v, sgn, cl, i, stop, tgt, True)
+    return None
+
+
+def trade_leg(c: dict, v: dict) -> dict | None:
+    mv, hi, lo = c["sw"][v["win"]]
+    up = mv > 0
+    b, n, k = c["bars"], len(c["bars"]) // 5, int(v["win"]) // 5
+    sgn = -1 if up else 1                                      # trade the new leg, against the morning move
+    base = lo if up else hi                                    # where the morning move started
+    if up:                                                      # the morning extreme (top for an up morning)
+        ext_i = max(range(k), key=lambda j: b[5 * j + 1]); ext = b[5 * ext_i + 1]
+    else:
+        ext_i = min(range(k), key=lambda j: b[5 * j + 2]); ext = b[5 * ext_i + 2]
+    late, last_m = MIN[v["late"]], MIN[v["exit"]]
+    lvf, stf = float(v["level"]), float(v["stop"])
+    on, far = False, None                                       # far = the leg's low (high) so far
+    for i in range(k, n):
+        o, h, l, cl, m = b[5 * i:5 * i + 5]
+        if m >= late or m >= last_m:
+            return None
+        if not on:
+            if (h > ext) if up else (l < ext):
+                ext, ext_i = (h if up else l), i
+            half = ext - (ext - base) * LEG_CONFIRM
+            if (cl < half) if up else (cl > half):
+                on = True
+                far = min(b[5 * j + 2] for j in range(ext_i, i + 1)) if up else max(b[5 * j + 1] for j in range(ext_i, i + 1))
+            continue
+        leg = ext - far                                         # signed: + for an up morning (leg goes down)
+        lvl = far + leg * lvf
+        stop = (far + leg * stf) * (1 - sgn * TICK)
+        reach = (h >= lvl) if up else (l <= lvl)
+        if v["entry"] == "touch" and reach:
+            entry = max(o, lvl) if up else min(o, lvl)
+            if (up and entry >= stop) or (not up and entry <= stop):
+                return None
+            tgt = target(v, sgn, entry, stop, far, leg)
+            if (up and (h >= stop)) or (not up and (l <= stop)):
+                return finish(c, v, sgn, entry, i, stop, tgt, stop, "stop", m, False)
+            return manage(c, v, sgn, entry, i, stop, tgt, False)
+        if v["entry"] == "confirm" and reach and ((cl < lvl) if up else (cl > lvl)) and \
+                ((cl < stop) if up else (cl > stop)):
+            return manage(c, v, sgn, cl, i, stop, target(v, sgn, cl, stop, far, leg), True)
+        if (h >= ext) if up else (l <= ext):                    # back through the top: the reversal failed
+            return None
+        far = min(far, l) if up else max(far, h)               # redraw on new lows (highs)
+    return None
+
+
+def manage(c, v, sgn, entry, ie, stop, tgt, at_close) -> dict | None:
+    b, n = c["bars"], len(c["bars"]) // 5
+    last_m = MIN[v["exit"]]
+    if (sgn > 0 and (stop >= entry or tgt <= entry)) or (sgn < 0 and (stop <= entry or tgt >= entry)):
+        return None
     px, why, at = None, "time", None
     for i in range(ie + 1, n):
         o, h, l, cl, m = b[5 * i:5 * i + 5]
@@ -208,15 +324,16 @@ def trade(c: dict, v: dict) -> dict | None:
             break
     if px is None:
         px, at = b[5 * (n - 1) + 3], b[5 * (n - 1) + 4] + 5
-    return finish(c, v, sgn, entry, ie, stop, tgt, px, why, at, mv)
+    return finish(c, v, sgn, entry, ie, stop, tgt, px, why, at, at_close)
 
 
-def finish(c, v, sgn, entry, ie, stop, tgt, px, why, at, mv) -> dict | None:
+def finish(c, v, sgn, entry, ie, stop, tgt, px, why, at, at_close) -> dict | None:
     risk = abs(entry - stop)
     if risk <= entry * 0.0003:
         return None
+    mv = c["sw"][v["win"]][0]
     ret = sgn * (px / entry - 1) - 2 * v.get("cost", COST)
-    m_in = int(c["bars"][5 * ie + 4]) + (5 if v["entry"] == "confirm" else 0)
+    m_in = int(c["bars"][5 * ie + 4]) + (5 if at_close else 0)
     return {"s": c["s"], "d": c["d"], "mv": round(mv * 100, 2), "dir": "long" if sgn > 0 else "short",
             "in": round(entry, 2), "tin": f"{m_in // 60:02d}:{m_in % 60:02d}", "sl": round(stop, 2),
             "tp": round(tgt, 2), "out": round(px, 2), "why": why,
@@ -254,21 +371,29 @@ def summary(res: dict) -> str:
     L = [f"# Fibonacci Retracement backtest ({res['generated']})", "",
          f"S&P 100, 5-minute bars from {res['from']}, costs {res['costs_pct_a_side']}% a side. "
          f"SPY over the same period: {res['spy_total']}%. Train = 2021-2023, test = 2024 on.", "",
-         "## Default rules", "", "`" + " | ".join(f"{k}={v}" for k, v in res["default"].items()) + "`", "",
-         hdr, row("default", res["base_split"]), "",
-         "## One switch changed at a time", "", hdr]
-    for k, opts in res["sweeps"].items():
-        for o, s in opts.items():
-            L.append(row(f"{k}={o}" + (" (default)" if DEFAULT[k] == o else ""), s))
-    top = sorted((c for c in res["combos"] if (c["train"].get("n") or 0) >= 200),
-                 key=lambda c: -(c["train"].get("avg") or -9))[:10]
-    L += ["", "## Best 10 combinations chosen on TRAIN only (min 200 train trades) - check whether TEST holds", "", hdr]
-    for c in top:
-        L.append(row(" ".join(f"{k}={c['v'][k]}" for k in ("win", "move", "level", "entry", "stop", "tp", "exit")), c))
-    held = sum(1 for c in top if (c["test"].get("avg") or 0) > 0)
-    L += ["", f"Of those 10, **{held}** were still profitable per trade in the test years.",
-          f"Combinations tested: {len(res['combos'])}. Positive in BOTH train and test: "
-          f"{sum(1 for c in res['combos'] if (c['train'].get('avg') or 0) > 0 and (c['test'].get('avg') or 0) > 0)}."]
+         "## The five versions on their default switches", "",
+         "`" + " | ".join(f"{k}={v}" for k, v in res["default"].items() if k not in ("mode", "anchor")) + "`", "",
+         hdr]
+    for mk, s in res["modes"].items():
+        L.append(row(MODE_NAME[mk], s["base"]))
+    L += ["", "## All versions together", "",
+          f"Combinations tested: {len(res['combos'])}. Positive per trade in BOTH train and test: "
+          f"**{sum(1 for c in res['combos'] if (c['train'].get('avg') or 0) > 0 and (c['test'].get('avg') or 0) > 0)}**.", ""]
+    for mk, s in res["modes"].items():
+        mode = mk.split("|")[0]
+        L += ["", f"## {MODE_NAME[mk]}", "", "### One switch changed at a time", "", hdr]
+        for k, opts in s["sweeps"].items():
+            for o, st in opts.items():
+                L.append(row(f"{k}={o}" + (" (default)" if DEFAULT[k] == o else ""), st))
+        mine = [c for c in res["combos"] if f"{c['v']['mode']}|{c['v']['anchor']}" == mk]
+        top = sorted((c for c in mine if (c["train"].get("n") or 0) >= 200),
+                     key=lambda c: -(c["train"].get("avg") or -9))[:10]
+        L += ["", "### Best 10 combinations chosen on TRAIN only (min 200 train trades) - does TEST hold?", "", hdr]
+        for c in top:
+            L.append(row(" ".join(f"{k}={c['v'][k]}" for k in USES[mode] if k not in ("gapf", "late")), c))
+        L += ["", f"Of those 10, **{sum(1 for c in top if (c['test'].get('avg') or 0) > 0)}** were still profitable "
+                  f"per trade in the test years. Combinations in this version: {len(mine)}, positive in both train and "
+                  f"test: **{sum(1 for c in mine if (c['train'].get('avg') or 0) > 0 and (c['test'].get('avg') or 0) > 0)}**."]
     return "\n".join(L) + "\n"
 
 
@@ -306,55 +431,39 @@ def main() -> None:
     res = {"generated": datetime.now(timezone.utc).isoformat(timespec="minutes"), "from": FROM,
            "rules": __doc__.split("Exact rules tested here")[1].split("Data:")[0].strip(),
            "default": DEFAULT, "variants": VARIANTS, "spy_by_year": spy, "spy_total": spy_total,
-           "costs_pct_a_side": COST * 100}
-    base = run(cands, DEFAULT)
-    res["base"] = stats(base, spy)
-    res["base"].pop("_daily", None)
-    res["base_split"] = split(base, spy)
-    res["base_trades_recent"] = [{k: t[k] for k in t if k != "rv"} for t in sorted(base, key=lambda t: t["d"])[-300:]]
+           "costs_pct_a_side": COST * 100, "modes": {}, "combos": []}
 
-    # how often does a pullback to each level happen at all, and how often does price then make it back to the swing?
-    res["level_hits"] = {}
-    for lv in VARIANTS["level"]:
-        ts = run(cands, {**DEFAULT, "level": lv, "tp": "swing", "exit": "eod"})
-        n_days = sum(1 for c in cands if passes(c, DEFAULT))
-        res["level_hits"][lv] = {"setups": n_days, "filled": len(ts),
-                                 "back_to_swing": sum(t["why"] == "target" for t in ts),
-                                 "stopped": sum(t["why"] == "stop" for t in ts)}
+    for mode, anchor in MODES:
+        mk = f"{mode}|{anchor}"
+        dv = {**DEFAULT, "mode": mode, "anchor": anchor}
+        base = run(cands, dv)
+        m = {"base": split(base, spy),
+             "base_trades_recent": [{k: t[k] for k in t if k != "rv"} for t in sorted(base, key=lambda t: t["d"])[-100:]],
+             "cost_check": {f"{cst * 100:.2f}": cut(stats(run(cands, {**dv, "cost": cst}), spy))
+                            for cst in (0.0, 0.0003, 0.0006, 0.001)},
+             "sweeps": {k: {o: split(run(cands, {**dv, k: o}), spy) for o in VARIANTS[k]} for k in USES[mode]}}
+        res["modes"][mk] = m
 
-    res["cost_check"] = {f"{cst * 100:.2f}": cut(stats(run(cands, {**DEFAULT, "cost": cst}), spy))
-                         for cst in (0.0, 0.0003, 0.0006, 0.001)}
-    res["sweeps"] = {k: {o: split(run(cands, {**DEFAULT, k: o}), spy) for o in opts} for k, opts in VARIANTS.items()}
-    print(f"sweeps done ({time.time() - t0:.0f}s)", flush=True)
-
-    # the move threshold only filters days, so simulate once at the smallest move and filter the trades
-    res["combos"] = []
-    lo_mv = VARIANTS["move"][0]
-    for w in VARIANTS["win"]:
-        for lv in VARIANTS["level"]:
-            for en in VARIANTS["entry"]:
-                for st in VARIANTS["stop"]:
-                    for tp in VARIANTS["tp"]:
-                        for ex in VARIANTS["exit"]:
-                            v = {**DEFAULT, "win": w, "move": lo_mv, "level": lv, "entry": en,
-                                 "stop": st, "tp": tp, "exit": ex}
-                            ts = run(cands, v)
-                            for mv in VARIANTS["move"]:
-                                sub = [t for t in ts if t["rv"] >= float(mv) / 100]
-                                res["combos"].append({"v": {k: ({**v, "move": mv})[k] for k in PAGE_KEYS},
-                                                      **split(sub, spy)})
-    print(f"{len(res['combos'])} combinations ({time.time() - t0:.0f}s)", flush=True)
+        # the move threshold only filters days, so simulate once at the smallest move and filter the trades
+        grid = [k for k in USES[mode] if k not in ("move", "gapf", "late")]
+        combos = [{}]
+        for k in grid:
+            combos = [{**x, k: o} for x in combos for o in VARIANTS[k]]
+        for x in combos:
+            v = {**dv, **x, "move": VARIANTS["move"][0]}
+            ts = run(cands, v)
+            for mv in VARIANTS["move"]:
+                sub = [t for t in ts if t["rv"] >= float(mv) / 100]
+                res["combos"].append({"v": {k: ({**v, "move": mv})[k] for k in PAGE_KEYS}, **split(sub, spy)})
+        b = m["base"]["full"]
+        print(f"{mk}: default {b.get('n')} trades, win {b.get('win')}%, avg {b.get('avg')}%, PF {b.get('pf')}, "
+              f"account {b.get('acct_total')}% | {len(combos) * 3} combinations ({time.time() - t0:.0f}s)", flush=True)
 
     out = Path("/tmp/fib-demo.json") if a.demo else OUT_DIR / "backtest.json"
     out.parent.mkdir(parents=True, exist_ok=True)
-    res["base"].pop("_daily", None)
     out.write_text(json.dumps(res, separators=(",", ":")))
-    md = summary(res)
-    (out.with_name("fib-demo-SUMMARY.md") if a.demo else OUT_DIR / "SUMMARY.md").write_text(md)
-    b = res["base"]
-    print(f"default: {b.get('n')} trades, win {b.get('win')}%, avg {b.get('avg')}%, PF {b.get('pf')}, "
-          f"account {b.get('acct_total')}% (max DD {b.get('acct_maxdd')}%) | SPY {spy_total}% -> {out} "
-          f"({time.time() - t0:.0f}s)")
+    (out.with_name("fib-demo-SUMMARY.md") if a.demo else OUT_DIR / "SUMMARY.md").write_text(summary(res))
+    print(f"done -> {out} ({time.time() - t0:.0f}s)")
 
 
 if __name__ == "__main__":
