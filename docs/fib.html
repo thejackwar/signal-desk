@@ -100,6 +100,17 @@ tr.sel td { background: var(--blue-bg) !important; }
 .legend { display: flex; flex-wrap: wrap; gap: 6px 14px; font: 500 11px var(--mono); color: var(--faint); margin-top: 6px; }
 .legend i { display: inline-block; width: 14px; height: 2px; margin-right: 6px; vertical-align: 3px; }
 .empty { padding: 30px 0; text-align: center; color: var(--muted); }
+details.rules { border: 1px solid var(--line); border-radius: 4px; background: var(--panel); margin: 10px 0; }
+details.rules > summary { cursor: pointer; padding: 12px 14px; font-weight: 600; list-style: none; display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+details.rules > summary::-webkit-details-marker { display: none; }
+details.rules > summary::before { content: "▸"; color: var(--faint); margin-right: 8px; }
+details.rules[open] > summary::before { content: "▾"; }
+details.rules > summary span.fine { font-weight: 400; }
+details.rules .tw2 { overflow-x: auto; -webkit-overflow-scrolling: touch; padding: 0 6px 8px; }
+details.rules table td:first-child { white-space: normal; min-width: 220px; }
+tr.both td:first-child { box-shadow: inset 3px 0 0 var(--up); }
+tr.def td { font-weight: 600; }
+.morebtn { font: 500 13px var(--font); color: var(--fg); background: #0a1017; border: 1px solid var(--line); border-radius: 6px; padding: 7px 12px; cursor: pointer; margin: 4px 8px 10px; }
 footer { margin-top: 48px; border-top: 1px solid var(--line); padding-top: 16px; }
 </style>
 </head>
@@ -130,6 +141,10 @@ footer { margin-top: 48px; border-top: 1px solid var(--line); padding-top: 16px;
   <div class="steps" id="how"></div>
   <div class="cards" id="cards"></div>
   <p class="note" id="verdict"></p>
+
+  <h2>Every rule we tested</h2>
+  <p>Each rule's result over all the trades it made, and in each half on its own. A green bar marks a rule that made money in <b>both</b> 2021–23 and 2024–26. Open a group to see it.</p>
+  <div id="rules"></div>
 
   <h2>The trades, one by one</h2>
   <p id="tr-p">A sample of the trades with the default settings: the latest 40 and 60 more picked at random over the years. Click a row to draw it.</p>
@@ -338,7 +353,74 @@ function caption(t, tm, z, o, f) {
   return `${morning} It then turned and gave back half the move, so the levels went on the new leg: from the ${up ? "top" : "bottom"} (${px(o)}) to the ${up ? "lowest low" : "highest high"} since (${px(z)}). Price bounced to the ${lv} and the test ${long ? "bought" : "shorted"} at ${px(t.in)} at ${esc(tm.tin)} New York. Stop ${px(t.sl)}, target ${px(t.tp)}. ${out}`;
 }
 
-function render() { save(); header(); list(); chart(); }
+// ------------------------------------------------------------------ every rule tested
+const KN = { n: "Burst window", x: "Burst size", vol: "Volume", one: "One-candle bursts", slow: "Slowing-down check", trend: "Trend filter",
+  pvol: "Pullback volume", clean: "Clean burst", vwap: "VWAP side", hours: "Hours", cap: "Trade limit", level: "Entry level", entry: "Entry",
+  wait: "Wait for the level", stop: "Stop", tp: "Target", hold: "Hold at most", cost: "Costs each way",
+  win: "Watch window", move: "Morning move at least", gapf: "Which days", fstop: "Stop (fade)", late: "Last entry", exit: "Close by" };
+const PCT = o => pctLbl(+o);
+const VL = {
+  n: o => `${o} min`, x: o => `${o}%`, vol: o => o === "any" ? "no filter" : `${o}× normal`, one: o => ({ keep: "count as burst", skip: "skip", close: "read by the close" }[o] || o),
+  slow: o => o, trend: o => o === "on" ? "with the 1h 50-EMA" : "off", pvol: o => o === "on" ? "under 60% of the burst" : "off", clean: o => o === "on" ? "3+ candles, close near the top" : "off",
+  vwap: o => o === "on" ? "on the right side" : "off", hours: o => ({ all: "all", day: "08:00–22:00 Rome", day_wk: "08:00–22:00 weekdays" }[o] || o),
+  cap: o => ({ off: "none", "1day": "1 trade a day", cool: "4 h pause after a loss" }[o] || o), level: PCT,
+  entry: o => ({ touch: "touch (limit order)", confirm: "close back over the level", bounce: "green candle closing back over", zone: "anywhere in 38.2–50%", now: "at the window's end" }[o] || o),
+  wait: o => `${o} min`, stop: o => o === "1" ? "100% (start of the move)" : PCT(o), tp: o => ({ swing: "back to the high/low", "1.272": "127.2% extension", "1.618": "161.8% extension", "2R": "2× the risk", "0.236": "23.6% level", "0.382": "38.2% level", scale: "half at 23.6%, rest to the high" }[o] || o),
+  hold: o => +o >= 390 ? (S.tab === "spyb" ? "rest of the day" : `${o / 60} h`) : `${o} min`, cost: o => `${o}%`,
+  win: o => `first ${o} min`, move: o => `±${o}%`, gapf: o => ({ all: "every day", gap: "gap days (±2%)", quiet: "quiet opens (±1%)" }[o] || o),
+  fstop: o => o === "extreme" ? "beyond the morning extreme" : "halfway back", late: o => ({ "1100": "11:00", "1200": "12:00", eod: "15:55" }[o] || o), exit: o => ({ "1200": "12:00", eod: "the close" }[o] || o) };
+const vlab = (k, o) => (VL[k] ? VL[k](String(o)) : String(o));
+const both = s => (s.train?.avg ?? 0) > 0 && (s.test?.avg ?? 0) > 0 && (s.train?.n ?? 0) >= 20 && (s.test?.n ?? 0) >= 20;
+const SHOWN = {};
+
+function rtable(rows) {
+  return `<div class="tw2"><table><thead><tr><th>Rule</th><th>Trades</th><th>Won</th><th>Avg trade</th><th>2021–23</th><th>2024–26</th></tr></thead><tbody>` +
+    rows.map(([name, s, def]) => { const F = s.full || {}, A = s.train || {}, B = s.test || {};
+      return `<tr class="${both(s) ? "both" : ""} ${def ? "def" : ""}" style="cursor:default"><td>${name}</td><td>${(F.n || 0).toLocaleString("en")}</td><td>${F.n ? Math.round(F.win) + "%" : "–"}</td><td class="${tone(F.avg)}">${pc(F.avg, 3)}</td><td class="${tone(A.avg)}">${pc(A.avg, 3)}</td><td class="${tone(B.avg)}">${pc(B.avg, 3)}</td></tr>`; }).join("") + `</tbody></table></div>`;
+}
+const group = (id, title, sub, body, open = false) => `<details class="rules" data-g="${id}"${open || SHOWN["o" + id] ? " open" : ""}><summary><span>${title}</span><span class="fine">${sub}</span></summary>${body}</details>`;
+const vtext = (v, def, skip = []) => { const d = Object.entries(v).filter(([k, o]) => !skip.includes(k) && def[k] !== undefined && String(def[k]) !== String(o));
+  return d.length ? d.map(([k, o]) => `${KN[k] || k}: ${esc(vlab(k, o))}`).join(" · ") : "default rules"; };
+
+function rules() {
+  const R = isB() ? BD().B : SD().B, el = $("rules");
+  if (!R) { el.innerHTML = `<p class="fine">Appears when the backtest has run.</p>`; return; }
+  const def = R.default || {};
+  let html = "";
+  const sweeps = isB() ? R.sweeps : R.modes?.[S.mode]?.sweeps;
+  if (isB() && R.presets) {
+    const rows = Object.entries(R.presets).map(([name, s]) => [esc(name), s, name === "default rules"]);
+    html += group("p", "Fixes from reviewing the trades", `${rows.length} rules · ${rows.filter(r => both(r[1])).length} made money in both halves`, rtable(rows), true);
+  }
+  if (isB() && R.filters) {
+    const rows = Object.entries(R.filters).map(([name, s]) => [esc(name), s, false]);
+    html += group("f", "Filters (on top of the best fixes)", `${rows.length} rules · ${rows.filter(r => both(r[1])).length} made money in both halves`, rtable(rows));
+  }
+  if (sweeps) {
+    const rows = [];
+    for (const [k, opts] of Object.entries(sweeps)) for (const [o, s] of Object.entries(opts))
+      rows.push([`${KN[k] || k}: ${esc(vlab(k, o))}${String(def[k]) === String(o) ? " <span class=\"fine\">(default)</span>" : ""}`, s, String(def[k]) === String(o)]);
+    html += group("s", "One setting changed at a time", `${rows.length} rules · ${rows.filter(r => both(r[1])).length} made money in both halves`, rtable(rows), !isB());
+  }
+  let combos = R.combos || [];
+  if (!isB()) combos = combos.filter(c => `${c.v.mode}|${c.v.anchor}` === S.mode);
+  if (combos.length) {
+    const mn = isB() ? 50 : 30;
+    const pos = combos.filter(both).length;
+    const sorted = combos.filter(c => (c.train?.n || 0) >= mn).sort((a, b) => (b.train?.avg ?? -9) - (a.train?.avg ?? -9));
+    const lim = SHOWN["c" + S.tab + S.mode] ? sorted.length : 25;
+    const held = sorted.slice(0, 10).filter(c => (c.test?.avg ?? 0) > 0).length;
+    const rows = sorted.slice(0, lim).map(c => [esc(vtext(c.v, def, ["mode", "anchor"])), c, false]);
+    html += group("c", "Every combination", `${combos.length.toLocaleString("en")} tested · ${pos} made money in both halves`,
+      `<p class="fine" style="margin:0 14px 8px">Sorted by 2021–23 only (as if picked then, with at least ${mn} trades), so the 2024–26 column is the honest check: of the top 10, <b>${held}</b> still made money in 2024–26.</p>` +
+      rtable(rows) + (sorted.length > lim ? `<button type="button" class="morebtn" data-more="${"c" + S.tab + S.mode}">Show all ${sorted.length.toLocaleString("en")}</button>` : ""));
+  }
+  el.innerHTML = html || `<p class="fine">No rule tables in this backtest yet.</p>`;
+}
+document.addEventListener("click", e => { const b = e.target.closest("[data-more]"); if (b) { SHOWN[b.dataset.more] = 1; SHOWN.oc = 1; rules(); } });
+document.addEventListener("toggle", e => { const d = e.target.closest?.("details.rules"); if (d) SHOWN["o" + d.dataset.g] = d.open ? 1 : 0; }, true);
+
+function render() { save(); header(); rules(); list(); chart(); }
 
 document.addEventListener("click", e => {
   const tb = e.target.closest("[data-tab]"); if (tb) { e.preventDefault(); S.tab = tb.dataset.tab; S.i = 0; ensure().then(render); return; }
