@@ -676,8 +676,16 @@ def main() -> None:
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(json.dumps(res, separators=(",", ":")))
     (out.with_name("fib-burst-demo.md") if a.demo else OUT_DIR / "BURST.md").write_text(summary(res))
+    # The website's trade viewer: Giacomo's rule, and the strongest version of it (2% big-candle bursts).
+    lists = []
+    for key_, name_, q in (("rule", "Your rule: 1% bursts", G),
+                           ("big2", "Your rule: 2% bursts, 3x volume, big candles", {**G, "x": "2", "vol": "3", "big": "on"})):
+        v_ = {**DEFAULT, **q}
+        ts_ = run(v_)
+        lists.append({"key": key_, "name": name_, "default": v_, "stats": split(ts_), "trades": sample(ts_, B)})
     (out.with_name("fib-burst-demo-trades.json") if a.demo else OUT_DIR / "trades_btc.json").write_text(
-        json.dumps({"generated": res["generated"], "default": DEFAULT, "trades": sample(base, B)}, separators=(",", ":")))
+        json.dumps({"generated": res["generated"], "default": lists[0]["default"], "trades": lists[0]["trades"],
+                    "lists": lists}, separators=(",", ":")))
     f = res["base"]["full"]
     print(f"default: {f.get('n')} trades, win {f.get('win')}%, avg {f.get('avg')}%, PF {f.get('pf')}, "
           f"account {f.get('acct')}% | BTC {res['hold_btc']}% -> {out} ({time.time() - t0:.0f}s)")

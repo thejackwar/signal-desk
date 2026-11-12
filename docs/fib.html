@@ -147,7 +147,7 @@ footer { margin-top: 48px; border-top: 1px solid var(--line); padding-top: 16px;
   <div id="rules"></div>
 
   <h2>The trades, one by one</h2>
-  <p id="tr-p">A sample of the trades with the default settings: the latest 40 and 60 more picked at random over the years. Click a row to draw it.</p>
+  <p id="tr-p">A sample of the trades with the chosen rule: the latest 40 and 60 more picked at random over the years. Click a row to draw it.</p>
 
   <div class="panel" id="viewer">
     <div class="ph">
@@ -183,7 +183,8 @@ const hm = m => `${String(Math.floor(m / 60)).padStart(2, "0")}:${String(m % 60)
 const fmtD = d => new Date(d + "T12:00:00Z").toLocaleDateString("en-GB", { timeZone: "UTC", weekday: "short", day: "numeric", month: "short", year: "numeric" });
 const px = v => v >= 1000 ? v.toLocaleString("en", { maximumFractionDigits: 0 }) : v.toFixed(2);
 const pctLbl = f => (f * 100).toFixed(1).replace(".0", "") + "%";
-const WHY = { stop: "stop", target: "target", time: "time exit" };
+const WHY = { stop: "stop", target: "target", time: "time exit", "part + swing": "75% at 23.6%, rest at the high",
+  "part + back to 38.2%": "75% at 23.6%, rest out at 38.2%", "part + time": "75% at 23.6%, rest on time" };
 const LEVELS = [[0, "#8a96a3"], [0.236, "#f0566a"], [0.382, "#f5a623"], [0.5, "#2fd6a0"], [0.618, "#26c6da"], [0.786, "#4fc3f7"], [1, "#8a96a3"]];
 const MODES = [["trend|window", "Pullback (trend)"], ["trend|pdc", "Pullback, from yesterday's close"], ["fade|window", "Fade the break"], ["fade|pdc", "Fade, from yesterday's close"], ["leg|window", "Reversal leg"]];
 const HOW = {
@@ -195,7 +196,9 @@ const HOW = {
   "btc": [["Burst", () => "Bitcoin moves at least 1% within 15 minutes, on at least 2× the normal volume of the last 24 hours."], ["Draw", () => "Levels from the burst's low to its high, redrawn while it keeps making new highs."], ["Enter", l => `Buy the pullback to the ${l} level within 60 minutes (short the bounce after a sell-off burst).`], ["Out", () => "Stop below 78.6%, target back to the burst's high, closed after 4 hours."]],
 };
 
-const S = { tab: "stocks", mode: "trend|window", f: "all", i: 0 };
+const S = { tab: "stocks", mode: "trend|window", f: "all", i: 0, list: 0 };
+const costTxt = () => +(((isB() ? (BL()?.default || BD().T?.default) : SD().T?.default) || {}).cost ?? 0) ? "after costs" : "no costs";
+const BL = () => { const L = BD().T?.lists; return L && L.length ? L[Math.min(S.list, L.length - 1)] : null; };   // the chosen burst trade list
 try { Object.assign(S, JSON.parse(localStorage.getItem("fibPage") || "{}")); } catch {}
 const save = () => { try { localStorage.setItem("fibPage", JSON.stringify({ tab: S.tab, mode: S.mode, f: S.f })); } catch {} };
 const D = { stocks: {}, spy: {}, btc: {}, spyb: {} };
@@ -204,8 +207,8 @@ const BD = () => D[S.tab] || {};
 const NAME = () => S.tab === "btc" ? "Bitcoin" : "SPY";
 // the burst rules in words, from the defaults the backtest actually used
 function howBurst() {
-  const d = BD().T?.default || {}, spy = S.tab === "spyb";
-  const tp = { swing: "back to the burst's high", "0.236": "the 23.6% level", "0.382": "the 38.2% level", "1.272": "the 127.2% extension", "2R": "2× the risk", scale: "half at 23.6%, the rest to the high (out at 38.2% if it comes back)" }[d.tp] || d.tp;
+  const d = BL()?.default || BD().T?.default || {}, spy = S.tab === "spyb";
+  const tp = { scale75: "75% off just before 23.6%; the rest just before the burst's high, or out at 38.2% if price comes back there first", swing: "back to the burst's high", "0.236": "the 23.6% level", "0.382": "the 38.2% level", "1.272": "the 127.2% extension", "2R": "2× the risk", scale: "half at 23.6%, the rest to the high (out at 38.2% if it comes back)" }[d.tp] || d.tp;
   const hold = +(d.hold || 240), holdTxt = hold >= 390 ? "the rest of the day" : hold >= 60 ? `${hold / 60} hour${hold > 60 ? "s" : ""}` : `${hold} minutes`;
   return [["Burst", `${NAME()} moves at least ${d.x ?? "1"}% within ${d.n ?? 15} minutes${d.vol === "any" ? "" : `, on at least ${d.vol ?? 2}× the normal minute volume of the ${spy ? "previous session" : "last 24 hours"}`}.`],
     ["Draw", "Levels from the burst's low to its high, redrawn while it keeps making new highs."],
@@ -214,38 +217,41 @@ function howBurst() {
         : d.entry === "confirm" ? `Wait for a candle that touches the ${L} level and closes back above it, then buy at that close`
         : d.entry === "zone" ? "Buy the first minute price trades between 38.2% and 50%" : `Buy the pullback with a limit order at the ${L} level`;
       return `${how}, within ${d.wait ?? 60} minutes${d.slow === "on" ? "; not while it is still falling (one of the last 2 candles must be green)" : ""}. Mirror for a sell-off burst.`; })()],
-    ["Out", `Stop below ${pctLbl(+(d.stop ?? 0.786))}, target ${tp}, closed after ${holdTxt}${spy ? " or at the 16:00 close" : ""}.`]];
+    ["Out", `Stop just beyond ${pctLbl(+(d.stop ?? 0.786))}, target ${tp}, closed after ${holdTxt}${spy ? " or at the 16:00 close" : ""}.`]];
 }
 const SD = () => D[S.tab] || {};                              // the stock-type tabs: {B: results, T: trades}
 async function load(p) { try { const r = await fetch(p + "?t=" + Date.now()); return r.ok ? r.json() : null; } catch { return null; } }
 
 function trades() {
-  const all = isB() ? (BD().T?.trades || []) : (SD().T?.modes?.[S.mode] || []);
+  const all = isB() ? (BL()?.trades || BD().T?.trades || []) : (SD().T?.modes?.[S.mode] || []);
   return all.filter(t => S.f === "all" || (S.f === "win" ? t.pct > 0 : t.pct <= 0));
 }
-const defLevel = () => isB() ? +(BD().T?.default?.level ?? 0.5) : +(SD().T?.default?.level ?? 0.618);
+const defLevel = () => isB() ? +((BL()?.default || BD().T?.default)?.level ?? 0.5) : +(SD().T?.default?.level ?? 0.618);
 
 // ------------------------------------------------------------------ top of the page
 function header() {
   document.querySelectorAll("#tabs button").forEach(b => b.setAttribute("aria-pressed", b.dataset.tab === S.tab));
-  $("mode-row").innerHTML = !isB() ? `<span class="k">Version</span><div class="seg" id="modes">${MODES.map(([k, l]) => `<button type="button" data-mode="${k}" aria-pressed="${k === S.mode}">${esc(l)}</button>`).join("")}</div>` : "";
+  const LS = BD().T?.lists || [];
+  $("mode-row").innerHTML = !isB() ? `<span class="k">Version</span><div class="seg" id="modes">${MODES.map(([k, l]) => `<button type="button" data-mode="${k}" aria-pressed="${k === S.mode}">${esc(l)}</button>`).join("")}</div>`
+    : LS.length ? `<span class="k">Rule</span><div class="seg" id="lists">${LS.map((x, i) => `<button type="button" data-list="${i}" aria-pressed="${i === Math.min(S.list, LS.length - 1)}">${esc(x.name)}</button>`).join("")}</div>` : "";
   const w = SD().T?.default?.win || "30", l = pctLbl(defLevel());
   const how = isB() ? howBurst() : HOW[S.mode].map(([h, f]) => [h, f(h === "Watch" ? w : l)]);
   $("how").innerHTML = how.map(([h, t]) => `<div class="step"><span class="k">${esc(h)}</span><p>${esc(t)}</p></div>`).join("");
 
   let st = null, bench = null, benchName = "";
-  if (isB()) { st = BD().B?.base; bench = BD().B?.hold_btc; benchName = `Holding ${NAME()}`; }
+  if (isB()) { st = BL()?.stats || BD().B?.base; bench = BD().B?.hold_btc; benchName = `Holding ${NAME()}`; }
   else { st = SD().B?.modes?.[S.mode]?.base; bench = SD().B?.spy_total; benchName = "Holding SPY"; }
   if (!st) { $("cards").innerHTML = `<div class="empty" style="grid-column:1/-1">${S.tab === "stocks" ? "The S&amp;P 100 backtest takes a few hours on GitHub. The <a href=\"#\" data-tab=\"spy\">SPY quick test</a> is faster." : "This backtest runs in a few minutes after each change on GitHub. Check back shortly."}${S.tab !== "btc" ? ` The <a href="#" data-tab="btc">Bitcoin bursts</a> trades are ready.` : ""}</div>`; $("verdict").textContent = ""; return; }
   const F = st.full, A = st.train, B = st.test, acct = F.acct ?? F.acct_total, dd = F.maxdd ?? F.acct_maxdd;
   $("cards").innerHTML = `
     <div><span class="k">Trades</span><b>${(F.n || 0).toLocaleString("en")}</b><small>${Math.round(F.win)}% won</small></div>
-    <div><span class="k">Average trade</span><b class="${tone(F.avg)}">${pc(F.avg, 3)}</b><small>after costs · profit factor ${F.pf ?? "–"}</small></div>
+    <div><span class="k">Average trade</span><b class="${tone(F.avg)}">${pc(F.avg, 3)}</b><small>${costTxt()} · profit factor ${F.pf ?? "–"}</small></div>
     <div><span class="k">Account</span><b class="${tone(acct)}">${pc(acct, 0)}</b><small>${esc(benchName)}: ${pc(bench, 0)} · worst drop ${pc(dd, 0)}</small></div>
     <div><span class="k">2021–23 vs 2024–26</span><b><span class="${tone(A.avg)}">${pc(A.avg, 3)}</span> <span style="color:var(--faint)">/</span> <span class="${tone(B.avg)}">${pc(B.avg, 3)}</span></b><small>average trade in each half</small></div>`;
   const ok = A.avg > 0 && B.avg > 0;
-  $("verdict").innerHTML = ok ? `<b>Made money in both halves</b> with the default settings.` :
-    `<b>${F.avg > 0 ? "Thin" : "Lost money"}</b> with the default settings${A.avg > 0 !== B.avg > 0 ? " (and not consistent between the two halves)" : ""}. ${F.pf != null && F.pf < 1 ? "For every €1 won, about €" + (1 / F.pf).toFixed(2) + " was lost." : ""}`;
+  const setName = isB() && BL() ? esc(BL().name.replace(/^Your rule/, "your rule")) : "the default settings";
+  $("verdict").innerHTML = ok ? `<b>Made money in both halves</b> with ${setName}.` :
+    `<b>${F.avg > 0 ? "Thin" : "Lost money"}</b> with ${setName}${A.avg > 0 !== B.avg > 0 ? " (and not consistent between the two halves)" : ""}. ${F.pf != null && F.pf < 1 ? "For every €1 won, about €" + (1 / F.pf).toFixed(2) + " was lost." : ""}`;
   $("foot").textContent = S.tab === "btc"
     ? `Data: Binance BTCUSDT 1-minute candles, ${BD().B?.from ?? "2021"} to ${BD().B?.to ?? "today"}. Costs ${BD().T?.default?.cost ?? "0.05"}% each way. One trade at a time, whole account, no leverage. Full tables: docs/data/fib/BURST.md. Information only, not advice.`
     : S.tab === "spyb"
@@ -340,7 +346,7 @@ function chart() {
 
 function caption(t, tm, z, o, f) {
   const long = t.dir === "long", res = `<b class="${tone(t.pct)}">${pc(t.pct)}</b>`;
-  const out = `Out at ${px(t.out)} at ${esc(tm.tout)} (${esc(WHY[t.why] || t.why)}): ${res} after costs.`;
+  const out = `Out at ${px(t.out)} at ${esc(tm.tout)} (${esc(WHY[t.why] || t.why)}): ${res} ${costTxt()}.`;
   const lv = `${pctLbl(f)} level (${px(z + (o - z) * f)})`;
   if (isB()) {
     const upb = t.ext > t.a;
@@ -424,6 +430,7 @@ document.addEventListener("toggle", e => { const d = e.target.closest?.("details
 function render() { save(); header(); rules(); list(); chart(); }
 
 document.addEventListener("click", e => {
+  const lb = e.target.closest("[data-list]"); if (lb) { e.preventDefault(); S.list = +lb.dataset.list; S.i = 0; render(); return; }
   const tb = e.target.closest("[data-tab]"); if (tb) { e.preventDefault(); S.tab = tb.dataset.tab; S.i = 0; ensure().then(render); return; }
   const md = e.target.closest("[data-mode]"); if (md) { S.mode = md.dataset.mode; S.i = 0; render(); return; }
   const fl = e.target.closest("[data-f]"); if (fl) { S.f = fl.dataset.f; S.i = 0; document.querySelectorAll("#filter button").forEach(b => b.setAttribute("aria-pressed", b.dataset.f === S.f)); render(); return; }
