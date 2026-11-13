@@ -420,7 +420,52 @@ function renderBuilder() {
 }
 
 // ------------------------------------------------------------------ Backtest
-const T_ = { uni: "spy", variant: "hold", sid: "covered_call", data: null };
+const T_ = { uni: "spy", variant: "hold", sid: "covered_call", data: null, from: null };
+
+// "From" year: every curve is cut at the last monthly expiry before 1 January of that year and
+// rebased to the starting account, then its statistics are recomputed here the same way as
+// engine/options_backtest.py does (stats / after_tax), so they match a rerun from that year.
+function afterTaxM(eq, dates, mdl) {
+  const rate = mdl.tax ?? 0.26, stamp = mdl.stamp ?? 0.002, carry = 4, losses = [];
+  let v = eq[0], yStart = v;
+  const pay = (gain, year) => {
+    if (gain < 0) { losses.push([year, -gain]); return 0; }
+    for (const L of losses) if (year - L[0] <= carry && L[1] > 0 && gain > 0) { const u = Math.min(gain, L[1]); L[1] -= u; gain -= u; }
+    return gain * rate;
+  };
+  for (let g = 1; g < eq.length; g++) {
+    if (dates[g].slice(0, 4) !== dates[g - 1].slice(0, 4)) { v -= pay(v - yStart, +dates[g - 1].slice(0, 4)); yStart = v; }
+    v *= eq[g - 1] > 0 ? eq[g] / eq[g - 1] : 0;
+    v -= v * stamp * (Date.parse(dates[g]) - Date.parse(dates[g - 1])) / 864e5 / 365;
+  }
+  return v - pay(v - yStart, +dates[dates.length - 1].slice(0, 4));
+}
+function statsM(eq, dates, rets, mdl) {
+  const yrs = (Date.parse(dates[dates.length - 1]) - Date.parse(dates[0])) / 864e5 / 365.25;
+  const cagr = end => end <= 0 ? -100 : yrs > 0.2 ? ((end / eq[0]) ** (1 / yrs) - 1) * 100 : null;
+  let peak = eq[0], dd = 0;
+  for (const v of eq) { peak = Math.max(peak, v); dd = Math.min(dd, peak > 0 ? v / peak - 1 : 0); }
+  const n = rets.length, wins = rets.filter(r => r > 0).length;
+  return { cagr: cagr(eq[eq.length - 1]), cagr_tax: cagr(afterTaxM(eq, dates, mdl)), maxdd: dd * 100,
+    win: n ? 100 * wins / n : null, trades: n, avg: n ? 100 * rets.reduce((a, b) => a + b, 0) / n : null,
+    best: n ? 100 * Math.max(...rets) : null, worst: n ? 100 * Math.min(...rets) : null, final: Math.round(eq[eq.length - 1]) };
+}
+function fromView(U, year, d) {
+  if (!U?.dates || !year || +year <= +U.dates[0].slice(0, 4)) return U;
+  const cut = `${year}-01-01`;
+  let i = 0; U.dates.forEach((x, k) => { if (x < cut) i = k; });
+  if (i >= U.dates.length - 2) return U;
+  const dates = U.dates.slice(i), acct = d.account;
+  const re = eq => { const e = eq.slice(i); return e.map(v => e[0] > 0 ? acct * v / e[0] : 0); };
+  const monthly = e => e.slice(1).map((v, k) => e[k] > 0 ? v / e[k] - 1 : 0);
+  const blk = b => { if (!b) return b; const eq = re(b.eq);
+    // the per-month win rate here is of the account, which for one SPY contract is the same as the trade
+    return { ...b, eq, stats: statsM(eq, dates, monthly(eq), d.model), trades: b.trades?.filter(t => t.open >= dates[0]) }; };
+  const strat = {};
+  for (const [sid, b] of Object.entries(U.strat)) strat[sid] = { ...b, hold: blk(b.hold), managed: blk(b.managed) };
+  const bench = re(U.bench);
+  return { ...U, dates, strat, bench, bench_stats: statsM(bench, dates, [], d.model), cut: true };
+}
 async function backtest(sid) {
   const v = $("v-backtest");
   if (sid) T_.sid = sid;
@@ -434,7 +479,10 @@ async function backtest(sid) {
 function renderBacktest() {
   const d = T_.data, v = $("v-backtest");
   // "sp500": the same backtest on every S&P 500 stock (data/sp500/options/backtest.json, its stock group is also "sp100")
-  const U = T_.uni === "spy" ? d.spy : T_.uni === "sp500" && T_.data500?.sp100 ? T_.data500.sp100 : d.sp100;
+  const y0 = d.spy.dates[0].slice(0, 4), yFrom = T_.from && +T_.from > +y0 ? T_.from : y0;
+  const U = fromView(T_.uni === "spy" ? d.spy : T_.uni === "sp500" && T_.data500?.sp100 ? T_.data500.sp100 : d.sp100, yFrom, d);
+  const lastY = +d.as_of.slice(0, 4) - 1;
+  const years = Array.from({ length: lastY - +y0 + 1 }, (_, k) => String(+y0 + k));
   const st = d.strategies;
   const blockOf = sid => { const b = U.strat[sid]; return (T_.variant === "managed" && b?.managed) ? { b: b.managed, used: "managed" } : { b: b?.hold, used: "hold" }; };
   const sel = T_.sid, selB = blockOf(sel), m = L.META[sel];
@@ -463,17 +511,18 @@ function renderBacktest() {
     const t5 = r => `<tr><td><a href="#build/${r[0]}/${sel}">${r[0]}</a></td><td class="${cls(r[1])}">${pct(r[1])}</td><td class="neg">${pct(r[2], 0)}</td><td>${r[3]?.toFixed(0) ?? "–"}%</td><td class="${cls(r[4])}">${pct(r[4])}</td><td class="${cls((r[1] ?? 0) - (r[4] ?? 0))}">${pct((r[1] ?? 0) - (r[4] ?? 0))}</td></tr>`;
     const head = `<thead><tr><th>Stock</th><th>A year</th><th>Max drop</th><th>Wins</th><th>Holding it</th><th>Difference</th></tr></thead>`;
     const beat = tk.filter(r => r[1] != null && r[4] != null && r[1] > r[4]).length;
-    detail = `<p class="note">${m.name} beat simply holding the stock on ${beat} of ${tk.length} stocks (held to expiry, each stock on its own).</p>
+    detail = `<p class="note">${m.name} beat simply holding the stock on ${beat} of ${tk.length} stocks (held to expiry, each stock on its own${U.cut ? `, since ${y0}: the per-stock tables always cover the whole backtest` : ""}).</p>
       <div class="split"><div><h4>Best 10</h4><div class="tbl"><table>${head}<tbody>${tk.slice(0, 10).map(t5).join("")}</tbody></table></div></div>
       <div><h4>Worst 10</h4><div class="tbl"><table>${head}<tbody>${tk.slice(-10).reverse().map(t5).join("")}</tbody></table></div></div></div>`;
   }
   const mdl = d.model;
   v.innerHTML = `${d.demo ? `<p class="note err">These are simulated test numbers, not real results.</p>` : ""}
-  ${findings(d)}
+  ${findings(d, fromView(d.spy, yFrom, d), U.cut ? null : d.sp100, yFrom)}
   <div class="panel">
     <div class="subrow"><div class="seg" id="tuni"><button type="button" data-v="spy" aria-pressed="${T_.uni === "spy"}">SPY</button><button type="button" data-v="sp100" aria-pressed="${T_.uni === "sp100"}">S&amp;P 100 stocks</button><button type="button" data-v="sp500" aria-pressed="${T_.uni === "sp500"}">S&amp;P 500 stocks</button></div>
+      <label class="from">From <select id="tfrom" class="k">${years.map(y => `<option value="${y}"${y === yFrom ? " selected" : ""}>${y}</option>`).join("")}</select></label>
       <div class="seg" id="tvar"><button type="button" data-v="hold" aria-pressed="${T_.variant === "hold"}">Hold to expiry</button><button type="button" data-v="managed" aria-pressed="${T_.variant === "managed"}">Take profit / stop</button></div></div>
-    <p class="note">$${d.account.toLocaleString("en-US")} account from ${d.spy.dates[0].slice(0, 4)}, a new position every month on the monthly expiry. Strategies that own shares or hold cash for an assignment use the whole account; spreads, condors, straddles, strangles and calendars risk ${(d.risk * 100).toFixed(0)}% of it each month (their max loss). ${T_.uni === "sp100" ? `Average of ${U.count} stocks, each run on its own.` : ""} ${T_.variant === "managed" ? "Take profit / stop: credit trades close at 50% of the premium kept or a loss of twice the premium; debit trades at +100% or −50%. Strategies with shares are always held." : ""}</p>
+    <p class="note">$${d.account.toLocaleString("en-US")} account from ${U.cut ? shortDate(U.dates[0]) : y0} (data to ${shortDate(U.dates[U.dates.length - 1])}), a new position every month on the monthly expiry. Strategies that own shares or hold cash for an assignment use the whole account; spreads, condors, straddles, strangles and calendars risk ${(d.risk * 100).toFixed(0)}% of it each month (their max loss). ${T_.uni === "sp100" ? `Average of ${U.count} stocks, each run on its own.` : ""} ${T_.variant === "managed" ? "Take profit / stop: credit trades close at 50% of the premium kept or a loss of twice the premium; debit trades at +100% or −50%. Strategies with shares are always held." : ""}</p>
     <div class="tbl"><table><thead><tr><th>Strategy</th><th>A year</th><th>After tax</th><th>Max drop</th><th>Wins</th><th>Months</th><th>Final</th></tr></thead><tbody>${rows}
       <tr class="bench"><td>${benchName}</td><td>${pct(bs.cagr)}</td><td>${pct(bs.cagr_tax)}</td><td>${pct(bs.maxdd, 0)}</td><td>–</td><td>–</td><td>${money(bs.final)}</td></tr></tbody></table></div>
     <p class="note">After tax: 26% Italian tax on each year's net gain (losses carried forward 4 years) and 0.2% a year stamp duty, as in the Strategy Lab. Tap a strategy for its chart.</p>
@@ -505,13 +554,14 @@ function renderBacktest() {
     }
     T_.uni = b.dataset.v; renderBacktest();
   });
+  $("tfrom").addEventListener("change", e => { T_.from = e.target.value; renderBacktest(); });
   $("tvar").addEventListener("click", e => { const b = e.target.closest("button"); if (!b) return; T_.variant = b.dataset.v; renderBacktest(); });
 }
 
 // What the backtest says, in a few lines. Written from the numbers each time, so it stays true
 // after every weekly rerun (a sentence whose condition no longer holds is simply left out).
-function findings(d) {
-  const S = d.spy, P = d.sp100, b = S.bench_stats, yr = d.spy.dates[0].slice(0, 4);
+function findings(d, S = d.spy, P = d.sp100, yr = d.spy.dates[0].slice(0, 4)) {
+  const b = S.bench_stats;
   const h = sid => S.strat[sid]?.hold?.stats, mg = sid => S.strat[sid]?.managed?.stats;
   const name = sid => L.META[sid].name.toLowerCase();
   const out = [];
@@ -535,7 +585,7 @@ function findings(d) {
     const worst = longVol.reduce((a, c) => h(c).cagr < h(a).cagr ? c : a);
     out.push(`${longVol.length} of the spread, condor, straddle, strangle and calendar strategies <b>lost money</b> traded every month (worst: the ${name(worst)}, ${pct(h(worst).cagr)} a year). Paying for options month after month costs more than it brings in, on average.`);
   }
-  const t = sid => (P.strat?.[sid]?.tickers || []).filter(r => r[1] != null && r[4] != null);
+  const t = sid => (P?.strat?.[sid]?.tickers || []).filter(r => r[1] != null && r[4] != null);
   const ccT = t("covered_call"), colT = t("collar");
   if (ccT.length) out.push(`On the S&amp;P 100 stocks the pattern is the same: covered calls beat holding the stock on ${ccT.filter(r => r[1] > r[4]).length} of ${ccT.length}${colT.length ? `, collars on ${colT.filter(r => r[1] > r[4]).length}` : ""}.`);
   const takeaway = !beat.length
