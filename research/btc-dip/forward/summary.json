@@ -1,10 +1,10 @@
 {
   "start": "2026-10-31T10:00:00+00:00",
-  "updated": "2026-11-16T22:00:00+00:00",
-  "last_candle": "2026-11-16T21:00:00+00:00",
+  "updated": "2026-11-16T23:00:00+00:00",
+  "last_candle": "2026-11-16T22:00:00+00:00",
   "source": "Binance BTCUSDT",
-  "btc_price": 65302.46,
-  "btc_since_start": -0.1570968929025457,
+  "btc_price": 65319.65,
+  "btc_since_start": -0.15687500992277725,
   "variants": [
     {
       "dip": 0.05,
