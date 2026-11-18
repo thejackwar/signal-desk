@@ -14,7 +14,8 @@ This test waits to see the move first:
   Deadline    no new entry after 11:00 New York.
   Stop        "range" (default): just above the opening-range high; "1" / "2": 1% / 2% above entry.
   Target      "none" (default, hold to the close), "1R" or "2R" (R = entry -> stop distance).
-  Exit        15:59 close (default) or 12:00.
+  Exit        15:59 close (default), 12:00, 10:30 (first hour) or 10:00 (first 30 minutes).
+  Wait 1      = short the first minute's close: roughly "short the open".
   Filter      every report / gap up / gap up > 2% / gap down / beat / miss or in line / Q3-type (Nov) only.
   Side        "short" (the fade). "long" mirrors it: buy the break ABOVE the range high (follow the move).
   Exit rules  stop first if a bar hits both (cautious); a gap through a level fills at the bar's open.
@@ -54,11 +55,11 @@ TICK = 0.0005            # 0.05% buffer beyond a level
 DEADLINE = 660           # 11:00 NY, minutes from midnight
 OPEN_M, CLOSE_M = 570, 959
 
-WAITS = [5, 15, 30]
+WAITS = [1, 5, 15, 30]
 ENTRIES = ["break", "below_open", "any"]
 STOPS = ["range", "1", "2"]
 TARGETS = ["none", "1R", "2R"]
-EXITS = ["close", "1200"]
+EXITS = ["close", "1200", "1030", "1000"]
 SIDES = ["short", "long"]
 FILTERS = {
     "all": lambda e: True,
@@ -132,7 +133,7 @@ def simulate(f: dict, wait: int, entry: str, stop: str, tp: str, exit_: str, sid
     if not rng or not rest:
         return None
     rh, rl, o = max(x[2] for x in rng), min(x[3] for x in rng), f["open"]
-    last_m = 715 if exit_ == "1200" else CLOSE_M
+    last_m = {"1000": 599, "1030": 629, "1200": 715}.get(exit_, CLOSE_M)
     px, tin, k0 = None, None, None
     if entry in ("any", "below_open"):
         c = rng[-1][4]
@@ -305,8 +306,8 @@ def write_ticker(t: str, facts_t: list[dict]):
     evs = []
     for f in facts_t:
         ev = {k: v for k, v in f.items() if not k.startswith("_")}
-        ev["trades"] = {f"{w}|{e}|{s}": simulate(f, w, e, s, "none", "close", "short")
-                        for w in WAITS for e in ENTRIES for s in STOPS}
+        ev["trades"] = {f"{w}|{e}|{s}|{x}": simulate(f, w, e, s, "none", x, "short")
+                        for w in WAITS for e in ENTRIES for s in STOPS for x in EXITS}
         evs.append(ev)
     (OUT_DIR / f"{t}.json").write_text(json.dumps({"ticker": t, "events": evs}, separators=(",", ":")))
 
@@ -316,10 +317,10 @@ def print_report(rows: list[dict], facts_: list[dict]):
     for f in facts_:
         print(f"  {f['t']} {f['day']} {f['res']:6} pm925 {f['pm925']!s:>6}  gap {f['gap']:+6.2f}  open->close {f['oc']:+6.2f}")
     print("\nShort, hold to close, no target - by wait / entry / stop / filter:")
-    print(f"{'wait':>4} {'entry':11} {'stop':6} {'filter':12} {'n':>3}/{'of':<3} {'win%':>5} {'avg%':>6} {'total%':>7} {'worst':>6} {'pf':>5}")
+    print(f"{'exit':>5} {'wait':>4} {'entry':11} {'stop':6} {'filter':12} {'n':>3}/{'of':<3} {'win%':>5} {'avg%':>6} {'total%':>7} {'worst':>6} {'pf':>5}")
     for r in rows:
-        if r["side"] == "short" and r["tp"] == "none" and r["exit"] == "close" and r["n"]:
-            print(f"{r['wait']:>4} {r['entry']:11} {r['stop']:6} {r['filter']:12} {r['n']:>3}/{r['eligible']:<3} "
+        if r["side"] == "short" and r["tp"] == "none" and r["filter"] in ("all", "gap_up", "nov_only") and r["n"]:
+            print(f"{r['exit']:>5} {r['wait']:>4} {r['entry']:11} {r['stop']:6} {r['filter']:12} {r['n']:>3}/{r['eligible']:<3} "
                   f"{r['win']:5.0f} {r['avg']:+6.2f} {r['total']:+7.1f} {r['worst']:+6.2f} {r['pf']!s:>5}")
     best = sorted([r for r in rows if r.get("n", 0) >= 8], key=lambda r: -r["avg"])[:15]
     print("\nTop 15 variants with >= 8 trades (beware: picked in hindsight):")
