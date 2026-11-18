@@ -1,0 +1,49 @@
+name: Earnings Fade
+
+# engine/earnings_fade.py - wait 5/15/30 minutes after the open on earnings day, then fade (or follow)
+# the move, on 1-minute Alpaca bars since 2018. Also records the real 09:25 pre-market price.
+# Run by hand: Actions -> Earnings Fade -> Run workflow (tickers: WMT, or e.g. WMT,TGT,COST, or sp100).
+on:
+  push:
+    branches: [main]
+    paths: ["engine/earnings_fade.py", ".github/workflows/earnings-fade.yml"]
+  workflow_dispatch:
+    inputs:
+      tickers:
+        description: "Tickers (comma separated) or sp100"
+        default: "WMT"
+        required: true
+
+permissions:
+  contents: write
+
+concurrency:
+  group: earnings-fade
+  cancel-in-progress: false
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 240
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Backtest
+        env:
+          ALPACA_KEY_ID: ${{ secrets.ALPACA_KEY_ID }}
+          ALPACA_SECRET_KEY: ${{ secrets.ALPACA_SECRET_KEY }}
+          TICKERS: ${{ github.event.inputs.tickers || 'WMT' }}
+        run: |
+          if [ "$TICKERS" = "sp100" ]; then python -u engine/earnings_fade.py --sp100 | tee report.txt
+          else python -u engine/earnings_fade.py --tickers "$TICKERS" | tee report.txt; fi
+          { echo '```'; tail -n 400 report.txt; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
+      - name: Publish
+        run: |
+          git config user.name "signal-desk-bot"
+          git config user.email "signal-desk-bot@users.noreply.github.com"
+          git add docs/data/earnings_fade
+          git diff --cached --quiet && exit 0
+          git commit -m "Earnings Fade backtest $(date -u +%F\ %H:%M)"
+          for i in 1 2 3; do git pull --rebase && git push && break; sleep 5; done
