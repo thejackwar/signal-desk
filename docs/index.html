@@ -3435,7 +3435,7 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px sol
     // commodities: "Ticker" sorts like the pit board, sector by sector, since GC/CL/ZW mean little to most people
     const pitOrder = (a, b) => SECTORS.indexOf(a.sector) - SECTORS.indexOf(b.sector) || a.name.localeCompare(b.name);
     const keys = { ticker: isComm() ? ["Sector", pitOrder] : ["Ticker", (a, b) => a.ticker.localeCompare(b.ticker)], chg1d: ["Today", (a, b) => b.chg1d - a.chg1d],
-      chg1m: ["1 month", (a, b) => b.chg1m - a.chg1m], vs200: ["vs 200d", (a, b) => (b.vs200 ?? -999) - (a.vs200 ?? -999)],
+      chg1m: ["1 month", (a, b) => (b.chg1m ?? -999) - (a.chg1m ?? -999)], vs200: ["vs 200d", (a, b) => (b.vs200 ?? -999) - (a.vs200 ?? -999)],
       alerts: ["Alerts", (a, b) => (b.bull + b.bear) - (a.bull + a.bear) || a.ticker.localeCompare(b.ticker)] };
     const list = S.stocks.stocks.slice().sort(keys[sort][1]);
     S.firstSel = "stock-" + list[0].ticker;

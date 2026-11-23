@@ -1,0 +1,4 @@
+{
+  "_about": "Extra stocks shown on the site (stock list, stock pages and Terminal lookup) that aren't in the S&P 100/500, e.g. new listings with too little history for the strategies. They are added to both the S&P 100 and S&P 500 views but never scanned for strategy alerts or used in backtests. Format: ticker -> [name, sector]. Remove a ticker once it joins the index lists.",
+  "ANT": ["Anthropic", "Technology"]
+}

@@ -122,6 +122,39 @@ def fetch_real(tickers: list[str], period: str = "2y", keep_open_candle: bool = 
     return data
 
 
+def load_extras() -> dict[str, list]:
+    """engine/extra_tickers.json: stocks shown on the site but not scanned (e.g. new listings like ANT)."""
+    f = ENGINE / "extra_tickers.json"
+    if MARKET != "stocks" or not f.exists():
+        return {}
+    return {t: v for t, v in json.loads(f.read_text()).items() if not t.startswith("_")}
+
+
+def fetch_extras(tickers: list[str], skip: set[str]) -> dict[str, pd.DataFrame]:
+    """Daily candles for the extra stocks; any history length of 2+ days is enough (no strategies run on them)."""
+    want = [t for t in tickers if t not in skip]
+    if not want:
+        return {}
+    import yfinance as yf
+    out = {}
+    for t in want:
+        try:
+            df = yf.download(t, period="2y", interval="1d", auto_adjust=True, progress=False)
+            if isinstance(df.columns, pd.MultiIndex):
+                df.columns = df.columns.get_level_values(0)
+            df = df.rename(columns=str.lower)[["open", "high", "low", "close", "volume"]]
+            df = df.dropna(subset=["open", "high", "low", "close"])
+            df["volume"] = df["volume"].fillna(0)
+        except Exception as e:   # one bad symbol never stops the scan
+            print(f"::warning::extra ticker {t}: {e}")
+            continue
+        if len(df) >= 2:
+            out[t] = df
+        else:
+            print(f"extra ticker {t}: only {len(df)} day(s) of data so far, skipped")
+    return out
+
+
 def fetch_demo(n_tickers: int = 30, bars: int = 500, seed: int = 7) -> dict[str, pd.DataFrame]:
     rng = np.random.default_rng(seed)
     names = ["ALFA", "BRVO", "CHRL", "DLTA", "ECHO", "FXTR", "GOLF", "HTEL", "INDG", "JLTT",
@@ -415,7 +448,7 @@ def stock_files(data: dict[str, pd.DataFrame], alerts: list[dict], names: dict) 
             "ticker": t, "name": meta[0], "sector": meta[1],
             "price": rp(last),
             "chg1d": round((last / prev - 1) * 100, 2),
-            "chg1m": round((last / float(c.iloc[-MONTH - 1]) - 1) * 100, 2),
+            "chg1m": round((last / float(c.iloc[-MONTH - 1]) - 1) * 100, 2) if len(c) > MONTH + 1 else None,
             "chg1y": round((last / float(c.iloc[-YEAR - 1]) - 1) * 100, 2) if len(c) > YEAR + 1 else None,
             "vs200": round((last / float(m200.iloc[-1]) - 1) * 100, 2) if np.isfinite(m200.iloc[-1]) else None,
             "rsi": round(float(r), 1) if np.isfinite(r) else None,
@@ -591,7 +624,10 @@ def main():
             f.unlink()
 
     names = json.loads((ENGINE / MARKETS[MARKET]["names"]).read_text())
-    stocks = stock_files(data, alerts, names)
+    extras = {} if args.demo else load_extras()
+    shown = {**data, **fetch_extras(list(extras), set(data))}   # extras: listed and searchable, never scanned
+    names = {**extras, **names}
+    stocks = stock_files(shown, alerts, names)
     above = [r for r in stocks if r["vs200"] is not None]
     STOCKS_OUT.write_text(json.dumps({
         "as_of": f"{as_of:%Y-%m-%d}",
