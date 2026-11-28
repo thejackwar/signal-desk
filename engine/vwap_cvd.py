@@ -75,7 +75,9 @@ EXITS = {"1200": 720, "eod": 955}
 TPS = ["1", "2", "3"]
 SETUPS = ["reclaim", "rejection", "divergence", "drive"]
 DEFAULT = {"tp": "2", "exit": "1200"}
-SKIP_COND = {"W", "Z", "4", "7", "9", "C", "G", "H", "P", "T", "U", "V"}
+# W avg price, Z/U/T out of sequence or extended, 4/7/9/C/G/H/P/V special, O/Q/X/5/6/M auction and cross
+# prints (the opening cross is huge and has no buyer/seller side - it swamped CVD before this was excluded)
+SKIP_COND = {"W", "Z", "4", "7", "9", "C", "G", "H", "P", "T", "U", "V", "O", "Q", "X", "5", "6", "M"}
 
 
 # ===================================================================== data
