@@ -17,21 +17,26 @@ for sym, d in (("AAPL", "2026-11-20"), ("NVDA", "2026-11-20"), ("TSLA", "2026-10
     bad = sum(1 for a, b in zip(ks, ks[1:]) if b < a)
     print(" out-of-order pairs (true time)", bad)
     raw = sorted(raw, key=key)
+    print(" venues", collections.Counter(t.get("x") for t in raw).most_common(6))
     delta = V.day_cvd.__wrapped__(sym, d) if hasattr(V.day_cvd, "__wrapped__") else None
     # recompute here with and without condition filter, plus price per minute
-    for skip in (True, False):
+    for skip in ("lit", "dlast", "all"):
         last, side, dm, px = None, 0, collections.defaultdict(float), {}
         zero = up = dn = 0
         for t in raw:
-            if skip and V.SKIP_COND & set(t.get("c") or []):
+            if V.SKIP_COND & set(t.get("c") or []):
                 continue
             p, s = t["p"], t["s"]
+            m = V.minute(t["t"])[1]
+            if t.get("x") == "D" and skip != "all":
+                if skip == "dlast" and last is not None and p != last:
+                    dm[m] += (1 if p > last else -1) * s
+                continue
             if last is not None:
                 if p > last: side = 1; up += 1
                 elif p < last: side = -1; dn += 1
                 else: zero += 1
             last = p
-            m = V.minute(t["t"])[1]
             if side: dm[m] += side * s
             px.setdefault(m, [p, p])[1] = p
         ms = sorted(px)
