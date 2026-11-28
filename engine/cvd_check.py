@@ -10,8 +10,13 @@ for sym, d in (("AAPL", "2026-11-20"), ("NVDA", "2026-11-20"), ("TSLA", "2026-10
     conds = collections.Counter(c for t in raw for c in (t.get("c") or []))
     print(sym, d, "trades", len(raw), "conds", conds.most_common(12))
     print(" first", [(t["t"][11:23], t["p"], t["s"], t.get("c"), t.get("x")) for t in raw[:8]])
-    ts = [t["t"] for t in raw]
-    print(" sorted?", ts == sorted(ts))
+    def key(t):
+        a, _, f = t["t"].rstrip("Z").partition(".")
+        return a + "." + f.ljust(9, "0")
+    ks = [key(t) for t in raw]
+    bad = sum(1 for a, b in zip(ks, ks[1:]) if b < a)
+    print(" out-of-order pairs (true time)", bad)
+    raw = sorted(raw, key=key)
     delta = V.day_cvd.__wrapped__(sym, d) if hasattr(V.day_cvd, "__wrapped__") else None
     # recompute here with and without condition filter, plus price per minute
     for skip in (True, False):
