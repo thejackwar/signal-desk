@@ -8,6 +8,13 @@ on:
     branches: [main]
     paths: ["engine/vwap_cvd.py"]
   workflow_dispatch:
+    inputs:
+      mode:
+        description: "vwap (VWAP setups only, from 2021) or both (adds the CVD pilot - slow on the free plan)"
+        default: vwap
+      rpm:
+        description: "Alpaca requests per minute (190 free plan, up to ~9000 on Algo Trader Plus)"
+        default: "190"
 
 permissions:
   contents: write
@@ -30,6 +37,8 @@ jobs:
           ALPACA_KEY_ID: ${{ secrets.ALPACA_KEY_ID }}
           ALPACA_SECRET_KEY: ${{ secrets.ALPACA_SECRET_KEY }}
           MAX_SECONDS: "19500"
+          MODE: ${{ github.event.inputs.mode || 'vwap' }}
+          ALPACA_RPM: ${{ github.event.inputs.rpm || '190' }}
         run: python -u engine/vwap_cvd.py
       - name: Publish
         run: |
