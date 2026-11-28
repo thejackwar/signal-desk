@@ -77,6 +77,9 @@ SETUPS = ["reclaim", "rejection", "divergence", "drive"]
 DEFAULT = {"tp": "2", "exit": "1200"}
 # W avg price, Z/U/T out of sequence or extended, 4/7/9/C/G/H/P/V special, O/Q/X/5/6/M auction and cross
 # prints (the opening cross is huge and has no buyer/seller side - it swamped CVD before this was excluded)
+# Off-exchange prints (venue D: dark pools, retail wholesalers) are left out of CVD: retail buys filled at a
+# sub-penny under the ask look like downticks, which dragged tick-rule CVD down all morning.
+LIT_ONLY = os.environ.get("CVD_LIT_ONLY", "1") == "1"
 SKIP_COND = {"W", "Z", "4", "7", "9", "C", "G", "H", "P", "T", "U", "V", "O", "Q", "X", "5", "6", "M"}
 
 
@@ -165,7 +168,7 @@ def day_cvd(sym: str, d: str) -> dict[int, float]:
     delta: dict[int, float] = defaultdict(float)
     last, side = None, 0
     for tr in raw.get(sym, []):
-        if SKIP_COND & set(tr.get("c") or []):
+        if SKIP_COND & set(tr.get("c") or []) or (LIT_ONLY and tr.get("x") == "D"):
             continue
         p, sz = tr["p"], tr["s"]
         if last is not None:
